@@ -22,9 +22,6 @@
         "styles.css"
       ],
       "scripts": [
-        "../node_modules/three/build/three.js",
-        "../node_modules/three/examples/js/loaders/STLLoader.js",
-        "../node_modules/three/examples/js/controls/TrackballControls.js"
       ],
       "environmentSource": "environments/environment.ts",
       "environments": {
