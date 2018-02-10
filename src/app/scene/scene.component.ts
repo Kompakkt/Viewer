@@ -66,11 +66,13 @@ export class SceneComponent implements AfterViewInit {
 
   public onMouseDown(event: MouseEvent) {
 
-    var pickResult = this.scene.pick(this.scene.pointerX, this.scene.pointerY);
+    let pickResult = this.scene.pick(this.scene.pointerX, this.scene.pointerY);
 
-    pickResult.pickedMesh.showBoundingBox = !pickResult.pickedMesh.showBoundingBox;
+    if (pickResult.pickedMesh) {
+      pickResult.pickedMesh.showBoundingBox = !pickResult.pickedMesh.showBoundingBox;
+    }
 
-    console.log(pickResult)
+    console.log(pickResult);
   }
 
   public onMouseUp(event: MouseEvent) {
