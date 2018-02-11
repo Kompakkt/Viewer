@@ -1,2 +1,7 @@
-<canvas #canvas (mousedown)="onMouseDown($event)" (mouseup)="onMouseUp($event)" id="renderCanvas">
+<canvas #canvas
+        (pointerdown)="onMouseDown($event)"
+        (mousedown)="onMouseDown($event)"
+        (pointerup)="onMouseUp($event)"
+        (mouseup)="onMouseUp($event)"
+        id="renderCanvas">
 </canvas>

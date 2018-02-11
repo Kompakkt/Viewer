@@ -12,9 +12,9 @@ export class SceneComponent implements AfterViewInit {
   @ViewChild('canvas')
   private canvasRef: ElementRef;
 
-  private canvas;
-  private engine;
-  private scene;
+  private canvas : HTMLCanvasElement;
+  private engine : BABYLON.Engine;
+  private scene : BABYLON.Scene;
 
   constructor() {
   }
@@ -33,22 +33,27 @@ export class SceneComponent implements AfterViewInit {
     // create a basic BJS Scene object
     this.scene = new BABYLON.Scene(this.engine);
 
+    this.scene.clearColor = new BABYLON.Color4(0, 0, 0, .7);
+
     this.createCamera();
 
     this.createLight();
 
     // create a built-in "sphere" shape; its constructor takes 6 params: name, segment, diameter, scene, updatable, sideOrientation
     let sphere = BABYLON.Mesh.CreateSphere('sphere1', 16, 2, this.scene);
+
     // move the sphere upward 1/2 of its height
     sphere.position.y = 1;
+
     // create a built-in "ground" shape; its constructor takes the same 6 params : name, width, height, subdivision, scene, updatable
-    let ground = BABYLON.Mesh.CreateGround('ground1', 6, 6, 2, this.scene);
+    let ground = BABYLON.Mesh.CreateGround('ground1', 5, 5, 2, this.scene);
   }
 
   private createLight() {
 
     // create a basic light, aiming 0,1,0 - meaning, to the sky
     let light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0,1,0), this.scene);
+    light.groundColor = new BABYLON.Color3(.1, .1, .1);
   }
 
   private createCamera() {
