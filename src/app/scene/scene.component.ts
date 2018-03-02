@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, ElementRef, Input, ViewChild, HostListener } from '@angular/core';
 
 import * as BABYLON from 'babylonjs';
+import 'babylonjs-loaders';
 
 @Component({
   selector: 'scene',
