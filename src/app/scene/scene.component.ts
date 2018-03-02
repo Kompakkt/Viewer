@@ -34,20 +34,15 @@ export class SceneComponent implements AfterViewInit {
     // create a basic BJS Scene object
     this.scene = new BABYLON.Scene(this.engine);
 
-    this.scene.clearColor = new BABYLON.Color4(0, 0, 0, .7);
+    BABYLON.SceneLoader.Append("assets/models/testmodel/", "testmodel.obj",
+      this.scene, function (scene) {
+    });
+
+    this.scene.clearColor = new BABYLON.Color4(0, 0, 0, .0);
 
     this.createCamera();
 
     this.createLight();
-
-    // create a built-in "sphere" shape; its constructor takes 6 params: name, segment, diameter, scene, updatable, sideOrientation
-    let sphere = BABYLON.Mesh.CreateSphere('sphere1', 16, 2, this.scene);
-
-    // move the sphere upward 1/2 of its height
-    sphere.position.y = 1;
-
-    // create a built-in "ground" shape; its constructor takes the same 6 params : name, width, height, subdivision, scene, updatable
-    let ground = BABYLON.Mesh.CreateGround('ground1', 5, 5, 2, this.scene);
   }
 
   private createLight() {
@@ -59,11 +54,8 @@ export class SceneComponent implements AfterViewInit {
 
   private createCamera() {
 
-    // create a FreeCamera, and set its position to (x:0, y:5, z:-10)
-    let camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 5,-10), this.scene);
-    // target the camera to scene origin
+    let camera = new BABYLON.ArcRotateCamera('camera1', 0, 0, 0, new BABYLON.Vector3(10, 0, 30), this.scene);
     camera.setTarget(BABYLON.Vector3.Zero());
-    // attach the camera to the canvas
     camera.attachControl(this.canvas, false);
   }
 
@@ -72,6 +64,7 @@ export class SceneComponent implements AfterViewInit {
 
   public onMouseDown(event: MouseEvent) {
 
+    /*
     let pickResult = this.scene.pick(this.scene.pointerX, this.scene.pointerY);
 
     if (pickResult.pickedMesh) {
@@ -79,6 +72,7 @@ export class SceneComponent implements AfterViewInit {
     }
 
     console.log(pickResult);
+    */
   }
 
   public onMouseUp(event: MouseEvent) {
