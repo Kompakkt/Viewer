@@ -1,12 +1,8 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import {BrowserModule} from '@angular/platform-browser';
+import {NgModule} from '@angular/core';
 
-
-import { AppComponent } from './app.component';
-import { SceneComponent } from './scene/scene.component';
-
-import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
-
+import {AppComponent} from './app.component';
+import {SceneComponent} from './scene/scene.component';
 
 @NgModule({
   declarations: [
@@ -14,10 +10,10 @@ import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
     SceneComponent
   ],
   imports: [
-    NgbModule.forRoot(),
     BrowserModule
   ],
   providers: [],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}
