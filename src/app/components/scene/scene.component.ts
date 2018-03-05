@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, Input, ViewChild, HostListener } from '@angular/core';
 
 import * as BABYLON from 'babylonjs';
-import 'babylonjs-loaders';
+import {ImportService} from "../../services/import/import.service";
 
 @Component({
   selector: 'scene',
@@ -17,7 +17,8 @@ export class SceneComponent implements AfterViewInit {
   private engine : BABYLON.Engine;
   private scene : BABYLON.Scene;
 
-  constructor() {
+  constructor(private importService: ImportService) {
+
   }
 
   private getCanvas(): HTMLCanvasElement {
@@ -34,9 +35,8 @@ export class SceneComponent implements AfterViewInit {
     // create a basic BJS Scene object
     this.scene = new BABYLON.Scene(this.engine);
 
-    BABYLON.SceneLoader.Append("assets/models/testmodel/", "testmodel.obj",
-      this.scene, function (scene) {
-    });
+    this.importService.loadObj(this.scene, "assets/models/testmodel/", "testmodel.obj").then(
+      (success) => {});
 
     this.scene.clearColor = new BABYLON.Color4(0, 0, 0, .0);
 
