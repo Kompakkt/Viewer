@@ -3,7 +3,7 @@ import {NgModule} from '@angular/core';
 
 import {AppComponent} from './app.component';
 import {SceneComponent} from './components/scene/scene.component';
-import {ImportService} from "./services/import/import.service";
+import {ImportService} from './services/import/import.service';
 
 @NgModule({
   declarations: [

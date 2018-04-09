@@ -35,34 +35,120 @@ export class SceneComponent implements AfterViewInit {
     // create a basic BJS Scene object
     this.scene = new BABYLON.Scene(this.engine);
 
-    this.importService.loadObj(this.scene, "assets/models/testmodel/", "testmodel.obj").then(
-      (success) => {});
-
-    this.scene.clearColor = new BABYLON.Color4(0, 0, 0, .0);
-
     this.createCamera();
-
     this.createLight();
-  }
-
-  private createLight() {
-
-    // create a basic light, aiming 0,1,0 - meaning, to the sky
-    let light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0,1,0), this.scene);
-    light.groundColor = new BABYLON.Color3(.1, .1, .1);
+    this.loadObject();
   }
 
   private createCamera() {
 
-    let camera = new BABYLON.ArcRotateCamera('camera1', 0, 0, 0, new BABYLON.Vector3(10, 0, 30), this.scene);
-    camera.setTarget(BABYLON.Vector3.Zero());
-    camera.attachControl(this.canvas, false);
+    let camera1 = new BABYLON.ArcRotateCamera("camera1", 0, 0.8, 100, BABYLON.Vector3.Zero(), this.scene);
+    camera1.setTarget(BABYLON.Vector3.Zero());
+    camera1.attachControl(this.canvas, true);
+
+    let camera2 = new BABYLON.UniversalCamera("camera2", new BABYLON.Vector3(0, 20, -50), this.scene);
+
+    // Skybox
+    let skybox = BABYLON.Mesh.CreateBox("skyBox", 500.0, this.scene);
+    let skyboxMaterial = new BABYLON.StandardMaterial("skyBox", this.scene);
+    skyboxMaterial.backFaceCulling = false;
+    let skyURL = "https://www.babylonjs-playground.com/textures/skybox3";
+    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, this.scene);
+    skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+    skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+    skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+    skyboxMaterial.disableLighting = true;
+    skybox.material = skyboxMaterial;
+
+    // add buttons
+    let buttonbox = document.createElement('div');
+    buttonbox.id = "buttonbox";
+    buttonbox.style.position = "absolute";
+    buttonbox.style.top = "140px";
+    buttonbox.style.left = "85%";
+    buttonbox.style.border = "5pt inset blue";
+    buttonbox.style.padding = "2pt";
+    buttonbox.style.paddingRight = "2pt";
+    buttonbox.style.width = "10em";
+    buttonbox.style.display = "block";
+    document.body.appendChild(buttonbox);
+
+
+    let tTag = document.createElement('div');
+    tTag.id = "choose";
+    tTag.textContent = "Cams:";
+    tTag.style.textAlign = "center";
+    tTag.style.border = "2pt solid gold";
+    tTag.style.marginLeft = "1.5pt";
+    tTag.style.marginTop = "3pt";
+    tTag.style.marginBottom = "2pt";
+    tTag.style.backgroundColor = "dodgerblue";
+    tTag.style.width = "96%";
+    tTag.style.fontSize = "1.0em";
+    tTag.style.color = "white";
+    buttonbox.appendChild(tTag);
+
+
+    let b8 = document.createElement('button');
+    b8.id = "uni";
+    b8.textContent = "ArcRotate Cam";
+    b8.style.display = "block";
+    b8.style.width = "100%";
+    b8.style.fontSize = "1.1em";
+    b8.style.cursor = "pointer";
+    buttonbox.appendChild(b8);
+    b8.onclick = function() {
+      setCamArcRotate();
+    }
+
+    let b9 = document.createElement('button');
+    b9.id = "arc";
+    b9.textContent = "Universal Cam";
+    b9.style.display = "block";
+    b9.style.width = "100%";
+    b9.style.fontSize = "1.1em";
+    b9.style.cursor = "pointer";
+    buttonbox.appendChild(b9);
+    b9.onclick = function() {
+      setCamUniversal();
+    }
+
+    this.scene.onDispose =()=>{
+      if (document.getElementById('buttonbox')) {
+        document.getElementById('buttonbox').parentNode.removeChild(document.getElementById('buttonbox'));
+      }
+    }
+
+//-----------------------------------------------------------
+// camera activators
+
+    let setCamArcRotate = function() {
+      this.scene.activeCamera = camera1;
+      console.log("!works")
+      camera1.attachControl(this.canvas, true);
+    };
+    let setCamUniversal = function() {
+      this.scene.activeCamera = camera2;
+      camera2.attachControl(this.canvas, true);
+    };
+
+  }
+
+  private createLight() {
+
+    let light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(1,0,1), this.scene);
+    light.groundColor = new BABYLON.Color3(.1, .1, .1);
+  }
+
+  private loadObject(){
+
+    BABYLON.SceneLoader.ImportMesh("", "assets/models/testmodel/", "testmodel.obj", this.scene, function (newMeshes) {});
   }
 
   private startRendering() {
   }
 
-  public onMouseDown(event: MouseEvent) {
+  /*public onMouseDown(event: MouseEvent) {
 
     /*
     let pickResult = this.scene.pick(this.scene.pointerX, this.scene.pointerY);
@@ -72,7 +158,7 @@ export class SceneComponent implements AfterViewInit {
     }
 
     console.log(pickResult);
-    */
+
   }
 
   public onMouseUp(event: MouseEvent) {
@@ -90,7 +176,7 @@ export class SceneComponent implements AfterViewInit {
   @HostListener('document:keypress', ['$event'])
   public onKeyPress(event: KeyboardEvent) {
     console.log("onKeyPress: " + event.key);
-  }
+  }*/
 
   ngAfterViewInit() {
 
@@ -104,6 +190,7 @@ export class SceneComponent implements AfterViewInit {
     });
     this.createLight();
     this.createCamera();
+    this.loadObject();
     this.startRendering();
   }
 
