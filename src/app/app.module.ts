@@ -7,6 +7,7 @@ import {CamerasComponent} from './components/cameras/cameras.component';
 import {ImportService} from './services/import/import.service';
 import { SkyboxComponent } from './components/skybox/skybox.component';
 import { UploadModelComponent } from './components/upload-model/upload-model.component';
+import { LightComponent } from './components/light/light.component';
 
 @NgModule({
   declarations: [
@@ -14,12 +15,19 @@ import { UploadModelComponent } from './components/upload-model/upload-model.com
     SceneComponent,
     CamerasComponent,
     SkyboxComponent,
-    UploadModelComponent
+    UploadModelComponent,
+    LightComponent
   ],
   imports: [
     BrowserModule
   ],
-  providers: [ImportService],
+  providers: [
+    ImportService,
+    SkyboxComponent,
+    LightComponent,
+    CamerasComponent,
+    UploadModelComponent
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {
