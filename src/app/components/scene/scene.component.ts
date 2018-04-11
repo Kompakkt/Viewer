@@ -4,7 +4,7 @@ import * as BABYLON from 'babylonjs';
 import {ImportService} from "../../services/import/import.service";
 
 @Component({
-  selector: 'scene',
+  selector: 'app-scene',
   templateUrl: './scene.component.html',
   styleUrls: ['./scene.component.css']
 })
@@ -60,6 +60,7 @@ export class SceneComponent implements AfterViewInit {
     skyboxMaterial.disableLighting = true;
     skybox.material = skyboxMaterial;
 
+    /*
     // add buttons
     let buttonbox = document.createElement('div');
     buttonbox.id = "buttonbox";
@@ -111,7 +112,8 @@ export class SceneComponent implements AfterViewInit {
     buttonbox.appendChild(b9);
     b9.onclick = function() {
       setCamUniversal();
-    }
+    }*/
+
 
     this.scene.onDispose =()=>{
       if (document.getElementById('buttonbox')) {
@@ -131,7 +133,6 @@ export class SceneComponent implements AfterViewInit {
       this.scene.activeCamera = camera2;
       camera2.attachControl(this.canvas, true);
     };
-
   }
 
   private createLight() {
