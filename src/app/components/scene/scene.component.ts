@@ -35,20 +35,13 @@ export class SceneComponent implements AfterViewInit {
     // create a basic BJS Scene object
     this.scene = new BABYLON.Scene(this.engine);
 
+    this.createSkybox();
     this.createCamera();
     this.createLight();
     this.loadObject();
   }
 
-  private createCamera() {
-
-    let camera1 = new BABYLON.ArcRotateCamera("camera1", 0, 0.8, 100, BABYLON.Vector3.Zero(), this.scene);
-    camera1.setTarget(BABYLON.Vector3.Zero());
-    camera1.attachControl(this.canvas, true);
-
-    let camera2 = new BABYLON.UniversalCamera("camera2", new BABYLON.Vector3(0, 20, -50), this.scene);
-
-    // Skybox
+  private createSkybox() {
     let skybox = BABYLON.Mesh.CreateBox("skyBox", 500.0, this.scene);
     let skyboxMaterial = new BABYLON.StandardMaterial("skyBox", this.scene);
     skyboxMaterial.backFaceCulling = false;
@@ -59,6 +52,15 @@ export class SceneComponent implements AfterViewInit {
     skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
     skyboxMaterial.disableLighting = true;
     skybox.material = skyboxMaterial;
+  }
+
+  private createCamera() {
+
+    let camera1 = new BABYLON.ArcRotateCamera("camera1", 0, 0.8, 100, BABYLON.Vector3.Zero(), this.scene);
+    camera1.setTarget(BABYLON.Vector3.Zero());
+    camera1.attachControl(this.canvas, true);
+
+    let camera2 = new BABYLON.UniversalCamera("camera2", new BABYLON.Vector3(0, 20, -50), this.scene);
 
     /*
     // add buttons
