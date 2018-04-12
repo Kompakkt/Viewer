@@ -52,7 +52,7 @@ export class SceneComponent implements AfterViewInit {
 
   private startRendering() {
   }
-  
+
   ngAfterViewInit() {
 
     this.createScene();
