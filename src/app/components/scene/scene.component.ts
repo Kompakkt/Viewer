@@ -48,11 +48,19 @@ export class SceneComponent implements AfterViewInit {
     this.camerasComponent.createCamera(this.scene, this.canvas);
     this.lightComponent.createLight(this.scene);
     this.uploadModelComponent.loadObject(this.scene);
+
+    this.getFocus();
+    this.scene.collisionsEnabled = true;
+  }
+
+  //focus canvas at start
+  private getFocus() {
+    document.getElementById("renderCanvas").focus();
   }
 
   private startRendering() {
   }
-  
+
   ngAfterViewInit() {
 
     this.createScene();
