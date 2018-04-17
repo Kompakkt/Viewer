@@ -43,14 +43,16 @@ export class SceneComponent implements AfterViewInit {
 
     // create a basic BJS Scene object
     this.scene = new BABYLON.Scene(this.engine);
+    this.engine.displayLoadingUI();
 
     this.skyboxComponent.createSkybox(this.scene);
     this.camerasComponent.createCamera(this.scene, this.canvas);
     this.lightComponent.createLight(this.scene);
     this.uploadModelComponent.loadObject(this.scene);
 
-    this.getFocus();
     this.scene.collisionsEnabled = true;
+
+    this.getFocus();
   }
 
   //focus canvas at start
@@ -75,6 +77,12 @@ export class SceneComponent implements AfterViewInit {
     this.lightComponent.createLight(this.scene);
     this.camerasComponent.createCamera(this.scene, this.canvas);
     this.uploadModelComponent.loadObject(this.scene);
+
+    let that = this;
+    setTimeout(function () {
+      that.engine.hideLoadingUI();
+    }, 3000);
+
     this.startRendering();
   }
 
