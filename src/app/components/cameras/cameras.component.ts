@@ -211,7 +211,7 @@ export class CamerasComponent implements OnInit {
       if(_camChanger == 0) {
         setArcCamToDefault(_scene, _canvas);
       }
-      else if(_camChanger = 1){
+      else if(_camChanger == 1){
         setUnvCamToDefault(_scene, _canvas);
         console.log(camera2.rotation.x)
         console.log(camera2.rotation.y)
