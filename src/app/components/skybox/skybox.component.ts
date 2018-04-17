@@ -18,13 +18,20 @@ export class SkyboxComponent implements OnInit {
     let skyboxes = [
       'https://www.babylonjs-playground.com/textures/skybox',
       'https://www.babylonjs-playground.com/textures/skybox2',
-      'https://www.babylonjs-playground.com/textures/skybox3'
+      'https://www.babylonjs-playground.com/textures/skybox4'
     ];
 
     let _insert = 0;
     let skyURL;
 
-    window.onload = function () {
+    //set defaultskybox
+    window.onload = function() {
+      skyURL = skyboxes[0];
+      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, _scene);
+      skyURL = skyboxes[1];
+      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, _scene);
+      skyURL = skyboxes[2];
+      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, _scene);
       skyURL = skyboxes[_insert];
       skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, _scene);
       skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
@@ -32,7 +39,9 @@ export class SkyboxComponent implements OnInit {
       skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
       skyboxMaterial.disableLighting = true;
       skybox.material = skyboxMaterial;
-    };
+    }
+
+    //set box with button
     document.getElementById('sky').onclick = function () {
       _insert = 0;
       skyURL = skyboxes[_insert];
@@ -63,7 +72,6 @@ export class SkyboxComponent implements OnInit {
       skyboxMaterial.disableLighting = true;
       skybox.material = skyboxMaterial;
     };
-
   }
 
   constructor() {
