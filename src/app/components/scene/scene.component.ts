@@ -45,19 +45,12 @@ export class SceneComponent implements AfterViewInit {
     this.scene = new BABYLON.Scene(this.engine);
     this.engine.displayLoadingUI();
 
-    this.skyboxComponent.createSkybox(this.scene);
+    this.skyboxComponent.createSkybox(this.scene, this.canvas);
     this.camerasComponent.createCamera(this.scene, this.canvas);
     this.lightComponent.createLight(this.scene);
     this.uploadModelComponent.loadObject(this.scene);
 
     this.scene.collisionsEnabled = true;
-
-    this.getFocus();
-  }
-
-  //focus canvas at start
-  private getFocus() {
-    document.getElementById("renderCanvas").focus();
   }
 
   private startRendering() {
@@ -73,7 +66,7 @@ export class SceneComponent implements AfterViewInit {
     this.engine.runRenderLoop(function(){
       scene.render();
     });
-    this.skyboxComponent.createSkybox(this.scene);
+    this.skyboxComponent.createSkybox(this.scene, this.canvas);
     this.lightComponent.createLight(this.scene);
     this.camerasComponent.createCamera(this.scene, this.canvas);
     this.uploadModelComponent.loadObject(this.scene);

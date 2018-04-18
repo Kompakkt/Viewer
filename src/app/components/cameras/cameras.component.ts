@@ -11,6 +11,9 @@ import {ImportService} from '../../services/import/import.service';
 })
 export class CamerasComponent implements OnInit {
 
+  constructor() {}
+
+
   public createCamera(_scene, _canvas) {
 
     let _alpha = 9;
@@ -47,6 +50,8 @@ export class CamerasComponent implements OnInit {
     //camera changer
     let _camChanger = 0;
 
+    _canvas.focus();
+
     //set camera to orbit cam
     let setCamArcRotate = function (_scene, _canvas) {
       camera1 = new BABYLON.ArcRotateCamera('camera1', null, null, null, new BABYLON.Vector3(camera2.position.x, camera2.position.y, camera2.position.z), _scene);
@@ -62,12 +67,10 @@ export class CamerasComponent implements OnInit {
     };
 
     let arc = document.getElementById('arc').onclick = function () {
+      _canvas.focus();
       if (_camChanger == 1) {
         _camChanger = 0;
         setCamArcRotate(_scene, _canvas);
-        console.log(camera1.alpha);
-        console.log(camera1.beta);
-        console.log(camera1.radius);
       }
       else {
       }
@@ -87,6 +90,7 @@ export class CamerasComponent implements OnInit {
       camera2.checkCollisions = true;
     };
     document.getElementById('unv').onclick = function () {
+      _canvas.focus();
       if (_camChanger == 0) {
         _camChanger = 1;
         setCamUniversal(_scene, _canvas);
@@ -209,6 +213,7 @@ export class CamerasComponent implements OnInit {
     };
 
     document.getElementById('def').onclick = function () {
+      _canvas.focus();
       if (_camChanger == 0) {
         setArcCamToDefault(_scene, _canvas);
       }
@@ -264,9 +269,6 @@ export class CamerasComponent implements OnInit {
     plane6.checkCollisions = true;
 
 
-  }
-
-  constructor() {
   }
 
   ngOnInit() {

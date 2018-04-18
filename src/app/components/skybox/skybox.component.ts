@@ -8,7 +8,7 @@ import * as BABYLON from 'babylonjs';
 })
 export class SkyboxComponent implements OnInit {
 
-  public createSkybox(_scene) {
+  public createSkybox(_scene, _canvas) {
 
     let skybox = BABYLON.Mesh.CreateBox('skyBox', 500.0, _scene);
     let skyboxMaterial = new BABYLON.StandardMaterial('skyBox', _scene);
@@ -43,6 +43,7 @@ export class SkyboxComponent implements OnInit {
 
     //set box with button
     document.getElementById('sky').onclick = function () {
+      _canvas.focus();
       _insert = 0;
       skyURL = skyboxes[_insert];
       skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, _scene);
@@ -53,6 +54,7 @@ export class SkyboxComponent implements OnInit {
       skybox.material = skyboxMaterial;
     };
     document.getElementById('urban').onclick = function () {
+      _canvas.focus();
       _insert = 1;
       skyURL = skyboxes[_insert];
       skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, _scene);
@@ -63,6 +65,7 @@ export class SkyboxComponent implements OnInit {
       skybox.material = skyboxMaterial;
     };
     document.getElementById('fantasy').onclick = function () {
+      _canvas.focus();
       _insert = 2;
       skyURL = skyboxes[_insert];
       skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, _scene);
