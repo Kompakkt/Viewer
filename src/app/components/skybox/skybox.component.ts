@@ -8,6 +8,43 @@ import * as BABYLON from 'babylonjs';
 })
 export class SkyboxComponent implements OnInit {
 
+  private setSkyboxMaterial(skyboxMaterial: BABYLON.StandardMaterial, skybox: BABYLON.Mesh,
+                            skyURL: string, scene: BABYLON.Scene) {
+    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, scene);
+    skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+    skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+    skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+    skyboxMaterial.disableLighting = true;
+    skybox.material = skyboxMaterial;
+  }
+
+  private changeSkyboxSky(canvas: HTMLCanvasElement, insert: number, skyboxes: any,
+                          skyboxMaterial: BABYLON.StandardMaterial, skybox: BABYLON.Mesh,
+                          skyURL: string, scene: BABYLON.Scene,) {
+    canvas.focus();
+    insert = 0;
+    skyURL = skyboxes[insert];
+    this.setSkyboxMaterial(skyboxMaterial, skybox, skyURL, scene)
+  }
+
+  private changeSkyboxUrban(canvas: HTMLCanvasElement, insert: number, skyboxes: any,
+                            skyboxMaterial: BABYLON.StandardMaterial, skybox: BABYLON.Mesh,
+                            skyURL: string, scene: BABYLON.Scene,) {
+    canvas.focus();
+    insert = 1;
+    skyURL = skyboxes[insert];
+    this.setSkyboxMaterial(skyboxMaterial, skybox, skyURL, scene)
+  }
+
+  private changeSkyboxFantasy(canvas: HTMLCanvasElement, insert: number, skyboxes: any,
+                              skyboxMaterial: BABYLON.StandardMaterial, skybox: BABYLON.Mesh,
+                              skyURL: string, scene: BABYLON.Scene,) {
+    canvas.focus();
+    insert = 1;
+    skyURL = skyboxes[insert];
+    this.setSkyboxMaterial(skyboxMaterial, skybox, skyURL, scene)
+  }
+
   public createSkybox(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
 
     const skybox = BABYLON.Mesh.CreateBox('skyBox', 500.0, scene);
@@ -25,56 +62,20 @@ export class SkyboxComponent implements OnInit {
     let skyURL;
 
     // set defaultskybox
-    window.onload = function() {
-      skyURL = skyboxes[0];
-      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, scene);
-      skyURL = skyboxes[1];
-      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, scene);
-      skyURL = skyboxes[2];
-      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, scene);
-      skyURL = skyboxes[insert];
-      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, scene);
-      skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
-      skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
-      skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
-      skyboxMaterial.disableLighting = true;
-      skybox.material = skyboxMaterial;
-    };
+    skyURL = skyboxes[0];
+    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, scene);
+    skyURL = skyboxes[1];
+    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, scene);
+    skyURL = skyboxes[2];
+    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, scene);
+    skyURL = skyboxes[insert];
+    this.setSkyboxMaterial(skyboxMaterial, skybox, skyURL, scene)
+
 
     // set box with button
-    document.getElementById('sky').onclick = function () {
-      canvas.focus();
-      insert = 0;
-      skyURL = skyboxes[insert];
-      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, scene);
-      skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
-      skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
-      skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
-      skyboxMaterial.disableLighting = true;
-      skybox.material = skyboxMaterial;
-    };
-    document.getElementById('urban').onclick = function () {
-      canvas.focus();
-      insert = 1;
-      skyURL = skyboxes[insert];
-      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, scene);
-      skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
-      skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
-      skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
-      skyboxMaterial.disableLighting = true;
-      skybox.material = skyboxMaterial;
-    };
-    document.getElementById('fantasy').onclick = function () {
-      canvas.focus();
-      insert = 2;
-      skyURL = skyboxes[insert];
-      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, scene);
-      skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
-      skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
-      skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
-      skyboxMaterial.disableLighting = true;
-      skybox.material = skyboxMaterial;
-    };
+    this.changeSkyboxSky(canvas, insert, skyboxes, skyboxMaterial, skybox, skyURL, scene)
+    this.changeSkyboxUrban(canvas, insert, skyboxes, skyboxMaterial, skybox, skyURL, scene)
+    this.changeSkyboxFantasy(canvas, insert, skyboxes, skyboxMaterial, skybox, skyURL, scene)
   }
 
   constructor() {
