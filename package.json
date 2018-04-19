@@ -22,6 +22,7 @@
     "@angular/platform-browser-dynamic": "5.2.10",
     "@angular/router": "5.2.10",
     "babylonjs": "3.2.0-rc.1",
+    "babylonjs-gui": "3.2.0-rc.1",
     "babylonjs-loaders": "3.2.0-rc.1",
     "core-js": "2.5.5",
     "rxjs": "5.5.10",

@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, Input, ViewChild, HostListener } from '@angular/core';
+import {AfterViewInit, Component, ElementRef, Input, ViewChild, HostListener} from '@angular/core';
 
 import * as BABYLON from 'babylonjs';
 
@@ -28,7 +28,16 @@ export class SceneComponent implements AfterViewInit {
     private lightComponent: LightComponent,
     private camerasComponent: CamerasComponent,
     private uploadModelComponent: UploadModelComponent
-  ) {}
+  ) {
+  }
+
+  @HostListener('window:resize', ['$event'])
+  public onResize(event: Event) {
+
+    this.engine.resize();
+    this.canvas.style.width = '100%';
+    this.canvas.style.height = '100%';
+  }
 
   private getCanvas(): HTMLCanvasElement {
     return this.canvasRef.nativeElement;
