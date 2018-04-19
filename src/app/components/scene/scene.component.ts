@@ -31,6 +31,14 @@ export class SceneComponent implements AfterViewInit {
   ) {
   }
 
+  @HostListener('window:resize', ['$event'])
+  public onResize(event: Event) {
+
+    this.engine.resize();
+    this.canvas.style.width = '100%';
+    this.canvas.style.height = '100%';
+  }
+
   private getCanvas(): HTMLCanvasElement {
     return this.canvasRef.nativeElement;
   }
