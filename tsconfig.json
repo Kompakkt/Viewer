@@ -15,6 +15,7 @@
     ],
     "types": [
       "babylonjs",
+      "babylonjs-gui",
       "babylonjs-loaders"
     ],
     "lib": [

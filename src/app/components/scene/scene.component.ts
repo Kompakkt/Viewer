@@ -1,12 +1,12 @@
-import { AfterViewInit, Component, ElementRef, Input, ViewChild, HostListener } from '@angular/core';
+import {AfterViewInit, Component, ElementRef, Input, ViewChild, HostListener} from '@angular/core';
 
 import * as BABYLON from 'babylonjs';
 
-import {ImportService} from "../../services/import/import.service";
-import {SkyboxComponent} from "../skybox/skybox.component";
-import {CamerasComponent} from "../cameras/cameras.component";
-import {LightComponent} from "../light/light.component";
-import {UploadModelComponent} from "../upload-model/upload-model.component";
+import {ImportService} from '../../services/import/import.service';
+import {SkyboxComponent} from '../skybox/skybox.component';
+import {CamerasComponent} from '../cameras/cameras.component';
+import {LightComponent} from '../light/light.component';
+import {UploadModelComponent} from '../upload-model/upload-model.component';
 
 @Component({
   selector: 'app-scene',
@@ -18,9 +18,9 @@ export class SceneComponent implements AfterViewInit {
   @ViewChild('canvas')
   private canvasRef: ElementRef;
 
-  private canvas : HTMLCanvasElement;
-  private engine : BABYLON.Engine;
-  private scene : BABYLON.Scene;
+  private canvas: HTMLCanvasElement;
+  private engine: BABYLON.Engine;
+  private scene: BABYLON.Scene;
 
   constructor(
     private importService: ImportService,
@@ -28,7 +28,8 @@ export class SceneComponent implements AfterViewInit {
     private lightComponent: LightComponent,
     private camerasComponent: CamerasComponent,
     private uploadModelComponent: UploadModelComponent
-  ) {}
+  ) {
+  }
 
   private getCanvas(): HTMLCanvasElement {
     return this.canvasRef.nativeElement;
@@ -63,7 +64,7 @@ export class SceneComponent implements AfterViewInit {
     let scene = this.scene;
 
     // run the render loop
-    this.engine.runRenderLoop(function(){
+    this.engine.runRenderLoop(function () {
       scene.render();
     });
     this.skyboxComponent.createSkybox(this.scene, this.canvas);
