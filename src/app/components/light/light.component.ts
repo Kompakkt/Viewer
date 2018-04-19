@@ -1,3 +1,7 @@
+/**
+ * Light Component
+ * @author: Benedikt Mildenberger
+ */
 import { Component, OnInit } from '@angular/core';
 import * as BABYLON from "babylonjs";
 
@@ -8,7 +12,7 @@ import * as BABYLON from "babylonjs";
 })
 export class LightComponent implements OnInit {
 
-  public createLight(_scene) {
+  public createLight(_scene: BABYLON.Scene) {
     let light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(1,0,1), _scene);
     light.groundColor = new BABYLON.Color3(.1, .1, .1);
   }

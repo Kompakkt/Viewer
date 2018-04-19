@@ -8,6 +8,7 @@ import {ImportService} from './services/import/import.service';
 import { SkyboxComponent } from './components/skybox/skybox.component';
 import { UploadModelComponent } from './components/upload-model/upload-model.component';
 import { LightComponent } from './components/light/light.component';
+import { MenuComponent } from './menu/menu.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { LightComponent } from './components/light/light.component';
     CamerasComponent,
     SkyboxComponent,
     UploadModelComponent,
-    LightComponent
+    LightComponent,
+    MenuComponent
   ],
   imports: [
     BrowserModule

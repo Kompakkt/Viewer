@@ -11,10 +11,15 @@ import {ImportService} from '../../services/import/import.service';
 })
 export class CamerasComponent implements OnInit {
 
-  constructor() {}
+  constructor() {
+  }
+
+  public hello() {
+
+  };
 
 
-  public createCamera(_scene, _canvas) {
+  public createCamera(_scene: BABYLON.Scene, _canvas: HTMLCanvasElement) {
 
     let _alpha = 9;
     let _beta = 1.3;
@@ -53,8 +58,9 @@ export class CamerasComponent implements OnInit {
     _canvas.focus();
 
     //set camera to orbit cam
-    let setCamArcRotate = function (_scene, _canvas) {
-      camera1 = new BABYLON.ArcRotateCamera('camera1', null, null, null, new BABYLON.Vector3(camera2.position.x, camera2.position.y, camera2.position.z), _scene);
+    let setCamArcRotate = function (_scene: BABYLON.Scene, _canvas: HTMLCanvasElement) {
+      camera1 = new BABYLON.ArcRotateCamera('camera1', 0, 0, 0,
+        new BABYLON.Vector3(camera2.position.x, camera2.position.y, camera2.position.z), _scene);
       camera1.keysUp.push(87);
       camera1.keysDown.push(83);
       camera1.keysLeft.push(65);
@@ -66,9 +72,9 @@ export class CamerasComponent implements OnInit {
       camera1.attachControl(_canvas, true);
     };
 
-    let arc = document.getElementById('arc').onclick = function () {
+    document.getElementById('arc').onclick = function () {
       _canvas.focus();
-      if (_camChanger == 1) {
+      if (_camChanger === 1) {
         _camChanger = 0;
         setCamArcRotate(_scene, _canvas);
       }
@@ -77,7 +83,7 @@ export class CamerasComponent implements OnInit {
     };
 
     //set camera to first-person/universal cam
-    let setCamUniversal = function (_scene, _canvas) {
+    let setCamUniversal = function (_scene: BABYLON.Scene, _canvas: HTMLCanvasElement) {
       camera2 = new BABYLON.UniversalCamera('camera2', new BABYLON.Vector3(camera1.position.x, camera1.position.y, camera1.position.z), _scene);
       camera2.keysUp.push(87);
       camera2.keysDown.push(83);
@@ -100,7 +106,7 @@ export class CamerasComponent implements OnInit {
     };
 
     //set camera to defautlt
-    let setArcCamToDefault = function (_scene, _canvas) {
+    let setArcCamToDefault = function (_scene: BABYLON.Scene, _canvas: HTMLCanvasElement) {
       _scene.activeCamera = camera1;
       camera1.attachControl(_canvas, true);
 
@@ -159,7 +165,7 @@ export class CamerasComponent implements OnInit {
       });
     };
 
-    let setUnvCamToDefault = function (_scene, _canvas) {
+    let setUnvCamToDefault = function (_scene: BABYLON.Scene, _canvas: HTMLCanvasElement) {
 
       var setBackAnm = new BABYLON.Animation('camPos', 'position', 30,
         BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
@@ -177,7 +183,7 @@ export class CamerasComponent implements OnInit {
         BABYLON.Animation.ANIMATIONTYPE_FLOAT,
         BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 
-      var setBackRotX = [{
+      let setBackRotX = [{
         frame: 15,
         value: camera2.rotation.x
       }, {
@@ -259,7 +265,6 @@ export class CamerasComponent implements OnInit {
     plane5.setPositionWithLocalVector(new BABYLON.Vector3(0, 0, 240));
     plane6.setPositionWithLocalVector(new BABYLON.Vector3(0, 0, 240));
 
-
     _scene.collisionsEnabled = true;
     plane1.checkCollisions = true;
     plane2.checkCollisions = true;
@@ -267,8 +272,6 @@ export class CamerasComponent implements OnInit {
     plane4.checkCollisions = true;
     plane5.checkCollisions = true;
     plane6.checkCollisions = true;
-
-
   }
 
   ngOnInit() {

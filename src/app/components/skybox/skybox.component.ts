@@ -8,7 +8,7 @@ import * as BABYLON from 'babylonjs';
 })
 export class SkyboxComponent implements OnInit {
 
-  public createSkybox(_scene, _canvas) {
+  public createSkybox(_scene: BABYLON.Scene, _canvas: HTMLCanvasElement) {
 
     let skybox = BABYLON.Mesh.CreateBox('skyBox', 500.0, _scene);
     let skyboxMaterial = new BABYLON.StandardMaterial('skyBox', _scene);
