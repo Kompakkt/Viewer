@@ -12,7 +12,7 @@ export class AnnotationsComponent implements OnInit {
 
   public createAnnotations() {
 
-    const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI('UI');
+    const advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('UI');
 
   }
 
