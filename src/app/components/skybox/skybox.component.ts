@@ -21,7 +21,7 @@ export class SkyboxComponent implements OnInit {
   private changeSkyboxSky(canvas: HTMLCanvasElement, insert: number, skyboxes: any,
                           skyboxMaterial: BABYLON.StandardMaterial, skybox: BABYLON.Mesh,
                           skyURL: string, scene: BABYLON.Scene,) {
-    canvas.focus();
+
     insert = 0;
     skyURL = skyboxes[insert];
     this.setSkyboxMaterial(skyboxMaterial, skybox, skyURL, scene)
@@ -30,7 +30,7 @@ export class SkyboxComponent implements OnInit {
   private changeSkyboxUrban(canvas: HTMLCanvasElement, insert: number, skyboxes: any,
                             skyboxMaterial: BABYLON.StandardMaterial, skybox: BABYLON.Mesh,
                             skyURL: string, scene: BABYLON.Scene,) {
-    canvas.focus();
+
     insert = 1;
     skyURL = skyboxes[insert];
     this.setSkyboxMaterial(skyboxMaterial, skybox, skyURL, scene)
@@ -39,8 +39,8 @@ export class SkyboxComponent implements OnInit {
   private changeSkyboxFantasy(canvas: HTMLCanvasElement, insert: number, skyboxes: any,
                               skyboxMaterial: BABYLON.StandardMaterial, skybox: BABYLON.Mesh,
                               skyURL: string, scene: BABYLON.Scene,) {
-    canvas.focus();
-    insert = 1;
+
+    insert = 2;
     skyURL = skyboxes[insert];
     this.setSkyboxMaterial(skyboxMaterial, skybox, skyURL, scene)
   }
@@ -70,6 +70,7 @@ export class SkyboxComponent implements OnInit {
     skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, scene);
     skyURL = skyboxes[insert];
     this.setSkyboxMaterial(skyboxMaterial, skybox, skyURL, scene)
+    console.log("done")
 
 
     // set box with button
