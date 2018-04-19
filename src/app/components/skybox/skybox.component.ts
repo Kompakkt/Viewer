@@ -8,45 +8,45 @@ import * as BABYLON from 'babylonjs';
 })
 export class SkyboxComponent implements OnInit {
 
-  public createSkybox(_scene: BABYLON.Scene, _canvas: HTMLCanvasElement) {
+  public createSkybox(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
 
-    let skybox = BABYLON.Mesh.CreateBox('skyBox', 500.0, _scene);
-    let skyboxMaterial = new BABYLON.StandardMaterial('skyBox', _scene);
+    const skybox = BABYLON.Mesh.CreateBox('skyBox', 500.0, scene);
+    const skyboxMaterial = new BABYLON.StandardMaterial('skyBox', scene);
     skyboxMaterial.backFaceCulling = false;
 
 
-    let skyboxes = [
+    const skyboxes = [
       'https://www.babylonjs-playground.com/textures/skybox',
       'https://www.babylonjs-playground.com/textures/skybox2',
       'https://www.babylonjs-playground.com/textures/skybox4'
     ];
 
-    let _insert = 0;
+    let insert = 0;
     let skyURL;
 
-    //set defaultskybox
+    // set defaultskybox
     window.onload = function() {
       skyURL = skyboxes[0];
-      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, _scene);
+      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, scene);
       skyURL = skyboxes[1];
-      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, _scene);
+      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, scene);
       skyURL = skyboxes[2];
-      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, _scene);
-      skyURL = skyboxes[_insert];
-      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, _scene);
+      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, scene);
+      skyURL = skyboxes[insert];
+      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, scene);
       skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
       skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
       skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
       skyboxMaterial.disableLighting = true;
       skybox.material = skyboxMaterial;
-    }
+    };
 
-    //set box with button
+    // set box with button
     document.getElementById('sky').onclick = function () {
-      _canvas.focus();
-      _insert = 0;
-      skyURL = skyboxes[_insert];
-      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, _scene);
+      canvas.focus();
+      insert = 0;
+      skyURL = skyboxes[insert];
+      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, scene);
       skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
       skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
       skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
@@ -54,10 +54,10 @@ export class SkyboxComponent implements OnInit {
       skybox.material = skyboxMaterial;
     };
     document.getElementById('urban').onclick = function () {
-      _canvas.focus();
-      _insert = 1;
-      skyURL = skyboxes[_insert];
-      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, _scene);
+      canvas.focus();
+      insert = 1;
+      skyURL = skyboxes[insert];
+      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, scene);
       skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
       skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
       skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
@@ -65,10 +65,10 @@ export class SkyboxComponent implements OnInit {
       skybox.material = skyboxMaterial;
     };
     document.getElementById('fantasy').onclick = function () {
-      _canvas.focus();
-      _insert = 2;
-      skyURL = skyboxes[_insert];
-      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, _scene);
+      canvas.focus();
+      insert = 2;
+      skyURL = skyboxes[insert];
+      skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, scene);
       skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
       skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
       skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
