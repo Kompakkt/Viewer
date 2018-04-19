@@ -9,6 +9,7 @@ import { SkyboxComponent } from './components/skybox/skybox.component';
 import { UploadModelComponent } from './components/upload-model/upload-model.component';
 import { LightComponent } from './components/light/light.component';
 import { MenuComponent } from './menu/menu.component';
+import {AnnotationsComponent} from './components/annotations/annotations.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { MenuComponent } from './menu/menu.component';
     SkyboxComponent,
     UploadModelComponent,
     LightComponent,
-    MenuComponent
+    MenuComponent,
+    AnnotationsComponent
   ],
   imports: [
     BrowserModule
@@ -28,7 +30,8 @@ import { MenuComponent } from './menu/menu.component';
     SkyboxComponent,
     LightComponent,
     CamerasComponent,
-    UploadModelComponent
+    UploadModelComponent,
+    AnnotationsComponent
   ],
   bootstrap: [AppComponent]
 })

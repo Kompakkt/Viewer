@@ -7,6 +7,7 @@ import {SkyboxComponent} from '../skybox/skybox.component';
 import {CamerasComponent} from '../cameras/cameras.component';
 import {LightComponent} from '../light/light.component';
 import {UploadModelComponent} from '../upload-model/upload-model.component';
+import {AnnotationsComponent} from '../annotations/annotations.component';
 
 @Component({
   selector: 'app-scene',
@@ -27,7 +28,8 @@ export class SceneComponent implements AfterViewInit {
     private skyboxComponent: SkyboxComponent,
     private lightComponent: LightComponent,
     private camerasComponent: CamerasComponent,
-    private uploadModelComponent: UploadModelComponent
+    private uploadModelComponent: UploadModelComponent,
+    private annotationsComponent: AnnotationsComponent
   ) {
   }
 
@@ -59,6 +61,9 @@ export class SceneComponent implements AfterViewInit {
     this.lightComponent.createLight(this.scene);
     this.uploadModelComponent.loadObject(this.scene);
 
+    this.annotationsComponent.createAnnotations();
+
+
     this.scene.collisionsEnabled = true;
   }
 
@@ -72,13 +77,15 @@ export class SceneComponent implements AfterViewInit {
     const scene = this.scene;
 
     // run the render loop
-    this.engine.runRenderLoop(function() {
+    this.engine.runRenderLoop(function () {
       scene.render();
     });
     this.skyboxComponent.createSkybox(this.scene, this.canvas);
     this.lightComponent.createLight(this.scene);
     this.camerasComponent.createCamera(this.scene, this.canvas);
     this.uploadModelComponent.loadObject(this.scene);
+    this.annotationsComponent.createAnnotations();
+
 
     const that = this;
     setTimeout(function () {

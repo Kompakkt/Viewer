@@ -7,7 +7,9 @@
     "types": [
       "babylonjs",
       "jasmine",
-      "node"
+      "node",
+      "babylonjs-gui",
+      "babylonjs-materials"
     ]
   },
   "files": [
