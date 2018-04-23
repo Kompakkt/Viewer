@@ -18,6 +18,7 @@ export class CamerasComponent implements OnInit {
   private camChanger: number;
 
   constructor() {
+    this.camChanger = 0;
   }
 
 
@@ -55,9 +56,6 @@ export class CamerasComponent implements OnInit {
 
     const xRot = this.camera2.rotation.x;
     const yRot = this.camera2.rotation.y;
-
-    // camera changer
-    this.camChanger = 0;
 
     this.canvas.focus();
 
@@ -158,6 +156,8 @@ export class CamerasComponent implements OnInit {
   public setCamUniversal() {
 
     console.log('works');
+
+    console.log(this.camChanger)
 
     if (this.camChanger === 0) {
 

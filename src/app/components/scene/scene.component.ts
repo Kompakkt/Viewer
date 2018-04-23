@@ -80,12 +80,6 @@ export class SceneComponent implements AfterViewInit {
     this.engine.runRenderLoop(function () {
       scene.render();
     });
-    this.skyboxComponent.createSkybox(this.scene, this.canvas);
-    this.lightComponent.createLight(this.scene);
-    this.camerasComponent.createCamera(this.scene, this.canvas);
-    this.uploadModelComponent.loadObject(this.scene);
-    this.annotationsComponent.createAnnotations();
-
 
     const that = this;
     setTimeout(function () {
