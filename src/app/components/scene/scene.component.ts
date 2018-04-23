@@ -56,12 +56,12 @@ export class SceneComponent implements AfterViewInit {
     this.scene = new BABYLON.Scene(this.engine);
     this.engine.displayLoadingUI();
 
-    this.skyboxComponent.createSkybox(this.scene, this.canvas);
+   // this.skyboxComponent.createSkybox(this.scene, this.canvas);
     this.camerasComponent.createCamera(this.scene, this.canvas);
     this.lightComponent.createLight(this.scene);
-    this.uploadModelComponent.loadObject(this.scene);
+   // this.uploadModelComponent.loadObject(this.scene);
 
-    this.annotationsComponent.createAnnotations();
+    this.annotationsComponent.createAnnotations(this.scene, this.canvas);
 
 
     this.scene.collisionsEnabled = true;
@@ -80,11 +80,11 @@ export class SceneComponent implements AfterViewInit {
     this.engine.runRenderLoop(function () {
       scene.render();
     });
-    this.skyboxComponent.createSkybox(this.scene, this.canvas);
+    //this.skyboxComponent.createSkybox(this.scene, this.canvas);
     this.lightComponent.createLight(this.scene);
     this.camerasComponent.createCamera(this.scene, this.canvas);
-    this.uploadModelComponent.loadObject(this.scene);
-    this.annotationsComponent.createAnnotations();
+    //this.uploadModelComponent.loadObject(this.scene);
+    this.annotationsComponent.createAnnotations(this.scene, this.canvas);
 
 
     const that = this;
