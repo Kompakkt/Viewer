@@ -61,7 +61,7 @@ export class SceneComponent implements AfterViewInit {
     this.lightComponent.createLight(this.scene);
     this.uploadModelComponent.loadObject(this.scene);
 
-    this.annotationsComponent.createAnnotations();
+    this.annotationsComponent.createAnnotations(this.scene, this.canvas);
 
 
     this.scene.collisionsEnabled = true;

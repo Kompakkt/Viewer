@@ -12,7 +12,7 @@ export class AnnotationsComponent implements OnInit {
 
 
   public createAnnotations(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
-
+    /*
     const advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('UI');
 
 
@@ -50,7 +50,7 @@ export class AnnotationsComponent implements OnInit {
     sphere.actionManager = new BABYLON.ActionManager(scene);
     sphere.actionManager.registerAction(action4);
 
-    /*
+
         const advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('UI');
 
 
