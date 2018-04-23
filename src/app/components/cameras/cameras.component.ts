@@ -11,8 +11,15 @@ import {ImportService} from '../../services/import/import.service';
 })
 export class CamerasComponent implements OnInit {
 
+  private canvas: HTMLCanvasElement;
+  private scene: BABYLON.Scene;
+  private camera1: BABYLON.ArcRotateCamera;
+  private camera2: BABYLON.UniversalCamera;
+  private camChanger: number;
+
   constructor() {
   }
+
 
   public createCamera(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
 
@@ -20,81 +27,79 @@ export class CamerasComponent implements OnInit {
     const beta = 1.3;
     const radius = 100;
 
-    let camera1 = new BABYLON.ArcRotateCamera('camera1', alpha, beta, radius, BABYLON.Vector3.Zero(), scene);
-    camera1.setTarget(BABYLON.Vector3.Zero());
-    camera1.attachControl(canvas, true);
-    camera1.keysUp.push(87);
-    camera1.keysDown.push(83);
-    camera1.keysLeft.push(65);
-    camera1.keysRight.push(68);
-    camera1.panningSensibility = 25;
-    camera1.upperRadiusLimit = 230;
+    this.canvas = canvas;
+    this.scene = scene;
 
+    this.camera1 = new BABYLON.ArcRotateCamera('camera1', alpha, beta, radius, BABYLON.Vector3.Zero(), this.scene);
+    this.camera1.setTarget(BABYLON.Vector3.Zero());
+    this.camera1.attachControl(canvas, true);
+    this.camera1.keysUp.push(87);
+    this.camera1.keysDown.push(83);
+    this.camera1.keysLeft.push(65);
+    this.camera1.keysRight.push(68);
+    this.camera1.panningSensibility = 25;
+    this.camera1.upperRadiusLimit = 230;
 
-    const x = camera1.position.x;
-    const y = camera1.position.y;
-    const z = camera1.position.z;
+    const x = this.camera1.position.x;
+    const y = this.camera1.position.y;
+    const z = this.camera1.position.z;
 
-    let camera2 = new BABYLON.UniversalCamera('camera2', new BABYLON.Vector3(x, y, z), scene);
-    camera2.keysUp.push(87);
-    camera2.keysDown.push(83);
-    camera2.keysLeft.push(65);
-    camera2.keysRight.push(68);
-    camera2.ellipsoid = new BABYLON.Vector3(10, 10, 10);
-    camera2.checkCollisions = true;
-    camera2.setTarget(BABYLON.Vector3.Zero());
+    this.camera2 = new BABYLON.UniversalCamera('camera2', new BABYLON.Vector3(x, y, z), this.scene);
+    this.camera2.keysUp.push(87);
+    this.camera2.keysDown.push(83);
+    this.camera2.keysLeft.push(65);
+    this.camera2.keysRight.push(68);
+    this.camera2.ellipsoid = new BABYLON.Vector3(10, 10, 10);
+    this.camera2.checkCollisions = true;
+    this.camera2.setTarget(BABYLON.Vector3.Zero());
 
-    const xRot = camera2.rotation.x;
-    const yRot = camera2.rotation.y;
+    const xRot = this.camera2.rotation.x;
+    const yRot = this.camera2.rotation.y;
 
-    //camera changer
-    let camChanger = 0;
+    // camera changer
+    this.camChanger = 0;
 
-    canvas.focus();
+    this.canvas.focus();
 
-    this.setCamArcRotate(scene, canvas, camera1, camera2, camChanger);
-    this.setCamUniversal(scene, canvas, camera1, camera2, camChanger);
+    this.setCamArcRotateDefault(alpha, beta, radius);
+    this.setCamUniversalDefault(x, y, z, xRot, yRot);
 
-    this.setCamArcRotateDefault(scene, canvas, camera1, camera2, camChanger, alpha, beta, radius);
-    this.setCamUniversalDefault(scene, canvas, camera1, camera2, camChanger, x, y, z, xRot, yRot);
+    this.setBackToDefault(alpha, beta, radius, x, y, z, xRot, yRot);
 
-    this.setBackToDefault(scene, canvas, camera1, camera2, camChanger, alpha, beta, radius, x, y, z, xRot, yRot);
-
-    this.setCamCollider(scene);
+    this.setCamCollider();
   }
 
   ngOnInit() {
   }
 
-  private setCamArcRotate(scene: BABYLON.Scene, canvas: HTMLCanvasElement,
-                          camera1: BABYLON.ArcRotateCamera, camera2: BABYLON.UniversalCamera, camChanger: number) {
-console.log("works")
-    if(camChanger === 1){
-      console.log("works")
-      camera1 = new BABYLON.ArcRotateCamera('camera1', 0, 0, 0,
-        new BABYLON.Vector3(camera2.position.x, camera2.position.y, camera2.position.z), scene);
-      camera1.keysUp.push(87);
-      camera1.keysDown.push(83);
-      camera1.keysLeft.push(65);
-      camera1.keysRight.push(68);
-      camera1.panningSensibility = 25;
-      camera1.upperRadiusLimit = 200;
-      camera1.setTarget(BABYLON.Vector3.Zero());
-      scene.activeCamera = camera1;
-      camera1.attachControl(canvas, true);
+  private setCamArcRotate() {
 
-      canvas.focus();
-      camChanger = 0;
+    if (this.camChanger === 1) {
+
+      console.log('works');
+
+      this.camera1 = new BABYLON.ArcRotateCamera('camera1', 0, 0, 0,
+        new BABYLON.Vector3(this.camera2.position.x, this.camera2.position.y, this.camera2.position.z), this.scene);
+
+      this.camera1.keysUp.push(87);
+      this.camera1.keysDown.push(83);
+      this.camera1.keysLeft.push(65);
+      this.camera1.keysRight.push(68);
+      this.camera1.panningSensibility = 25;
+      this.camera1.upperRadiusLimit = 200;
+      this.camera1.setTarget(BABYLON.Vector3.Zero());
+      this.scene.activeCamera = this.camera1;
+      this.camera1.attachControl(this.canvas, true);
+
+      this.canvas.focus();
+      this.camChanger = 0;
     }
-    else{}
   }
 
-  private setCamArcRotateDefault(scene: BABYLON.Scene, canvas: HTMLCanvasElement,
-                          camera1: BABYLON.ArcRotateCamera, camera2: BABYLON.UniversalCamera, camChanger: number,
-                          alpha: number, beta: number, radius: number) {
+  private setCamArcRotateDefault(alpha: number, beta: number, radius: number) {
 
-    scene.activeCamera = camera1;
-    camera1.attachControl(canvas, true);
+    this.scene.activeCamera = this.camera1;
+    this.camera1.attachControl(this.canvas, true);
 
     const animCamAlpha = new BABYLON.Animation('animCam', 'alpha', 30,
       BABYLON.Animation.ANIMATIONTYPE_FLOAT,
@@ -103,7 +108,7 @@ console.log("works")
     const backAlpha = [];
     backAlpha.push({
       frame: 0,
-      value: camera1.alpha
+      value: this.camera1.alpha
     });
     backAlpha.push({
       frame: 30,
@@ -116,7 +121,7 @@ console.log("works")
     const backBeta = [];
     backBeta.push({
       frame: 0,
-      value: camera1.beta
+      value: this.camera1.beta
     });
     backBeta.push({
       frame: 30,
@@ -129,7 +134,7 @@ console.log("works")
     const backRadius = [];
     backRadius.push({
       frame: 0,
-      value: camera1.radius
+      value: this.camera1.radius
     });
     backRadius.push({
       frame: 30,
@@ -140,41 +145,41 @@ console.log("works")
     animCamBeta.setKeys(backBeta);
     animCamRadius.setKeys(backRadius);
 
-    camera1.animations.push(animCamAlpha);
-    camera1.animations.push(animCamBeta);
-    camera1.animations.push(animCamRadius);
+    this.camera1.animations.push(animCamAlpha);
+    this.camera1.animations.push(animCamBeta);
+    this.camera1.animations.push(animCamRadius);
 
-    camera1.setTarget(BABYLON.Vector3.Zero());
+    this.camera1.setTarget(BABYLON.Vector3.Zero());
 
-    scene.beginAnimation(camera1, 0, 30, false, 1, function () {
+    this.scene.beginAnimation(this.camera1, 0, 30, false, 1, function () {
     });
   }
 
-  private setCamUniversal(scene: BABYLON.Scene, canvas: HTMLCanvasElement,
-                          camera1: BABYLON.ArcRotateCamera, camera2: BABYLON.UniversalCamera, camChanger: number) {
-    console.log("works")
+  public setCamUniversal() {
 
-      console.log("works")
-      camera2 = new BABYLON.UniversalCamera('camera2',
-        new BABYLON.Vector3(camera1.position.x, camera1.position.y, camera1.position.z), scene);
-      camera2.keysUp.push(87);
-      camera2.keysDown.push(83);
-      camera2.keysLeft.push(65);
-      camera2.keysRight.push(68);
-      camera2.setTarget(BABYLON.Vector3.Zero());
-      scene.activeCamera = camera2;
-      camera2.attachControl(canvas, true);
-      camera2.ellipsoid = new BABYLON.Vector3(10, 10, 10);
-      camera2.checkCollisions = true;
+    console.log('works');
 
-      canvas.focus();
-      camChanger = 1;
+    if (this.camChanger === 0) {
 
+      console.log('works');
+      this.camera2 = new BABYLON.UniversalCamera('camera2',
+        new BABYLON.Vector3(this.camera1.position.x, this.camera1.position.y, this.camera1.position.z), this.scene);
+      this.camera2.keysUp.push(87);
+      this.camera2.keysDown.push(83);
+      this.camera2.keysLeft.push(65);
+      this.camera2.keysRight.push(68);
+      this.camera2.setTarget(BABYLON.Vector3.Zero());
+      this.scene.activeCamera = this.camera2;
+      this.camera2.attachControl(this.canvas, true);
+      this.camera2.ellipsoid = new BABYLON.Vector3(10, 10, 10);
+      this.camera2.checkCollisions = true;
+
+      this.canvas.focus();
+      this.camChanger = 1;
+    }
   }
 
-  private setCamUniversalDefault(scene: BABYLON.Scene, canvas: HTMLCanvasElement,
-                          camera1: BABYLON.ArcRotateCamera, camera2: BABYLON.UniversalCamera, camChanger: number,
-                          x: number, y: number, z: number, xRot: number, yRot: number) {
+  private setCamUniversalDefault(x: number, y: number, z: number, xRot: number, yRot: number) {
 
     const setBackAnm = new BABYLON.Animation('camPos', 'position', 30,
       BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
@@ -182,7 +187,7 @@ console.log("works")
 
     const setBackPos = [{
       frame: 0,
-      value: new BABYLON.Vector3(camera2.position.x, camera2.position.y, camera2.position.z)
+      value: new BABYLON.Vector3(this.camera2.position.x, this.camera2.position.y, this.camera2.position.z)
     }, {
       frame: 30,
       value: new BABYLON.Vector3(x, y, z)
@@ -194,7 +199,7 @@ console.log("works")
 
     const setBackRotX = [{
       frame: 15,
-      value: camera2.rotation.x
+      value: this.camera2.rotation.x
     }, {
       frame: 30,
       value: xRot
@@ -206,7 +211,7 @@ console.log("works")
 
     const setBackRotY = [{
       frame: 15,
-      value: camera2.rotation.y
+      value: this.camera2.rotation.y
     }, {
       frame: 30,
       value: yRot
@@ -216,36 +221,37 @@ console.log("works")
     setBackRotXAnm.setKeys(setBackRotX);
     setBackRotYAnm.setKeys(setBackRotY);
 
-    camera2.animations.push(setBackAnm);
-    camera2.animations.push(setBackRotXAnm);
-    camera2.animations.push(setBackRotYAnm);
+    this.camera2.animations.push(setBackAnm);
+    this.camera2.animations.push(setBackRotXAnm);
+    this.camera2.animations.push(setBackRotYAnm);
 
-    scene.beginAnimation(camera2, 0, 30, false, 1, function () {
+    this.scene.beginAnimation(this.camera2, 0, 30, false, 1, function () {
 
     });
   }
 
-  private setCamCollider(scene: BABYLON.Scene) {
-    //sides
-    const plane2 = BABYLON.MeshBuilder.CreatePlane('plane', {height: 500, width: 500}, scene);
+  private setCamCollider() {
+
+    // sides
+    const plane2 = BABYLON.MeshBuilder.CreatePlane('plane', {height: 500, width: 500}, this.scene);
     plane2.visibility = 0;
-    const plane3 = BABYLON.MeshBuilder.CreatePlane('plane', {height: 500, width: 500}, scene);
+    const plane3 = BABYLON.MeshBuilder.CreatePlane('plane', {height: 500, width: 500}, this.scene);
     plane3.rotation.y = 90 * Math.PI / 180;
     plane3.visibility = 0;
-    const plane4 = BABYLON.MeshBuilder.CreatePlane('plane', {height: 500, width: 500}, scene);
+    const plane4 = BABYLON.MeshBuilder.CreatePlane('plane', {height: 500, width: 500}, this.scene);
     plane4.rotation.x = Math.PI;
     plane4.visibility = 0;
-    const plane5 = BABYLON.MeshBuilder.CreatePlane('plane', {height: 500, width: 500}, scene);
+    const plane5 = BABYLON.MeshBuilder.CreatePlane('plane', {height: 500, width: 500}, this.scene);
     plane5.rotation.y = 270 * Math.PI / 180;
     plane5.visibility = 0;
 
     // lower
-    const plane1 = BABYLON.MeshBuilder.CreatePlane('plane', {height: 500, width: 500}, scene);
+    const plane1 = BABYLON.MeshBuilder.CreatePlane('plane', {height: 500, width: 500}, this.scene);
     plane1.rotation.x = 90 * Math.PI / 180;
     plane1.visibility = 0;
 
     // upper
-    const plane6 = BABYLON.MeshBuilder.CreatePlane('plane', {height: 500, width: 500,}, scene);
+    const plane6 = BABYLON.MeshBuilder.CreatePlane('plane', {height: 500, width: 500,}, this.scene);
     plane6.rotation.x = 270 * Math.PI / 180;
     plane6.visibility = 0;
 
@@ -256,7 +262,7 @@ console.log("works")
     plane5.setPositionWithLocalVector(new BABYLON.Vector3(0, 0, 240));
     plane6.setPositionWithLocalVector(new BABYLON.Vector3(0, 0, 240));
 
-    scene.collisionsEnabled = true;
+    this.scene.collisionsEnabled = true;
     plane1.checkCollisions = true;
     plane2.checkCollisions = true;
     plane3.checkCollisions = true;
@@ -265,18 +271,14 @@ console.log("works")
     plane6.checkCollisions = true;
   }
 
-  private setBackToDefault(scene: BABYLON.Scene, canvas: HTMLCanvasElement, camera1: BABYLON.ArcRotateCamera,
-                    camera2: BABYLON.UniversalCamera, camChanger: number, alpha: number, beta: number, radius: number,
-                    x: number, y: number, z: number, xRot: number, yRot: number) {
+  private setBackToDefault(alpha: number, beta: number, radius: number,
+                           x: number, y: number, z: number, xRot: number, yRot: number) {
 
-    canvas.focus();
-    if (camChanger === 0) {
-      this.setCamArcRotateDefault(scene, canvas, camera1, camera2, camChanger, alpha, beta, radius);
-    }
-    else if (camChanger === 1) {
-      this.setCamUniversalDefault(scene, canvas, camera1, camera2, camChanger, x, y, z, xRot, yRot);
+    this.canvas.focus();
+    if (this.camChanger === 0) {
+      this.setCamArcRotateDefault(alpha, beta, radius);
+    } else if (this.camChanger === 1) {
+      this.setCamUniversalDefault(x, y, z, xRot, yRot);
     }
   }
 }
-
-
