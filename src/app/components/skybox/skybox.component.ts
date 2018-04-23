@@ -8,78 +8,76 @@ import * as BABYLON from 'babylonjs';
 })
 export class SkyboxComponent implements OnInit {
 
-  private setSkyboxMaterial(skyboxMaterial: BABYLON.StandardMaterial, skybox: BABYLON.Mesh,
-                            skyURL: string, scene: BABYLON.Scene) {
-    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, scene);
-    skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
-    skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
-    skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
-    skyboxMaterial.disableLighting = true;
-    skybox.material = skyboxMaterial;
+  private canvas: HTMLCanvasElement;
+  private scene: BABYLON.Scene;
+  private skybox: BABYLON.Mesh;
+  private skyboxMaterial: BABYLON.StandardMaterial;
+  private insert: number;
+  private skyURL: string;
+  private skyboxes: any;
+
+  constructor() {
+    this.insert = 0;
   }
 
-  private changeSkyboxSky(canvas: HTMLCanvasElement, insert: number, skyboxes: any,
-                          skyboxMaterial: BABYLON.StandardMaterial, skybox: BABYLON.Mesh,
-                          skyURL: string, scene: BABYLON.Scene,) {
-
-    insert = 0;
-    skyURL = skyboxes[insert];
-    this.setSkyboxMaterial(skyboxMaterial, skybox, skyURL, scene)
+  private setSkyboxMaterial() {
+    this.skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(this.skyURL, this.scene);
+    this.skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+    this.skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+    this.skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+    this.skyboxMaterial.disableLighting = true;
+    this.skybox.material = this.skyboxMaterial;
   }
 
-  private changeSkyboxUrban(canvas: HTMLCanvasElement, insert: number, skyboxes: any,
-                            skyboxMaterial: BABYLON.StandardMaterial, skybox: BABYLON.Mesh,
-                            skyURL: string, scene: BABYLON.Scene,) {
-
-    insert = 1;
-    skyURL = skyboxes[insert];
-    this.setSkyboxMaterial(skyboxMaterial, skybox, skyURL, scene)
+  private changeSkyboxSky() {
+    this.insert = 0;
+    this.skyURL = this.skyboxes[this.insert];
+    this.setSkyboxMaterial()
   }
 
-  private changeSkyboxFantasy(canvas: HTMLCanvasElement, insert: number, skyboxes: any,
-                              skyboxMaterial: BABYLON.StandardMaterial, skybox: BABYLON.Mesh,
-                              skyURL: string, scene: BABYLON.Scene,) {
-
-    insert = 2;
-    skyURL = skyboxes[insert];
-    this.setSkyboxMaterial(skyboxMaterial, skybox, skyURL, scene)
+  private changeSkyboxUrban() {
+    this.insert = 1;
+    this.skyURL = this.skyboxes[this.insert];
+    this.setSkyboxMaterial()
   }
 
-  public createSkybox(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
+  private changeSkyboxFantasy() {
+    this.insert = 2;
+    this.skyURL = this.skyboxes[this.insert];
+    this.setSkyboxMaterial()
+  }
 
-    const skybox = BABYLON.Mesh.CreateBox('skyBox', 500.0, scene);
-    const skyboxMaterial = new BABYLON.StandardMaterial('skyBox', scene);
-    skyboxMaterial.backFaceCulling = false;
+  public createSkybox() {
+
+    const skybox = BABYLON.Mesh.CreateBox('skyBox', 500.0, this.scene);
+    this.skyboxMaterial = new BABYLON.StandardMaterial('skyBox', this.scene);
+    this.skyboxMaterial.backFaceCulling = false;
 
 
-    const skyboxes = [
+    this.skyboxes = [
       'https://www.babylonjs-playground.com/textures/skybox',
       'https://www.babylonjs-playground.com/textures/skybox2',
       'https://www.babylonjs-playground.com/textures/skybox4'
     ];
 
-    let insert = 0;
-    let skyURL;
+    this.insert = 0;
 
     // set defaultskybox
-    skyURL = skyboxes[0];
-    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, scene);
-    skyURL = skyboxes[1];
-    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, scene);
-    skyURL = skyboxes[2];
-    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(skyURL, scene);
-    skyURL = skyboxes[insert];
-    this.setSkyboxMaterial(skyboxMaterial, skybox, skyURL, scene)
+    this.skyURL = this.skyboxes[0];
+    this.skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(this.skyURL, this.scene);
+    this.skyURL = this.skyboxes[1];
+    this.skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(this.skyURL, this.scene);
+    this.skyURL = this.skyboxes[2];
+    this.skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(this.skyURL, this.scene);
+    this.skyURL = this.skyboxes[this.insert];
+    this.setSkyboxMaterial()
     console.log("done")
 
 
     // set box with button
-    this.changeSkyboxSky(canvas, insert, skyboxes, skyboxMaterial, skybox, skyURL, scene)
-    this.changeSkyboxUrban(canvas, insert, skyboxes, skyboxMaterial, skybox, skyURL, scene)
-    this.changeSkyboxFantasy(canvas, insert, skyboxes, skyboxMaterial, skybox, skyURL, scene)
-  }
-
-  constructor() {
+    this.changeSkyboxSky()
+    this.changeSkyboxUrban()
+    this.changeSkyboxFantasy()
   }
 
   ngOnInit() {
