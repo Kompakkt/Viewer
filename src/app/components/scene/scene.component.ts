@@ -1,7 +1,6 @@
 import {AfterViewInit, Component, ElementRef, Input, ViewChild, HostListener} from '@angular/core';
 
 import {SkyboxComponent} from '../skybox/skybox.component';
-import {UploadModelComponent} from '../upload-model/upload-model.component';
 import {AnnotationsComponent} from '../annotations/annotations.component';
 import {CameraService} from '../../services/camera/camera.service';
 import {BabylonService} from '../../services/engine/babylon.service';
@@ -21,7 +20,6 @@ export class SceneComponent implements AfterViewInit {
   constructor(
     private skyboxComponent: SkyboxComponent,
     private cameraService: CameraService,
-    private uploadModelComponent: UploadModelComponent,
     private annotationsComponent: AnnotationsComponent,
     private babylonService: BabylonService
   ) {
@@ -51,7 +49,7 @@ export class SceneComponent implements AfterViewInit {
 
     this.babylonService.createHemisphericLight('light1', {x: 0, y: 1, z: 0});
 
-    this.uploadModelComponent.loadObject(scene);
+    this.babylonService.loadObject('', 'assets/models/testmodel/', 'testmodel.obj');
 
     this.annotationsComponent.createAnnotations(scene, this.canvas);
 

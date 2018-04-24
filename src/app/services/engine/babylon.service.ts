@@ -39,4 +39,7 @@ export class BabylonService {
     return new BABYLON.HemisphericLight(name, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
   }
 
+  public loadObject(meshNames: string, rootUrl: string, sceneFilename: string) {
+    return BABYLON.SceneLoader.ImportMesh(meshNames, rootUrl, sceneFilename, this.scene);
+  }
 }
