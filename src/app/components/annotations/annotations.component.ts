@@ -110,8 +110,9 @@ export class AnnotationsComponent implements OnInit {
 
       annotation.style.top = vector.y + 'px';
       annotation.style.left = vector.x + 'px';
+      */
     }
-    */
+
 
   /*
       Annotation befindet sich hinter dem Mesh und soll transparent werden
