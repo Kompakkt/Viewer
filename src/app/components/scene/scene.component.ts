@@ -2,12 +2,12 @@ import {AfterViewInit, Component, ElementRef, Input, ViewChild, HostListener} fr
 
 import * as BABYLON from 'babylonjs';
 
-import {ImportService} from '../../services/import/import.service';
 import {SkyboxComponent} from '../skybox/skybox.component';
 import {LightComponent} from '../light/light.component';
 import {UploadModelComponent} from '../upload-model/upload-model.component';
 import {AnnotationsComponent} from '../annotations/annotations.component';
 import {CameraService} from '../../services/camera/camera.service';
+import {BabylonService} from '../../services/engine/babylon.service';
 
 @Component({
   selector: 'app-scene',
@@ -20,23 +20,21 @@ export class SceneComponent implements AfterViewInit {
   private canvasRef: ElementRef;
 
   private canvas: HTMLCanvasElement;
-  private engine: BABYLON.Engine;
-  private scene: BABYLON.Scene;
 
   constructor(
-    private importService: ImportService,
     private skyboxComponent: SkyboxComponent,
     private lightComponent: LightComponent,
     private cameraService: CameraService,
     private uploadModelComponent: UploadModelComponent,
-    private annotationsComponent: AnnotationsComponent
+    private annotationsComponent: AnnotationsComponent,
+    private babylonService: BabylonService
   ) {
   }
 
   @HostListener('window:resize', ['$event'])
   public onResize(event: Event) {
 
-    this.engine.resize();
+    this.babylonService.getEngine().resize();
     this.canvas.style.width = '100%';
     this.canvas.style.height = '100%';
   }
@@ -49,44 +47,27 @@ export class SceneComponent implements AfterViewInit {
 
     this.canvas = this.getCanvas();
 
-    // load the 3D engine
-    this.engine = new BABYLON.Engine(this.canvas, true);
+    this.babylonService.createEngine(this.canvas, true);
+    const scene = this.babylonService.createScene();
 
-    // create a basic BJS Scene object
-    this.scene = new BABYLON.Scene(this.engine);
-    this.engine.displayLoadingUI();
+    this.skyboxComponent.createSkybox(scene, this.canvas);
+    this.cameraService.createCamera(scene, this.canvas);
+    this.lightComponent.createLight(scene);
+    this.uploadModelComponent.loadObject(scene);
 
-    this.skyboxComponent.createSkybox(this.scene, this.canvas);
-    this.cameraService.createCamera(this.scene, this.canvas);
-    this.lightComponent.createLight(this.scene);
-    this.uploadModelComponent.loadObject(this.scene);
+    this.annotationsComponent.createAnnotations(scene, this.canvas);
 
-    this.annotationsComponent.createAnnotations(this.scene, this.canvas);
-
-
-    this.scene.collisionsEnabled = true;
-  }
-
-  private startRendering() {
+    scene.collisionsEnabled = true;
   }
 
   ngAfterViewInit() {
 
     this.createScene();
 
-    const scene = this.scene;
+    const scene = this.babylonService.getScene();
 
-    // run the render loop
-    this.engine.runRenderLoop(function () {
+    this.babylonService.getEngine().runRenderLoop(function () {
       scene.render();
     });
-
-    const that = this;
-    setTimeout(function () {
-      that.engine.hideLoadingUI();
-    }, 3000);
-
-    this.startRendering();
   }
-
 }

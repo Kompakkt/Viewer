@@ -10,6 +10,7 @@ import {LightComponent} from './components/light/light.component';
 import {MenuComponent} from './menu/menu.component';
 import {AnnotationsComponent} from './components/annotations/annotations.component';
 import {CameraService} from './services/camera/camera.service';
+import {BabylonService} from './services/engine/babylon.service';
 
 @NgModule({
   declarations: [
@@ -30,7 +31,8 @@ import {CameraService} from './services/camera/camera.service';
     LightComponent,
     UploadModelComponent,
     AnnotationsComponent,
-    CameraService
+    CameraService,
+    BabylonService
   ],
   bootstrap: [AppComponent]
 })
