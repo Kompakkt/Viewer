@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {CameraService} from '../services/camera/camera.service';
 
-import * as BABYLON from 'babylonjs';
+import {BabylonService} from '../services/engine/babylon.service';
 
 @Component({
   selector: 'app-menu',
@@ -10,7 +10,8 @@ import * as BABYLON from 'babylonjs';
 })
 export class MenuComponent implements OnInit {
 
-  constructor(private cameraService: CameraService) {
+  constructor(private cameraService: CameraService,
+              private babylonService: BabylonService) {
   }
 
   ngOnInit() {
@@ -29,7 +30,7 @@ export class MenuComponent implements OnInit {
   }
 
   public fullscreen() {
-    //this.sceneComponent.getEngine().switchFullscreen(true);
+    this.babylonService.fullscreen();
   }
 
 }

@@ -27,4 +27,8 @@ export class BabylonService {
     return this.scene;
   }
 
+  public fullscreen(): void {
+    this.engine.switchFullscreen(false);
+  }
+
 }
