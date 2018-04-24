@@ -67,6 +67,7 @@ export class AnnotationsComponent implements OnInit {
     // plane.material.diffuseTexture.hasAlpha = true;
     // alpha = 0.0;
     plane.showBoundingBox = true;
+    plane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
     //  this.mesh.getBoundingInfo()._update(BABYLON.Matrix.Scaling(bbsize));
     // plane._updateNonUniformScalingState(false);
     const advancedTexturePlane = GUI.AdvancedDynamicTexture.CreateForMesh(plane);

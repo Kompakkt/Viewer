@@ -49,7 +49,7 @@ export class SceneComponent implements AfterViewInit {
     this.skyboxComponent.createSkybox(scene, this.canvas);
     this.cameraService.createCamera(scene, this.canvas);
 
-    this.babylonService.createHemisphericLight('light1', { x: 0, y: 1, z: 0 });
+    this.babylonService.createHemisphericLight('light1', {x: 0, y: 1, z: 0});
 
     this.uploadModelComponent.loadObject(scene);
 
@@ -63,15 +63,6 @@ export class SceneComponent implements AfterViewInit {
     this.createScene();
 
     const scene = this.babylonService.getScene();
-
-    scene.registerBeforeRender(function () {
-      if (scene.getMeshesByTags('plane') !== null) {
-        scene.getMeshesByTags('plane', function (ct) {
-          ct.lookAt(scene.activeCamera.position);
-        });
-      }
-    });
-
 
     this.babylonService.getEngine().runRenderLoop(function () {
       scene.render();
