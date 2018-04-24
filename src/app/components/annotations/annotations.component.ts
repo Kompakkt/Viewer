@@ -10,150 +10,128 @@ import * as GUI from 'babylonjs-gui';
 })
 export class AnnotationsComponent implements OnInit {
 
+  private canvas: HTMLCanvasElement;
+  private scene: BABYLON.Scene;
+  private mesh: BABYLON.Mesh;
+  private annotationCounter: number;
+
+
+  constructor() {
+  }
+
 
   public createAnnotations(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
-    /*
-    const advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('UI');
 
+    this.scene = scene;
 
+    // Bei Doppelklick auf ein Modell
     const mousePickModel = function (unit_mesh) {
       console.log('mouse picks ' + unit_mesh.meshUnderPointer.id);
       console.log(unit_mesh);
       if (unit_mesh.source !== null) {
-        const pickResult = scene.pick(scene.pointerX, scene.pointerY, null, false, camera);
+        const pickResult = scene.pick(scene.pointerX, scene.pointerY, null, false, this.camera);
 
         if (pickResult.pickedMesh) {
-          const target = new GUI.Ellipse();
-          target.width = '30px';
-          target.height = '30px';
-          target.color = 'White';
-          target.thickness = 1;
-          target.background = 'black';
-          advancedTexture.addControl(target);
-          target.moveToVector3(new BABYLON.Vector3(pickResult.pickedPoint.x, pickResult.pickedPoint.y, pickResult.pickedPoint.z), scene);
-          //target.linkWithMesh(sphere);
-          //target.showBoundingBox = true;
-          target.onPointerDownObservable.add(function () {
-            alert('works');
-            //target.isPickable = true;
-          });
-          const label = new GUI.TextBlock();
-          label.text = '1';
-          target.addControl(label);
+          const pickResultVector = new BABYLON.Vector3(pickResult.pickedPoint.x, pickResult.pickedPoint.y, pickResult.pickedPoint.z);
+          createAnnotationLabel(pickResultVector);
+
 
         }
       }
     };
 
-    const sphere = BABYLON.Mesh.CreateSphere('sphere1', 16, 2, scene);
-    const action4 = new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnDoublePickTrigger, mousePickModel);
-    sphere.actionManager = new BABYLON.ActionManager(scene);
-    sphere.actionManager.registerAction(action4);
+    //this.mesh = scene.getMeshByName('loaded');
+    // Doppelklick auf Modell, bekommt eine Funktion
+    this.mesh = BABYLON.Mesh.CreateSphere('sphere1', 16, 2, scene);
 
-
-        const advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('UI');
-
-
-            //When pointer down event is raised
-            scene.onPointerDown = function (evt, pickResult) {
-              // if the click hits the ground object, we change the impact position
-              if (pickResult.hit) {
-
-                const target = new GUI.Ellipse();
-                target.width = '30px';
-                target.height = '30px';
-                target.color = 'White';
-                target.thickness = 1;
-                target.background = 'black';
-                advancedTexture.addControl(target);
-                target.moveToVector3(new BABYLON.Vector3(pickResult.pickedPoint.x, pickResult.pickedPoint.y, 0), scene);
-                //target.linkWithMesh(sphere);
-                //target.showBoundingBox = true;
-                target.onPointerDownObservable.add(function () {
-                  alert('works');
-                  //target.isPickable = true;
-                });
-                const label = new GUI.TextBlock();
-                label.text = '1';
-                target.addControl(label);
-
-              }
-            };
-
-               mesh.actionManager
-                .registerAction(
-                    new BABYLON.InterpolateValueAction(
-                        BABYLON.ActionManager.OnPickTrigger,
-                        mesh,
-                        'visibility',
-                        0.2,
-                        1000
-                    )
-                )
-                .then(
-                    new BABYLON.InterpolateValueAction(
-                        BABYLON.ActionManager.OnPickTrigger,
-                        mesh,
-                        'visibility',
-                        1.0,
-                        1000
-                    )
-                );
-          const meshDistance = BABYLON.Vector3.Distance(camera.position, mesh.position);
-          const spriteDistance = camera.position.distanceTo(camera.position, target.position);
-          const spriteBehindObject = spriteDistance > meshDistance;
-
-          target.material.alpha = spriteBehindObject ? 0.25 : 1;
-
-        //DOppelklick
-        mesh.actionManager = new BABYLON.ActionManager(scene);
-
-               BABYLON.ActionManager.OnDoublePickTrigger
-               BABYLON.ExecuteCodeAction(trigger, func, condition): Executes code.
-
-
-        var process = function (e) {
-                var currentMesh;
-
-                var pickinfo = scene.pick(scene.pointerX, scene.pointerY, function (mesh) { return mesh != ground && mesh != skybox });
-
-                if (pickinfo.hit) {
-                    currentMesh = pickinfo.pickedMesh;
-                }
-
-                if (!currentMesh) return;
-                console.log(currentMesh);
-
-                // explosion(box1);
-                explosion(currentMesh);
-                setInterval( reducer(currentMesh), 200 );
-
-                return false;
-            };
-
-            var reducer = function (mesh) {
-                mesh.visibility -= .1;
-            };
-
-            canvas.addEventListener("dblclick", process);
-
-            var explosion = function(mesh){
-                particleSystem.emitter = mesh;
-                particleSystem.manualEmitCount = 1500;
-            }
-
-            scene.onDispose = function () {
-                canvas.removeEventListener("dblclick", process);
-            };
-
-        */
+    const action = new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnDoublePickTrigger, mousePickModel);
+    this.mesh.actionManager = new BABYLON.ActionManager(scene);
+    this.mesh.actionManager.registerAction(action);
 
   }
 
-  constructor() {
-  }
 
   ngOnInit() {
   }
 
+
+  public createAnnotationLabel(position: BABYLON.Vector3) {
+    const plane = BABYLON.MeshBuilder.CreatePlane('plane_' + String(this.annotationCounter), {height: 1, width: 1}, this.scene);
+    BABYLON.Tags.AddTagsTo(plane, 'plane');
+    plane.position = new BABYLON.Vector3(position.x, position.y, position.z);
+    //plane.material.diffuseTexture.hasAlpha = true;
+    //alpha = 0.0;
+    plane.showBoundingBox = true;
+    //  this.mesh.getBoundingInfo()._update(BABYLON.Matrix.Scaling(bbsize));
+    //plane._updateNonUniformScalingState(false);
+    const advancedTexturePlane = GUI.AdvancedDynamicTexture.CreateForMesh(plane);
+
+    const label = new GUI.Ellipse('label_' + String(this.annotationCounter));
+    label.width = '100%';
+    label.height = '100%';
+    label.color = 'White';
+    label.thickness = 1;
+    label.background = 'black';
+    label.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+    advancedTexturePlane.addControl(label);
+    label.onPointerDownObservable.add(function () {
+      // Kameraposition einnehmen
+      // HTML Textbox anzeigen
+      alert('works');
+
+    });
+    const number = new GUI.TextBlock();
+    this.annotationCounter++;
+    number.text = String(this.annotationCounter);
+    label.addControl(number);
+    /*
+
+          *
+          * Dann kann diese auch onclick leuchten
+          * Dafür die 3D engine in Scene so laden:
+          * this.engine = new BABYLON.Engine(this.canvas, true, { stencil: true });
+          * Add the highlight layer.
+          * var hl = new BABYLON.HighlightLayer("hl1", scene);
+          * hl.addMesh(plane, BABYLON.Color3.Green());
+          * hl.removeMesh(plane);
+          */
+  }
+
+
+  // HTML Textbox anzeigen (onklick) und ausblenden, sobald eine neue Navigation ausgeführt wird
+
+    private updateScreenPosition() {
+/*
+      const annotation = <HTMLElement>document.querySelector('.annotation');
+      const vector = scene.getMeshByName('plane_').position;
+
+      vector.x = Math.round((0.5 + vector.x / 2) * (canvas.width / window.devicePixelRatio));
+      vector.y = Math.round((0.5 - vector.y / 2) * (canvas.height / window.devicePixelRatio));
+
+      annotation.style.top = vector.y + 'px';
+      annotation.style.left = vector.x + 'px';
+    }
+    */
+
+  /*
+      Annotation befindet sich hinter dem Mesh und soll transparent werden
+
+
+             const meshDistance = BABYLON.Vector3.Distance(camera.position, mesh.position);
+             const spriteDistance = camera.position.distanceTo(camera.position, target.position);
+             const spriteBehindObject = spriteDistance > meshDistance;
+
+             target.material.alpha = spriteBehindObject ? 0.25 : 1;
+
+             alpha wert
+               var reducer = function (mesh) {
+                   mesh.visibility -= .1;
+               };
+
+
+           */
+
+  // Delete Annotation
+
 }
+

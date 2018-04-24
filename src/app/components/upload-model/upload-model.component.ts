@@ -8,7 +8,7 @@ import { Component, OnInit } from '@angular/core';
 export class UploadModelComponent implements OnInit {
 
   public loadObject(scene: BABYLON.Scene) {
-    BABYLON.SceneLoader.ImportMesh('','assets/models/testmodel/',
+    BABYLON.SceneLoader.ImportMesh('loaded','assets/models/testmodel/',
       'testmodel.obj', scene, function (newMeshes) {});
   }
 

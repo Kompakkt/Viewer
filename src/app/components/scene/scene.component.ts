@@ -64,6 +64,15 @@ export class SceneComponent implements AfterViewInit {
 
     const scene = this.babylonService.getScene();
 
+    scene.registerBeforeRender(function () {
+      if (scene.getMeshesByTags('plane') !== null) {
+        scene.getMeshesByTags('plane', function (ct) {
+          ct.lookAt(scene.activeCamera.position);
+        });
+      }
+    });
+
+
     this.babylonService.getEngine().runRenderLoop(function () {
       scene.render();
     });
