@@ -11,6 +11,7 @@ export class UploadModelComponent implements OnInit {
     BABYLON.SceneLoader.ImportMesh('', 'assets/models/testmodel/',
       'testmodel.obj', scene, function (newMeshes) {
       });
+
   }
 
   constructor() {

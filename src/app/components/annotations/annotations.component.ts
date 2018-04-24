@@ -23,6 +23,7 @@ export class AnnotationsComponent implements OnInit {
 
     this.scene = scene;
     this.canvas = canvas;
+    this.annotationCounter = 0;
 
     // Please refactor me, I'm as ugly as a german folk musician!!!11!!!1!
     const that = this;
@@ -42,13 +43,13 @@ export class AnnotationsComponent implements OnInit {
         }
       }
     };
-
-    // this.mesh = scene.getMeshByName('loaded');
+    //const mesh = this.scene.getMeshByName('Texture_0');
     // Doppelklick auf Modell, bekommt eine Funktion
-    this.mesh = BABYLON.Mesh.CreateSphere('sphere1', 16, 2, scene);
+    this.mesh = BABYLON.Mesh.CreateBox('box1', 4, this.scene);
+
 
     const action = new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnDoublePickTrigger, mousePickModel);
-    this.mesh.actionManager = new BABYLON.ActionManager(scene);
+    this.mesh.actionManager = new BABYLON.ActionManager(this.scene);
     this.mesh.actionManager.registerAction(action);
 
   }
@@ -59,6 +60,7 @@ export class AnnotationsComponent implements OnInit {
   public createAnnotationLabel(position: BABYLON.Vector3) {
     // Please refactor me, I'm as ugly as a german folk musician!!!11!!!1!
     const that = this;
+    this.annotationCounter++;
     const plane = BABYLON.MeshBuilder.CreatePlane('plane_' + String(this.annotationCounter), {height: 1, width: 1}, this.scene);
     BABYLON.Tags.AddTagsTo(plane, 'plane');
     plane.position = new BABYLON.Vector3(position.x, position.y, position.z);
@@ -81,15 +83,18 @@ export class AnnotationsComponent implements OnInit {
       // Kameraposition einnehmen
       // HTML Textbox anzeigen
       alert('works');
-      that.updateScreenPosition(position);
+      //that.updateScreenPosition();
 
     });
     const number = new GUI.TextBlock();
-    this.annotationCounter++;
     number.text = String(this.annotationCounter);
+    number.color = 'white';
+    number.fontSize = 1000;
+
+    number.width = '2000px';
+    number.height = '2000px';
     label.addControl(number);
     /*
-
           *
           * Dann kann diese auch onclick leuchten
           * Dafür die 3D engine in Scene so laden:
@@ -104,16 +109,17 @@ export class AnnotationsComponent implements OnInit {
 
   // HTML Textbox anzeigen (onklick) und ausblenden, sobald eine neue Navigation ausgeführt wird
 
-  private updateScreenPosition(position: BABYLON.Vector3) {
+  private updateScreenPosition() {
 
-          const annotation = <HTMLElement>document.querySelector('.annotation');
-          const vector = position;
 
-          vector.x = Math.round((0.5 + vector.x / 2) * (this.canvas.width / window.devicePixelRatio));
-          vector.y = Math.round((0.5 - vector.y / 2) * (this.canvas.height / window.devicePixelRatio));
+    const annotation = <HTMLElement>document.querySelector('.annotation');
+    const vector = this.scene.getMeshByName('plane_1').getBoundingInfo().boundingBox.centerWorld;
 
-          annotation.style.top = vector.y + 'px';
-          annotation.style.left = vector.x + 'px';
+    vector.x = Math.round((0.5 + vector.x / 2) * (this.canvas.width / window.devicePixelRatio));
+    vector.y = Math.round((0.5 - vector.y / 2) * (this.canvas.height / window.devicePixelRatio));
+
+    annotation.style.top = vector.y + 'px';
+    annotation.style.left = vector.x + 'px';
 
   }
 
