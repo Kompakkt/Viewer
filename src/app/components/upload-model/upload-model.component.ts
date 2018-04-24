@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 
 @Component({
   selector: 'app-upload-model',
@@ -8,11 +8,13 @@ import { Component, OnInit } from '@angular/core';
 export class UploadModelComponent implements OnInit {
 
   public loadObject(scene: BABYLON.Scene) {
-    BABYLON.SceneLoader.ImportMesh('loaded','assets/models/testmodel/',
-      'testmodel.obj', scene, function (newMeshes) {});
+    BABYLON.SceneLoader.ImportMesh('', 'assets/models/testmodel/',
+      'testmodel.obj', scene, function (newMeshes) {
+      });
   }
 
-  constructor() { }
+  constructor() {
+  }
 
   ngOnInit() {
   }
