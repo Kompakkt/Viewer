@@ -5,11 +5,11 @@
     "baseUrl": "./",
     "module": "commonjs",
     "types": [
-      "babylonjs",
       "jasmine",
       "node",
+      "babylonjs",
       "babylonjs-gui",
-      "babylonjs-materials"
+      "babylonjs-loaders"
     ]
   },
   "files": [
