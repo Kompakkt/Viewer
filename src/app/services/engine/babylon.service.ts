@@ -1,3 +1,7 @@
+/**
+ * @author Jan G. Wieners
+ */
+
 import {Injectable} from '@angular/core';
 
 import * as BABYLON from 'babylonjs';
