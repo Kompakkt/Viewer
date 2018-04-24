@@ -19,13 +19,15 @@ export class AnnotationsComponent implements OnInit {
   constructor() {
   }
 
-
   public createAnnotations(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
 
     this.scene = scene;
 
+    // Please refactor me, I'm as ugly as a german folk musician!!!11!!!1!
+    const that = this;
+
     // Bei Doppelklick auf ein Modell
-    const mousePickModel = function (unit_mesh) {
+    const mousePickModel = function (unit_mesh: any) {
       console.log('mouse picks ' + unit_mesh.meshUnderPointer.id);
       console.log(unit_mesh);
       if (unit_mesh.source !== null) {
@@ -33,14 +35,14 @@ export class AnnotationsComponent implements OnInit {
 
         if (pickResult.pickedMesh) {
           const pickResultVector = new BABYLON.Vector3(pickResult.pickedPoint.x, pickResult.pickedPoint.y, pickResult.pickedPoint.z);
-          createAnnotationLabel(pickResultVector);
 
-
+          // Please refactor me, please!
+          that.createAnnotationLabel(pickResultVector);
         }
       }
     };
 
-    //this.mesh = scene.getMeshByName('loaded');
+    // this.mesh = scene.getMeshByName('loaded');
     // Doppelklick auf Modell, bekommt eine Funktion
     this.mesh = BABYLON.Mesh.CreateSphere('sphere1', 16, 2, scene);
 
@@ -50,20 +52,18 @@ export class AnnotationsComponent implements OnInit {
 
   }
 
-
   ngOnInit() {
   }
-
 
   public createAnnotationLabel(position: BABYLON.Vector3) {
     const plane = BABYLON.MeshBuilder.CreatePlane('plane_' + String(this.annotationCounter), {height: 1, width: 1}, this.scene);
     BABYLON.Tags.AddTagsTo(plane, 'plane');
     plane.position = new BABYLON.Vector3(position.x, position.y, position.z);
-    //plane.material.diffuseTexture.hasAlpha = true;
-    //alpha = 0.0;
+    // plane.material.diffuseTexture.hasAlpha = true;
+    // alpha = 0.0;
     plane.showBoundingBox = true;
     //  this.mesh.getBoundingInfo()._update(BABYLON.Matrix.Scaling(bbsize));
-    //plane._updateNonUniformScalingState(false);
+    // plane._updateNonUniformScalingState(false);
     const advancedTexturePlane = GUI.AdvancedDynamicTexture.CreateForMesh(plane);
 
     const label = new GUI.Ellipse('label_' + String(this.annotationCounter));
@@ -100,18 +100,18 @@ export class AnnotationsComponent implements OnInit {
 
   // HTML Textbox anzeigen (onklick) und ausblenden, sobald eine neue Navigation ausgeführt wird
 
-    private updateScreenPosition() {
-/*
-      const annotation = <HTMLElement>document.querySelector('.annotation');
-      const vector = scene.getMeshByName('plane_').position;
+  private updateScreenPosition() {
+    /*
+          const annotation = <HTMLElement>document.querySelector('.annotation');
+          const vector = scene.getMeshByName('plane_').position;
 
-      vector.x = Math.round((0.5 + vector.x / 2) * (canvas.width / window.devicePixelRatio));
-      vector.y = Math.round((0.5 - vector.y / 2) * (canvas.height / window.devicePixelRatio));
+          vector.x = Math.round((0.5 + vector.x / 2) * (canvas.width / window.devicePixelRatio));
+          vector.y = Math.round((0.5 - vector.y / 2) * (canvas.height / window.devicePixelRatio));
 
-      annotation.style.top = vector.y + 'px';
-      annotation.style.left = vector.x + 'px';
-      */
-    }
+          annotation.style.top = vector.y + 'px';
+          annotation.style.left = vector.x + 'px';
+          */
+  }
 
 
   /*
