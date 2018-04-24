@@ -125,7 +125,7 @@ export class AnnotationsComponent implements OnInit {
 
 
   /*
-      Annotation befindet sich hinter dem Mesh und soll transparent werden
+      Annotation befindet sich hinter dem Mesh und soll transparent werden / Momentan Bounding Box, evt. diese Stylen
 
 
              const meshDistance = BABYLON.Vector3.Distance(camera.position, mesh.position);
@@ -143,6 +143,8 @@ export class AnnotationsComponent implements OnInit {
            */
 
   // Delete Annotation
+
+
 
 }
 
