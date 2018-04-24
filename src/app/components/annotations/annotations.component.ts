@@ -22,6 +22,7 @@ export class AnnotationsComponent implements OnInit {
   public createAnnotations(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
 
     this.scene = scene;
+    this.canvas = canvas;
 
     // Please refactor me, I'm as ugly as a german folk musician!!!11!!!1!
     const that = this;
@@ -56,6 +57,8 @@ export class AnnotationsComponent implements OnInit {
   }
 
   public createAnnotationLabel(position: BABYLON.Vector3) {
+    // Please refactor me, I'm as ugly as a german folk musician!!!11!!!1!
+    const that = this;
     const plane = BABYLON.MeshBuilder.CreatePlane('plane_' + String(this.annotationCounter), {height: 1, width: 1}, this.scene);
     BABYLON.Tags.AddTagsTo(plane, 'plane');
     plane.position = new BABYLON.Vector3(position.x, position.y, position.z);
@@ -78,6 +81,7 @@ export class AnnotationsComponent implements OnInit {
       // Kameraposition einnehmen
       // HTML Textbox anzeigen
       alert('works');
+      that.updateScreenPosition(position);
 
     });
     const number = new GUI.TextBlock();
@@ -100,17 +104,17 @@ export class AnnotationsComponent implements OnInit {
 
   // HTML Textbox anzeigen (onklick) und ausblenden, sobald eine neue Navigation ausgeführt wird
 
-  private updateScreenPosition() {
-    /*
-          const annotation = <HTMLElement>document.querySelector('.annotation');
-          const vector = scene.getMeshByName('plane_').position;
+  private updateScreenPosition(position: BABYLON.Vector3) {
 
-          vector.x = Math.round((0.5 + vector.x / 2) * (canvas.width / window.devicePixelRatio));
-          vector.y = Math.round((0.5 - vector.y / 2) * (canvas.height / window.devicePixelRatio));
+          const annotation = <HTMLElement>document.querySelector('.annotation');
+          const vector = position;
+
+          vector.x = Math.round((0.5 + vector.x / 2) * (this.canvas.width / window.devicePixelRatio));
+          vector.y = Math.round((0.5 - vector.y / 2) * (this.canvas.height / window.devicePixelRatio));
 
           annotation.style.top = vector.y + 'px';
           annotation.style.left = vector.x + 'px';
-          */
+
   }
 
 
