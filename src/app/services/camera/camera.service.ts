@@ -1,15 +1,9 @@
-import {Component, OnInit} from '@angular/core';
-import {ViewChild} from '@angular/core';
+import {Injectable} from '@angular/core';
 
 import * as BABYLON from 'babylonjs';
-import {ImportService} from '../../services/import/import.service';
 
-@Component({
-  selector: 'app-cameras',
-  templateUrl: './cameras.component.html',
-  styleUrls: ['./cameras.component.css']
-})
-export class CamerasComponent implements OnInit {
+@Injectable()
+export class CameraService {
 
   private canvas: HTMLCanvasElement;
   private scene: BABYLON.Scene;
@@ -20,7 +14,6 @@ export class CamerasComponent implements OnInit {
   constructor() {
     this.camChanger = 0;
   }
-
 
   public createCamera(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
 
@@ -67,14 +60,9 @@ export class CamerasComponent implements OnInit {
     this.setCamCollider();
   }
 
-  ngOnInit() {
-  }
-
-  private setCamArcRotate() {
+  public setCamArcRotate() {
 
     if (this.camChanger === 1) {
-
-      console.log('works');
 
       this.camera1 = new BABYLON.ArcRotateCamera('camera1', 0, 0, 0,
         new BABYLON.Vector3(this.camera2.position.x, this.camera2.position.y, this.camera2.position.z), this.scene);
@@ -155,13 +143,8 @@ export class CamerasComponent implements OnInit {
 
   public setCamUniversal() {
 
-    console.log('works');
-
-    console.log(this.camChanger)
-
     if (this.camChanger === 0) {
 
-      console.log('works');
       this.camera2 = new BABYLON.UniversalCamera('camera2',
         new BABYLON.Vector3(this.camera1.position.x, this.camera1.position.y, this.camera1.position.z), this.scene);
       this.camera2.keysUp.push(87);
@@ -271,14 +254,14 @@ export class CamerasComponent implements OnInit {
     plane6.checkCollisions = true;
   }
 
-  private setBackToDefault(alpha: number, beta: number, radius: number,
-                           x: number, y: number, z: number, xRot: number, yRot: number) {
+  public setBackToDefault(alpha: number, beta: number, radius: number,
+                          x: number, y: number, z: number, xRot: number, yRot: number) {
 
-    this.canvas.focus();
     if (this.camChanger === 0) {
       this.setCamArcRotateDefault(alpha, beta, radius);
     } else if (this.camChanger === 1) {
       this.setCamUniversalDefault(x, y, z, xRot, yRot);
     }
   }
+
 }

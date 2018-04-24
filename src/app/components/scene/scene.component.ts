@@ -4,10 +4,10 @@ import * as BABYLON from 'babylonjs';
 
 import {ImportService} from '../../services/import/import.service';
 import {SkyboxComponent} from '../skybox/skybox.component';
-import {CamerasComponent} from '../cameras/cameras.component';
 import {LightComponent} from '../light/light.component';
 import {UploadModelComponent} from '../upload-model/upload-model.component';
 import {AnnotationsComponent} from '../annotations/annotations.component';
+import {CameraService} from '../../services/camera/camera.service';
 
 @Component({
   selector: 'app-scene',
@@ -27,7 +27,7 @@ export class SceneComponent implements AfterViewInit {
     private importService: ImportService,
     private skyboxComponent: SkyboxComponent,
     private lightComponent: LightComponent,
-    private camerasComponent: CamerasComponent,
+    private cameraService: CameraService,
     private uploadModelComponent: UploadModelComponent,
     private annotationsComponent: AnnotationsComponent
   ) {
@@ -57,7 +57,7 @@ export class SceneComponent implements AfterViewInit {
     this.engine.displayLoadingUI();
 
     this.skyboxComponent.createSkybox(this.scene, this.canvas);
-    this.camerasComponent.createCamera(this.scene, this.canvas);
+    this.cameraService.createCamera(this.scene, this.canvas);
     this.lightComponent.createLight(this.scene);
     this.uploadModelComponent.loadObject(this.scene);
 

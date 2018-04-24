@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import {CameraService} from '../services/camera/camera.service';
 
 @Component({
   selector: 'app-menu',
@@ -7,9 +8,20 @@ import { Component, OnInit } from '@angular/core';
 })
 export class MenuComponent implements OnInit {
 
-  constructor() { }
+  constructor(private cameraService: CameraService) { }
 
   ngOnInit() {
   }
 
+  public setCamArcRotate() {
+    this.cameraService.setCamArcRotate();
+  }
+
+  public setCamUniversal() {
+    this.cameraService.setCamUniversal();
+  }
+
+  public setBackToDefault() {
+    // this.cameraService.setBackToDefault();
+  }
 }
