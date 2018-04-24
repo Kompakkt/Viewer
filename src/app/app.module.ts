@@ -6,7 +6,6 @@ import {SceneComponent} from './components/scene/scene.component';
 import {ImportService} from './services/import/import.service';
 import {SkyboxComponent} from './components/skybox/skybox.component';
 import {UploadModelComponent} from './components/upload-model/upload-model.component';
-import {LightComponent} from './components/light/light.component';
 import {MenuComponent} from './menu/menu.component';
 import {AnnotationsComponent} from './components/annotations/annotations.component';
 import {CameraService} from './services/camera/camera.service';
@@ -18,7 +17,6 @@ import {BabylonService} from './services/engine/babylon.service';
     SceneComponent,
     SkyboxComponent,
     UploadModelComponent,
-    LightComponent,
     MenuComponent,
     AnnotationsComponent
   ],
@@ -28,7 +26,6 @@ import {BabylonService} from './services/engine/babylon.service';
   providers: [
     ImportService,
     SkyboxComponent,
-    LightComponent,
     UploadModelComponent,
     AnnotationsComponent,
     CameraService,
