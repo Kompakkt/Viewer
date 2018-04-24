@@ -1,7 +1,5 @@
 import {AfterViewInit, Component, ElementRef, Input, ViewChild, HostListener} from '@angular/core';
 
-import * as BABYLON from 'babylonjs';
-
 import {SkyboxComponent} from '../skybox/skybox.component';
 import {LightComponent} from '../light/light.component';
 import {UploadModelComponent} from '../upload-model/upload-model.component';
