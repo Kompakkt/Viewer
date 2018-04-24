@@ -1,3 +1,7 @@
+/**
+ * @author Jan G. Wieners
+ */
+
 import {Injectable} from '@angular/core';
 
 import * as BABYLON from 'babylonjs';
@@ -29,6 +33,10 @@ export class BabylonService {
 
   public fullscreen(): void {
     this.engine.switchFullscreen(false);
+  }
+
+  public createHemisphericLight(name: string, position: any): BABYLON.HemisphericLight {
+    return new BABYLON.HemisphericLight(name, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
   }
 
 }
