@@ -42,4 +42,8 @@ export class BabylonService {
   public loadObject(meshNames: string, rootUrl: string, sceneFilename: string) {
     return BABYLON.SceneLoader.ImportMesh(meshNames, rootUrl, sceneFilename, this.scene);
   }
+
+  public createArcRotateCam(name: string, alpha: number, beta: number, radius: number, position: any) {
+    return new BABYLON.ArcRotateCamera(name, alpha, beta, radius, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
+  }
 }

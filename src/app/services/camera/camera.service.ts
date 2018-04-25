@@ -6,6 +6,9 @@ import {Injectable} from '@angular/core';
 
 import * as BABYLON from 'babylonjs';
 
+import {BabylonService} from '../../services/engine/babylon.service';
+import Vector3 = BABYLON.Vector3;
+
 @Injectable()
 export class CameraService {
 
@@ -23,7 +26,9 @@ export class CameraService {
   private xRot: number;
   private yRot: number;
 
-  constructor() {}
+  constructor(
+    private babylonService: BabylonService
+  ) {}
 
   public createCamera(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
     this.alpha = 9;
@@ -33,7 +38,7 @@ export class CameraService {
     this.canvas = canvas;
     this.scene = scene;
 
-    this.camera1 = new BABYLON.ArcRotateCamera('camera1', this.alpha, this.beta, this.radius, BABYLON.Vector3.Zero(), this.scene);
+    this.camera1 =  this.babylonService.createArcRotateCam('camera1', this.alpha, this.beta, this.radius, Vector3.Zero());
     this.arcRotateSettings();
 
     this.x = this.camera1.position.x;
@@ -55,8 +60,8 @@ export class CameraService {
 
   public setCamArcRotate() {
     if (this.camChanger === 1) {
-      this.camera1 = new BABYLON.ArcRotateCamera('camera1', 0, 0, 0,
-        new BABYLON.Vector3(this.camera2.position.x, this.camera2.position.y, this.camera2.position.z), this.scene);
+      this.camera1 = this.babylonService.createArcRotateCam('camera1', 0, 0, 0,
+        new Vector3(this.camera2.position.x, this.camera2.position.y, this.camera2.position.z));
       this.arcRotateSettings();
       this.scene.activeCamera = this.camera1;
       this.camera1.attachControl(this.canvas, true);
@@ -91,7 +96,7 @@ export class CameraService {
     this.camera1.keysRight.push(68);
     this.camera1.panningSensibility = 25;
     this.camera1.upperRadiusLimit = 200;
-    this.camera1.setTarget(BABYLON.Vector3.Zero());
+    this.camera1.setTarget(Vector3.Zero());
     this.canvas.focus();
   }
 
