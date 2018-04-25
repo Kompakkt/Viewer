@@ -36,7 +36,7 @@ export class CameraService {
     this.radius = 100;
 
     this.canvas = canvas;
-    this.scene = scene;
+    this.scene = this.babylonService.getScene();
 
     this.camera1 =  this.babylonService.createArcRotateCam('camera1', this.alpha, this.beta, this.radius, Vector3.Zero());
     this.arcRotateSettings();
@@ -61,7 +61,7 @@ export class CameraService {
   public setCamArcRotate() {
     if (this.camChanger === 1) {
       this.camera1 = this.babylonService.createArcRotateCam('camera1', 0, 0, 0,
-        new Vector3(this.camera2.position.x, this.camera2.position.y, this.camera2.position.z));
+        {x: this.camera2.position.x, y: this.camera2.position.y, z: this.camera2.position.z});
       this.arcRotateSettings();
       this.scene.activeCamera = this.camera1;
       this.camera1.attachControl(this.canvas, true);
@@ -72,7 +72,7 @@ export class CameraService {
   public setCamUniversal() {
     if (this.camChanger === 0) {
       this.camera2 = this.babylonService.createUniversalCam('camera2',
-        new BABYLON.Vector3(this.camera1.position.x, this.camera1.position.y, this.camera1.position.z));
+        {x: this.camera1.position.x, y: this.camera1.position.y, z: this.camera1.position.z});
       this.universalSettings();
       this.scene.activeCamera = this.camera2;
       this.camera2.attachControl(this.canvas, true);
@@ -115,7 +115,7 @@ export class CameraService {
     this.scene.activeCamera = this.camera1;
     this.camera1.attachControl(this.canvas, true);
 
-    const animCamAlpha = this.babylonService.createCamAnimationCycle('animCam', 'alpha', 30);
+    const animCamAlpha = this.babylonService.createCamAnimationCycle('animCam', 'alpha', 30)
     const backAlpha = [];
     backAlpha.push({
       frame: 0,
@@ -126,7 +126,7 @@ export class CameraService {
       value: this.alpha
     });
 
-    const animCamBeta = this.babylonService.createCamAnimationCycle('animCam', 'alpha', 30);
+    const animCamBeta = this.babylonService.createCamAnimationCycle('animCam', 'beta', 30)
     const backBeta = [];
     backBeta.push({
       frame: 0,
@@ -137,7 +137,7 @@ export class CameraService {
       value: this.beta
     });
 
-    const animCamRadius = this.babylonService.createCamAnimationCycle('animCam', 'alpha', 30);
+    const animCamRadius = this.babylonService.createCamAnimationCycle('animCam', 'radius', 30)
     const backRadius = [];
     backRadius.push({
       frame: 0,
@@ -163,7 +163,7 @@ export class CameraService {
   }
 
   private setCamUniversalDefault() {
-    const setBackAnm = this.babylonService.createCamAnimationStatic('camPos', 'position', 30);
+    const setBackAnm = this.babylonService.createCamAnimationStatic('animCam', 'position', 30)
     const setBackPos = [{
       frame: 0,
       value: new BABYLON.Vector3(this.camera2.position.x, this.camera2.position.y, this.camera2.position.z)
@@ -172,7 +172,7 @@ export class CameraService {
       value: new BABYLON.Vector3(this.x, this.y, this.z)
     }];
 
-    const setBackRotXAnm = this.babylonService.createCamAnimationCycle('animCam', 'alpha', 30);
+    const setBackRotXAnm = this.babylonService.createCamAnimationCycle('animCam', 'rotation.x', 30)
     const setBackRotX = [{
       frame: 15,
       value: this.camera2.rotation.x
@@ -181,7 +181,7 @@ export class CameraService {
       value: this.xRot
     }];
 
-    const setBackRotYAnm = this.babylonService.createCamAnimationCycle('animCam', 'alpha', 30);
+    const setBackRotYAnm = this.babylonService.createCamAnimationCycle('animCam', 'rotation.y', 30)
     const setBackRotY = [{
       frame: 15,
       value: this.camera2.rotation.y
