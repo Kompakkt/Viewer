@@ -37,25 +37,21 @@ export class AnnotationsComponent implements OnInit {
 
     // Action -> Bei Doppelklick auf ein Modell
     const mousePickModel = function (unit_mesh: any) {
-      console.log('mouse picks ' + unit_mesh.meshUnderPointer.id);
-      console.log(unit_mesh);
       if (unit_mesh.source !== null) {
         const pickResult = scene.pick(scene.pointerX, scene.pointerY, null, false, this.camera);
-
         if (pickResult.pickedMesh) {
           const pickResultVector = new BABYLON.Vector3(pickResult.pickedPoint.x, pickResult.pickedPoint.y, pickResult.pickedPoint.z);
           const normal = pickResult.getNormal(true, true);
-          // Please refactor me, please!
+          // TODO Please refactor me, please!
           that.createAnnotationLabel(pickResultVector, normal);
         }
       }
     };
 
     // TODO hier würde ich gerne auf unser Modell zugreifen
-    //this.mesh = this.scene.getMeshByName('Texture_0');
-
+    // this.scene.getMeshByName('Texture_0');
+    // beim importieren erreichbar über newMeshes[0];
     this.mesh = BABYLON.Mesh.CreateBox('box1', 4, this.scene);
-
     // Doppelklick auf Modell, bekommt eine Funktion
     const action = new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnDoublePickTrigger, mousePickModel);
     this.mesh.actionManager = new BABYLON.ActionManager(this.scene);
@@ -63,27 +59,40 @@ export class AnnotationsComponent implements OnInit {
 
   }
 
-
   ngOnInit() {
   }
 
   public createAnnotationLabel(position: BABYLON.Vector3, normal: BABYLON.Vector3) {
-    // TODO Please refactor me, I'm as ugly as a german folk musician!!!11!!!1!
-    const that = this;
     this.annotationCounter++;
 
-    that.createGeometryForLabel('plane', 'label', true, 1, 0, position, normal);
-    that.createGeometryForLabel('planeup', 'labelup', true, 0.5, 1, position, normal);
-
+    // two Labels: one is for isOccluded true, one for false -> alpha 0.5 for transparancy
+    this.createGeometryForLabel('plane', 'label', true, 1, 0, position, normal);
+    this.createGeometryForLabel('planeup', 'labelup', true, 0.5, 1, position, normal);
   }
 
-  private createGeometryForLabel(namePlane: string, nameLabel: string, clickable: Boolean, alpha: number, renderingGroup: number, position: BABYLON.Vector3, normal: BABYLON.Vector3) {
-    const plane = BABYLON.MeshBuilder.CreatePlane(namePlane + '_' + String(this.annotationCounter), {height: 1, width: 1}, this.scene);
+  private createGeometryForLabel
+  (
+    namePlane: string,
+    nameLabel: string,
+    clickable: boolean,
+    alpha: number,
+    renderingGroup: number,
+    position: BABYLON.Vector3,
+    normal: BABYLON.Vector3
+  ) {
+    const plane = BABYLON.MeshBuilder.CreatePlane
+    (
+      namePlane + '_' + String(this.annotationCounter),
+      {height: 1, width: 1},
+      this.scene
+    );
     BABYLON.Tags.AddTagsTo(plane, namePlane);
     plane.position = new BABYLON.Vector3(position.x, position.y, position.z);
     plane.translate(normal, 1, BABYLON.Space.WORLD);
     plane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+
     const advancedTexturePlane = GUI.AdvancedDynamicTexture.CreateForMesh(plane);
+
     const label = new GUI.Ellipse(nameLabel + '_' + String(this.annotationCounter));
     label.width = '100%';
     label.height = '100%';
@@ -91,7 +100,9 @@ export class AnnotationsComponent implements OnInit {
     label.thickness = 1;
     label.background = 'black';
     label.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+
     advancedTexturePlane.addControl(label);
+
     if (clickable === true) {
       label.onPointerDownObservable.add(function () {
         // Kameraposition einnehmen
@@ -111,24 +122,28 @@ export class AnnotationsComponent implements OnInit {
 
       });
     }
+
     const number = new GUI.TextBlock();
     number.text = String(this.annotationCounter);
     number.color = 'white';
     number.fontSize = 1000;
     number.width = '2000px';
     number.height = '2000px';
+
     label.addControl(number);
+
     plane.material.alpha = alpha;
     //TODO: click is not working if renderingGroup = 1 and Object is behind another object
     plane.renderingGroupId = renderingGroup;
-
   }
 
 
-// HTML Textbox anzeigen (onklick) und ausblenden, sobald eine neue Navigation ausgeführt wird
+// Onklick
+// Position einnehmen (erstmal perfekte Sicht auf die Annotation)
+// HTML Box anzeigen (visible)
+// Bei Interaktion HTML Box ausblenden if camera move (unvisible)
 
   private updateScreenPosition() {
-
 
     const annotation = <HTMLElement>document.querySelector('.annotation');
     const vector = this.scene.getMeshByName('plane_1').getBoundingInfo().boundingBox.centerWorld;
@@ -139,11 +154,8 @@ export class AnnotationsComponent implements OnInit {
     annotation.style.top = vector.y + 'px';
     annotation.style.left = vector.x + 'px';
 
-
-}
+  }
 
 // Delete Annotation
-
-
 }
 
