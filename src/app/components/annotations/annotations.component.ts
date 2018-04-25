@@ -32,7 +32,7 @@ export class AnnotationsComponent implements OnInit {
     this.canvas = canvas;
     this.annotationCounter = 0;
 
-    // Please refactor me, I'm as ugly as a german folk musician!!!11!!!1!
+    // TODO Please refactor me, I'm as ugly as a german folk musician!!!11!!!1!
     const that = this;
 
     // Action -> Bei Doppelklick auf ein Modell
@@ -53,6 +53,7 @@ export class AnnotationsComponent implements OnInit {
 
     // TODO hier würde ich gerne auf unser Modell zugreifen
     //this.mesh = this.scene.getMeshByName('Texture_0');
+
     this.mesh = BABYLON.Mesh.CreateBox('box1', 4, this.scene);
 
     // Doppelklick auf Modell, bekommt eine Funktion
@@ -67,7 +68,7 @@ export class AnnotationsComponent implements OnInit {
   }
 
   public createAnnotationLabel(position: BABYLON.Vector3, normal: BABYLON.Vector3) {
-    // Please refactor me, I'm as ugly as a german folk musician!!!11!!!1!
+    // TODO Please refactor me, I'm as ugly as a german folk musician!!!11!!!1!
     const that = this;
     this.annotationCounter++;
 
@@ -82,7 +83,7 @@ export class AnnotationsComponent implements OnInit {
     plane.position = new BABYLON.Vector3(position.x, position.y, position.z);
     plane.translate(normal, 1, BABYLON.Space.WORLD);
     plane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
-    const advancedTexturePlanef = GUI.AdvancedDynamicTexture.CreateForMesh(plane);
+    const advancedTexturePlane = GUI.AdvancedDynamicTexture.CreateForMesh(plane);
     const label = new GUI.Ellipse(nameLabel + '_' + String(this.annotationCounter));
     label.width = '100%';
     label.height = '100%';
@@ -90,7 +91,7 @@ export class AnnotationsComponent implements OnInit {
     label.thickness = 1;
     label.background = 'black';
     label.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
-    advancedTexturePlanef.addControl(label);
+    advancedTexturePlane.addControl(label);
     if (clickable === true) {
       label.onPointerDownObservable.add(function () {
         // Kameraposition einnehmen
@@ -110,15 +111,15 @@ export class AnnotationsComponent implements OnInit {
 
       });
     }
-    const numberf = new GUI.TextBlock();
-    numberf.text = String(this.annotationCounter);
-    numberf.color = 'white';
-    numberf.fontSize = 1000;
-    numberf.width = '2000px';
-    numberf.height = '2000px';
-    label.addControl(numberf);
+    const number = new GUI.TextBlock();
+    number.text = String(this.annotationCounter);
+    number.color = 'white';
+    number.fontSize = 1000;
+    number.width = '2000px';
+    number.height = '2000px';
+    label.addControl(number);
     plane.material.alpha = alpha;
-    //TODO: click is not working if renderingGroup = 1
+    //TODO: click is not working if renderingGroup = 1 and Object is behind another object
     plane.renderingGroupId = renderingGroup;
 
   }
