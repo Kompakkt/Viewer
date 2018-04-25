@@ -11,6 +11,7 @@ import {CameraService} from './services/camera/camera.service';
 import {BabylonService} from './services/engine/babylon.service';
 import {SkyboxService} from './services/skybox/skybox.service';
 import {LanguageService} from './services/language/language.service';
+import {DataService} from './services/data/data.service';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import {LanguageService} from './services/language/language.service';
     AnnotationsComponent,
     CameraService,
     BabylonService,
-    LanguageService
+    LanguageService,
+    DataService
   ],
   bootstrap: [AppComponent]
 })
