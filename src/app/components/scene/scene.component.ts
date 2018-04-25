@@ -1,3 +1,7 @@
+/**
+ * @author Benedikt Mildenberger
+ */
+
 import {AfterViewInit, Component, ElementRef, Input, ViewChild, HostListener} from '@angular/core';
 
 import {SkyboxService} from '../../services/skybox/skybox.service';
