@@ -1,6 +1,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "allowSyntheticDefaultImports": true, // for PouchDB
     "noImplicitAny": false,
     "strictNullChecks": false,
     "outDir": "./dist/out-tsc",
