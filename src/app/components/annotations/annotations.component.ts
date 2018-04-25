@@ -1,6 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import * as BABYLON from 'babylonjs';
 import * as GUI from 'babylonjs-gui';
+import {BabylonService} from '../../services/engine/babylon.service';
+import {CameraService} from '../../services/camera/camera.service';
+import {ImportService} from '../../services/import/import.service';
 
 
 @Component({
@@ -16,7 +19,11 @@ export class AnnotationsComponent implements OnInit {
   private annotationCounter: number;
 
 
-  constructor() {
+  constructor(
+    private cameraService: CameraService,
+    private babylonService: BabylonService,
+    private importService: ImportService
+  ) {
   }
 
   public createAnnotations(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
@@ -28,7 +35,7 @@ export class AnnotationsComponent implements OnInit {
     // Please refactor me, I'm as ugly as a german folk musician!!!11!!!1!
     const that = this;
 
-    // Bei Doppelklick auf ein Modell
+    // Action -> Bei Doppelklick auf ein Modell
     const mousePickModel = function (unit_mesh: any) {
       console.log('mouse picks ' + unit_mesh.meshUnderPointer.id);
       console.log(unit_mesh);
@@ -37,78 +44,87 @@ export class AnnotationsComponent implements OnInit {
 
         if (pickResult.pickedMesh) {
           const pickResultVector = new BABYLON.Vector3(pickResult.pickedPoint.x, pickResult.pickedPoint.y, pickResult.pickedPoint.z);
-
+          const normal = pickResult.getNormal(true, true);
           // Please refactor me, please!
-          that.createAnnotationLabel(pickResultVector);
+          that.createAnnotationLabel(pickResultVector, normal);
         }
       }
     };
-    //const mesh = this.scene.getMeshByName('Texture_0');
-    // Doppelklick auf Modell, bekommt eine Funktion
+
+    // TODO hier würde ich gerne auf unser Modell zugreifen
+    //this.mesh = this.scene.getMeshByName('Texture_0');
     this.mesh = BABYLON.Mesh.CreateBox('box1', 4, this.scene);
 
-
+    // Doppelklick auf Modell, bekommt eine Funktion
     const action = new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnDoublePickTrigger, mousePickModel);
     this.mesh.actionManager = new BABYLON.ActionManager(this.scene);
     this.mesh.actionManager.registerAction(action);
 
   }
 
+
   ngOnInit() {
   }
 
-  public createAnnotationLabel(position: BABYLON.Vector3) {
+  public createAnnotationLabel(position: BABYLON.Vector3, normal: BABYLON.Vector3) {
     // Please refactor me, I'm as ugly as a german folk musician!!!11!!!1!
     const that = this;
     this.annotationCounter++;
-    const plane = BABYLON.MeshBuilder.CreatePlane('plane_' + String(this.annotationCounter), {height: 1, width: 1}, this.scene);
-    BABYLON.Tags.AddTagsTo(plane, 'plane');
-    plane.position = new BABYLON.Vector3(position.x, position.y, position.z);
-    // plane.material.diffuseTexture.hasAlpha = true;
-    // alpha = 0.0;
-    plane.showBoundingBox = true;
-    plane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
-    //  this.mesh.getBoundingInfo()._update(BABYLON.Matrix.Scaling(bbsize));
-    // plane._updateNonUniformScalingState(false);
-    const advancedTexturePlane = GUI.AdvancedDynamicTexture.CreateForMesh(plane);
 
-    const label = new GUI.Ellipse('label_' + String(this.annotationCounter));
+    that.createGeometryForLabel('plane', 'label', true, 1, 0, position, normal);
+    that.createGeometryForLabel('planeup', 'labelup', true, 0.5, 1, position, normal);
+
+  }
+
+  private createGeometryForLabel(namePlane: string, nameLabel: string, clickable: Boolean, alpha: number, renderingGroup: number, position: BABYLON.Vector3, normal: BABYLON.Vector3) {
+    const plane = BABYLON.MeshBuilder.CreatePlane(namePlane + '_' + String(this.annotationCounter), {height: 1, width: 1}, this.scene);
+    BABYLON.Tags.AddTagsTo(plane, namePlane);
+    plane.position = new BABYLON.Vector3(position.x, position.y, position.z);
+    plane.translate(normal, 1, BABYLON.Space.WORLD);
+    plane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+    const advancedTexturePlanef = GUI.AdvancedDynamicTexture.CreateForMesh(plane);
+    const label = new GUI.Ellipse(nameLabel + '_' + String(this.annotationCounter));
     label.width = '100%';
     label.height = '100%';
     label.color = 'White';
     label.thickness = 1;
     label.background = 'black';
     label.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
-    advancedTexturePlane.addControl(label);
-    label.onPointerDownObservable.add(function () {
-      // Kameraposition einnehmen
-      // HTML Textbox anzeigen
-      alert('works');
-      //that.updateScreenPosition();
+    advancedTexturePlanef.addControl(label);
+    if (clickable === true) {
+      label.onPointerDownObservable.add(function () {
+        // Kameraposition einnehmen
+        // HTML Textbox anzeigen
+        alert('works');
+        //that.updateScreenPosition();
+        /*
+      *
+      * Dann kann diese auch onclick leuchten
+      * Dafür die 3D engine in Scene so laden:
+      * this.engine = new BABYLON.Engine(this.canvas, true, { stencil: true });
+      * Add the highlight layer.
+      * var hl = new BABYLON.HighlightLayer("hl1", scene);
+      * hl.addMesh(plane, BABYLON.Color3.Green());
+      * hl.removeMesh(plane);
+      */
 
-    });
-    const number = new GUI.TextBlock();
-    number.text = String(this.annotationCounter);
-    number.color = 'white';
-    number.fontSize = 1000;
+      });
+    }
+    const numberf = new GUI.TextBlock();
+    numberf.text = String(this.annotationCounter);
+    numberf.color = 'white';
+    numberf.fontSize = 1000;
+    numberf.width = '2000px';
+    numberf.height = '2000px';
+    label.addControl(numberf);
+    plane.material.alpha = alpha;
+    //TODO: click is not working if renderingGroup = 1
+    plane.renderingGroupId = renderingGroup;
 
-    number.width = '2000px';
-    number.height = '2000px';
-    label.addControl(number);
-    /*
-          *
-          * Dann kann diese auch onclick leuchten
-          * Dafür die 3D engine in Scene so laden:
-          * this.engine = new BABYLON.Engine(this.canvas, true, { stencil: true });
-          * Add the highlight layer.
-          * var hl = new BABYLON.HighlightLayer("hl1", scene);
-          * hl.addMesh(plane, BABYLON.Color3.Green());
-          * hl.removeMesh(plane);
-          */
   }
 
 
-  // HTML Textbox anzeigen (onklick) und ausblenden, sobald eine neue Navigation ausgeführt wird
+// HTML Textbox anzeigen (onklick) und ausblenden, sobald eine neue Navigation ausgeführt wird
 
   private updateScreenPosition() {
 
@@ -122,29 +138,10 @@ export class AnnotationsComponent implements OnInit {
     annotation.style.top = vector.y + 'px';
     annotation.style.left = vector.x + 'px';
 
-  }
 
+}
 
-  /*
-      Annotation befindet sich hinter dem Mesh und soll transparent werden / Momentan Bounding Box, evt. diese Stylen
-
-
-             const meshDistance = BABYLON.Vector3.Distance(camera.position, mesh.position);
-             const spriteDistance = camera.position.distanceTo(camera.position, target.position);
-             const spriteBehindObject = spriteDistance > meshDistance;
-
-             target.material.alpha = spriteBehindObject ? 0.25 : 1;
-
-             alpha wert
-               var reducer = function (mesh) {
-                   mesh.visibility -= .1;
-               };
-
-
-           */
-
-  // Delete Annotation
-
+// Delete Annotation
 
 
 }
