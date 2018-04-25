@@ -26,7 +26,7 @@ export class MenuComponent implements OnInit {
   }
 
   public setBackToDefault() {
-    // this.cameraService.setBackToDefault();
+    this.cameraService.setBackToDefault();
   }
 
   public fullscreen() {
