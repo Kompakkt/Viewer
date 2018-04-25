@@ -202,6 +202,7 @@ export class CameraService {
     });
   }
 
+  // Suggestion: change to https://doc.babylonjs.com/babylon101/cameras,_mesh_collisions_and_gravity#web-worker-based-collision-system-since-21
   private setCamCollider() {
     // sides
     const plane2 = this.babylonService.createCamCollider('plane2', {height: 500, width: 500});
