@@ -46,4 +46,24 @@ export class BabylonService {
   public createArcRotateCam(name: string, alpha: number, beta: number, radius: number, position: any) {
     return new BABYLON.ArcRotateCamera(name, alpha, beta, radius, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
   }
+
+  public createUniversalCam(name: string, position: any) {
+    return new BABYLON.UniversalCamera(name, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
+  }
+
+  public createCamCollider(name: string, options: any) {
+    return BABYLON.MeshBuilder.CreatePlane(name, {height: options.height, width: options.width}, this.scene);
+  }
+
+  public createCamAnimationCycle(name: string, target: any, frames: number) {
+    return new BABYLON.Animation(name, target, frames,
+      BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+      BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+  }
+
+  public createCamAnimationStatic(name: string, target: any, frames: number) {
+    return new BABYLON.Animation(name, target, frames,
+      BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
+      BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+  }
 }
