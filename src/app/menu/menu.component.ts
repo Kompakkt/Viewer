@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {CameraService} from '../services/camera/camera.service';
 
 import {BabylonService} from '../services/engine/babylon.service';
+import {SkyboxService} from '../services/skybox/skybox.service';
 
 @Component({
   selector: 'app-menu',
@@ -10,9 +11,13 @@ import {BabylonService} from '../services/engine/babylon.service';
 })
 export class MenuComponent implements OnInit {
 
-  constructor(private cameraService: CameraService,
-              private babylonService: BabylonService) {
-  }
+  public skyboxChanger: number;
+
+  constructor(
+    private skyboxService: SkyboxService,
+    private cameraService: CameraService,
+    private babylonService: BabylonService
+  ) {}
 
   ngOnInit() {
   }
@@ -33,4 +38,8 @@ export class MenuComponent implements OnInit {
     this.babylonService.fullscreen();
   }
 
+  public changeSkybox() {
+    this.skyboxService.insert = this.skyboxChanger;
+    this.skyboxService.setSkyboxMaterial();
+  }
 }
