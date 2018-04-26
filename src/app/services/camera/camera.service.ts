@@ -27,9 +27,11 @@ export class CameraService {
 
   constructor(
     private babylonService: BabylonService
-  ) {}
+  ) {
+  }
 
   public createCamera(canvas: HTMLCanvasElement) {
+
     this.alpha = 9;
     this.beta = 1.3;
     this.radius = 100;
@@ -37,7 +39,7 @@ export class CameraService {
     this.canvas = canvas;
     this.scene = this.babylonService.getScene();
 
-    this.camera1 =  this.babylonService.createArcRotateCam('camera1', this.alpha, this.beta, this.radius, Vector3.Zero());
+    this.camera1 = this.babylonService.createArcRotateCam('camera1', this.alpha, this.beta, this.radius, Vector3.Zero());
     this.arcRotateSettings();
 
     this.x = this.camera1.position.x;
@@ -58,7 +60,9 @@ export class CameraService {
   }
 
   public setCamArcRotate() {
+
     if (this.camChanger === 1) {
+
       this.camera1 = this.babylonService.createArcRotateCam('camera1', 0, 0, 0,
         {x: this.camera2.position.x, y: this.camera2.position.y, z: this.camera2.position.z});
       this.arcRotateSettings();
@@ -69,7 +73,9 @@ export class CameraService {
   }
 
   public setCamUniversal() {
+
     if (this.camChanger === 0) {
+
       this.camera2 = this.babylonService.createUniversalCam('camera2',
         {x: this.camera1.position.x, y: this.camera1.position.y, z: this.camera1.position.z});
       this.universalSettings();
@@ -80,15 +86,17 @@ export class CameraService {
   }
 
   public setBackToDefault() {
+
     if (this.camChanger === 0) {
       this.setCamArcRotateDefault();
-    } else if (this.camChanger === 1) {
+    } else {
       this.setCamUniversalDefault();
     }
     this.canvas.focus();
   }
 
   private arcRotateSettings() {
+
     this.camera1.keysUp.push(87);
     this.camera1.keysDown.push(83);
     this.camera1.keysLeft.push(65);
@@ -100,17 +108,19 @@ export class CameraService {
   }
 
   private universalSettings() {
+
     this.camera2.keysUp.push(87);
     this.camera2.keysDown.push(83);
     this.camera2.keysLeft.push(65);
     this.camera2.keysRight.push(68);
     this.camera2.setTarget(Vector3.Zero());
-    this.camera2.ellipsoid = new BABYLON.Vector3(10, 10, 10)
+    this.camera2.ellipsoid = new BABYLON.Vector3(10, 10, 10);
     this.camera2.checkCollisions = true;
     this.canvas.focus();
   }
 
   private setCamArcRotateDefault() {
+
     this.scene.activeCamera = this.camera1;
     this.camera1.attachControl(this.canvas, true);
 
@@ -162,6 +172,7 @@ export class CameraService {
   }
 
   private setCamUniversalDefault() {
+
     const setBackAnm = this.babylonService.createCamAnimationStatic('animCam', 'position', 30);
     const setBackPos = [{
       frame: 0,
@@ -204,6 +215,7 @@ export class CameraService {
   // Suggestion: change to
   // https://doc.babylonjs.com/babylon101/cameras,_mesh_collisions_and_gravity#web-worker-based-collision-system-since-21
   private setCamCollider() {
+
     // sides
     const plane2 = this.babylonService.createCamCollider('plane2', {height: 500, width: 500});
     plane2.visibility = 0;

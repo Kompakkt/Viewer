@@ -22,6 +22,7 @@ export class SkyboxService {
   }
 
   private preloadSkyboxes() {
+
     this.skyURL = this.skyboxes[0];
     this.skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(this.skyURL, this.scene);
     this.skyURL = this.skyboxes[1];
@@ -31,6 +32,7 @@ export class SkyboxService {
   }
 
   public setSkyboxMaterial() {
+
     this.skyURL = this.skyboxes[this.insert];
     this.skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(this.skyURL, this.scene);
     this.skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
@@ -49,13 +51,11 @@ export class SkyboxService {
     this.skyboxMaterial = new BABYLON.StandardMaterial('skyBox', this.scene);
     this.skyboxMaterial.backFaceCulling = false;
 
-
     this.skyboxes = [
       'https://www.babylonjs-playground.com/textures/skybox',
       'https://www.babylonjs-playground.com/textures/skybox2',
       'https://www.babylonjs-playground.com/textures/skybox3'
     ];
-
 
     this.insert = 0;
 
