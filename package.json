@@ -26,7 +26,7 @@
     "babylonjs-gui": "3.2.0-rc.3",
     "babylonjs-loaders": "3.2.0-rc.3",
     "core-js": "2.5.5",
-    "pouchdb": "^6.4.3",
+    "pouchdb": "6.4.3",
     "rxjs": "5.5.10",
     "zone.js": "0.8.26"
   },
@@ -45,9 +45,9 @@
     "karma-coverage-istanbul-reporter": "^1.4.2",
     "karma-jasmine": "~1.1.1",
     "karma-jasmine-html-reporter": "^1.0.0",
-    "node-sass": "^4.8.3",
+    "node-sass": "4.9.0",
     "protractor": "5.3.1",
-    "ts-node": "6.0.0",
+    "ts-node": "6.0.1",
     "tslint": "~5.9.1",
     "typescript": "^2.6.2"
   }
