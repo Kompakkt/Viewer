@@ -50,7 +50,7 @@ export class SceneComponent implements AfterViewInit {
     const scene = this.babylonService.createScene();
 
     this.skyboxService.createSkybox(scene, this.canvas);
-    this.cameraService.createCamera(scene, this.canvas);
+    this.cameraService.createCamera(this.canvas);
 
     this.babylonService.createHemisphericLight('light1', {x: 0, y: 1, z: 0});
 

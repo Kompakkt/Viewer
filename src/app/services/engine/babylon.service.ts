@@ -51,8 +51,30 @@ export class BabylonService {
     return new BABYLON.UniversalCamera(name, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
   }
 
+  public setCamTarget(camera: any) {
+    camera.setTarget(BABYLON.Vector3.Zero());
+  }
+
+  public setVector3(x: number, y: number, z: number) {
+    return new BABYLON.Vector3(x, y, z);
+  }
+
+  public enableCollisionInScene() {
+    this.scene.collisionsEnabled = true;
+  }
+
   public createCamCollider(name: string, options: any) {
     return BABYLON.MeshBuilder.CreatePlane(name, {height: options.height, width: options.width}, this.scene);
+  }
+
+  public setPlaneCollision(plane: BABYLON.Mesh, position: any) {
+    return plane.setPositionWithLocalVector(new BABYLON.Vector3(position.x, position.y, position.z)),
+           plane.checkCollisions = true;
+  }
+
+  public setCamCollison(camera: BABYLON.UniversalCamera) {
+    return camera.ellipsoid = new BABYLON.Vector3(10, 10, 10),
+           camera.checkCollisions = true;
   }
 
   public createCamAnimationCycle(name: string, target: any, frames: number) {
