@@ -9,6 +9,7 @@ import {AnnotationsComponent} from '../annotations/annotations.component';
 import {CameraService} from '../../services/camera/camera.service';
 import {BabylonService} from '../../services/engine/babylon.service';
 import {DataService} from '../../services/data/data.service';
+import {ImportService} from '../../services/import/import.service';
 
 @Component({
   selector: 'app-scene',
@@ -27,7 +28,8 @@ export class SceneComponent implements AfterViewInit {
     private cameraService: CameraService,
     private annotationsComponent: AnnotationsComponent,
     private babylonService: BabylonService,
-    private dataService: DataService
+    private dataService: DataService,
+    private importService: ImportService
   ) {}
 
   @HostListener('window:resize', ['$event'])
@@ -54,9 +56,12 @@ export class SceneComponent implements AfterViewInit {
 
     this.babylonService.createHemisphericLight('light1', {x: 0, y: 1, z: 0});
 
-    this.babylonService.loadObject('', 'assets/models/testmodel/', 'testmodel.obj');
+    const annotations = this.annotationsComponent;
+    const canvas = this.canvas;
 
-    this.annotationsComponent.createAnnotations(scene, this.canvas);
+    this.importService.loadObj(scene, 'assets/models/testmodel/', 'testmodel.obj').then(function() {
+      annotations.createAnnotations(scene, canvas);
+    });
 
     scene.collisionsEnabled = true;
   }
