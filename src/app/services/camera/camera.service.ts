@@ -4,10 +4,7 @@
 
 import {Injectable} from '@angular/core';
 
-// import * as BABYLON from 'babylonjs';
-
 import {BabylonService} from '../../services/engine/babylon.service';
-import Vector3 = BABYLON.Vector3;
 
 @Injectable()
 export class CameraService {
@@ -30,7 +27,7 @@ export class CameraService {
     private babylonService: BabylonService
   ) {}
 
-  public createCamera(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
+  public createCamera(canvas: HTMLCanvasElement) {
     this.alpha = 9;
     this.beta = 1.3;
     this.radius = 100;
@@ -38,14 +35,15 @@ export class CameraService {
     this.canvas = canvas;
     this.scene = this.babylonService.getScene();
 
-    this.camera1 =  this.babylonService.createArcRotateCam('camera1', this.alpha, this.beta, this.radius, Vector3.Zero());
+    this.camera1 =  this.babylonService.createArcRotateCam('camera1', this.alpha, this.beta, this.radius,
+      this.babylonService.setVector3(0,0,0));
     this.arcRotateSettings();
 
     this.x = this.camera1.position.x;
     this.y = this.camera1.position.y;
     this.z = this.camera1.position.z;
 
-    this.camera2 = this.babylonService.createUniversalCam('camera2', new BABYLON.Vector3(this.x, this.y, this.z));
+    this.camera2 = this.babylonService.createUniversalCam('camera2', {x: this.x, y: this.y, z: this.z});
     this.universalSettings();
 
     this.xRot = this.camera2.rotation.x;
@@ -96,7 +94,7 @@ export class CameraService {
     this.camera1.keysRight.push(68);
     this.camera1.panningSensibility = 25;
     this.camera1.upperRadiusLimit = 200;
-    this.camera1.setTarget(Vector3.Zero());
+    this.babylonService.setCamTarget(this.camera1);
     this.canvas.focus();
   }
 
@@ -105,9 +103,8 @@ export class CameraService {
     this.camera2.keysDown.push(83);
     this.camera2.keysLeft.push(65);
     this.camera2.keysRight.push(68);
-    this.camera2.setTarget(BABYLON.Vector3.Zero());
-    this.camera2.ellipsoid = new BABYLON.Vector3(10, 10, 10);
-    this.camera2.checkCollisions = true;
+    this.babylonService.setCamTarget(this.camera2);
+    this.babylonService.setCamCollison(this.camera2);
     this.canvas.focus();
   }
 
@@ -115,7 +112,7 @@ export class CameraService {
     this.scene.activeCamera = this.camera1;
     this.camera1.attachControl(this.canvas, true);
 
-    const animCamAlpha = this.babylonService.createCamAnimationCycle('animCam', 'alpha', 30)
+    const animCamAlpha = this.babylonService.createCamAnimationCycle('animCam', 'alpha', 30);
     const backAlpha = [];
     backAlpha.push({
       frame: 0,
@@ -126,7 +123,7 @@ export class CameraService {
       value: this.alpha
     });
 
-    const animCamBeta = this.babylonService.createCamAnimationCycle('animCam', 'beta', 30)
+    const animCamBeta = this.babylonService.createCamAnimationCycle('animCam', 'beta', 30);
     const backBeta = [];
     backBeta.push({
       frame: 0,
@@ -137,7 +134,7 @@ export class CameraService {
       value: this.beta
     });
 
-    const animCamRadius = this.babylonService.createCamAnimationCycle('animCam', 'radius', 30)
+    const animCamRadius = this.babylonService.createCamAnimationCycle('animCam', 'radius', 30);
     const backRadius = [];
     backRadius.push({
       frame: 0,
@@ -156,23 +153,23 @@ export class CameraService {
     this.camera1.animations.push(animCamBeta);
     this.camera1.animations.push(animCamRadius);
 
-    this.camera1.setTarget(BABYLON.Vector3.Zero());
+    this.babylonService.setCamTarget(this.camera1);
 
     this.scene.beginAnimation(this.camera1, 0, 30, false, 1, function () {
     });
   }
 
   private setCamUniversalDefault() {
-    const setBackAnm = this.babylonService.createCamAnimationStatic('animCam', 'position', 30)
+    const setBackAnm = this.babylonService.createCamAnimationStatic('animCam', 'position', 30);
     const setBackPos = [{
       frame: 0,
-      value: new BABYLON.Vector3(this.camera2.position.x, this.camera2.position.y, this.camera2.position.z)
+      value: {x: this.camera2.position.x, y: this.camera2.position.y, z: this.camera2.position.z}
     }, {
       frame: 30,
-      value: new BABYLON.Vector3(this.x, this.y, this.z)
+      value: this.babylonService.setVector3(this.x, this.y, this.z)
     }];
 
-    const setBackRotXAnm = this.babylonService.createCamAnimationCycle('animCam', 'rotation.x', 30)
+    const setBackRotXAnm = this.babylonService.createCamAnimationCycle('animCam', 'rotation.x', 30);
     const setBackRotX = [{
       frame: 15,
       value: this.camera2.rotation.x
@@ -181,7 +178,7 @@ export class CameraService {
       value: this.xRot
     }];
 
-    const setBackRotYAnm = this.babylonService.createCamAnimationCycle('animCam', 'rotation.y', 30)
+    const setBackRotYAnm = this.babylonService.createCamAnimationCycle('animCam', 'rotation.y', 30);
     const setBackRotY = [{
       frame: 15,
       value: this.camera2.rotation.y
@@ -202,7 +199,8 @@ export class CameraService {
     });
   }
 
-  // Suggestion: change to https://doc.babylonjs.com/babylon101/cameras,_mesh_collisions_and_gravity#web-worker-based-collision-system-since-21
+  // Suggestion: change to
+  // https://doc.babylonjs.com/babylon101/cameras,_mesh_collisions_and_gravity#web-worker-based-collision-system-since-21
   private setCamCollider() {
     // sides
     const plane2 = this.babylonService.createCamCollider('plane2', {height: 500, width: 500});
@@ -230,19 +228,13 @@ export class CameraService {
     plane6.rotation.x = 270 * Math.PI / 180;
     plane6.visibility = 0;
 
-    plane1.setPositionWithLocalVector(new BABYLON.Vector3(0, 0, 240));
-    plane2.setPositionWithLocalVector(new BABYLON.Vector3(0, 0, 240));
-    plane3.setPositionWithLocalVector(new BABYLON.Vector3(0, 0, 240));
-    plane4.setPositionWithLocalVector(new BABYLON.Vector3(0, 0, 240));
-    plane5.setPositionWithLocalVector(new BABYLON.Vector3(0, 0, 240));
-    plane6.setPositionWithLocalVector(new BABYLON.Vector3(0, 0, 240));
+    this.babylonService.setPlaneCollision(plane1, {x: 0, y: 0, z: 240});
+    this.babylonService.setPlaneCollision(plane2, {x: 0, y: 0, z: 240});
+    this.babylonService.setPlaneCollision(plane3, {x: 0, y: 0, z: 240});
+    this.babylonService.setPlaneCollision(plane4, {x: 0, y: 0, z: 240});
+    this.babylonService.setPlaneCollision(plane5, {x: 0, y: 0, z: 240});
+    this.babylonService.setPlaneCollision(plane6, {x: 0, y: 0, z: 240});
 
-    this.scene.collisionsEnabled = true;
-    plane1.checkCollisions = true;
-    plane2.checkCollisions = true;
-    plane3.checkCollisions = true;
-    plane4.checkCollisions = true;
-    plane5.checkCollisions = true;
-    plane6.checkCollisions = true;
+    this.babylonService.enableCollisionInScene();
   }
 }
