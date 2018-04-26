@@ -48,15 +48,10 @@ export class AnnotationsComponent implements OnInit {
       }
     };
 
-    // TODO hier würde ich gerne auf unser Modell zugreifen
-    // this.scene.getMeshByName('Texture_0');
-    // beim importieren erreichbar über newMeshes[0];
-    this.mesh = BABYLON.Mesh.CreateBox('box1', 4, this.scene);
-    // Doppelklick auf Modell, bekommt eine Funktion
+    const mesh = this.scene.getMeshByName('Texture_0');
     const action = new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnDoublePickTrigger, mousePickModel);
-    this.mesh.actionManager = new BABYLON.ActionManager(this.scene);
-    this.mesh.actionManager.registerAction(action);
-
+    mesh.actionManager = new BABYLON.ActionManager(this.scene);
+    mesh.actionManager.registerAction(action);
   }
 
   ngOnInit() {
