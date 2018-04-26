@@ -5,6 +5,7 @@
 import {Injectable} from '@angular/core';
 
 import * as BABYLON from 'babylonjs';
+import 'babylonjs-loaders';
 
 @Injectable()
 export class BabylonService {
@@ -39,10 +40,6 @@ export class BabylonService {
     return new BABYLON.HemisphericLight(name, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
   }
 
-  public loadObject(meshNames: string, rootUrl: string, sceneFilename: string) {
-    return BABYLON.SceneLoader.ImportMesh(meshNames, rootUrl, sceneFilename, this.scene);
-  }
-
   public createArcRotateCam(name: string, alpha: number, beta: number, radius: number, position: any) {
     return new BABYLON.ArcRotateCamera(name, alpha, beta, radius, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
   }
@@ -60,7 +57,6 @@ export class BabylonService {
            plane.checkCollisions = true;
   }
 
-
   public createCamAnimationCycle(name: string, target: any, frames: number) {
     return new BABYLON.Animation(name, target, frames,
       BABYLON.Animation.ANIMATIONTYPE_FLOAT,
@@ -71,5 +67,14 @@ export class BabylonService {
     return new BABYLON.Animation(name, target, frames,
       BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
       BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+  }
+
+  public loadObj(scene: BABYLON.Scene, rootUrl: string, filename: string) {
+
+    return new Promise <any> ((resolve, reject) => {
+      BABYLON.SceneLoader.Append(rootUrl, filename, scene, function (success) {
+        resolve(success);
+      });
+    });
   }
 }

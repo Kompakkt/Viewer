@@ -3,7 +3,6 @@ import * as BABYLON from 'babylonjs';
 import * as GUI from 'babylonjs-gui';
 import {BabylonService} from '../../services/engine/babylon.service';
 import {CameraService} from '../../services/camera/camera.service';
-import {ImportService} from '../../services/import/import.service';
 
 
 @Component({
@@ -22,7 +21,6 @@ export class AnnotationsComponent implements OnInit {
   constructor(
     private cameraService: CameraService,
     private babylonService: BabylonService,
-    private importService: ImportService
   ) {
   }
 

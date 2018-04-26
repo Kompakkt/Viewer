@@ -6,7 +6,6 @@ import {SceneComponent} from './components/scene/scene.component';
 import {MenuComponent} from './menu/menu.component';
 import {AnnotationsComponent} from './components/annotations/annotations.component';
 
-import {ImportService} from './services/import/import.service';
 import {CameraService} from './services/camera/camera.service';
 import {BabylonService} from './services/engine/babylon.service';
 import {SkyboxService} from './services/skybox/skybox.service';
@@ -24,7 +23,6 @@ import {DataService} from './services/data/data.service';
     BrowserModule
   ],
   providers: [
-    ImportService,
     SkyboxService,
     AnnotationsComponent,
     CameraService,
