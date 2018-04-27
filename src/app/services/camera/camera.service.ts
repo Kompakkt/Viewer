@@ -127,44 +127,37 @@ export class CameraService {
     this.arcRotateCamera.attachControl(this.canvas, true);
 
     const animCamAlpha = this.babylonService.createCamAnimationCycle('animCam', 'alpha', 30);
-    const backAlpha = [];
-    backAlpha.push({
-      frame: 0,
-      value: this.arcRotateCamera.alpha
-    });
-    backAlpha.push({
-      frame: 30,
-      value: this.alpha
-    });
+    animCamAlpha.setKeys([
+      {
+        frame: 0,
+        value: this.arcRotateCamera.alpha
+      }, {
+        frame: 30,
+        value: this.alpha
+      }
+    ]);
+    this.arcRotateCamera.animations.push(animCamAlpha);
 
     const animCamBeta = this.babylonService.createCamAnimationCycle('animCam', 'beta', 30);
-    const backBeta = [];
-    backBeta.push({
-      frame: 0,
-      value: this.arcRotateCamera.beta
-    });
-    backBeta.push({
-      frame: 30,
-      value: this.beta
-    });
+    animCamBeta.setKeys([
+      {
+        frame: 0,
+        value: this.arcRotateCamera.beta
+      }, {
+        frame: 30,
+        value: this.beta
+      }]);
+    this.arcRotateCamera.animations.push(animCamBeta);
 
     const animCamRadius = this.babylonService.createCamAnimationCycle('animCam', 'radius', 30);
-    const backRadius = [];
-    backRadius.push({
-      frame: 0,
-      value: this.arcRotateCamera.radius
-    });
-    backRadius.push({
-      frame: 30,
-      value: this.radius
-    });
-
-    animCamAlpha.setKeys(backAlpha);
-    animCamBeta.setKeys(backBeta);
-    animCamRadius.setKeys(backRadius);
-
-    this.arcRotateCamera.animations.push(animCamAlpha);
-    this.arcRotateCamera.animations.push(animCamBeta);
+    animCamRadius.setKeys([
+      {
+        frame: 0,
+        value: this.arcRotateCamera.radius
+      }, {
+        frame: 30,
+        value: this.radius
+      }]);
     this.arcRotateCamera.animations.push(animCamRadius);
 
     this.arcRotateCamera.setTarget(Vector3.Zero());
