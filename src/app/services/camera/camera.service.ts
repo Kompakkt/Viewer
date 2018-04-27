@@ -169,35 +169,31 @@ export class CameraService {
   private setCamUniversalDefault() {
 
     const setBackAnm = this.babylonService.createCamAnimationStatic('animCam', 'position', 30);
-    const setBackPos = [{
+
+    const setBackRotXAnm = this.babylonService.createCamAnimationCycle('animCam', 'rotation.x', 30);
+    const setBackRotYAnm = this.babylonService.createCamAnimationCycle('animCam', 'rotation.y', 30);
+
+    setBackAnm.setKeys([{
       frame: 0,
       value: new BABYLON.Vector3(this.universalCamera.position.x, this.universalCamera.position.y, this.universalCamera.position.z)
     }, {
       frame: 30,
       value: new BABYLON.Vector3(this.x, this.y, this.z)
-    }];
-
-    const setBackRotXAnm = this.babylonService.createCamAnimationCycle('animCam', 'rotation.x', 30);
-    const setBackRotX = [{
+    }]);
+    setBackRotXAnm.setKeys([{
       frame: 15,
       value: this.universalCamera.rotation.x
     }, {
       frame: 30,
       value: this.xRot
-    }];
-
-    const setBackRotYAnm = this.babylonService.createCamAnimationCycle('animCam', 'rotation.y', 30);
-    const setBackRotY = [{
+    }]);
+    setBackRotYAnm.setKeys([{
       frame: 15,
       value: this.universalCamera.rotation.y
     }, {
       frame: 30,
       value: this.yRot
-    }];
-
-    setBackAnm.setKeys(setBackPos);
-    setBackRotXAnm.setKeys(setBackRotX);
-    setBackRotYAnm.setKeys(setBackRotY);
+    }]);
 
     this.universalCamera.animations.push(setBackAnm);
     this.universalCamera.animations.push(setBackRotXAnm);
