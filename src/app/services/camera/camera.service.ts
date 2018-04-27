@@ -39,14 +39,14 @@ export class CameraService {
     this.canvas = canvas;
     this.scene = this.babylonService.getScene();
 
-    this.arcRotateCamera = this.babylonService.createArcRotateCam('camera1', this.alpha, this.beta, this.radius, Vector3.Zero());
+    this.arcRotateCamera = this.babylonService.createArcRotateCam('arcRotateCamera', this.alpha, this.beta, this.radius, Vector3.Zero());
     this.arcRotateSettings();
 
     this.x = this.arcRotateCamera.position.x;
     this.y = this.arcRotateCamera.position.y;
     this.z = this.arcRotateCamera.position.z;
 
-    this.universalCamera = this.babylonService.createUniversalCam('camera2', new BABYLON.Vector3(this.x, this.y, this.z));
+    this.universalCamera = this.babylonService.createUniversalCam('universalCamera', new BABYLON.Vector3(this.x, this.y, this.z));
     this.universalSettings();
 
     this.xRot = this.universalCamera.rotation.x;
@@ -63,7 +63,7 @@ export class CameraService {
 
     if (this.camChanger === 1) {
 
-      this.arcRotateCamera = this.babylonService.createArcRotateCam('camera1', 0, 0, 0,
+      this.arcRotateCamera = this.babylonService.createArcRotateCam('arcRotateCamera', 0, 0, 0,
         {x: this.universalCamera.position.x, y: this.universalCamera.position.y, z: this.universalCamera.position.z});
       this.arcRotateSettings();
       this.scene.activeCamera = this.arcRotateCamera;
@@ -76,7 +76,7 @@ export class CameraService {
 
     if (this.camChanger === 0) {
 
-      this.universalCamera = this.babylonService.createUniversalCam('camera2',
+      this.universalCamera = this.babylonService.createUniversalCam('universalCamera',
         {x: this.arcRotateCamera.position.x, y: this.arcRotateCamera.position.y, z: this.arcRotateCamera.position.z});
       this.universalSettings();
       this.scene.activeCamera = this.universalCamera;
