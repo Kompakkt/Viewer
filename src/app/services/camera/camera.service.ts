@@ -13,8 +13,8 @@ export class CameraService {
 
   private canvas: HTMLCanvasElement;
   private scene: BABYLON.Scene;
-  private camera1: BABYLON.ArcRotateCamera;
-  private camera2: BABYLON.UniversalCamera;
+  private arcRotateCamera: BABYLON.ArcRotateCamera;
+  private universalCamera: BABYLON.UniversalCamera;
   private camChanger: number;
   private alpha: number;
   private beta: number;
@@ -39,22 +39,22 @@ export class CameraService {
     this.canvas = canvas;
     this.scene = this.babylonService.getScene();
 
-    this.camera1 = this.babylonService.createArcRotateCam('camera1', this.alpha, this.beta, this.radius, Vector3.Zero());
+    this.arcRotateCamera = this.babylonService.createArcRotateCam('camera1', this.alpha, this.beta, this.radius, Vector3.Zero());
     this.arcRotateSettings();
 
-    this.x = this.camera1.position.x;
-    this.y = this.camera1.position.y;
-    this.z = this.camera1.position.z;
+    this.x = this.arcRotateCamera.position.x;
+    this.y = this.arcRotateCamera.position.y;
+    this.z = this.arcRotateCamera.position.z;
 
-    this.camera2 = this.babylonService.createUniversalCam('camera2', new BABYLON.Vector3(this.x, this.y, this.z));
+    this.universalCamera = this.babylonService.createUniversalCam('camera2', new BABYLON.Vector3(this.x, this.y, this.z));
     this.universalSettings();
 
-    this.xRot = this.camera2.rotation.x;
-    this.yRot = this.camera2.rotation.y;
+    this.xRot = this.universalCamera.rotation.x;
+    this.yRot = this.universalCamera.rotation.y;
 
     this.camChanger = 0;
 
-    this.camera1.attachControl(canvas, true);
+    this.arcRotateCamera.attachControl(canvas, true);
 
     this.setCamCollider();
   }
@@ -63,11 +63,11 @@ export class CameraService {
 
     if (this.camChanger === 1) {
 
-      this.camera1 = this.babylonService.createArcRotateCam('camera1', 0, 0, 0,
-        {x: this.camera2.position.x, y: this.camera2.position.y, z: this.camera2.position.z});
+      this.arcRotateCamera = this.babylonService.createArcRotateCam('camera1', 0, 0, 0,
+        {x: this.universalCamera.position.x, y: this.universalCamera.position.y, z: this.universalCamera.position.z});
       this.arcRotateSettings();
-      this.scene.activeCamera = this.camera1;
-      this.camera1.attachControl(this.canvas, true);
+      this.scene.activeCamera = this.arcRotateCamera;
+      this.arcRotateCamera.attachControl(this.canvas, true);
       this.camChanger = 0;
     }
   }
@@ -76,11 +76,11 @@ export class CameraService {
 
     if (this.camChanger === 0) {
 
-      this.camera2 = this.babylonService.createUniversalCam('camera2',
-        {x: this.camera1.position.x, y: this.camera1.position.y, z: this.camera1.position.z});
+      this.universalCamera = this.babylonService.createUniversalCam('camera2',
+        {x: this.arcRotateCamera.position.x, y: this.arcRotateCamera.position.y, z: this.arcRotateCamera.position.z});
       this.universalSettings();
-      this.scene.activeCamera = this.camera2;
-      this.camera2.attachControl(this.canvas, true);
+      this.scene.activeCamera = this.universalCamera;
+      this.universalCamera.attachControl(this.canvas, true);
       this.camChanger = 1;
     }
   }
@@ -97,38 +97,38 @@ export class CameraService {
 
   private arcRotateSettings() {
 
-    this.camera1.keysUp.push(87);
-    this.camera1.keysDown.push(83);
-    this.camera1.keysLeft.push(65);
-    this.camera1.keysRight.push(68);
-    this.camera1.panningSensibility = 25;
-    this.camera1.upperRadiusLimit = 200;
-    this.camera1.setTarget(Vector3.Zero());
+    this.arcRotateCamera.keysUp.push(87);
+    this.arcRotateCamera.keysDown.push(83);
+    this.arcRotateCamera.keysLeft.push(65);
+    this.arcRotateCamera.keysRight.push(68);
+    this.arcRotateCamera.panningSensibility = 25;
+    this.arcRotateCamera.upperRadiusLimit = 200;
+    this.arcRotateCamera.setTarget(Vector3.Zero());
     this.canvas.focus();
   }
 
   private universalSettings() {
 
-    this.camera2.keysUp.push(87);
-    this.camera2.keysDown.push(83);
-    this.camera2.keysLeft.push(65);
-    this.camera2.keysRight.push(68);
-    this.camera2.setTarget(Vector3.Zero());
-    this.camera2.ellipsoid = new BABYLON.Vector3(10, 10, 10);
-    this.camera2.checkCollisions = true;
+    this.universalCamera.keysUp.push(87);
+    this.universalCamera.keysDown.push(83);
+    this.universalCamera.keysLeft.push(65);
+    this.universalCamera.keysRight.push(68);
+    this.universalCamera.setTarget(Vector3.Zero());
+    this.universalCamera.ellipsoid = new BABYLON.Vector3(10, 10, 10);
+    this.universalCamera.checkCollisions = true;
     this.canvas.focus();
   }
 
   private setCamArcRotateDefault() {
 
-    this.scene.activeCamera = this.camera1;
-    this.camera1.attachControl(this.canvas, true);
+    this.scene.activeCamera = this.arcRotateCamera;
+    this.arcRotateCamera.attachControl(this.canvas, true);
 
     const animCamAlpha = this.babylonService.createCamAnimationCycle('animCam', 'alpha', 30);
     const backAlpha = [];
     backAlpha.push({
       frame: 0,
-      value: this.camera1.alpha
+      value: this.arcRotateCamera.alpha
     });
     backAlpha.push({
       frame: 30,
@@ -139,7 +139,7 @@ export class CameraService {
     const backBeta = [];
     backBeta.push({
       frame: 0,
-      value: this.camera1.beta
+      value: this.arcRotateCamera.beta
     });
     backBeta.push({
       frame: 30,
@@ -150,7 +150,7 @@ export class CameraService {
     const backRadius = [];
     backRadius.push({
       frame: 0,
-      value: this.camera1.radius
+      value: this.arcRotateCamera.radius
     });
     backRadius.push({
       frame: 30,
@@ -161,13 +161,13 @@ export class CameraService {
     animCamBeta.setKeys(backBeta);
     animCamRadius.setKeys(backRadius);
 
-    this.camera1.animations.push(animCamAlpha);
-    this.camera1.animations.push(animCamBeta);
-    this.camera1.animations.push(animCamRadius);
+    this.arcRotateCamera.animations.push(animCamAlpha);
+    this.arcRotateCamera.animations.push(animCamBeta);
+    this.arcRotateCamera.animations.push(animCamRadius);
 
-    this.camera1.setTarget(Vector3.Zero());
+    this.arcRotateCamera.setTarget(Vector3.Zero());
 
-    this.scene.beginAnimation(this.camera1, 0, 30, false, 1, function () {
+    this.scene.beginAnimation(this.arcRotateCamera, 0, 30, false, 1, function () {
     });
   }
 
@@ -176,7 +176,7 @@ export class CameraService {
     const setBackAnm = this.babylonService.createCamAnimationStatic('animCam', 'position', 30);
     const setBackPos = [{
       frame: 0,
-      value: new BABYLON.Vector3(this.camera2.position.x, this.camera2.position.y, this.camera2.position.z)
+      value: new BABYLON.Vector3(this.universalCamera.position.x, this.universalCamera.position.y, this.universalCamera.position.z)
     }, {
       frame: 30,
       value: new BABYLON.Vector3(this.x, this.y, this.z)
@@ -185,7 +185,7 @@ export class CameraService {
     const setBackRotXAnm = this.babylonService.createCamAnimationCycle('animCam', 'rotation.x', 30);
     const setBackRotX = [{
       frame: 15,
-      value: this.camera2.rotation.x
+      value: this.universalCamera.rotation.x
     }, {
       frame: 30,
       value: this.xRot
@@ -194,7 +194,7 @@ export class CameraService {
     const setBackRotYAnm = this.babylonService.createCamAnimationCycle('animCam', 'rotation.y', 30);
     const setBackRotY = [{
       frame: 15,
-      value: this.camera2.rotation.y
+      value: this.universalCamera.rotation.y
     }, {
       frame: 30,
       value: this.yRot
@@ -204,11 +204,11 @@ export class CameraService {
     setBackRotXAnm.setKeys(setBackRotX);
     setBackRotYAnm.setKeys(setBackRotY);
 
-    this.camera2.animations.push(setBackAnm);
-    this.camera2.animations.push(setBackRotXAnm);
-    this.camera2.animations.push(setBackRotYAnm);
+    this.universalCamera.animations.push(setBackAnm);
+    this.universalCamera.animations.push(setBackRotXAnm);
+    this.universalCamera.animations.push(setBackRotYAnm);
 
-    this.scene.beginAnimation(this.camera2, 0, 30, false, 1, function () {
+    this.scene.beginAnimation(this.universalCamera, 0, 30, false, 1, function () {
     });
   }
 
