@@ -1,14 +1,9 @@
-/**
- * @author Benedikt Mildenberger
- */
-
 import {AfterViewInit, Component, ElementRef, Input, ViewChild, HostListener} from '@angular/core';
 
 import {SkyboxService} from '../../services/skybox/skybox.service';
 import {AnnotationsComponent} from '../annotations/annotations.component';
 import {CameraService} from '../../services/camera/camera.service';
 import {BabylonService} from '../../services/engine/babylon.service';
-import {DataService} from '../../services/data/data.service';
 
 @Component({
   selector: 'app-scene',
@@ -26,8 +21,7 @@ export class SceneComponent implements AfterViewInit {
     private skyboxService: SkyboxService,
     private cameraService: CameraService,
     private annotationsComponent: AnnotationsComponent,
-    private babylonService: BabylonService,
-    private dataService: DataService
+    private babylonService: BabylonService
   ) {}
 
   @HostListener('window:resize', ['$event'])
@@ -50,7 +44,8 @@ export class SceneComponent implements AfterViewInit {
     const scene = this.babylonService.createScene();
 
     this.skyboxService.createSkybox(scene, this.canvas);
-    this.cameraService.createCamera(this.canvas);
+
+    this.cameraService.createCameras(this.canvas);
 
     this.babylonService.createHemisphericLight('light1', {x: 0, y: 1, z: 0});
 

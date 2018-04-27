@@ -30,7 +30,7 @@ export class CameraService {
   ) {
   }
 
-  public createCamera(canvas: HTMLCanvasElement) {
+  public createCameras(canvas: HTMLCanvasElement) {
 
     this.alpha = 9;
     this.beta = 1.3;
