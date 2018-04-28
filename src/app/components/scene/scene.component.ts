@@ -12,6 +12,9 @@ import {BabylonService} from '../../services/engine/babylon.service';
 })
 export class SceneComponent implements AfterViewInit {
 
+  @Input() modelFileName: string;
+  @Input() modelDirectory: string;
+
   @ViewChild('canvas')
   private canvasRef: ElementRef;
 
@@ -52,7 +55,7 @@ export class SceneComponent implements AfterViewInit {
     const annotations = this.annotationsComponent;
     const canvas = this.canvas;
 
-    this.babylonService.loadObj(scene, 'assets/models/testmodel/', 'testmodel.obj').then(function() {
+    this.babylonService.loadObj(scene, this.modelDirectory, this.modelFileName).then(function() {
       annotations.createAnnotations(scene, canvas);
     });
 
