@@ -11,8 +11,6 @@ import {SkyboxService} from '../services/skybox/skybox.service';
 })
 export class MenuComponent implements OnInit {
 
-  public skyboxChanger: number;
-
   constructor(
     private skyboxService: SkyboxService,
     private cameraService: CameraService,
@@ -38,8 +36,7 @@ export class MenuComponent implements OnInit {
     this.babylonService.fullscreen();
   }
 
-  public changeSkybox() {
-    this.skyboxService.insert = this.skyboxChanger;
-    this.skyboxService.setSkyboxMaterial();
+  public changeSkybox(skyboxID) {
+    this.skyboxService.setSkyboxMaterial(skyboxID);
   }
 }
