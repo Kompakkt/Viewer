@@ -12,6 +12,7 @@ export class SkyboxService {
   private scene: BABYLON.Scene;
   private skybox: BABYLON.Mesh;
   private skyboxes: any[string] = [
+    'assets/textures/skybox/darkgrey/darkgrey',
     'https://www.babylonjs-playground.com/textures/skybox',
     'https://www.babylonjs-playground.com/textures/skybox2',
     'https://www.babylonjs-playground.com/textures/skybox3'
