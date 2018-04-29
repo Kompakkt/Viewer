@@ -14,48 +14,51 @@ export class AnnotationsComponent implements OnInit {
 
   private canvas: HTMLCanvasElement;
   private scene: BABYLON.Scene;
-  private mesh: BABYLON.Mesh;
-  private annotationCounter: number;
-
+  private annotationCounter: number = 0;
 
   constructor(
     private cameraService: CameraService,
     private babylonService: BabylonService,
-  ) {
+  ) {}
+
+  private mousePickModel(unit_mesh: any) {
+
+    if (unit_mesh.source !== null) {
+
+      const pickResult = this.scene.pick(this.scene.pointerX, this.scene.pointerY,
+        null, false, this.scene.activeCamera);
+
+      if (pickResult.pickedMesh) {
+
+        const pickResultVector = new BABYLON.Vector3(pickResult.pickedPoint.x, pickResult.pickedPoint.y, pickResult.pickedPoint.z);
+        const normal = pickResult.getNormal(true, true);
+
+        this.createAnnotationLabel(pickResultVector, normal);
+      }
+    }
   }
 
-  public createAnnotations(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
+  public createAnnotations() {
 
-    this.scene = scene;
-    this.canvas = canvas;
-    this.annotationCounter = 0;
+    this.scene = this.babylonService.getScene();
 
-    // TODO Please refactor me, I'm as ugly as a german folk musician!!!11!!!1!
     const that = this;
 
-    // Action -> Bei Doppelklick auf ein Modell
-    const mousePickModel = function (unit_mesh: any) {
-      if (unit_mesh.source !== null) {
-        const pickResult = scene.pick(scene.pointerX, scene.pointerY, null, false, this.camera);
-        if (pickResult.pickedMesh) {
-          const pickResultVector = new BABYLON.Vector3(pickResult.pickedPoint.x, pickResult.pickedPoint.y, pickResult.pickedPoint.z);
-          const normal = pickResult.getNormal(true, true);
-          // TODO Please refactor me, please!
-          that.createAnnotationLabel(pickResultVector, normal);
-        }
-      }
-    };
-
     const mesh = this.scene.getMeshByName('Texture_0');
-    const action = new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnDoublePickTrigger, mousePickModel);
     mesh.actionManager = new BABYLON.ActionManager(this.scene);
-    mesh.actionManager.registerAction(action);
+
+    mesh.actionManager.registerAction(
+      new BABYLON.ExecuteCodeAction(
+        BABYLON.ActionManager.OnDoublePickTrigger, function (evt) {
+          that.mousePickModel(evt);
+        }));
   }
 
   ngOnInit() {
   }
 
   public createAnnotationLabel(position: BABYLON.Vector3, normal: BABYLON.Vector3) {
+
     this.annotationCounter++;
 
     // two Labels: one is for isOccluded true, one for false -> alpha 0.5 for transparancy
@@ -63,16 +66,9 @@ export class AnnotationsComponent implements OnInit {
     this.createGeometryForLabel('planeup', 'labelup', true, 0.5, 1, position, normal);
   }
 
-  private createGeometryForLabel
-  (
-    namePlane: string,
-    nameLabel: string,
-    clickable: boolean,
-    alpha: number,
-    renderingGroup: number,
-    position: BABYLON.Vector3,
-    normal: BABYLON.Vector3
-  ) {
+  private createGeometryForLabel(namePlane: string, nameLabel: string, clickable: boolean,
+                                 alpha: number, renderingGroup: number, position: BABYLON.Vector3,
+                                 normal: BABYLON.Vector3) {
     const plane = BABYLON.MeshBuilder.CreatePlane
     (
       namePlane + '_' + String(this.annotationCounter),

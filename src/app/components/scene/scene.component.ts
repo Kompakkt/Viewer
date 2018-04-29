@@ -53,10 +53,9 @@ export class SceneComponent implements AfterViewInit {
     this.babylonService.createHemisphericLight('light1', {x: 0, y: 1, z: 0});
 
     const annotations = this.annotationsComponent;
-    const canvas = this.canvas;
 
     this.babylonService.loadObj(scene, this.modelDirectory, this.modelFileName).then(function() {
-      annotations.createAnnotations(scene, canvas);
+      annotations.createAnnotations();
     });
 
     scene.collisionsEnabled = true;
