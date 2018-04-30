@@ -83,8 +83,6 @@ export class CameraService {
 
   public setBackToDefault() {
 
-    console.log(this.scene.activeCamera.getClassName());
-
     switch (this.scene.activeCamera.getClassName()) {
 
       case 'ArcRotateCamera':
