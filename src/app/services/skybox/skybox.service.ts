@@ -13,9 +13,10 @@ export class SkyboxService {
   private skybox: BABYLON.Mesh;
   private skyboxes: any[string] = [
     'assets/textures/skybox/darkgrey/darkgrey',
-    'https://www.babylonjs-playground.com/textures/skybox',
-    'https://www.babylonjs-playground.com/textures/skybox2',
-    'https://www.babylonjs-playground.com/textures/skybox3'
+    'assets/textures/skybox/white/white',
+    'assets/textures/skybox/lightgrey/lightgrey',
+    'assets/textures/skybox/blue/blue',
+    'assets/textures/skybox/marineblue/marineblue'
   ];
 
   constructor() {}
