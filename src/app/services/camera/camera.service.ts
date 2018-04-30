@@ -15,7 +15,6 @@ export class CameraService {
   private scene: BABYLON.Scene;
   private arcRotateCamera: BABYLON.ArcRotateCamera;
   private universalCamera: BABYLON.UniversalCamera;
-  private camChanger: number;
   private alpha: number;
   private beta: number;
   private radius: number;
@@ -53,8 +52,6 @@ export class CameraService {
     this.xRot = this.universalCamera.rotation.x;
     this.yRot = this.universalCamera.rotation.y;
 
-    this.camChanger = 0;
-
     this.arcRotateCamera.attachControl(canvas, true);
 
     this.setCamCollider();
@@ -62,37 +59,42 @@ export class CameraService {
 
   public setCamArcRotate() {
 
-    if (this.camChanger === 1) {
+    if (this.scene.activeCamera.getClassName() !== 'ArcRotateCamera') {
 
       this.arcRotateCamera = this.babylonService.createArcRotateCam('arcRotateCamera', 0, 0, 0,
         {x: this.universalCamera.position.x, y: this.universalCamera.position.y, z: this.universalCamera.position.z});
       this.arcRotateSettings();
       this.scene.activeCamera = this.arcRotateCamera;
       this.arcRotateCamera.attachControl(this.canvas, true);
-      this.camChanger = 0;
     }
   }
 
   public setCamUniversal() {
 
-    if (this.camChanger === 0) {
+    if (this.scene.activeCamera.getClassName() !== 'UniversalCamera') {
 
       this.universalCamera = this.babylonService.createUniversalCam('universalCamera',
         {x: this.arcRotateCamera.position.x, y: this.arcRotateCamera.position.y, z: this.arcRotateCamera.position.z});
       this.universalSettings();
       this.scene.activeCamera = this.universalCamera;
       this.universalCamera.attachControl(this.canvas, true);
-      this.camChanger = 1;
     }
   }
 
   public setBackToDefault() {
 
-    if (this.camChanger === 0) {
-      this.setCamArcRotateDefault();
-    } else {
-      this.setCamUniversalDefault();
+    console.log(this.scene.activeCamera.getClassName());
+
+    switch (this.scene.activeCamera.getClassName()) {
+
+      case 'ArcRotateCamera':
+        this.setCamArcRotateDefault();
+        break;
+      case 'UniversalCamera':
+        this.setCamUniversalDefault();
+        break;
     }
+
     this.canvas.focus();
   }
 
