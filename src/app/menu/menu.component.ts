@@ -32,6 +32,10 @@ export class MenuComponent implements OnInit {
     this.cameraService.setBackToDefault();
   }
 
+  public consoleLogging() {
+    this.cameraService.consoleLogging();
+  }
+
   public fullscreen() {
     this.babylonService.fullscreen();
   }

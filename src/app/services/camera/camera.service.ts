@@ -60,50 +60,18 @@ export class CameraService {
   public setCamArcRotate() {
 
     if (this.scene.activeCamera.getClassName() !== 'ArcRotateCamera') {
-    /*
-    * this.arcRotateCamera = this.babylonService.createArcRotateCam('arcRotateCamera', 0, 0, 0,
-    * {x: this.universalCamera.position.x, y: this.universalCamera.position.y, z: this.universalCamera.position.z});
-    */
-      this.arcRotateCamera.setPosition(new Vector3(this.universalCamera.position.x, this.universalCamera.position.y, this.universalCamera.position.z));
-      this.arcRotateSettings();
 
-      /*
-      * Steps to reproduce bug:
-      * - move with orbit cam
-      * - change to universal cam and move
-      * - change to orbit cam
-      * RESULT: cam jumps to a whole other position
-      * Thoughts: die Kamera springt zu einer komplett anderen position, dies liegt unter anderem an den alpah, beta und radius werten
-      *           setze ich diese jedoch auf 0 wie oben in der ausgeklammerten funktion, dann bin ich im objekt (was ja auch sinn ergibt da alles auf 0 ist)
-      *           deshalb verstehe ich nicht warum die oben ausgeklammerte funktion überhaupt funktioniert da ich dort die gleichen werte auf 0 setze
-      */
-
-      this.scene.activeCamera = this.arcRotateCamera;
-      this.arcRotateCamera.attachControl(this.canvas, true);
+      this.setCameraActive(this.arcRotateCamera);
+      this.setCamArcRotateDefault();
     }
   }
 
   public setCamUniversal() {
 
     if (this.scene.activeCamera.getClassName() !== 'UniversalCamera') {
-  /*
-  *    this.universalCamera = this.babylonService.createUniversalCam('universalCamera',
-  *     {x: this.arcRotateCamera.position.x, y: this.arcRotateCamera.position.y, z: this.arcRotateCamera.position.z});
-  */
-      this.universalCamera.position = new Vector3(this.arcRotateCamera.position.x, this.arcRotateCamera.position.y, this.arcRotateCamera.position.z);
-      this.universalCamera.setTarget(Vector3.Zero());
-      /*
-      * Steps to reproduce bug:
-      * - move with orbit cam
-      * - change to universal cam and move
-      * - change to orbit cam (jump not important for this bug), move orbit cam
-      * - change to universal cam
-      * RESULT: cam moves away from object
-      * Thoughts: die kamera scheint so weit vom objekt weg zu schwenken wie man davor bei der orbit cam gedreht hat
-      */
-      this.universalSettings();
-      this.scene.activeCamera = this.universalCamera;
-      this.universalCamera.attachControl(this.canvas, true);
+
+      this.setCameraActive(this.universalCamera);
+      this.setCamUniversalDefault();
     }
   }
 
@@ -149,6 +117,13 @@ export class CameraService {
 
   private setCamArcRotateDefault() {
 
+    this.arcRotateAnimation();
+    this.beginAnimating(this.arcRotateCamera, function () {
+    })
+  }
+
+  private arcRotateAnimation() {
+
     this.scene.activeCamera = this.arcRotateCamera;
     this.arcRotateCamera.attachControl(this.canvas, true);
 
@@ -187,13 +162,16 @@ export class CameraService {
     this.arcRotateCamera.animations.push(animCamRadius);
 
     this.arcRotateCamera.setTarget(Vector3.Zero());
-
-    this.scene.beginAnimation(this.arcRotateCamera, 0, 30, false, 1, function () {
-    });
   }
 
   private setCamUniversalDefault() {
 
+    this.universalAnimation();
+    this.beginAnimating(this.universalCamera, function () {
+    })
+  }
+
+  private universalAnimation() {
     const setBackAnm = this.babylonService.createCamAnimationStatic('animCam', 'position', 30);
 
     const setBackRotXAnm = this.babylonService.createCamAnimationCycle('animCam', 'rotation.x', 30);
@@ -224,9 +202,21 @@ export class CameraService {
     this.universalCamera.animations.push(setBackAnm);
     this.universalCamera.animations.push(setBackRotXAnm);
     this.universalCamera.animations.push(setBackRotYAnm);
+  }
 
-    this.scene.beginAnimation(this.universalCamera, 0, 30, false, 1, function () {
-    });
+  private beginAnimating(camera, onAnimationEnd) {
+    this.scene.beginAnimation(camera, 0, 30, false, 1, onAnimationEnd);
+  }
+
+  private setCameraActive(camera) {
+    this.scene.activeCamera = camera;
+    camera.attachControl(this.canvas, true);
+    camera.setTarget(Vector3.Zero());
+  }
+
+  public consoleLogging(){
+    console.log(this.arcRotateCamera);
+    console.log(this.universalCamera);
   }
 
   // Suggestion: change to
