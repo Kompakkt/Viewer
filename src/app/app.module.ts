@@ -1,6 +1,8 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 
+import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+
 import {AppComponent} from './app.component';
 import {SceneComponent} from './components/scene/scene.component';
 import {MenuComponent} from './menu/menu.component';
@@ -20,7 +22,8 @@ import {DataService} from './services/data/data.service';
     AnnotationsComponent
   ],
   imports: [
-    BrowserModule
+    BrowserModule,
+    NgbModule.forRoot()
   ],
   providers: [
     SkyboxService,

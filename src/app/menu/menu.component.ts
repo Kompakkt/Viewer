@@ -1,6 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {CameraService} from '../services/camera/camera.service';
 
+import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+
 import {BabylonService} from '../services/engine/babylon.service';
 import {SkyboxService} from '../services/skybox/skybox.service';
 
