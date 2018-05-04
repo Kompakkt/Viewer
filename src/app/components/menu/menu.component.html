@@ -1,24 +1,19 @@
 <div id="menu">
 
-  <button type="button" class="btn btn-outline-secondary" (click)="setCamArcRotate()">Orbit Camera</button>
-  <button type="button" class="btn btn-outline-secondary" (click)="setCamUniversal()">Universal Camera</button>
-  <button type="button" class="btn btn-outline-secondary" (click)="setBackToDefault()">Set back to Default</button>
+  <button (click)="setCamArcRotate()">Orbit Camera</button>
+  <button (click)="setCamUniversal()">Universal Camera</button>
+  <button (click)="setBackToDefault()">Set back to Default</button>
 
-  <button type="button" class="btn btn-outline-secondary" (click)="consoleLogging()">Console.log</button>
+  <button (click)="consoleLogging()">Console.log</button>
 
-  <ng-template #popContent>
-    <button type="button" class="btn btn-outline-secondary" id="grey" (click)="changeSkybox(0)">Grey</button>
-    <button type="button" class="btn btn-outline-secondary" id="white" (click)="changeSkybox(1)">White</button>
-    <button type="button" class="btn btn-outline-secondary" id="lightgrey" (click)="changeSkybox(2)">Light Grey</button>
-    <button type="button" class="btn btn-outline-secondary" id="blue" (click)="changeSkybox(3)">Blue</button>
-    <button type="button" class="btn btn-outline-secondary" id="marineblue" (click)="changeSkybox(4)">Marine Blue
-    </button>
-  </ng-template>
+  <button (click)="changeSkybox(0)">Grey</button>
+  <button (click)="changeSkybox(1)">White</button>
+  <button (click)="changeSkybox(2)">Light Grey</button>
+  <button (click)="changeSkybox(3)">Blue</button>
+  <button (click)="changeSkybox(4)">Marine Blue</button>
 
-  <button type="button" class="btn btn-outline-secondary" [ngbPopover]="popContent" popoverTitle="Fancy content">
-    Skyboxes
+  <button mat-mini-fab color="black" (click)="fullscreen()">
+    <mat-icon aria-label="Switch to fullscreen mode">fullscreen</mat-icon>
   </button>
-
-  <button type="button" class="btn btn-outline-secondary" id="fullscreen" (click)="fullscreen()">Fullscreen</button>
 
 </div>
