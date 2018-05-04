@@ -6,6 +6,8 @@ import {AnnotationsComponent} from './components/annotations/annotations.compone
 import {SceneComponent} from './components/scene/scene.component';
 import {MenuComponent} from './components/menu/menu.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {MatButtonModule} from '@angular/material';
+import {MatIconModule} from '@angular/material';
 
 @NgModule({
   declarations: [
@@ -16,7 +18,9 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
   ],
   imports: [
     BrowserModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    MatButtonModule,
+    MatIconModule
   ],
   providers: [AnnotationsComponent],
   bootstrap: [AppComponent]
