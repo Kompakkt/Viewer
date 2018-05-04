@@ -6,7 +6,9 @@ import {Injectable} from '@angular/core';
 
 import * as BABYLON from 'babylonjs';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class SkyboxService {
 
   private scene: BABYLON.Scene;

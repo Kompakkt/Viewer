@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 
 import PouchDB from 'pouchdb';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class DataService {
 
   constructor() {

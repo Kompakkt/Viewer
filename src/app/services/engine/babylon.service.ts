@@ -7,7 +7,9 @@ import {Injectable} from '@angular/core';
 import * as BABYLON from 'babylonjs';
 import 'babylonjs-loaders';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class BabylonService {
 
   constructor() {

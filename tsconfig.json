@@ -1,9 +1,8 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "allowSyntheticDefaultImports": true, // for PouchDB
-    "noImplicitAny": false,
-    "strictNullChecks": false,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": "./",
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
@@ -14,11 +13,7 @@
     "typeRoots": [
       "node_modules/@types"
     ],
-    "types": [
-      "babylonjs",
-      "babylonjs-gui",
-      "babylonjs-loaders"
-    ],
+    "types": ["babylonjs"],
     "lib": [
       "es2017",
       "dom"
