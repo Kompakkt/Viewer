@@ -6,8 +6,7 @@ import {AnnotationsComponent} from './components/annotations/annotations.compone
 import {SceneComponent} from './components/scene/scene.component';
 import {MenuComponent} from './components/menu/menu.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {MatButtonModule} from '@angular/material';
-import {MatIconModule} from '@angular/material';
+import {MatButtonModule, MatTooltipModule, MatIconModule, MatMenuModule} from '@angular/material';
 
 @NgModule({
   declarations: [
@@ -19,7 +18,9 @@ import {MatIconModule} from '@angular/material';
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
+    MatTooltipModule,
     MatButtonModule,
+    MatMenuModule,
     MatIconModule
   ],
   providers: [AnnotationsComponent],

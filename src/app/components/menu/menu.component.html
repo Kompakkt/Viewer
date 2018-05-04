@@ -1,18 +1,32 @@
 <div id="menu">
 
-  <button (click)="setCamArcRotate()">Orbit Camera</button>
-  <button (click)="setCamUniversal()">Universal Camera</button>
-  <button (click)="setBackToDefault()">Set back to Default</button>
+  <button mat-button (click)="setCamArcRotate()">Orbit Camera</button>
+  <button mat-button (click)="setCamUniversal()">Universal Camera</button>
+  <button mat-button (click)="setBackToDefault()">Set back to Default</button>
 
-  <button (click)="consoleLogging()">Console.log</button>
+  <button mat-button (click)="consoleLogging()">Console.log</button>
 
-  <button (click)="changeSkybox(0)">Grey</button>
-  <button (click)="changeSkybox(1)">White</button>
-  <button (click)="changeSkybox(2)">Light Grey</button>
-  <button (click)="changeSkybox(3)">Blue</button>
-  <button (click)="changeSkybox(4)">Marine Blue</button>
+  <button mat-button [matMenuTriggerFor]="settingsMenu"
+          matTooltip="Settings" matTooltipPosition="above">
+    <mat-icon aria-label="Settings">settings</mat-icon>
+  </button>
 
-  <button mat-mini-fab color="black" (click)="fullscreen()">
+  <!-- Settings Menu -->
+  <mat-menu #settingsMenu="matMenu" yPosition="above" [overlapTrigger]="false">
+    <button mat-menu-item [matMenuTriggerFor]="skyboxes">Skyboxes</button>
+  </mat-menu>
+
+  <mat-menu #skyboxes="matMenu">
+    <button mat-menu-item (click)="changeSkybox(0)">Grey</button>
+    <button mat-menu-item (click)="changeSkybox(1)">White</button>
+    <button mat-menu-item (click)="changeSkybox(2)">Light Grey</button>
+    <button mat-menu-item (click)="changeSkybox(3)">Blue</button>
+    <button mat-menu-item (click)="changeSkybox(4)">Marine Blue</button>
+  </mat-menu>
+  <!-- / Settings Menu -->
+
+  <button mat-button color="secondary" (click)="fullscreen()"
+          matTooltip="Fullscreen" matTooltipPosition="above">
     <mat-icon aria-label="Switch to fullscreen mode">fullscreen</mat-icon>
   </button>
 
