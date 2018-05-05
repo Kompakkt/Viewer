@@ -12,8 +12,7 @@ import 'babylonjs-loaders';
 })
 export class BabylonService {
 
-  constructor() {
-  }
+  constructor() {}
 
   private engine: BABYLON.Engine;
   private scene: BABYLON.Scene;
@@ -56,7 +55,7 @@ export class BabylonService {
 
   public setPlaneCollision(plane: BABYLON.Mesh, position: any) {
     return plane.setPositionWithLocalVector(new BABYLON.Vector3(position.x, position.y, position.z)),
-           plane.checkCollisions = true;
+      plane.checkCollisions = true;
   }
 
   public createCamAnimationCycle(name: string, target: any, frames: number) {
@@ -71,11 +70,14 @@ export class BabylonService {
       BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
   }
 
-  public loadObj(scene: BABYLON.Scene, rootUrl: string, filename: string) {
+  public loadModel(scene: BABYLON.Scene, rootUrl: string, filename: string) {
 
-    return new Promise <any> ((resolve, reject) => {
-      BABYLON.SceneLoader.Append(rootUrl, filename, scene, function (success) {
-        resolve(success);
+    return new Promise<any>((resolve, reject) => {
+
+      BABYLON.SceneLoader.AppendAsync(rootUrl, filename, this.scene).then(function () {
+        resolve();
+      }, function (error) {
+        reject(error);
       });
     });
   }
