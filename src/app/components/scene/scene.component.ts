@@ -41,26 +41,24 @@ export class SceneComponent implements AfterViewInit {
     return this.canvasRef.nativeElement;
   }
 
-  private createScene() {
+  private initialize() {
 
     this.canvas = this.getCanvas();
 
     this.babylonService.createEngine(this.canvas, true);
+
     const scene = this.babylonService.createScene();
 
-    this.skyboxService.createSkybox(scene, this.canvas);
+    this.skyboxService.createSkybox();
 
     this.cameraService.createCameras(this.canvas);
 
     this.babylonService.createHemisphericLight('light1', {x: 0, y: 1, z: 0});
 
-    const annotations = this.annotationsComponent;
-
-    // ToDo Hi! I'm ugly!
     const that = this;
 
     this.babylonService.loadModel(scene, this.modelDirectory, this.modelFileName).then(function() {
-      annotations.createAnnotations();
+      that.annotationsComponent.createAnnotations();
     }, function(error) {
       that.messageService.error(error.message);
     });
@@ -70,7 +68,7 @@ export class SceneComponent implements AfterViewInit {
 
   ngAfterViewInit() {
 
-    this.createScene();
+    this.initialize();
 
     const scene = this.babylonService.getScene();
 
