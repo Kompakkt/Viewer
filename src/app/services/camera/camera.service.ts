@@ -11,6 +11,7 @@ import Vector3 = BABYLON.Vector3;
 @Injectable({
   providedIn: 'root'
 })
+
 export class CameraService {
 
   private canvas: HTMLCanvasElement;
@@ -40,15 +41,17 @@ export class CameraService {
     this.canvas = canvas;
     this.scene = this.babylonService.getScene();
 
-    this.arcRotateCamera = this.babylonService.createArcRotateCam('arcRotateCamera', this.alpha, this.beta, this.radius, Vector3.Zero());
+    this.arcRotateCamera = this.babylonService.createArcRotateCam('arcRotateCamera',
+      this.alpha, this.beta, this.radius, Vector3.Zero());
 
     this.arcRotateSettings();
 
-    this.x = this.arcRotateCamera.position.x;
-    this.y = this.arcRotateCamera.position.y;
-    this.z = this.arcRotateCamera.position.z;
+    this.x = 0;
+    this.y = 50;
+    this.z = 100;
 
-    this.universalCamera = this.babylonService.createUniversalCam('universalCamera', new BABYLON.Vector3(this.x, this.y, this.z));
+    this.universalCamera = this.babylonService.createUniversalCam('universalCamera',
+      new BABYLON.Vector3(this.x, this.y, this.z));
     this.universalSettings();
 
     this.xRot = this.universalCamera.rotation.x;
@@ -59,12 +62,19 @@ export class CameraService {
     this.setCamCollider();
   }
 
+  // Very bad workaround which would normaly never have happend
+  // under the supervision of the almighty Jan Wieners.
+  // Current state: - waiting for Babylon forum.
+
   public setCamArcRotate() {
 
     if (this.scene.activeCamera.getClassName() !== 'ArcRotateCamera') {
 
+      this.arcRotateCamera.dispose();
+      this.arcRotateCamera = this.babylonService.createArcRotateCam('arcRotateCamera',
+        this.alpha, this.beta, this.radius, Vector3.Zero());
+      this.arcRotateSettings();
       this.setCameraActive(this.arcRotateCamera);
-      this.setCamArcRotateDefault();
     }
   }
 
@@ -72,8 +82,11 @@ export class CameraService {
 
     if (this.scene.activeCamera.getClassName() !== 'UniversalCamera') {
 
+      this.universalCamera.dispose();
+      this.universalCamera = this.babylonService.createUniversalCam('universalCamera',
+        {x: this.x, y: this.y, z: this.z});
+      this.universalSettings();
       this.setCameraActive(this.universalCamera);
-      this.setCamUniversalDefault();
     }
   }
 
@@ -101,6 +114,11 @@ export class CameraService {
     camera.setTarget(Vector3.Zero());
   }
 
+  private setCameraActive(camera: any) {
+    this.scene.activeCamera = camera;
+    camera.attachControl(this.canvas, true);
+  }
+
   private arcRotateSettings() {
 
     this.setCameraDefaults(this.arcRotateCamera);
@@ -118,13 +136,6 @@ export class CameraService {
   }
 
   private setCamArcRotateDefault() {
-
-    this.arcRotateAnimation();
-    this.beginAnimating(this.arcRotateCamera, function () {
-    })
-  }
-
-  private arcRotateAnimation() {
 
     this.scene.activeCamera = this.arcRotateCamera;
     this.arcRotateCamera.attachControl(this.canvas, true);
@@ -164,16 +175,13 @@ export class CameraService {
     this.arcRotateCamera.animations.push(animCamRadius);
 
     this.arcRotateCamera.setTarget(Vector3.Zero());
+
+    this.scene.beginAnimation(this.arcRotateCamera, 0, 30, false, 1, function () {
+    });
   }
 
   private setCamUniversalDefault() {
 
-    this.universalAnimation();
-    this.beginAnimating(this.universalCamera, function () {
-    })
-  }
-
-  private universalAnimation() {
     const setBackAnm = this.babylonService.createCamAnimationStatic('animCam', 'position', 30);
 
     const setBackRotXAnm = this.babylonService.createCamAnimationCycle('animCam', 'rotation.x', 30);
@@ -204,21 +212,9 @@ export class CameraService {
     this.universalCamera.animations.push(setBackAnm);
     this.universalCamera.animations.push(setBackRotXAnm);
     this.universalCamera.animations.push(setBackRotYAnm);
-  }
 
-  private beginAnimating(camera, onAnimationEnd) {
-    this.scene.beginAnimation(camera, 0, 30, false, 1, onAnimationEnd);
-  }
-
-  private setCameraActive(camera) {
-    this.scene.activeCamera = camera;
-    camera.attachControl(this.canvas, true);
-    camera.setTarget(Vector3.Zero());
-  }
-
-  public consoleLogging(){
-    console.log(this.arcRotateCamera);
-    console.log(this.universalCamera);
+    this.scene.beginAnimation(this.universalCamera, 0, 30, false, 1, function () {
+    });
   }
 
   // Suggestion: change to
