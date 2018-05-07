@@ -221,39 +221,25 @@ export class CameraService {
   // https://doc.babylonjs.com/babylon101/cameras,_mesh_collisions_and_gravity#web-worker-based-collision-system-since-21
   private setCamCollider() {
 
-    // sides
-    const plane2 = this.babylonService.createCamCollider('plane2', {height: 500, width: 500});
-    plane2.visibility = 0;
+    const planes = [];
 
-    const plane3 = this.babylonService.createCamCollider('plane3', {height: 500, width: 500});
-    plane3.rotation.y = 90 * Math.PI / 180;
-    plane3.visibility = 0;
+    for (let i = 0; i <= 5; i++) {
+      planes.push(this.babylonService.createCamCollider('plane' + String([i]), {height: 500, width: 500}));
+      planes[i].visibility = 0;
+    }
 
-    const plane4 = this.babylonService.createCamCollider('plane4', {height: 500, width: 500});
-    plane4.rotation.x = Math.PI;
-    plane4.visibility = 0;
+    planes[0].rotation.x = 90 * Math.PI / 180;  // lower
+    planes[2].rotation.y = 90 * Math.PI / 180;  // side
+    planes[3].rotation.x = Math.PI;             // side
+    planes[4].rotation.y = 270 * Math.PI / 180; // side
+    planes[5].rotation.x = 270 * Math.PI / 180; // upper
 
-    const plane5 = this.babylonService.createCamCollider('plane5', {height: 500, width: 500});
-    plane5.rotation.y = 270 * Math.PI / 180;
-    plane5.visibility = 0;
-
-    // lower
-    const plane1 = this.babylonService.createCamCollider('plane1', {height: 500, width: 500});
-    plane1.rotation.x = 90 * Math.PI / 180;
-    plane1.visibility = 0;
-
-    // upper
-    const plane6 = this.babylonService.createCamCollider('plane6', {height: 500, width: 500});
-    plane6.rotation.x = 270 * Math.PI / 180;
-    plane6.visibility = 0;
-
-    this.babylonService.setPlaneCollision(plane1, {x: 0, y: 0, z: 240});
-    this.babylonService.setPlaneCollision(plane2, {x: 0, y: 0, z: 240});
-    this.babylonService.setPlaneCollision(plane3, {x: 0, y: 0, z: 240});
-    this.babylonService.setPlaneCollision(plane4, {x: 0, y: 0, z: 240});
-    this.babylonService.setPlaneCollision(plane5, {x: 0, y: 0, z: 240});
-    this.babylonService.setPlaneCollision(plane6, {x: 0, y: 0, z: 240});
+    for (let i = 0; i <= 5; i++) {
+      this.babylonService.setPlaneCollision(planes[i], {x: 0, y: 0, z: 240});
+    }
 
     this.scene.collisionsEnabled = true;
+
+    return planes;
   }
 }
