@@ -115,6 +115,7 @@ export class CameraService {
   }
 
   private setCameraActive(camera: any) {
+
     this.scene.activeCamera = camera;
     camera.attachControl(this.canvas, true);
   }
