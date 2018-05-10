@@ -21,8 +21,6 @@ export class SceneComponent implements AfterViewInit {
 
   private canvas: HTMLCanvasElement;
 
-  private babylonService;
-
   constructor(
     private skyboxService: SkyboxService,
     private cameraService: CameraService,
