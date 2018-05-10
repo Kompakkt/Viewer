@@ -21,13 +21,16 @@ export class SceneComponent implements AfterViewInit {
 
   private canvas: HTMLCanvasElement;
 
+  private babylonService;
+
   constructor(
     private skyboxService: SkyboxService,
     private cameraService: CameraService,
     private annotationsComponent: AnnotationsComponent,
-    private babylonService: BabylonService,
-    private messageService: MessageService
-  ) {}
+    private messageService: MessageService,
+    private babylonService: BabylonService
+  ) {
+  }
 
   @HostListener('window:resize', ['$event'])
   public onResize(event: Event) {
@@ -45,9 +48,9 @@ export class SceneComponent implements AfterViewInit {
 
     this.canvas = this.getCanvas();
 
-    this.babylonService.createEngine(this.canvas, true);
+    this.babylonService.startup(this.getCanvas(), true);
 
-    const scene = this.babylonService.createScene();
+    const scene = this.babylonService.getScene();
 
     this.skyboxService.createSkybox();
 
