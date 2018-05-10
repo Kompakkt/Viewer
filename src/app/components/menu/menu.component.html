@@ -1,9 +1,5 @@
 <div id="menu">
 
-  <button mat-button (click)="setCamArcRotate()">Orbit Camera</button>
-  <button mat-button (click)="setCamUniversal()">Universal Camera</button>
-  <button mat-button (click)="setBackToDefault()">Set back to Default</button>
-
   <button mat-icon-button [matMenuTriggerFor]="settingsMenu"
           matTooltip="Settings" matTooltipPosition="above">
     <mat-icon aria-label="Settings">settings</mat-icon>
@@ -11,9 +7,19 @@
 
   <!-- Settings Menu -->
   <mat-menu #settingsMenu="matMenu" yPosition="above" [overlapTrigger]="false">
+    <button mat-menu-item [matMenuTriggerFor]="cameras">Cameras</button>
     <button mat-menu-item [matMenuTriggerFor]="skyboxes">Skyboxes</button>
   </mat-menu>
 
+  <!-- Cameras Submenu -->
+  <mat-menu #cameras="matMenu">
+    <button mat-menu-item (click)="setCamArcRotate()">Orbit Camera</button>
+    <button mat-menu-item (click)="setCamUniversal()">Universal Camera</button>
+    <button mat-menu-item (click)="setBackToDefault()">Reset Camera</button>
+  </mat-menu>
+  <!-- / Cameras Submenu -->
+
+  <!-- Skyboxes Submenu -->
   <mat-menu #skyboxes="matMenu">
     <button mat-menu-item (click)="changeSkybox(0)">Grey</button>
     <button mat-menu-item (click)="changeSkybox(1)">White</button>
@@ -21,6 +27,8 @@
     <button mat-menu-item (click)="changeSkybox(3)">Blue</button>
     <button mat-menu-item (click)="changeSkybox(4)">Marine Blue</button>
   </mat-menu>
+  <!-- /Skyboxes Submenu -->
+
   <!-- / Settings Menu -->
 
   <button *ngIf="!fullscreen"
