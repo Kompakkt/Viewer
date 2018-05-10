@@ -62,19 +62,12 @@ export class CameraService {
     this.setCamCollider();
   }
 
-  // Very bad workaround which would normaly never have happend
-  // under the supervision of the almighty Jan Wieners.
-  // Current state: - waiting for Babylon forum.
-
   public setCamArcRotate() {
 
     if (this.scene.activeCamera.getClassName() !== 'ArcRotateCamera') {
 
-      this.arcRotateCamera.dispose();
-      this.arcRotateCamera = this.babylonService.createArcRotateCam('arcRotateCamera',
-        this.alpha, this.beta, this.radius, Vector3.Zero());
+      this.setCameraActive(this.arcRotateCamera, this.universalCamera);
       this.arcRotateSettings();
-      this.setCameraActive(this.arcRotateCamera);
     }
   }
 
@@ -82,11 +75,8 @@ export class CameraService {
 
     if (this.scene.activeCamera.getClassName() !== 'UniversalCamera') {
 
-      this.universalCamera.dispose();
-      this.universalCamera = this.babylonService.createUniversalCam('universalCamera',
-        {x: this.x, y: this.y, z: this.z});
+      this.setCameraActive(this.universalCamera, this.arcRotateCamera);
       this.universalSettings();
-      this.setCameraActive(this.universalCamera);
     }
   }
 
@@ -114,25 +104,32 @@ export class CameraService {
     camera.setTarget(Vector3.Zero());
   }
 
-  private setCameraActive(camera: any) {
+  private setCameraActive(camera1: any, camera2: any) {
 
-    this.scene.activeCamera = camera;
-    camera.attachControl(this.canvas, true);
+    camera2.detachControl(this.canvas);
+    this.scene.activeCamera = camera1;
+    camera1.attachControl(this.canvas, true);
   }
 
   private arcRotateSettings() {
 
-    this.setCameraDefaults(this.arcRotateCamera);
+    this.arcRotateCamera.alpha = this.alpha;
+    this.arcRotateCamera.beta = this.beta;
+    this.arcRotateCamera.radius = this.radius;
     this.arcRotateCamera.panningSensibility = 25;
     this.arcRotateCamera.upperRadiusLimit = 200;
+    this.setCameraDefaults(this.arcRotateCamera);
     this.canvas.focus();
   }
 
   private universalSettings() {
 
-    this.setCameraDefaults(this.universalCamera);
+    this.universalCamera.position.x = this.x;
+    this.universalCamera.position.y = this.y;
+    this.universalCamera.position.z = this.z;
     this.universalCamera.ellipsoid = new BABYLON.Vector3(10, 10, 10);
     this.universalCamera.checkCollisions = true;
+    this.setCameraDefaults(this.universalCamera);
     this.canvas.focus();
   }
 
