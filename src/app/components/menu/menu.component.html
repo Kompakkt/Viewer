@@ -4,7 +4,7 @@
   <button mat-button (click)="setCamUniversal()">Universal Camera</button>
   <button mat-button (click)="setBackToDefault()">Set back to Default</button>
 
-  <button mat-button [matMenuTriggerFor]="settingsMenu"
+  <button mat-icon-button [matMenuTriggerFor]="settingsMenu"
           matTooltip="Settings" matTooltipPosition="above">
     <mat-icon aria-label="Settings">settings</mat-icon>
   </button>
@@ -23,7 +23,7 @@
   </mat-menu>
   <!-- / Settings Menu -->
 
-  <button mat-button color="secondary" (click)="fullscreen()"
+  <button mat-icon-button (click)="fullscreen()"
           matTooltip="Fullscreen" matTooltipPosition="above">
     <mat-icon aria-label="Switch to fullscreen mode">fullscreen</mat-icon>
   </button>
