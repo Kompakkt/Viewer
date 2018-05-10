@@ -23,9 +23,16 @@
   </mat-menu>
   <!-- / Settings Menu -->
 
-  <button mat-icon-button (click)="fullscreen()"
+  <button *ngIf="!fullscreen"
+          mat-icon-button (click)="enterFullscreen()"
           matTooltip="Fullscreen" matTooltipPosition="above">
     <mat-icon aria-label="Switch to fullscreen mode">fullscreen</mat-icon>
+  </button>
+
+  <button *ngIf="fullscreen"
+          mat-icon-button (click)="quitFullscreen(this)"
+          matTooltip="Exit Fullscreen" matTooltipPosition="above">
+    <mat-icon aria-label="Exit fullscreen mode">fullscreen_exit</mat-icon>
   </button>
 
 </div>

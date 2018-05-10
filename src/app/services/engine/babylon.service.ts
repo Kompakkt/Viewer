@@ -1,7 +1,3 @@
-/**
- * @author Jan G. Wieners
- */
-
 import {Injectable} from '@angular/core';
 
 import * as BABYLON from 'babylonjs';
@@ -12,7 +8,8 @@ import 'babylonjs-loaders';
 })
 export class BabylonService {
 
-  constructor() {}
+  constructor() {
+  }
 
   private engine: BABYLON.Engine;
   private scene: BABYLON.Scene;
@@ -31,10 +28,6 @@ export class BabylonService {
 
   public getScene(): BABYLON.Scene {
     return this.scene;
-  }
-
-  public fullscreen(): void {
-    this.engine.switchFullscreen(false);
   }
 
   public createHemisphericLight(name: string, position: any): BABYLON.HemisphericLight {
