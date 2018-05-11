@@ -68,4 +68,8 @@ export class MenuComponent implements OnInit {
   public changeSkybox(skyboxID) {
     this.skyboxService.setSkyboxMaterial(skyboxID);
   }
+
+  public saveScene() {
+    console.log(this.babylonService.saveScene());
+  }
 }

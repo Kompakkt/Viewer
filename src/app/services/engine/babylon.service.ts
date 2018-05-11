@@ -72,4 +72,8 @@ export class BabylonService {
       });
     });
   }
+
+  public saveScene() {
+    return BABYLON.SceneSerializer.Serialize(this.scene);
+  }
 }

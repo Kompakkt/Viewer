@@ -5,6 +5,11 @@
     <mat-icon aria-label="Settings">settings</mat-icon>
   </button>
 
+  <button mat-icon-button (click)="saveScene()"
+          matTooltip="Save Scene" matTooltipPosition="above">
+    <mat-icon aria-label="Save Scene">save</mat-icon>
+  </button>
+
   <!-- Settings Menu -->
   <mat-menu #settingsMenu="matMenu" yPosition="above" [overlapTrigger]="false">
     <button mat-menu-item [matMenuTriggerFor]="cameras">Cameras</button>
@@ -31,6 +36,7 @@
 
   <!-- / Settings Menu -->
 
+  <!-- Fullscreen Buttons -->
   <button *ngIf="!fullscreen"
           mat-icon-button (click)="enterFullscreen()"
           matTooltip="Fullscreen" matTooltipPosition="above">
@@ -38,9 +44,10 @@
   </button>
 
   <button *ngIf="fullscreen"
-          mat-icon-button (click)="quitFullscreen(this)"
+          mat-icon-button (click)="quitFullscreen()"
           matTooltip="Exit Fullscreen" matTooltipPosition="above">
     <mat-icon aria-label="Exit fullscreen mode">fullscreen_exit</mat-icon>
   </button>
+  <!-- / Fullscreen Buttons -->
 
 </div>
