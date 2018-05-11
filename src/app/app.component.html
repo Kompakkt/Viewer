@@ -1,5 +1,12 @@
-<app-scene
-  modelFileName="testmodel.obj"
-  modelDirectory="assets/models/testmodel/">
-</app-scene>
-<app-annotations></app-annotations>
+<mat-sidenav-container id="appcontainer">
+  <mat-sidenav mode="side" opened>
+    <app-editor></app-editor>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <app-scene
+      modelFileName="testmodel.obj"
+      modelDirectory="assets/models/testmodel/">
+    </app-scene>
+    <app-annotations></app-annotations>
+  </mat-sidenav-content>
+</mat-sidenav-container>
