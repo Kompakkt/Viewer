@@ -1,17 +1,28 @@
-.annotation {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1;
-  margin-left: 15px;
-  margin-top: 15px;
-  padding: 1em;
-  width: 200px;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.8);
-  border-radius: .5em;
-  font-size: 12px;
-  line-height: 1.2;
-  transition: opacity .5s;
+.example-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
 }
 
+.example-sidenav-content {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.example-sidenav {
+  padding: 20px;
+}
+
+
+#menu {
+position: absolute;
+bottom: 0;
+right: 0;
+display: inline;
+padding: 15px;
+width: 100%;
+color: #fff;
+text-align: right;
+}

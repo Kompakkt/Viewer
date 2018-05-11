@@ -12,12 +12,13 @@
   "private": true,
   "dependencies": {
     "@angular/animations": "^6.0.1",
+    "@angular/cdk": "^6.0.1",
     "@angular/common": "^6.0.1",
     "@angular/compiler": "^6.0.1",
     "@angular/core": "^6.0.1",
     "@angular/forms": "^6.0.1",
     "@angular/http": "^6.0.1",
-    "@angular/material": "6.0.1",
+    "@angular/material": "^6.0.1",
     "@angular/platform-browser": "^6.0.1",
     "@angular/platform-browser-dynamic": "^6.0.1",
     "@angular/router": "^6.0.1",
@@ -26,10 +27,10 @@
     "babylonjs-gui": "^3.2.0",
     "babylonjs-loaders": "^3.2.0",
     "core-js": "^2.5.4",
+    "npm": "^6.0.1",
     "pouchdb": "^6.4.3",
     "rxjs": "^6.0.0",
-    "zone.js": "^0.8.26",
-    "@angular/cdk": "6.0.1"
+    "zone.js": "^0.8.26"
   },
   "devDependencies": {
     "@angular/compiler-cli": "^6.0.1",

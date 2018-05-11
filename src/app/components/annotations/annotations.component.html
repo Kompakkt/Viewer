@@ -1,2 +1,23 @@
-<div class="write_annotation">
-</div>
+<mat-drawer-container class="example-container" autosize>
+  <mat-drawer #drawer class="example-sidenav" mode="side">
+    <p>Auto-resizing sidenav</p>
+    <p *ngIf="showFiller">Lorem, ipsum dolor sit amet consectetur.</p>
+    <button (click)="showFiller = !showFiller" mat-raised-button>
+      Toggle extra text
+    </button>
+  </mat-drawer>
+
+  <div class="example-sidenav-content">
+    <app-scene
+      modelFileName="testmodel.obj"
+      modelDirectory="assets/models/testmodel/">
+    </app-scene>
+    <!-- Annotations Button -->
+    <div id="menu">
+    <button mat-mini-fab color="primary" mat-button (click)="drawer.toggle()"
+            matTooltip="Annotations" matTooltipPosition="above">
+      <mat-icon aria-label="Example icon-button with a heart icon">favorite</mat-icon>
+    </button>
+    </div>
+  </div>
+</mat-drawer-container>
