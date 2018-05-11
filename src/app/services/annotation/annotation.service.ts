@@ -34,29 +34,51 @@ export class AnnotationService {
         const pickResultVector = new BABYLON.Vector3(pickResult.pickedPoint.x, pickResult.pickedPoint.y, pickResult.pickedPoint.z);
         const normal = pickResult.getNormal(true, true);
 
-        this.createAnnotationLabel(pickResultVector, normal);
+        this.createNewAnnotation(pickResultVector, normal);
       }
     }
   }
 
-  public createAnnotations() {
 
-    this.scene = this.babylonService.getScene();
-
-    const that = this;
-
-    const mesh = this.scene.getMeshByName('Texture_0');
-    mesh.actionManager = new BABYLON.ActionManager(this.scene);
-
-    mesh.actionManager.registerAction(
-      new BABYLON.ExecuteCodeAction(
-        BABYLON.ActionManager.OnDoublePickTrigger, function (evt) {
-          that.mousePickModel(evt);
-        }));
+  // Test this function -> was createAnnotations
+  public pickableModel(name: string, pickable: boolean) {
+    const mesh = this.scene.getMeshByName(name);
+    if (mesh != null) {
+      if (pickable) {
+        if (mesh.actionManager == null) {
+          this.scene = this.babylonService.getScene();
+          const that = this;
+          mesh.actionManager = new BABYLON.ActionManager(this.scene);
+          mesh.actionManager.registerAction(
+            new BABYLON.ExecuteCodeAction(
+              BABYLON.ActionManager.OnDoublePickTrigger, function (evt) {
+                that.mousePickModel(evt);
+              }));
+        } else {
+          return;
+        }
+      } else {
+        if (mesh.actionManager != null && mesh.actionManager.hasPickTriggers) {
+          for (const num of actionManager.actions) {
+            actionManager.actions.splice(num, 1);
+          }
+        } else {
+          return;
+        }
+      }
+    }
   }
 
+  public drawAnnotation() {
+    //this.createAnnotationLabel(pickResultVector, normal, precedence);
+  }
 
-  public createAnnotationLabel(position: BABYLON.Vector3, normal: BABYLON.Vector3) {
+  public createNewAnnotation(position: BABYLON.Vector3, normal: BABYLON.Vector3) {
+    const precedence = annotationCounter;
+    this.createAnnotationLabel(pickResultVector, normal, precedence);
+  }
+
+  public createAnnotationLabel(position: BABYLON.Vector3, normal: BABYLON.Vector3, precedence: number) {
 
     this.annotationCounter++;
 
@@ -98,15 +120,15 @@ export class AnnotationService {
         alert('works');
         //that.updateScreenPosition();
         /*
-      *
-      * Dann kann diese auch onclick leuchten
-      * Dafür die 3D engine in Scene so laden:
-      * this.engine = new BABYLON.Engine(this.canvas, true, { stencil: true });
-      * Add the highlight layer.
-      * var hl = new BABYLON.HighlightLayer("hl1", scene);
-      * hl.addMesh(plane, BABYLON.Color3.Green());
-      * hl.removeMesh(plane);
-      */
+ *
+ * Dann kann diese auch onclick leuchten
+ * Dafür die 3D engine in Scene so laden:
+ * this.engine = new BABYLON.Engine(this.canvas, true, { stencil: true });
+ * Add the highlight layer.
+ * var hl = new BABYLON.HighlightLayer("hl1", scene);
+ * hl.addMesh(plane, BABYLON.Color3.Green());
+ * hl.removeMesh(plane);
+ */
 
       });
     }
@@ -126,10 +148,9 @@ export class AnnotationService {
   }
 
 
-// Onklick
-// Position einnehmen (erstmal perfekte Sicht auf die Annotation)
-// HTML Box anzeigen (visible)
-// Bei Interaktion HTML Box ausblenden if camera move (unvisible)
+  // Onklick
+  // Position einnehmen (erstmal perfekte Sicht auf die Annotation)
+  // HTML Box anzeigen (visible)
 
   private updateScreenPosition() {
 
@@ -146,4 +167,3 @@ export class AnnotationService {
 
 // Delete Annotation
 }
-
