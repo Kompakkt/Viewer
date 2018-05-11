@@ -2,7 +2,6 @@ import {Component, Inject, OnInit} from '@angular/core';
 
 import {DOCUMENT} from '@angular/common';
 
-import {AnnotationsComponent} from '../annotations/annotations.component';
 import {CameraService} from '../../services/camera/camera.service';
 import {BabylonService} from '../../services/engine/babylon.service';
 import {SkyboxService} from '../../services/skybox/skybox.service';
@@ -15,7 +14,6 @@ import {SkyboxService} from '../../services/skybox/skybox.service';
 export class MenuComponent implements OnInit {
 
   constructor(
-    private annotationsComponent: AnnotationsComponent,
     private skyboxService: SkyboxService,
     private cameraService: CameraService,
     private babylonService: BabylonService,
@@ -76,11 +74,5 @@ export class MenuComponent implements OnInit {
 
   public saveScene() {
     console.log(this.babylonService.saveScene());
-  }
-
-  public toggleAnnotationsMode() {
-
-    // toggle: abfragen welcher Modus aktiviert ist
-    console.log('annotations');
   }
 }

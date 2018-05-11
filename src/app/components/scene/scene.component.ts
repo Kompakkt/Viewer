@@ -1,7 +1,6 @@
 import {AfterViewInit, Component, ElementRef, Input, ViewChild, HostListener} from '@angular/core';
 
 import {SkyboxService} from '../../services/skybox/skybox.service';
-import {AnnotationsComponent} from '../annotations/annotations.component';
 import {CameraService} from '../../services/camera/camera.service';
 import {BabylonService} from '../../services/engine/babylon.service';
 import {MessageService} from '../../services/message/message.service';
@@ -24,7 +23,6 @@ export class SceneComponent implements AfterViewInit {
   constructor(
     private skyboxService: SkyboxService,
     private cameraService: CameraService,
-    private annotationsComponent: AnnotationsComponent,
     private messageService: MessageService,
     private babylonService: BabylonService
   ) {
