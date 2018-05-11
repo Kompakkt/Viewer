@@ -9,7 +9,7 @@ export class AnnotationsComponent implements OnInit {
 
   constructor() {
   }
-
+/*
   private updateScreenPosition() {
 
     const annotation = <HTMLElement>document.querySelector('.annotation');
@@ -21,7 +21,7 @@ export class AnnotationsComponent implements OnInit {
     annotation.style.top = vector.y + 'px';
     annotation.style.left = vector.x + 'px';
 
-  }
+  }*/
 
   ngOnInit() {
   }
