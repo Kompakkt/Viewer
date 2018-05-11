@@ -1,6 +1,6 @@
-import { TestBed, inject } from '@angular/core/testing';
+import {TestBed, inject} from '@angular/core/testing';
 
-import { AnnotationService } from './annotation.service';
+import {AnnotationService} from './annotation.service';
 
 describe('AnnotationService', () => {
   beforeEach(() => {

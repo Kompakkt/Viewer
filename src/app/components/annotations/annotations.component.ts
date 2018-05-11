@@ -1,8 +1,6 @@
 import {Component, Inject, OnInit} from '@angular/core';
 
 
-
-
 @Component({
   selector: 'app-annotations',
   templateUrl: './annotations.component.html',
@@ -11,14 +9,9 @@ import {Component, Inject, OnInit} from '@angular/core';
 export class AnnotationsComponent implements OnInit {
 
 
-
-
-  constructor(
-
-  ) {
+  constructor() {
 
   }
-
 
 
   ngOnInit() {

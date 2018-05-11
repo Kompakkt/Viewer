@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import * as GUI from 'babylonjs-gui';
 import {CameraService} from '../camera/camera.service';
 import {BabylonService} from '../engine/babylon.service';
@@ -15,7 +15,8 @@ export class AnnotationService {
   constructor(
     private cameraService: CameraService,
     private babylonService: BabylonService,
-  ) {}
+  ) {
+  }
 
   // load existing annotations (get data) -> draw labels
   // make modell pickable via doubleclick -> add json data, pass to annotation component and draw label
@@ -53,7 +54,6 @@ export class AnnotationService {
           that.mousePickModel(evt);
         }));
   }
-
 
 
   public createAnnotationLabel(position: BABYLON.Vector3, normal: BABYLON.Vector3) {
