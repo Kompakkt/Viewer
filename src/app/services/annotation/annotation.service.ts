@@ -1,5 +1,7 @@
 import {Injectable} from '@angular/core';
 import * as GUI from 'babylonjs-gui';
+import * as BABYLON from 'babylonjs';
+
 import {CameraService} from '../camera/camera.service';
 import {BabylonService} from '../engine/babylon.service';
 

@@ -4,6 +4,7 @@ import {SkyboxService} from '../../services/skybox/skybox.service';
 import {CameraService} from '../../services/camera/camera.service';
 import {BabylonService} from '../../services/engine/babylon.service';
 import {MessageService} from '../../services/message/message.service';
+import {AnnotationService} from '../../services/annotation/annotation.service';
 
 @Component({
   selector: 'app-scene',
@@ -24,7 +25,8 @@ export class SceneComponent implements AfterViewInit {
     private skyboxService: SkyboxService,
     private cameraService: CameraService,
     private messageService: MessageService,
-    private babylonService: BabylonService
+    private babylonService: BabylonService,
+    private annotationService: AnnotationService
   ) {
   }
 
@@ -57,7 +59,7 @@ export class SceneComponent implements AfterViewInit {
     const that = this;
 
     this.babylonService.loadModel(scene, this.modelDirectory, this.modelFileName).then(function () {
-      // that.annotationsComponent.createAnnotations();
+      that.annotationService.createAnnotations();
     }, function (error) {
       that.messageService.error(error.message);
     });
