@@ -50,8 +50,11 @@ export class CameraService {
     this.y = 50;
     this.z = 100;
 
-    this.universalCamera = this.babylonService.createUniversalCam('universalCamera',
-      new BABYLON.Vector3(this.x, this.y, this.z));
+    this.universalCamera = new BABYLON.UniversalCamera('universalCamera',
+      new BABYLON.Vector3(this.x, this.y, this.z), this.scene);
+
+    new BABYLON.UniversalCamera('universalCamera', new BABYLON.Vector3(this.x, this.y, this.z), this.scene);
+
     this.universalSettings();
 
     this.xRot = this.universalCamera.rotation.x;
@@ -138,7 +141,13 @@ export class CameraService {
     this.scene.activeCamera = this.arcRotateCamera;
     this.arcRotateCamera.attachControl(this.canvas, true);
 
-    const animCamAlpha = this.babylonService.createCamAnimationCycle('animCam', 'alpha', 30);
+    const name = 'animCam',
+      frames = 30;
+
+    const animCamAlpha = new BABYLON.Animation(name, 'alpha', frames,
+      BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+      BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+
     animCamAlpha.setKeys([
       {
         frame: 0,
@@ -150,7 +159,10 @@ export class CameraService {
     ]);
     this.arcRotateCamera.animations.push(animCamAlpha);
 
-    const animCamBeta = this.babylonService.createCamAnimationCycle('animCam', 'beta', 30);
+    const animCamBeta = new BABYLON.Animation(name, 'beta', frames,
+      BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+      BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+
     animCamBeta.setKeys([
       {
         frame: 0,
@@ -161,7 +173,10 @@ export class CameraService {
       }]);
     this.arcRotateCamera.animations.push(animCamBeta);
 
-    const animCamRadius = this.babylonService.createCamAnimationCycle('animCam', 'radius', 30);
+    const animCamRadius = new BABYLON.Animation(name, 'radius', frames,
+      BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+      BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+
     animCamRadius.setKeys([
       {
         frame: 0,
@@ -180,10 +195,17 @@ export class CameraService {
 
   private setCamUniversalDefault() {
 
-    const setBackAnm = this.babylonService.createCamAnimationStatic('animCam', 'position', 30);
+    const setBackAnm = new BABYLON.Animation('animCam', 'position', 30,
+      BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
+      BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
 
-    const setBackRotXAnm = this.babylonService.createCamAnimationCycle('animCam', 'rotation.x', 30);
-    const setBackRotYAnm = this.babylonService.createCamAnimationCycle('animCam', 'rotation.y', 30);
+    const setBackRotXAnm = new BABYLON.Animation('animCam', 'rotation.x', 30,
+      BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+      BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+
+    const setBackRotYAnm = new BABYLON.Animation('animCam', 'rotation.y', 30,
+      BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+      BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 
     setBackAnm.setKeys([{
       frame: 0,
@@ -233,7 +255,9 @@ export class CameraService {
     planes[5].rotation.x = 270 * Math.PI / 180; // upper
 
     for (let i = 0; i <= 5; i++) {
-      this.babylonService.setPlaneCollision(planes[i], {x: 0, y: 0, z: 240});
+
+      planes[i].setPositionWithLocalVector(new BABYLON.Vector3(0, 0, 240));
+      planes[i].checkCollisions = true;
     }
 
     this.scene.collisionsEnabled = true;
