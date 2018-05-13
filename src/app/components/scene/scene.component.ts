@@ -59,7 +59,7 @@ export class SceneComponent implements AfterViewInit {
     const that = this;
 
     this.babylonService.loadModel(scene, this.modelDirectory, this.modelFileName).then(function () {
-      that.annotationService.createAnnotations();
+      //that.annotationService.createAnnotations();
     }, function (error) {
       that.messageService.error(error.message);
     });
