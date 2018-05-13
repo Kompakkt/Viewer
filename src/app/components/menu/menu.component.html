@@ -1,5 +1,10 @@
 <div id="menu">
 
+  <button mat-icon-button (click)="editScene()"
+          matTooltip="Edit Scene" matTooltipPosition="above">
+    <mat-icon aria-label="Edit Scene">edit</mat-icon>
+  </button>
+
   <button mat-icon-button [matMenuTriggerFor]="settingsMenu"
           matTooltip="Settings" matTooltipPosition="above">
     <mat-icon aria-label="Settings">settings</mat-icon>

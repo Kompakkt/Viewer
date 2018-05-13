@@ -1,10 +1,11 @@
-import {Component, Inject, OnInit} from '@angular/core';
+import {Component, Inject, OnInit, ViewChild} from '@angular/core';
 
 import {DOCUMENT} from '@angular/common';
 
 import {CameraService} from '../../services/camera/camera.service';
 import {BabylonService} from '../../services/engine/babylon.service';
 import {SkyboxService} from '../../services/skybox/skybox.service';
+import {SidenavService} from '../../services/sidenav/sidenav.service';
 
 @Component({
   selector: 'app-menu',
@@ -14,6 +15,7 @@ import {SkyboxService} from '../../services/skybox/skybox.service';
 export class MenuComponent implements OnInit {
 
   constructor(
+    private sidenav: SidenavService,
     private skyboxService: SkyboxService,
     private cameraService: CameraService,
     private babylonService: BabylonService,
@@ -22,9 +24,6 @@ export class MenuComponent implements OnInit {
   }
 
   private fullscreen: Boolean = false;
-
-
-
 
   ngOnInit() {
   }
@@ -74,5 +73,9 @@ export class MenuComponent implements OnInit {
 
   public saveScene() {
     console.log(this.babylonService.saveScene());
+  }
+
+  public editScene() {
+    this.sidenav.toggle();
   }
 }
