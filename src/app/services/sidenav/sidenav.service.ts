@@ -1,10 +1,14 @@
-import {Injectable} from '@angular/core';
+import {HostListener, Injectable} from '@angular/core';
 import {MatSidenav} from '@angular/material';
+import {BabylonService} from '../engine/babylon.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SidenavService {
+
+  constructor(public babylonService: BabylonService) {
+  }
 
   private sidenav: MatSidenav;
 
@@ -21,6 +25,11 @@ export class SidenavService {
   }
 
   public toggle(): void {
-    this.sidenav.toggle();
+
+    let that = this;
+
+    this.sidenav.toggle().then(function() {
+      that.babylonService.resize();
+    });
   }
 }

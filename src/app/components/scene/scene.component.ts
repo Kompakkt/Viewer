@@ -31,11 +31,8 @@ export class SceneComponent implements AfterViewInit {
   }
 
   @HostListener('window:resize', ['$event'])
-  public onResize(event: Event) {
-
-    this.babylonService.getEngine().resize();
-    this.canvas.style.width = '100%';
-    this.canvas.style.height = '100%';
+  public onResize() {
+    this.babylonService.resize();
   }
 
   private getCanvas(): HTMLCanvasElement {

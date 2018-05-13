@@ -11,13 +11,22 @@ export class BabylonService {
   constructor() {
   }
 
-  private engine: BABYLON.Engine;
   private scene: BABYLON.Scene;
+  private engine: BABYLON.Engine;
+  private canvas: HTMLCanvasElement;
 
   public startup(canvas: HTMLCanvasElement, antialiasing: boolean): void {
 
+    this.canvas = canvas;
     this.engine = new BABYLON.Engine(canvas, antialiasing);
     this.scene = new BABYLON.Scene(this.engine);
+  }
+
+  public resize(): void {
+
+    this.engine.resize();
+    this.canvas.style.width = '100%';
+    this.canvas.style.height = '100%';
   }
 
   public getEngine(): BABYLON.Engine {
