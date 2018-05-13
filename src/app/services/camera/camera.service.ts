@@ -53,8 +53,6 @@ export class CameraService {
     this.universalCamera = new BABYLON.UniversalCamera('universalCamera',
       new BABYLON.Vector3(this.x, this.y, this.z), this.scene);
 
-    new BABYLON.UniversalCamera('universalCamera', new BABYLON.Vector3(this.x, this.y, this.z), this.scene);
-
     this.universalSettings();
 
     this.xRot = this.universalCamera.rotation.x;
