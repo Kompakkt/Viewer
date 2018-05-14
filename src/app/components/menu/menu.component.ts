@@ -1,4 +1,4 @@
-import {Component, Inject, OnInit, ViewChild} from '@angular/core';
+import {Component, Inject, Input, OnInit, ViewChild} from '@angular/core';
 
 import {DOCUMENT} from '@angular/common';
 
@@ -6,6 +6,7 @@ import {CameraService} from '../../services/camera/camera.service';
 import {BabylonService} from '../../services/engine/babylon.service';
 import {SkyboxService} from '../../services/skybox/skybox.service';
 import {SidenavService} from '../../services/sidenav/sidenav.service';
+import {AnnotationService} from '../../services/annotation/annotation.service';
 
 @Component({
   selector: 'app-menu',
@@ -19,11 +20,13 @@ export class MenuComponent implements OnInit {
     private skyboxService: SkyboxService,
     private cameraService: CameraService,
     private babylonService: BabylonService,
+    private annotationService: AnnotationService,
     @Inject(DOCUMENT) private document: any
   ) {
   }
 
   private fullscreen: Boolean = false;
+  private pickable: Boolean = false;
 
   ngOnInit() {
   }
@@ -77,5 +80,12 @@ export class MenuComponent implements OnInit {
 
   public editScene() {
     this.sidenav.toggle();
+    if (this.pickable) {
+      this.annotationService.pickableModel('Texture_0', false);
+      this.pickable = false;
+    } else {
+      this.annotationService.pickableModel('Texture_0', true);
+      this.pickable = true;
+    }
   }
 }

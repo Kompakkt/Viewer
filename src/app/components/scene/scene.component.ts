@@ -4,7 +4,6 @@ import {SkyboxService} from '../../services/skybox/skybox.service';
 import {CameraService} from '../../services/camera/camera.service';
 import {BabylonService} from '../../services/engine/babylon.service';
 import {MessageService} from '../../services/message/message.service';
-import {AnnotationService} from '../../services/annotation/annotation.service';
 
 @Component({
   selector: 'app-scene',
@@ -26,7 +25,6 @@ export class SceneComponent implements AfterViewInit {
     private cameraService: CameraService,
     private messageService: MessageService,
     private babylonService: BabylonService,
-    private annotationService: AnnotationService
   ) {
   }
 
@@ -53,13 +51,7 @@ export class SceneComponent implements AfterViewInit {
 
     this.babylonService.createHemisphericLight('light1', {x: 0, y: 1, z: 0});
 
-    const that = this;
-
-    this.babylonService.loadModel(scene, this.modelDirectory, this.modelFileName).then(function () {
-      //that.annotationService.createAnnotations();
-    }, function (error) {
-      that.messageService.error(error.message);
-    });
+    this.babylonService.loadModel(scene, this.modelDirectory, this.modelFileName);
 
     scene.collisionsEnabled = true;
   }

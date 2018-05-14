@@ -41,36 +41,28 @@ export class AnnotationService {
     }
   }
 
-
-  // Test this function -> was createAnnotations
   public pickableModel(name: string, pickable: boolean) {
-    /*
+    this.scene = this.babylonService.getScene();
     const mesh = this.scene.getMeshByName(name);
     if (mesh != null) {
+      mesh.actionManager = new BABYLON.ActionManager(this.scene);
       if (pickable) {
-        if (mesh.actionManager == null) {
-          this.scene = this.babylonService.getScene();
-          const that = this;
-          mesh.actionManager = new BABYLON.ActionManager(this.scene);
-          mesh.actionManager.registerAction(
-            new BABYLON.ExecuteCodeAction(
-              BABYLON.ActionManager.OnDoublePickTrigger, function (evt) {
-                that.mousePickModel(evt);
-              }));
-        } else {
-          return;
-        }
+        const that = this;
+        mesh.actionManager.registerAction(
+          new BABYLON.ExecuteCodeAction(
+            BABYLON.ActionManager.OnDoublePickTrigger, function (evt) {
+              that.mousePickModel(evt);
+            }));
       } else {
-        if (mesh.actionManager != null && mesh.actionManager.hasPickTriggers) {
-          for (const num of actionManager.actions) {
-            actionManager.actions.splice(num, 1);
+        if (mesh.actionManager.hasPickTriggers) {
+          for (let i = mesh.actionManager.actions.length - 1; i >= 0; i--) {
+            mesh.actionManager.actions.splice(i, 1);
           }
-        } else {
-          return;
         }
       }
-    }*/
+    }
   }
+
 
   public drawAnnotation() {
     //this.createAnnotationLabel(pickResultVector, normal, precedence);
@@ -123,15 +115,15 @@ export class AnnotationService {
         alert('works');
         //that.updateScreenPosition();
         /*
- *
- * Dann kann diese auch onclick leuchten
- * Dafür die 3D engine in Scene so laden:
- * this.engine = new BABYLON.Engine(this.canvas, true, { stencil: true });
- * Add the highlight layer.
- * var hl = new BABYLON.HighlightLayer("hl1", scene);
- * hl.addMesh(plane, BABYLON.Color3.Green());
- * hl.removeMesh(plane);
- */
+  *
+  * Dann kann diese auch onclick leuchten
+  * Dafür die 3D engine in Scene so laden:
+  * this.engine = new BABYLON.Engine(this.canvas, true, { stencil: true });
+  * Add the highlight layer.
+  * var hl = new BABYLON.HighlightLayer("hl1", scene);
+  * hl.addMesh(plane, BABYLON.Color3.Green());
+  * hl.removeMesh(plane);
+  */
 
       });
     }
