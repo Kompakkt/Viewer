@@ -1,4 +1,5 @@
-import {Annotation} from '/app/interfaces/annotation/annotation.ts';
+/*
+import {Annotation} from '.../app/interfaces/annotation/annotation';
 
 export const ANNOTATIONS: Annotation[] = [
 
@@ -11,3 +12,4 @@ export const ANNOTATIONS: Annotation[] = [
     positionz: 13, babylonVectorx: 12, babylonVectory: 12, babylonVectorz: 13, precedence: 1, person: 'Wieners', date: 12
   }
 ];
+*/

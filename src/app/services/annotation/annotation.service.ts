@@ -44,6 +44,7 @@ export class AnnotationService {
 
   // Test this function -> was createAnnotations
   public pickableModel(name: string, pickable: boolean) {
+    /*
     const mesh = this.scene.getMeshByName(name);
     if (mesh != null) {
       if (pickable) {
@@ -68,7 +69,7 @@ export class AnnotationService {
           return;
         }
       }
-    }
+    }*/
   }
 
   public drawAnnotation() {
@@ -76,8 +77,8 @@ export class AnnotationService {
   }
 
   public createNewAnnotation(position: BABYLON.Vector3, normal: BABYLON.Vector3) {
-    const precedence = annotationCounter;
-    this.createAnnotationLabel(pickResultVector, normal, precedence);
+    const precedence = this.annotationCounter;
+    this.createAnnotationLabel(position, normal, precedence);
   }
 
   public createAnnotationLabel(position: BABYLON.Vector3, normal: BABYLON.Vector3, precedence: number) {
