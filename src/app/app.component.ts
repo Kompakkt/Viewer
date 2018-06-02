@@ -1,6 +1,4 @@
 import {Component, ViewChild} from '@angular/core';
-import {SidenavService} from './services/sidenav/sidenav.service';
-import {MatSidenav} from '@angular/material';
 
 @Component({
   selector: 'app-root',
@@ -9,12 +7,8 @@ import {MatSidenav} from '@angular/material';
 })
 export class AppComponent {
 
-  @ViewChild('sidenav') public sidenav: MatSidenav;
+  @ViewChild('sidenav') public sidenav;
 
-  constructor(private sidenavService: SidenavService) {
-  }
-
-  ngOnInit(): void {
-    this.sidenavService.setSidenav(this.sidenav);
+  constructor() {
   }
 }

@@ -1,1 +1,17 @@
+:host {
+  box-sizing: border-box;
+  display: none;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  border: 0;
+  padding: 25px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.7);
+  position: absolute;
+  height: 100%;
+  min-width: 300px;
+  z-index: 5;
+}
 
+:host.is-open {
+  display: block;
+}

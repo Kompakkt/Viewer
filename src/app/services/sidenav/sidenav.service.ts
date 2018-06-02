@@ -1,35 +1,21 @@
-import {HostListener, Injectable} from '@angular/core';
-import {MatSidenav} from '@angular/material';
-import {BabylonService} from '../engine/babylon.service';
+import {EventEmitter, Injectable, Output} from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SidenavService {
 
-  constructor(public babylonService: BabylonService) {
+  constructor() {
   }
 
-  private sidenav: MatSidenav;
+  private isOpen = false;
 
-  public setSidenav(sidenav: MatSidenav) {
-    this.sidenav = sidenav;
-  }
-
-  public open() {
-    return this.sidenav.open();
-  }
-
-  public close() {
-    return this.sidenav.close();
-  }
+  @Output() change: EventEmitter<boolean> = new EventEmitter();
 
   public toggle(): void {
 
-    let that = this;
-
-    this.sidenav.toggle().then(function() {
-      that.babylonService.resize();
-    });
+    console.log(this.isOpen)
+    this.isOpen = !this.isOpen;
+    this.change.emit(this.isOpen);
   }
 }

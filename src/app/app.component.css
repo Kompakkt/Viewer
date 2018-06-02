@@ -9,11 +9,3 @@
 .mat-drawer-content {
   overflow: hidden;
 }
-
-#editor {
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-  border: 0;
-  padding: 25px;
-  color: #fff;
-  background-color: #333;
-}

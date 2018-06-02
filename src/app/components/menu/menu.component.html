@@ -1,58 +1,54 @@
-<div id="menu">
+<button mat-icon-button (click)="editScene()"
+        matTooltip="Edit Scene" matTooltipPosition="above">
+  <mat-icon aria-label="Edit Scene">edit</mat-icon>
+</button>
 
-  <button mat-icon-button (click)="editScene()"
-          matTooltip="Edit Scene" matTooltipPosition="above">
-    <mat-icon aria-label="Edit Scene">edit</mat-icon>
-  </button>
+<button mat-icon-button [matMenuTriggerFor]="settingsMenu"
+        matTooltip="Settings" matTooltipPosition="above">
+  <mat-icon aria-label="Settings">settings</mat-icon>
+</button>
 
-  <button mat-icon-button [matMenuTriggerFor]="settingsMenu"
-          matTooltip="Settings" matTooltipPosition="above">
-    <mat-icon aria-label="Settings">settings</mat-icon>
-  </button>
+<button mat-icon-button (click)="saveScene()"
+        matTooltip="Save Scene" matTooltipPosition="above">
+  <mat-icon aria-label="Save Scene">save</mat-icon>
+</button>
 
-  <button mat-icon-button (click)="saveScene()"
-          matTooltip="Save Scene" matTooltipPosition="above">
-    <mat-icon aria-label="Save Scene">save</mat-icon>
-  </button>
+<!-- Settings Menu -->
+<mat-menu #settingsMenu="matMenu" yPosition="above" [overlapTrigger]="false">
+  <button mat-menu-item [matMenuTriggerFor]="cameras">Cameras</button>
+  <button mat-menu-item [matMenuTriggerFor]="skyboxes">Skyboxes</button>
+</mat-menu>
 
-  <!-- Settings Menu -->
-  <mat-menu #settingsMenu="matMenu" yPosition="above" [overlapTrigger]="false">
-    <button mat-menu-item [matMenuTriggerFor]="cameras">Cameras</button>
-    <button mat-menu-item [matMenuTriggerFor]="skyboxes">Skyboxes</button>
-  </mat-menu>
+<!-- Cameras Submenu -->
+<mat-menu #cameras="matMenu">
+  <button mat-menu-item (click)="setCamArcRotate()">Orbit Camera</button>
+  <button mat-menu-item (click)="setCamUniversal()">Universal Camera</button>
+  <button mat-menu-item (click)="setBackToDefault()">Reset Camera</button>
+</mat-menu>
+<!-- / Cameras Submenu -->
 
-  <!-- Cameras Submenu -->
-  <mat-menu #cameras="matMenu">
-    <button mat-menu-item (click)="setCamArcRotate()">Orbit Camera</button>
-    <button mat-menu-item (click)="setCamUniversal()">Universal Camera</button>
-    <button mat-menu-item (click)="setBackToDefault()">Reset Camera</button>
-  </mat-menu>
-  <!-- / Cameras Submenu -->
+<!-- Skyboxes Submenu -->
+<mat-menu #skyboxes="matMenu">
+  <button mat-menu-item (click)="changeSkybox(0)">Grey</button>
+  <button mat-menu-item (click)="changeSkybox(1)">White</button>
+  <button mat-menu-item (click)="changeSkybox(2)">Light Grey</button>
+  <button mat-menu-item (click)="changeSkybox(3)">Blue</button>
+  <button mat-menu-item (click)="changeSkybox(4)">Marine Blue</button>
+</mat-menu>
+<!-- /Skyboxes Submenu -->
 
-  <!-- Skyboxes Submenu -->
-  <mat-menu #skyboxes="matMenu">
-    <button mat-menu-item (click)="changeSkybox(0)">Grey</button>
-    <button mat-menu-item (click)="changeSkybox(1)">White</button>
-    <button mat-menu-item (click)="changeSkybox(2)">Light Grey</button>
-    <button mat-menu-item (click)="changeSkybox(3)">Blue</button>
-    <button mat-menu-item (click)="changeSkybox(4)">Marine Blue</button>
-  </mat-menu>
-  <!-- /Skyboxes Submenu -->
+<!-- / Settings Menu -->
 
-  <!-- / Settings Menu -->
+<!-- Fullscreen Buttons -->
+<button *ngIf="!fullscreen"
+        mat-icon-button (click)="enterFullscreen()"
+        matTooltip="Fullscreen" matTooltipPosition="above">
+  <mat-icon aria-label="Switch to fullscreen mode">fullscreen</mat-icon>
+</button>
 
-  <!-- Fullscreen Buttons -->
-  <button *ngIf="!fullscreen"
-          mat-icon-button (click)="enterFullscreen()"
-          matTooltip="Fullscreen" matTooltipPosition="above">
-    <mat-icon aria-label="Switch to fullscreen mode">fullscreen</mat-icon>
-  </button>
-
-  <button *ngIf="fullscreen"
-          mat-icon-button (click)="quitFullscreen()"
-          matTooltip="Exit Fullscreen" matTooltipPosition="above">
-    <mat-icon aria-label="Exit fullscreen mode">fullscreen_exit</mat-icon>
-  </button>
-  <!-- / Fullscreen Buttons -->
-
-</div>
+<button *ngIf="fullscreen"
+        mat-icon-button (click)="quitFullscreen()"
+        matTooltip="Exit Fullscreen" matTooltipPosition="above">
+  <mat-icon aria-label="Exit fullscreen mode">fullscreen_exit</mat-icon>
+</button>
+<!-- / Fullscreen Buttons -->

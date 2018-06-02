@@ -1,4 +1,4 @@
-#menu {
+:host {
   position: absolute;
   bottom: 0;
   right: 0;
@@ -7,9 +7,10 @@
   width: 100%;
   color: #fff;
   text-align: right;
+  z-index: 15;
 }
 
-#menu a {
+:host a {
   text-decoration: none;
   color: #fff;
 }

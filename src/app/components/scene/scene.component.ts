@@ -15,8 +15,7 @@ export class SceneComponent implements AfterViewInit {
   @Input() modelFileName: string;
   @Input() modelDirectory: string;
 
-  @ViewChild('canvas')
-  private canvasRef: ElementRef;
+  @ViewChild('canvas') private canvasRef: ElementRef;
 
   private canvas: HTMLCanvasElement;
 
@@ -26,11 +25,6 @@ export class SceneComponent implements AfterViewInit {
     private messageService: MessageService,
     private babylonService: BabylonService,
   ) {
-  }
-
-  @HostListener('window:resize', ['$event'])
-  public onResize() {
-    this.babylonService.resize();
   }
 
   private getCanvas(): HTMLCanvasElement {

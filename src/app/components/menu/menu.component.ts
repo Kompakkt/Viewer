@@ -16,9 +16,9 @@ import {AnnotationService} from '../../services/annotation/annotation.service';
 export class MenuComponent implements OnInit {
 
   constructor(
-    private sidenav: SidenavService,
     private skyboxService: SkyboxService,
     private cameraService: CameraService,
+    private sidenavService: SidenavService,
     private babylonService: BabylonService,
     private annotationService: AnnotationService,
     @Inject(DOCUMENT) private document: any
@@ -79,7 +79,9 @@ export class MenuComponent implements OnInit {
   }
 
   public editScene() {
-    this.sidenav.toggle();
+
+    this.sidenavService.toggle();
+
     if (this.pickable) {
       this.annotationService.pickableModel('Texture_0', false);
       this.pickable = false;

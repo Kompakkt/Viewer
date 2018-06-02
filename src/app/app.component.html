@@ -1,15 +1,10 @@
 <div id="appcontainer">
-  <mat-sidenav-container>
-    <mat-sidenav #sidenav
-                 id="editor"
-                 mode="side">
-      <app-editor></app-editor>
-    </mat-sidenav>
-    <mat-sidenav-content>
-      <app-scene
-        modelFileName="testmodel.obj"
-        modelDirectory="assets/models/testmodel/">
-      </app-scene>
-    </mat-sidenav-content>
-  </mat-sidenav-container>
+
+  <app-editor></app-editor>
+
+  <app-scene
+    modelFileName="testmodel.obj"
+    modelDirectory="assets/models/testmodel/">
+  </app-scene>
+
 </div>
