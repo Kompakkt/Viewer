@@ -5,7 +5,7 @@
 import {Injectable} from '@angular/core';
 import * as BABYLON from 'babylonjs';
 
-import {BabylonService} from '../engine/babylon.service';
+import {BabylonService} from '../babylon/babylon.service';
 import Vector3 = BABYLON.Vector3;
 
 @Injectable({

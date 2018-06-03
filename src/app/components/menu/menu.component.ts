@@ -3,7 +3,7 @@ import {Component, Inject, Input, OnInit, ViewChild} from '@angular/core';
 import {DOCUMENT} from '@angular/common';
 
 import {CameraService} from '../../services/camera/camera.service';
-import {BabylonService} from '../../services/engine/babylon.service';
+import {BabylonService} from '../../services/babylon/babylon.service';
 import {SkyboxService} from '../../services/skybox/skybox.service';
 import {SidenavService} from '../../services/sidenav/sidenav.service';
 import {AnnotationService} from '../../services/annotation/annotation.service';

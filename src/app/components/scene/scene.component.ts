@@ -2,7 +2,7 @@ import {AfterViewInit, Component, ElementRef, Input, ViewChild, HostListener} fr
 
 import {SkyboxService} from '../../services/skybox/skybox.service';
 import {CameraService} from '../../services/camera/camera.service';
-import {BabylonService} from '../../services/engine/babylon.service';
+import {BabylonService} from '../../services/babylon/babylon.service';
 import {MessageService} from '../../services/message/message.service';
 
 @Component({
