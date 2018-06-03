@@ -1,7 +1,3 @@
-/**
- * @author Benedikt Mildenberger
- */
-
 import {Injectable} from '@angular/core';
 
 import * as BABYLON from 'babylonjs';

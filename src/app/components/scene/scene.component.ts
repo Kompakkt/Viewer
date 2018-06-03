@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, Input, ViewChild, HostListener} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, Input, ViewChild} from '@angular/core';
 
 import {SkyboxService} from '../../services/skybox/skybox.service';
 import {CameraService} from '../../services/camera/camera.service';
