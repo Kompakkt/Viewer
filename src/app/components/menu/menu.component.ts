@@ -25,8 +25,8 @@ export class MenuComponent implements OnInit {
   ) {
   }
 
-  private fullscreen: Boolean = false;
-  private pickable: Boolean = false;
+  public fullscreen: Boolean = false;
+  public pickable: Boolean = false;
 
   ngOnInit() {
   }

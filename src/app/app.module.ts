@@ -7,13 +7,15 @@ import {MenuComponent} from './components/menu/menu.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatButtonModule, MatTooltipModule, MatIconModule, MatMenuModule, MatSnackBarModule} from '@angular/material';
 import {EditorComponent} from './components/editor/editor.component';
+import {AnnotationsComponent} from './components/annotations/annotations.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     SceneComponent,
     MenuComponent,
-    EditorComponent
+    EditorComponent,
+    AnnotationsComponent
   ],
   imports: [
     BrowserModule,
