@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, Input, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, HostListener, Input, ViewChild} from '@angular/core';
 
 import {SkyboxService} from '../../services/skybox/skybox.service';
 import {CameraService} from '../../services/camera/camera.service';
@@ -18,6 +18,11 @@ export class SceneComponent implements AfterViewInit {
   @ViewChild('canvas') private canvasRef: ElementRef;
 
   private canvas: HTMLCanvasElement;
+
+  @HostListener('window:resize', ['$event'])
+  public onResize() {
+    this.babylonService.resize();
+  }
 
   constructor(
     private skyboxService: SkyboxService,
