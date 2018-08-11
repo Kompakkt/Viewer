@@ -50,7 +50,18 @@ export class SceneComponent implements AfterViewInit {
 
     this.babylonService.createHemisphericLight('light1', {x: 0, y: 1, z: 0});
 
-    this.babylonService.loadModel(scene, this.modelDirectory, this.modelFileName);
+    const engine = this.babylonService.getEngine();
+    engine.loadingUIText = 'Preparing scene';
+    engine.displayLoadingUI();
+
+    const message = this.messageService;
+
+    this.babylonService.loadModel(scene, this.modelDirectory, this.modelFileName).then(function () {
+      engine.hideLoadingUI();
+    }, function(error) {
+      engine.hideLoadingUI();
+      message.error(error);
+    });
 
     scene.collisionsEnabled = true;
   }

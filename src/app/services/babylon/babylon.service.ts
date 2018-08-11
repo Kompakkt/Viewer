@@ -53,7 +53,8 @@ export class BabylonService {
 
     return new Promise<any>((resolve, reject) => {
 
-      BABYLON.SceneLoader.AppendAsync(rootUrl, filename, this.scene).then(function () {
+      BABYLON.SceneLoader.ImportMeshAsync(null, rootUrl, filename, this.scene).then(function (result) {
+        console.log(result);
         resolve();
       }, function (error) {
         reject(error);
