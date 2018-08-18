@@ -18,7 +18,7 @@ export class BabylonService {
   public startup(canvas: HTMLCanvasElement, antialiasing: boolean): void {
 
     this.canvas = canvas;
-    this.engine = new BABYLON.Engine(canvas, antialiasing);
+    this.engine = new BABYLON.Engine(canvas, antialiasing, { preserveDrawingBuffer: true, stencil: true });
     this.scene = new BABYLON.Scene(this.engine);
   }
 

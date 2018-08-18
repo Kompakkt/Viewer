@@ -13,6 +13,11 @@
   <mat-icon aria-label="Save Scene">save</mat-icon>
 </button>
 
+<button mat-icon-button (click)="takeScreenshot()"
+        matTooltip="Take Screenshot" matTooltipPosition="above">
+  <mat-icon aria-label="Take Screenshot">camera</mat-icon>
+</button>
+
 <!-- Settings Menu -->
 <mat-menu #settingsMenu="matMenu" yPosition="above" [overlapTrigger]="false">
   <button mat-menu-item [matMenuTriggerFor]="cameras">Cameras</button>

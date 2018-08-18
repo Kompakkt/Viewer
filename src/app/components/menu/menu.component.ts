@@ -90,4 +90,8 @@ export class MenuComponent implements OnInit {
       this.pickable = true;
     }
   }
+
+  public takeScreenshot() {
+    this.cameraService.createScreenshot();
+  }
 }

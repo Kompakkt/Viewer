@@ -258,4 +258,8 @@ export class CameraService {
 
     return planes;
   }
+
+  public createScreenshot(): void {
+    BABYLON.Tools.CreateScreenshot(this.babylonService.getEngine(), this.scene.activeCamera, {precision: 2});
+  }
 }
