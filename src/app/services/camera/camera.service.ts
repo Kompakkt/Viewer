@@ -28,14 +28,14 @@ export class CameraService {
   ) {
   }
 
-  public createCameras(canvas: HTMLCanvasElement) {
+  public createCameras(): void {
 
     this.alpha = 9;
     this.beta = 1.3;
     this.radius = 100;
 
-    this.canvas = canvas;
     this.scene = this.babylonService.getScene();
+    this.canvas = this.babylonService.getCanvas();
 
     this.arcRotateCamera = this.babylonService.createArcRotateCam('arcRotateCamera',
       this.alpha, this.beta, this.radius, Vector3.Zero());
@@ -54,12 +54,12 @@ export class CameraService {
     this.xRot = this.universalCamera.rotation.x;
     this.yRot = this.universalCamera.rotation.y;
 
-    this.arcRotateCamera.attachControl(canvas, true);
+    this.arcRotateCamera.attachControl(this.canvas, true);
 
     this.setCamCollider();
   }
 
-  public setCamArcRotate() {
+  public setCamArcRotate(): void {
 
     if (this.scene.activeCamera.getClassName() !== 'ArcRotateCamera') {
 
@@ -68,7 +68,7 @@ export class CameraService {
     }
   }
 
-  public setCamUniversal() {
+  public setCamUniversal(): void {
 
     if (this.scene.activeCamera.getClassName() !== 'UniversalCamera') {
 
@@ -77,7 +77,7 @@ export class CameraService {
     }
   }
 
-  public setBackToDefault() {
+  public setBackToDefault(): void {
 
     switch (this.scene.activeCamera.getClassName()) {
 
@@ -92,7 +92,7 @@ export class CameraService {
     this.canvas.focus();
   }
 
-  private setCameraDefaults(camera: any) {
+  private setCameraDefaults(camera: any): void {
 
     camera.keysUp.push(87);
     camera.keysDown.push(83);
@@ -101,14 +101,14 @@ export class CameraService {
     camera.setTarget(Vector3.Zero());
   }
 
-  private setCameraActive(camera1: any, camera2: any) {
+  private setCameraActive(camera1: any, camera2: any): void {
 
     camera2.detachControl(this.canvas);
     this.scene.activeCamera = camera1;
     camera1.attachControl(this.canvas, true);
   }
 
-  private arcRotateSettings() {
+  private arcRotateSettings(): void {
 
     this.arcRotateCamera.alpha = this.alpha;
     this.arcRotateCamera.beta = this.beta;
@@ -119,7 +119,7 @@ export class CameraService {
     this.canvas.focus();
   }
 
-  private universalSettings() {
+  private universalSettings(): void {
 
     this.universalCamera.position.x = this.x;
     this.universalCamera.position.y = this.y;

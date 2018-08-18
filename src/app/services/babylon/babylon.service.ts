@@ -37,6 +37,10 @@ export class BabylonService {
     return this.scene;
   }
 
+  public getCanvas(): HTMLCanvasElement {
+    return this.canvas;
+  }
+
   public createHemisphericLight(name: string, position: any): BABYLON.HemisphericLight {
     return new BABYLON.HemisphericLight(name, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
   }

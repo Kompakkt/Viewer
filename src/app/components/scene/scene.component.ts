@@ -36,7 +36,7 @@ export class SceneComponent implements AfterViewInit {
     return this.canvasRef.nativeElement;
   }
 
-  private initialize() {
+  private bootstrap() {
 
     this.canvas = this.getCanvas();
 
@@ -46,7 +46,7 @@ export class SceneComponent implements AfterViewInit {
 
     this.skyboxService.createSkybox();
 
-    this.cameraService.createCameras(this.canvas);
+    this.cameraService.createCameras();
 
     this.babylonService.createHemisphericLight('light1', {x: 0, y: 1, z: 0});
 
@@ -68,7 +68,7 @@ export class SceneComponent implements AfterViewInit {
 
   ngAfterViewInit() {
 
-    this.initialize();
+    this.bootstrap();
 
     const scene = this.babylonService.getScene();
 
