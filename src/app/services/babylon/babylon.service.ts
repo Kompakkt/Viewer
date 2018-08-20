@@ -49,10 +49,6 @@ export class BabylonService {
     return new BABYLON.ArcRotateCamera(name, alpha, beta, radius, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
   }
 
-  public createCamCollider(name: string, options: any) {
-    return BABYLON.MeshBuilder.CreatePlane(name, {height: options.height, width: options.width}, this.scene);
-  }
-
   public loadModel(scene: BABYLON.Scene, rootUrl: string, filename: string) {
 
     return new Promise<any>((resolve, reject) => {

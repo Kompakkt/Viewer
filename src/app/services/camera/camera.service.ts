@@ -55,8 +55,6 @@ export class CameraService {
     this.yRot = this.universalCamera.rotation.y;
 
     this.arcRotateCamera.attachControl(this.canvas, true);
-
-    this.setCamCollider();
   }
 
   public setCamArcRotate(): void {
@@ -229,34 +227,6 @@ export class CameraService {
 
     this.scene.beginAnimation(this.universalCamera, 0, 30, false, 1, function () {
     });
-  }
-
-  // Suggestion: change to
-  // https://doc.babylonjs.com/babylon101/cameras,_mesh_collisions_and_gravity#web-worker-based-collision-system-since-21
-  private setCamCollider() {
-
-    const planes = [];
-
-    for (let i = 0; i <= 5; i++) {
-      planes.push(this.babylonService.createCamCollider('plane' + String([i]), {height: 500, width: 500}));
-      planes[i].visibility = 0;
-    }
-
-    planes[0].rotation.x = 90 * Math.PI / 180;  // lower
-    planes[2].rotation.y = 90 * Math.PI / 180;  // side
-    planes[3].rotation.x = Math.PI;             // side
-    planes[4].rotation.y = 270 * Math.PI / 180; // side
-    planes[5].rotation.x = 270 * Math.PI / 180; // upper
-
-    for (let i = 0; i <= 5; i++) {
-
-      planes[i].setPositionWithLocalVector(new BABYLON.Vector3(0, 0, 240));
-      planes[i].checkCollisions = true;
-    }
-
-    this.scene.collisionsEnabled = true;
-
-    return planes;
   }
 
   public createScreenshot(): void {

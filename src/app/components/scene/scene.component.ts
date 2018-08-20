@@ -44,7 +44,7 @@ export class SceneComponent implements AfterViewInit {
 
     const scene = this.babylonService.getScene();
 
-    this.skyboxService.createSkybox();
+    scene.clearColor = new BABYLON.Color4(0.2, 0.2, 0.2, 0.7);
 
     this.cameraService.createCameras();
 
