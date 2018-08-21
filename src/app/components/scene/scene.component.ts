@@ -16,8 +16,6 @@ export class SceneComponent implements AfterViewInit {
 
   @ViewChild('canvas') private canvasRef: ElementRef;
 
-  private canvas: HTMLCanvasElement;
-
   @HostListener('window:resize', ['$event'])
   public onResize() {
     this.babylonService.resize();
@@ -30,23 +28,13 @@ export class SceneComponent implements AfterViewInit {
   ) {
   }
 
-  private getCanvas(): HTMLCanvasElement {
-    return this.canvasRef.nativeElement;
-  }
-
   private bootstrap() {
 
-    this.canvas = this.getCanvas();
-
-    this.babylonService.startup(this.getCanvas(), true);
-
-    const scene = this.babylonService.getScene();
-
-    scene.clearColor = new BABYLON.Color4(0.2, 0.2, 0.2, 0.7);
-
-    this.cameraService.createCameras();
-
+    this.babylonService.bootstrap(this.canvasRef.nativeElement, true);
+    this.babylonService.setClearColor(0.2, 0.2, 0.2, 0.8);
     this.babylonService.createHemisphericLight('light1', {x: 0, y: 1, z: 0});
+
+    this.cameraService.bootstrap();
 
     const engine = this.babylonService.getEngine();
     engine.loadingUIText = 'Preparing scene';
@@ -54,14 +42,12 @@ export class SceneComponent implements AfterViewInit {
 
     const message = this.messageService;
 
-    this.babylonService.loadModel(scene, this.modelDirectory, this.modelFileName).then(function () {
+    this.babylonService.loadModel(this.modelDirectory, this.modelFileName).then(function () {
       engine.hideLoadingUI();
     }, function(error) {
       engine.hideLoadingUI();
       message.error(error);
     });
-
-    scene.collisionsEnabled = true;
   }
 
   ngAfterViewInit() {
@@ -69,7 +55,6 @@ export class SceneComponent implements AfterViewInit {
     this.bootstrap();
 
     const scene = this.babylonService.getScene();
-
     this.babylonService.getEngine().runRenderLoop(function () {
       scene.render();
     });

@@ -28,7 +28,7 @@ export class CameraService {
   ) {
   }
 
-  public createCameras(): void {
+  public bootstrap(): void {
 
     this.alpha = 9;
     this.beta = 1.3;

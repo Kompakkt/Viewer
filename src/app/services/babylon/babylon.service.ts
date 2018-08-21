@@ -15,7 +15,7 @@ export class BabylonService {
   private engine: BABYLON.Engine;
   private canvas: HTMLCanvasElement;
 
-  public startup(canvas: HTMLCanvasElement, antialiasing: boolean): void {
+  public bootstrap(canvas: HTMLCanvasElement, antialiasing: boolean): void {
 
     this.canvas = canvas;
     this.engine = new BABYLON.Engine(canvas, antialiasing, { preserveDrawingBuffer: true, stencil: true });
@@ -41,6 +41,10 @@ export class BabylonService {
     return this.canvas;
   }
 
+  public setClearColor(r: number, g: number, b: number, a: number): void {
+    this.scene.clearColor = new BABYLON.Color4(r, g, b, a);
+  }
+
   public createHemisphericLight(name: string, position: any): BABYLON.HemisphericLight {
     return new BABYLON.HemisphericLight(name, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
   }
@@ -49,7 +53,7 @@ export class BabylonService {
     return new BABYLON.ArcRotateCamera(name, alpha, beta, radius, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
   }
 
-  public loadModel(scene: BABYLON.Scene, rootUrl: string, filename: string) {
+  public loadModel(rootUrl: string, filename: string) {
 
     return new Promise<any>((resolve, reject) => {
 
