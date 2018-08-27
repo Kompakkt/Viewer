@@ -1,3 +1,36 @@
-<p>
-  annotations works!
-</p>
+
+<mat-card class="annotation-card">
+
+  <mat-card-header (click)="collapsed = !collapsed">
+    <div mat-card-avatar class="annotation-header-image"><span>{{annotation.counter}}</span></div>
+    <mat-card-title> {{annotation.title | uppercase}}</mat-card-title>
+    <mat-card-subtitle>{{getValidation(annotation.validated)}}</mat-card-subtitle>
+  </mat-card-header>
+
+
+  <img mat-card-image src='././././assets/exampleDataAnnotations/images/anno1.png' *ngIf="!collapsed">
+  <mat-card-content *ngIf="!collapsed">
+    <p>
+      {{annotation.description}}
+    </p>
+    <mat-checkbox>Validated</mat-checkbox>
+    <button mat-icon-button (click)="takeScreenshot()"
+            matTooltip="Select Perspective" matTooltipPosition="right">
+      <mat-icon aria-label="Select Perspective">camera</mat-icon>
+    </button>
+  </mat-card-content>
+  <mat-card-actions>
+    <button mat-icon-button (click)="takeScreenshot()"
+            matTooltip="Edit" matTooltipPosition="above">
+      <mat-icon aria-label="Edit">edit</mat-icon>
+    </button>
+    <button mat-icon-button (click)="takeScreenshot()"
+            matTooltip="Delete" matTooltipPosition="above">
+      <mat-icon aria-label="Delete">delete</mat-icon>
+    </button>
+
+
+
+
+  </mat-card-actions>
+</mat-card>

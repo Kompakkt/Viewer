@@ -15,3 +15,12 @@
 :host.is-open {
   display: block;
 }
+
+.mat-icon {
+  color: #fff;
+
+}
+
+.mat-tab-group {
+  width: 300px;
+}

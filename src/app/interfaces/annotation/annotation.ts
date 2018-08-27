@@ -1,6 +1,13 @@
 export interface Annotation {
+  counter: number;
   id: number;
+  validated: boolean;
   title: string;
+  description: string;
+}
+
+
+/*
   description: string[];
   positionx: number;
   positiony: number;
@@ -10,4 +17,4 @@ export interface Annotation {
   precedence: number;
   person: string;
   date: number;
-}
+ */

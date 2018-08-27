@@ -1,11 +1,13 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
+import { FormsModule } from '@angular/forms'; // <-- NgModel lives here
+
 
 import {AppComponent} from './app.component';
 import {SceneComponent} from './components/scene/scene.component';
 import {MenuComponent} from './components/menu/menu.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {MatButtonModule, MatTooltipModule, MatIconModule, MatMenuModule, MatSnackBarModule} from '@angular/material';
+import {MatButtonModule, MatTooltipModule, MatIconModule, MatMenuModule, MatSnackBarModule, MatCardModule, MatTabsModule, MatExpansionModule, MatFormFieldModule, MatCheckboxModule} from '@angular/material';
 import {EditorComponent} from './components/editor/editor.component';
 import {AnnotationsComponent} from './components/annotations/annotations.component';
 
@@ -24,7 +26,13 @@ import {AnnotationsComponent} from './components/annotations/annotations.compone
     MatTooltipModule,
     MatButtonModule,
     MatMenuModule,
-    MatIconModule
+    MatIconModule,
+    MatCardModule,
+    FormsModule,
+    MatTabsModule,
+    MatExpansionModule,
+    MatFormFieldModule,
+    MatCheckboxModule
   ],
   providers: [],
   bootstrap: [AppComponent]

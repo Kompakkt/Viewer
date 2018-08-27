@@ -1,0 +1,25 @@
+.annotation-card {
+  max-width: 300px;
+}
+
+.annotation-header-image {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:16px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+
+
+
+span {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+#number {
+  position: absolute;
+  z-index: -1;
+}

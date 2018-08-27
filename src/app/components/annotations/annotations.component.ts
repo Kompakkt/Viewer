@@ -1,4 +1,8 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, Inject, OnInit} from '@angular/core';
+import {Annotation} from '../../interfaces/annotation/annotation';
+
+import {CameraService} from '../../services/camera/camera.service';
+
 
 @Component({
   selector: 'app-annotations',
@@ -7,23 +11,35 @@ import {Component, OnInit} from '@angular/core';
 })
 export class AnnotationsComponent implements OnInit {
 
-  constructor() {
+  annotation: Annotation = {
+    counter: 1,
+    id: 1,
+    validated: true,
+    title: 'Interesting Annotation',
+    description: 'Here you can write interesting or uninteresting things about your annotation.'
+
+  };
+
+  constructor(
+    private cameraService: CameraService,
+  ) {
   }
-/*
-  private updateScreenPosition() {
 
-    const annotation = <HTMLElement>document.querySelector('.annotation');
-    const vector = this.scene.getMeshByName('plane_1').getBoundingInfo().boundingBox.centerWorld;
-
-    vector.x = Math.round((0.5 + vector.x / 2) * (this.canvas.width / window.devicePixelRatio));
-    vector.y = Math.round((0.5 - vector.y / 2) * (this.canvas.height / window.devicePixelRatio));
-
-    annotation.style.top = vector.y + 'px';
-    annotation.style.left = vector.x + 'px';
-
-  }*/
 
   ngOnInit() {
   }
 
+  public getValidation(validated) {
+    if (validated) {
+      return 'validated';
+    } else { return 'unvalidated'; }
+  }
+
+
+  public takeScreenshot() {
+    this.cameraService.createScreenshot();
+  }
+
 }
+
+

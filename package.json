@@ -27,6 +27,7 @@
     "babylonjs-gui": "3.2.0",
     "babylonjs-loaders": "3.2.0",
     "core-js": "^2.5.4",
+    "npm": "^6.4.0",
     "pouchdb": "^7.0.0",
     "rxjs": "^6.2.2",
     "zone.js": "^0.8.26"
