@@ -1,0 +1,24 @@
+<mat-card class="single-annotation-card">
+
+  <mat-card-header>
+    <mat-card-title> {{annotation.title | uppercase}}</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <p>
+      Please get position related to label.
+      {{annotation.description}}
+    </p>
+  </mat-card-content>
+  <mat-card-actions>
+    <button mat-icon-button (click)="takeScreenshot()"
+            matTooltip="Edit" matTooltipPosition="above">
+      <mat-icon aria-label="Edit">edit</mat-icon>
+    </button>
+    <button mat-icon-button (click)="takeScreenshot()"
+            matTooltip="Delete" matTooltipPosition="above">
+      <mat-icon aria-label="Delete">delete</mat-icon>
+    </button>
+
+  </mat-card-actions>
+</mat-card>

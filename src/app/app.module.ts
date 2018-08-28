@@ -21,6 +21,7 @@ import {
 } from '@angular/material';
 import {EditorComponent} from './components/editor/editor.component';
 import {AnnotationsEditorComponent} from './components/annotations-editor/annotations-editor.component';
+import { AnnotationComponent } from './components/annotation/annotation.component';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import {AnnotationsEditorComponent} from './components/annotations-editor/annota
     SceneComponent,
     MenuComponent,
     EditorComponent,
-    AnnotationsEditorComponent
+    AnnotationsEditorComponent,
+    AnnotationComponent
   ],
   imports: [
     BrowserModule,
