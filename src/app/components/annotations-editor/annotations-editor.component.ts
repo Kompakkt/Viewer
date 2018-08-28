@@ -4,13 +4,13 @@ import {Annotation} from '../../interfaces/annotation/annotation';
 import {CameraService} from '../../services/camera/camera.service';
 
 @Component({
-  selector: 'app-annotations',
-  templateUrl: './annotations.component.html',
-  styleUrls: ['./annotations.component.css']
+  selector: 'app-annotations-editor',
+  templateUrl: './annotations-editor.component.html',
+  styleUrls: ['./annotations-editor.component.css']
 })
-export class AnnotationsComponent implements OnInit {
+export class AnnotationsEditorComponent implements OnInit {
 
-  public collapsed = false;
+  public collapsed = true;
 
   annotation: Annotation = {
     counter: 1,
