@@ -54,7 +54,7 @@ export class CameraService {
     this.xRot = this.universalCamera.rotation.x;
     this.yRot = this.universalCamera.rotation.y;
 
-    this.arcRotateCamera.attachControl(this.canvas, true);
+    this.arcRotateCamera.attachControl(this.canvas, false);
   }
 
   public setCamArcRotate(): void {
@@ -103,7 +103,7 @@ export class CameraService {
 
     camera2.detachControl(this.canvas);
     this.scene.activeCamera = camera1;
-    camera1.attachControl(this.canvas, true);
+    camera1.attachControl(this.canvas, false);
   }
 
   private arcRotateSettings(): void {
@@ -131,7 +131,7 @@ export class CameraService {
   private setCamArcRotateDefault() {
 
     this.scene.activeCamera = this.arcRotateCamera;
-    this.arcRotateCamera.attachControl(this.canvas, true);
+    this.arcRotateCamera.attachControl(this.canvas, false);
 
     const name = 'animCam',
       frames = 30;
