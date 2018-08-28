@@ -10,7 +10,7 @@ import {CameraService} from '../../services/camera/camera.service';
 })
 export class AnnotationsComponent implements OnInit {
 
-  private collapsed = false;
+  public collapsed = false;
 
   annotation: Annotation = {
     counter: 1,
