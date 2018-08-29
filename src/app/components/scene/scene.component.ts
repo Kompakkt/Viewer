@@ -13,6 +13,7 @@ export class SceneComponent implements AfterViewInit {
 
   @Input() modelFileName: string;
   @Input() modelDirectory: string;
+  @Input() backgroundImage: string;
 
   @ViewChild('canvas') private canvasRef: ElementRef;
 
@@ -32,6 +33,11 @@ export class SceneComponent implements AfterViewInit {
 
     this.babylonService.bootstrap(this.canvasRef.nativeElement, true);
     this.babylonService.setClearColor(0.2, 0.2, 0.2, 0.8);
+
+    if (this.backgroundImage) {
+      this.babylonService.setBackgroundImage(this.backgroundImage);
+    }
+
     this.babylonService.createHemisphericLight('light1', {x: 0, y: 1, z: 0});
 
     this.cameraService.bootstrap();

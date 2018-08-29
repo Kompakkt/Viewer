@@ -53,6 +53,13 @@ export class BabylonService {
     return new BABYLON.ArcRotateCamera(name, alpha, beta, radius, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
   }
 
+  public setBackgroundImage(imgUrl: string): void {
+
+    const background = new BABYLON.Layer('background', imgUrl, this.scene, true);
+    background.isBackground = true;
+    background.texture.level = 0;
+  };
+
   public loadModel(rootUrl: string, filename: string) {
 
     var myMaterial = new BABYLON.StandardMaterial('myMaterial', this.scene);
