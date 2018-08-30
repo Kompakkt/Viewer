@@ -1,4 +1,6 @@
-<mat-card class="single-annotation-card">
+<mat-card class="single-annotation-card"
+          [style.top.px]="positionTop"
+          [style.left.px]="positionLeft">
 
   <mat-card-header>
     <mat-card-title> {{annotation.title | uppercase}}</mat-card-title>

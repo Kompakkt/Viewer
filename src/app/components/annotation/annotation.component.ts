@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {Annotation} from '../../interfaces/annotation/annotation';
 
 @Component({
@@ -8,6 +8,9 @@ import {Annotation} from '../../interfaces/annotation/annotation';
 })
 export class AnnotationComponent implements OnInit {
 
+  public positionTop;
+  public positionLeft;
+
   annotation: Annotation = {
     counter: 1,
     id: 1,
@@ -15,7 +18,11 @@ export class AnnotationComponent implements OnInit {
     title: 'Interesting Annotation',
     description: 'Here you can write interesting or uninteresting things about your annotation.'
   };
-  constructor() { }
+
+  constructor() {
+    this.positionTop = '15';
+    this.positionLeft = '15';
+  }
 
   public takeScreenshot() {
 
