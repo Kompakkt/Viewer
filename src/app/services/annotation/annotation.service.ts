@@ -133,8 +133,8 @@ export class AnnotationService {
     number.text = String(this.annotationCounter);
     number.color = 'white';
     number.fontSize = 1000;
-    number.width = '2000px';
-    number.height = '2000px';
+    //number.width = '2000px';
+    //number.height = '2000px';
 
     label.addControl(number);
 
@@ -148,16 +148,24 @@ export class AnnotationService {
   // Position einnehmen (erstmal perfekte Sicht auf die Annotation)
   // HTML Box anzeigen (visible)
 
-  private updateScreenPosition() {
+  public updateScreenPosition() {
+    const _getMesh = this.babylonService.getScene().getMeshByName('plane_1');
+    if (_getMesh != null) {
+      const annotation = <HTMLElement>document.querySelector('.single-annotation-card');
+      const vector = _getMesh.getBoundingInfo().boundingBox.centerWorld;
 
-    const annotation = <HTMLElement>document.querySelector('.annotation');
-    const vector = this.babylonService.getScene().getMeshByName('plane_1').getBoundingInfo().boundingBox.centerWorld;
+      const engine = this.babylonService.getEngine();
+      const scene = this.babylonService.getScene();
+      const newVector = BABYLON.Vector3.Project(
+        vector,
+        BABYLON.Matrix.Identity(),
+        scene.getTransformMatrix(),
+        scene.activeCamera.viewport.toGlobal(engine.getRenderWidth(),engine.getRenderHeight())
+        );
 
-    vector.x = Math.round((0.5 + vector.x / 2) * (this.canvas.width / window.devicePixelRatio));
-    vector.y = Math.round((0.5 - vector.y / 2) * (this.canvas.height / window.devicePixelRatio));
-
-    annotation.style.top = vector.y + 'px';
-    annotation.style.left = vector.x + 'px';
+      annotation.style.top = vector.y + 'px';
+      annotation.style.left = vector.x + 'px';
+    }
   }
 
 // Delete Annotation

@@ -3,6 +3,7 @@ import {AfterViewInit, Component, ElementRef, HostListener, Input, ViewChild} fr
 import {CameraService} from '../../services/camera/camera.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
 import {MessageService} from '../../services/message/message.service';
+import {AnnotationService} from '../../services/annotation/annotation.service';
 
 @Component({
   selector: 'app-scene',
@@ -26,6 +27,7 @@ export class SceneComponent implements AfterViewInit {
     private cameraService: CameraService,
     private messageService: MessageService,
     private babylonService: BabylonService,
+    private annotationService: AnnotationService
   ) {
   }
 
@@ -61,7 +63,9 @@ export class SceneComponent implements AfterViewInit {
     this.bootstrap();
 
     const scene = this.babylonService.getScene();
+    const _annServ = this.annotationService;
     this.babylonService.getEngine().runRenderLoop(function () {
+      _annServ.updateScreenPosition();
       scene.render();
     });
   }
