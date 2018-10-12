@@ -33,6 +33,7 @@ export class AnnotationService {
         const pickResultVector = new BABYLON.Vector3(pickResult.pickedPoint.x, pickResult.pickedPoint.y, pickResult.pickedPoint.z);
         const normal = pickResult.getNormal(true, true);
 
+        console.log(pickResultVector);
         this.createNewAnnotation(pickResultVector, normal);
       }
     }
@@ -149,10 +150,13 @@ export class AnnotationService {
   // HTML Box anzeigen (visible)
 
   public updateScreenPosition() {
-    const _getMesh = this.babylonService.getScene().getMeshByName('plane_1');
-    if (_getMesh != null) {
+
+    const getMesh = this.babylonService.getScene().getMeshByName('plane_1');
+
+    if (getMesh != null) {
+
       const annotation = <HTMLElement>document.querySelector('.single-annotation-card');
-      const vector = _getMesh.getBoundingInfo().boundingBox.centerWorld;
+      const vector = getMesh.getBoundingInfo().boundingBox.centerWorld;
 
       const engine = this.babylonService.getEngine();
       const scene = this.babylonService.getScene();
@@ -165,6 +169,8 @@ export class AnnotationService {
 
       annotation.style.top = vector.y + 'px';
       annotation.style.left = vector.x + 'px';
+
+      console.log(annotation.style.top, annotation.style.left);
     }
   }
 

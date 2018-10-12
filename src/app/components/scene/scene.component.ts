@@ -63,9 +63,11 @@ export class SceneComponent implements AfterViewInit {
     this.bootstrap();
 
     const scene = this.babylonService.getScene();
-    const _annServ = this.annotationService;
+    const annotationServive = this.annotationService;
+
     this.babylonService.getEngine().runRenderLoop(function () {
-      _annServ.updateScreenPosition();
+
+      annotationServive.updateScreenPosition();
       scene.render();
     });
   }
