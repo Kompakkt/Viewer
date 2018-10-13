@@ -16,6 +16,12 @@
 
       <mat-card-subtitle>{{getValidation(annotation.validated)}}</mat-card-subtitle>
 
+      <button id="closeButton"
+              mat-icon-button
+              (click)="closeAnnotation()">
+        <mat-icon aria-label="Close">close</mat-icon>
+      </button>
+
     </mat-card-header>
 
 

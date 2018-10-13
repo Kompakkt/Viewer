@@ -22,6 +22,10 @@ export class AnnotationService {
   constructor(private babylonService: BabylonService) {
   }
 
+  public hideAnnotation() {
+    this.annotationIsVisible = false;
+  }
+
   private mousePickModel(unit_mesh: any) {
 
     if (unit_mesh.source !== null) {

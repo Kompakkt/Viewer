@@ -35,6 +35,9 @@ export class AnnotationComponent implements OnInit {
 
   }
 
+  private closeAnnotation() {
+    this.annotationService.hideAnnotation();
+  }
 
   public getValidation(validated) {
     if (validated) {

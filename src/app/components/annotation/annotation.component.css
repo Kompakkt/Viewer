@@ -3,3 +3,9 @@
   max-width: 300px;
   position: absolute;
 }
+
+#closeButton {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
