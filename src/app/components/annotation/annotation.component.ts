@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {Annotation} from '../../interfaces/annotation/annotation';
+import {AnnotationService} from '../../services/annotation/annotation.service';
 
 @Component({
   selector: 'app-annotation',
@@ -7,9 +8,6 @@ import {Annotation} from '../../interfaces/annotation/annotation';
   styleUrls: ['./annotation.component.css']
 })
 export class AnnotationComponent implements OnInit {
-
-  public positionTop;
-  public positionLeft;
 
   annotation: Annotation = {
     counter: 1,
@@ -19,13 +17,10 @@ export class AnnotationComponent implements OnInit {
     description: 'Here you can write interesting or uninteresting things about your annotation.'
   };
 
-  constructor() {
-    this.positionTop = '15';
-    this.positionLeft = '15';
+  constructor(public annotationService: AnnotationService) {
   }
 
   public takeScreenshot() {
-
   }
 
   ngOnInit() {

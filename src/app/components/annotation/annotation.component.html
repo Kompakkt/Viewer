@@ -1,6 +1,7 @@
 <mat-card class="single-annotation-card"
-          [style.top.px]="positionTop"
-          [style.left.px]="positionLeft">
+          *ngIf="annotationService.annotationIsVisible"
+          [style.top.px]="annotationService.annotationPosition.top"
+          [style.left.px]="annotationService.annotationPosition.left">
 
   <mat-card-header>
     <mat-card-title> {{annotation.title | uppercase}}</mat-card-title>
@@ -9,7 +10,7 @@
   <mat-card-content>
     <p>
       Position<br>
-      x: {{positionLeft}}, y: {{positionTop}}
+      x: {{annotationService.annotationPosition.left}}, y: {{annotationService.annotationPosition.top}}
 
       <br><br>
       {{annotation.description}}

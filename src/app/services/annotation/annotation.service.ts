@@ -10,15 +10,17 @@ import {BabylonService} from '../babylon/babylon.service';
 })
 export class AnnotationService {
 
-  private canvas: HTMLCanvasElement;
+  public annotationPosition = {
+    top: 150,
+    left: 15
+  };
+
+  public annotationIsVisible = false;
+
   private annotationCounter = 0;
 
   constructor(private babylonService: BabylonService) {
   }
-
-  // load existing annotations (get data) -> draw labels
-  // make modell pickable via doubleclick -> add json data, pass to annotation component and draw label
-  // delete label
 
   private mousePickModel(unit_mesh: any) {
 
@@ -29,12 +31,7 @@ export class AnnotationService {
         null, false, scene.activeCamera);
 
       if (pickResult.pickedMesh) {
-
-        const pickResultVector = new BABYLON.Vector3(pickResult.pickedPoint.x, pickResult.pickedPoint.y, pickResult.pickedPoint.z);
-        const normal = pickResult.getNormal(true, true);
-
-        console.log(pickResultVector);
-        this.createNewAnnotation(pickResultVector, normal);
+        this.createAnnotation(pickResult);
       }
     }
   }
@@ -67,13 +64,17 @@ export class AnnotationService {
     }
   }
 
-  public createNewAnnotation(position: BABYLON.Vector3, normal: BABYLON.Vector3) {
+  private createAnnotation(pickResult) {
 
-    const precedence = this.annotationCounter;
-    this.createAnnotationLabel(position, normal, precedence);
+    const pickResultVector = new BABYLON.Vector3(pickResult.pickedPoint.x, pickResult.pickedPoint.y, pickResult.pickedPoint.z);
+
+    this.createAnnotationLabel(pickResultVector, pickResult.getNormal(true, true));
+    this.createAnnotationCard(pickResult, pickResultVector);
+
+    this.annotationIsVisible = true;
   }
 
-  public createAnnotationLabel(position: BABYLON.Vector3, normal: BABYLON.Vector3, precedence: number) {
+  private createAnnotationLabel(position: BABYLON.Vector3, normal: BABYLON.Vector3) {
 
     this.annotationCounter++;
 
@@ -82,23 +83,21 @@ export class AnnotationService {
     this.createGeometryForLabel('planeup', 'labelup', true, 0.5, 1, position, normal);
   }
 
+  private createAnnotationCard(pickResult, pickResultVector: BABYLON.Vector3) {
+
+    const activeCamera = this.babylonService.getScene().activeCamera;
+    const engine = this.babylonService.getEngine();
+
+    const p = BABYLON.Vector3.Project(pickResultVector, pickResult.pickedMesh.getWorldMatrix(),
+      activeCamera.getViewMatrix().multiply(activeCamera.getProjectionMatrix()),
+      activeCamera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight()));
+
+    this.annotationPosition.left = Math.round(p.x);
+    this.annotationPosition.top = Math.round(p.y);
+  }
+
   private onMarkerClicked() {
-
-    // Kameraposition einnehmen
-    // HTML Textbox anzeigen
     alert('works now');
-    // that.updateScreenPosition();
-
-    /*
-  *
-  * Dann kann diese auch onclick leuchten
-  * Dafür die 3D engine in Scene so laden:
-  * this.engine = new BABYLON.Engine(this.canvas, true, { stencil: true });
-  * Add the highlight layer.
-  * var hl = new BABYLON.HighlightLayer("hl1", scene);
-  * hl.addMesh(plane, BABYLON.Color3.Green());
-  * hl.removeMesh(plane);
-  */
   }
 
   private createGeometryForLabel(namePlane: string, nameLabel: string, clickable: boolean,
@@ -134,45 +133,14 @@ export class AnnotationService {
     number.text = String(this.annotationCounter);
     number.color = 'white';
     number.fontSize = 1000;
-    //number.width = '2000px';
-    //number.height = '2000px';
 
     label.addControl(number);
 
     plane.material.alpha = alpha;
-    // TODO: click is not working if renderingGroup = 1 and Object is behind another object
+    // TODO: click is not working if renderingGroup == 1 and Object is behind another object
     plane.renderingGroupId = renderingGroup;
   }
 
-
-  // Onclick
-  // Position einnehmen (erstmal perfekte Sicht auf die Annotation)
-  // HTML Box anzeigen (visible)
-
   public updateScreenPosition() {
-
-    const getMesh = this.babylonService.getScene().getMeshByName('plane_1');
-
-    if (getMesh != null) {
-
-      const annotation = <HTMLElement>document.querySelector('.single-annotation-card');
-      const vector = getMesh.getBoundingInfo().boundingBox.centerWorld;
-
-      const engine = this.babylonService.getEngine();
-      const scene = this.babylonService.getScene();
-      const newVector = BABYLON.Vector3.Project(
-        vector,
-        BABYLON.Matrix.Identity(),
-        scene.getTransformMatrix(),
-        scene.activeCamera.viewport.toGlobal(engine.getRenderWidth(),engine.getRenderHeight())
-        );
-
-      annotation.style.top = vector.y + 'px';
-      annotation.style.left = vector.x + 'px';
-
-      console.log(annotation.style.top, annotation.style.left);
-    }
   }
-
-// Delete Annotation
 }
