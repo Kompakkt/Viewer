@@ -1,4 +1,5 @@
 export interface Annotation {
+  model: string;
   id: number;
   sequence: number;
   positionx: number;

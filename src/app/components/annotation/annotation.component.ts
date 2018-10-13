@@ -15,6 +15,7 @@ export class AnnotationComponent implements OnInit {
   public labelModeText = 'edit';
 
   annotation: Annotation = {
+    model: 'example',
     id: 1,
     sequence: 1,
     positionx: 1,
