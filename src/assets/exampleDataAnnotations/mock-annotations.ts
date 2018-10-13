@@ -1,15 +1,30 @@
-/*
-import {Annotation} from '.../app/interfaces/annotation/annotation';
+
+import {Annotation} from 'src/app/interfaces/annotation/annotation';
 
 export const ANNOTATIONS: Annotation[] = [
 
   {
-    id: 13, title: 'Tür', description: 'this is a door', positionx: 13, positiony: 13,
-    positionz: 13, babylonVectorx: 12, babylonVectory: 12, babylonVectorz: 13, precedence: 1, person: 'Wieners', date: 12
+    id: 1, sequence: 1, positionx: 1, positiony: 1, babylonVectorx: 1, babylonVectory: 1, babylonVectorz: 1,
+    validated: true, title: 'Interesting Annotation',
+    description: 'Here you can write interesting or uninteresting things about your annotation.',
+    person: 'x', date: 1, preview: './assets/exampleDataAnnotations/images/anno1.png'
   },
   {
-    id: 13, title: 'Tür', description: 'this is a door', positionx: 13, positiony: 13,
-    positionz: 13, babylonVectorx: 12, babylonVectory: 12, babylonVectorz: 13, precedence: 1, person: 'Wieners', date: 12
+    id: 2, sequence: 2, positionx: 1, positiony: 1, babylonVectorx: 1, babylonVectory: 1, babylonVectorz: 1,
+    validated: true, title: 'Interesting Annotation',
+    description: 'Here you can write interesting or uninteresting things about your annotation.',
+    person: 'x', date: 1, preview: './assets/exampleDataAnnotations/images/anno1.png'
+  },
+  {
+    id: 3, sequence: 3, positionx: 1, positiony: 1, babylonVectorx: 1, babylonVectory: 1, babylonVectorz: 1,
+    validated: true, title: 'Interesting Annotation',
+    description: 'Here you can write interesting or uninteresting things about your annotation.',
+    person: 'x', date: 1, preview: './assets/exampleDataAnnotations/images/anno1.png'
+  },
+  {
+    id: 4, sequence: 4, positionx: 1, positiony: 1, babylonVectorx: 1, babylonVectory: 1, babylonVectorz: 1,
+    validated: true, title: 'Interesting Annotation',
+    description: 'Here you can write interesting or uninteresting things about your annotation.',
+    person: 'x', date: 1, preview: './assets/exampleDataAnnotations/images/anno1.png'
   }
 ];
-*/

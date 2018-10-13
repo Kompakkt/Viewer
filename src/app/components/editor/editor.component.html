@@ -1,12 +1,22 @@
 <mat-tab-group>
+
+
   <mat-tab>
     <ng-template mat-tab-label>
       <mat-icon class="example-tab-icon">add_location</mat-icon>
     </ng-template>
+
     <h3>Annotations</h3>
     <br>
-    <app-annotations-editor></app-annotations-editor>
+
+      <div *ngFor="let annotation of annotations; last as last">
+        <app-annotations-editor [annotation]="annotation"></app-annotations-editor>
+      </div>
+
+
   </mat-tab>
+
+
   <mat-tab>
     <ng-template mat-tab-label>
       <mat-icon class="example-tab-icon">settings</mat-icon>

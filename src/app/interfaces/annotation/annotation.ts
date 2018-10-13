@@ -1,20 +1,15 @@
 export interface Annotation {
-  counter: number;
   id: number;
-  validated: boolean;
-  title: string;
-  description: string;
-}
-
-
-/*
-  description: string[];
+  sequence: number;
   positionx: number;
   positiony: number;
   babylonVectorx: number;
   babylonVectory: number;
   babylonVectorz: number;
-  precedence: number;
+  validated: boolean;
+  title: string;
+  description: string;
   person: string;
   date: number;
- */
+  preview: string;
+}

@@ -17,7 +17,7 @@ import {
   MatTabsModule,
   MatExpansionModule,
   MatFormFieldModule,
-  MatCheckboxModule
+  MatCheckboxModule, MatInputModule, MatListModule, MatDividerModule
 } from '@angular/material';
 import {EditorComponent} from './components/editor/editor.component';
 import {AnnotationsEditorComponent} from './components/annotations-editor/annotations-editor.component';
@@ -45,7 +45,10 @@ import { AnnotationComponent } from './components/annotation/annotation.componen
     MatTabsModule,
     MatExpansionModule,
     MatFormFieldModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    MatInputModule,
+    MatListModule,
+    MatDividerModule
   ],
   providers: [],
   bootstrap: [AppComponent]
