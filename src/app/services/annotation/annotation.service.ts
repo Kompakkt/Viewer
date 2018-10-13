@@ -100,10 +100,6 @@ export class AnnotationService {
     this.annotationPosition.top = Math.round(p.y);
   }
 
-  private onMarkerClicked() {
-    alert('works now');
-  }
-
   private createGeometryForLabel(namePlane: string, nameLabel: string, clickable: boolean,
                                  alpha: number, renderingGroup: number, position: BABYLON.Vector3,
                                  normal: BABYLON.Vector3) {
@@ -130,7 +126,13 @@ export class AnnotationService {
     advancedTexturePlane.addControl(label);
 
     if (clickable) {
-      label.onPointerDownObservable.add(this.onMarkerClicked);
+
+      const that = this;
+      const id = this.annotationCounter;
+
+      label.onPointerDownObservable.add(function() {
+        that.onMarkerClicked(id);
+      });
     }
 
     const number = new GUI.TextBlock();
@@ -143,6 +145,10 @@ export class AnnotationService {
     plane.material.alpha = alpha;
     // TODO: click is not working if renderingGroup == 1 and Object is behind another object
     plane.renderingGroupId = renderingGroup;
+  }
+
+  private onMarkerClicked(id) {
+    console.log(id);
   }
 
   public updateScreenPosition() {
