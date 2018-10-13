@@ -9,10 +9,10 @@
     <h3>Annotations</h3>
     <br>
 
-      <div *ngFor="let annotation of annotations; last as last">
-        <app-annotations-editor [annotation]="annotation"></app-annotations-editor>
-      </div>
-
+    <div *ngFor="let annotation of annotations; last as last">
+      <app-annotations-editor [annotation]="annotation"></app-annotations-editor>
+      <mat-divider [inset]="true" *ngIf="!last"></mat-divider>
+    </div>
 
   </mat-tab>
 
