@@ -1,5 +1,6 @@
 .annotation-card {
   max-width: 300px;
+  height: 100%;
 }
 
 .annotation-header-image {
