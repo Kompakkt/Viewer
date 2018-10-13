@@ -1,6 +1,5 @@
 import {Injectable} from '@angular/core';
 
-import * as BABYLON from 'babylonjs';
 import * as GUI from 'babylonjs-gui';
 import { Annotation } from 'src/app/interfaces/annotation/annotation';
 import { ANNOTATIONS } from 'src/assets/exampleDataAnnotations/mock-annotations';
@@ -8,18 +7,22 @@ import { Observable, of } from 'rxjs';
 import { DataService } from '../data/data.service';
 import {BabylonService} from '../babylon/babylon.service';
 
+/**
+ * @author Zoe Schubert
+ * @author Jan G. Wieners
+ */
+
 @Injectable({
   providedIn: 'root'
 })
 export class AnnotationService {
 
   public annotationPosition = {
-    top: 150,
-    left: 15
+    top: 0,
+    left: 0
   };
 
   public annotationIsVisible = false;
-
   private annotationCounter = 0;
 
   constructor(private babylonService: BabylonService) {
@@ -45,16 +48,15 @@ export class AnnotationService {
 
   public pickableModel(name: string, pickable: boolean) {
 
-    const scene = this.babylonService.getScene();
-    const mesh = scene.getMeshByName(name);
+    const mesh = this.babylonService.getScene().getMeshByName(name);
 
-    if (mesh != null) {
-
-      mesh.actionManager = new BABYLON.ActionManager(scene);
+    if (mesh !== null) {
 
       if (pickable) {
 
         const that = this;
+
+        mesh.actionManager = new BABYLON.ActionManager(this.babylonService.getScene());
 
         mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(
           BABYLON.ActionManager.OnDoublePickTrigger, function (evt) {
@@ -133,7 +135,8 @@ export class AnnotationService {
       const that = this;
       const id = this.annotationCounter;
 
-      label.onPointerDownObservable.add(function() {
+      label.onPointerDownObservable.add(function () {
+        that.onMarkerClicked(id);
       });
     }
 
