@@ -13,4 +13,6 @@ export interface Annotation {
   person: string;
   date: number;
   preview: string;
+  _id: string;
+  _rev: string;
 }

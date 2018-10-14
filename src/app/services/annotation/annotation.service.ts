@@ -1,11 +1,12 @@
 import {Injectable} from '@angular/core';
 
+import {Observable, of} from 'rxjs';
 import * as GUI from 'babylonjs-gui';
-import { Annotation } from 'src/app/interfaces/annotation/annotation';
-import { ANNOTATIONS } from 'src/assets/exampleDataAnnotations/mock-annotations';
-import { Observable, of } from 'rxjs';
-import { DataService } from '../data/data.service';
+import {Annotation} from 'src/app/interfaces/annotation/annotation';
+import {ANNOTATIONS} from 'src/assets/exampleDataAnnotations/mock-annotations';
+import {DataService} from '../data/data.service';
 import {BabylonService} from '../babylon/babylon.service';
+
 
 /**
  * @author Zoe Schubert
@@ -17,6 +18,7 @@ import {BabylonService} from '../babylon/babylon.service';
 })
 export class AnnotationService {
 
+
   public annotationPosition = {
     top: 0,
     left: 0
@@ -25,7 +27,8 @@ export class AnnotationService {
   public annotationIsVisible = false;
   private annotationCounter = 0;
 
-  constructor(private babylonService: BabylonService) {
+
+  constructor(private babylonService: BabylonService, private dataService: DataService) {
   }
 
   public hideAnnotation() {
@@ -159,38 +162,28 @@ export class AnnotationService {
   public updateScreenPosition() {
   }
 
-  getAnnotations(): Observable<Annotation[]> {
-    return of(ANNOTATIONS);
-  }
-/*  createExampleData() {
-    const annotations = [
+  public fetchAnnotations(): Observable<Annotation[]> {
 
-      {
-        model: 'example', id: 11, sequence: 1, positionx: 1, positiony: 1, babylonVectorx: 1, babylonVectory: 1, babylonVectorz: 1,
-        validated: true, title: 'Interesting Annotation',
-        description: 'Here you can write interesting or uninteresting things about your annotation.',
-        person: 'x', date: 1, preview: './assets/exampleDataAnnotations/images/anno1.png'
-      },
-      {
-        model: 'example', id: 12, sequence: 2, positionx: 1, positiony: 1, babylonVectorx: 1, babylonVectory: 1, babylonVectorz: 1,
-        validated: true, title: 'Interesting Annotation',
-        description: 'Here you can write interesting or uninteresting things about your annotation.',
-        person: 'x', date: 1, preview: './assets/exampleDataAnnotations/images/anno1.png'
-      },
-      {
-        model: 'example', id: 13, sequence: 3, positionx: 1, positiony: 1, babylonVectorx: 1, babylonVectory: 1, babylonVectorz: 1,
-        validated: true, title: 'Interesting Annotation',
-        description: 'Here you can write interesting or uninteresting things about your annotation.',
-        person: 'x', date: 1, preview: './assets/exampleDataAnnotations/images/anno1.png'
-      },
-      {
-        model: 'example', id: 14, sequence: 4, positionx: 1, positiony: 1, babylonVectorx: 1, babylonVectory: 1, babylonVectorz: 1,
-        validated: true, title: 'Interesting Annotation',
-        description: 'Here you can write interesting or uninteresting things about your annotation.',
-        person: 'x', date: 1, preview: './assets/exampleDataAnnotations/images/anno1.png'
+
+    return of(this.fetchData());
+
+    // return of(ANNOTATIONS);
+  }
+
+  private fetchData(): Array<any> {
+
+    const annotationList: Array<any> = [];
+
+    this.dataService.fetch().then(result => {
+      for (let i = 0; i < result.rows.length; i++) {
+        annotationList.push(result.rows[i].doc);
       }
-    ];
-    return {annotations};
-  }*/
+    }, error => {
+      console.error(error);
+    });
+
+
+    return annotationList;
+  }
 
 }

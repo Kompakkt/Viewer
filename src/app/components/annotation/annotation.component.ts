@@ -28,7 +28,9 @@ export class AnnotationComponent implements OnInit {
     description: 'Here you can write interesting or uninteresting things about your annotation.',
     person: 'x',
     date: 1,
-    preview: './assets/exampleDataAnnotations/images/anno1.png'
+    preview: './assets/exampleDataAnnotations/images/anno1.png',
+    _id: 'xx',
+    _rev: 'xx'
 
   };
 

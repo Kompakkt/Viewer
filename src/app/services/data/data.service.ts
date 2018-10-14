@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter } from '@angular/core';
+import {Injectable, EventEmitter} from '@angular/core';
 import PouchDB from 'pouchdb';
 
 @Injectable({
@@ -9,17 +9,59 @@ export class DataService {
   private isInstantiated: boolean;
   private database: any;
   private listener: EventEmitter<any> = new EventEmitter();
+  public annotations: Array<any>;
+
+  // private annotations = [] as Array<Annotation>;
+
 
   public constructor() {
+
+    // example data
+
+
+    this.annotations = [
+
+      {
+        model: 'example', id: 11, sequence: 1, positionx: 1, positiony: 1, babylonVectorx: 1, babylonVectory: 1, babylonVectorz: 1,
+        validated: true, title: 'Interesting Annotation',
+        description: 'Here you can write interesting or uninteresting things about your annotation.',
+        person: 'x', date: 1, preview: './assets/exampleDataAnnotations/images/anno1.png'
+      },
+      {
+        model: 'example', id: 12, sequence: 2, positionx: 1, positiony: 1, babylonVectorx: 1, babylonVectory: 1, babylonVectorz: 1,
+        validated: true, title: 'Interesting Annotation',
+        description: 'Here you can write interesting or uninteresting things about your annotation.',
+        person: 'x', date: 1, preview: './assets/exampleDataAnnotations/images/anno1.png'
+      },
+      {
+        model: 'example', id: 13, sequence: 3, positionx: 1, positiony: 1, babylonVectorx: 1, babylonVectory: 1, babylonVectorz: 1,
+        validated: true, title: 'Interesting Annotation',
+        description: 'Here you can write interesting or uninteresting things about your annotation.',
+        person: 'x', date: 1, preview: './assets/exampleDataAnnotations/images/anno1.png'
+      },
+      {
+        model: 'example', id: 14, sequence: 4, positionx: 1, positiony: 1, babylonVectorx: 1, babylonVectory: 1, babylonVectorz: 1,
+        validated: true, title: 'Interesting Annotation',
+        description: 'Here you can write interesting or uninteresting things about your annotation.',
+        person: 'x', date: 1, preview: './assets/exampleDataAnnotations/images/anno1.png'
+      }
+    ];
 
     if (!this.isInstantiated) {
       this.database = new PouchDB('annotationdb');
       this.isInstantiated = true;
+      this.database.bulkDocs(this.annotations).then(function (result) {
+        // handle result
+      }).catch(function (err) {
+        console.log(err);
+      });
     }
 
     this.database.info().then(function (info) {
       console.log(info);
+
     });
+
   }
 
   public fetch() {

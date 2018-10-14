@@ -28,7 +28,7 @@ export class EditorComponent implements OnInit {
   }
 
   getAnnotations(): void {
-    this.annotationService.getAnnotations()
+    this.annotationService.fetchAnnotations()
       .subscribe(annotations => this.annotations = annotations);
   }
 
