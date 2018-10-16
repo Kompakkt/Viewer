@@ -9,9 +9,11 @@
     <h3>Annotations</h3>
     <br>
 
-    <div *ngFor="let annotation of annotations; last as last">
-      <app-annotations-editor [annotation]="annotation"></app-annotations-editor>
-      <mat-divider [inset]="true" *ngIf="!last"></mat-divider>
+    <div *ngIf="(this.annotationService.annotations$ | async).length">
+      <div *ngFor="let annotation of this.annotationService.annotations$ | async; last as last">
+        <app-annotations-editor [annotation]="annotation"></app-annotations-editor>
+        <mat-divider [inset]="true" *ngIf="!last"></mat-divider>
+      </div>
     </div>
 
   </mat-tab>

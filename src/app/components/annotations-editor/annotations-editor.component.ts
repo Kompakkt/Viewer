@@ -1,7 +1,8 @@
 import {Component, Inject, Input, OnInit} from '@angular/core';
 import {Annotation} from '../../interfaces/annotation/annotation';
 
-import {CameraService} from '../../services/camera/camera.service';
+import {DataService} from '../../services/data/data.service';
+import {AnnotationService} from '../../services/annotation/annotation.service';
 
 @Component({
   selector: 'app-annotations-editor',
@@ -12,14 +13,13 @@ export class AnnotationsEditorComponent implements OnInit {
 
   @Input() annotation: Annotation;
 
+
   public collapsed = true;
   public editMode = false;
   public labelMode = 'edit';
   public labelModeText = 'edit';
 
-
-
-  constructor(
+  constructor(private dataservice: DataService, private annotationService: AnnotationService
   ) {
   }
 
@@ -39,7 +39,8 @@ export class AnnotationsEditorComponent implements OnInit {
   public selectPerspective() {
   }
 
-  public deleteAnnotation() {
+  public deleteAnnotation(): void {
+    this.annotationService.deleteAnnotation(this.annotation);
   }
 
   public toggleEditViewMode() {
@@ -56,6 +57,7 @@ export class AnnotationsEditorComponent implements OnInit {
       this.labelModeText = 'view';
     }
   }
+
 
 }
 

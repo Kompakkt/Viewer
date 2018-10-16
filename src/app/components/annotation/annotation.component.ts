@@ -15,23 +15,17 @@ export class AnnotationComponent implements OnInit {
   public labelModeText = 'edit';
 
   annotation: Annotation = {
-    model: 'example',
-    id: 1,
-    sequence: 1,
-    positionx: 1,
-    positiony: 1,
-    babylonVectorx: 1,
-    babylonVectory: 1,
-    babylonVectorz: 1,
+    _id: 'sdfsdf',
+    relatedModel: 'example',
+    ranking: 1,
+    referencePoint: [{dimension: 'x', value: 1}, {dimension: 'y', value: 1}, {dimension: 'z', value: 1}],
+    cameraPosition: [{dimension: 'x', value: 1}, {dimension: 'y', value: 1}, {dimension: 'z', value: 1}],
+    preview: './assets/exampleDataAnnotations/images/anno1.png',
+    originatorID: 'x',
     validated: true,
     title: 'Interesting Annotation',
-    description: 'Here you can write interesting or uninteresting things about your annotation.',
-    person: 'x',
-    date: 1,
-    preview: './assets/exampleDataAnnotations/images/anno1.png',
-    _id: 'xx',
-    _rev: 'xx'
-
+    description: 'Here you can write interesting',
+    date: 'sometime'
   };
 
   constructor(public annotationService: AnnotationService) {

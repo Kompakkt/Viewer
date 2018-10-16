@@ -4,7 +4,7 @@
 
     <mat-card-header (click)="!editMode ? collapsed = !collapsed : false">
 
-      <div mat-card-avatar class="annotation-header-image"><span>{{annotation.sequence}}</span></div>
+      <div mat-card-avatar class="annotation-header-image"><span>{{annotation.ranking}}</span></div>
 
       <mat-card-title>
         <span *ngIf="!editMode">{{annotation.title | uppercase}}</span>

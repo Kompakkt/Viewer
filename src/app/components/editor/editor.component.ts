@@ -1,7 +1,8 @@
-import {Component, HostBinding, OnInit} from '@angular/core';
+import {Component, HostBinding, NgZone, OnInit} from '@angular/core';
 import {SidenavService} from '../../services/sidenav/sidenav.service';
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {Annotation} from '../../interfaces/annotation/annotation';
+import {DataService} from '../../services/data/data.service';
 
 
 @Component({
@@ -11,11 +12,12 @@ import {Annotation} from '../../interfaces/annotation/annotation';
 })
 export class EditorComponent implements OnInit {
 
-  annotations: Annotation[];
+  public testanno: Array<Annotation>;
+
 
   @HostBinding('class.is-open') private isOpen = false;
 
-  constructor(private sidenavService: SidenavService, private annotationService: AnnotationService) {
+  constructor(private sidenavService: SidenavService, public annotationService: AnnotationService) {
   }
 
   ngOnInit() {
@@ -28,9 +30,7 @@ export class EditorComponent implements OnInit {
   }
 
   getAnnotations(): void {
-    this.annotationService.fetchAnnotations()
-      .subscribe(annotations => this.annotations = annotations);
+    this.annotationService.annotations$ = this.annotationService.fetchAnnotations();
   }
-
 
 }
