@@ -57,28 +57,14 @@ export class BabylonService {
 
     const background = new BABYLON.Layer('background', imgUrl, this.scene, true);
     background.isBackground = true;
-    background.texture.level = 0;
   };
 
   public loadModel(rootUrl: string, filename: string) {
 
-    var myMaterial = new BABYLON.StandardMaterial('myMaterial', this.scene);
-    myMaterial.diffuseTexture = new BABYLON.Texture('assets/textures/skybox/blue/blue_nx.jpg', this.scene);
-    myMaterial.specularColor = new BABYLON.Color3(0.5, 0.6, 0.87);
-    myMaterial.emissiveColor = new BABYLON.Color3(1, 1, 1);
-    myMaterial.ambientColor = new BABYLON.Color3(0.23, 0.98, 0.53);
-    myMaterial.pointsCloud = true;
-    myMaterial.wireframe = true;
-
     return new Promise<any>((resolve, reject) => {
 
       BABYLON.SceneLoader.ImportMeshAsync(null, rootUrl, filename, this.scene).then(function (result) {
-        console.log(result);
-        //result.meshes[0].showSubM eshesBoundingBox = true;
-        result.meshes[0].material = myMaterial;
-        result.meshes[1].dispose();
-        result.meshes[2].dispose();
-        resolve();
+        resolve(result);
       }, function (error) {
         reject(error);
       });
