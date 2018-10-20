@@ -49,7 +49,7 @@ export class BabylonService {
     return new BABYLON.HemisphericLight(name, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
   }
 
-  public createArcRotateCam(name: string, alpha: number, beta: number, radius: number, position: any) {
+  public createArcRotateCam(name: string, alpha: number, beta: number, radius: number, position: any): BABYLON.ArcRotateCamera {
     return new BABYLON.ArcRotateCamera(name, alpha, beta, radius, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
   }
 
@@ -59,7 +59,7 @@ export class BabylonService {
     background.isBackground = true;
   };
 
-  public loadModel(rootUrl: string, filename: string) {
+  public loadModel(rootUrl: string, filename: string): Promise<any> {
 
     return new Promise<any>((resolve, reject) => {
 
@@ -71,11 +71,21 @@ export class BabylonService {
     });
   }
 
-  public saveScene() {
+  public saveScene(): void {
     return BABYLON.SceneSerializer.Serialize(this.scene);
   }
 
-  public createScreenshot() {
+  public createScreenshot(): void {
     BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, {precision: 2});
+  }
+
+  public createPreviewScreenshot(width) {
+
+    return new Promise<any>((resolve, reject) => {
+
+      BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, width, function (screenshot) {
+        resolve(screenshot);
+      });
+    });
   }
 }

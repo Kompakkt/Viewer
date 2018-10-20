@@ -53,6 +53,8 @@ export class DataService {
       });*/
     }
 
+    //this.database.destroy();
+
     this.database.info().then(function (info) {
       console.log(info);
     });

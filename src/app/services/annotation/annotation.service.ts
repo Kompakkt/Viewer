@@ -101,29 +101,36 @@ export class AnnotationService {
     const xValue = {dimension: 'x', value: pickResult.pickedPoint.x};
     const yValue = {dimension: 'y', value: pickResult.pickedPoint.y};
     const zValue = {dimension: 'z', value: pickResult.pickedPoint.z};
-    this.newAnnotation.referencePoint.push(xValue);
-    this.newAnnotation.referencePoint.push(yValue);
-    this.newAnnotation.referencePoint.push(zValue);
 
-    // Fake data
-    this.newAnnotation.cameraPosition.push(xValue);
-    this.newAnnotation.cameraPosition.push(yValue);
-    this.newAnnotation.cameraPosition.push(zValue);
+    this.babylonService.createPreviewScreenshot(320).then(result => {
 
-    this.newAnnotation._id = pickResultVector.toString();
-    this.newAnnotation.validated = false;
-    this.newAnnotation.title = 'test';
-    this.newAnnotation.description = 'test';
-    this.newAnnotation.originatorID = 'fake';
-    this.newAnnotation.date = 'today';
-    this.newAnnotation.preview = './assets/exampleDataAnnotations/images/anno1.png';
+      this.newAnnotation.referencePoint.push(xValue);
+      this.newAnnotation.referencePoint.push(yValue);
+      this.newAnnotation.referencePoint.push(zValue);
 
-    this.createAnnotationLabel(pickResultVector, pickResult.getNormal(true, true));
-    this.createAnnotationCard(pickResult, pickResultVector);
+      // Fake data
+      this.newAnnotation.cameraPosition.push(xValue);
+      this.newAnnotation.cameraPosition.push(yValue);
+      this.newAnnotation.cameraPosition.push(zValue);
 
-    this.annotationIsVisible = true;
-    this.add();
+      this.newAnnotation._id = pickResultVector.toString();
+      this.newAnnotation.validated = false;
+      this.newAnnotation.title = 'test';
+      this.newAnnotation.description = 'test';
+      this.newAnnotation.originatorID = 'fake';
+      this.newAnnotation.date = 'today';
 
+
+      this.newAnnotation.preview = result;
+
+      //this.newAnnotation.preview = './assets/exampleDataAnnotations/images/anno1.png';
+
+      this.createAnnotationLabel(pickResultVector, pickResult.getNormal(true, true));
+      this.createAnnotationCard(pickResult, pickResultVector);
+
+      this.annotationIsVisible = true;
+      this.add();
+    });
   }
 
   private createAnnotationLabel(position: BABYLON.Vector3, normal: BABYLON.Vector3) {
