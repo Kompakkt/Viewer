@@ -4,7 +4,7 @@ export interface Annotation {
   ranking: number;
   referencePoint: { dimension: string, value: number }[];
   cameraPosition: { dimension: string, value: number }[];
-  preview: string;
+  preview: any;
   originatorID: string;
   validated: boolean;
   title: string;

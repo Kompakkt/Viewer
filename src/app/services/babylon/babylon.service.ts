@@ -74,4 +74,8 @@ export class BabylonService {
   public saveScene() {
     return BABYLON.SceneSerializer.Serialize(this.scene);
   }
+
+  public createScreenshot() {
+    BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, {precision: 2});
+  }
 }

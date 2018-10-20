@@ -230,6 +230,6 @@ export class CameraService {
   }
 
   public createScreenshot(): void {
-    BABYLON.Tools.CreateScreenshot(this.babylonService.getEngine(), this.scene.activeCamera, {precision: 2});
+    this.babylonService.createScreenshot();
   }
 }
