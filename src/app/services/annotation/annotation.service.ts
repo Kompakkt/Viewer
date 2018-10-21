@@ -27,7 +27,7 @@ export class AnnotationService {
 
   public annotations$: Observable<Annotation[]>;
 
-  private newAnnotation: Annotation = {
+  public newAnnotation: Annotation = {
     _id: 'dsfsdfsdf',
     relatedModel: 'puff',
     ranking: 123,
@@ -43,10 +43,8 @@ export class AnnotationService {
 
   private annotationCounter = 0;
 
-
   constructor(private babylonService: BabylonService, private dataService: DataService) {
   }
-
 
   public hideAnnotation() {
     this.annotationIsVisible = false;
@@ -69,6 +67,7 @@ export class AnnotationService {
   public pickableModel(name: string, pickable: boolean) {
 
     const mesh = this.babylonService.getScene().getMeshByName(name);
+
     this.newAnnotation.relatedModel = 'test';
 
     if (mesh !== null) {
@@ -102,7 +101,7 @@ export class AnnotationService {
     const yValue = {dimension: 'y', value: pickResult.pickedPoint.y};
     const zValue = {dimension: 'z', value: pickResult.pickedPoint.z};
 
-    this.babylonService.createPreviewScreenshot(320).then(result => {
+    this.babylonService.createPreviewScreenshot(320).then(detailScreenshot => {
 
       this.newAnnotation.referencePoint.push(xValue);
       this.newAnnotation.referencePoint.push(yValue);
@@ -120,10 +119,7 @@ export class AnnotationService {
       this.newAnnotation.originatorID = 'fake';
       this.newAnnotation.date = 'today';
 
-
-      this.newAnnotation.preview = result;
-
-      //this.newAnnotation.preview = './assets/exampleDataAnnotations/images/anno1.png';
+      this.newAnnotation.preview = detailScreenshot;
 
       this.createAnnotationLabel(pickResultVector, pickResult.getNormal(true, true));
       this.createAnnotationCard(pickResult, pickResultVector);
@@ -134,6 +130,7 @@ export class AnnotationService {
   }
 
   private createAnnotationLabel(position: BABYLON.Vector3, normal: BABYLON.Vector3) {
+
     this.annotationCounter++;
     this.newAnnotation.ranking = this.annotationCounter;
 
@@ -212,11 +209,11 @@ export class AnnotationService {
   }
 
   private add(): void {
+
     this.dataService.database.put(this.newAnnotation);
     this.annotations$ = this.fetchAnnotations();
 
   }
-
 
   public fetchAnnotations(): Observable<Annotation[]> {
 
@@ -241,8 +238,8 @@ export class AnnotationService {
     return annotationList;
   }
 
-
   deleteAnnotation(annotation: Annotation) {
+
     this.dataService.database.remove(annotation._id, annotation._rev, function (error, response) {
       if (error) {
         console.log('removed');

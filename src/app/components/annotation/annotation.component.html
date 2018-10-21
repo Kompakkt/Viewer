@@ -8,13 +8,13 @@
     <mat-card-header>
 
       <mat-card-title>
-        <span *ngIf="!editMode">{{annotation.title | uppercase}}</span>
+        <span *ngIf="!editMode">{{annotationService.newAnnotation.title | uppercase}}</span>
         <mat-form-field *ngIf="editMode">
-          <input matInput name="title" #title="ngModel" type="text" placeholder="Title" [(ngModel)]="annotation.title">
+          <input matInput name="title" #title="ngModel" type="text" placeholder="Title" [(ngModel)]="annotationService.newAnnotation.title">
         </mat-form-field>
       </mat-card-title>
 
-      <mat-card-subtitle>{{getValidation(annotation.validated)}}</mat-card-subtitle>
+      <mat-card-subtitle>{{getValidation(annotationService.newAnnotation.validated)}}</mat-card-subtitle>
 
       <button id="closeButton"
               mat-icon-button
@@ -24,14 +24,14 @@
 
     </mat-card-header>
 
-    <img mat-card-image src="{{annotation.preview}}" alt="{{annotation.title}}">
+    <img mat-card-image src="{{annotationService.newAnnotation.preview}}" alt="{{annotationService.newAnnotation.title}}">
 
     <mat-card-content>
 
-      <p *ngIf="!editMode"> {{annotation.description}}</p>
+      <p *ngIf="!editMode"> {{annotationService.newAnnotation.description}}</p>
       <mat-form-field *ngIf="editMode">
         <textarea matInput name="description" #description="ngModel" type="text" placeholder="Description"
-                  [(ngModel)]="annotation.description"></textarea>
+                  [(ngModel)]="annotationService.newAnnotation.description"></textarea>
       </mat-form-field>
 
     </mat-card-content>

@@ -1,5 +1,4 @@
 import {Component, OnInit} from '@angular/core';
-import {Annotation} from '../../interfaces/annotation/annotation';
 import {AnnotationService} from '../../services/annotation/annotation.service';
 
 @Component({
@@ -14,22 +13,7 @@ export class AnnotationComponent implements OnInit {
   public labelMode = 'edit';
   public labelModeText = 'edit';
 
-  annotation: Annotation = {
-    _id: 'sdfsdf',
-    relatedModel: 'example',
-    ranking: 1,
-    referencePoint: [{dimension: 'x', value: 1}, {dimension: 'y', value: 1}, {dimension: 'z', value: 1}],
-    cameraPosition: [{dimension: 'x', value: 1}, {dimension: 'y', value: 1}, {dimension: 'z', value: 1}],
-    preview: './assets/exampleDataAnnotations/images/anno1.png',
-    originatorID: 'x',
-    validated: true,
-    title: 'Interesting Annotation',
-    description: 'Here you can write interesting',
-    date: 'sometime'
-  };
-
   constructor(public annotationService: AnnotationService) {
-
   }
 
   private closeAnnotation() {
@@ -37,6 +21,7 @@ export class AnnotationComponent implements OnInit {
   }
 
   public getValidation(validated) {
+
     if (validated) {
       return 'validated';
     } else {
