@@ -1,8 +1,9 @@
-import {Component, Inject, Input, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {Annotation} from '../../interfaces/annotation/annotation';
 
 import {DataService} from '../../services/data/data.service';
 import {AnnotationService} from '../../services/annotation/annotation.service';
+import {BabylonService} from '../../services/babylon/babylon.service';
 
 @Component({
   selector: 'app-annotations-editor',
@@ -19,13 +20,14 @@ export class AnnotationsEditorComponent implements OnInit {
   public labelMode = 'edit';
   public labelModeText = 'edit';
 
-  constructor(private dataservice: DataService, private annotationService: AnnotationService
+  constructor(private dataservice: DataService, private annotationService: AnnotationService, private babylonService: BabylonService
   ) {
   }
 
 
   ngOnInit() {
   }
+
 
   public getValidation(validated) {
     if (validated) {
@@ -37,6 +39,8 @@ export class AnnotationsEditorComponent implements OnInit {
 
 
   public selectPerspective() {
+    // this.babylonService.createPreviewScreenshot(220).then(detailScreenshot => {
+    //  });
   }
 
   public deleteAnnotation(): void {
@@ -45,7 +49,6 @@ export class AnnotationsEditorComponent implements OnInit {
 
   public toggleEditViewMode() {
     console.log('toggle Function');
-
     if (this.editMode) {
       this.editMode = false;
       this.labelMode = 'edit';

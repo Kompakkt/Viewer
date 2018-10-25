@@ -18,7 +18,7 @@ export class AnnotationcardsComponent implements OnInit, AfterViewInit {
   @ViewChildren(AnnotationComponent)
   annotations: QueryList<AnnotationComponent>;
 
-  constructor(private annotationService: AnnotationService, private annotationmarkerService: AnnotationmarkerService) {
+  constructor(public annotationService: AnnotationService, private annotationmarkerService: AnnotationmarkerService) {
 
   }
 
