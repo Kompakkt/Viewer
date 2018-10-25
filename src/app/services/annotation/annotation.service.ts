@@ -44,15 +44,9 @@ export class AnnotationService {
     return this.numberOfAnnotations.toString();
   }
 
-  private getAnnotationView(): string {
+  private getAnnotationView() {
     // TODO
-
-    this.babylonService.createPreviewScreenshot(320).then(detailScreenshot => {
-     const p = detailScreenshot;
-      return detailScreenshot;
-    });
     // return cameraposition
-    return '';
   }
 
   private getOriginatorID(): string {
@@ -68,30 +62,30 @@ export class AnnotationService {
 
 
   public createNewAnnotation = function (result: any) {
-
-    const newAnnotation: Annotation = {
-      _id: this.createAnnotationID(),
-      relatedModel: result.pickedMesh.name,
-      ranking: this.getInitialRanking(),
-      referencePoint: [{dimension: 'x', value: result.pickedPoint.x}, {dimension: 'y', value: result.pickedPoint.y}, {
-        dimension: 'z', value: result.pickedPoint.z
-      }],
-      referencePointNormal: [{dimension: 'x', value: result.getNormal(true, true).x},
-        {dimension: 'y', value: result.getNormal(true, true).y}, {
-          dimension: 'z', value: result.getNormal(true, true).z
+    this.babylonService.createPreviewScreenshot(220).then(detailScreenshot => {
+      const newAnnotation: Annotation = {
+        _id: this.createAnnotationID(),
+        relatedModel: result.pickedMesh.name,
+        ranking: this.getInitialRanking(),
+        referencePoint: [{dimension: 'x', value: result.pickedPoint.x}, {dimension: 'y', value: result.pickedPoint.y}, {
+          dimension: 'z', value: result.pickedPoint.z
         }],
-      cameraPosition: [{dimension: 'x', value: 1}, {dimension: 'y', value: 1}, {dimension: 'z', value: 1}],
-      preview: this.getAnnotationView(),
-      originatorID: this.getOriginatorID(),
-      validated: false,
-      title: '',
-      description: '',
-      date: this.getTimestamp()
-    };
+        referencePointNormal: [{dimension: 'x', value: result.getNormal(true, true).x},
+          {dimension: 'y', value: result.getNormal(true, true).y}, {
+            dimension: 'z', value: result.getNormal(true, true).z
+          }],
+        cameraPosition: [{dimension: 'x', value: 1}, {dimension: 'y', value: 1}, {dimension: 'z', value: 1}],
+        preview: detailScreenshot,
+        originatorID: this.getOriginatorID(),
+        validated: false,
+        title: '',
+        description: '',
+        date: this.getTimestamp()
+      };
 
-    this.add(newAnnotation);
-    this.annotationmarkerService.createAnnotationMarker(newAnnotation);
-
+      this.add(newAnnotation);
+      this.annotationmarkerService.createAnnotationMarker(newAnnotation);
+    }
   };
 
 
