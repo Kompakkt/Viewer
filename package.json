@@ -20,7 +20,9 @@
       "name": "Kai Niebes"
     },
     {
-      "name": "Jan G. Wieners"
+      "name": "Jan G. Wieners",
+      "email": "jan.wieners@uni-koeln.de",
+      "url": "http://www.jan-wieners.de"
     }
   ],
   "private": true,
