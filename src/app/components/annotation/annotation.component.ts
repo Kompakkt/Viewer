@@ -27,7 +27,7 @@ export class AnnotationComponent implements OnInit {
 
   constructor(private dataService: DataService, private annotationService: AnnotationService, private babylonService: BabylonService
   ) {
-    this.visibility = false;
+    this.visibility = true;
   }
 
   ngOnInit() {
