@@ -12,8 +12,11 @@ export class CameraService {
 
   private canvas: HTMLCanvasElement;
   private scene: BABYLON.Scene;
+
   private arcRotateCamera: BABYLON.ArcRotateCamera;
   private universalCamera: BABYLON.UniversalCamera;
+  private webvrFreeCamera: BABYLON.WebVRFreeCamera;
+
   private alpha: number;
   private beta: number;
   private radius: number;
@@ -55,6 +58,12 @@ export class CameraService {
     this.yRot = this.universalCamera.rotation.y;
 
     this.arcRotateCamera.attachControl(this.canvas, false);
+
+    this.webvrFreeCamera = new BABYLON.WebVRFreeCamera('webvrFreeCamera', new BABYLON.Vector3(this.x, this.y, this.z), this.scene);
+  }
+
+  public useVRcam(): void {
+    this.scene.activeCamera = this.webvrFreeCamera;
   }
 
   public setCamArcRotate(): void {
