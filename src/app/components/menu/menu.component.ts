@@ -29,8 +29,6 @@ export class MenuComponent implements OnInit {
   public fullscreen: Boolean = false;
 
   ngOnInit() {
-
-
   }
 
   public setCamArcRotate() {
@@ -39,6 +37,10 @@ export class MenuComponent implements OnInit {
 
   public setCamUniversal() {
     this.cameraService.setCamUniversal();
+  }
+
+  public setVRcam() {
+    this.cameraService.useVRcam();
   }
 
   public setBackToDefault() {
