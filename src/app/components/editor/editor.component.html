@@ -9,13 +9,9 @@
     <h3>Annotations</h3>
     <br>
 
-    <div *ngIf="(this.annotationService.annotations$ | async).length">
-      <div *ngFor="let annotation of this.annotationService.annotations$ | async; last as last">
-        <app-annotations-editor [annotation]="annotation"></app-annotations-editor>
-        <mat-divider [inset]="true" *ngIf="!last"></mat-divider>
+    <div cdkDropList class="example-list" (cdkDropListDropped)="drop($event)" *ngIf="(this.annotationService.annotations$ | async).length">
+        <app-annotations-editor class="example-box" *ngFor="let annotation of this.annotationService.annotations$ | async;"  [annotation]="annotation" cdkDrag></app-annotations-editor>
       </div>
-    </div>
-
   </mat-tab>
 
 
