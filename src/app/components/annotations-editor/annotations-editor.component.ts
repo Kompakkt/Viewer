@@ -19,15 +19,16 @@ export class AnnotationsEditorComponent implements OnInit {
   public editMode = false;
   public labelMode = 'edit';
   public labelModeText = 'edit';
+  public imgSrc = '';
 
-  constructor(private dataservice: DataService, private annotationService: AnnotationService, private babylonService: BabylonService
+  constructor(private dataService: DataService, private annotationService: AnnotationService, private babylonService: BabylonService
   ) {
   }
 
 
   ngOnInit() {
+    this.imgSrc = this.annotation.preview;
   }
-
 
   public getValidation(validated) {
     if (validated) {
@@ -37,10 +38,10 @@ export class AnnotationsEditorComponent implements OnInit {
     }
   }
 
-
   public selectPerspective() {
-    // this.babylonService.createPreviewScreenshot(220).then(detailScreenshot => {
-    //  });
+    this.babylonService.createPreviewScreenshot(220).then(detailScreenshot => {
+      this.imgSrc = detailScreenshot;
+    });
   }
 
   public deleteAnnotation(): void {
