@@ -85,7 +85,7 @@ export class AnnotationService {
 
       this.add(newAnnotation);
       this.annotationmarkerService.createAnnotationMarker(newAnnotation);
-    }
+    });
   };
 
 
