@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnInit, QueryList, ViewChildren} from '@angular/core';
+import {AfterViewInit, Component, Input, OnInit, QueryList, ViewChildren} from '@angular/core';
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {AnnotationComponent} from '../annotation/annotation.component';
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
@@ -11,7 +11,10 @@ import {AnnotationmarkerService} from '../../services/annotationmarker/annotatio
 })
 export class AnnotationcardsComponent implements OnInit, AfterViewInit {
 
-  //@ViewChildren(AnnotationComponent) annotations : QueryList<AnnotationComponent>;
+  public popup_is_open = '';
+
+
+  // @ViewChildren(AnnotationComponent) annotations : QueryList<AnnotationComponent>;
   @ViewChildren(AnnotationComponent)
   annotations: QueryList<AnnotationComponent>;
 
@@ -22,6 +25,7 @@ export class AnnotationcardsComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.getAnnotations();
+
   }
 
 
@@ -34,10 +38,18 @@ export class AnnotationcardsComponent implements OnInit, AfterViewInit {
 
         })
       );
+
+    this.annotationmarkerService.popupIsOpen().subscribe(
+      popup_is_open => this.setVisability(popup_is_open, true)
+    );
+
+
   }
 
   public setVisability(id: string, visibility: boolean) {
-    this.annotations.find(annotation => annotation.id === id).visabilityAnnotationCard(visibility);
+    if (this.annotations.find(annotation => annotation.id === id) != null) {
+      this.annotations.find(annotation => annotation.id === id).visabilityAnnotationCard(visibility);
+    }
   }
 
 

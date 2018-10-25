@@ -7,6 +7,7 @@ import {BabylonService} from '../babylon/babylon.service';
 import * as BABYLON from 'babylonjs';
 import {ActionService} from '../action/action.service';
 import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
+import {BehaviorSubject} from 'rxjs/internal/BehaviorSubject';
 
 
 /**
@@ -20,7 +21,6 @@ import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.serv
 
 export class AnnotationService {
 
-  public annotationIsVisible = false;
 
   public annotations$: Observable<Annotation[]>;
 
@@ -134,10 +134,6 @@ export class AnnotationService {
       }
     });
     this.annotations$ = this.fetchAnnotations();
-  }
-
-  public hideAnnotation() {
-    this.annotationIsVisible = false;
   }
 
 }
