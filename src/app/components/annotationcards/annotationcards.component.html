@@ -1,0 +1,9 @@
+<div>
+<div *ngIf="(this.annotationService.annotations$ | async).length">
+  <div *ngFor="let annotation of this.annotationService.annotations$ | async">
+    <app-annotation [annotation]="annotation" id = {{annotation._id}}></app-annotation>
+  </div>
+</div>
+</div>
+
+

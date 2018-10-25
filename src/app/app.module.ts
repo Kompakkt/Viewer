@@ -22,6 +22,7 @@ import {
 import {EditorComponent} from './components/editor/editor.component';
 import {AnnotationsEditorComponent} from './components/annotations-editor/annotations-editor.component';
 import { AnnotationComponent } from './components/annotation/annotation.component';
+import { AnnotationcardsComponent } from './components/annotationcards/annotationcards.component';
 
 @NgModule({
   declarations: [
@@ -30,7 +31,8 @@ import { AnnotationComponent } from './components/annotation/annotation.componen
     MenuComponent,
     EditorComponent,
     AnnotationsEditorComponent,
-    AnnotationComponent
+    AnnotationComponent,
+    AnnotationcardsComponent
   ],
   imports: [
     BrowserModule,

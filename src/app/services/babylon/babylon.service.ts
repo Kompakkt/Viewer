@@ -57,7 +57,7 @@ export class BabylonService {
 
     const background = new BABYLON.Layer('background', imgUrl, this.scene, true);
     background.isBackground = true;
-  };
+  }
 
   public loadModel(rootUrl: string, filename: string): Promise<any> {
 

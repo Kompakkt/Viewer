@@ -1,4 +1,4 @@
-import {Component, Inject, OnInit} from '@angular/core';
+import {Component, Inject, Input, OnInit} from '@angular/core';
 
 import {DOCUMENT} from '@angular/common';
 
@@ -15,6 +15,7 @@ import {AnnotationService} from '../../services/annotation/annotation.service';
 })
 export class MenuComponent implements OnInit {
 
+
   constructor(
     private skyboxService: SkyboxService,
     private cameraService: CameraService,
@@ -26,9 +27,10 @@ export class MenuComponent implements OnInit {
   }
 
   public fullscreen: Boolean = false;
-  public pickable: Boolean = false;
 
   ngOnInit() {
+
+
   }
 
   public setCamArcRotate() {
@@ -79,16 +81,7 @@ export class MenuComponent implements OnInit {
   }
 
   public editScene() {
-
     this.sidenavService.toggle();
-
-    if (this.pickable) {
-      this.annotationService.pickableModel('Texture_0', false);
-      this.pickable = false;
-    } else {
-      this.annotationService.pickableModel('Texture_0', true);
-      this.pickable = true;
-    }
   }
 
   public takeScreenshot() {

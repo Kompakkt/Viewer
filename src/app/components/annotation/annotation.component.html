@@ -1,20 +1,20 @@
 <mat-card class="single-annotation-card"
-          *ngIf="annotationService.annotationIsVisible"
-          [style.top.px]="annotationService.annotationPosition.top"
-          [style.left.px]="annotationService.annotationPosition.left">
+          [style.top.px]="positionLeft"
+          [style.left.px]="positionRight"
+          *ngIf = "visibility"
+          id = {{annotation._id}}>
 
   <form class="annotation-form">
 
     <mat-card-header>
 
       <mat-card-title>
-        <span *ngIf="!editMode">{{annotationService.newAnnotation.title | uppercase}}</span>
+        <span *ngIf="!editMode">{{annotation.title | uppercase}}</span>
         <mat-form-field *ngIf="editMode">
-          <input matInput name="title" #title="ngModel" type="text" placeholder="Title" [(ngModel)]="annotationService.newAnnotation.title">
+          <input matInput name="title" #title="ngModel" type="text" placeholder="Title" [(ngModel)]="annotation.title">
         </mat-form-field>
       </mat-card-title>
 
-      <mat-card-subtitle>{{getValidation(annotationService.newAnnotation.validated)}}</mat-card-subtitle>
 
       <button id="closeButton"
               mat-icon-button
@@ -24,14 +24,12 @@
 
     </mat-card-header>
 
-    <img mat-card-image src="{{annotationService.newAnnotation.preview}}" alt="{{annotationService.newAnnotation.title}}">
-
     <mat-card-content>
 
-      <p *ngIf="!editMode"> {{annotationService.newAnnotation.description}}</p>
+      <p *ngIf="!editMode"> {{annotation.description}}</p>
       <mat-form-field *ngIf="editMode">
         <textarea matInput name="description" #description="ngModel" type="text" placeholder="Description"
-                  [(ngModel)]="annotationService.newAnnotation.description"></textarea>
+                  [(ngModel)]="annotation.description"></textarea>
       </mat-form-field>
 
     </mat-card-content>

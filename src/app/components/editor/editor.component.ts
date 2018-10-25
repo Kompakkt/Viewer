@@ -1,8 +1,7 @@
 import {Component, HostBinding, NgZone, OnInit} from '@angular/core';
 import {SidenavService} from '../../services/sidenav/sidenav.service';
 import {AnnotationService} from '../../services/annotation/annotation.service';
-import {Annotation} from '../../interfaces/annotation/annotation';
-import {DataService} from '../../services/data/data.service';
+import {ActionService} from '../../services/action/action.service';
 
 
 @Component({
@@ -12,19 +11,22 @@ import {DataService} from '../../services/data/data.service';
 })
 export class EditorComponent implements OnInit {
 
-  public testanno: Array<Annotation>;
-
-
   @HostBinding('class.is-open') private isOpen = false;
 
-  constructor(private sidenavService: SidenavService, public annotationService: AnnotationService) {
+  constructor(private sidenavService: SidenavService,
+              private actionService: ActionService,
+              public annotationService: AnnotationService) {
   }
 
-  ngOnInit() {
 
+  ngOnInit() {
     this.sidenavService.change.subscribe(isOpen => {
       this.isOpen = isOpen;
+      this.actionService.pickableModel('Texture_0', this.isOpen);
+      // TODO initialize after model is loaded!
+      this.annotationService.initializeAnnotationMode('Texture_0');
     });
+
 
     this.getAnnotations();
   }
