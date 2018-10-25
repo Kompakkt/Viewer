@@ -82,10 +82,10 @@ export class AnnotationService {
         description: '',
         date: this.getTimestamp()
       };
-    });
+
       this.add(newAnnotation);
       this.annotationmarkerService.createAnnotationMarker(newAnnotation);
-
+    });
   };
 
 
