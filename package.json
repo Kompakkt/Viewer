@@ -9,6 +9,20 @@
     "lint": "ng lint",
     "e2e": "ng e2e"
   },
+  "contributors": [
+    {
+      "name": "Zoe Schubert"
+    },
+    {
+      "name": "Benedikt Mildenberger"
+    },
+    {
+      "name": "Kai Niebes"
+    },
+    {
+      "name": "Jan G. Wieners"
+    }
+  ],
   "private": true,
   "dependencies": {
     "@angular/animations": "^7.0.1",
