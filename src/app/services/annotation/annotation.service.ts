@@ -22,6 +22,8 @@ import {BehaviorSubject} from 'rxjs/internal/BehaviorSubject';
 export class AnnotationService {
 
 
+
+
   public annotations$: Observable<Annotation[]>;
 
   private numberOfAnnotations: number;
@@ -93,6 +95,8 @@ export class AnnotationService {
     this.dataService.database.put(annotation);
     this.annotations$ = this.fetchAnnotations();
   }
+
+
 
   public fetchAnnotations(): Observable<Annotation[]> {
     return of(this.fetchData());

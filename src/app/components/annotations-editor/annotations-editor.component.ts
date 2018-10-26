@@ -19,7 +19,8 @@ export class AnnotationsEditorComponent implements OnInit {
   public editMode = false;
   public labelMode = 'edit';
   public labelModeText = 'edit';
-  public imgSrc = '';
+  public _id = '';
+  public preview = '';
 
   constructor(private dataService: DataService, private annotationService: AnnotationService, private babylonService: BabylonService
   ) {
@@ -27,7 +28,8 @@ export class AnnotationsEditorComponent implements OnInit {
 
 
   ngOnInit() {
-    this.imgSrc = this.annotation.preview;
+    this.preview = this.annotation.preview;
+    this._id = this.annotation._id;
   }
 
   public getValidation(validated) {
@@ -40,7 +42,7 @@ export class AnnotationsEditorComponent implements OnInit {
 
   public selectPerspective() {
     this.babylonService.createPreviewScreenshot(220).then(detailScreenshot => {
-      this.imgSrc = detailScreenshot;
+      this.preview = detailScreenshot;
     });
   }
 
@@ -54,12 +56,18 @@ export class AnnotationsEditorComponent implements OnInit {
       this.editMode = false;
       this.labelMode = 'edit';
       this.labelModeText = 'edit';
+      this.save();
     } else {
       this.collapsed = false;
       this.editMode = true;
       this.labelMode = 'remove_red_eye';
       this.labelModeText = 'view';
     }
+  }
+
+  private save(): void {
+    console.log(this._id + ' hat den titel ' + this.annotation.title);
+    this.dataService.updateAnnotation(this._id, this.annotation.title, this.annotation.description, this.preview);
   }
 
 

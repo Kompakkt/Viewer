@@ -17,31 +17,6 @@ export class DataService {
 
   public constructor() {
 
-    //TODO
-    // delete example data
-    this.annotations = [
-      {
-        relatedModel: 'example', id: 11, ranking: 1,
-        referencePoint: [{dimension: 'x', value: 1}, {dimension: 'y', value: 1}, {dimension: 'z', value: 1}],
-        cameraPosition: [{dimension: 'x', value: 1}, {dimension: 'y', value: 1}, {dimension: 'z', value: 1}],
-        preview: './assets/exampleDataAnnotations/images/anno1.png', originatorID: 'x', validated: true,
-        title: 'Interesting Annotation', description: 'Here you can write interesting', date: 'sometime'
-      },
-      {
-        relatedModel: 'example', id: 11, ranking: 1,
-        referencePoint: [{dimension: 'x', value: 1}, {dimension: 'y', value: 1}, {dimension: 'z', value: 1}],
-        cameraPosition: [{dimension: 'x', value: 1}, {dimension: 'y', value: 1}, {dimension: 'z', value: 1}],
-        preview: './assets/exampleDataAnnotations/images/anno1.png', originatorID: 'x', validated: true,
-        title: 'Interesting Annotation', description: 'Here you can write interesting', date: 'sometime'
-      },
-      {
-        relatedModel: 'example', _id: 11, ranking: 1,
-        referencePoint: [{dimension: 'x', value: 1}, {dimension: 'y', value: 1}, {dimension: 'z', value: 1}],
-        cameraPosition: [{dimension: 'x', value: 1}, {dimension: 'y', value: 1}, {dimension: 'z', value: 1}],
-        preview: './assets/exampleDataAnnotations/images/anno1.png', originatorID: 'x', validated: true,
-        title: 'Interesting Annotation', description: 'Here you can write interesting', date: 'sometime'
-      }
-    ];
 
     if (!this.isInstantiated) {
       this.database = new PouchDB('annotationdb');
@@ -53,7 +28,7 @@ export class DataService {
       });*/
     }
 
-    //this.database.destroy();
+    // this.database.destroy();
 
     this.database.info().then(function (info) {
       console.log(info);
@@ -63,6 +38,25 @@ export class DataService {
 
   public fetch() {
     return this.database.allDocs({include_docs: true});
+  }
+
+  public updateAnnotation(id: string, title: string, description: string, preview: string): void {
+    const db = this.database;
+    db.get(id).then(function (doc) {
+      console.log(doc);
+      // update
+      doc.title = title;
+      doc.description = description;
+      doc.preview = preview;
+      // doc.ranking = ranking;
+
+
+      // put them back
+      return db.put(doc);
+    }).then(function (doc) {
+      console.log(doc);
+
+    });
   }
 
 }

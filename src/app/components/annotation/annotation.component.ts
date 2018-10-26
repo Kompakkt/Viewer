@@ -60,8 +60,6 @@ export class AnnotationComponent implements OnInit {
     this.visibility = visibility;
   }
 
-  public selectPerspective() {
-  }
 
   public deleteAnnotation(): void {
     this.annotationService.deleteAnnotation(this.annotation);
@@ -78,6 +76,7 @@ export class AnnotationComponent implements OnInit {
       this.editMode = false;
       this.labelMode = 'edit';
       this.labelModeText = 'edit';
+      this.save();
     } else {
       this.editMode = true;
       this.labelMode = 'remove_red_eye';
@@ -85,5 +84,9 @@ export class AnnotationComponent implements OnInit {
     }
   }
 
+  private save(): void {
+    console.log(this.id + ' hat den titel ' + this.annotation.title);
+    this.dataService.updateAnnotation(this.id, this.annotation.title, this.annotation.description, this.annotation.preview);
+  }
 
 }
