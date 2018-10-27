@@ -31,18 +31,12 @@ export class AnnotationcardsComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.annotationsList.changes
       .subscribe(() => this.annotationsList.forEach(function (value) {
-          console.log(value);
-
-          console.log('die ID ' + value.id);
-
         })
       );
 
     this.annotationmarkerService.popupIsOpen().subscribe(
       popup_is_open => this.setVisability(popup_is_open, true)
     );
-
-
   }
 
   public setVisability(id: string, visibility: boolean) {
@@ -50,8 +44,6 @@ export class AnnotationcardsComponent implements OnInit, AfterViewInit {
       this.annotationsList.find(annotation => annotation.id === id).visabilityAnnotationCard(visibility);
     }
   }
-
-
 
 
 }

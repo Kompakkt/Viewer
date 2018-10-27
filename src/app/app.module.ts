@@ -24,6 +24,7 @@ import {AnnotationsEditorComponent} from './components/annotations-editor/annota
 import { AnnotationComponent } from './components/annotation/annotation.component';
 import { AnnotationcardsComponent } from './components/annotationcards/annotationcards.component';
 import { AnnotationwalkthroughComponent } from './components/annotationwalkthrough/annotationwalkthrough.component';
+import {DragDropModule} from '@angular/cdk/drag-drop';
 
 @NgModule({
   declarations: [
@@ -52,7 +53,8 @@ import { AnnotationwalkthroughComponent } from './components/annotationwalkthrou
     MatCheckboxModule,
     MatInputModule,
     MatListModule,
-    MatDividerModule
+    MatDividerModule,
+    DragDropModule
   ],
   providers: [],
   bootstrap: [AppComponent]
