@@ -4,6 +4,8 @@ import * as GUI from 'babylonjs-gui';
 import {BabylonService} from '../babylon/babylon.service';
 import {BehaviorSubject} from 'rxjs/internal/BehaviorSubject';
 import {Observable} from 'rxjs/internal/Observable';
+import {CameraService} from '../camera/camera.service';
+import {Annotation} from '../../interfaces/annotation/annotation';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +26,7 @@ export class AnnotationmarkerService {
   }
 
 
-  constructor(private babylonService: BabylonService) {
+  constructor(private babylonService: BabylonService, private cameraService: CameraService) {
 
   }
 
@@ -37,11 +39,13 @@ export class AnnotationmarkerService {
       annotation.referencePoint[1].value, annotation.referencePoint[2].value);
     const normalVector = new BABYLON.Vector3(annotation.referencePointNormal[0].value,
       annotation.referencePointNormal[1].value, annotation.referencePointNormal[2].value);
+    const cameraVector = new BABYLON.Vector3(annotation.cameraPosition[0].value,
+      annotation.cameraPosition[1].value, annotation.cameraPosition[2].value);
 
     // two Labels: one is for isOccluded true, one for false -> alpha 0.5 for transparancy
 
     const plane1 = this.createPlane(annotation._id + '_pick', 1, 1, annotation._id, positionVector, normalVector);
-    const label1 = this.createClickLabel(annotation._id, '100%', '100%', annotation._id, 'White', 'black');
+    const label1 = this.createClickLabel(annotation._id, '100%', '100%', annotation._id, 'White', 'black', cameraVector);
 
     GUI.AdvancedDynamicTexture.CreateForMesh(plane1).addControl(label1);
     label1.addControl(this.createRankingNumber(annotation._id, annotation.ranking));
@@ -49,7 +53,7 @@ export class AnnotationmarkerService {
     plane1.renderingGroupId = 0;
 
     const plane2 = this.createPlane(annotation._id + '_pick', 1, 1, annotation._id, positionVector, normalVector);
-    const label2 = this.createClickLabel(annotation._id, '100%', '100%', annotation._id, 'White', 'black');
+    const label2 = this.createClickLabel(annotation._id, '100%', '100%', annotation._id, 'White', 'black', cameraVector);
 
     GUI.AdvancedDynamicTexture.CreateForMesh(plane2).addControl(label2);
     label2.addControl(this.createRankingNumber(annotation._id, annotation.ranking));
@@ -68,7 +72,8 @@ export class AnnotationmarkerService {
     return plane;
   }
 
-  private createClickLabel(name: string, height: string, width: string, tag: string, color: string, backgroundColor: string) {
+  private createClickLabel(name: string, height: string, width: string, tag: string, color: string,
+                           backgroundColor: string, cameraVector: BABYLON.Vector3) {
 
     const label = new GUI.Ellipse(name);
     label.width = width;
@@ -83,16 +88,15 @@ export class AnnotationmarkerService {
     const id = name;
 
     label.onPointerDownObservable.add(function () {
-      that.onMarkerClicked(id);
+      that.onMarkerClicked(id, cameraVector);
     });
     return label;
 
   }
 
-  private onMarkerClicked(id) {
-    console.log(id);
+  private onMarkerClicked(id, cameraVector: BABYLON.Vector3) {
     this.toggleCreatorPopup(id);
-
+    this.cameraService.moveCameraToTarget(cameraVector);
   }
 
   public createRankingNumber(annotationID: string, rankingNumber: string) {
@@ -107,7 +111,7 @@ export class AnnotationmarkerService {
 
   public setRankingNumber() {
 
-    //need to redraw -> delete and create
+    // need to redraw -> delete and create
     // http://playground.babylonjs.com/#HETZDX#4
     /*
     const label = this.babylonService.getScene().getMeshesByTags(annotationID && 'plane');
@@ -116,20 +120,46 @@ export class AnnotationmarkerService {
     });*/
   }
 
-  public visabilityMarker(annotationID: string, visability: boolean) {
+  public deleteMarker(annotationID: string) {
     const marker = this.babylonService.getScene().getMeshesByTags(annotationID);
     marker.forEach(function (value) {
-      value.isVisible = visability;
+      value.dispose();
     });
   }
 
-  public deleteMarker(annotationID: string) {
-    const marker = this.babylonService.getScene().getMeshesByTags(annotationID);
-    console.log(annotationID);
-    console.log(this.babylonService.getScene().getMeshesByTags(annotationID));
-    console.log(marker);
+  public deleteAllMarker() {
+    const marker = this.babylonService.getScene().getMeshesByTags('label');
     marker.forEach(function (value) {
       value.dispose();
+    });
+
+    const planes = this.babylonService.getScene().getMeshesByTags('plane');
+    planes.forEach(function (value) {
+      value.dispose();
+    });
+  }
+
+  public redrawAllMarker(annotations: Annotation[]) {
+    this.deleteAllMarker();
+    annotations.forEach(function (value) {
+      this.createAnnotationMarker(value);
+    });
+  }
+
+  public redrawMarker(annotation: Annotation) {
+    this.deleteMarker(annotation._id);
+    this.createAnnotationMarker(annotation);
+  }
+
+  public hideAllMarker(visability: boolean) {
+    const marker = this.babylonService.getScene().getMeshesByTags('label');
+    marker.forEach(function (value) {
+      value.isVisible = visability;
+    });
+
+    const planes = this.babylonService.getScene().getMeshesByTags('plane');
+    planes.forEach(function (value) {
+      value.isVisible = visability;
     });
   }
 

@@ -16,7 +16,7 @@ export class AnnotationcardsComponent implements OnInit, AfterViewInit {
 
   // @ViewChildren(AnnotationComponent) annotations : QueryList<AnnotationComponent>;
   @ViewChildren(AnnotationComponent)
-  annotations: QueryList<AnnotationComponent>;
+  annotationsList: QueryList<AnnotationComponent>;
 
   constructor(public annotationService: AnnotationService, private annotationmarkerService: AnnotationmarkerService) {
 
@@ -24,14 +24,13 @@ export class AnnotationcardsComponent implements OnInit, AfterViewInit {
 
 
   ngOnInit() {
-    this.getAnnotations();
 
   }
 
 
   ngAfterViewInit(): void {
-    this.annotations.changes
-      .subscribe(() => this.annotations.forEach(function (value) {
+    this.annotationsList.changes
+      .subscribe(() => this.annotationsList.forEach(function (value) {
           console.log(value);
 
           console.log('die ID ' + value.id);
@@ -47,15 +46,12 @@ export class AnnotationcardsComponent implements OnInit, AfterViewInit {
   }
 
   public setVisability(id: string, visibility: boolean) {
-    if (this.annotations.find(annotation => annotation.id === id) != null) {
-      this.annotations.find(annotation => annotation.id === id).visabilityAnnotationCard(visibility);
+    if (this.annotationsList.find(annotation => annotation.id === id) != null) {
+      this.annotationsList.find(annotation => annotation.id === id).visabilityAnnotationCard(visibility);
     }
   }
 
 
-  getAnnotations(): void {
-    this.annotationService.annotations$ = this.annotationService.fetchAnnotations();
 
-  }
 
 }

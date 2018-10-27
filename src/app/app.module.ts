@@ -23,6 +23,7 @@ import {EditorComponent} from './components/editor/editor.component';
 import {AnnotationsEditorComponent} from './components/annotations-editor/annotations-editor.component';
 import { AnnotationComponent } from './components/annotation/annotation.component';
 import { AnnotationcardsComponent } from './components/annotationcards/annotationcards.component';
+import { AnnotationwalkthroughComponent } from './components/annotationwalkthrough/annotationwalkthrough.component';
 
 @NgModule({
   declarations: [
@@ -32,7 +33,8 @@ import { AnnotationcardsComponent } from './components/annotationcards/annotatio
     EditorComponent,
     AnnotationsEditorComponent,
     AnnotationComponent,
-    AnnotationcardsComponent
+    AnnotationcardsComponent,
+    AnnotationwalkthroughComponent
   ],
   imports: [
     BrowserModule,

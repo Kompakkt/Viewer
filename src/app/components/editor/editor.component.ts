@@ -29,12 +29,9 @@ export class EditorComponent implements OnInit {
     });
 
 
-    this.getAnnotations();
   }
 
-  getAnnotations(): void {
-    this.annotationService.annotations$ = this.annotationService.fetchAnnotations();
-  }
+
 
   drop(event: CdkDragDrop<string[]>) {
     // moveItemInArray(this.annotationService.annotations$, event.previousIndex, event.currentIndex);

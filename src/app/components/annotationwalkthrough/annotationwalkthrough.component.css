@@ -1,0 +1,15 @@
+:host {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  display: inline;
+  padding: 15px;
+  width: 100%;
+  color: #fff;
+  text-align: center;
+}
+
+:host a {
+  text-decoration: none;
+  color: #fff;
+}

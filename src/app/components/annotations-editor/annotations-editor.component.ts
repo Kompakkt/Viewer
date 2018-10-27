@@ -4,6 +4,9 @@ import {Annotation} from '../../interfaces/annotation/annotation';
 import {DataService} from '../../services/data/data.service';
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
+import {CameraService} from '../../services/camera/camera.service';
+import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
+
 
 @Component({
   selector: 'app-annotations-editor',
@@ -19,28 +22,31 @@ export class AnnotationsEditorComponent implements OnInit {
   public editMode = false;
   public labelMode = 'edit';
   public labelModeText = 'edit';
-  public _id = '';
   public preview = '';
 
-  constructor(private dataService: DataService, private annotationService: AnnotationService, private babylonService: BabylonService
+  constructor(private dataService: DataService, private annotationService: AnnotationService,
+              private babylonService: BabylonService, private cameraService: CameraService,
+              private annotationmarkerService: AnnotationmarkerService
   ) {
   }
 
-
   ngOnInit() {
     this.preview = this.annotation.preview;
-    this._id = this.annotation._id;
   }
 
   public getValidation(validated) {
     if (validated) {
+      this.annotation.validated = true;
       return 'validated';
     } else {
+      this.annotation.validated = false;
       return 'unvalidated';
     }
   }
 
   public selectPerspective() {
+    this.annotation.cameraPosition = this.cameraService.getActualCameraPosAnnotation();
+    this.annotationmarkerService.redrawMarker(this.annotation);
     this.babylonService.createPreviewScreenshot(220).then(detailScreenshot => {
       this.preview = detailScreenshot;
     });
@@ -51,7 +57,6 @@ export class AnnotationsEditorComponent implements OnInit {
   }
 
   public toggleEditViewMode() {
-    console.log('toggle Function');
     if (this.editMode) {
       this.editMode = false;
       this.labelMode = 'edit';
@@ -66,11 +71,9 @@ export class AnnotationsEditorComponent implements OnInit {
   }
 
   private save(): void {
-    console.log(this._id + ' hat den titel ' + this.annotation.title);
-    this.dataService.updateAnnotation(this._id, this.annotation.title, this.annotation.description, this.preview);
+    this.dataService.updateAnnotation(this.annotation._id, this.annotation.title, this.annotation.description,
+      this.preview, this.annotation.cameraPosition, this.annotation.validated);
   }
-
-
 }
 
 

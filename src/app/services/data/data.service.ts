@@ -1,6 +1,8 @@
 import {Injectable, EventEmitter} from '@angular/core';
 import PouchDB from 'pouchdb';
 import {Annotation} from '../../interfaces/annotation/annotation';
+import {isUndefined} from 'util';
+import {ifTrue} from 'codelyzer/util/function';
 
 
 @Injectable({
@@ -40,20 +42,40 @@ export class DataService {
     return this.database.allDocs({include_docs: true});
   }
 
-  public updateAnnotation(id: string, title: string, description: string, preview: string): void {
+  public delete(id: string, rev: string) {
+    this.database.remove(id, rev, function (error, response) {
+      if (error) {
+        return console.log(error);
+      }
+    });
+  }
+
+  public updateAnnotation(id: string, title: string, description: string, preview?: string, cameraPosition?, validated?: boolean): void {
     const db = this.database;
     db.get(id).then(function (doc) {
-      console.log(doc);
       // update
       doc.title = title;
       doc.description = description;
-      doc.preview = preview;
+
+      if (!isUndefined(preview)) {
+        doc.preview = preview;
+      }
+      if (!isUndefined(cameraPosition)) {
+
+        doc.cameraPosition = cameraPosition;
+      }
+      if (!isUndefined(validated)) {
+        console.log(isUndefined(doc.validated ));
+
+        doc.validated = validated;
+      }
+
       // doc.ranking = ranking;
 
-
       // put them back
+      console.log(doc);
+
       return db.put(doc);
-    }).then(function (doc) {
       console.log(doc);
 
     });

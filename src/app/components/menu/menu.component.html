@@ -1,3 +1,5 @@
+<app-annotationwalkthrough></app-annotationwalkthrough>
+
 <button mat-icon-button (click)="editScene()"
         matTooltip="Edit Scene" matTooltipPosition="above">
   <mat-icon aria-label="Edit Scene">edit</mat-icon>
@@ -29,7 +31,7 @@
 <!-- Cameras Submenu -->
 <mat-menu #cameras="matMenu">
   <button mat-menu-item (click)="setCamArcRotate()">Orbit Camera</button>
-  <button mat-menu-item (click)="setCamUniversal()">Universal Camera</button>
+  <!--button mat-menu-item (click)="setCamUniversal()">Universal Camera</button-->
   <button mat-menu-item (click)="setVRcam()">VR Camera</button>
   <button mat-menu-item (click)="setBackToDefault()">Reset Camera</button>
 </mat-menu>

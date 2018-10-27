@@ -3,6 +3,7 @@ import * as BABYLON from 'babylonjs';
 
 import {BabylonService} from '../babylon/babylon.service';
 import Vector3 = BABYLON.Vector3;
+import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
 
 @Injectable({
   providedIn: 'root'
@@ -27,8 +28,8 @@ export class CameraService {
   private yRot: number;
 
   constructor(
-    private babylonService: BabylonService
-  ) {
+    private babylonService: BabylonService,
+) {
   }
 
   public bootstrap(): void {
@@ -241,4 +242,70 @@ export class CameraService {
   public createScreenshot(): void {
     this.babylonService.createScreenshot();
   }
+
+  public moveCameraToTarget(positionVector: BABYLON.Vector3) {
+
+
+    this.scene.activeCamera = this.arcRotateCamera;
+    this.arcRotateCamera.attachControl(this.canvas, false);
+
+    const name = 'animCam',
+      frames = 30;
+
+    const animCamAlpha = new BABYLON.Animation(name, 'alpha', frames,
+      BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+      BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+
+    animCamAlpha.setKeys([
+      {
+        frame: 0,
+        value: this.arcRotateCamera.alpha
+      }, {
+        frame: 30,
+        value: positionVector.x
+      }
+    ]);
+    this.arcRotateCamera.animations.push(animCamAlpha);
+
+    const animCamBeta = new BABYLON.Animation(name, 'beta', frames,
+      BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+      BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+
+    animCamBeta.setKeys([
+      {
+        frame: 0,
+        value: this.arcRotateCamera.beta
+      }, {
+        frame: 30,
+        value: positionVector.y
+      }]);
+    this.arcRotateCamera.animations.push(animCamBeta);
+
+    const animCamRadius = new BABYLON.Animation(name, 'radius', frames,
+      BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+      BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+
+    animCamRadius.setKeys([
+      {
+        frame: 0,
+        value: this.arcRotateCamera.radius
+      }, {
+        frame: 30,
+        value: positionVector.z
+      }]);
+    this.arcRotateCamera.animations.push(animCamRadius);
+
+    this.arcRotateCamera.setTarget(Vector3.Zero());
+
+    this.scene.beginAnimation(this.arcRotateCamera, 0, 30, false, 1, function () {
+    });
+  }
+
+  public getActualCameraPosAnnotation() {
+    const cameraPosition = [{dimension: 'x', value: this.arcRotateCamera.alpha},
+      {dimension: 'y', value: this.arcRotateCamera.beta},
+      {dimension: 'z', value: this.arcRotateCamera.radius}];
+    return cameraPosition;
+  }
+
 }

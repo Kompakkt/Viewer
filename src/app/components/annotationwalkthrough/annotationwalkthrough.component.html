@@ -1,0 +1,13 @@
+<div *ngIf="this.annotationService.annotations.length > 1">
+  <button mat-icon-button (click)="previousAnnotation()"
+          matTooltip="Back" matTooltipPosition="above">
+    <mat-icon aria-label="Back">keyboard_arrow_left</mat-icon>
+  </button>
+
+  <span>{{title | uppercase}}</span>
+
+  <button mat-icon-button (click)="nextAnnotation()"
+          matTooltip="Next" matTooltipPosition="above">
+    <mat-icon aria-label="Save Scene">keyboard_arrow_right</mat-icon>
+  </button>
+</div>

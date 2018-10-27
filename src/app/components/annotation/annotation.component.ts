@@ -70,8 +70,6 @@ export class AnnotationComponent implements OnInit {
   }
 
   public toggleEditViewMode() {
-    console.log('toggle Function');
-
     if (this.editMode) {
       this.editMode = false;
       this.labelMode = 'edit';
@@ -85,8 +83,7 @@ export class AnnotationComponent implements OnInit {
   }
 
   private save(): void {
-    console.log(this.id + ' hat den titel ' + this.annotation.title);
-    this.dataService.updateAnnotation(this.id, this.annotation.title, this.annotation.description, this.annotation.preview);
+    this.dataService.updateAnnotation(this.annotation._id, this.annotation.title, this.annotation.description);
   }
 
 }
