@@ -18,6 +18,8 @@ import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.serv
 export class AnnotationService {
 
   public annotations: Annotation[];
+  private unsortedAnnotations: Annotation[];
+
 
   constructor(private babylonService: BabylonService,
               private dataService: DataService,
@@ -25,10 +27,25 @@ export class AnnotationService {
               private annotationmarkerService: AnnotationmarkerService) {
 
     this.annotations = this.fetchData();
+
   }
 
   public initializeAnnotationMode(modelName: string) {
     this.actionService.createActionManager(modelName, BABYLON.ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
+
+    this.unsortedAnnotations = this.annotations.slice(0);
+    this.annotations.splice(0, this.annotations.length);
+    this.annotations = this.unsortedAnnotations.slice(0);
+
+    this.annotations.sort((leftSide, rightSide): number => {
+      if (+leftSide.ranking < +rightSide.ranking) {
+        return -1;
+      }
+      if (+leftSide.ranking > +rightSide.ranking) {
+        return 1;
+      }
+      return 0;
+    });
   }
 
   public createNewAnnotation = function (result: any) {
@@ -66,6 +83,7 @@ export class AnnotationService {
 
   private fetchData(): Array<any> {
     const annotationList: Array<any> = [];
+
     this.dataService.fetch().then(result => {
       for (let i = 0; i < result.rows.length; i++) {
         this.annotationmarkerService.createAnnotationMarker(result.rows[i].doc);
@@ -75,6 +93,7 @@ export class AnnotationService {
     }, error => {
       console.error(error);
     });
+
     return annotationList;
   }
 
@@ -86,4 +105,18 @@ export class AnnotationService {
       this.annotations.splice(index, 1);
     }
   }
+
+  public changedRankingPositions() {
+
+    for (let _i = 0; _i < this.annotations.length; _i++) {
+      console.log(this.annotations[_i]);
+      this.annotations[_i].ranking = String(_i + 1);
+      console.log(this.annotations[_i]);
+      this.annotationmarkerService.deleteMarker(this.annotations[_i]._id);
+      this.annotationmarkerService.createAnnotationMarker(this.annotations[_i]);
+      this.dataService.updateAnnotationRanking(this.annotations[_i]._id, this.annotations[_i].ranking);
+    }
+
+  }
+
 }

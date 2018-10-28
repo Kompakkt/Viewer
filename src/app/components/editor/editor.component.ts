@@ -27,14 +27,11 @@ export class EditorComponent implements OnInit {
       // TODO initialize after model is loaded!
       this.annotationService.initializeAnnotationMode('Texture_0');
     });
-
-
   }
 
-
-
   drop(event: CdkDragDrop<string[]>) {
-    // moveItemInArray(this.annotationService.annotations$, event.previousIndex, event.currentIndex);
+    moveItemInArray(this.annotationService.annotations, event.previousIndex, event.currentIndex);
+    this.annotationService.changedRankingPositions();
   }
 
 }

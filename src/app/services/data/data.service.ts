@@ -65,19 +65,26 @@ export class DataService {
         doc.cameraPosition = cameraPosition;
       }
       if (!isUndefined(validated)) {
-        console.log(isUndefined(doc.validated ));
+        console.log(isUndefined(doc.validated));
 
         doc.validated = validated;
       }
-
-      // doc.ranking = ranking;
-
       // put them back
       console.log(doc);
 
       return db.put(doc);
       console.log(doc);
 
+    });
+  }
+
+  public updateAnnotationRanking(id: string, ranking: string) {
+    const db = this.database;
+    db.get(id).then(function (doc) {
+      // update
+      doc.ranking = ranking;
+      // put them back
+      return db.put(doc);
     });
   }
 
