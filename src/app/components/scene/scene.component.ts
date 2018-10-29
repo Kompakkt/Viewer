@@ -45,7 +45,6 @@ export class SceneComponent implements AfterViewInit {
     this.cameraService.bootstrap();
 
     const engine = this.babylonService.getEngine();
-    engine.loadingUIText = 'Preparing scene';
     engine.displayLoadingUI();
 
     const message = this.messageService;
