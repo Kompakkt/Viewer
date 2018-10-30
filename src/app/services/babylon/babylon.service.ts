@@ -61,9 +61,22 @@ export class BabylonService {
 
   public loadModel(rootUrl: string, filename: string): Promise<any> {
 
+    const engine = this.engine;
+
     return new Promise<any>((resolve, reject) => {
 
-      BABYLON.SceneLoader.ImportMeshAsync(null, rootUrl, filename, this.scene).then(function (result) {
+      BABYLON.SceneLoader.ImportMeshAsync(null, rootUrl, filename, this.scene, function (progress) {
+
+        if (progress.lengthComputable) {
+          engine.loadingUIText = 'Loading, please wait...' + (progress.loaded * 100 / progress.total).toFixed() + '%';
+        } else {
+
+          const dlCount = progress.loaded / (1024 * 1024);
+          engine.loadingUIText = 'Loading, please wait...' + Math.floor(dlCount * 100.0) / 100.0 + ' MB already loaded.';
+        }
+
+        engine.loadingUIText = 'Loaded ' + progress.loaded + ' / ';
+      }).then(function (result) {
         resolve(result);
       }, function (error) {
         reject(error);
