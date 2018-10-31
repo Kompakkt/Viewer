@@ -1,14 +1,32 @@
 import {Injectable} from '@angular/core';
 
 import * as BABYLON from 'babylonjs';
+
+import {MessageService} from '../../services/message/message.service';
+
 import 'babylonjs-loaders';
+import ILoadingScreen = BABYLON.ILoadingScreen;
+
+class MyLoadingScreen implements ILoadingScreen {
+
+  //optional, but needed due to interface definitions
+  public loadingUIBackgroundColor: string
+  constructor(public loadingUIText: string) {}
+  public displayLoadingUI() {
+    // alert(this.loadingUIText);
+  }
+
+  public hideLoadingUI() {
+    // alert("Loaded!");
+  }
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class BabylonService {
 
-  constructor() {
+  constructor(private messageService: MessageService) {
   }
 
   private scene: BABYLON.Scene;
@@ -63,22 +81,27 @@ export class BabylonService {
 
     const engine = this.engine;
 
+    engine.loadingScreen = new MyLoadingScreen("I'm loading!!");;
+    engine.displayLoadingUI();
+
     return new Promise<any>((resolve, reject) => {
 
       BABYLON.SceneLoader.ImportMeshAsync(null, rootUrl, filename, this.scene, function (progress) {
 
         if (progress.lengthComputable) {
-          engine.loadingUIText = 'Loading, please wait...' + (progress.loaded * 100 / progress.total).toFixed() + '%';
+          // engine.loadingUIText = 'Loading, please wait...' + (progress.loaded * 100 / progress.total).toFixed() + '%';
         } else {
 
-          const dlCount = progress.loaded / (1024 * 1024);
-          engine.loadingUIText = 'Loading, please wait...' + Math.floor(dlCount * 100.0) / 100.0 + ' MB already loaded.';
+          // const dlCount = progress.loaded / (1024 * 1024);
+          // engine.loadingUIText = 'Loading, please wait...' + Math.floor(dlCount * 100.0) / 100.0 + ' MB already loaded.';
         }
 
-        engine.loadingUIText = 'Loaded ' + progress.loaded + ' / ';
+        // engine.loadingUIText = 'Loaded ' + progress.loaded + ' / ';
       }).then(function (result) {
+        engine.hideLoadingUI();
         resolve(result);
       }, function (error) {
+        engine.hideLoadingUI();
         reject(error);
       });
     });

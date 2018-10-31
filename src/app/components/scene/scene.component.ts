@@ -2,7 +2,6 @@ import {AfterViewInit, Component, ElementRef, HostListener, Input, ViewChild} fr
 
 import {CameraService} from '../../services/camera/camera.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
-import {MessageService} from '../../services/message/message.service';
 import {AnnotationService} from '../../services/annotation/annotation.service';
 
 @Component({
@@ -25,7 +24,6 @@ export class SceneComponent implements AfterViewInit {
 
   constructor(
     private cameraService: CameraService,
-    private messageService: MessageService,
     private babylonService: BabylonService,
     private annotationService: AnnotationService
   ) {
@@ -44,17 +42,7 @@ export class SceneComponent implements AfterViewInit {
 
     this.cameraService.bootstrap();
 
-    const engine = this.babylonService.getEngine();
-    engine.displayLoadingUI();
-
-    const message = this.messageService;
-
-    this.babylonService.loadModel(this.modelDirectory, this.modelFileName).then(function () {
-      engine.hideLoadingUI();
-    }, function(error) {
-      engine.hideLoadingUI();
-      message.error(error);
-    });
+    this.babylonService.loadModel(this.modelDirectory, this.modelFileName);
   }
 
   ngAfterViewInit() {
