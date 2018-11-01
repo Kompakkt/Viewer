@@ -118,9 +118,6 @@ export class CameraService {
 
   private arcRotateSettings(): void {
 
-    this.arcRotateCamera.alpha = this.alpha;
-    this.arcRotateCamera.beta = this.beta;
-    this.arcRotateCamera.radius = this.radius;
     this.arcRotateCamera.panningSensibility = 25;
     this.arcRotateCamera.upperRadiusLimit = 200;
     this.setCameraDefaults(this.arcRotateCamera);

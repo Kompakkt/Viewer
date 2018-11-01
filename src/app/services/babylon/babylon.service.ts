@@ -2,36 +2,27 @@ import {Injectable} from '@angular/core';
 
 import * as BABYLON from 'babylonjs';
 
-import {MessageService} from '../../services/message/message.service';
+import {MessageService} from '../message/message.service';
 
 import 'babylonjs-loaders';
-import ILoadingScreen = BABYLON.ILoadingScreen;
+import {LoadingScreen} from './loadingscreen';
 
-class MyLoadingScreen implements ILoadingScreen {
-
-  //optional, but needed due to interface definitions
-  public loadingUIBackgroundColor: string
-  constructor(public loadingUIText: string) {}
-  public displayLoadingUI() {
-    // alert(this.loadingUIText);
-  }
-
-  public hideLoadingUI() {
-    // alert("Loaded!");
-  }
-}
+/**
+ * @author Zoe Schubert
+ * @author Jan G. Wieners
+ */
 
 @Injectable({
   providedIn: 'root'
 })
 export class BabylonService {
 
-  constructor(private messageService: MessageService) {
-  }
-
   private scene: BABYLON.Scene;
   private engine: BABYLON.Engine;
   private canvas: HTMLCanvasElement;
+
+  constructor(private message: MessageService) {
+  }
 
   public bootstrap(canvas: HTMLCanvasElement, antialiasing: boolean): void {
 
@@ -79,9 +70,11 @@ export class BabylonService {
 
   public loadModel(rootUrl: string, filename: string): Promise<any> {
 
+    const message = this.message;
     const engine = this.engine;
 
-    engine.loadingScreen = new MyLoadingScreen("I'm loading!!");;
+    engine.loadingScreen = new LoadingScreen(this.canvas, '', '#111111', 'assets/img/kompakkt-icon.png');
+
     engine.displayLoadingUI();
 
     return new Promise<any>((resolve, reject) => {
@@ -89,19 +82,16 @@ export class BabylonService {
       BABYLON.SceneLoader.ImportMeshAsync(null, rootUrl, filename, this.scene, function (progress) {
 
         if (progress.lengthComputable) {
-          // engine.loadingUIText = 'Loading, please wait...' + (progress.loaded * 100 / progress.total).toFixed() + '%';
-        } else {
-
-          // const dlCount = progress.loaded / (1024 * 1024);
-          // engine.loadingUIText = 'Loading, please wait...' + Math.floor(dlCount * 100.0) / 100.0 + ' MB already loaded.';
+          engine.loadingUIText = (progress.loaded * 100 / progress.total).toFixed() + '%';
         }
-
-        // engine.loadingUIText = 'Loaded ' + progress.loaded + ' / ';
       }).then(function (result) {
+
         engine.hideLoadingUI();
         resolve(result);
       }, function (error) {
+
         engine.hideLoadingUI();
+        message.error(error);
         reject(error);
       });
     });
