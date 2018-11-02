@@ -1,5 +1,5 @@
 .single-annotation-card {
-  z-index: 3;
+  z-index: 0;
   max-width: 300px;
   position: absolute;
 }
