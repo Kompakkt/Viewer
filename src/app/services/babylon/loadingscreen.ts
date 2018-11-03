@@ -54,12 +54,12 @@ export class LoadingScreen implements BABYLON.ILoadingScreen {
       this.loadingDiv.appendChild(imgBack);
     }
 
-    this.loadingDiv.id = 'loading-wrapper';
+    this.loadingDiv.id = 'loadingDiv';
     this.loadingDiv.style.opacity = '0';
     this.loadingDiv.style.transition = 'opacity 2s ease';
 
     // Loading text
-    this.loadingTextDiv = document.createElement('loading-text');
+    this.loadingTextDiv = document.createElement('div');
     this.loadingTextDiv.style.position = 'absolute';
     this.loadingTextDiv.style.left = '0';
     this.loadingTextDiv.style.top = '50%';
@@ -70,6 +70,7 @@ export class LoadingScreen implements BABYLON.ILoadingScreen {
     this.loadingTextDiv.style.fontSize = '15px';
     this.loadingTextDiv.style.color = 'white';
     this.loadingTextDiv.style.textAlign = 'center';
+    this.loadingTextDiv.innerHTML = 'Loading';
 
     this.loadingDiv.appendChild(this.loadingTextDiv);
 
