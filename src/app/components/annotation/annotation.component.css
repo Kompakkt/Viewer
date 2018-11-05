@@ -9,3 +9,16 @@
   top: 0;
   right: 0;
 }
+
+.mat-card {
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 3px;
+  color: #fff;
+  font-size: 12px;
+  min-width: 250px;
+  padding-bottom: 5px;
+}
+
+.mat-card .mat-input-element {
+  color: #fff;
+}

@@ -9,9 +9,9 @@
     <h3>Annotations</h3>
     <br>
 
-    <div cdkDropList class="example-list" (cdkDropListDropped)="drop($event)"
+    <div cdkDropList class="annotations-list" (cdkDropListDropped)="drop($event)"
          *ngIf="this.annotationService.annotations.length">
-      <app-annotations-editor class="example-box" *ngFor="let annotation of this.annotationService.annotations;"
+      <app-annotations-editor class="annotation-box" *ngFor="let annotation of this.annotationService.annotations;"
                               [annotation]="annotation" cdkDrag></app-annotations-editor>
     </div>
   </mat-tab>
