@@ -43,6 +43,14 @@ export class SceneComponent implements AfterViewInit {
     this.cameraService.bootstrap();
 
     this.babylonService.loadModel(this.modelDirectory, this.modelFileName);
+
+    /* Example of how the same function can load from our ExpressJS Server
+     * The host and filename strings should later be extracted from a REST API
+     * request which will provide us with the location
+     */
+    /* const host = 'http://localhost:8080/models/testmodel/';
+    const filename = 'testmodel.babylon';
+    this.babylonService.loadModel(host, filename); */
   }
 
   ngAfterViewInit() {
