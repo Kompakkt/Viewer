@@ -73,24 +73,24 @@ export class BabylonService {
     const message = this.message;
     const engine = this.engine;
 
-    engine.loadingScreen = new LoadingScreen(this.canvas, '', '#111111', 'assets/img/kompakkt-icon.png');
+    // engine.loadingScreen = new LoadingScreen(this.canvas, '', '#111111', 'assets/img/kompakkt-icon.png');
 
-    engine.displayLoadingUI();
+    // engine.displayLoadingUI();
 
     return new Promise<any>((resolve, reject) => {
 
       BABYLON.SceneLoader.ImportMeshAsync(null, rootUrl, filename, this.scene, function (progress) {
 
         if (progress.lengthComputable) {
-          engine.loadingUIText = (progress.loaded * 100 / progress.total).toFixed() + '%';
+          // engine.loadingUIText = (progress.loaded * 100 / progress.total).toFixed() + '%';
         }
       }).then(function (result) {
 
-        engine.hideLoadingUI();
+        // engine.hideLoadingUI();
         resolve(result);
       }, function (error) {
 
-        engine.hideLoadingUI();
+        // engine.hideLoadingUI();
         message.error(error);
         reject(error);
       });
