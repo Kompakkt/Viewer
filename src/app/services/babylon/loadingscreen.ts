@@ -115,9 +115,12 @@ export class LoadingScreen implements BABYLON.ILoadingScreen {
     const onTransitionEnd = () => {
 
       if (!this.loadingDiv) {
+        alert('no loading div');
         return;
       }
-      document.body.removeChild(this.loadingDiv);
+
+      let loadingdiv = document.getElementById('loadingDiv');
+      document.body.removeChild(loadingdiv);
       window.removeEventListener('resize', this.resizeLoadingUI);
 
       this.loadingDiv = null;
