@@ -3,6 +3,7 @@ import {SidenavService} from '../../services/sidenav/sidenav.service';
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {ActionService} from '../../services/action/action.service';
 import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
+import {BabylonService} from '../../services/babylon/babylon.service';
 
 
 @Component({
@@ -17,6 +18,7 @@ export class EditorComponent implements OnInit {
 
   constructor(private sidenavService: SidenavService,
               private actionService: ActionService,
+              private babylonService: BabylonService,
               public annotationService: AnnotationService) {
   }
 
@@ -25,8 +27,10 @@ export class EditorComponent implements OnInit {
     this.sidenavService.change.subscribe(isOpen => {
       this.isOpen = isOpen;
       // TODO initialize after model is loaded!
-      this.actionService.pickableModel(this.modelFileName, this.isOpen);
-      this.annotationService.initializeAnnotationMode(this.modelFileName);
+      this.babylonService.getScene().meshes.forEach(mesh => {
+        this.actionService.pickableModel(mesh.name, this.isOpen);
+        this.annotationService.initializeAnnotationMode(mesh.name);
+      });
     });
   }
 
