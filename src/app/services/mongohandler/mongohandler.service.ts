@@ -19,7 +19,7 @@ export class MongohandlerService {
 
   // TODO: any durch Interface ersetzen
   public getCompilation(identifier: string): Observable<any[]> {
-    return this.http.get<any>(`${this.endpoint}/api/v1/get/findall/compilation/${identifier}`);
+    return this.http.get<any>(`${this.endpoint}/api/v1/get/find/compilation/${identifier}`);
   }
 
 /* Funktionen aus ObjectsRepository, nur zum Vergleich
