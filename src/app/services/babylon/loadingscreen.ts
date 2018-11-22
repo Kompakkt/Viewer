@@ -58,6 +58,8 @@ export class LoadingScreen implements BABYLON.ILoadingScreen {
     this.loadingDiv.style.opacity = '0';
     this.loadingDiv.style.transition = 'opacity 2s ease';
 
+    this.loadingDiv.style.pointerEvents = 'none';
+
     // Loading text
     this.loadingTextDiv = document.createElement('div');
     this.loadingTextDiv.style.position = 'absolute';
@@ -71,6 +73,8 @@ export class LoadingScreen implements BABYLON.ILoadingScreen {
     this.loadingTextDiv.style.color = 'white';
     this.loadingTextDiv.style.textAlign = 'center';
     this.loadingTextDiv.innerHTML = 'Loading';
+
+    this.loadingTextDiv.style.pointerEvents = 'none';
 
     this.loadingDiv.appendChild(this.loadingTextDiv);
 
