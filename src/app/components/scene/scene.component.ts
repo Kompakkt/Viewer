@@ -42,7 +42,7 @@ export class SceneComponent implements AfterViewInit {
 
     this.cameraService.bootstrap();
 
-    this.babylonService.loadModel(this.modelDirectory, this.modelFileName);
+    // this.babylonService.loadModel(this.modelDirectory, this.modelFileName);
   }
 
   ngAfterViewInit() {

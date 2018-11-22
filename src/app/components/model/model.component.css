@@ -1,0 +1,25 @@
+.model-card {
+
+  width: 500px;
+  max-width: 100%;
+  height: 100%;
+}
+
+.model-header-image {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:16px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+span {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+#number {
+  position: absolute;
+  z-index: -1;
+}

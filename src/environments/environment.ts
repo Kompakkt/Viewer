@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  express_server_url: 'http://localhost',
-  express_server_port: 8080,
+  express_server_url: 'https://blacklodge.hki.uni-koeln.de',
+  express_server_port: 8065,
   // express_server_url: 'https://miskatonic.hki.uni-koeln.de'
 };
 

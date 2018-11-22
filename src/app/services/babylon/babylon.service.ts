@@ -85,7 +85,6 @@ export class BabylonService {
           engine.loadingUIText = (progress.loaded * 100 / progress.total).toFixed() + '%';
         }
       }).then(function (result) {
-
         engine.hideLoadingUI();
         resolve(result);
       }, function (error) {

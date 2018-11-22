@@ -1,6 +1,9 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms'; // <-- NgModel lives here
+import { HttpClientModule } from '@angular/common/http';
+import { DeviceDetectorModule } from 'ngx-device-detector';
+
 
 
 import {AppComponent} from './app.component';
@@ -21,11 +24,11 @@ import {
 } from '@angular/material';
 import {EditorComponent} from './components/editor/editor.component';
 import {AnnotationsEditorComponent} from './components/annotations-editor/annotations-editor.component';
-import { AnnotationComponent } from './components/annotation/annotation.component';
-import { AnnotationcardsComponent } from './components/annotationcards/annotationcards.component';
-import { AnnotationwalkthroughComponent } from './components/annotationwalkthrough/annotationwalkthrough.component';
+import {AnnotationComponent} from './components/annotation/annotation.component';
+import {AnnotationcardsComponent} from './components/annotationcards/annotationcards.component';
+import {AnnotationwalkthroughComponent} from './components/annotationwalkthrough/annotationwalkthrough.component';
 import {DragDropModule} from '@angular/cdk/drag-drop';
-import { DeviceDetectorModule } from 'ngx-device-detector';
+import {ModelComponent} from './components/model/model.component';
 
 @NgModule({
   declarations: [
@@ -36,7 +39,8 @@ import { DeviceDetectorModule } from 'ngx-device-detector';
     AnnotationsEditorComponent,
     AnnotationComponent,
     AnnotationcardsComponent,
-    AnnotationwalkthroughComponent
+    AnnotationwalkthroughComponent,
+    ModelComponent
   ],
   imports: [
     BrowserModule,
@@ -55,6 +59,8 @@ import { DeviceDetectorModule } from 'ngx-device-detector';
     MatInputModule,
     MatListModule,
     MatDividerModule,
+    DragDropModule,
+    HttpClientModule,
     DragDropModule,
     DeviceDetectorModule.forRoot()
   ],

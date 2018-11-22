@@ -1,0 +1,33 @@
+<mat-card class="single-model-card"
+          [style.top.px]="positionLeft"
+          [style.left.px]="positionRight">
+
+  <form class="model-form">
+
+    <mat-card-header>
+
+      <mat-card-title>
+        <span>{{model.name | uppercase}}</span>
+      </mat-card-title>
+
+    </mat-card-header>
+
+    <img mat-card-image src={{preview}}>
+
+    <mat-card-content>
+
+    </mat-card-content>
+
+
+    <mat-card-actions>
+
+      <button mat-icon-button (click)="loadModel()"
+              matTooltip="Load" matTooltipPosition="above">
+        <mat-icon aria-label="Delete">delete</mat-icon>
+      </button>
+
+    </mat-card-actions>
+
+
+  </form>
+</mat-card>

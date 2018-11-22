@@ -151,15 +151,19 @@ export class AnnotationmarkerService {
     this.createAnnotationMarker(annotation);
   }
 
-  public hideAllMarker(visability: boolean) {
-    const marker = this.babylonService.getScene().getMeshesByTags('label');
-    marker.forEach(function (value) {
-      value.isVisible = visability;
-    });
+  public hideAllMarker(visibility: boolean) {
+    return new Promise<any>((resolve) => {
 
-    const planes = this.babylonService.getScene().getMeshesByTags('plane');
-    planes.forEach(function (value) {
-      value.isVisible = visability;
+      const marker = this.babylonService.getScene().getMeshesByTags('label');
+      marker.forEach(function (value) {
+        value.isVisible = visibility;
+      });
+
+      const planes = this.babylonService.getScene().getMeshesByTags('plane');
+      planes.forEach(function (value) {
+        value.isVisible = visibility;
+      });
+
     });
   }
 

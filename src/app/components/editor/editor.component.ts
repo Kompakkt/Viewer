@@ -4,6 +4,7 @@ import {AnnotationService} from '../../services/annotation/annotation.service';
 import {ActionService} from '../../services/action/action.service';
 import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
 import {BabylonService} from '../../services/babylon/babylon.service';
+import {CatalogueService} from '../../services/catalogue/catalogue.service';
 
 
 @Component({
@@ -19,7 +20,8 @@ export class EditorComponent implements OnInit {
   constructor(private sidenavService: SidenavService,
               private actionService: ActionService,
               private babylonService: BabylonService,
-              public annotationService: AnnotationService) {
+              public annotationService: AnnotationService,
+              public catalogueService: CatalogueService) {
   }
 
 
@@ -31,6 +33,8 @@ export class EditorComponent implements OnInit {
         this.actionService.pickableModel(mesh.name, this.isOpen);
         this.annotationService.initializeAnnotationMode(mesh.name);
       });
+
+
     });
   }
 

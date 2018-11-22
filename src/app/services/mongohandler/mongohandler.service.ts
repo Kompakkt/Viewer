@@ -1,5 +1,4 @@
 import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
 import {environment} from '../../../environments/environment';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 
@@ -18,8 +17,8 @@ export class MongohandlerService {
   }
 
   // TODO: any durch Interface ersetzen
-  public getCompilation(identifier: string): Observable<any[]> {
-    return this.http.get<any>(`${this.endpoint}/api/v1/get/find/compilation/${identifier}`);
+  public getCompilation(identifier: string): Promise<any> {
+    return this.http.get<any>(`${this.endpoint}/api/v1/get/find/compilation/${identifier}`).toPromise();
   }
 
 /* Funktionen aus ObjectsRepository, nur zum Vergleich
