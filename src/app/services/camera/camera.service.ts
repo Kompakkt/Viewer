@@ -113,6 +113,10 @@ export class CameraService {
     this.canvas.focus();
   }
 
+  public setActiveCameraTarget(target: Vector3): void {
+    this.arcRotateCamera.setTarget(target);
+  }
+
   private setCameraDefaults(camera: any): void {
 
     camera.keysUp.push(87);
