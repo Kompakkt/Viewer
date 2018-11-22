@@ -5,6 +5,8 @@ import {BabylonService} from '../babylon/babylon.service';
 import Vector3 = BABYLON.Vector3;
 import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
 
+import { DeviceDetectorService } from 'ngx-device-detector';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -15,7 +17,7 @@ export class CameraService {
 
   private arcRotateCamera: BABYLON.ArcRotateCamera;
   private universalCamera: BABYLON.UniversalCamera;
-  private deviceOrientCamera: BABYLON.VRDeviceOrientationFreeCamera;
+  private vrCamera: BABYLON.VRDeviceOrientationFreeCamera | BABYLON.VRDeviceOrientationArcRotateCamera;
 
   private alpha: number;
   private beta: number;
@@ -28,6 +30,7 @@ export class CameraService {
 
   constructor(
     private babylonService: BabylonService,
+    private deviceService: DeviceDetectorService
 ) {
   }
 
@@ -59,15 +62,16 @@ export class CameraService {
 
     this.arcRotateCamera.attachControl(this.canvas, false);
 
-    this.deviceOrientCamera = new BABYLON.VRDeviceOrientationFreeCamera('deviceOrientCamera',
-      new BABYLON.Vector3(this.x, this.y, this.z), this.scene);
+    this.vrCamera = this.deviceService.isMobile() ? new BABYLON.VRDeviceOrientationFreeCamera('vrCamera',
+      new BABYLON.Vector3(this.x, this.y, this.z), this.scene) :
+      new BABYLON.VRDeviceOrientationArcRotateCamera('vrCamera', Math.PI / 2, Math.PI / 4, 25, new BABYLON.Vector3(0, 0, 0), this.scene);
   }
 
   public setVRCam(): void {
 
-    if (this.scene.activeCamera.getClassName() !== 'deviceOrientCamera') {
-      this.deviceOrientCamera.position = this.scene.activeCamera.position;
-      this.setCameraActive(this.deviceOrientCamera);
+    if (this.scene.activeCamera.getClassName() !== 'vrCamera') {
+      this.vrCamera.position = this.scene.activeCamera.position;
+      this.setCameraActive(this.vrCamera);
     }
   }
 

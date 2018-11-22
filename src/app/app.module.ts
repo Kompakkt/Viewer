@@ -25,6 +25,7 @@ import { AnnotationComponent } from './components/annotation/annotation.componen
 import { AnnotationcardsComponent } from './components/annotationcards/annotationcards.component';
 import { AnnotationwalkthroughComponent } from './components/annotationwalkthrough/annotationwalkthrough.component';
 import {DragDropModule} from '@angular/cdk/drag-drop';
+import { DeviceDetectorModule } from 'ngx-device-detector';
 
 @NgModule({
   declarations: [
@@ -54,7 +55,8 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
     MatInputModule,
     MatListModule,
     MatDividerModule,
-    DragDropModule
+    DragDropModule,
+    DeviceDetectorModule.forRoot()
   ],
   providers: [],
   bootstrap: [AppComponent]
