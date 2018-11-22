@@ -36,7 +36,11 @@ export class ModelComponent implements OnInit {
       this.actionService.pickableModel(model.meshes[0].name, true);
       this.annotationService.initializeAnnotationMode(model.meshes[0].name);
       this.actualModelName = model.meshes[0].name;
+      this.annotationService.loadAnnotations(this.actualModelName);
+
     });
+
+
   }
 
 

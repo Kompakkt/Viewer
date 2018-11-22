@@ -19,6 +19,7 @@ export class AnnotationService {
 
   public annotations: Annotation[];
   private unsortedAnnotations: Annotation[];
+  private allAnnotations: Annotation[];
 
 
   constructor(private babylonService: BabylonService,
@@ -26,7 +27,20 @@ export class AnnotationService {
               private actionService: ActionService,
               private annotationmarkerService: AnnotationmarkerService) {
 
-    this.annotations = this.fetchData();
+    this.allAnnotations = this.fetchData();
+    this.annotations = [];
+  }
+
+  public loadAnnotations(modelName: string) {
+    this.annotationmarkerService.deleteAllMarker();
+    this.annotations = [];
+    for (let i = 0; i < this.allAnnotations.length; i++) {
+      if (this.allAnnotations[i].relatedModel === modelName) {
+        this.annotations.push(this.allAnnotations[i]);
+        this.annotationmarkerService.createAnnotationMarker(this.allAnnotations[i]);
+
+      }
+    }
 
   }
 
@@ -79,6 +93,7 @@ export class AnnotationService {
   private add(annotation): void {
     this.dataService.database.put(annotation);
     this.annotations.push(annotation);
+    this.allAnnotations.push(annotation);
   }
 
   private fetchData(): Array<any> {
@@ -86,7 +101,6 @@ export class AnnotationService {
 
     this.dataService.fetch().then(result => {
       for (let i = 0; i < result.rows.length; i++) {
-        this.annotationmarkerService.createAnnotationMarker(result.rows[i].doc);
         annotationList.push(result.rows[i].doc);
         console.log(result.rows[i].doc);
       }
@@ -103,6 +117,10 @@ export class AnnotationService {
     const index: number = this.annotations.indexOf(annotation);
     if (index !== -1) {
       this.annotations.splice(index, 1);
+    }
+    const indexb: number = this.allAnnotations.indexOf(annotation);
+    if (indexb !== -1) {
+      this.allAnnotations.splice(indexb, 1);
     }
   }
 
