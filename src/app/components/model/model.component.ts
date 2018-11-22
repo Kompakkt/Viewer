@@ -39,10 +39,10 @@ export class ModelComponent implements OnInit {
       this.cameraService.setActiveCameraTarget(model.meshes[0]._boundingInfo.boundingBox.centerWorld);
 
       // Füge Tags hinzu und lade Annotationen
-      BABYLON.Tags.AddTagsTo(model, model.meshes[0].name);
-      this.actionService.pickableModel(model.meshes[0].name, true);
-      this.annotationService.initializeAnnotationMode(model.meshes[0].name);
-      this.actualModelName = model.meshes[0].name;
+      BABYLON.Tags.AddTagsTo(model.meshes[0], this.model.name);
+      this.actionService.pickableModel(this.model.name, true);
+      this.annotationService.initializeAnnotationMode(this.model.name);
+      this.actualModelName = this.model.name;
       this.annotationService.loadAnnotations(this.actualModelName);
 
     });

@@ -35,6 +35,8 @@ export class AnnotationService {
     this.annotationmarkerService.deleteAllMarker();
     this.annotations = [];
     for (let i = 0; i < this.allAnnotations.length; i++) {
+      console.log(this.allAnnotations[i]);
+      console.log(modelName);
       if (this.allAnnotations[i].relatedModel === modelName) {
         this.annotations.push(this.allAnnotations[i]);
         this.annotationmarkerService.createAnnotationMarker(this.allAnnotations[i]);
@@ -66,7 +68,7 @@ export class AnnotationService {
     this.babylonService.createPreviewScreenshot(220).then(detailScreenshot => {
       const newAnnotation: Annotation = {
         _id: Math.random().toString(36).substr(2, 9),
-        relatedModel: result.pickedMesh.name,
+        relatedModel: BABYLON.Tags.GetTags(result.pickedMesh),
         ranking: String(this.annotations.length + 1),
         referencePoint: [{dimension: 'x', value: result.pickedPoint.x}, {dimension: 'y', value: result.pickedPoint.y}, {
           dimension: 'z', value: result.pickedPoint.z

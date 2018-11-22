@@ -32,8 +32,7 @@ export class ActionService {
 
 
   public pickableModel(modelName: string, pickable: boolean) {
-    const mesh = this.babylonService.getScene().getMeshByName(modelName);
-    mesh.isPickable = pickable;
+    this.babylonService.getScene().getMeshesByTags(modelName).map(model => model.isPickable = pickable);
   }
 
 }
