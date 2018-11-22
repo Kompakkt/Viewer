@@ -65,7 +65,7 @@ export class CameraService {
     this.vrCamera = this.deviceService.isMobile() ? new BABYLON.VRDeviceOrientationFreeCamera('vrCamera',
       new BABYLON.Vector3(this.x, this.y, this.z), this.scene) :
       new BABYLON.VRDeviceOrientationArcRotateCamera('vrCamera', Math.PI / 2, Math.PI / 4, 25, new BABYLON.Vector3(0, 0, 0), this.scene);
-    
+
     // Remove mouse input on mobile VR Camera to prevent flickering of meshes
     if (this.vrCamera instanceof BABYLON.VRDeviceOrientationFreeCamera) {
       this.vrCamera.inputs.remove(this.vrCamera.inputs.attached.mouse);

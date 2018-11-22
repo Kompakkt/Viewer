@@ -77,7 +77,7 @@ export class LoadingScreen implements BABYLON.ILoadingScreen {
     this.loadingTextDiv.innerHTML = this.loadingText;
 
     // Generating keyframes
-    var style = document.createElement('style');
+    const style = document.createElement('style');
     style.type = 'text/css';
 
     const keyFrames =
@@ -119,7 +119,7 @@ export class LoadingScreen implements BABYLON.ILoadingScreen {
         return;
       }
 
-      let loadingdiv = document.getElementById('loadingDiv');
+      const loadingdiv = document.getElementById('loadingDiv');
       document.body.removeChild(loadingdiv);
       window.removeEventListener('resize', this.resizeLoadingUI);
 
@@ -171,5 +171,5 @@ export class LoadingScreen implements BABYLON.ILoadingScreen {
     this.loadingDiv.style.top = canvasRect.top + 'px';
     this.loadingDiv.style.width = canvasRect.width + 'px';
     this.loadingDiv.style.height = canvasRect.height + 'px';
-  };
+  }
 }
