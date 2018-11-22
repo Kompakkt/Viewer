@@ -8,7 +8,6 @@ import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.serv
 @Injectable({
   providedIn: 'root'
 })
-
 export class CameraService {
 
   private canvas: HTMLCanvasElement;
@@ -16,7 +15,7 @@ export class CameraService {
 
   private arcRotateCamera: BABYLON.ArcRotateCamera;
   private universalCamera: BABYLON.UniversalCamera;
-  private webvrFreeCamera: BABYLON.WebVRFreeCamera;
+  private deviceOrientCamera: BABYLON.VRDeviceOrientationFreeCamera;
 
   private alpha: number;
   private beta: number;
@@ -60,18 +59,23 @@ export class CameraService {
 
     this.arcRotateCamera.attachControl(this.canvas, false);
 
-    this.webvrFreeCamera = new BABYLON.WebVRFreeCamera('webvrFreeCamera', new BABYLON.Vector3(this.x, this.y, this.z), this.scene);
+    this.deviceOrientCamera = new BABYLON.VRDeviceOrientationFreeCamera('deviceOrientCamera',
+      new BABYLON.Vector3(this.x, this.y, this.z), this.scene);
   }
 
-  public useVRcam(): void {
-    this.scene.activeCamera = this.webvrFreeCamera;
+  public setVRCam(): void {
+
+    if (this.scene.activeCamera.getClassName() !== 'deviceOrientCamera') {
+      this.deviceOrientCamera.position = this.scene.activeCamera.position;
+      this.setCameraActive(this.deviceOrientCamera);
+    }
   }
 
   public setCamArcRotate(): void {
 
     if (this.scene.activeCamera.getClassName() !== 'ArcRotateCamera') {
 
-      this.setCameraActive(this.arcRotateCamera, this.universalCamera);
+      this.setCameraActive(this.arcRotateCamera);
       this.arcRotateSettings();
     }
   }
@@ -80,7 +84,7 @@ export class CameraService {
 
     if (this.scene.activeCamera.getClassName() !== 'UniversalCamera') {
 
-      this.setCameraActive(this.universalCamera, this.arcRotateCamera);
+      this.setCameraActive(this.universalCamera);
       this.universalSettings();
     }
   }
@@ -109,11 +113,10 @@ export class CameraService {
     camera.setTarget(Vector3.Zero());
   }
 
-  private setCameraActive(camera1: any, camera2: any): void {
-
-    camera2.detachControl(this.canvas);
-    this.scene.activeCamera = camera1;
-    camera1.attachControl(this.canvas, false);
+  private setCameraActive(newActiveCamera: any): void {
+    this.scene.activeCamera.detachControl(this.canvas);
+    this.scene.activeCamera = newActiveCamera;
+    newActiveCamera.attachControl(this.canvas, false);
   }
 
   private arcRotateSettings(): void {

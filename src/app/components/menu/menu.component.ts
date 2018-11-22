@@ -40,7 +40,7 @@ export class MenuComponent implements OnInit {
   }
 
   public setVRcam() {
-    this.cameraService.useVRcam();
+    this.cameraService.setVRCam();
   }
 
   public setBackToDefault() {
