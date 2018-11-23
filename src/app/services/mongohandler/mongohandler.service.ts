@@ -21,6 +21,10 @@ export class MongohandlerService {
     return this.http.get<any>(`${this.endpoint}/api/v1/get/find/compilation/${identifier}`).toPromise();
   }
 
+  public updateScreenshot(identifier: string, screenshot: string): Promise<any> {
+    return this.http.post<any>(`${this.endpoint}/api/v1/post/screenshot/${identifier}`, {data: screenshot}).toPromise();
+  }
+
 /* Funktionen aus ObjectsRepository, nur zum Vergleich
   private findSingleInCollection(collection: Collection, identifier: string): Observable<Person | Institute | Tag> {
     return this.http.get<Person | Institute>(`${this.endpoint}/api/v1/get/find/${collection}/${identifier}`);
