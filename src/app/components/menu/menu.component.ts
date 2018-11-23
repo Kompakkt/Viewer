@@ -7,6 +7,8 @@ import {BabylonService} from '../../services/babylon/babylon.service';
 import {SkyboxService} from '../../services/skybox/skybox.service';
 import {SidenavService} from '../../services/sidenav/sidenav.service';
 import {AnnotationService} from '../../services/annotation/annotation.service';
+import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
+import {CatalogueService} from '../../services/catalogue/catalogue.service';
 
 @Component({
   selector: 'app-menu',
@@ -22,6 +24,8 @@ export class MenuComponent implements OnInit {
     private sidenavService: SidenavService,
     private babylonService: BabylonService,
     private annotationService: AnnotationService,
+    private mongohandlerService: MongohandlerService,
+    private catalogueService: CatalogueService,
     @Inject(DOCUMENT) private document: any
   ) {
   }
@@ -88,5 +92,14 @@ export class MenuComponent implements OnInit {
 
   public takeScreenshot() {
     this.cameraService.createScreenshot();
+    this.babylonService.createPreviewScreenshot(320).then((screenshot) => {
+      console.log('Screenshot size: ' + ((new TextEncoder().encode(screenshot)).length) / 1024 / 1024 + 'MB');
+      if (this.babylonService.getScene().meshes.length !== 0) {
+        this.mongohandlerService.updateScreenshot(this.catalogueService.activeModel._id, screenshot).then((result) => {
+          console.log('Sent!');
+          console.log(result);
+        });
+      }
+    });
   }
 }
