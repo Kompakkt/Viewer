@@ -21,6 +21,10 @@ export class CatalogueService {
 
   }
 
+  public updateCompilation(): void {
+    this.models = this.fetchData();
+  }
+
 
   public initializeCatalogue() {
 

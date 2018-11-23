@@ -98,6 +98,7 @@ export class MenuComponent implements OnInit {
         this.mongohandlerService.updateScreenshot(this.catalogueService.activeModel._id, screenshot).then((result) => {
           console.log('Sent!');
           console.log(result);
+          this.catalogueService.updateCompilation();
         });
       }
     });
