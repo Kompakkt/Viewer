@@ -10,7 +10,7 @@ import {forEach} from '@angular/router/src/utils/collection';
 })
 export class CatalogueService {
 
-
+  public activeModel: Model;
   public models: Model[];
   private unsortedModels: Model[];
 
