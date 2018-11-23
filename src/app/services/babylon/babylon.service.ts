@@ -100,14 +100,16 @@ export class BabylonService {
     return BABYLON.SceneSerializer.Serialize(this.scene);
   }
 
-  public createScreenshot(): void {
-    BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, {precision: 2});
+  public createScreenshot(): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, {precision: 2}, (screenshot) => {
+        resolve(screenshot);
+      });
+    });
   }
 
-  public createPreviewScreenshot(width) {
-
-    return new Promise<any>((resolve, reject) => {
-
+  public createPreviewScreenshot(width): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
       BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, width, function (screenshot) {
         resolve(screenshot);
       });

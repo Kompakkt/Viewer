@@ -252,8 +252,8 @@ export class CameraService {
     });
   }
 
-  public createScreenshot(): void {
-    this.babylonService.createScreenshot();
+  public createScreenshot(): Promise<string> {
+    return this.babylonService.createScreenshot();
   }
 
   public moveCameraToTarget(positionVector: BABYLON.Vector3) {
