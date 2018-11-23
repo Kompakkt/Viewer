@@ -93,11 +93,8 @@ export class MenuComponent implements OnInit {
   public takeScreenshot() {
     this.cameraService.createScreenshot();
     this.babylonService.createPreviewScreenshot(320).then((screenshot) => {
-      console.log('Screenshot size: ' + ((new TextEncoder().encode(screenshot)).length) / 1024 / 1024 + 'MB');
       if (this.babylonService.getScene().meshes.length !== 0) {
         this.mongohandlerService.updateScreenshot(this.catalogueService.activeModel._id, screenshot).then((result) => {
-          console.log('Sent!');
-          console.log(result);
           this.catalogueService.activeModel.preview = screenshot;
         });
       }
