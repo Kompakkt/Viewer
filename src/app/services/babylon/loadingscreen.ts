@@ -121,7 +121,7 @@ export class LoadingScreen implements BABYLON.ILoadingScreen {
     const onTransitionEnd = () => {
 
       if (!this.loadingDiv) {
-        alert('no loading div');
+        console.log('no loading div');
         return;
       }
 
