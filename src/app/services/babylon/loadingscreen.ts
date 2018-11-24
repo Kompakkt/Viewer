@@ -1,5 +1,6 @@
 import * as BABYLON from 'babylonjs';
 import Nullable = BABYLON.Nullable;
+import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreenhandler.service';
 
 /**
  * Extends Babylon.js/src/Loading/babylon.loadingScreen.ts
@@ -21,161 +22,62 @@ export class LoadingScreen implements BABYLON.ILoadingScreen {
   constructor(private renderingCanvas: HTMLCanvasElement,
               private loadingText = '',
               private loadingDivBackgroundColor = 'black',
-              private logo = '') {
+              private logo = '',
+              private loadingScreenHandler: LoadingscreenhandlerService) {
+    this.loadingScreenHandler.backgroundColor = this.loadingDivBackgroundColor;
+    this.loadingScreenHandler.logo = this.logo;
+    window.addEventListener('resize', this.resizeLoadingUI);
+    this.resizeLoadingUI();
   }
 
   /**
    * Function called to display the loading screen
    */
   public displayLoadingUI(): void {
-
-    if (this.loadingDiv) {
-      // Do not add a loading screen if there is already one
-      return;
+    if (!this.loadingScreenHandler.isLoading) {
+      this.loadingScreenHandler.updateOpacity('1');
     }
-
-    this.loadingDiv = document.createElement('div');
-
-    if (this.logo) {
-
-      const imgBack = new Image();
-      imgBack.src = this.logo;
-
-      imgBack.style.position = 'absolute';
-      imgBack.style.left = '50%';
-      imgBack.style.top = '50%';
-      imgBack.style.marginLeft = '-60px';
-      imgBack.style.marginTop = '-60px';
-      imgBack.style.animation = 'spin1 2s infinite ease-in-out';
-      imgBack.style.webkitAnimation = 'spin1 2s infinite ease-in-out';
-      imgBack.style.transformOrigin = '50% 50%';
-      imgBack.style.webkitTransformOrigin = '50% 50%';
-
-      this.loadingDiv.appendChild(imgBack);
-    }
-
-    this.loadingDiv.id = 'loadingDiv';
-    this.loadingDiv.style.opacity = '0';
-    this.loadingDiv.style.transition = 'opacity 2s ease';
-
-    this.loadingDiv.style.pointerEvents = 'none';
-
-    this.loadingDiv.style.zIndex = '999';
-
-    // Loading text
-    this.loadingTextDiv = document.createElement('div');
-    this.loadingTextDiv.style.position = 'absolute';
-    this.loadingTextDiv.style.left = '0';
-    this.loadingTextDiv.style.top = '50%';
-    this.loadingTextDiv.style.marginTop = '80px';
-    this.loadingTextDiv.style.width = '100%';
-    this.loadingTextDiv.style.height = '20px';
-    this.loadingTextDiv.style.fontFamily = 'Verdana';
-    this.loadingTextDiv.style.fontSize = '15px';
-    this.loadingTextDiv.style.color = 'white';
-    this.loadingTextDiv.style.textAlign = 'center';
-    this.loadingTextDiv.innerHTML = 'Loading';
-
-    this.loadingTextDiv.style.pointerEvents = 'none';
-
-    this.loadingDiv.appendChild(this.loadingTextDiv);
-
-    this.loadingTextDiv.innerHTML = this.loadingText;
-
-    // Generating keyframes
-    const style = document.createElement('style');
-    style.type = 'text/css';
-
-    const keyFrames =
-      `@-webkit-keyframes spin1 {\
-                    0% { -webkit-transform: rotate(0deg);}
-                    100% { -webkit-transform: rotate(360deg);}
-                }\
-                @keyframes spin1 {\
-                    0% { transform: rotate(0deg);}
-                    100% { transform: rotate(360deg);}
-                }`;
-
-    style.innerHTML = keyFrames;
-    document.getElementsByTagName('head')[0].appendChild(style);
-
-    this.resizeLoadingUI();
-
-    window.addEventListener('resize', this.resizeLoadingUI);
-
-    this.loadingDiv.style.backgroundColor = this.loadingDivBackgroundColor;
-    document.body.appendChild(this.loadingDiv);
-
-    this.loadingDiv.style.opacity = '1';
   }
 
   /**
    * Function called to hide the loading screen
    */
   public hideLoadingUI(): void {
-
-    if (!this.loadingDiv) {
-      return;
+    if (this.loadingScreenHandler.isLoading) {
+      this.loadingScreenHandler.updateOpacity('0');
     }
-
-    const onTransitionEnd = () => {
-
-      if (!this.loadingDiv) {
-        console.log('no loading div');
-        return;
-      }
-
-      const loadingdiv = document.getElementById('loadingDiv');
-      document.body.removeChild(loadingdiv);
-      window.removeEventListener('resize', this.resizeLoadingUI);
-
-      this.loadingDiv = null;
-    };
-
-    this.loadingDiv.style.opacity = '0';
-    this.loadingDiv.addEventListener('transitionend', onTransitionEnd);
   }
 
   /**
    * Gets or sets the text to display while loading
    */
   public set loadingUIText(text: string) {
-
-    if (this.loadingTextDiv) {
-      this.loadingTextDiv.innerHTML = text;
-    }
+    this.loadingScreenHandler.updateLoadingText(text);
   }
 
   public get loadingUIText(): string {
-    return this.loadingText;
+    return this.loadingScreenHandler.loadingText.source['value'];
   }
 
   /**
    * Gets or sets the color to use for the background
    */
   public get loadingUIBackgroundColor(): string {
-    return this.loadingDivBackgroundColor;
+    return this.loadingScreenHandler.backgroundColor;
   }
 
   public set loadingUIBackgroundColor(color: string) {
-
-    if (this.loadingDiv) {
-      this.loadingDiv.style.backgroundColor = color;
-    }
+    this.loadingScreenHandler.backgroundColor = color;
   }
 
   private resizeLoadingUI = () => {
-
-    if (!this.loadingDiv) {
-      return;
-    }
-
     const canvasRect = this.renderingCanvas.getBoundingClientRect();
 
-    this.loadingDiv.style.position = (window.getComputedStyle(this.renderingCanvas).position === 'fixed') ? 'fixed' : 'absolute';
-    this.loadingDiv.style.left = canvasRect.left + 'px';
-    this.loadingDiv.style.top = canvasRect.top + 'px';
-    this.loadingDiv.style.width = canvasRect.width + 'px';
-    this.loadingDiv.style.height = canvasRect.height + 'px';
+    this.loadingScreenHandler.updateLoadingStyle({
+      top: canvasRect.top + 'px',
+      left: canvasRect.left + 'px',
+      width: canvasRect.width + 'px',
+      height: canvasRect.height + 'px'
+    });
   }
 }

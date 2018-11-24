@@ -6,6 +6,7 @@ import {ActionService} from '../../services/action/action.service';
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {CameraService} from '../../services/camera/camera.service';
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
+import {LoadingscreenhandlerService} from '../../services/loadingscreenhandler/loadingscreenhandler.service';
 
 
 @Component({
@@ -22,7 +23,8 @@ export class ModelComponent implements OnInit {
               private actionService: ActionService,
               private annotationService: AnnotationService,
               private cameraService: CameraService,
-              private catalogueService: CatalogueService
+              private catalogueService: CatalogueService,
+              private loadingScreenHandler: LoadingscreenhandlerService
   ) {
   }
 
@@ -31,7 +33,12 @@ export class ModelComponent implements OnInit {
     this.catalogueService.Observables.model.subscribe((result) => this.loadModel());
   }
 
+  public changeModel(): void {
+    this.catalogueService.updateActiveModel(this.model);
+  }
+
   public loadModel(): void {
+    if (!this.loadingScreenHandler.isLoading) {
     this.babylonService.getScene().meshes.map(model => model.dispose());
 
     this.babylonService.loadModel('https://blacklodge.hki.uni-koeln.de:8065/models/',
@@ -50,8 +57,8 @@ export class ModelComponent implements OnInit {
       this.actualModelName = this.model.name;
       this.annotationService.loadAnnotations(this.actualModelName);
 
-    });
-
+     });
+    }
 
   }
 

@@ -30,6 +30,7 @@ import {AnnotationwalkthroughComponent} from './components/annotationwalkthrough
 import {DragDropModule} from '@angular/cdk/drag-drop';
 import {ModelComponent} from './components/model/model.component';
 import { CollectionsOverviewComponent } from './components/collections-overview/collections-overview.component';
+import { LoadingscreenComponent } from './components/loadingscreen/loadingscreen.component';
 
 @NgModule({
   declarations: [
@@ -42,7 +43,8 @@ import { CollectionsOverviewComponent } from './components/collections-overview/
     AnnotationcardsComponent,
     AnnotationwalkthroughComponent,
     ModelComponent,
-    CollectionsOverviewComponent
+    CollectionsOverviewComponent,
+    LoadingscreenComponent
   ],
   imports: [
     BrowserModule,

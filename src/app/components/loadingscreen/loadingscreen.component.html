@@ -1,0 +1,13 @@
+<div 
+[style.top]="style.top" 
+[style.left]="style.left" 
+[style.width]="style.width" 
+[style.height]="style.height" 
+[style.opacity]="opacity" 
+[style.background-color]="backgroundColor" 
+id="loadingDiv">
+	<img #loadingImage *ngIf="logo !== null" id="loadingDivImg" [src]="logo" alt="">
+	<div id="loadingDivText">
+		{{ loadingText }}
+	</div>
+</div>

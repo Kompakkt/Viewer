@@ -22,6 +22,7 @@ export class CatalogueService {
     models: this.Subjects.models.asObservable()
   };
   private unsortedModels: Model[];
+  private isFirstLoad = true;
 
 
   constructor(private mongohandlerService: MongohandlerService) {
@@ -62,7 +63,10 @@ export class CatalogueService {
     }).catch(error => console.error(error));
     if (compilation.models.length > 0) {
       this.Subjects.models.next(compilation.models);
-      this.updateActiveModel(compilation.models[0]);
+      if (this.isFirstLoad) {
+        this.updateActiveModel(compilation.models[0]);
+        this.isFirstLoad = false;
+      }
     }
   }
 }

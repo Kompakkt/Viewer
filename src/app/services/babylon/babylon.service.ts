@@ -6,6 +6,7 @@ import {MessageService} from '../message/message.service';
 
 import 'babylonjs-loaders';
 import {LoadingScreen} from './loadingscreen';
+import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreenhandler.service';
 
 /**
  * @author Zoe Schubert
@@ -21,7 +22,7 @@ export class BabylonService {
   private engine: BABYLON.Engine;
   private canvas: HTMLCanvasElement;
 
-  constructor(private message: MessageService) {
+  constructor(private message: MessageService, private loadingScreenHandler: LoadingscreenhandlerService) {
   }
 
   public bootstrap(canvas: HTMLCanvasElement, antialiasing: boolean): void {
@@ -73,7 +74,7 @@ export class BabylonService {
     const message = this.message;
     const engine = this.engine;
 
-    engine.loadingScreen = new LoadingScreen(this.canvas, '', '#111111', 'assets/img/kompakkt-icon.png');
+    engine.loadingScreen = new LoadingScreen(this.canvas, '', '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
 
     engine.displayLoadingUI();
 
