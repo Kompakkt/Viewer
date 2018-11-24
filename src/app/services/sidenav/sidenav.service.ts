@@ -8,13 +8,21 @@ export class SidenavService {
   constructor() {
   }
 
-  private isOpen = false;
+  private editorIsOpen = false;
+  private collectionsOverviewIsOpen = false;
 
-  @Output() change: EventEmitter<boolean> = new EventEmitter();
+  @Output() editor: EventEmitter<boolean> = new EventEmitter();
+  @Output() collectionsOverview: EventEmitter<boolean> = new EventEmitter();
 
-  public toggle(): void {
+  public toggleEditor(): void {
 
-    this.isOpen = !this.isOpen;
-    this.change.emit(this.isOpen);
+    this.editorIsOpen = !this.editorIsOpen;
+    this.editor.emit(this.editorIsOpen);
+  }
+
+  public toggleCollectionsOverview(): void {
+
+    this.collectionsOverviewIsOpen = !this.collectionsOverviewIsOpen;
+    this.collectionsOverview.emit(this.collectionsOverviewIsOpen);
   }
 }

@@ -1,24 +1,11 @@
 <mat-tab-group>
 
-
-  <mat-tab>
-    <ng-template mat-tab-label>
-      <mat-icon class="example-tab-icon">power_settings_new</mat-icon>
-    </ng-template>
-
-    <h3>Catalogue</h3>
-    <br>
-    <app-model class="model-box" *ngFor="let model of this.catalogueService.models;" [model]="model"></app-model>
-  </mat-tab>
-
-
   <mat-tab>
     <ng-template mat-tab-label>
       <mat-icon class="example-tab-icon">add_location</mat-icon>
     </ng-template>
 
     <h3>Annotations</h3>
-    <br>
 
     <div cdkDropList class="annotations-list" (cdkDropListDropped)="drop($event)"
          *ngIf="this.annotationService.annotations.length">
@@ -27,12 +14,4 @@
     </div>
   </mat-tab>
 
-
-  <mat-tab>
-    <ng-template mat-tab-label>
-      <mat-icon class="example-tab-icon">power_settings_new</mat-icon>
-    </ng-template>
-    <h3>Nothing</h3>
-    <br>
-  </mat-tab>
 </mat-tab-group>

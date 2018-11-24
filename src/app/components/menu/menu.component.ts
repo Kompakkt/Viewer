@@ -86,8 +86,12 @@ export class MenuComponent implements OnInit {
     console.log(this.babylonService.saveScene());
   }
 
-  public editScene() {
-    this.sidenavService.toggle();
+  public editScene(): void {
+    this.sidenavService.toggleEditor();
+  }
+
+  public toggleCollectionsOverview(): void {
+    this.sidenavService.toggleCollectionsOverview();
   }
 
   public takeScreenshot() {

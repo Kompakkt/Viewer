@@ -1,0 +1,24 @@
+:host {
+  box-sizing: border-box;
+  display: none;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  border: 0;
+  padding: 25px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.7);
+  position: absolute;
+  height: 90%;
+  width: 300px;
+  z-index: 50;
+  top: 0;
+  right: 0;
+}
+
+:host.is-open {
+  display: block;
+}
+
+.mat-tab-group {
+  width: 300px;
+  height: 100%;
+}
