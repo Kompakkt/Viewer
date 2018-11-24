@@ -27,7 +27,6 @@ export class LoadingScreen implements BABYLON.ILoadingScreen {
     this.loadingScreenHandler.backgroundColor = this.loadingDivBackgroundColor;
     this.loadingScreenHandler.logo = this.logo;
     window.addEventListener('resize', this.resizeLoadingUI);
-    this.resizeLoadingUI();
   }
 
   /**
