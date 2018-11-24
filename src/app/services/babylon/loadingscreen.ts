@@ -60,6 +60,8 @@ export class LoadingScreen implements BABYLON.ILoadingScreen {
 
     this.loadingDiv.style.pointerEvents = 'none';
 
+    this.loadingDiv.style.zIndex = '999';
+
     // Loading text
     this.loadingTextDiv = document.createElement('div');
     this.loadingTextDiv.style.position = 'absolute';
