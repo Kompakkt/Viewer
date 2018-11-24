@@ -17,12 +17,14 @@ export class AnnotationwalkthroughComponent implements OnInit {
 
   constructor(public annotationService: AnnotationService, private cameraService: CameraService,
               private annotationmarkerService: AnnotationmarkerService) {
-    this.title = 'walkthrough annotation';
+
+    this.title = '';
     this.positionVector = BABYLON.Vector3.Zero();
     this.actualRanking = 0;
   }
 
   public previousAnnotation() {
+
     if (this.annotationService.annotations.length) {
       if (this.actualRanking === 0) {
         this.actualRanking = this.annotationService.annotations.length;
@@ -41,6 +43,7 @@ export class AnnotationwalkthroughComponent implements OnInit {
   }
 
   public nextAnnotation() {
+
     if (this.annotationService.annotations.length) {
       if (this.actualRanking > this.annotationService.annotations.length - 1) {
         this.actualRanking = this.annotationService.annotations.length - 1;
@@ -63,6 +66,7 @@ export class AnnotationwalkthroughComponent implements OnInit {
   }
 
   private getAction(index: number) {
+
     const test = this.annotationService.annotations[index];
     const test2 = this.annotationService.annotations.length;
     console.log('annotation an der Stelle ' + index + ' ist ' + test + 'Array länge ' + test2);

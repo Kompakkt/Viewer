@@ -1,12 +1,5 @@
-<mat-tab-group>
+<h3>Objektübersicht</h3>
 
-  <mat-tab>
-    <ng-template mat-tab-label>
-      <mat-icon class="example-tab-icon">power_settings_new</mat-icon>
-    </ng-template>
-
-    <h3>Catalogue</h3>
-    <app-model class="model-box" *ngFor="let model of this.catalogueService.Observables.models.source['value'];" [model]="model"></app-model>
-  </mat-tab>
-
-</mat-tab-group>
+<div id="model-overview">
+  <app-model class="model-box" *ngFor="let model of this.catalogueService.Observables.models.source['value'];" [model]="model"></app-model>
+</div>
