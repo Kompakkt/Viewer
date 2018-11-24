@@ -3,7 +3,6 @@
   display: none;
   font-family: Roboto, "Helvetica Neue", sans-serif;
   border: 0;
-  padding: 25px;
   color: #fff;
   background: rgba(0, 0, 0, 0.7);
   position: absolute;
@@ -15,8 +14,19 @@
   overflow-y: scroll;
 }
 
+:host h3 {
+  background-color: #104b74;
+  padding: 15px;
+  margin: 0;
+}
+
 :host.is-open {
   display: block;
+}
+
+
+#model-overview {
+  padding: 25px;
 }
 
 .mat-tab-group {

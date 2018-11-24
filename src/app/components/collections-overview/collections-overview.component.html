@@ -1,2 +1,5 @@
 <h3>Objektübersicht</h3>
-<app-model class="model-box" *ngFor="let model of this.catalogueService.models;" [model]="model"></app-model>
+
+<div id="model-overview">
+  <app-model class="model-box" *ngFor="let model of this.catalogueService.models;" [model]="model"></app-model>
+</div>
