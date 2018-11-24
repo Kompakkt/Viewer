@@ -128,15 +128,8 @@ export class AnnotationmarkerService {
   }
 
   public deleteAllMarker() {
-    const marker = this.babylonService.getScene().getMeshesByTags('label');
-    marker.forEach(function (value) {
-      value.dispose();
-    });
-
-    const planes = this.babylonService.getScene().getMeshesByTags('plane');
-    planes.forEach(function (value) {
-      value.dispose();
-    });
+    this.babylonService.getScene().getMeshesByTags('label').map(mesh => mesh.dispose());
+    this.babylonService.getScene().getMeshesByTags('plane').map(mesh => mesh.dispose());
   }
 
   public redrawAllMarker(annotations: Annotation[]) {
