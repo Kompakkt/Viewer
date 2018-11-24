@@ -8,10 +8,11 @@
   background: rgba(0, 0, 0, 0.7);
   position: absolute;
   height: 90%;
-  width: 300px;
+  width: 350px;
   z-index: 50;
   top: 0;
   right: 0;
+  overflow-y: scroll;
 }
 
 :host.is-open {

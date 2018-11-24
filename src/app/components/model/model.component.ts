@@ -30,10 +30,13 @@ export class ModelComponent implements OnInit {
   }
 
   public loadModel(): void {
+
     this.babylonService.getScene().meshes.map(model => model.dispose());
 
-    this.babylonService.loadModel('https://blacklodge.hki.uni-koeln.de:8065/models/', this.model.processed.low)
-    .then(model => {
+    const modelUrl = 'https://blacklodge.hki.uni-koeln.de:8065/models/';
+
+    this.babylonService.loadModel(modelUrl, this.model.processed.low).then(model => {
+
       // Warte auf Antwort von loadModel, da loadModel ein Promise<object> von ImportMeshAync übergibt
       // model ist hier das neu geladene Model, aus dem wir direkt den Namen nehmen können
 
@@ -49,11 +52,6 @@ export class ModelComponent implements OnInit {
       this.annotationService.initializeAnnotationMode(this.model.name);
       this.actualModelName = this.model.name;
       this.annotationService.loadAnnotations(this.actualModelName);
-
     });
-
-
   }
-
-
 }

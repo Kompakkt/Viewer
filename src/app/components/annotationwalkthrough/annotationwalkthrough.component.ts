@@ -17,7 +17,7 @@ export class AnnotationwalkthroughComponent implements OnInit {
 
   constructor(public annotationService: AnnotationService, private cameraService: CameraService,
               private annotationmarkerService: AnnotationmarkerService) {
-    
+
     this.title = '';
     this.positionVector = BABYLON.Vector3.Zero();
     this.actualRanking = 0;

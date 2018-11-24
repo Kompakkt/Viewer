@@ -1,33 +1,19 @@
-<mat-card class="single-model-card"
-          [style.top.px]="positionLeft"
-          [style.left.px]="positionRight">
+<mat-card class="model-card">
 
-  <form class="model-form">
+  <mat-card-header>
 
-    <mat-card-header>
+    <mat-card-title>
+      {{model.name}}
+    </mat-card-title>
 
-      <mat-card-title>
-        <span>{{model.name | uppercase}}</span>
-      </mat-card-title>
+  </mat-card-header>
 
-    </mat-card-header>
+  <img mat-card-image src={{model.preview}} (click)="loadModel()">
 
-    <img mat-card-image src={{model.preview}}>
+  <!--
+  <mat-card-content>
 
-    <mat-card-content>
+  </mat-card-content>
+   -->
 
-    </mat-card-content>
-
-
-    <mat-card-actions>
-
-      <button mat-icon-button (click)="loadModel()"
-              matTooltip="Load" matTooltipPosition="above">
-        <mat-icon aria-label="Load">video_call</mat-icon>
-      </button>
-
-    </mat-card-actions>
-
-
-  </form>
 </mat-card>
