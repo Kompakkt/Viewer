@@ -27,18 +27,18 @@ export class ModelComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.catalogueService.Observables.quality.subscribe((result) => this.loadModel());
+    this.catalogueService.Observables.model.subscribe((result) => this.loadModel());
   }
 
   public loadModel(): void {
     this.babylonService.getScene().meshes.map(model => model.dispose());
 
-    this.babylonService.loadModel('https://blacklodge.hki.uni-koeln.de:8065/models/', this.model.processed.low)
+    this.babylonService.loadModel('https://blacklodge.hki.uni-koeln.de:8065/models/',
+      this.catalogueService.Observables.model.source['value'].processed[this.catalogueService.Observables.quality.source['value']])
     .then(model => {
       // Warte auf Antwort von loadModel, da loadModel ein Promise<object> von ImportMeshAync übergibt
       // model ist hier das neu geladene Model, aus dem wir direkt den Namen nehmen können
-
-      // Weise den CatalogueService darauf hin, welches Modell aktiv ist
-      this.catalogueService.activeModel = this.model;
 
       // Zentriere auf das neu geladene Model
       this.cameraService.setActiveCameraTarget(model.meshes[0]._boundingInfo.boundingBox.centerWorld);

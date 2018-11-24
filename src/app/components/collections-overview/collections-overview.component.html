@@ -6,7 +6,7 @@
     </ng-template>
 
     <h3>Catalogue</h3>
-    <app-model class="model-box" *ngFor="let model of this.catalogueService.models;" [model]="model"></app-model>
+    <app-model class="model-box" *ngFor="let model of this.catalogueService.Observables.models.source['value'];" [model]="model"></app-model>
   </mat-tab>
 
 </mat-tab-group>

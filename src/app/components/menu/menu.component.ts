@@ -17,6 +17,7 @@ import {CatalogueService} from '../../services/catalogue/catalogue.service';
 })
 export class MenuComponent implements OnInit {
 
+  private activeModel;
 
   constructor(
     private skyboxService: SkyboxService,
@@ -33,6 +34,7 @@ export class MenuComponent implements OnInit {
   public fullscreen: Boolean = false;
 
   ngOnInit() {
+    this.catalogueService.Observables.model.subscribe((newModel) => this.activeModel = newModel);
   }
 
   public setCamArcRotate() {
@@ -49,6 +51,12 @@ export class MenuComponent implements OnInit {
 
   public setBackToDefault() {
     this.cameraService.setBackToDefault();
+  }
+
+  public setModelQuality(quality: string) {
+    if (this.catalogueService.Observables.quality.source['value'] !== quality) {
+      this.catalogueService.updateQuality(quality);
+    }
   }
 
   public quitFullscreen() {
@@ -98,8 +106,8 @@ export class MenuComponent implements OnInit {
     this.cameraService.createScreenshot();
     this.babylonService.createPreviewScreenshot(320).then((screenshot) => {
       if (this.babylonService.getScene().meshes.length !== 0) {
-        this.mongohandlerService.updateScreenshot(this.catalogueService.activeModel._id, screenshot).then((result) => {
-          this.catalogueService.activeModel.preview = screenshot;
+        this.mongohandlerService.updateScreenshot(this.activeModel.model._id, screenshot).then((result) => {
+          this.activeModel.model.preview = screenshot;
         });
       }
     });

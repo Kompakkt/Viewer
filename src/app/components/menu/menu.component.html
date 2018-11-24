@@ -28,6 +28,7 @@
 <!-- Settings Menu -->
 <mat-menu #settingsMenu="matMenu" yPosition="above" [overlapTrigger]="false">
   <button mat-menu-item [matMenuTriggerFor]="cameras">Cameras</button>
+  <button mat-menu-item [matMenuTriggerFor]="quality">Quality</button>
   <!--
   <button mat-menu-item [matMenuTriggerFor]="skyboxes">Skyboxes</button>
   -->
@@ -41,6 +42,14 @@
   <button mat-menu-item (click)="setBackToDefault()">Reset Camera</button>
 </mat-menu>
 <!-- / Cameras Submenu -->
+
+<!-- Quality Submenu -->
+<mat-menu #quality="matMenu">
+  <button mat-menu-item (click)="setModelQuality('high')">High</button>
+  <button mat-menu-item (click)="setModelQuality('medium')">Medium</button>
+  <button mat-menu-item (click)="setModelQuality('low')">Low</button>
+</mat-menu>
+<!-- / Quality Submenu -->
 
 <!-- Skyboxes Submenu -->
 <!--
