@@ -4,7 +4,7 @@
           *ngIf = "visibility"
           id = {{annotation._id}}>
 
-  <form class="annotation-form">
+  <form class="annotation-form" (ngSubmit)="onSubmit($event)">
 
     <mat-card-header>
 
@@ -18,7 +18,8 @@
 
       <button id="closeButton"
               mat-icon-button
-              (click)="closeAnnotation()">
+              (click)="closeAnnotation()"
+              type="button">
         <mat-icon aria-label="Close">close</mat-icon>
       </button>
 
@@ -38,12 +39,14 @@
     <mat-card-actions>
 
       <button mat-icon-button (click)="toggleEditViewMode()"
-              matTooltip={{labelModeText}} matTooltipPosition="above">
+              matTooltip={{labelModeText}} matTooltipPosition="above"
+              type="button">
         <mat-icon attr.aria-label={{labelModeText}}>{{labelMode}}</mat-icon>
       </button>
 
       <button mat-icon-button (click)="deleteAnnotation()"
-              matTooltip="Delete" matTooltipPosition="above">
+              matTooltip="Delete" matTooltipPosition="above"
+              type="button">
         <mat-icon aria-label="Delete">delete</mat-icon>
       </button>
 

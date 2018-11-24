@@ -74,6 +74,10 @@ export class AnnotationsEditorComponent implements OnInit {
     this.dataService.updateAnnotation(this.annotation._id, this.annotation.title, this.annotation.description,
       this.preview, this.annotation.cameraPosition, this.annotation.validated);
   }
+
+  public onSubmit(event) {
+    console.log(event);
+  }
 }
 
 

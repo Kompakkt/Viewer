@@ -1,5 +1,5 @@
 <mat-card class="annotation-card">
-  <form class="annotation-form">
+  <form class="annotation-form" (ngSubmit)="onSubmit($event)">
 
 
     <mat-card-header (click)="!editMode ? collapsed = !collapsed : false">
@@ -37,7 +37,8 @@
       <button mat-icon-button (click)="selectPerspective()"
               matTooltip="Select Perspective"
               matTooltipPosition="right"
-              *ngIf="editMode">
+              *ngIf="editMode"
+              type="button">
         <mat-icon aria-label="Select Perspective">camera</mat-icon>
       </button>
 
@@ -47,12 +48,14 @@
     <mat-card-actions>
 
       <button mat-icon-button (click)="toggleEditViewMode()"
-              matTooltip={{labelModeText}} matTooltipPosition="above">
+              matTooltip={{labelModeText}} matTooltipPosition="above"
+              type="button">
         <mat-icon attr.aria-label={{labelModeText}}>{{labelMode}}</mat-icon>
       </button>
 
       <button mat-icon-button (click)="deleteAnnotation()"
-              matTooltip="Delete" matTooltipPosition="above">
+              matTooltip="Delete" matTooltipPosition="above"
+              type="button">
         <mat-icon aria-label="Delete">delete</mat-icon>
       </button>
 

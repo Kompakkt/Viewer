@@ -86,4 +86,7 @@ export class AnnotationComponent implements OnInit {
     this.dataService.updateAnnotation(this.annotation._id, this.annotation.title, this.annotation.description);
   }
 
+  public onSumbit(event) {
+    console.log(event);
+  }
 }
