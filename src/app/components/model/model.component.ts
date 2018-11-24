@@ -29,23 +29,24 @@ export class ModelComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.catalogueService.Observables.quality.subscribe((result) => this.loadModel());
-    this.catalogueService.Observables.model.subscribe((result) => this.loadModel());
+    this.catalogueService.Observables.quality.subscribe((result) => {
+      this.catalogueService.updateActiveModel(this.catalogueService.Observables.model.source['_value']);
+    });
+    this.catalogueService.Observables.model.subscribe((result) => this.loadModel(result));
   }
 
   public changeModel(): void {
     this.catalogueService.updateActiveModel(this.model);
   }
 
-  public loadModel(): void {
+  public loadModel(newModel: Model): void {
     if (!this.loadingScreenHandler.isLoading) {
       this.babylonService.getScene().meshes.map(model => model.dispose());
 
       const modelUrl = 'https://blacklodge.hki.uni-koeln.de:8065/models/';
-      const quality = this.catalogueService.Observables.quality.source['value'];
-      const modelPath = this.catalogueService.Observables.model.source['value'].processed[quality];
+      const quality = this.catalogueService.Observables.quality.source['_value'];
 
-      this.babylonService.loadModel(modelUrl, modelPath).then(model => {
+      this.babylonService.loadModel(modelUrl, newModel.processed[quality]).then(model => {
         // Warte auf Antwort von loadModel, da loadModel ein Promise<object> von ImportMeshAync übergibt
         // model ist hier das neu geladene Model, aus dem wir direkt den Namen nehmen können
 
@@ -53,10 +54,10 @@ export class ModelComponent implements OnInit {
         this.cameraService.setActiveCameraTarget(model.meshes[0]._boundingInfo.boundingBox.centerWorld);
 
         // Füge Tags hinzu und lade Annotationen
-        BABYLON.Tags.AddTagsTo(model.meshes[0], this.model.name);
-        this.actionService.pickableModel(this.model.name, true);
-        this.annotationService.initializeAnnotationMode(this.model.name);
-        this.actualModelName = this.model.name;
+        BABYLON.Tags.AddTagsTo(model.meshes[0], newModel.name);
+        this.actionService.pickableModel(newModel.name, true);
+        this.annotationService.initializeAnnotationMode(newModel.name);
+        this.actualModelName = newModel.name;
         this.annotationService.loadAnnotations(this.actualModelName);
       });
     }
