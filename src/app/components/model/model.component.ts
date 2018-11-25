@@ -32,21 +32,21 @@ export class ModelComponent implements OnInit {
     this.catalogueService.Observables.quality.subscribe((result) => {
       this.catalogueService.updateActiveModel(this.catalogueService.Observables.model.source['_value']);
     });
-    this.catalogueService.Observables.model.subscribe((result) => this.loadModel(result));
+    this.catalogueService.Observables.model.subscribe(async (result) => this.loadModel(result));
   }
 
   public changeModel(): void {
     this.catalogueService.updateActiveModel(this.model);
   }
 
-  public loadModel(newModel: Model): void {
+  public loadModel(newModel: Model) {
     if (!this.loadingScreenHandler.isLoading) {
       this.babylonService.getScene().meshes.map(model => model.dispose());
 
       const modelUrl = 'https://blacklodge.hki.uni-koeln.de:8065/models/';
       const quality = this.catalogueService.Observables.quality.source['_value'];
 
-      this.babylonService.loadModel(modelUrl, newModel.processed[quality]).then(model => {
+      this.babylonService.loadModel(modelUrl, newModel.processed[quality]).then(async (model) => {
         // Warte auf Antwort von loadModel, da loadModel ein Promise<object> von ImportMeshAync übergibt
         // model ist hier das neu geladene Model, aus dem wir direkt den Namen nehmen können
 
@@ -56,9 +56,11 @@ export class ModelComponent implements OnInit {
         // Füge Tags hinzu und lade Annotationen
         BABYLON.Tags.AddTagsTo(model.meshes[0], newModel.name);
         this.actionService.pickableModel(newModel.name, true);
-        this.annotationService.initializeAnnotationMode(newModel.name);
-        this.actualModelName = newModel.name;
-        this.annotationService.loadAnnotations(this.actualModelName);
+        setTimeout(() => {
+          while (this.loadingScreenHandler.isLoading) { }
+          this.annotationService.initializeAnnotationMode(newModel.name);
+          this.annotationService.loadAnnotations(newModel.name);
+        }, 0);
       });
     }
   }
