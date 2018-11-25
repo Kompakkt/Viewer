@@ -30,6 +30,7 @@ export class BabylonService {
     this.canvas = canvas;
     this.engine = new BABYLON.Engine(canvas, antialiasing, {preserveDrawingBuffer: true, stencil: true});
     this.scene = new BABYLON.Scene(this.engine);
+    this.engine.loadingScreen = new LoadingScreen(this.canvas, '', '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
   }
 
   public resize(): void {
@@ -73,8 +74,6 @@ export class BabylonService {
 
     const message = this.message;
     const engine = this.engine;
-
-    engine.loadingScreen = new LoadingScreen(this.canvas, '', '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
 
     engine.displayLoadingUI();
 
