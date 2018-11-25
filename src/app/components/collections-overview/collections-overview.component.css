@@ -6,7 +6,7 @@
   color: #fff;
   background: rgba(0, 0, 0, 0.7);
   position: absolute;
-  height: 90%;
+  height: 100%;
   width: 350px;
   z-index: 50;
   top: 0;
@@ -27,6 +27,7 @@
 
 #model-overview {
   padding: 25px;
+  height: 100%;
 }
 
 .mat-tab-group {
