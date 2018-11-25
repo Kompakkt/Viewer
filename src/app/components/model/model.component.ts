@@ -35,7 +35,7 @@ export class ModelComponent implements OnInit {
     this.catalogueService.Observables.model.subscribe(async (result) => this.loadModel(result));
   }
 
-  public changeModel(): void {
+  public async changeModel() {
     this.catalogueService.updateActiveModel(this.model);
   }
 
@@ -56,11 +56,13 @@ export class ModelComponent implements OnInit {
         // Füge Tags hinzu und lade Annotationen
         BABYLON.Tags.AddTagsTo(model.meshes[0], newModel.name);
         this.actionService.pickableModel(newModel.name, true);
+
+        // TODO: Irgendwie auf Initialisierung des annotationServices warten
         setTimeout(() => {
           while (this.loadingScreenHandler.isLoading) { }
           this.annotationService.initializeAnnotationMode(newModel.name);
           this.annotationService.loadAnnotations(newModel.name);
-        }, 0);
+        }, 500);
       });
     }
   }

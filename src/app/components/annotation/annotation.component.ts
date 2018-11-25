@@ -23,6 +23,7 @@ export class AnnotationComponent implements OnInit {
   public positionRight = 0;
   public visibility: boolean;
   public id = '';
+  public opacity = '0';
 
 
   constructor(private dataService: DataService, private annotationService: AnnotationService, private babylonService: BabylonService
@@ -35,6 +36,9 @@ export class AnnotationComponent implements OnInit {
 
     setInterval(() => {
       this.setPosition(this.annotation);
+    }, 10);
+    setTimeout(() => {
+      this.opacity = '1';
     }, 10);
   }
 
@@ -62,11 +66,17 @@ export class AnnotationComponent implements OnInit {
 
 
   public deleteAnnotation(): void {
-    this.annotationService.deleteAnnotation(this.annotation);
+    this.opacity = '0';
+    setTimeout(() => {
+      this.annotationService.deleteAnnotation(this.annotation);
+    }, 500);
   }
 
   private closeAnnotation(): void {
-    this.visibility = false;
+    this.opacity = '0';
+    setTimeout(() => {
+      this.visibility = false;
+    }, 500);
   }
 
   public toggleEditViewMode() {

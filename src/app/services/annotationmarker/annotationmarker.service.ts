@@ -127,9 +127,9 @@ export class AnnotationmarkerService {
     });
   }
 
-  public deleteAllMarker() {
-    this.babylonService.getScene().getMeshesByTags('label').map(mesh => mesh.dispose());
-    this.babylonService.getScene().getMeshesByTags('plane').map(mesh => mesh.dispose());
+  public async deleteAllMarker() {
+    await this.babylonService.getScene().getMeshesByTags('label').map(mesh => mesh.dispose());
+    await this.babylonService.getScene().getMeshesByTags('plane').map(mesh => mesh.dispose());
   }
 
   public redrawAllMarker(annotations: Annotation[]) {

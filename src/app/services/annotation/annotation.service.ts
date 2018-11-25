@@ -31,22 +31,19 @@ export class AnnotationService {
     this.annotations = [];
   }
 
-  public loadAnnotations(modelName: string) {
-    this.annotationmarkerService.deleteAllMarker();
+  public async loadAnnotations(modelName: string) {
+    await this.annotationmarkerService.deleteAllMarker();
     this.annotations = [];
     for (let i = 0; i < this.allAnnotations.length; i++) {
-      console.log(this.allAnnotations[i]);
-      console.log(modelName);
       if (this.allAnnotations[i].relatedModel === modelName) {
         this.annotations.push(this.allAnnotations[i]);
         this.annotationmarkerService.createAnnotationMarker(this.allAnnotations[i]);
-
       }
     }
 
   }
 
-  public initializeAnnotationMode(modelName: string) {
+  public async initializeAnnotationMode(modelName: string) {
     this.actionService.createActionManager(modelName, BABYLON.ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
 
     this.unsortedAnnotations = this.annotations.slice(0);
