@@ -20,14 +20,18 @@ export class LoadModelService {
   ) {
   }
 
-  public loadModel(newModel: Model) {
+  public loadModel(newModel: Model, quality?: string) {
     if (!this.loadingScreenHandler.isLoading) {
       try {
         this.babylonService.getScene().meshes.map(model => model.dispose());
        } catch (e) {}
 
       const modelUrl = 'https://blacklodge.hki.uni-koeln.de:8065/models/';
-      const quality = 'low';
+
+      if (quality === undefined) {
+        const quality = 'low';  
+      }
+      
 
       this.babylonService.loadModel(modelUrl, newModel.processed[quality]).then(async (model) => {
         // Warte auf Antwort von loadModel, da loadModel ein Promise<object> von ImportMeshAync übergibt

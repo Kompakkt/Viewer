@@ -1,11 +1,11 @@
-import {Injectable} from '@angular/core';
-import {Model} from '../../interfaces/model/model.interface';
-import {BabylonService} from '../babylon/babylon.service';
-import {MongohandlerService} from '../mongohandler/mongohandler.service';
-import {Annotation} from '../../interfaces/annotation/annotation';
-import {forEach} from '@angular/router/src/utils/collection';
-import {BehaviorSubject} from 'rxjs';
-import {LoadModelService} from '../load-model/load-model.service';
+import { Injectable } from '@angular/core';
+import { Model } from '../../interfaces/model/model.interface';
+import { BabylonService } from '../babylon/babylon.service';
+import { MongohandlerService } from '../mongohandler/mongohandler.service';
+import { Annotation } from '../../interfaces/annotation/annotation';
+import { forEach } from '@angular/router/src/utils/collection';
+import { BehaviorSubject } from 'rxjs';
+import { LoadModelService } from '../load-model/load-model.service';
 
 @Injectable({
   providedIn: 'root'
@@ -26,14 +26,13 @@ export class CatalogueService {
   private isFirstLoad = true;
 
 
-   constructor(private mongohandlerService: MongohandlerService, private loadModelSerivce: LoadModelService) {
+  constructor(private mongohandlerService: MongohandlerService, private loadModelSerivce: LoadModelService) {
     if (this.isFirstLoad && location.href !== location.origin) {
-      const modelUrl = location.href.replace(location.origin, '').replace('/models/', '');
+      const modelUrl = location.href.replace(location.origin, '').replace('/models/', '').replace('?','');
       // TODO: somehow wait for Kompakkt to be initialized
-        console.log('Load model from origin');
-        this.updateQuality('low');
-        setTimeout(() => {
-          this.loadModelSerivce.loadModel({
+      this.updateQuality('low');
+      setTimeout(() => {
+        this.loadModelSerivce.loadModel({
           _id: 'PreviewModel',
           name: 'PreviewModel',
           finished: false,
@@ -52,7 +51,8 @@ export class CatalogueService {
             high: modelUrl,
             raw: modelUrl
           }
-        })}, 5000);
+        }, 'low');
+      }, 5000);
     } else {
       this.fetchData();
     }
