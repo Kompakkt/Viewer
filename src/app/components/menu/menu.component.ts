@@ -1,4 +1,6 @@
 import {Component, Inject, Input, OnInit} from '@angular/core';
+import {DomSanitizer} from '@angular/platform-browser';
+import {MatIconRegistry} from '@angular/material';
 
 import {DOCUMENT} from '@angular/common';
 
@@ -10,6 +12,10 @@ import {AnnotationService} from '../../services/annotation/annotation.service';
 import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
 
+/**
+ * @author Zoe Schubert
+ */
+
 @Component({
   selector: 'app-menu',
   templateUrl: './menu.component.html',
@@ -20,6 +26,8 @@ export class MenuComponent implements OnInit {
   private activeModel;
 
   constructor(
+    private iconRegistry: MatIconRegistry,
+    private sanitizer: DomSanitizer,
     private skyboxService: SkyboxService,
     private cameraService: CameraService,
     private sidenavService: SidenavService,
@@ -29,6 +37,9 @@ export class MenuComponent implements OnInit {
     private catalogueService: CatalogueService,
     @Inject(DOCUMENT) private document: any
   ) {
+    iconRegistry.addSvgIcon(
+      'cardboard',
+      sanitizer.bypassSecurityTrustResourceUrl('assets/img/google-cardboard.svg'));
   }
 
   public fullscreen: Boolean = false;
