@@ -34,7 +34,7 @@ export class MenuComponent implements OnInit {
   public fullscreen: Boolean = false;
 
   ngOnInit() {
-    this.catalogueService.Observables.model.subscribe((newModel) => this.activeModel = newModel);
+    // this.catalogueService.Observables.model.subscribe((newModel) => this.activeModel = newModel);
   }
 
   public setCamArcRotate() {

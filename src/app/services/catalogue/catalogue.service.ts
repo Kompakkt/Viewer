@@ -5,6 +5,7 @@ import {MongohandlerService} from '../mongohandler/mongohandler.service';
 import {Annotation} from '../../interfaces/annotation/annotation';
 import {forEach} from '@angular/router/src/utils/collection';
 import {BehaviorSubject} from 'rxjs';
+import {LoadModelService} from '../load-model/load-model.service';
 
 @Injectable({
   providedIn: 'root'
@@ -25,8 +26,36 @@ export class CatalogueService {
   private isFirstLoad = true;
 
 
-  constructor(private mongohandlerService: MongohandlerService) {
-    this.fetchData();
+   constructor(private mongohandlerService: MongohandlerService, private loadModelSerivce: LoadModelService) {
+    if (this.isFirstLoad && location.href !== location.origin) {
+      const modelUrl = location.href.replace(location.origin, '').replace('/models/', '');
+      // TODO: somehow wait for Kompakkt to be initialized
+        console.log('Load model from origin');
+        this.updateQuality('low');
+        setTimeout(() => {
+          this.loadModelSerivce.loadModel({
+          _id: 'PreviewModel',
+          name: 'PreviewModel',
+          finished: false,
+          online: false,
+          files: [
+            modelUrl
+          ],
+          processed: {
+            time: {
+              start: '',
+              end: '',
+              total: ''
+            },
+            low: modelUrl,
+            medium: modelUrl,
+            high: modelUrl,
+            raw: modelUrl
+          }
+        })}, 5000);
+    } else {
+      this.fetchData();
+    }
   }
 
   public updateQuality(quality: string) {
