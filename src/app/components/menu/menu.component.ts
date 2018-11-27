@@ -106,8 +106,8 @@ export class MenuComponent implements OnInit {
     this.cameraService.createScreenshot();
     this.babylonService.createPreviewScreenshot(320).then((screenshot) => {
       if (this.babylonService.getScene().meshes.length !== 0) {
-        this.mongohandlerService.updateScreenshot(this.activeModel.model._id, screenshot).then((result) => {
-          this.activeModel.model.preview = screenshot;
+        this.mongohandlerService.updateScreenshot(this.activeModel._id, screenshot).then((result) => {
+          this.activeModel.preview = result.value.preview;
         });
       }
     });
