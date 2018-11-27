@@ -1,10 +1,11 @@
-import {Injectable} from '@angular/core';
-import {Model} from '../../interfaces/model/model.interface';
-import {BabylonService} from '../babylon/babylon.service';
-import {MongohandlerService} from '../mongohandler/mongohandler.service';
-import {Annotation} from '../../interfaces/annotation/annotation';
-import {forEach} from '@angular/router/src/utils/collection';
-import {BehaviorSubject} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { Model } from '../../interfaces/model/model.interface';
+import { BabylonService } from '../babylon/babylon.service';
+import { MongohandlerService } from '../mongohandler/mongohandler.service';
+import { Annotation } from '../../interfaces/annotation/annotation';
+import { forEach } from '@angular/router/src/utils/collection';
+import { BehaviorSubject } from 'rxjs';
+import { LoadModelService } from '../load-model/load-model.service';
 
 @Injectable({
   providedIn: 'root'
@@ -25,8 +26,37 @@ export class CatalogueService {
   private isFirstLoad = true;
 
 
-  constructor(private mongohandlerService: MongohandlerService) {
-    this.fetchData();
+  constructor(private mongohandlerService: MongohandlerService, private loadModelSerivce: LoadModelService) {
+    if (this.isFirstLoad && location.href.indexOf('?') !== -1) {
+      const modelUrl = location.href.replace(location.href.split('?')[0], '').replace('?models/', '');
+      console.log(modelUrl);
+      // TODO: somehow wait for Kompakkt to be initialized
+      this.updateQuality('low');
+      setTimeout(() => {
+        this.loadModelSerivce.loadModel({
+          _id: 'PreviewModel',
+          name: 'PreviewModel',
+          finished: false,
+          online: false,
+          files: [
+            modelUrl
+          ],
+          processed: {
+            time: {
+              start: '',
+              end: '',
+              total: ''
+            },
+            low: modelUrl,
+            medium: modelUrl,
+            high: modelUrl,
+            raw: modelUrl
+          }
+        }, 'low');
+      }, 5000);
+    } else {
+      this.fetchData();
+    }
   }
 
   public updateQuality(quality: string) {
