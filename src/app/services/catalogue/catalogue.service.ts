@@ -28,7 +28,7 @@ export class CatalogueService {
 
   constructor(private mongohandlerService: MongohandlerService, private loadModelSerivce: LoadModelService) {
     if (this.isFirstLoad && location.href.indexOf('?') !== -1) {
-      const modelUrl = location.href.replace(location.origin, '').replace('/?models/', '');
+      const modelUrl = location.href.replace(location.href.split('?')[0], '').replace('?models/', '');
       console.log(modelUrl);
       // TODO: somehow wait for Kompakkt to be initialized
       this.updateQuality('low');
