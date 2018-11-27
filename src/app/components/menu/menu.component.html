@@ -6,8 +6,8 @@
 </button>
 
 <button mat-icon-button (click)="editScene()"
-        matTooltip="Edit Scene" matTooltipPosition="above">
-  <mat-icon aria-label="Edit Scene">edit</mat-icon>
+        matTooltip="Show and edit annotations" matTooltipPosition="above">
+  <mat-icon aria-label="Show and edit annotations">place</mat-icon>
 </button>
 
 <button mat-icon-button [matMenuTriggerFor]="settingsMenu"
@@ -15,20 +15,30 @@
   <mat-icon aria-label="Settings">settings</mat-icon>
 </button>
 
+<!--
 <button mat-icon-button (click)="saveScene()"
         matTooltip="Save Scene" matTooltipPosition="above">
   <mat-icon aria-label="Save Scene">save</mat-icon>
 </button>
-
-<button mat-icon-button (click)="takeScreenshot()"
-        matTooltip="Take Screenshot" matTooltipPosition="above">
-  <mat-icon aria-label="Take Screenshot">camera</mat-icon>
-</button>
+-->
 
 <!-- Settings Menu -->
 <mat-menu #settingsMenu="matMenu" yPosition="above" [overlapTrigger]="false">
-  <button mat-menu-item [matMenuTriggerFor]="cameras">Cameras</button>
-  <button mat-menu-item [matMenuTriggerFor]="quality">Quality</button>
+
+  <button mat-menu-item [matMenuTriggerFor]="cameras">
+    <mat-icon>videocam</mat-icon>
+    <span>Cameras</span>
+  </button>
+
+  <button mat-menu-item [matMenuTriggerFor]="quality">
+    <mat-icon>high_quality</mat-icon>
+    <span>Quality</span>
+  </button>
+
+  <button mat-menu-item (click)="takeScreenshot()">
+    <mat-icon>camera</mat-icon>
+    <span>Screenshot</span>
+  </button>
   <!--
   <button mat-menu-item [matMenuTriggerFor]="skyboxes">Skyboxes</button>
   -->
@@ -65,6 +75,13 @@
 
 <!-- / Settings Menu -->
 
+<!-- VR Button -->
+<button mat-icon-button (click)="setVRcam()"
+        matTooltip="VR Camera" matTooltipPosition="above">
+  <mat-icon aria-label="VR Camera" svgIcon="cardboard"></mat-icon>
+</button>
+<!-- VR Button -->
+
 <!-- Fullscreen Buttons -->
 <button *ngIf="!fullscreen"
         mat-icon-button (click)="enterFullscreen()"
@@ -78,10 +95,3 @@
   <mat-icon aria-label="Exit fullscreen mode">fullscreen_exit</mat-icon>
 </button>
 <!-- / Fullscreen Buttons -->
-
-<!-- VR Button -->
-<button mat-icon-button (click)="setVRcam()"
-        matTooltip="VR Camera" matTooltipPosition="above">
-  <mat-icon aria-label="VR Camera" svgIcon="cardboard"></mat-icon>
-</button>
-<!-- VR Button -->
