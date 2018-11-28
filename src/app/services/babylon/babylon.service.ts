@@ -34,10 +34,7 @@ export class BabylonService {
   }
 
   public resize(): void {
-
     this.engine.resize();
-    this.canvas.style.width = '100%';
-    this.canvas.style.height = '100%';
   }
 
   public getEngine(): BABYLON.Engine {
