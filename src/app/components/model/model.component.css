@@ -8,4 +8,6 @@
 
 .model-card img {
   cursor: pointer;
+  height: 150px;
+  object-fit: cover;
 }
