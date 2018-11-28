@@ -17,17 +17,13 @@ export class ModelComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.catalogueService.Observables.quality.subscribe((result) => {
-      this.catalogueService.updateActiveModel(this.catalogueService.Observables.model.source['_value']);
-    });
-    this.catalogueService.Observables.model.subscribe(async (result) => this.loadModel(result));
+    this.catalogueService.Observables.quality.subscribe((result) =>
+      this.loadModelService.loadModel(this.catalogueService.Observables.model.source['_value'], result));
+    this.catalogueService.Observables.model.subscribe((result) =>
+      this.loadModelService.loadModel(result, this.catalogueService.Observables.quality.source['value']));
   }
 
   public async changeModel() {
     this.catalogueService.updateActiveModel(this.model);
-  }
-
-  public loadModel(newModel: Model) {
-    this.loadModelService.loadModel(newModel);
   }
 }
