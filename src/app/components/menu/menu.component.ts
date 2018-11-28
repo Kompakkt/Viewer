@@ -1,16 +1,16 @@
-import {Component, Inject, Input, OnInit} from '@angular/core';
-import {DomSanitizer} from '@angular/platform-browser';
-import {MatIconRegistry} from '@angular/material';
+import { Component, Inject, Input, OnInit } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
+import { MatIconRegistry } from '@angular/material';
 
-import {DOCUMENT} from '@angular/common';
+import { DOCUMENT } from '@angular/common';
 
-import {CameraService} from '../../services/camera/camera.service';
-import {BabylonService} from '../../services/babylon/babylon.service';
-import {SkyboxService} from '../../services/skybox/skybox.service';
-import {SidenavService} from '../../services/sidenav/sidenav.service';
-import {AnnotationService} from '../../services/annotation/annotation.service';
-import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
-import {CatalogueService} from '../../services/catalogue/catalogue.service';
+import { CameraService } from '../../services/camera/camera.service';
+import { BabylonService } from '../../services/babylon/babylon.service';
+import { SkyboxService } from '../../services/skybox/skybox.service';
+import { SidenavService } from '../../services/sidenav/sidenav.service';
+import { AnnotationService } from '../../services/annotation/annotation.service';
+import { MongohandlerService } from '../../services/mongohandler/mongohandler.service';
+import { CatalogueService } from '../../services/catalogue/catalogue.service';
 
 /**
  * @author Zoe Schubert
@@ -45,7 +45,9 @@ export class MenuComponent implements OnInit {
   public fullscreen: Boolean = false;
 
   ngOnInit() {
-    // this.catalogueService.Observables.model.subscribe((newModel) => this.activeModel = newModel);
+    this.catalogueService.Observables.model.subscribe((newModel) => {
+      this.activeModel = newModel;
+    });
   }
 
   public setCamArcRotate() {
@@ -115,10 +117,13 @@ export class MenuComponent implements OnInit {
 
   public takeScreenshot() {
     this.cameraService.createScreenshot();
-    this.babylonService.createPreviewScreenshot(320).then((screenshot) => {
-      if (this.babylonService.getScene().meshes.length !== 0) {
+    this.babylonService.createPreviewScreenshot().then((screenshot) => {
+      if (this.activeModel !== null) {
         this.mongohandlerService.updateScreenshot(this.activeModel._id, screenshot).then((result) => {
-          this.activeModel.preview = result.value.preview;
+          // TODO: Find out why picture isn't refreshed once the server sends the result
+          this.catalogueService.Observables.models.source['value']
+          .filter(model => model._id === this.activeModel._id)
+          .map(model => model.preview = result.value.preview);
         });
       }
     });

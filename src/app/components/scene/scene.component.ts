@@ -3,6 +3,7 @@ import {AfterViewInit, Component, ElementRef, HostListener, Input, ViewChild} fr
 import {CameraService} from '../../services/camera/camera.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
 import {AnnotationService} from '../../services/annotation/annotation.service';
+import {CatalogueService} from '../../services/catalogue/catalogue.service';
 
 @Component({
   selector: 'app-scene',
@@ -25,7 +26,8 @@ export class SceneComponent implements AfterViewInit {
   constructor(
     private cameraService: CameraService,
     private babylonService: BabylonService,
-    private annotationService: AnnotationService
+    private annotationService: AnnotationService,
+    private catalogueService: CatalogueService
   ) {
   }
 
@@ -41,6 +43,8 @@ export class SceneComponent implements AfterViewInit {
     this.babylonService.createHemisphericLight('light1', {x: 0, y: 1, z: 0});
 
     this.cameraService.bootstrap();
+
+    this.catalogueService.bootstrap();
 
     // this.babylonService.loadModel(this.modelDirectory, this.modelFileName);
   }

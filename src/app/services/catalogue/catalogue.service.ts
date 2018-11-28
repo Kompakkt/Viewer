@@ -26,7 +26,10 @@ export class CatalogueService {
   private isFirstLoad = true;
 
 
-  constructor(private mongohandlerService: MongohandlerService, private loadModelSerivce: LoadModelService) {
+  constructor(private mongohandlerService: MongohandlerService, private loadModelSerivce: LoadModelService) {    
+  }
+
+  public bootstrap() {
     if (this.isFirstLoad && location.href.indexOf('?') !== -1) {
       const modelUrl = location.href.replace(location.href.split('?')[0], '').replace('?models/', '');
       console.log(modelUrl);
