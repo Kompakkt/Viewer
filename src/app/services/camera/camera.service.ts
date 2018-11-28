@@ -1,9 +1,9 @@
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 import * as BABYLON from 'babylonjs';
 
-import {BabylonService} from '../babylon/babylon.service';
+import { BabylonService } from '../babylon/babylon.service';
 import Vector3 = BABYLON.Vector3;
-import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
+import { AnnotationmarkerService } from '../annotationmarker/annotationmarker.service';
 
 import { DeviceDetectorService } from 'ngx-device-detector';
 
@@ -31,45 +31,45 @@ export class CameraService {
   constructor(
     private babylonService: BabylonService,
     private deviceService: DeviceDetectorService
-) {
-  }
+  ) {
+    this.babylonService.CanvasObservable.subscribe((newCanvas) => {
+      if (newCanvas) {
+        this.alpha = 9;
+        this.beta = 1.3;
+        this.radius = 100;
 
-  public bootstrap(): void {
+        this.scene = this.babylonService.getScene();
+        this.canvas = newCanvas;
 
-    this.alpha = 9;
-    this.beta = 1.3;
-    this.radius = 100;
+        this.arcRotateCamera = this.babylonService.createArcRotateCam('arcRotateCamera',
+          this.alpha, this.beta, this.radius, Vector3.Zero());
 
-    this.scene = this.babylonService.getScene();
-    this.canvas = this.babylonService.getCanvas();
+        this.arcRotateSettings();
 
-    this.arcRotateCamera = this.babylonService.createArcRotateCam('arcRotateCamera',
-      this.alpha, this.beta, this.radius, Vector3.Zero());
+        this.x = 0;
+        this.y = 50;
+        this.z = 100;
 
-    this.arcRotateSettings();
+        this.universalCamera = new BABYLON.UniversalCamera('universalCamera',
+          new BABYLON.Vector3(this.x, this.y, this.z), this.scene);
 
-    this.x = 0;
-    this.y = 50;
-    this.z = 100;
+        this.universalSettings();
 
-    this.universalCamera = new BABYLON.UniversalCamera('universalCamera',
-      new BABYLON.Vector3(this.x, this.y, this.z), this.scene);
+        this.xRot = this.universalCamera.rotation.x;
+        this.yRot = this.universalCamera.rotation.y;
 
-    this.universalSettings();
+        this.arcRotateCamera.attachControl(newCanvas, false);
 
-    this.xRot = this.universalCamera.rotation.x;
-    this.yRot = this.universalCamera.rotation.y;
+        this.vrCamera = this.deviceService.isMobile() ? new BABYLON.VRDeviceOrientationFreeCamera('vrCamera',
+          new BABYLON.Vector3(this.x, this.y, this.z), this.scene) :
+          new BABYLON.VRDeviceOrientationArcRotateCamera('vrCamera', Math.PI / 2, Math.PI / 4, 25, new BABYLON.Vector3(0, 0, 0), this.scene);
 
-    this.arcRotateCamera.attachControl(this.canvas, false);
-
-    this.vrCamera = this.deviceService.isMobile() ? new BABYLON.VRDeviceOrientationFreeCamera('vrCamera',
-      new BABYLON.Vector3(this.x, this.y, this.z), this.scene) :
-      new BABYLON.VRDeviceOrientationArcRotateCamera('vrCamera', Math.PI / 2, Math.PI / 4, 25, new BABYLON.Vector3(0, 0, 0), this.scene);
-
-    // Remove mouse input on mobile VR Camera to prevent flickering of meshes
-    if (this.vrCamera instanceof BABYLON.VRDeviceOrientationFreeCamera) {
-      this.vrCamera.inputs.remove(this.vrCamera.inputs.attached.mouse);
-    }
+        // Remove mouse input on mobile VR Camera to prevent flickering of meshes
+        if (this.vrCamera instanceof BABYLON.VRDeviceOrientationFreeCamera) {
+          this.vrCamera.inputs.remove(this.vrCamera.inputs.attached.mouse);
+        }
+      }
+    });
   }
 
   public setVRCam(): void {
@@ -204,7 +204,7 @@ export class CameraService {
 
     this.arcRotateCamera.setTarget(Vector3.Zero());
 
-    this.scene.beginAnimation(this.arcRotateCamera, 0, 30, false, 1, function () {
+    this.scene.beginAnimation(this.arcRotateCamera, 0, 30, false, 1, function() {
     });
   }
 
@@ -248,7 +248,7 @@ export class CameraService {
     this.universalCamera.animations.push(setBackRotXAnm);
     this.universalCamera.animations.push(setBackRotYAnm);
 
-    this.scene.beginAnimation(this.universalCamera, 0, 30, false, 1, function () {
+    this.scene.beginAnimation(this.universalCamera, 0, 30, false, 1, function() {
     });
   }
 
@@ -310,14 +310,14 @@ export class CameraService {
 
     this.arcRotateCamera.setTarget(Vector3.Zero());
 
-    this.scene.beginAnimation(this.arcRotateCamera, 0, 30, false, 1, function () {
+    this.scene.beginAnimation(this.arcRotateCamera, 0, 30, false, 1, function() {
     });
   }
 
   public getActualCameraPosAnnotation() {
-    const cameraPosition = [{dimension: 'x', value: this.arcRotateCamera.alpha},
-      {dimension: 'y', value: this.arcRotateCamera.beta},
-      {dimension: 'z', value: this.arcRotateCamera.radius}];
+    const cameraPosition = [{ dimension: 'x', value: this.arcRotateCamera.alpha },
+    { dimension: 'y', value: this.arcRotateCamera.beta },
+    { dimension: 'z', value: this.arcRotateCamera.radius }];
     return cameraPosition;
   }
 

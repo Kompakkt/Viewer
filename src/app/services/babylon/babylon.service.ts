@@ -8,6 +8,8 @@ import 'babylonjs-loaders';
 import {LoadingScreen} from './loadingscreen';
 import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreenhandler.service';
 
+import {BehaviorSubject} from 'rxjs';
+
 /**
  * @author Zoe Schubert
  * @author Jan G. Wieners
@@ -17,20 +19,36 @@ import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreen
   providedIn: 'root'
 })
 export class BabylonService {
-
   private scene: BABYLON.Scene;
   private engine: BABYLON.Engine;
-  private canvas: HTMLCanvasElement;
+
+  private CanvasSubject = new BehaviorSubject<HTMLCanvasElement>(null);
+  public CanvasObservable = this.CanvasSubject.asObservable();
+
+  private backgroundURL = 'assets/textures/backgrounds/darkgrey.jpg';
 
   constructor(private message: MessageService, private loadingScreenHandler: LoadingscreenhandlerService) {
+    this.CanvasObservable.subscribe(newCanvas => {
+      if (newCanvas) {
+        this.engine = new BABYLON.Engine(newCanvas, true, {preserveDrawingBuffer: true, stencil: true});
+        this.scene = new BABYLON.Scene(this.engine);
+        this.engine.loadingScreen = new LoadingScreen(newCanvas, '', '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
+
+        this.engine.runRenderLoop(() => {
+          this.scene.render();
+        });
+
+        this.setBackgroundImage(this.backgroundURL);
+
+        this.setClearColor(0.2, 0.2, 0.2, 0.8);
+
+        this.createHemisphericLight('light1', { x: 0, y: 1, z: 0 });
+      }
+    });
   }
 
-  public bootstrap(canvas: HTMLCanvasElement, antialiasing: boolean): void {
-
-    this.canvas = canvas;
-    this.engine = new BABYLON.Engine(canvas, antialiasing, {preserveDrawingBuffer: true, stencil: true});
-    this.scene = new BABYLON.Scene(this.engine);
-    this.engine.loadingScreen = new LoadingScreen(this.canvas, '', '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
+  public updateCanvas(newCanvas: HTMLCanvasElement) {
+    this.CanvasSubject.next(newCanvas);
   }
 
   public resize(): void {
@@ -43,10 +61,6 @@ export class BabylonService {
 
   public getScene(): BABYLON.Scene {
     return this.scene;
-  }
-
-  public getCanvas(): HTMLCanvasElement {
-    return this.canvas;
   }
 
   public setClearColor(r: number, g: number, b: number, a: number): void {
@@ -62,7 +76,6 @@ export class BabylonService {
   }
 
   public setBackgroundImage(imgUrl: string): void {
-
     const background = new BABYLON.Layer('background', imgUrl, this.scene, true);
     background.isBackground = true;
   }
