@@ -111,7 +111,7 @@ export class BabylonService {
   public createPreviewScreenshot(width?: number): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       if (width === undefined) {
-        BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, {width:800, height:400}, (screenshot) => {
+        BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, {width:250, height:140}, (screenshot) => {
           resolve(screenshot);
         });
       } else {
