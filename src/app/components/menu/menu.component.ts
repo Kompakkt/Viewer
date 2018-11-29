@@ -11,6 +11,7 @@ import { SidenavService } from '../../services/sidenav/sidenav.service';
 import { AnnotationService } from '../../services/annotation/annotation.service';
 import { MongohandlerService } from '../../services/mongohandler/mongohandler.service';
 import { CatalogueService } from '../../services/catalogue/catalogue.service';
+import {AnnotationvrService} from '../../services/annotationvr/annotationvr.service';
 
 /**
  * @author Zoe Schubert
@@ -35,6 +36,8 @@ export class MenuComponent implements OnInit {
     private annotationService: AnnotationService,
     private mongohandlerService: MongohandlerService,
     private catalogueService: CatalogueService,
+    private annotationVRService: AnnotationvrService,
+
     @Inject(DOCUMENT) private document: any
   ) {
     iconRegistry.addSvgIcon(
@@ -59,7 +62,12 @@ export class MenuComponent implements OnInit {
   }
 
   public setVRcam() {
-    this.cameraService.setVRCam();
+    // this.cameraService.setVRCam();
+    const element: HTMLElement = document.getElementById('babylonVRiconbtn') as HTMLElement;
+    element.click();
+    // this.annotationVRService.createVRAnnotationControls();
+    // this.annotationVRService.createVRAnnotationContentField();
+
   }
 
   public setBackToDefault() {

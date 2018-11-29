@@ -21,6 +21,7 @@ import {BehaviorSubject} from 'rxjs';
 export class BabylonService {
   private scene: BABYLON.Scene;
   private engine: BABYLON.Engine;
+  private VRHelper: BABYLON.VRExperienceHelper;
 
   private CanvasSubject = new BehaviorSubject<HTMLCanvasElement>(null);
   public CanvasObservable = this.CanvasSubject.asObservable();
@@ -75,6 +76,15 @@ export class BabylonService {
     return new BABYLON.ArcRotateCamera(name, alpha, beta, radius, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
   }
 
+  public createVRHelper() {
+    this.VRHelper = this.scene.createDefaultVRExperience({createDeviceOrientationCamera: false});
+    this.VRHelper.enableInteractions();
+  }
+
+  public getVRHelper() {
+    return this.VRHelper;
+  }
+
   public setBackgroundImage(imgUrl: string): void {
     const background = new BABYLON.Layer('background', imgUrl, this.scene, true);
     background.isBackground = true;
@@ -121,7 +131,7 @@ export class BabylonService {
   public createPreviewScreenshot(width?: number): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       if (width === undefined) {
-        BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, {width:250, height:140}, (screenshot) => {
+        BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, {width: 250, height: 140}, (screenshot) => {
           resolve(screenshot);
         });
       } else {
