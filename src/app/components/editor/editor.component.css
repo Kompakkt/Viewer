@@ -18,21 +18,11 @@
 
 .mat-icon {
   color: #fff;
-
 }
 
 .mat-tab-group {
-  width: 300px;
+  width: 100%;
   height: 100%;
-}
-
-.annotations-list {
-  width: 500px;
-  max-width: 100%;
-  min-height: 60px;
-  display: block;
-  border-radius: 3px;
-  overflow: hidden;
 }
 
 .annotation-box {

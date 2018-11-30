@@ -1,17 +1,32 @@
-<mat-tab-group>
+<mat-tab-group mat-align-tabs="center" animationDuration="0ms">
 
   <mat-tab>
     <ng-template mat-tab-label>
-      <mat-icon class="example-tab-icon">add_location</mat-icon>
+      <mat-icon class="tab-icon">place</mat-icon>
     </ng-template>
-
-    <h3>Annotationen</h3>
 
     <div cdkDropList class="annotations-list" (cdkDropListDropped)="drop($event)"
          *ngIf="this.annotationService.annotations.length">
       <app-annotations-editor class="annotation-box" *ngFor="let annotation of this.annotationService.annotations;"
                               [annotation]="annotation" cdkDrag></app-annotations-editor>
     </div>
+  </mat-tab>
+
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon class="tab-icon">settings</mat-icon>
+    </ng-template>
+
+    <h3>Voreinstellungen</h3>
+
+  </mat-tab>
+
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon class="tab-icon">information</mat-icon>
+    </ng-template>
+
+    <h3>Objektinformationen</h3>
   </mat-tab>
 
 </mat-tab-group>
