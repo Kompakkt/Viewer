@@ -62,6 +62,7 @@ export class AnnotationComponent implements OnInit {
 
   public visabilityAnnotationCard(visibility: boolean) {
     this.visibility = visibility;
+    this.opacity = '1';
   }
 
 
