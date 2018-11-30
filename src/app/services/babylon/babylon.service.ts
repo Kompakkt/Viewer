@@ -1,4 +1,5 @@
-import {Injectable} from '@angular/core';
+import {Inject, Injectable} from '@angular/core';
+import {DOCUMENT} from '@angular/common';
 
 import * as BABYLON from 'babylonjs';
 
@@ -28,7 +29,9 @@ export class BabylonService {
 
   private backgroundURL = 'assets/textures/backgrounds/darkgrey.jpg';
 
-  constructor(private message: MessageService, private loadingScreenHandler: LoadingscreenhandlerService) {
+  constructor(private message: MessageService,
+              private loadingScreenHandler: LoadingscreenhandlerService,
+              @Inject(DOCUMENT) private document: any) {
     this.CanvasObservable.subscribe(newCanvas => {
       if (newCanvas) {
         this.engine = new BABYLON.Engine(newCanvas, true, {preserveDrawingBuffer: true, stencil: true});
@@ -43,7 +46,7 @@ export class BabylonService {
 
         this.setClearColor(0.2, 0.2, 0.2, 0.8);
 
-        this.createHemisphericLight('light1', { x: 0, y: 1, z: 0 });
+        this.createHemisphericLight('light1', {x: 0, y: 1, z: 0});
       }
     });
   }
@@ -77,7 +80,14 @@ export class BabylonService {
   }
 
   public createVRHelper() {
-    this.VRHelper = this.scene.createDefaultVRExperience({createDeviceOrientationCamera: false});
+
+    const vrButton: HTMLButtonElement = this.document.getElementById('vrbutton');
+
+    this.VRHelper = this.scene.createDefaultVRExperience({
+      createDeviceOrientationCamera: false,
+      useCustomVRButton: true,
+      customVRButton: vrButton
+    });
     this.VRHelper.enableInteractions();
   }
 

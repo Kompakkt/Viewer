@@ -47,8 +47,7 @@
 <!-- Cameras Submenu -->
 <mat-menu #cameras="matMenu">
   <button mat-menu-item (click)="setCamArcRotate()">Orbit Camera</button>
-  <!--button mat-menu-item (click)="setCamUniversal()">Universal Camera</button-->
-  <button mat-menu-item (click)="setVRcam()">VR Camera</button>
+  <button mat-menu-item (click)="setCamUniversal()">Universal Camera</button>
   <button mat-menu-item (click)="setBackToDefault()">Reset Camera</button>
 </mat-menu>
 <!-- / Cameras Submenu -->
@@ -76,7 +75,9 @@
 <!-- / Settings Menu -->
 
 <!-- VR Button -->
-<button mat-icon-button (click)="setVRcam()"
+<!-- Click event gets handled by Babylon's VRExperienceHelper -->
+<button id="vrbutton"
+        mat-icon-button
         matTooltip="VR Camera" matTooltipPosition="above">
   <mat-icon aria-label="VR Camera" svgIcon="cardboard"></mat-icon>
 </button>

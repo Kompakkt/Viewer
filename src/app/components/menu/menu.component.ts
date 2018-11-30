@@ -37,9 +37,8 @@ export class MenuComponent implements OnInit {
     private mongohandlerService: MongohandlerService,
     private catalogueService: CatalogueService,
     private annotationVRService: AnnotationvrService,
+    @Inject(DOCUMENT) private document: any) {
 
-    @Inject(DOCUMENT) private document: any
-  ) {
     iconRegistry.addSvgIcon(
       'cardboard',
       sanitizer.bypassSecurityTrustResourceUrl('assets/img/google-cardboard.svg'));
@@ -59,15 +58,6 @@ export class MenuComponent implements OnInit {
 
   public setCamUniversal() {
     this.cameraService.setCamUniversal();
-  }
-
-  public setVRcam() {
-    // this.cameraService.setVRCam();
-    const element: HTMLElement = document.getElementById('babylonVRiconbtn') as HTMLElement;
-    element.click();
-    // this.annotationVRService.createVRAnnotationControls();
-    // this.annotationVRService.createVRAnnotationContentField();
-
   }
 
   public setBackToDefault() {

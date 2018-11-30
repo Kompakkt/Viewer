@@ -75,14 +75,6 @@ export class CameraService {
     });
   }
 
-  public setVRCam(): void {
-
-    if (this.scene.activeCamera.getClassName() !== 'vrCamera') {
-      this.vrCamera.position = this.scene.activeCamera.position;
-      this.setCameraActive(this.vrCamera);
-    }
-  }
-
   public setCamArcRotate(): void {
 
     if (this.scene.activeCamera.getClassName() !== 'ArcRotateCamera') {
