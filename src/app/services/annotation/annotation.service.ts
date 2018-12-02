@@ -121,6 +121,7 @@ export class AnnotationService {
     if (indexb !== -1) {
       this.allAnnotations.splice(indexb, 1);
     }
+    this.changedRankingPositions();
   }
 
   public changedRankingPositions() {
