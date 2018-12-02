@@ -10,3 +10,35 @@ html, body {
 .mat-card {
   border-radius: 1px !important;
 }
+
+/* Material Design Tabs */
+.mat-tab-header, .mat-tab-nav-bar {
+  border-bottom: none;
+}
+
+.mat-tab-group .mat-tab-label-active {
+  background-color: #555;
+}
+
+.mat-tab-group.mat-primary .mat-ink-bar, .mat-tab-nav-bar.mat-primary .mat-ink-bar {
+  background-color: #333;
+}
+
+.mat-tab-group .mat-tab-label {
+  min-width: 50px !important;
+  padding: 0;
+}
+
+.mat-tab-body {
+  /* background-color: #333; */
+}
+
+.mat-tab-body-wrapper {
+  height: 100%;
+}
+
+/* / Material Design Tabs */
+
+.single-annotation-card .mat-card-header-text {
+  margin: 0 !important;
+}

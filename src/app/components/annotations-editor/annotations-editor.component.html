@@ -16,19 +16,20 @@
 
       <mat-card-subtitle>{{getValidation(annotation.validated)}}</mat-card-subtitle>
 
-    </mat-card-header>   
+    </mat-card-header>
 
     <img mat-card-image src={{preview}} *ngIf="!collapsed">
 
     <mat-card-content *ngIf="!collapsed">
 
       <p *ngIf="!editMode"> {{annotation.description}}</p>
-      <mat-form-field *ngIf="editMode">
+
+      <mat-form-field *ngIf="editMode" class="description">
         <textarea matInput name="description" #description="ngModel" type="text" placeholder="Description"
                   [(ngModel)]="annotation.description"></textarea>
       </mat-form-field>
 
-      <mat-checkbox *ngIf="editMode" [checked]="annotation.validated"
+      <mat-checkbox class="validation" *ngIf="editMode" [checked]="annotation.validated"
                     (change)="annotation.validated = !annotation.validated">Validated
       </mat-checkbox>
 
@@ -36,8 +37,9 @@
               matTooltip="Select Perspective"
               matTooltipPosition="right"
               *ngIf="editMode"
-              type="button">
-        <mat-icon aria-label="Select Perspective">camera</mat-icon>
+              type="button"
+              class="perspective">
+        <mat-icon aria-label="Select Perspective">camera</mat-icon> Select Perspective
       </button>
 
     </mat-card-content>

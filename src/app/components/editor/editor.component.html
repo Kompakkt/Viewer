@@ -1,4 +1,4 @@
-<mat-tab-group mat-align-tabs="center" animationDuration="0ms">
+<mat-tab-group mat-align-tabs="left" animationDuration="0ms">
 
   <mat-tab>
     <ng-template mat-tab-label>
@@ -8,7 +8,8 @@
     <div cdkDropList class="annotations-list" (cdkDropListDropped)="drop($event)"
          *ngIf="this.annotationService.annotations.length">
       <app-annotations-editor class="annotation-box" *ngFor="let annotation of this.annotationService.annotations;"
-                              [annotation]="annotation" cdkDrag></app-annotations-editor>
+                              [annotation]="annotation"
+                              cdkDrag cdkDragLockAxis="y"></app-annotations-editor>
     </div>
   </mat-tab>
 
