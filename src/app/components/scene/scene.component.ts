@@ -4,7 +4,7 @@ import { BabylonService } from '../../services/babylon/babylon.service';
 @Component({
   selector: 'app-scene',
   templateUrl: './scene.component.html',
-  styleUrls: ['./scene.component.css']
+  styleUrls: ['./scene.component.scss']
 })
 export class SceneComponent implements AfterViewInit {
 

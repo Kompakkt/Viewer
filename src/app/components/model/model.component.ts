@@ -7,7 +7,7 @@ import { LoadModelService } from '../../services/load-model/load-model.service';
 @Component({
   selector: 'app-model',
   templateUrl: './model.component.html',
-  styleUrls: ['./model.component.css']
+  styleUrls: ['./model.component.scss']
 })
 export class ModelComponent implements OnInit {
   @Input() model: Model;

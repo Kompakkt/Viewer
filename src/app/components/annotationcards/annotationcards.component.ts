@@ -7,7 +7,7 @@ import {AnnotationmarkerService} from '../../services/annotationmarker/annotatio
 @Component({
   selector: 'app-annotationcards',
   templateUrl: './annotationcards.component.html',
-  styleUrls: ['./annotationcards.component.css']
+  styleUrls: ['./annotationcards.component.scss']
 })
 export class AnnotationcardsComponent implements OnInit, AfterViewInit {
 

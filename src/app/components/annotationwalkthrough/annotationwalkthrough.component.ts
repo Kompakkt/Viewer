@@ -7,7 +7,7 @@ import {AnnotationmarkerService} from '../../services/annotationmarker/annotatio
 @Component({
   selector: 'app-annotationwalkthrough',
   templateUrl: './annotationwalkthrough.component.html',
-  styleUrls: ['./annotationwalkthrough.component.css']
+  styleUrls: ['./annotationwalkthrough.component.scss']
 })
 export class AnnotationwalkthroughComponent implements OnInit {
 

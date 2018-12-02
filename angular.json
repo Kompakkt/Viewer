@@ -128,5 +128,10 @@
       }
     }
   },
-  "defaultProject": "Kompakkt"
+  "defaultProject": "Kompakkt",
+  "schematics": {
+    "@schematics/angular:component": {
+      "styleext": "scss"
+    }
+  }
 }

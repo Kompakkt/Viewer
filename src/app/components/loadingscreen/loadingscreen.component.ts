@@ -4,7 +4,7 @@ import { LoadingscreenhandlerService } from '../../services/loadingscreenhandler
 @Component({
     selector: 'app-loading-screen',
     templateUrl: './loadingscreen.component.html',
-    styleUrls: ['./loadingscreen.component.css']
+    styleUrls: ['./loadingscreen.component.scss']
 })
 export class LoadingscreenComponent implements OnInit {
 

@@ -1,3 +1,5 @@
+$cardbgr: rgba(0, 0, 0, 0.7);
+
 .single-annotation-card {
   transition: opacity 0.25s ease;
   z-index: 0;
@@ -12,7 +14,7 @@
 }
 
 .mat-card {
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: $cardbgr;
   border-radius: 3px;
   color: #fff;
   font-size: 12px;

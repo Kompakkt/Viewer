@@ -11,7 +11,7 @@ import {AnnotationmarkerService} from '../../services/annotationmarker/annotatio
 @Component({
   selector: 'app-annotations-editor',
   templateUrl: './annotations-editor.component.html',
-  styleUrls: ['./annotations-editor.component.css']
+  styleUrls: ['./annotations-editor.component.scss']
 })
 export class AnnotationsEditorComponent implements OnInit {
 

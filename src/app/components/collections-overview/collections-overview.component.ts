@@ -5,7 +5,7 @@ import {CatalogueService} from '../../services/catalogue/catalogue.service';
 @Component({
   selector: 'app-collections-overview',
   templateUrl: './collections-overview.component.html',
-  styleUrls: ['./collections-overview.component.css']
+  styleUrls: ['./collections-overview.component.scss']
 })
 export class CollectionsOverviewComponent implements OnInit {
 
