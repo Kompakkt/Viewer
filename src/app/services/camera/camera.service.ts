@@ -1,11 +1,11 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import * as BABYLON from 'babylonjs';
 
-import { BabylonService } from '../babylon/babylon.service';
+import {BabylonService} from '../babylon/babylon.service';
 import Vector3 = BABYLON.Vector3;
-import { AnnotationmarkerService } from '../annotationmarker/annotationmarker.service';
+import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
 
-import { DeviceDetectorService } from 'ngx-device-detector';
+import {DeviceDetectorService} from 'ngx-device-detector';
 
 @Injectable({
   providedIn: 'root'
@@ -199,7 +199,7 @@ export class CameraService {
 
     this.arcRotateCamera.setTarget(Vector3.Zero());
 
-    this.scene.beginAnimation(this.arcRotateCamera, 0, 30, false, 1, function() {
+    this.scene.beginAnimation(this.arcRotateCamera, 0, 30, false, 1, function () {
     });
   }
 
@@ -243,7 +243,7 @@ export class CameraService {
     this.universalCamera.animations.push(setBackRotXAnm);
     this.universalCamera.animations.push(setBackRotYAnm);
 
-    this.scene.beginAnimation(this.universalCamera, 0, 30, false, 1, function() {
+    this.scene.beginAnimation(this.universalCamera, 0, 30, false, 1, function () {
     });
   }
 
@@ -305,14 +305,73 @@ export class CameraService {
 
     this.arcRotateCamera.setTarget(Vector3.Zero());
 
-    this.scene.beginAnimation(this.arcRotateCamera, 0, 30, false, 1, function() {
+    this.scene.beginAnimation(this.arcRotateCamera, 0, 30, false, 1, function () {
+    });
+  }
+
+
+  public moveVRCameraToTarget(positionVector: BABYLON.Vector3) {
+
+
+    this.scene.activeCamera = this.vrHelper.webVRCamera;
+    this.vrHelper.webVRCamera.attachControl(this.canvas, false);
+
+    const name = 'animCam',
+      frames = 30;
+
+    const animCamAlpha = new BABYLON.Animation(name, 'alpha', frames,
+      BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+      BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+
+    animCamAlpha.setKeys([
+      {
+        frame: 0,
+        value: this.vrHelper.webVRCamera.alpha
+      }, {
+        frame: 30,
+        value: positionVector.x
+      }
+    ]);
+    this.vrHelper.webVRCamera.animations.push(animCamAlpha);
+
+    const animCamBeta = new BABYLON.Animation(name, 'beta', frames,
+      BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+      BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+
+    animCamBeta.setKeys([
+      {
+        frame: 0,
+        value: this.vrHelper.webVRCamera.beta
+      }, {
+        frame: 30,
+        value: positionVector.y
+      }]);
+    this.vrHelper.webVRCamera.animations.push(animCamBeta);
+
+    const animCamRadius = new BABYLON.Animation(name, 'radius', frames,
+      BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+      BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+
+    animCamRadius.setKeys([
+      {
+        frame: 0,
+        value: this.vrHelper.webVRCamera.radius
+      }, {
+        frame: 30,
+        value: positionVector.z
+      }]);
+    this.vrHelper.webVRCamera.animations.push(animCamRadius);
+
+    this.vrHelper.webVRCamera.setTarget(Vector3.Zero());
+
+    this.scene.beginAnimation(this.vrHelper.webVRCamera, 0, 30, false, 1, function () {
     });
   }
 
   public getActualCameraPosAnnotation() {
-    const cameraPosition = [{ dimension: 'x', value: this.arcRotateCamera.alpha },
-    { dimension: 'y', value: this.arcRotateCamera.beta },
-    { dimension: 'z', value: this.arcRotateCamera.radius }];
+    const cameraPosition = [{dimension: 'x', value: this.arcRotateCamera.alpha},
+      {dimension: 'y', value: this.arcRotateCamera.beta},
+      {dimension: 'z', value: this.arcRotateCamera.radius}];
     return cameraPosition;
   }
 
