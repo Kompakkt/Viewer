@@ -18,6 +18,9 @@ export class SidenavService {
 
     this.editorIsOpen = !this.editorIsOpen;
     this.editor.emit(this.editorIsOpen);
+    if (this.editorIsOpen) {
+      this.closeCollectionsOverview();
+    }
   }
 
   public closeEditor(): void {
@@ -28,6 +31,11 @@ export class SidenavService {
   public toggleCollectionsOverview(): void {
 
     this.collectionsOverviewIsOpen = !this.collectionsOverviewIsOpen;
+    this.collectionsOverview.emit(this.collectionsOverviewIsOpen);
+  }
+
+  public closeCollectionsOverview(): void {
+    this.collectionsOverviewIsOpen = false;
     this.collectionsOverview.emit(this.collectionsOverviewIsOpen);
   }
 }
