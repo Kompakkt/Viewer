@@ -33,9 +33,10 @@ export class CatalogueService {
         const equal_split = url_split[1].split('=');
         if (equal_split.length > 1) {
           const query = equal_split[1];
-          console.log(query);
+          const category = equal_split[0];
+          console.log(category + ' ' + query);
           // TODO: Cases for audio, video and image
-          switch (query) {
+          switch (category) {
             case 'model':
               // TODO: somehow wait for Kompakkt to be initialized
               // TODO: pass metadata in query
