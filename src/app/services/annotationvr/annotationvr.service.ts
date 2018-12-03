@@ -73,6 +73,10 @@ export class AnnotationvrService {
 
 
   private moveVRcontrols() {
+
+    // TODO Get real positions!
+    let posX = 0, posY = 0, posZ = 0;
+
     const textfield = this.babylonService.getScene().getMeshesByTags('textfield');
     textfield.forEach(function (value) {
       value.parent = this.babylonService.getScene().activeCamera;

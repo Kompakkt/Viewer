@@ -89,6 +89,8 @@ export class BabylonService {
       customVRButton: vrButton
     });
     this.VRHelper.enableInteractions();
+
+    return this.VRHelper;
   }
 
   public getVRHelper() {

@@ -19,6 +19,8 @@ export class CameraService {
   private universalCamera: BABYLON.UniversalCamera;
   private vrCamera: BABYLON.VRDeviceOrientationFreeCamera | BABYLON.VRDeviceOrientationArcRotateCamera;
 
+  private vrHelper;
+
   private alpha: number;
   private beta: number;
   private radius: number;
@@ -70,7 +72,7 @@ export class CameraService {
           this.vrCamera.inputs.remove(this.vrCamera.inputs.attached.mouse);
         }
         */
-        this.babylonService.createVRHelper();
+        this.vrHelper = this.babylonService.createVRHelper();
       }
     });
   }
