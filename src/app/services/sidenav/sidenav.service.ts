@@ -20,6 +20,11 @@ export class SidenavService {
     this.editor.emit(this.editorIsOpen);
   }
 
+  public closeEditor(): void {
+    this.editorIsOpen = false;
+    this.editor.emit(this.editorIsOpen);
+  }
+
   public toggleCollectionsOverview(): void {
 
     this.collectionsOverviewIsOpen = !this.collectionsOverviewIsOpen;
