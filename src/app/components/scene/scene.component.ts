@@ -1,5 +1,5 @@
-import { AfterViewInit, Component, ElementRef, HostListener, Input, ViewChild } from '@angular/core';
-import { BabylonService } from '../../services/babylon/babylon.service';
+import {AfterViewInit, Component, ElementRef, HostListener, ViewChild} from '@angular/core';
+import {BabylonService} from '../../services/babylon/babylon.service';
 
 @Component({
   selector: 'app-scene',

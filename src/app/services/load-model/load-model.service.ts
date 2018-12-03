@@ -1,11 +1,11 @@
-import { Injectable } from '@angular/core';
-import { Model } from '../../interfaces/model/model.interface';
-import { BabylonService } from '../../services/babylon/babylon.service';
+import {Injectable} from '@angular/core';
+import {Model} from '../../interfaces/model/model.interface';
+import {BabylonService} from '../babylon/babylon.service';
 import * as BABYLON from 'babylonjs';
-import { ActionService } from '../../services/action/action.service';
-import { AnnotationService } from '../../services/annotation/annotation.service';
-import { CameraService } from '../../services/camera/camera.service';
-import { LoadingscreenhandlerService } from '../../services/loadingscreenhandler/loadingscreenhandler.service';
+import {ActionService} from '../action/action.service';
+import {AnnotationService} from '../annotation/annotation.service';
+import {CameraService} from '../camera/camera.service';
+import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreenhandler.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,10 +13,10 @@ import { LoadingscreenhandlerService } from '../../services/loadingscreenhandler
 export class LoadModelService {
 
   constructor(public babylonService: BabylonService,
-    private actionService: ActionService,
-    private annotationService: AnnotationService,
-    private cameraService: CameraService,
-    private loadingScreenHandler: LoadingscreenhandlerService
+              private actionService: ActionService,
+              private annotationService: AnnotationService,
+              private cameraService: CameraService,
+              private loadingScreenHandler: LoadingscreenhandlerService
   ) {
   }
 
@@ -24,7 +24,8 @@ export class LoadModelService {
     if (!this.loadingScreenHandler.isLoading) {
       try {
         this.babylonService.getScene().meshes.map(model => model.dispose());
-       } catch (e) {}
+      } catch (e) {
+      }
 
       const modelUrl = 'https://blacklodge.hki.uni-koeln.de:8065/models/';
 
@@ -45,7 +46,8 @@ export class LoadModelService {
 
         // TODO: Irgendwie auf Initialisierung des annotationServices warten
         setTimeout(() => {
-          while (this.loadingScreenHandler.isLoading) { }
+          while (this.loadingScreenHandler.isLoading) {
+          }
           this.annotationService.initializeAnnotationMode(newModel.name);
           this.annotationService.loadAnnotations(newModel.name);
         }, 500);

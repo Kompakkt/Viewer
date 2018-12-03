@@ -1,7 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { Model } from '../../interfaces/model/model.interface';
-import { CatalogueService } from '../../services/catalogue/catalogue.service';
-import { LoadModelService } from '../../services/load-model/load-model.service';
+import {Component, Input, OnInit} from '@angular/core';
+import {Model} from '../../interfaces/model/model.interface';
+import {CatalogueService} from '../../services/catalogue/catalogue.service';
+import {LoadModelService} from '../../services/load-model/load-model.service';
 import {SidenavService} from '../../services/sidenav/sidenav.service';
 
 

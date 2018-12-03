@@ -1,9 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Model } from '../../interfaces/model/model.interface';
-import { BabylonService } from '../babylon/babylon.service';
 import { MongohandlerService } from '../mongohandler/mongohandler.service';
-import { Annotation } from '../../interfaces/annotation/annotation';
-import { forEach } from '@angular/router/src/utils/collection';
 import { BehaviorSubject } from 'rxjs';
 import { LoadModelService } from '../load-model/load-model.service';
 

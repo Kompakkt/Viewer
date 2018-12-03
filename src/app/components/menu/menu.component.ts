@@ -1,16 +1,16 @@
-import { Component, Inject, Input, OnInit } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
-import { MatIconRegistry } from '@angular/material';
+import {Component, Inject, OnInit} from '@angular/core';
+import {DomSanitizer} from '@angular/platform-browser';
+import {MatIconRegistry} from '@angular/material';
 
-import { DOCUMENT } from '@angular/common';
+import {DOCUMENT} from '@angular/common';
 
-import { CameraService } from '../../services/camera/camera.service';
-import { BabylonService } from '../../services/babylon/babylon.service';
-import { SkyboxService } from '../../services/skybox/skybox.service';
-import { SidenavService } from '../../services/sidenav/sidenav.service';
-import { AnnotationService } from '../../services/annotation/annotation.service';
-import { MongohandlerService } from '../../services/mongohandler/mongohandler.service';
-import { CatalogueService } from '../../services/catalogue/catalogue.service';
+import {CameraService} from '../../services/camera/camera.service';
+import {BabylonService} from '../../services/babylon/babylon.service';
+import {SkyboxService} from '../../services/skybox/skybox.service';
+import {SidenavService} from '../../services/sidenav/sidenav.service';
+import {AnnotationService} from '../../services/annotation/annotation.service';
+import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
+import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {AnnotationvrService} from '../../services/annotationvr/annotationvr.service';
 
 /**
@@ -120,8 +120,8 @@ export class MenuComponent implements OnInit {
         this.mongohandlerService.updateScreenshot(this.activeModel._id, screenshot).then((result) => {
           // TODO: Find out why picture isn't refreshed once the server sends the result
           this.catalogueService.Observables.models.source['value']
-          .filter(model => model._id === this.activeModel._id)
-          .map(model => model.preview = result.value.preview);
+            .filter(model => model._id === this.activeModel._id)
+            .map(model => model.preview = result.value.preview);
         });
       }
     });

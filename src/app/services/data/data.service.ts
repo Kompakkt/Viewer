@@ -1,9 +1,6 @@
 import {Injectable, EventEmitter} from '@angular/core';
 import PouchDB from 'pouchdb';
-import {Annotation} from '../../interfaces/annotation/annotation';
 import {isUndefined} from 'util';
-import {ifTrue} from 'codelyzer/util/function';
-
 
 @Injectable({
   providedIn: 'root'

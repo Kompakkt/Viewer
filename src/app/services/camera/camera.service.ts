@@ -3,7 +3,6 @@ import * as BABYLON from 'babylonjs';
 
 import {BabylonService} from '../babylon/babylon.service';
 import Vector3 = BABYLON.Vector3;
-import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
 
 import {DeviceDetectorService} from 'ngx-device-detector';
 

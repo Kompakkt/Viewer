@@ -1,4 +1,4 @@
-import {Component, HostBinding, Input, OnInit} from '@angular/core';
+import {Component, HostBinding, OnInit} from '@angular/core';
 import {SidenavService} from '../../services/sidenav/sidenav.service';
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
 

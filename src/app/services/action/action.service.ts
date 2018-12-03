@@ -1,18 +1,14 @@
 import {Injectable} from '@angular/core';
 import * as BABYLON from 'babylonjs';
 import {BabylonService} from '../babylon/babylon.service';
-import {AnnotationService} from '../annotation/annotation.service';
-
 
 @Injectable({
   providedIn: 'root'
 })
 export class ActionService {
 
-
   constructor(private babylonService: BabylonService) {
   }
-
 
   public createActionManager(modelName: string, trigger: number, actionExecuted: (result: any) => void) {
     const mesh = this.babylonService.getScene().getMeshByName(modelName);
@@ -29,7 +25,6 @@ export class ActionService {
     } else {
     }
   }
-
 
   public pickableModel(modelName: string, pickable: boolean) {
     this.babylonService.getScene().getMeshesByTags(modelName).map(model => model.isPickable = pickable);

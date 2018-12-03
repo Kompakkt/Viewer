@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import {Injectable} from '@angular/core';
+import {BehaviorSubject} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +21,8 @@ export class LoadingscreenhandlerService {
   public backgroundColor = '#111111';
   public logo = 'assets/img/kompakkt-icon.png';
 
-  constructor() { }
+  constructor() {
+  }
 
   public updateOpacity(newOpacity: string): void {
     if (parseFloat(newOpacity) > 0.5) {
