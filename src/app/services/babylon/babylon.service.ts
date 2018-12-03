@@ -88,7 +88,20 @@ export class BabylonService {
       useCustomVRButton: true,
       customVRButton: vrButton
     });
+
+    // Example use of gaze tracker functionality
+    // this.VRHelper.gazeTrackerMesh = BABYLON.Mesh.CreateSphere('sphere1', 4, 0.3, this.scene);
+    // this.VRHelper.changeGazeColor(BABYLON.Color3.Red());
+
     this.VRHelper.enableInteractions();
+
+    this.VRHelper.displayGaze = true;
+
+    // Example for handling mesh selection events in VR
+    // See https://doc.babylonjs.com/how_to/webvr_helper#gaze-and-interaction
+    this.VRHelper.onNewMeshSelected.add(function (mesh) {
+      console.log(mesh);
+    });
 
     return this.VRHelper;
   }
