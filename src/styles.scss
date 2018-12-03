@@ -42,3 +42,15 @@ html, body {
 .single-annotation-card .mat-card-header-text {
   margin: 0 !important;
 }
+
+.mat-input-underline {
+  background-color: white !important;
+}
+
+.mat-form-field-label {
+  color: #fff !important;
+}
+
+.mat-form-field.mat-focused .mat-form-field-ripple {
+  background-color: #aaa;
+}
