@@ -20,6 +20,18 @@ export class AnnotationvrService {
   public positionVector: BABYLON.Vector3;
   public actualRanking: number;
 
+  private posXcontrolleft: number;
+  private posYcontrolleft: number;
+  private posZcontrolleft: number;
+
+  private posXcontrolright: number;
+  private posYcontrolright: number;
+  private posZcontrolright: number;
+
+  private posXtextfield: number;
+  private posYtextfield: number;
+  private posZtextfield: number;
+
   constructor(private babylonService: BabylonService,
               private annotationService: AnnotationService,
               private cameraService: CameraService) {
@@ -29,21 +41,33 @@ export class AnnotationvrService {
     this.selectingControl = false;
     this.selectedControl = false;
     this.selectedIndex = -1;
+
+    this.posXcontrolleft = -1.5;
+    this.posYcontrolleft = -0.9;
+    this.posZcontrolleft = 3;
+
+    this.posXcontrolright = 1.5;
+    this.posYcontrolright = -0.9;
+    this.posZcontrolright = 3;
+
+    this.posXtextfield = 0;
+    this.posYtextfield = -0.9;
+    this.posZtextfield = 3;
   }
 
   public createVRAnnotationControls() {
 
-    this.controls.push(this.createPlane('control0', 0.5, 'control0', -1.5, -0.9, 3));
+    this.controls.push(this.createPlane('control0', 0.5, 'control0', this.posXcontrolleft, this.posYcontrolleft, this.posZcontrolleft));
     this.createLabel('<', BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(this.controls[0], 1024, 512));
 
-    this.controls.push(this.createPlane('control1', 0.5, 'control1', 1.5, -0.9, 3));
+    this.controls.push(this.createPlane('control1', 0.5, 'control1', this.posXcontrolright, this.posYcontrolright, this.posZcontrolright));
     this.createLabel('>', BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(this.controls[1], 1024, 512));
   }
 
 
   public createVRAnnotationContentField() {
 
-    const plane = this.createPlane('textfield', 0.7, 'textfield', 0, -0.9, 3);
+    const plane = this.createPlane('textfield', 0.7, 'textfield', this.posXtextfield, this.posYtextfield, this.posZtextfield);
     const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(plane, 1024, 512);
     const rect1 = new BABYLON.GUI.Rectangle();
     rect1.cornerRadius = 45;
@@ -80,19 +104,29 @@ export class AnnotationvrService {
     const textfield = this.babylonService.getScene().getMeshesByTags('textfield');
     textfield.forEach(function (value) {
       value.parent = this.babylonService.getScene().activeCamera;
-      value.position.x = posX;
-      value.position.y = posY;
-      value.position.z = posZ;
+      value.position.x = this.posXtextfield;
+      value.position.y = this.posYtextfield;
+      value.position.z = this.posZtextfield;
       value.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
       value.setParent(null);
     });
 
-    const controls = this.babylonService.getScene().getMeshesByTags('control');
+    const controls = this.babylonService.getScene().getMeshesByTags('control0');
     controls.forEach(function (value) {
       value.parent = this.babylonService.getScene().activeCamera;
-      value.position.x = posX;
-      value.position.y = posY;
-      value.position.z = posZ;
+      value.position.x = this.posXcontrolleft;
+      value.position.y = this.posYcontrolleft;
+      value.position.z = this.posZcontrolleft;
+      value.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+      value.setParent(null);
+    });
+
+    const controls1 = this.babylonService.getScene().getMeshesByTags('control1');
+    controls1.forEach(function (value) {
+      value.parent = this.babylonService.getScene().activeCamera;
+      value.position.x = this.posXcontrolright;
+      value.position.y = this.posYcontrolright;
+      value.position.z = this.posZcontrolright;
       value.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
       value.setParent(null);
     });
