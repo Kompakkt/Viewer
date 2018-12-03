@@ -27,34 +27,58 @@ export class CatalogueService {
 
 
   constructor(private mongohandlerService: MongohandlerService, private loadModelSerivce: LoadModelService) {
-    if (this.isFirstLoad && location.href.indexOf('?') !== -1) {
-      const modelUrl = location.href.replace(location.href.split('?')[0], '').replace('?models/', '');
-      console.log(modelUrl);
-      // TODO: somehow wait for Kompakkt to be initialized
-      this.updateQuality('low');
-      setTimeout(() => {
-        this.loadModelSerivce.loadModel({
-          _id: 'PreviewModel',
-          name: 'PreviewModel',
-          finished: false,
-          online: false,
-          files: [
-            modelUrl
-          ],
-          processed: {
-            time: {
-              start: '',
-              end: '',
-              total: ''
-            },
-            low: modelUrl,
-            medium: modelUrl,
-            high: modelUrl,
-            raw: modelUrl
+    // TODO: Cleanup
+    const url_split = location.href.split('?');
+    if (this.isFirstLoad && url_split.length > 1) {
+        const equal_split = url_split[1].split('=');
+        if (equal_split.length > 1) {
+          const query = equal_split[1];
+          const category = equal_split[0];
+          console.log(category + ' ' + query);
+          // TODO: Cases for audio, video and image
+          switch (category) {
+            case 'model':
+              // TODO: somehow wait for Kompakkt to be initialized
+              // TODO: pass metadata in query
+              // TODO: load metadata if available
+              this.updateQuality('low');
+              setTimeout(() => {
+                this.loadModelSerivce.loadModel({
+                  _id: 'PreviewModel',
+                  name: 'PreviewModel',
+                  finished: false,
+                  online: false,
+                  files: [
+                    query
+                  ],
+                  processed: {
+                    time: {
+                      start: '',
+                      end: '',
+                      total: ''
+                    },
+                    low: query,
+                    medium: query,
+                    high: query,
+                    raw: query
+                  }
+                }, 'low');
+              }, 5000);
+              break;
+            case 'compilation':
+              this.fetchData(query);
+              break;
+            default:
+              console.log('No valid query passed. Loading test compilation');
+              this.fetchData();
+              break;
           }
-        }, 'low');
-      }, 5000);
+        } else {
+          console.log('No valid query passed. Loading test compilation');
+          this.fetchData();
+        }
     } else {
+      console.log('No valid query passed. Loading test compilation');
       this.fetchData();
     }
   }
@@ -87,8 +111,11 @@ export class CatalogueService {
     this.Subjects.models.next(models);
   }
 
-  private async fetchData() {
-    const compilation = await this.mongohandlerService.getCompilation('testcompilation2').then(result => {
+  private async fetchData(compilation_id?: string) {
+    if (compilation_id === undefined) {
+      compilation_id = 'testcompilation2';
+    }
+    const compilation = await this.mongohandlerService.getCompilation(compilation_id).then(result => {
       return result;
     }).catch(error => console.error(error));
     if (compilation.models.length > 0) {
