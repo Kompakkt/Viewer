@@ -1,4 +1,4 @@
-import {Inject, Injectable} from '@angular/core';
+import {EventEmitter, Inject, Injectable, Output} from '@angular/core';
 import {DOCUMENT} from '@angular/common';
 
 import * as BABYLON from 'babylonjs';
@@ -20,6 +20,9 @@ import {BehaviorSubject} from 'rxjs';
   providedIn: 'root'
 })
 export class BabylonService {
+
+  @Output() vrModeIsActive: EventEmitter<boolean> = new EventEmitter();
+
   private scene: BABYLON.Scene;
   private engine: BABYLON.Engine;
   private VRHelper: BABYLON.VRExperienceHelper;
@@ -32,8 +35,11 @@ export class BabylonService {
   constructor(private message: MessageService,
               private loadingScreenHandler: LoadingscreenhandlerService,
               @Inject(DOCUMENT) private document: any) {
+
     this.CanvasObservable.subscribe(newCanvas => {
+
       if (newCanvas) {
+
         this.engine = new BABYLON.Engine(newCanvas, true, {preserveDrawingBuffer: true, stencil: true});
         this.scene = new BABYLON.Scene(this.engine);
         this.engine.loadingScreen = new LoadingScreen(newCanvas, '', '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
@@ -101,6 +107,13 @@ export class BabylonService {
     // See https://doc.babylonjs.com/how_to/webvr_helper#gaze-and-interaction
     this.VRHelper.onNewMeshSelected.add(function (mesh) {
       console.log(mesh);
+    });
+
+    this.VRHelper.onEnteringVRObservable.add(() => {
+      this.vrModeIsActive.emit(true);
+    });
+    this.VRHelper.onExitingVRObservable.add(() => {
+      this.vrModeIsActive.emit(false);
     });
 
     return this.VRHelper;

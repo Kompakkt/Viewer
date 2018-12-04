@@ -8,8 +8,7 @@ import {AnnotationService} from '../annotation/annotation.service';
   providedIn: 'root'
 })
 export class AnnotationvrService {
-
-
+  
   private controls = [];
   private textBlock = new BABYLON.GUI.TextBlock();
 
@@ -35,6 +34,7 @@ export class AnnotationvrService {
   constructor(private babylonService: BabylonService,
               private annotationService: AnnotationService,
               private cameraService: CameraService) {
+
     this.controls = [];
     this.positionVector = BABYLON.Vector3.Zero();
     this.actualRanking = 0;
@@ -53,6 +53,18 @@ export class AnnotationvrService {
     this.posXtextfield = 0;
     this.posYtextfield = -0.9;
     this.posZtextfield = 3;
+
+    this.babylonService.vrModeIsActive.subscribe(vrModeIsActive => {
+
+      if (vrModeIsActive) {
+
+        this.createVRAnnotationControls();
+        this.createVRAnnotationContentField();
+        this.initializeControls();
+      } else {
+        this.deleteVRElements();
+      }
+    });
   }
 
   public createVRAnnotationControls() {
@@ -64,17 +76,17 @@ export class AnnotationvrService {
     this.createLabel('>', BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(this.controls[1], 1024, 512));
   }
 
-
   public createVRAnnotationContentField() {
 
     const plane = this.createPlane('textfield', 0.7, 'textfield', this.posXtextfield, this.posYtextfield, this.posZtextfield);
-    const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(plane, 1024, 512);
+
     const rect1 = new BABYLON.GUI.Rectangle();
     rect1.cornerRadius = 45;
     rect1.thickness = 10;
     rect1.background = 'gray';
     rect1.alpha = 0.5;
-    advancedTexture.addControl(rect1);
+
+    BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(plane, 1024, 512).addControl(rect1);
 
     this.textBlock.text = 'Look around to start the annotation tour.';
     this.textBlock.fontFamily = 'Lucida Console';
@@ -82,19 +94,20 @@ export class AnnotationvrService {
     rect1.addControl(this.textBlock);
   }
 
-
   public deleteVRElements() {
-    const textfield = this.babylonService.getScene().getMeshesByTags('textfield');
-    textfield.forEach(function (value) {
+
+    this.babylonService.getScene().getMeshesByTags('textfield').forEach(function (value) {
       value.dispose();
     });
 
-    const controls = this.babylonService.getScene().getMeshesByTags('control');
-    controls.forEach(function (value) {
+    this.babylonService.getScene().getMeshesByTags('control0').forEach(function (value) {
+      value.dispose();
+    });
+
+    this.babylonService.getScene().getMeshesByTags('control1').forEach(function (value) {
       value.dispose();
     });
   }
-
 
   private moveVRcontrols() {
 
@@ -130,7 +143,6 @@ export class AnnotationvrService {
       value.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
       value.setParent(null);
     });
-
   }
 
   public initializeControls() {
@@ -156,8 +168,8 @@ export class AnnotationvrService {
       }
     });
 
-
     this.babylonService.getVRHelper().onNewMeshSelected.add(function (mesh) {
+
       if (mesh.name.indexOf('control') !== -1) {
         this.selectedIndex = mesh.name[mesh.name.length - 1];
         this.controls[this.selectedIndex].material.diffuseColor = BABYLON.Color3.Blue();
@@ -175,11 +187,10 @@ export class AnnotationvrService {
         }
       }
     });
-
   }
 
-
   private createPlane(name: string, size: number, tag: string, posX: number, posY: number, posZ: number) {
+
     const plane = BABYLON.Mesh.CreatePlane(name, size, this.babylonService.getScene());
     BABYLON.Tags.AddTagsTo(plane, tag);
     plane.material = new BABYLON.StandardMaterial('contentMat', this.babylonService.getScene());
@@ -210,7 +221,6 @@ export class AnnotationvrService {
     textBlock.color = 'white';
     rect1.addControl(textBlock);
   }
-
 
   private previousAnnotation() {
 
