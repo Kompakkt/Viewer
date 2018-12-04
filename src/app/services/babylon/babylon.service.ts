@@ -32,6 +32,10 @@ export class BabylonService {
 
   private backgroundURL = 'assets/textures/backgrounds/darkgrey.jpg';
 
+  private actualControl: BABYLON.AbstractMesh;
+  private selectingControl: boolean;
+  private selectedControl: boolean;
+
   constructor(private message: MessageService,
               private loadingScreenHandler: LoadingscreenhandlerService,
               @Inject(DOCUMENT) private document: any) {
@@ -45,8 +49,24 @@ export class BabylonService {
         this.engine.loadingScreen = new LoadingScreen(newCanvas, '', '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
 
         this.engine.runRenderLoop(() => {
-          this.scene.render();
+
+          if (this.actualControl !== null) {
+            if (this.selectingControl && !this.selectedControl) {
+              this.actualControl.scaling.x += 0.005;
+              this.actualControl.scaling.y += 0.005;
+
+              if (this.actualControl.scaling.x >= 1.2) {
+                this.selectedControl = true;
+              }
+            }
+            if (this.selectedControl) {
+              // this.actualControl.material.diffuseColor = BABYLON.Color3.Red();
+              // this.actualControl.
+            }
+            this.scene.render();
+          }
         });
+
 
         this.setBackgroundImage(this.backgroundURL);
 
@@ -95,13 +115,38 @@ export class BabylonService {
       customVRButton: vrButton
     });
 
-    // Example use of gaze tracker functionality
-    // this.VRHelper.gazeTrackerMesh = BABYLON.Mesh.CreateSphere('sphere1', 4, 0.3, this.scene);
-    // this.VRHelper.changeGazeColor(BABYLON.Color3.Red());
-
     this.VRHelper.enableInteractions();
 
     this.VRHelper.displayGaze = true;
+
+    this.VRHelper.onNewMeshSelected.add(function (mesh) {
+
+      if (mesh.name === 'controlPrevious') {
+        this.actualControl = null;
+        this.actualControl = mesh;
+        this.actualControl.material.diffuseColor = BABYLON.Color3.Blue();
+        this.selectingControl = true;
+        console.log('PREVIOUS');
+      }
+      if (mesh.name === 'controlNext') {
+        this.actualControl = null;
+        this.actualControl = mesh;
+        this.actualControl.material.diffuseColor = BABYLON.Color3.Blue();
+        this.selectingControl = true;
+        console.log('NEXT');
+      } else {
+        this.selectingControl = false;
+        this.selectedControl = false;
+
+        if (this.actualControl !== null) {
+          this.actualControl.material.diffuseColor = BABYLON.Color3.White();
+          this.actualControl.height = 1;
+          this.actualControl.width = 1;
+          this.actualControl = null;
+        }
+      }
+    });
+
 
     this.VRHelper.onEnteringVRObservable.add(() => {
       this.vrModeIsActive.emit(true);

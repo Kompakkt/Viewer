@@ -3,6 +3,7 @@ import {BabylonService} from '../babylon/babylon.service';
 import {CameraService} from '../camera/camera.service';
 import * as BABYLON from 'babylonjs';
 import {AnnotationService} from '../annotation/annotation.service';
+import * as GUI from 'babylonjs-gui';
 
 @Injectable({
   providedIn: 'root'
@@ -33,9 +34,6 @@ export class AnnotationvrService {
   private posYtextfield: number;
   private posZtextfield: number;
 
-  private cameraWrapper = BABYLON.AbstractMesh;
-
-
   constructor(private babylonService: BabylonService,
               private annotationService: AnnotationService,
               private cameraService: CameraService) {
@@ -59,11 +57,9 @@ export class AnnotationvrService {
     this.posZtextfield = 3;
 
     this.babylonService.vrModeIsActive.subscribe(vrModeIsActive => {
-
       if (vrModeIsActive) {
         this.createVRAnnotationControls();
         this.createVRAnnotationContentField();
-        this.initializeControls();
       } else {
         this.deleteVRElements();
       }
@@ -72,32 +68,74 @@ export class AnnotationvrService {
 
   public createVRAnnotationControls() {
 
-    // this.cameraWrapper = BABYLON.Mesh.CreateBox('cameraWrapper', 2, this.babylonService.getScene());
-
-    this.controlPrevious = BABYLON.Mesh.CreateBox('controlPrevious', 2, this.babylonService.getScene());
-    // BABYLON.Tags.AddTagsTo(this.controlPrevious, 'control');
+    this.controlPrevious = BABYLON.MeshBuilder.CreatePlane('controlPrevious', {height: 1, width: 1}, this.babylonService.getScene());
+    this.controlPrevious.parent = this.babylonService.getScene().activeCamera;
     this.controlPrevious.position.x = this.posXcontrolPrevious;
     this.controlPrevious.position.y = this.posYcontrolPrevious;
     this.controlPrevious.position.z = this.posZcontrolPrevious;
     this.controlPrevious.material = new BABYLON.StandardMaterial('controlMat', this.babylonService.getScene());
+    this.controlPrevious.material.alpha = 1;
     this.controlPrevious.renderingGroupId = 1;
-    // this.controlPrevious.parent = this.cameraWrapper;
+    this.controlPrevious.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+    BABYLON.Tags.AddTagsTo(this.controlPrevious, 'control');
 
-    this.controlNext = BABYLON.Mesh.CreateBox('controlNexts', 2, this.babylonService.getScene());
-    // BABYLON.Tags.AddTagsTo(this.controlNext, 'control');
+    const label = this.createLabel();
+    GUI.AdvancedDynamicTexture.CreateForMesh(this.controlPrevious).addControl(label);
+
+
+    this.controlNext = BABYLON.MeshBuilder.CreatePlane('controlNext', {height: 1, width: 1}, this.babylonService.getScene());
+    this.controlNext.parent = this.babylonService.getScene().activeCamera;
     this.controlNext.position.x = this.posXcontrolNext;
-    this.controlNext.position.y = this.posXcontrolNext;
+    this.controlNext.position.y = this.posYcontrolNext;
     this.controlNext.position.z = this.posZcontrolNext;
     this.controlNext.material = new BABYLON.StandardMaterial('controlMat', this.babylonService.getScene());
+    this.controlNext.material.alpha = 1;
     this.controlNext.renderingGroupId = 1;
-    // this.controlNext.parent = this.cameraWrapper;
+    this.controlNext.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+    BABYLON.Tags.AddTagsTo(this.controlNext, 'control');
 
+    const label2 = this.createLabel2();
+    GUI.AdvancedDynamicTexture.CreateForMesh(this.controlNext).addControl(label2);
+
+  }
+
+  private createLabel() {
+
+    const label = new GUI.Ellipse('controlPreviousLabel');
+    label.width = '100%';
+    label.height = '100%';
+    label.color = 'white';
+    label.thickness = 1;
+    label.background = 'black';
+    label.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+
+    const that = this;
+    label.onPointerDownObservable.add(function () {
+      that.previousAnnotation();
+    });
+    return label;
+  }
+
+  private createLabel2() {
+
+    const label = new GUI.Ellipse('controlNextLabel');
+    label.width = '100%';
+    label.height = '100%';
+    label.color = 'white';
+    label.thickness = 1;
+    label.background = 'black';
+    label.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+
+    const that = this;
+    label.onPointerDownObservable.add(function () {
+      that.nextAnnotation();
+    });
+    return label;
   }
 
   public createVRAnnotationContentField() {
 
     this.annotationTextGround = BABYLON.Mesh.CreatePlane('annotationTextGround', 1, this.babylonService.getScene());
-    // BABYLON.Tags.AddTagsTo(this.annotationTextGround, 'control');
     this.annotationTextGround.material = new BABYLON.StandardMaterial('contentMat', this.babylonService.getScene());
     this.annotationTextGround.material.alpha = 1;
     this.annotationTextGround.renderingGroupId = 1;
@@ -106,7 +144,8 @@ export class AnnotationvrService {
     this.annotationTextGround.position.y = this.posYtextfield;
     this.annotationTextGround.position.z = this.posZtextfield;
     this.annotationTextGround.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
-    // this.annotationTextGround.parent = this.cameraWrapper;
+
+    BABYLON.Tags.AddTagsTo(this.annotationTextGround, 'control');
 
     const rect1 = new BABYLON.GUI.Rectangle();
     rect1.cornerRadius = 45;
@@ -124,78 +163,15 @@ export class AnnotationvrService {
   }
 
   public deleteVRElements() {
-    /*
+
         this.babylonService.getScene().getMeshesByTags('control').forEach(function (value) {
           value.dispose();
-        });*/
-    this.controlPrevious.dispose();
-    this.controlNext.dispose();
-    this.annotationTextGround.dispose();
+        });
   }
 
   private moveVRcontrols() {
 
   }
-
-  public initializeControls() {
-
-    this.babylonService.getScene().registerBeforeRender(function () {
-      // this.cameraWrapper.position = this.cameraService.getActualVRCameraPosAnnotation();
-      // this.cameraWrapper.rotation = camera.rotation;
-
-      if (this.selectingControlPrevious && !this.selectedControlPrevious) {
-        this.controlPrevious.scaling.width += 0.005;
-        this.controlPrevious.scaling.height += 0.005;
-
-        if (this.controlPrevious.scaling.width >= 1.2) {
-          this.selectedControlPrevious = true;
-          this.previousAnnotation();
-        }
-      }
-      if (this.selectedControlPrevious) {
-        this.controlPrevious.material.diffuseColor = BABYLON.Color3.Red();
-      }
-      if (this.selectingControlNext && !this.selectedControlNext) {
-        this.controlNext.scaling.width += 0.005;
-        this.controlNext.scaling.height += 0.005;
-
-        if (this.controlNext.scaling.width >= 1.2) {
-          this.selectedControlNext = true;
-          this.nextAnnotation();
-        }
-      }
-      if (this.selectedControlNext) {
-        this.controlNext.material.diffuseColor = BABYLON.Color3.Red();
-      }
-    });
-
-    this.babylonService.getVRHelper().onNewMeshSelected.add(function (mesh) {
-      if (mesh.name = 'controlPrevious') {
-        this.controlPrevious.material.diffuseColor = BABYLON.Color3.Blue();
-        this.selectingControlPrevious = true;
-      }
-      if (mesh.name = 'controlNext') {
-        this.controlNext.material.diffuseColor = BABYLON.Color3.Blue();
-        this.selectingControlNext = true;
-      } else {
-        this.selectingControlPrevious = false;
-        this.selectedControlPrevious = false;
-        this.selectingControlNext = false;
-        this.selectedControlNext = false;
-
-        this.controlPrevious.material.diffuseColor = BABYLON.Color3.White();
-        this.controlPrevious.scaling.x = 1;
-        this.controlPrevious.scaling.y = 1;
-        this.controlPrevious.scaling.z = 1;
-
-        this.controlNext.material.diffuseColor = BABYLON.Color3.White();
-        this.controlNext.scaling.x = 1;
-        this.controlNext.scaling.y = 1;
-        this.controlNext.scaling.z = 1;
-      }
-    });
-  }
-
 
   private previousAnnotation() {
 
@@ -256,5 +232,6 @@ export class AnnotationvrService {
       this.actualRanking = 0;
     }
   }
+
 
 }
