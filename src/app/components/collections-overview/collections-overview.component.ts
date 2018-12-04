@@ -1,5 +1,5 @@
 import {Component, HostBinding, OnInit} from '@angular/core';
-import {SidenavService} from '../../services/sidenav/sidenav.service';
+import {OverlayService} from '../../services/overlay/overlay.service';
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
 
 @Component({
@@ -11,13 +11,13 @@ export class CollectionsOverviewComponent implements OnInit {
 
   @HostBinding('class.is-open') private isOpen = false;
 
-  constructor(private sidenavService: SidenavService,
+  constructor(private overlayService: OverlayService,
               public catalogueService: CatalogueService) {
   }
 
   ngOnInit() {
 
-    this.sidenavService.collectionsOverview.subscribe(collectionsOverviewIsOpen => {
+    this.overlayService.collectionsOverview.subscribe(collectionsOverviewIsOpen => {
       this.isOpen = collectionsOverviewIsOpen;
     });
 

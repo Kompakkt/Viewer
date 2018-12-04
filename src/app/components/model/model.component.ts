@@ -2,7 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 import {Model} from '../../interfaces/model/model.interface';
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {LoadModelService} from '../../services/load-model/load-model.service';
-import {SidenavService} from '../../services/sidenav/sidenav.service';
+import {OverlayService} from '../../services/overlay/overlay.service';
 
 
 @Component({
@@ -15,7 +15,7 @@ export class ModelComponent implements OnInit {
 
   constructor(private catalogueService: CatalogueService,
               private loadModelService: LoadModelService,
-              private sidenavService: SidenavService) {
+              private overlayService: OverlayService) {
   }
 
   ngOnInit() {
@@ -27,6 +27,6 @@ export class ModelComponent implements OnInit {
 
   public async changeModel() {
     this.catalogueService.updateActiveModel(this.model);
-    this.sidenavService.closeEditor();
+    this.overlayService.closeEditor();
   }
 }

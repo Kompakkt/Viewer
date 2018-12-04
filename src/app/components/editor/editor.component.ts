@@ -1,5 +1,5 @@
 import {Component, HostBinding, Input, OnInit} from '@angular/core';
-import {SidenavService} from '../../services/sidenav/sidenav.service';
+import {OverlayService} from '../../services/overlay/overlay.service';
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {ActionService} from '../../services/action/action.service';
 import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
@@ -15,7 +15,7 @@ export class EditorComponent implements OnInit {
   @HostBinding('class.is-open') private isOpen = false;
   @Input() modelFileName: string;
 
-  constructor(private sidenavService: SidenavService,
+  constructor(private overlayService: OverlayService,
               private actionService: ActionService,
               private babylonService: BabylonService,
               public annotationService: AnnotationService) {
@@ -23,7 +23,7 @@ export class EditorComponent implements OnInit {
 
   ngOnInit() {
 
-    this.sidenavService.editor.subscribe(editorIsOpen => {
+    this.overlayService.editor.subscribe(editorIsOpen => {
 
       this.isOpen = editorIsOpen;
       // TODO initialize after model is loaded!
