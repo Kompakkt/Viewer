@@ -1,5 +1,9 @@
 $cardbgr: rgba(0, 0, 0, 0.7);
 
+:host {
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
 .single-annotation-card {
   transition: opacity 0.25s ease;
   z-index: 0;

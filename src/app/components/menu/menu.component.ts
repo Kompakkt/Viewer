@@ -7,7 +7,7 @@ import {DOCUMENT} from '@angular/common';
 import {CameraService} from '../../services/camera/camera.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
 import {SkyboxService} from '../../services/skybox/skybox.service';
-import {SidenavService} from '../../services/sidenav/sidenav.service';
+import {OverlayService} from '../../services/overlay/overlay.service';
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
@@ -31,7 +31,7 @@ export class MenuComponent implements OnInit {
     private sanitizer: DomSanitizer,
     private skyboxService: SkyboxService,
     private cameraService: CameraService,
-    private sidenavService: SidenavService,
+    private overlayService: OverlayService,
     private babylonService: BabylonService,
     private annotationService: AnnotationService,
     private mongohandlerService: MongohandlerService,
@@ -106,11 +106,11 @@ export class MenuComponent implements OnInit {
   }
 
   public editScene(): void {
-    this.sidenavService.toggleEditor();
+    this.overlayService.toggleEditor();
   }
 
   public toggleCollectionsOverview(): void {
-    this.sidenavService.toggleCollectionsOverview();
+    this.overlayService.toggleCollectionsOverview();
   }
 
   public takeScreenshot() {
