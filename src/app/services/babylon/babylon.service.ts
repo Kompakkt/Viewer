@@ -103,12 +103,6 @@ export class BabylonService {
 
     this.VRHelper.displayGaze = true;
 
-    // Example for handling mesh selection events in VR
-    // See https://doc.babylonjs.com/how_to/webvr_helper#gaze-and-interaction
-    this.VRHelper.onNewMeshSelected.add(function (mesh) {
-      console.log(mesh);
-    });
-
     this.VRHelper.onEnteringVRObservable.add(() => {
       this.vrModeIsActive.emit(true);
     });

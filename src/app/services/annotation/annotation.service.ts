@@ -5,6 +5,7 @@ import {BabylonService} from '../babylon/babylon.service';
 import * as BABYLON from 'babylonjs';
 import {ActionService} from '../action/action.service';
 import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
+import {AnnotationvrService} from '../annotationvr/annotationvr.service';
 
 /**
  * @author Zoe Schubert
@@ -59,6 +60,7 @@ export class AnnotationService {
       }
       return 0;
     });
+
   }
 
   public createNewAnnotation = function (result: any) {

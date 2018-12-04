@@ -369,6 +369,13 @@ export class CameraService {
     });
   }
 
+  public getActualVRCameraPosAnnotation() {
+    const cameraPosition = [{dimension: 'x', value: this.vrHelper.webVRCamera.alpha},
+      {dimension: 'y', value: this.vrHelper.webVRCamera.beta},
+      {dimension: 'z', value: this.vrHelper.webVRCamera.radius}];
+    return cameraPosition;
+  }
+
   public getActualCameraPosAnnotation() {
     const cameraPosition = [{dimension: 'x', value: this.arcRotateCamera.alpha},
       {dimension: 'y', value: this.arcRotateCamera.beta},

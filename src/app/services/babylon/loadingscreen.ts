@@ -45,8 +45,8 @@ export class LoadingScreen implements BABYLON.ILoadingScreen {
     if (this.loadingScreenHandler.isLoading) {
       // TODO: remove Timeout and make markers disappear quicker
       setTimeout(() => {
-        this.loadingScreenHandler.updateOpacity('0');  
-      }, 500);      
+        this.loadingScreenHandler.updateOpacity('0');
+      }, 500);
     }
   }
 

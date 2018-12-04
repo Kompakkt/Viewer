@@ -8,47 +8,51 @@ import {AnnotationService} from '../annotation/annotation.service';
   providedIn: 'root'
 })
 export class AnnotationvrService {
-  
-  private controls = [];
-  private textBlock = new BABYLON.GUI.TextBlock();
 
-  private selectingControl: boolean;
-  private selectedControl: boolean;
-  private selectedIndex: number;
+  private controlPrevious: BABYLON.AbstractMesh;
+  private controlNext: BABYLON.AbstractMesh;
+  private annotationTextField: BABYLON.GUI.TextBlock;
+  private annotationTextGround: BABYLON.AbstractMesh;
 
-  public positionVector: BABYLON.Vector3;
+  private selectingControlPrevious: boolean;
+  private selectedControlPrevious: boolean;
+  private selectingControlNext: boolean;
+  private selectedControlNext: boolean;
+
   public actualRanking: number;
 
-  private posXcontrolleft: number;
-  private posYcontrolleft: number;
-  private posZcontrolleft: number;
+  private posXcontrolPrevious: number;
+  private posYcontrolPrevious: number;
+  private posZcontrolPrevious: number;
 
-  private posXcontrolright: number;
-  private posYcontrolright: number;
-  private posZcontrolright: number;
+  private posXcontrolNext: number;
+  private posYcontrolNext: number;
+  private posZcontrolNext: number;
 
   private posXtextfield: number;
   private posYtextfield: number;
   private posZtextfield: number;
 
+  private cameraWrapper = BABYLON.AbstractMesh;
+
+
   constructor(private babylonService: BabylonService,
               private annotationService: AnnotationService,
               private cameraService: CameraService) {
 
-    this.controls = [];
-    this.positionVector = BABYLON.Vector3.Zero();
     this.actualRanking = 0;
-    this.selectingControl = false;
-    this.selectedControl = false;
-    this.selectedIndex = -1;
+    this.selectingControlPrevious = false;
+    this.selectedControlPrevious = false;
+    this.selectingControlNext = false;
+    this.selectedControlNext = false;
 
-    this.posXcontrolleft = -1.5;
-    this.posYcontrolleft = -0.9;
-    this.posZcontrolleft = 3;
+    this.posXcontrolPrevious = -1.5;
+    this.posYcontrolPrevious = -0.9;
+    this.posZcontrolPrevious = 3;
 
-    this.posXcontrolright = 1.5;
-    this.posYcontrolright = -0.9;
-    this.posZcontrolright = 3;
+    this.posXcontrolNext = 1.5;
+    this.posYcontrolNext = -0.9;
+    this.posZcontrolNext = 3;
 
     this.posXtextfield = 0;
     this.posYtextfield = -0.9;
@@ -57,7 +61,6 @@ export class AnnotationvrService {
     this.babylonService.vrModeIsActive.subscribe(vrModeIsActive => {
 
       if (vrModeIsActive) {
-
         this.createVRAnnotationControls();
         this.createVRAnnotationContentField();
         this.initializeControls();
@@ -69,16 +72,41 @@ export class AnnotationvrService {
 
   public createVRAnnotationControls() {
 
-    this.controls.push(this.createPlane('control0', 0.5, 'control0', this.posXcontrolleft, this.posYcontrolleft, this.posZcontrolleft));
-    this.createLabel('<', BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(this.controls[0], 1024, 512));
+    // this.cameraWrapper = BABYLON.Mesh.CreateBox('cameraWrapper', 2, this.babylonService.getScene());
 
-    this.controls.push(this.createPlane('control1', 0.5, 'control1', this.posXcontrolright, this.posYcontrolright, this.posZcontrolright));
-    this.createLabel('>', BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(this.controls[1], 1024, 512));
+    this.controlPrevious = BABYLON.Mesh.CreateBox('controlPrevious', 2, this.babylonService.getScene());
+    // BABYLON.Tags.AddTagsTo(this.controlPrevious, 'control');
+    this.controlPrevious.position.x = this.posXcontrolPrevious;
+    this.controlPrevious.position.y = this.posYcontrolPrevious;
+    this.controlPrevious.position.z = this.posZcontrolPrevious;
+    this.controlPrevious.material = new BABYLON.StandardMaterial('controlMat', this.babylonService.getScene());
+    this.controlPrevious.renderingGroupId = 1;
+    // this.controlPrevious.parent = this.cameraWrapper;
+
+    this.controlNext = BABYLON.Mesh.CreateBox('controlNexts', 2, this.babylonService.getScene());
+    // BABYLON.Tags.AddTagsTo(this.controlNext, 'control');
+    this.controlNext.position.x = this.posXcontrolNext;
+    this.controlNext.position.y = this.posXcontrolNext;
+    this.controlNext.position.z = this.posZcontrolNext;
+    this.controlNext.material = new BABYLON.StandardMaterial('controlMat', this.babylonService.getScene());
+    this.controlNext.renderingGroupId = 1;
+    // this.controlNext.parent = this.cameraWrapper;
+
   }
 
   public createVRAnnotationContentField() {
 
-    const plane = this.createPlane('textfield', 0.7, 'textfield', this.posXtextfield, this.posYtextfield, this.posZtextfield);
+    this.annotationTextGround = BABYLON.Mesh.CreatePlane('annotationTextGround', 1, this.babylonService.getScene());
+    // BABYLON.Tags.AddTagsTo(this.annotationTextGround, 'control');
+    this.annotationTextGround.material = new BABYLON.StandardMaterial('contentMat', this.babylonService.getScene());
+    this.annotationTextGround.material.alpha = 1;
+    this.annotationTextGround.renderingGroupId = 1;
+    this.annotationTextGround.parent = this.babylonService.getScene().activeCamera;
+    this.annotationTextGround.position.x = this.posXtextfield;
+    this.annotationTextGround.position.y = this.posYtextfield;
+    this.annotationTextGround.position.z = this.posZtextfield;
+    this.annotationTextGround.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+    // this.annotationTextGround.parent = this.cameraWrapper;
 
     const rect1 = new BABYLON.GUI.Rectangle();
     rect1.cornerRadius = 45;
@@ -86,141 +114,88 @@ export class AnnotationvrService {
     rect1.background = 'gray';
     rect1.alpha = 0.5;
 
-    BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(plane, 1024, 512).addControl(rect1);
+    BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(this.annotationTextGround, 1024, 512).addControl(rect1);
 
-    this.textBlock.text = 'Look around to start the annotation tour.';
-    this.textBlock.fontFamily = 'Lucida Console';
-    this.textBlock.fontSize = '150';
-    rect1.addControl(this.textBlock);
+    this.annotationTextField = new BABYLON.GUI.TextBlock();
+    this.annotationTextField.text = 'Look around to start the annotation tour.';
+    this.annotationTextField.fontFamily = 'Lucida Console';
+    this.annotationTextField.fontSize = '50';
+    rect1.addControl(this.annotationTextField);
   }
 
   public deleteVRElements() {
-
-    this.babylonService.getScene().getMeshesByTags('textfield').forEach(function (value) {
-      value.dispose();
-    });
-
-    this.babylonService.getScene().getMeshesByTags('control0').forEach(function (value) {
-      value.dispose();
-    });
-
-    this.babylonService.getScene().getMeshesByTags('control1').forEach(function (value) {
-      value.dispose();
-    });
+    /*
+        this.babylonService.getScene().getMeshesByTags('control').forEach(function (value) {
+          value.dispose();
+        });*/
+    this.controlPrevious.dispose();
+    this.controlNext.dispose();
+    this.annotationTextGround.dispose();
   }
 
   private moveVRcontrols() {
 
-    // TODO Get real positions!
-    let posX = 0, posY = 0, posZ = 0;
-
-    const textfield = this.babylonService.getScene().getMeshesByTags('textfield');
-    textfield.forEach(function (value) {
-      value.parent = this.babylonService.getScene().activeCamera;
-      value.position.x = this.posXtextfield;
-      value.position.y = this.posYtextfield;
-      value.position.z = this.posZtextfield;
-      value.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
-      value.setParent(null);
-    });
-
-    const controls = this.babylonService.getScene().getMeshesByTags('control0');
-    controls.forEach(function (value) {
-      value.parent = this.babylonService.getScene().activeCamera;
-      value.position.x = this.posXcontrolleft;
-      value.position.y = this.posYcontrolleft;
-      value.position.z = this.posZcontrolleft;
-      value.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
-      value.setParent(null);
-    });
-
-    const controls1 = this.babylonService.getScene().getMeshesByTags('control1');
-    controls1.forEach(function (value) {
-      value.parent = this.babylonService.getScene().activeCamera;
-      value.position.x = this.posXcontrolright;
-      value.position.y = this.posYcontrolright;
-      value.position.z = this.posZcontrolright;
-      value.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
-      value.setParent(null);
-    });
   }
 
   public initializeControls() {
 
     this.babylonService.getScene().registerBeforeRender(function () {
-      if (this.selectingControl && !this.selectedControl) {
-        this.controls[this.selectedIndex].scaling.width += 0.005;
-        this.controls[this.selectedIndex].scaling.height += 0.005;
+      // this.cameraWrapper.position = this.cameraService.getActualVRCameraPosAnnotation();
+      // this.cameraWrapper.rotation = camera.rotation;
 
-        if (this.controls[this.selectedIndex].scaling.width >= 1.2) {
-          this.selectedControl = true;
-          this.controls[this.selectedIndex].text = 'Selected';
-          if (this.selectedIndex = 0) {
-            this.previousAnnotation();
-          }
-          if (this.selectedIndex = 1) {
-            this.nextAnnotation();
-          }
+      if (this.selectingControlPrevious && !this.selectedControlPrevious) {
+        this.controlPrevious.scaling.width += 0.005;
+        this.controlPrevious.scaling.height += 0.005;
+
+        if (this.controlPrevious.scaling.width >= 1.2) {
+          this.selectedControlPrevious = true;
+          this.previousAnnotation();
         }
       }
-      if (this.selectedControl) {
-        this.controls[this.selectedIndex].material.diffuseColor = BABYLON.Color3.Red();
+      if (this.selectedControlPrevious) {
+        this.controlPrevious.material.diffuseColor = BABYLON.Color3.Red();
+      }
+      if (this.selectingControlNext && !this.selectedControlNext) {
+        this.controlNext.scaling.width += 0.005;
+        this.controlNext.scaling.height += 0.005;
+
+        if (this.controlNext.scaling.width >= 1.2) {
+          this.selectedControlNext = true;
+          this.nextAnnotation();
+        }
+      }
+      if (this.selectedControlNext) {
+        this.controlNext.material.diffuseColor = BABYLON.Color3.Red();
       }
     });
 
     this.babylonService.getVRHelper().onNewMeshSelected.add(function (mesh) {
-
-      if (mesh.name.indexOf('control') !== -1) {
-        this.selectedIndex = mesh.name[mesh.name.length - 1];
-        this.controls[this.selectedIndex].material.diffuseColor = BABYLON.Color3.Blue();
-        this.controls[this.selectedIndex].text = 'Selecting';
-        this.selectingControl = true;
+      if (mesh.name = 'controlPrevious') {
+        this.controlPrevious.material.diffuseColor = BABYLON.Color3.Blue();
+        this.selectingControlPrevious = true;
+      }
+      if (mesh.name = 'controlNext') {
+        this.controlNext.material.diffuseColor = BABYLON.Color3.Blue();
+        this.selectingControlNext = true;
       } else {
-        this.selectingControl = false;
-        this.selectingControl = false;
-        if (this.selectedIndex !== -1) {
-          this.controls[this.selectedIndex].material.diffuseColor = BABYLON.Color3.White();
-          this.controls[this.selectedIndex].scaling.width = 1;
-          this.controls[this.selectedIndex].scaling.height = 1;
-          this.controls[this.selectedIndex].text = 'Control ' + this.selectedIndex;
-          this.selectedIndex = -1;
-        }
+        this.selectingControlPrevious = false;
+        this.selectedControlPrevious = false;
+        this.selectingControlNext = false;
+        this.selectedControlNext = false;
+
+        this.controlPrevious.material.diffuseColor = BABYLON.Color3.White();
+        this.controlPrevious.scaling.x = 1;
+        this.controlPrevious.scaling.y = 1;
+        this.controlPrevious.scaling.z = 1;
+
+        this.controlNext.material.diffuseColor = BABYLON.Color3.White();
+        this.controlNext.scaling.x = 1;
+        this.controlNext.scaling.y = 1;
+        this.controlNext.scaling.z = 1;
       }
     });
   }
 
-  private createPlane(name: string, size: number, tag: string, posX: number, posY: number, posZ: number) {
-
-    const plane = BABYLON.Mesh.CreatePlane(name, size, this.babylonService.getScene());
-    BABYLON.Tags.AddTagsTo(plane, tag);
-    plane.material = new BABYLON.StandardMaterial('contentMat', this.babylonService.getScene());
-    plane.material.alpha = 1;
-    plane.renderingGroupId = 1;
-    plane.parent = this.babylonService.getScene().activeCamera;
-    plane.position.x = posX;
-    plane.position.y = posY;
-    plane.position.z = posZ;
-    plane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
-    plane.setParent(null);
-    return plane;
-  }
-
-  private createLabel(text: string, advancedTexture: BABYLON.GUI.AdvancedDynamicTexture) {
-
-    const rect1 = new BABYLON.GUI.Rectangle();
-    rect1.cornerRadius = 45;
-    rect1.thickness = 10;
-    rect1.background = 'gray';
-    rect1.alpha = 0.5;
-    advancedTexture.addControl(rect1);
-
-    const textBlock = new BABYLON.GUI.TextBlock();
-    textBlock.text = text;
-    textBlock.fontFamily = 'Lucida Console';
-    textBlock.fontSize = '200';
-    textBlock.color = 'white';
-    rect1.addControl(textBlock);
-  }
 
   private previousAnnotation() {
 
@@ -270,14 +245,13 @@ export class AnnotationvrService {
     const test2 = this.annotationService.annotations.length;
     console.log('annotation an der Stelle ' + index + ' ist ' + test + 'Array länge ' + test2);
     if (this.annotationService.annotations.length) {
-      this.textBlock.text = this.annotationService.annotations[index].title;
+      this.annotationTextField.text = this.annotationService.annotations[index].title;
 
       const cameraVector = new BABYLON.Vector3(this.annotationService.annotations[index].cameraPosition[0].value,
         this.annotationService.annotations[index].cameraPosition[1].value,
         this.annotationService.annotations[index].cameraPosition[2].value);
       this.cameraService.moveVRCameraToTarget(cameraVector);
       this.moveVRcontrols();
-      // this.annotationmarkerService.toggleCreatorPopup(this.annotationService.annotations[index]._id);
     } else {
       this.actualRanking = 0;
     }
