@@ -28,7 +28,7 @@
               },
               "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": ["node_modules/pepjs/dist/pep.min.js"]
           },
           "configurations": {
             "production": {

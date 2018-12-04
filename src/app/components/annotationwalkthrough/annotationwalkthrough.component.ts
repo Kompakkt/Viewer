@@ -11,16 +11,16 @@ import {AnnotationmarkerService} from '../../services/annotationmarker/annotatio
 })
 export class AnnotationwalkthroughComponent implements OnInit {
 
-  public title = '';
-  public positionVector: BABYLON.Vector3;
-  public actualRanking: number;
+  public title: string;
+  private positionVector: BABYLON.Vector3;
+  private actualRanking: number;
 
   constructor(public annotationService: AnnotationService, private cameraService: CameraService,
               private annotationmarkerService: AnnotationmarkerService) {
 
-    this.title = '';
     this.positionVector = BABYLON.Vector3.Zero();
     this.actualRanking = 0;
+    this.title = 'Annotation Walkthrough';
   }
 
   public previousAnnotation() {

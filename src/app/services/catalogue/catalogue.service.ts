@@ -23,7 +23,7 @@ export class CatalogueService {
   private isFirstLoad = true;
 
 
-  constructor(private mongohandlerService: MongohandlerService, private loadModelSerivce: LoadModelService) {
+  constructor(private mongohandlerService: MongohandlerService, private loadModelService: LoadModelService) {
     // TODO: Cleanup
     const url_split = location.href.split('?');
     if (this.isFirstLoad && url_split.length > 1) {
@@ -40,7 +40,7 @@ export class CatalogueService {
               // TODO: load metadata if available
               this.updateQuality('low');
               setTimeout(() => {
-                this.loadModelSerivce.loadModel({
+                this.loadModelService.loadModel({
                   _id: 'PreviewModel',
                   name: 'PreviewModel',
                   finished: false,
