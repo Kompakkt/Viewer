@@ -32,7 +32,7 @@ export class BabylonService {
 
   private backgroundURL = 'assets/textures/backgrounds/darkgrey.jpg';
 
-  private actualControl: BABYLON.AbstractMesh;
+  private actualControl: any = false;
   private selectingControl: boolean;
   private selectedControl: boolean;
 
@@ -48,25 +48,43 @@ export class BabylonService {
         this.scene = new BABYLON.Scene(this.engine);
         this.engine.loadingScreen = new LoadingScreen(newCanvas, '', '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
 
-        this.engine.runRenderLoop(() => {
+        const that = this;
 
-          if (this.actualControl !== null) {
-            if (this.selectingControl && !this.selectedControl) {
-              this.actualControl.scaling.x += 0.005;
-              this.actualControl.scaling.y += 0.005;
+        this.scene.registerBeforeRender(function () {
 
-              if (this.actualControl.scaling.x >= 1.2) {
-                this.selectedControl = true;
+          if (that.actualControl) {
+
+            that.actualControl.scaling.x += 0.005;
+            that.actualControl.scaling.y += 0.005;
+
+            if (that.actualControl.scaling.x >= 1.2) {
+              that.selectedControl = true;
+            }
+          }
+
+          /*
+          if (that.actualControl !== null) {
+
+            if (that.selectingControl && !that.selectedControl) {
+
+              that.actualControl.scaling.x += 0.005;
+              that.actualControl.scaling.y += 0.005;
+
+              if (that.actualControl.scaling.x >= 1.2) {
+                that.selectedControl = true;
               }
             }
-            if (this.selectedControl) {
+            if (that.selectedControl) {
               // this.actualControl.material.diffuseColor = BABYLON.Color3.Red();
               // this.actualControl.
             }
-            this.scene.render();
           }
+          */
         });
 
+        this.engine.runRenderLoop(() => {
+          this.scene.render();
+        });
 
         this.setBackgroundImage(this.backgroundURL);
 
@@ -119,34 +137,60 @@ export class BabylonService {
 
     this.VRHelper.displayGaze = true;
 
+    const that = this;
+
     this.VRHelper.onNewMeshSelected.add(function (mesh) {
 
+      const material = new BABYLON.StandardMaterial('meshMaterial', that.scene);
+
+      switch (mesh.name) {
+
+        case 'controlPrevious':
+          material.diffuseColor = BABYLON.Color3.Blue();
+          mesh.material = material;
+          that.actualControl = mesh;
+          break;
+
+        case 'controlNext':
+          material.diffuseColor = BABYLON.Color3.Red();
+          mesh.material = material;
+          that.actualControl = mesh;
+          break;
+
+        default:
+          material.diffuseColor = BABYLON.Color3.White();
+          that.actualControl.material = material;
+          that.actualControl.scaling.x = 1;
+          that.actualControl.scaling.y = 1;
+          that.actualControl = false;
+      }
+
+      /*
       if (mesh.name === 'controlPrevious') {
-        this.actualControl = null;
-        this.actualControl = mesh;
-        this.actualControl.material.diffuseColor = BABYLON.Color3.Blue();
-        this.selectingControl = true;
+        that.actualControl = null;
+        that.actualControl = mesh;
+        that.actualControl.material.diffuseColor = BABYLON.Color3.Blue();
+        that.selectingControl = true;
         console.log('PREVIOUS');
       }
       if (mesh.name === 'controlNext') {
-        this.actualControl = null;
-        this.actualControl = mesh;
-        this.actualControl.material.diffuseColor = BABYLON.Color3.Blue();
-        this.selectingControl = true;
+        that.actualControl = null;
+        that.actualControl = mesh;
+        that.actualControl.material.diffuseColor = BABYLON.Color3.Blue();
+        that.selectingControl = true;
         console.log('NEXT');
       } else {
-        this.selectingControl = false;
-        this.selectedControl = false;
+        that.selectingControl = false;
+        that.selectedControl = false;
 
-        if (this.actualControl !== null) {
-          this.actualControl.material.diffuseColor = BABYLON.Color3.White();
-          this.actualControl.height = 1;
-          this.actualControl.width = 1;
-          this.actualControl = null;
+        if (that.actualControl !== null) {
+          that.actualControl.material.diffuseColor = BABYLON.Color3.White();
+          that.actualControl.height = 1;
+          that.actualControl.width = 1;
+          that.actualControl = null;
         }
-      }
+        */
     });
-
 
     this.VRHelper.onEnteringVRObservable.add(() => {
       this.vrModeIsActive.emit(true);
