@@ -24,8 +24,9 @@ export class OverlayService {
   }
 
   public closeEditor(): void {
+
     this.editorIsOpen = false;
-    this.editor.emit(this.editorIsOpen);
+    this.editor.emit(false);
   }
 
   public toggleCollectionsOverview(): void {
@@ -36,6 +37,6 @@ export class OverlayService {
 
   public closeCollectionsOverview(): void {
     this.collectionsOverviewIsOpen = false;
-    this.collectionsOverview.emit(this.collectionsOverviewIsOpen);
+    this.collectionsOverview.emit(false);
   }
 }

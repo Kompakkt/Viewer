@@ -5,16 +5,20 @@ import {BehaviorSubject} from 'rxjs';
   providedIn: 'root'
 })
 export class LoadingscreenhandlerService {
+
   private OpacitySubject = new BehaviorSubject<string>('1');
   public opacity = this.OpacitySubject.asObservable();
   private TextSubject = new BehaviorSubject<string>('Loading');
   public loadingText = this.TextSubject.asObservable();
+
   private StyleSubject = new BehaviorSubject<any>({
+
     left: '0px',
     top: '0px',
     width: '100%',
     height: '100%'
   });
+
   public loadingStyle = this.StyleSubject.asObservable();
 
   public isLoading = false;
@@ -25,6 +29,7 @@ export class LoadingscreenhandlerService {
   }
 
   public updateOpacity(newOpacity: string): void {
+
     if (parseFloat(newOpacity) > 0.5) {
       this.isLoading = true;
     } else {

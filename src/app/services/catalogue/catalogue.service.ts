@@ -10,30 +10,40 @@ import { LoadModelService } from '../load-model/load-model.service';
 export class CatalogueService {
 
   private Subjects = {
+
     model: new BehaviorSubject<Model>(null),
     quality: new BehaviorSubject<string>('low'),
     models: new BehaviorSubject<Model[]>(Array<Model>())
   };
+
   public Observables = {
+
     model: this.Subjects.model.asObservable(),
     quality: this.Subjects.quality.asObservable(),
     models: this.Subjects.models.asObservable()
   };
+
   private unsortedModels: Model[];
   private isFirstLoad = true;
 
 
-  constructor(private mongohandlerService: MongohandlerService, private loadModelService: LoadModelService) {
+  constructor(private mongohandlerService: MongohandlerService,
+              private loadModelService: LoadModelService) {
+
     // TODO: Cleanup
     const url_split = location.href.split('?');
+
     if (this.isFirstLoad && url_split.length > 1) {
+
         const equal_split = url_split[1].split('=');
         if (equal_split.length > 1) {
           const query = equal_split[1];
           const category = equal_split[0];
           console.log(category + ' ' + query);
+
           // TODO: Cases for audio, video and image
           switch (category) {
+
             case 'model':
               // TODO: somehow wait for Kompakkt to be initialized
               // TODO: pass metadata in query
@@ -68,7 +78,6 @@ export class CatalogueService {
             default:
               console.log('No valid query passed. Loading test compilation');
               this.fetchData();
-              break;
           }
         } else {
           console.log('No valid query passed. Loading test compilation');
@@ -89,6 +98,7 @@ export class CatalogueService {
   }
 
   public initializeCatalogue() {
+
     let models = this.Observables.models.source['value'];
 
     this.unsortedModels = models.slice(0);
@@ -109,6 +119,7 @@ export class CatalogueService {
   }
 
   private async fetchData(compilation_id?: string) {
+
     if (compilation_id === undefined) {
       compilation_id = 'testcompilation2';
     }

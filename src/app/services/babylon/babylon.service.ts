@@ -207,8 +207,7 @@ export class BabylonService {
   }
 
   public setBackgroundImage(imgUrl: string): void {
-    const background = new BABYLON.Layer('background', imgUrl, this.scene, true);
-    background.isBackground = true;
+    new BABYLON.Layer('background', imgUrl, this.scene, true).isBackground = true;
   }
 
   public loadModel(rootUrl: string, filename: string): Promise<any> {
@@ -242,6 +241,7 @@ export class BabylonService {
   }
 
   public createScreenshot(): Promise<string> {
+
     return new Promise<string>((resolve, reject) => {
       BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, {precision: 2}, (screenshot) => {
         resolve(screenshot);
@@ -250,7 +250,9 @@ export class BabylonService {
   }
 
   public createPreviewScreenshot(width?: number): Promise<string> {
+
     return new Promise<string>((resolve, reject) => {
+
       if (width === undefined) {
         BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, {width: 250, height: 140}, (screenshot) => {
           resolve(screenshot);

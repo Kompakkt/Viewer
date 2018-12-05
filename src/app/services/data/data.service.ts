@@ -70,8 +70,6 @@ export class DataService {
       console.log(doc);
 
       return db.put(doc);
-      console.log(doc);
-
     });
   }
 

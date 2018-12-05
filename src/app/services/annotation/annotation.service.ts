@@ -5,7 +5,6 @@ import {BabylonService} from '../babylon/babylon.service';
 import * as BABYLON from 'babylonjs';
 import {ActionService} from '../action/action.service';
 import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
-import {AnnotationvrService} from '../annotationvr/annotationvr.service';
 
 /**
  * @author Zoe Schubert
@@ -22,7 +21,6 @@ export class AnnotationService {
   private unsortedAnnotations: Annotation[];
   private allAnnotations: Annotation[];
 
-
   constructor(private babylonService: BabylonService,
               private dataService: DataService,
               private actionService: ActionService,
@@ -33,9 +31,12 @@ export class AnnotationService {
   }
 
   public async loadAnnotations(modelName: string) {
+
     await this.annotationmarkerService.deleteAllMarker();
     this.annotations = [];
+
     for (let i = 0; i < this.allAnnotations.length; i++) {
+
       if (this.allAnnotations[i].relatedModel === modelName) {
         this.annotations.push(this.allAnnotations[i]);
         this.annotationmarkerService.createAnnotationMarker(this.allAnnotations[i]);
@@ -45,6 +46,7 @@ export class AnnotationService {
   }
 
   public async initializeAnnotationMode(modelName: string) {
+
     this.actionService.createActionManager(modelName, BABYLON.ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
 
     this.unsortedAnnotations = this.annotations.slice(0);
@@ -64,7 +66,9 @@ export class AnnotationService {
   }
 
   public createNewAnnotation = function (result: any) {
+
     this.babylonService.createPreviewScreenshot(220).then(detailScreenshot => {
+
       const newAnnotation: Annotation = {
         _id: Math.random().toString(36).substr(2, 9),
         relatedModel: BABYLON.Tags.GetTags(result.pickedMesh),
@@ -92,12 +96,14 @@ export class AnnotationService {
   };
 
   private add(annotation): void {
+
     this.dataService.database.put(annotation);
     this.annotations.push(annotation);
     this.allAnnotations.push(annotation);
   }
 
   private fetchData(): Array<any> {
+
     const annotationList: Array<any> = [];
 
     this.dataService.fetch().then(result => {
@@ -113,6 +119,7 @@ export class AnnotationService {
   }
 
   public deleteAnnotation(annotation: Annotation) {
+    
     this.annotationmarkerService.deleteMarker(annotation._id);
     this.dataService.delete(annotation._id, annotation._rev);
     const index: number = this.annotations.indexOf(annotation);

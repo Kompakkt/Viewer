@@ -16,12 +16,13 @@ export class LoadModelService {
               private actionService: ActionService,
               private annotationService: AnnotationService,
               private cameraService: CameraService,
-              private loadingScreenHandler: LoadingscreenhandlerService
-  ) {
+              private loadingScreenHandler: LoadingscreenhandlerService) {
   }
 
   public loadModel(newModel: Model, quality?: string) {
+
     if (!this.loadingScreenHandler.isLoading) {
+
       try {
         this.babylonService.getScene().meshes.map(model => model.dispose());
       } catch (e) {
@@ -34,6 +35,7 @@ export class LoadModelService {
       }
 
       this.babylonService.loadModel(modelUrl, newModel.processed[quality]).then(async (model) => {
+
         // Warte auf Antwort von loadModel, da loadModel ein Promise<object> von ImportMeshAync übergibt
         // model ist hier das neu geladene Model, aus dem wir direkt den Namen nehmen können
 
