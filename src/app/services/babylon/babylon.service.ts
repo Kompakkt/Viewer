@@ -40,6 +40,7 @@ export class BabylonService {
               private loadingScreenHandler: LoadingscreenhandlerService,
               @Inject(DOCUMENT) private document: any) {
 
+
     this.CanvasObservable.subscribe(newCanvas => {
 
       if (newCanvas) {
@@ -48,23 +49,26 @@ export class BabylonService {
         this.scene = new BABYLON.Scene(this.engine);
         this.engine.loadingScreen = new LoadingScreen(newCanvas, '', '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
 
+
         this.engine.runRenderLoop(() => {
 
-          if (this.actualControl !== null) {
-            if (this.selectingControl && !this.selectedControl) {
-              this.actualControl.scaling.x += 0.005;
-              this.actualControl.scaling.y += 0.005;
 
-              if (this.actualControl.scaling.x >= 1.2) {
-                this.selectedControl = true;
-              }
+          if (this.selectingControl && !this.selectedControl) {
+            this.actualControl.scaling.x += 0.005;
+            this.actualControl.scaling.y += 0.005;
+            console.log('SCALIN');
+
+            if (this.actualControl.scaling.x >= 1.2) {
+              this.selectedControl = true;
             }
-            if (this.selectedControl) {
-              // this.actualControl.material.diffuseColor = BABYLON.Color3.Red();
-              // this.actualControl.
-            }
-            this.scene.render();
           }
+          if (this.selectedControl) {
+            // this.actualControl.material.diffuseColor = BABYLON.Color3.Red();
+            //this.selectedControl.
+            //action().execute()
+          }
+          this.scene.render();
+
         });
 
 
@@ -73,6 +77,7 @@ export class BabylonService {
         this.setClearColor(0.2, 0.2, 0.2, 0.8);
 
         this.createHemisphericLight('light1', {x: 0, y: 1, z: 0});
+
       }
     });
   }
@@ -107,6 +112,10 @@ export class BabylonService {
 
   public createVRHelper() {
 
+    this.selectedControl = false;
+    this.selectingControl = false;
+
+
     const vrButton: HTMLButtonElement = this.document.getElementById('vrbutton');
 
     this.VRHelper = this.scene.createDefaultVRExperience({
@@ -127,6 +136,10 @@ export class BabylonService {
         this.actualControl.material.diffuseColor = BABYLON.Color3.Blue();
         this.selectingControl = true;
         console.log('PREVIOUS');
+        console.log(this.selectingControl);
+        console.log(this.selectedControl);
+
+
       }
       if (mesh.name === 'controlNext') {
         this.actualControl = null;
@@ -134,6 +147,8 @@ export class BabylonService {
         this.actualControl.material.diffuseColor = BABYLON.Color3.Blue();
         this.selectingControl = true;
         console.log('NEXT');
+        console.log(this.selectingControl);
+        console.log(this.selectedControl);
       } else {
         this.selectingControl = false;
         this.selectedControl = false;
@@ -158,9 +173,6 @@ export class BabylonService {
     return this.VRHelper;
   }
 
-  public getVRHelper() {
-    return this.VRHelper;
-  }
 
   public setBackgroundImage(imgUrl: string): void {
     const background = new BABYLON.Layer('background', imgUrl, this.scene, true);
