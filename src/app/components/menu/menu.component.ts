@@ -25,6 +25,7 @@ import {AnnotationvrService} from '../../services/annotationvr/annotationvr.serv
 export class MenuComponent implements OnInit {
 
   private activeModel;
+  private menuIsEnabled = true;
 
   constructor(
     private iconRegistry: MatIconRegistry,
@@ -42,6 +43,10 @@ export class MenuComponent implements OnInit {
     iconRegistry.addSvgIcon(
       'cardboard',
       sanitizer.bypassSecurityTrustResourceUrl('assets/img/google-cardboard.svg'));
+
+    this.babylonService.vrModeIsActive.subscribe(vrModeIsActive => {
+      this.menuIsEnabled = !vrModeIsActive;
+    });
   }
 
   public fullscreen: Boolean = false;
