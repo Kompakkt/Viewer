@@ -248,10 +248,6 @@ export class CameraService {
     });
   }
 
-  public createScreenshot(): Promise<string> {
-    return this.babylonService.createScreenshot();
-  }
-
   public moveCameraToTarget(positionVector: BABYLON.Vector3) {
 
 
