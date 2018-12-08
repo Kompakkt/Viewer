@@ -4,7 +4,7 @@
   font-family: Roboto, "Helvetica Neue", sans-serif;
   border: 0;
   color: #fff;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(255, 255, 255, 0.5);
   position: absolute;
   height: 100%;
   width: 350px;
@@ -15,15 +15,14 @@
 }
 
 :host h3 {
-  background-color: #104b74;
+  background-color: #222;
   padding: 15px;
   margin: 0;
 }
 
 :host.is-open {
-  display: block;
+  display: inherit;
 }
-
 
 #model-overview {
   padding: 25px;
