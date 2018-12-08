@@ -18,9 +18,6 @@ export class OverlayService {
 
     this.editorIsOpen = !this.editorIsOpen;
     this.editor.emit(this.editorIsOpen);
-    if (this.editorIsOpen) {
-      this.closeCollectionsOverview();
-    }
   }
 
   public closeEditor(): void {

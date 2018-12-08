@@ -19,6 +19,7 @@ export class ModelComponent implements OnInit {
   }
 
   ngOnInit() {
+
     this.catalogueService.Observables.quality.subscribe((result) =>
       this.loadModelService.loadModel(this.catalogueService.Observables.model.source['_value'], result));
     this.catalogueService.Observables.model.subscribe((result) =>
@@ -26,7 +27,9 @@ export class ModelComponent implements OnInit {
   }
 
   public async changeModel() {
+
     this.catalogueService.updateActiveModel(this.model);
+    this.overlayService.closeCollectionsOverview();
     this.overlayService.closeEditor();
   }
 }
