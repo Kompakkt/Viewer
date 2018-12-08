@@ -1,14 +1,24 @@
-$cardbgr: rgba(0, 0, 0, 0.7);
+$cardbgr: #111;
 
 :host {
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
 .single-annotation-card {
-  transition: opacity 0.25s ease;
   z-index: 0;
-  max-width: 300px;
   position: absolute;
+  opacity: 0.5 !important;
+  transition: all .2s ease-in-out;
+}
+
+.single-annotation-card:hover {
+  z-index: 99999;
+  opacity: 1 !important;
+  transform: scale(1.1);
+}
+
+.single-annotation-card .mat-form-field {
+  width: 100% !important;
 }
 
 #closeButton {
@@ -24,6 +34,10 @@ $cardbgr: rgba(0, 0, 0, 0.7);
   font-size: 12px;
   min-width: 250px;
   padding-bottom: 5px;
+}
+
+.mat-card-actions {
+  margin-bottom: 0 !important;
 }
 
 .mat-card .mat-input-element {

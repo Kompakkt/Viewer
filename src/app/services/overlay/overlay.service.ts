@@ -18,14 +18,12 @@ export class OverlayService {
 
     this.editorIsOpen = !this.editorIsOpen;
     this.editor.emit(this.editorIsOpen);
-    if (this.editorIsOpen) {
-      this.closeCollectionsOverview();
-    }
   }
 
   public closeEditor(): void {
+
     this.editorIsOpen = false;
-    this.editor.emit(this.editorIsOpen);
+    this.editor.emit(false);
   }
 
   public toggleCollectionsOverview(): void {
@@ -36,6 +34,6 @@ export class OverlayService {
 
   public closeCollectionsOverview(): void {
     this.collectionsOverviewIsOpen = false;
-    this.collectionsOverview.emit(this.collectionsOverviewIsOpen);
+    this.collectionsOverview.emit(false);
   }
 }

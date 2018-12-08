@@ -10,6 +10,7 @@ import {LoadingScreen} from './loadingscreen';
 import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreenhandler.service';
 
 import {BehaviorSubject} from 'rxjs';
+import ActionEvent = BABYLON.ActionEvent;
 
 /**
  * @author Zoe Schubert
@@ -32,14 +33,13 @@ export class BabylonService {
 
   private backgroundURL = 'assets/textures/backgrounds/darkgrey.jpg';
 
-  private actualControl: BABYLON.AbstractMesh;
+  private actualControl: any = false;
   private selectingControl: boolean;
   private selectedControl: boolean;
 
   constructor(private message: MessageService,
               private loadingScreenHandler: LoadingscreenhandlerService,
               @Inject(DOCUMENT) private document: any) {
-
 
     this.CanvasObservable.subscribe(newCanvas => {
 
@@ -49,35 +49,50 @@ export class BabylonService {
         this.scene = new BABYLON.Scene(this.engine);
         this.engine.loadingScreen = new LoadingScreen(newCanvas, '', '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
 
+        const that = this;
 
-        this.engine.runRenderLoop(() => {
+        this.scene.registerBeforeRender(function () {
 
+          if (that.actualControl && that.selectingControl && !that.selectedControl) {
 
-          if (this.selectingControl && !this.selectedControl) {
-            this.actualControl.scaling.x += 0.005;
-            this.actualControl.scaling.y += 0.005;
-            console.log('SCALIN');
+            that.actualControl.scaling.x += 0.005;
+            that.actualControl.scaling.y += 0.005;
 
-            if (this.actualControl.scaling.x >= 1.2) {
-              this.selectedControl = true;
+            if (that.actualControl.scaling.x >= 1.2) {
+              that.selectedControl = true;
+              console.log('Big enough');
             }
+
           }
-          if (this.selectedControl) {
-            // this.actualControl.material.diffuseColor = BABYLON.Color3.Red();
-            //this.selectedControl.
-            //action().execute()
+
+          // Achtung das Folgende wird unendlich oft aufgerufen...
+          if (that.selectedControl) {
+
+            console.log('Dont stare at me this way. I should be clicked.');
+
+            that.actualControl.actionManager = new BABYLON.ActionManager(that.scene);
+            that.actualControl.actionManager.processTrigger(BABYLON.ActionManager.OnPickTrigger, ActionEvent.CreateNew(that.actualControl));
+
+            that.selectedControl = false;
+            that.actualControl = false;
+
+            // const material = new BABYLON.StandardMaterial('meshMaterial', that.scene);
+            // material.diffuseColor = BABYLON.Color3.Purple();
+            // that.actualControl.material = material;
+
           }
-          this.scene.render();
 
         });
 
+        this.engine.runRenderLoop(() => {
+          this.scene.render();
+        });
 
         this.setBackgroundImage(this.backgroundURL);
 
         this.setClearColor(0.2, 0.2, 0.2, 0.8);
 
         this.createHemisphericLight('light1', {x: 0, y: 1, z: 0});
-
       }
     });
   }
@@ -112,10 +127,6 @@ export class BabylonService {
 
   public createVRHelper() {
 
-    this.selectedControl = false;
-    this.selectingControl = false;
-
-
     const vrButton: HTMLButtonElement = this.document.getElementById('vrbutton');
 
     this.VRHelper = this.scene.createDefaultVRExperience({
@@ -128,40 +139,46 @@ export class BabylonService {
 
     this.VRHelper.displayGaze = true;
 
+    const that = this;
+
     this.VRHelper.onNewMeshSelected.add(function (mesh) {
 
-      if (mesh.name === 'controlPrevious') {
-        this.actualControl = null;
-        this.actualControl = mesh;
-        this.actualControl.material.diffuseColor = BABYLON.Color3.Blue();
-        this.selectingControl = true;
-        console.log('PREVIOUS');
-        console.log(this.selectingControl);
-        console.log(this.selectedControl);
+      // const material = new BABYLON.StandardMaterial('meshMaterial', that.scene);
 
+      switch (mesh.name) {
 
+        case 'controlPrevious':
+          // material.diffuseColor = BABYLON.Color3.Blue();
+          //  mesh.material = material;
+          that.selectingControl = true;
+          that.actualControl = mesh;
+          that.selectingControl = true;
+          break;
+
+        case 'controlNext':
+          //  material.diffuseColor = BABYLON.Color3.Red();
+          //  mesh.material = material;
+          that.selectingControl = true;
+          that.actualControl = mesh;
+          that.selectingControl = true;
+          break;
+
+        default:
+          that.selectingControl = false;
+          that.selectedControl = false;
+
+          if (that.actualControl !== false) {
+            //   material.diffuseColor = BABYLON.Color3.White();
+            //  that.actualControl.material = material;
+            that.actualControl.scaling.x = 1;
+            that.actualControl.scaling.y = 1;
+            that.actualControl = false;
+
+          }
+          break;
       }
-      if (mesh.name === 'controlNext') {
-        this.actualControl = null;
-        this.actualControl = mesh;
-        this.actualControl.material.diffuseColor = BABYLON.Color3.Blue();
-        this.selectingControl = true;
-        console.log('NEXT');
-        console.log(this.selectingControl);
-        console.log(this.selectedControl);
-      } else {
-        this.selectingControl = false;
-        this.selectedControl = false;
 
-        if (this.actualControl !== null) {
-          this.actualControl.material.diffuseColor = BABYLON.Color3.White();
-          this.actualControl.height = 1;
-          this.actualControl.width = 1;
-          this.actualControl = null;
-        }
-      }
     });
-
 
     this.VRHelper.onEnteringVRObservable.add(() => {
       this.vrModeIsActive.emit(true);
@@ -173,6 +190,9 @@ export class BabylonService {
     return this.VRHelper;
   }
 
+  public getVRHelper() {
+    return this.VRHelper;
+  }
 
   public setBackgroundImage(imgUrl: string): void {
     const background = new BABYLON.Layer('background', imgUrl, this.scene, true);
@@ -209,12 +229,8 @@ export class BabylonService {
     return BABYLON.SceneSerializer.Serialize(this.scene);
   }
 
-  public createScreenshot(): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-      BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, {precision: 2}, (screenshot) => {
-        resolve(screenshot);
-      });
-    });
+  public createScreenshot(): void {
+      BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, {precision: 2});
   }
 
   public createPreviewScreenshot(width?: number): Promise<string> {
