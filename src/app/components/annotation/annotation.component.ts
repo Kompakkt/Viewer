@@ -15,7 +15,6 @@ export class AnnotationComponent implements OnInit {
 
   @Input() annotation: Annotation;
 
-
   public editMode = false;
   public labelMode = 'edit';
   public labelModeText = 'edit';
@@ -25,24 +24,22 @@ export class AnnotationComponent implements OnInit {
   public id = '';
   public opacity = '0';
 
-
-  constructor(private dataService: DataService, private annotationService: AnnotationService, private babylonService: BabylonService
-  ) {
+  constructor(private dataService: DataService, private annotationService: AnnotationService, private babylonService: BabylonService) {
     this.visibility = true;
   }
 
   ngOnInit() {
-    this.id = this.annotation._id;
 
+    this.id = this.annotation._id;
+    this.opacity = '1';
+    
     setInterval(() => {
       this.setPosition(this.annotation);
-    }, 10);
-    setTimeout(() => {
-      this.opacity = '1';
     }, 10);
   }
 
   public setPosition(annotation: Annotation) {
+
     const _getMesh = this.babylonService.getScene().getMeshByName(annotation._id + '_pick');
     if (_getMesh != null) {
 
@@ -57,16 +54,16 @@ export class AnnotationComponent implements OnInit {
       this.positionLeft = Math.round(p.y);
       this.positionRight = Math.round(p.x);
     }
-
   }
 
   public visabilityAnnotationCard(visibility: boolean) {
+
     this.visibility = visibility;
     this.opacity = '1';
   }
 
-
   public deleteAnnotation(): void {
+
     this.opacity = '0';
     setTimeout(() => {
       this.annotationService.deleteAnnotation(this.annotation);
@@ -74,6 +71,7 @@ export class AnnotationComponent implements OnInit {
   }
 
   private closeAnnotation(): void {
+
     this.opacity = '0';
     setTimeout(() => {
       this.visibility = false;
@@ -81,6 +79,7 @@ export class AnnotationComponent implements OnInit {
   }
 
   public toggleEditViewMode() {
+
     if (this.editMode) {
       this.editMode = false;
       this.labelMode = 'edit';
