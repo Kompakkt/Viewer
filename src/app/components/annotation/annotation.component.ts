@@ -32,7 +32,7 @@ export class AnnotationComponent implements OnInit {
 
     this.id = this.annotation._id;
     this.opacity = '1';
-    
+
     setInterval(() => {
       this.setPosition(this.annotation);
     }, 10);
@@ -79,7 +79,7 @@ export class AnnotationComponent implements OnInit {
   }
 
   public toggleEditViewMode() {
-
+    
     if (this.editMode) {
       this.editMode = false;
       this.labelMode = 'edit';

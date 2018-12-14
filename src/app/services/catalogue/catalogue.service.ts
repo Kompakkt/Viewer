@@ -1,8 +1,9 @@
-import { Injectable } from '@angular/core';
-import { Model } from '../../interfaces/model/model.interface';
-import { MongohandlerService } from '../mongohandler/mongohandler.service';
-import { BehaviorSubject } from 'rxjs';
-import { LoadModelService } from '../load-model/load-model.service';
+import {Injectable} from '@angular/core';
+import {Model} from '../../interfaces/model/model.interface';
+import {MongohandlerService} from '../mongohandler/mongohandler.service';
+import {BehaviorSubject} from 'rxjs';
+import {LoadModelService} from '../load-model/load-model.service';
+import {MessageService} from '../message/message.service';
 
 @Injectable({
   providedIn: 'root'
@@ -28,61 +29,65 @@ export class CatalogueService {
 
 
   constructor(private mongohandlerService: MongohandlerService,
-              private loadModelService: LoadModelService) {
+              private loadModelService: LoadModelService,
+              private message: MessageService) {
 
     // TODO: Cleanup
     const url_split = location.href.split('?');
 
     if (this.isFirstLoad && url_split.length > 1) {
 
-        const equal_split = url_split[1].split('=');
-        if (equal_split.length > 1) {
-          const query = equal_split[1];
-          const category = equal_split[0];
-          console.log(category + ' ' + query);
+      const equal_split = url_split[1].split('=');
 
-          // TODO: Cases for audio, video and image
-          switch (category) {
+      if (equal_split.length > 1) {
 
-            case 'model':
-              // TODO: somehow wait for Kompakkt to be initialized
-              // TODO: pass metadata in query
-              // TODO: load metadata if available
-              this.updateQuality('low');
-              setTimeout(() => {
-                this.loadModelService.loadModel({
-                  _id: 'PreviewModel',
-                  name: 'PreviewModel',
-                  finished: false,
-                  online: false,
-                  files: [
-                    query
-                  ],
-                  processed: {
-                    time: {
-                      start: '',
-                      end: '',
-                      total: ''
-                    },
-                    low: query,
-                    medium: query,
-                    high: query,
-                    raw: query
-                  }
-                }, 'low');
-              }, 5000);
-              break;
-            case 'compilation':
-              this.fetchData(query);
-              break;
-            default:
-              console.log('No valid query passed. Loading test compilation');
-              this.fetchData();
-          }
-        } else {
-          console.log('No valid query passed. Loading test compilation');
-          this.fetchData();
+        const query = equal_split[1];
+        const category = equal_split[0];
+
+        console.log(category + ' ' + query);
+
+        // TODO: Cases for audio, video and image
+        switch (category) {
+
+          case 'model':
+            // TODO: somehow wait for Kompakkt to be initialized
+            // TODO: pass metadata in query
+            // TODO: load metadata if available
+            this.updateQuality('low');
+            setTimeout(() => {
+              this.loadModelService.loadModel({
+                _id: 'PreviewModel',
+                name: 'PreviewModel',
+                finished: false,
+                online: false,
+                files: [
+                  query
+                ],
+                processed: {
+                  time: {
+                    start: '',
+                    end: '',
+                    total: ''
+                  },
+                  low: query,
+                  medium: query,
+                  high: query,
+                  raw: query
+                }
+              }, 'low');
+            }, 5000);
+            break;
+          case 'compilation':
+            this.fetchData(query);
+            break;
+          default:
+            console.log('No valid query passed. Loading test compilation');
+            this.fetchData();
         }
+      } else {
+        console.log('No valid query passed. Loading test compilation');
+        this.fetchData();
+      }
     } else {
       console.log('No valid query passed. Loading test compilation');
       this.fetchData();
@@ -118,20 +123,25 @@ export class CatalogueService {
     this.Subjects.models.next(models);
   }
 
-  private async fetchData(compilation_id?: string) {
+  private fetchData(compilation_id?: string) {
 
     if (compilation_id === undefined) {
       compilation_id = 'testcompilation2';
     }
-    const compilation = await this.mongohandlerService.getCompilation(compilation_id).then(result => {
-      return result;
-    }).catch(error => console.error(error));
-    if (compilation.models.length > 0) {
-      this.Subjects.models.next(compilation.models);
-      if (this.isFirstLoad) {
-        this.updateActiveModel(compilation.models[0]);
-        this.isFirstLoad = false;
+
+    this.mongohandlerService.getCompilation(compilation_id).subscribe(compilation => {
+
+      if (compilation.models.length > 0) {
+
+        this.Subjects.models.next(compilation.models);
+        if (this.isFirstLoad) {
+
+          this.updateActiveModel(compilation.models[0]);
+          this.isFirstLoad = false;
+        }
       }
-    }
+    }, error => {
+      this.message.error('Connection to object server refused.');
+    });
   }
 }

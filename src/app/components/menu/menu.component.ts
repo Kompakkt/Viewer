@@ -12,9 +12,11 @@ import {AnnotationService} from '../../services/annotation/annotation.service';
 import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {AnnotationvrService} from '../../services/annotationvr/annotationvr.service';
+import {MessageService} from '../../services/message/message.service';
 
 /**
  * @author Zoe Schubert
+ * @author Jan G. Wieners
  */
 
 @Component({
@@ -28,6 +30,7 @@ export class MenuComponent implements OnInit {
   private menuIsEnabled = true;
 
   constructor(
+    private message: MessageService,
     private iconRegistry: MatIconRegistry,
     private sanitizer: DomSanitizer,
     private skyboxService: SkyboxService,
@@ -126,11 +129,14 @@ export class MenuComponent implements OnInit {
 
       if (this.activeModel !== null) {
 
-        this.mongohandlerService.updateScreenshot(this.activeModel._id, screenshot).then((result) => {
+        this.mongohandlerService.updateScreenshot(this.activeModel._id, screenshot).subscribe(result => {
+
           // TODO: Find out why picture isn't refreshed once the server sends the result
           this.catalogueService.Observables.models.source['value']
             .filter(model => model._id === this.activeModel._id)
             .map(model => model.preview = result.value.preview);
+        }, error => {
+          this.message.error(error);
         });
       }
     });
