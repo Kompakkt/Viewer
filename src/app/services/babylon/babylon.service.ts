@@ -47,7 +47,8 @@ export class BabylonService {
 
         this.engine = new BABYLON.Engine(newCanvas, true, {preserveDrawingBuffer: true, stencil: true});
         this.scene = new BABYLON.Scene(this.engine);
-        this.engine.loadingScreen = new LoadingScreen(newCanvas, '', '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
+        this.engine.loadingScreen = new LoadingScreen(newCanvas, '',
+          '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
 
         const that = this;
 
@@ -234,12 +235,15 @@ export class BabylonService {
   }
 
   public createPreviewScreenshot(width?: number): Promise<string> {
+
     return new Promise<string>((resolve, reject) => {
+
       if (width === undefined) {
         BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, {width: 250, height: 140}, (screenshot) => {
           resolve(screenshot);
         });
       } else {
+
         BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, width, (screenshot) => {
           resolve(screenshot);
         });

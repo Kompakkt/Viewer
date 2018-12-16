@@ -107,9 +107,12 @@ export class AnnotationService {
     const annotationList: Array<any> = [];
 
     this.dataService.fetch().then(result => {
-      for (let i = 0; i < result.rows.length; i++) {
-        annotationList.push(result.rows[i].doc);
-        console.log(result.rows[i].doc);
+
+      const rows = result.rows;
+
+      for (let i = 0; i < rows.length; i++) {
+        annotationList.push(rows[i].doc);
+        console.log(rows[i].doc);
       }
     }, error => {
       console.error(error);
@@ -119,29 +122,34 @@ export class AnnotationService {
   }
 
   public deleteAnnotation(annotation: Annotation) {
-    
+
     this.annotationmarkerService.deleteMarker(annotation._id);
     this.dataService.delete(annotation._id, annotation._rev);
     const index: number = this.annotations.indexOf(annotation);
+
     if (index !== -1) {
       this.annotations.splice(index, 1);
     }
+
     const indexb: number = this.allAnnotations.indexOf(annotation);
+
     if (indexb !== -1) {
       this.allAnnotations.splice(indexb, 1);
     }
+
     this.changedRankingPositions();
   }
 
   public changedRankingPositions() {
 
-    for (let _i = 0; _i < this.annotations.length; _i++) {
-      console.log(this.annotations[_i]);
-      this.annotations[_i].ranking = String(_i + 1);
-      console.log(this.annotations[_i]);
-      this.annotationmarkerService.deleteMarker(this.annotations[_i]._id);
-      this.annotationmarkerService.createAnnotationMarker(this.annotations[_i]);
-      this.dataService.updateAnnotationRanking(this.annotations[_i]._id, this.annotations[_i].ranking);
+    const len = this.annotations.length;
+
+    for (let i = 0; i < len; i++) {
+
+      this.annotations[i].ranking = String(i + 1);
+      this.annotationmarkerService.deleteMarker(this.annotations[i]._id);
+      this.annotationmarkerService.createAnnotationMarker(this.annotations[i]);
+      this.dataService.updateAnnotationRanking(this.annotations[i]._id, this.annotations[i].ranking);
     }
 
   }

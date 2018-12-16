@@ -4,8 +4,6 @@ import * as BABYLON from 'babylonjs';
 import {BabylonService} from '../babylon/babylon.service';
 import Vector3 = BABYLON.Vector3;
 
-import {DeviceDetectorService} from 'ngx-device-detector';
-
 @Injectable({
   providedIn: 'root'
 })
@@ -30,9 +28,8 @@ export class CameraService {
   private yRot: number;
 
   constructor(
-    private babylonService: BabylonService,
-    private deviceService: DeviceDetectorService
-  ) {
+    private babylonService: BabylonService) {
+
     this.babylonService.CanvasObservable.subscribe((newCanvas) => {
       if (newCanvas) {
         this.alpha = 9;
@@ -61,16 +58,6 @@ export class CameraService {
 
         this.arcRotateCamera.attachControl(newCanvas, false);
 
-        /*
-        this.vrCamera = this.deviceService.isMobile() ? new BABYLON.VRDeviceOrientationFreeCamera('vrCamera',
-          new BABYLON.Vector3(this.x, this.y, this.z), this.scene) :
-          new BABYLON.VRDeviceOrientationArcRotateCamera('vrCamera', Math.PI / 2, Math.PI / 4, 25, new BABYLON.Vector3(0, 0, 0), this.scene);
-
-        // Remove mouse input on mobile VR Camera to prevent flickering of meshes
-        if (this.vrCamera instanceof BABYLON.VRDeviceOrientationFreeCamera) {
-          this.vrCamera.inputs.remove(this.vrCamera.inputs.attached.mouse);
-        }
-        */
         this.vrHelper = this.babylonService.createVRHelper();
       }
     });
@@ -306,7 +293,6 @@ export class CameraService {
     });
   }
 
-
   public moveVRCameraToTarget(positionVector: BABYLON.Vector3) {
 
 
@@ -363,13 +349,6 @@ export class CameraService {
 
     this.scene.beginAnimation(this.vrHelper.webVRCamera, 0, 30, false, 1, function () {
     });
-  }
-
-  public getActualVRCameraPosAnnotation() {
-    const cameraPosition = [{dimension: 'x', value: this.vrHelper.webVRCamera.alpha},
-      {dimension: 'y', value: this.vrHelper.webVRCamera.beta},
-      {dimension: 'z', value: this.vrHelper.webVRCamera.radius}];
-    return cameraPosition;
   }
 
   public getActualCameraPosAnnotation() {
