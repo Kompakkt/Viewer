@@ -65,21 +65,17 @@ export class AnnotationComponent implements OnInit {
   public deleteAnnotation(): void {
 
     this.opacity = '0';
-    setTimeout(() => {
-      this.annotationService.deleteAnnotation(this.annotation);
-    }, 500);
+    this.annotationService.deleteAnnotation(this.annotation);
   }
 
   private closeAnnotation(): void {
 
     this.opacity = '0';
-    setTimeout(() => {
-      this.visibility = false;
-    }, 500);
+    this.visibility = false;
   }
 
   public toggleEditViewMode() {
-    
+
     if (this.editMode) {
       this.editMode = false;
       this.labelMode = 'edit';

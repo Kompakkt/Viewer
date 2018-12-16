@@ -50,32 +50,30 @@ export class CatalogueService {
         switch (category) {
 
           case 'model':
-            // TODO: somehow wait for Kompakkt to be initialized
+
             // TODO: pass metadata in query
             // TODO: load metadata if available
             this.updateQuality('low');
-            setTimeout(() => {
-              this.loadModelService.loadModel({
-                _id: 'PreviewModel',
-                name: 'PreviewModel',
-                finished: false,
-                online: false,
-                files: [
-                  query
-                ],
-                processed: {
-                  time: {
-                    start: '',
-                    end: '',
-                    total: ''
-                  },
-                  low: query,
-                  medium: query,
-                  high: query,
-                  raw: query
-                }
-              }, 'low');
-            }, 5000);
+            this.loadModelService.loadModel({
+              _id: 'PreviewModel',
+              name: 'PreviewModel',
+              finished: false,
+              online: false,
+              files: [
+                query
+              ],
+              processed: {
+                time: {
+                  start: '',
+                  end: '',
+                  total: ''
+                },
+                low: query,
+                medium: query,
+                high: query,
+                raw: query
+              }
+            }, 'low');
             break;
           case 'compilation':
             this.fetchData(query);
