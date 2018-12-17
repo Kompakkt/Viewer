@@ -15,6 +15,7 @@ $cardbgr: #111;
   z-index: 99999;
   opacity: 1 !important;
   transform: scale(1.1);
+  transform-origin: top left;
 }
 
 .single-annotation-card .mat-form-field {
