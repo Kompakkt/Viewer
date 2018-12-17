@@ -31,6 +31,9 @@ export class CatalogueService {
   constructor(private mongohandlerService: MongohandlerService,
               private loadModelService: LoadModelService,
               private message: MessageService) {
+  }
+
+  public bootstrap(): void {
 
     // TODO: Cleanup
     const url_split = location.href.split('?');
@@ -54,6 +57,7 @@ export class CatalogueService {
             // TODO: pass metadata in query
             // TODO: load metadata if available
             this.updateQuality('low');
+
             this.loadModelService.loadModel({
               _id: 'PreviewModel',
               name: 'PreviewModel',
