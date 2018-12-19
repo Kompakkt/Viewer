@@ -28,13 +28,13 @@ export class LoadModelService {
       } catch (e) {
       }
 
-      const modelUrl = 'https://blacklodge.hki.uni-koeln.de:8065/models/';
+      const baseUrl = 'https://blacklodge.hki.uni-koeln.de:8065/';
 
       if (quality === undefined) {
         quality = 'low';
       }
 
-      this.babylonService.loadModel(modelUrl, newModel.processed[quality]).then(async (model) => {
+      this.babylonService.loadModel(baseUrl, newModel.processed[quality]).then(async (model) => {
 
         // Warte auf Antwort von loadModel, da loadModel ein Promise<object> von ImportMeshAync übergibt
         // model ist hier das neu geladene Model, aus dem wir direkt den Namen nehmen können
