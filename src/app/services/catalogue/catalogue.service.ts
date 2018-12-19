@@ -128,7 +128,7 @@ export class CatalogueService {
   private fetchData(compilation_id?: string) {
 
     if (compilation_id === undefined) {
-      compilation_id = 'testcompilation2';
+      compilation_id = 'testcompilation';
     }
 
     this.mongohandlerService.getCompilation(compilation_id).subscribe(compilation => {
