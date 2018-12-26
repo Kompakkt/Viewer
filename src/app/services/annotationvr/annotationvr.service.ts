@@ -109,9 +109,8 @@ export class AnnotationvrService {
     label.background = 'black';
     label.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
 
-    const that = this;
-    label.onPointerDownObservable.add(function () {
-      that.previousAnnotation();
+    label.onPointerDownObservable.add(() => {
+      this.previousAnnotation();
     });
     return label;
   }
@@ -126,9 +125,8 @@ export class AnnotationvrService {
     label.background = 'black';
     label.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
 
-    const that = this;
-    label.onPointerDownObservable.add(function () {
-      that.nextAnnotation();
+    label.onPointerDownObservable.add(() => {
+      this.nextAnnotation();
     });
     return label;
   }

@@ -50,39 +50,36 @@ export class BabylonService {
         this.engine.loadingScreen = new LoadingScreen(newCanvas, '',
           '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
 
-        const that = this;
+        this.scene.registerBeforeRender(() => {
 
-        this.scene.registerBeforeRender(function () {
+          if (this.actualControl && this.selectingControl && !this.selectedControl) {
 
-          if (that.actualControl && that.selectingControl && !that.selectedControl) {
+            this.actualControl.scaling.x += 0.005;
+            this.actualControl.scaling.y += 0.005;
 
-            that.actualControl.scaling.x += 0.005;
-            that.actualControl.scaling.y += 0.005;
-
-            if (that.actualControl.scaling.x >= 1.2) {
-              that.selectedControl = true;
+            if (this.actualControl.scaling.x >= 1.2) {
+              this.selectedControl = true;
               console.log('Big enough');
             }
 
           }
 
           // Achtung das Folgende wird unendlich oft aufgerufen...
-          if (that.selectedControl) {
+          if (this.selectedControl) {
 
             console.log('Dont stare at me this way. I should be clicked.');
 
-            that.actualControl.actionManager = new BABYLON.ActionManager(that.scene);
-            that.actualControl.actionManager.processTrigger(BABYLON.ActionManager.OnPickTrigger, ActionEvent.CreateNew(that.actualControl));
+            this.actualControl.actionManager = new BABYLON.ActionManager(this.scene);
+            this.actualControl.actionManager.processTrigger(BABYLON.ActionManager.OnPickTrigger, ActionEvent.CreateNew(this.actualControl));
 
-            that.selectedControl = false;
-            that.actualControl = false;
+            this.selectedControl = false;
+            this.actualControl = false;
 
-            // const material = new BABYLON.StandardMaterial('meshMaterial', that.scene);
+            // const material = new BABYLON.StandardMaterial('meshMaterial', this.scene);
             // material.diffuseColor = BABYLON.Color3.Purple();
-            // that.actualControl.material = material;
+            // this.actualControl.material = material;
 
           }
-
         });
 
         this.engine.runRenderLoop(() => {
@@ -140,40 +137,38 @@ export class BabylonService {
 
     this.VRHelper.displayGaze = true;
 
-    const that = this;
+    this.VRHelper.onNewMeshSelected.add((mesh) => {
 
-    this.VRHelper.onNewMeshSelected.add(function (mesh) {
-
-      // const material = new BABYLON.StandardMaterial('meshMaterial', that.scene);
+      // const material = new BABYLON.StandardMaterial('meshMaterial', this.scene);
 
       switch (mesh.name) {
 
         case 'controlPrevious':
           // material.diffuseColor = BABYLON.Color3.Blue();
           //  mesh.material = material;
-          that.selectingControl = true;
-          that.actualControl = mesh;
-          that.selectingControl = true;
+          this.selectingControl = true;
+          this.actualControl = mesh;
+          this.selectingControl = true;
           break;
 
         case 'controlNext':
           //  material.diffuseColor = BABYLON.Color3.Red();
           //  mesh.material = material;
-          that.selectingControl = true;
-          that.actualControl = mesh;
-          that.selectingControl = true;
+          this.selectingControl = true;
+          this.actualControl = mesh;
+          this.selectingControl = true;
           break;
 
         default:
-          that.selectingControl = false;
-          that.selectedControl = false;
+          this.selectingControl = false;
+          this.selectedControl = false;
 
-          if (that.actualControl !== false) {
+          if (this.actualControl !== false) {
             //   material.diffuseColor = BABYLON.Color3.White();
-            //  that.actualControl.material = material;
-            that.actualControl.scaling.x = 1;
-            that.actualControl.scaling.y = 1;
-            that.actualControl = false;
+            //  this.actualControl.material = material;
+            this.actualControl.scaling.x = 1;
+            this.actualControl.scaling.y = 1;
+            this.actualControl = false;
 
           }
           break;

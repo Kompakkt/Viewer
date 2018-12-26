@@ -84,11 +84,8 @@ export class AnnotationmarkerService {
     label.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
     BABYLON.Tags.AddTagsTo(label, tag + ' label');
 
-    const that = this;
-    const id = name;
-
-    label.onPointerDownObservable.add(function () {
-      that.onMarkerClicked(id, cameraVector);
+    label.onPointerDownObservable.add(() => {
+      this.onMarkerClicked(name, cameraVector);
     });
     return label;
 
