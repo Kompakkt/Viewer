@@ -33,6 +33,11 @@ export class AnnotationService {
 
   public async loadAnnotations(modelName: string) {
 
+    this.modelName = modelName;
+
+    this.annotations = [];
+    this.unsortedAnnotations = [];
+
     // 1)
     if (this.initialLoading) {
       this.allAnnotations = [];
@@ -41,16 +46,12 @@ export class AnnotationService {
     }
     // Ende 1
 
-    this.modelName = modelName;
-
-    this.annotations = [];
-    this.unsortedAnnotations = [];
 
     // Das darf erst nach 1) passieren
     // 2)
     for (const annotation of this.allAnnotations) {
       if (annotation.relatedModel === modelName) {
-        this.annotations.push(annotation);
+        this.unsortedAnnotations.push(annotation);
       }
     }
 
@@ -79,6 +80,7 @@ export class AnnotationService {
   }
 
   private sortAnnotations() {
+    this.annotations = this.unsortedAnnotations;
     this.unsortedAnnotations = this.annotations.slice(0);
     this.annotations.splice(0, this.annotations.length);
     this.annotations = this.unsortedAnnotations.slice(0);
