@@ -32,43 +32,62 @@ export class AnnotationService {
   }
 
   public async loadAnnotations(modelName: string) {
+    setTimeout(() => {
 
     this.modelName = modelName;
 
     this.annotations = [];
     this.unsortedAnnotations = [];
+    this.annotationmarkerService.deleteAllMarker();
+    }, 400);
+
 
     // 1)
-    if (this.initialLoading) {
+    setTimeout(() => {
+
+      if (this.initialLoading) {
       this.allAnnotations = [];
       this.allAnnotations = this.fetchData();
       this.initialLoading = false;
     }
     // Ende 1
+    }, 600);
 
 
     // Das darf erst nach 1) passieren
     // 2)
-    for (const annotation of this.allAnnotations) {
+    setTimeout(() => {
+
+      for (const annotation of this.allAnnotations) {
       if (annotation.relatedModel === modelName) {
         this.unsortedAnnotations.push(annotation);
       }
     }
+    }, 800);
 
     // Das darf erst nach 2) passieren
     // 3)
-    this.sortAnnotations();
+    setTimeout(() => {
 
-    this.annotationmarkerService.deleteAllMarker();
+      this.sortAnnotations();
+
+    }, 1000);
 
     // Das darf erst nach 3) passieren
     // 4)
-    for (const annotation of this.annotations) {
+    setTimeout(() => {
+
+      for (const annotation of this.annotations) {
       this.annotationmarkerService.createAnnotationMarker(annotation);
     }
+    }, 1200);
 
-    this.initializeAnnotationMode(modelName);
+    setTimeout(() => {
+
+      this.initializeAnnotationMode(modelName);
     this.actionService.pickableModel(modelName, false);
+    }, 1400);
+
   }
 
   public annotationMode(value: boolean) {
