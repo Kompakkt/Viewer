@@ -11,7 +11,7 @@ export class ActionService {
   }
 
   public createActionManager(modelName: string, trigger: number, actionExecuted: (result: any) => void) {
-    const mesh = this.babylonService.getScene().getMeshByName(modelName);
+    const mesh = this.babylonService.getScene().getMeshesByTags(modelName)[0];
     if (mesh !== null) {
       const scene = this.babylonService.getScene();
       mesh.actionManager = new BABYLON.ActionManager(scene);
