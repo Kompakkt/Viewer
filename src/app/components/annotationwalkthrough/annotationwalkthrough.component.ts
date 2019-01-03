@@ -76,7 +76,7 @@ export class AnnotationwalkthroughComponent implements OnInit {
         this.annotationService.annotations[index].cameraPosition[1].value,
         this.annotationService.annotations[index].cameraPosition[2].value);
       this.cameraService.moveCameraToTarget(cameraVector);
-      // this.annotationmarkerService.toggleCreatorPopup(this.annotationService.annotations[index]._id);
+      this.annotationmarkerService.toggleCreatorPopup(this.annotationService.annotations[index]._id);
     } else {
       this.actualRanking = 0;
     }

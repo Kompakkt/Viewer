@@ -41,7 +41,16 @@ export class AnnotationcardsComponent implements OnInit, AfterViewInit {
 
   public setVisability(id: string, visibility: boolean) {
     if (this.annotationsList.find(annotation => annotation.id === id) != null) {
+      this.hideAllCards();
       this.annotationsList.find(annotation => annotation.id === id).visabilityAnnotationCard(visibility);
+    }
+  }
+
+  public hideAllCards() {
+    if (this.annotationsList != null) {
+      this.annotationsList.forEach(function (value) {
+        value.visabilityAnnotationCard(false);
+      });
     }
   }
 

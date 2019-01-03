@@ -48,6 +48,13 @@ export class AnnotationsEditorComponent implements OnInit {
     this.annotation.cameraPosition = this.cameraService.getActualCameraPosAnnotation();
     this.annotationmarkerService.redrawMarker(this.annotation);
     this.babylonService.createPreviewScreenshot(220).then(detailScreenshot => {
+
+      /*
+      const i = new Image();
+      i.onload = function() {
+        alert( i.width + ', ' + i.height );
+      };
+      i.src = detailScreenshot;*/
       this.preview = detailScreenshot;
     });
   }

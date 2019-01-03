@@ -226,10 +226,13 @@ export class BabylonService {
   }
 
   public createScreenshot(): void {
-      BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, {precision: 2});
+    BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, {precision: 2});
   }
 
   public createPreviewScreenshot(width?: number): Promise<string> {
+    /*console.log('Aktuelle Höhe des Canvas: ' + this.engine.getRenderHeight() +
+      'Aktuelle Breite des Canvas: ' + this.engine.getRenderWidth());
+*/
 
     return new Promise<string>((resolve, reject) => {
 
