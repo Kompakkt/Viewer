@@ -32,25 +32,33 @@ export class AnnotationService {
   }
 
   public async loadAnnotations(modelName: string) {
-    setTimeout(() => {
 
+    // Der mdelName wird beim Laden eines neuen Modells übergeben und hier gespeichert,
+    // um auch als Referenz für eine neu erstellte Annotation nutzbar zu sein
     this.modelName = modelName;
 
+    // In diesem Array sollten alle Annotationen in der richtigen Reihenfolge liegen, die visuell für das aktuelle
+    // Model relevant sind, zu Beginn also erstmal keine
     this.annotations = [];
+
+    // Hier werden die Annotationen unsortiert rein geworfen, wenn sie aus der Datenbank kommen
     this.unsortedAnnotations = [];
+
+    // Alle Marker, die eventuell vom vorherigen Modell noch da sind, sollen gelöscht werden
     this.annotationmarkerService.deleteAllMarker();
-    }, 400);
 
 
     // 1)
     setTimeout(() => {
 
+      // Beim ersten Laden eines Mdoells, werden alle in der PuchDB vorhandenen Annotationen in
+      // das Array "allAnnotations" geladen
       if (this.initialLoading) {
-      this.allAnnotations = [];
-      this.allAnnotations = this.fetchData();
-      this.initialLoading = false;
-    }
-    // Ende 1
+        this.allAnnotations = [];
+        this.allAnnotations = this.fetchData();
+        this.initialLoading = false;
+      }
+      // Ende 1
     }, 600);
 
 
@@ -58,16 +66,24 @@ export class AnnotationService {
     // 2)
     setTimeout(() => {
 
+      // Die Annotationen, die sich auf das aktuelle Model beziehen (also als relatedModel den Namen
+      // des aktuellen Models aufweisen, werden raus gesucht und in das Array für unsortierte Annotationen
+      // gepusht, da sie dort liegen ohne visuelle Elemente zu erzeugen
       for (const annotation of this.allAnnotations) {
-      if (annotation.relatedModel === modelName) {
-        this.unsortedAnnotations.push(annotation);
+        if (annotation.relatedModel === modelName) {
+          this.unsortedAnnotations.push(annotation);
+        }
       }
-    }
     }, 800);
 
     // Das darf erst nach 2) passieren
     // 3)
     setTimeout(() => {
+
+      // Jetzt sollen die Annotationen sortiert werden und in der richtigen Reihenfolge in das Array geschrieben werden
+      // Achtung: dann gibt es auch direkt einen visuellen Output durch die Components!
+      // Da die Labels erst im nächsten Schritt gezeichnet werden, hängen die Fenster der Annotationen dann kurz ohne Position
+      // in der oberen linken Ecke.
 
       this.sortAnnotations();
 
@@ -77,27 +93,32 @@ export class AnnotationService {
     // 4)
     setTimeout(() => {
 
+      // Die Labels werden gezeichnet und die Fenster haben nun einen Orientierungspunkt
       for (const annotation of this.annotations) {
-      this.annotationmarkerService.createAnnotationMarker(annotation);
-    }
+        this.annotationmarkerService.createAnnotationMarker(annotation);
+      }
     }, 1200);
 
     setTimeout(() => {
-
+      // Das neu geladene Modell wird annotierbar, ist aber noch nicht klickbar -> das soll erst passieren,
+      // wenn der Edit-Mode aufgerufen wird
       this.initializeAnnotationMode(modelName);
-    this.actionService.pickableModel(modelName, false);
+      this.actionService.pickableModel(modelName, false);
     }, 1400);
 
   }
 
+  // Das aktuelle Modell wird anklickbar und damit annotierbar
   public annotationMode(value: boolean) {
     this.actionService.pickableModel(this.modelName, value);
   }
 
+  // Die Annotationsfunktionalität wird zum aktuellen Modell hinzugefügt
   public initializeAnnotationMode(modelName: string) {
     this.actionService.createActionManager(modelName, BABYLON.ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
   }
 
+  // Die Annotationen werden in der richtigen Reihenfolge in das Array für den visuellen Output geschrieben
   private sortAnnotations() {
     this.annotations = this.unsortedAnnotations;
     this.unsortedAnnotations = this.annotations.slice(0);
