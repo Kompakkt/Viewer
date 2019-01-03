@@ -21,6 +21,10 @@ export class MongohandlerService {
     return this.http.get<any>(this.endpoint + '/api/v1/get/find/compilation/' + identifier, {headers: this.headers});
   }
 
+  public getModelMetadata(identifier: string): Observable<any> {
+    return this.http.get<any>(this.endpoint + '/api/v1/get/find/digitalobject/' + identifier, {headers: this.headers});
+  }
+
   public updateScreenshot(identifier: string, screenshot: string): Observable<any> {
     return this.http.post<any>(this.endpoint + '/api/v1/post/screenshot/' + identifier, {data: screenshot});
   }
@@ -37,5 +41,13 @@ export class MongohandlerService {
     public submitToDB(SubmitObject: any): Observable<any> {
       return this.http.post(`${this.endpoint}/api/v1/post/submit`, SubmitObject);
     }
+
+  public getCompilation(identifier: string): Promise<Compilation> {
+    return this.http.get<Compilation>(`${this.endpoint}/api/v1/get/find/${Collection.Compilation}/${identifier}`).toPromise();
+  }
+
+    public getModelMetadata(identifier: string): Promise<any> {
+    return this.http.get(`${this.endpoint}/api/v1/get/find/${Collection.DigitalObject}/${identifier}`).toPromise();
+  }
   */
 }

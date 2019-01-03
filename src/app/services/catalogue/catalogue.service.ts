@@ -14,18 +14,22 @@ export class CatalogueService {
 
     model: new BehaviorSubject<Model>(null),
     quality: new BehaviorSubject<string>('low'),
-    models: new BehaviorSubject<Model[]>(Array<Model>())
+    models: new BehaviorSubject<Model[]>(Array<Model>()),
+    modelMetadata: new BehaviorSubject<string>(null)
+
   };
 
   public Observables = {
-
     model: this.Subjects.model.asObservable(),
     quality: this.Subjects.quality.asObservable(),
-    models: this.Subjects.models.asObservable()
+    models: this.Subjects.models.asObservable(),
+    modelMetadata: this.Subjects.modelMetadata.asObservable()
   };
 
   private unsortedModels: Model[];
   private isFirstLoad = true;
+  public receivedDigitalObject = false;
+  public metadata = null;
 
 
   constructor(private mongohandlerService: MongohandlerService,
@@ -102,6 +106,12 @@ export class CatalogueService {
 
   public updateActiveModel(model: Model) {
     this.Subjects.model.next(model);
+    this.fetchMetadata(model.relatedDigitalObject['_id']);
+  }
+
+  public updateMetadata(metadata: string) {
+    this.Subjects.modelMetadata.next(metadata);
+    this.metadata = metadata;
   }
 
   public initializeCatalogue() {
@@ -146,4 +156,16 @@ export class CatalogueService {
       this.message.error('Connection to object server refused.');
     });
   }
+
+  private fetchMetadata(metadata_id?: string) {
+
+    this.mongohandlerService.getModelMetadata(metadata_id).subscribe(result => {
+
+      this.updateMetadata(result);
+      this.receivedDigitalObject = true;
+    }, error => {
+      this.message.error('Connection to object server refused.');
+    });
+  }
+
 }

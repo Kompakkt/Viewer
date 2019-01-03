@@ -31,6 +31,7 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
 import {ModelComponent} from './components/model/model.component';
 import { CollectionsOverviewComponent } from './components/collections-overview/collections-overview.component';
 import { LoadingscreenComponent } from './components/loadingscreen/loadingscreen.component';
+import { MetadataComponent } from './components/metadata/metadata.component';
 
 @NgModule({
   declarations: [
@@ -44,7 +45,8 @@ import { LoadingscreenComponent } from './components/loadingscreen/loadingscreen
     AnnotationwalkthroughComponent,
     ModelComponent,
     CollectionsOverviewComponent,
-    LoadingscreenComponent
+    LoadingscreenComponent,
+    MetadataComponent
   ],
   imports: [
     BrowserModule,
