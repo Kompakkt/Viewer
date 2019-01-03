@@ -20,35 +20,65 @@ export class AnnotationService {
   public annotations: Annotation[];
   private unsortedAnnotations: Annotation[];
   private allAnnotations: Annotation[];
+  private modelName: string;
+  private initialLoading: boolean;
 
   constructor(private babylonService: BabylonService,
               private dataService: DataService,
               private actionService: ActionService,
               private annotationmarkerService: AnnotationmarkerService) {
-
-    this.allAnnotations = this.fetchData();
+    this.initialLoading = true;
     this.annotations = [];
   }
 
   public async loadAnnotations(modelName: string) {
 
-    await this.annotationmarkerService.deleteAllMarker();
+    // 1)
+    if (this.initialLoading) {
+      this.allAnnotations = [];
+      this.allAnnotations = this.fetchData();
+      this.initialLoading = false;
+    }
+    // Ende 1
+
+    this.modelName = modelName;
+
     this.annotations = [];
+    this.unsortedAnnotations = [];
 
-    for (let annotation of this.allAnnotations) {
-
+    // Das darf erst nach 1) passieren
+    // 2)
+    for (const annotation of this.allAnnotations) {
       if (annotation.relatedModel === modelName) {
         this.annotations.push(annotation);
-        this.annotationmarkerService.createAnnotationMarker(annotation);
       }
     }
 
+    // Das darf erst nach 2) passieren
+    // 3)
+    this.sortAnnotations();
+
+    this.annotationmarkerService.deleteAllMarker();
+
+    // Das darf erst nach 3) passieren
+    // 4)
+    for (const annotation of this.annotations) {
+      this.annotationmarkerService.createAnnotationMarker(annotation);
+    }
+
+    this.initializeAnnotationMode(modelName);
+    this.actionService.pickableModel(modelName, false);
   }
 
-  public async initializeAnnotationMode(modelName: string) {
+  public annotationMode(value: boolean) {
+    this.actionService.pickableModel(this.modelName, value);
+  }
 
+  public initializeAnnotationMode(modelName: string) {
     this.actionService.createActionManager(modelName, BABYLON.ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
+  }
 
+  private sortAnnotations() {
     this.unsortedAnnotations = this.annotations.slice(0);
     this.annotations.splice(0, this.annotations.length);
     this.annotations = this.unsortedAnnotations.slice(0);
@@ -62,7 +92,6 @@ export class AnnotationService {
       }
       return 0;
     });
-
   }
 
   public createNewAnnotation = function (result: any) {
@@ -71,7 +100,8 @@ export class AnnotationService {
 
       const newAnnotation: Annotation = {
         _id: Math.random().toString(36).substr(2, 9),
-        relatedModel: BABYLON.Tags.GetTags(result.pickedMesh),
+        // relatedModel: BABYLON.Tags.GetTags(result.pickedMesh),
+        relatedModel: this.modelName,
         ranking: String(this.annotations.length + 1),
         referencePoint: [{dimension: 'x', value: result.pickedPoint.x}, {dimension: 'y', value: result.pickedPoint.y}, {
           dimension: 'z', value: result.pickedPoint.z
@@ -96,7 +126,6 @@ export class AnnotationService {
   };
 
   private add(annotation): void {
-
     this.dataService.database.put(annotation);
     this.annotations.push(annotation);
     this.allAnnotations.push(annotation);
@@ -110,7 +139,7 @@ export class AnnotationService {
 
       const rows = result.rows;
 
-      for (let row of rows) {
+      for (const row of rows) {
         annotationList.push(row.doc);
       }
     }, error => {
@@ -143,7 +172,7 @@ export class AnnotationService {
 
     let i = 0;
 
-    for (let annotation of this.annotations) {
+    for (const annotation of this.annotations) {
 
       annotation.ranking = String(i + 1);
       this.annotationmarkerService.deleteMarker(annotation._id);

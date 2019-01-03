@@ -44,13 +44,13 @@ export class LoadModelService {
 
         // Füge Tags hinzu und lade Annotationen
         BABYLON.Tags.AddTagsTo(model.meshes[0], newModel.name);
-        this.actionService.pickableModel(newModel.name, true);
+        // this.actionService.pickableModel(newModel.name, true);
 
         // TODO: Irgendwie auf Initialisierung des annotationServices warten
         setTimeout(() => {
           while (this.loadingScreenHandler.isLoading) {
           }
-          this.annotationService.initializeAnnotationMode(newModel.name);
+          // this.annotationService.initializeAnnotationMode(newModel.name);
           this.annotationService.loadAnnotations(newModel.name);
         }, 500);
       });

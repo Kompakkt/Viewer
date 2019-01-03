@@ -24,14 +24,8 @@ export class EditorComponent implements OnInit {
   ngOnInit() {
 
     this.overlayService.editor.subscribe(editorIsOpen => {
-
       this.isOpen = editorIsOpen;
-      // TODO initialize after model is loaded!
-      this.babylonService.getScene().meshes.forEach(mesh => {
-        this.actionService.pickableModel(mesh.name, this.isOpen);
-        this.annotationService.initializeAnnotationMode(mesh.name);
-      });
-
+      this.annotationService.annotationMode(this.isOpen);
     });
   }
 
