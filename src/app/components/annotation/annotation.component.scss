@@ -6,8 +6,10 @@ $cardbgr: #111;
 
 .single-annotation-card {
   z-index: 0;
+  margin-top: 5px;
   position: absolute;
-  opacity: 0.7 !important;
+  opacity: 0.9 !important;
+  border-radius: 5px !important;
   transition: all .0s ease-in-out;
 }
 
