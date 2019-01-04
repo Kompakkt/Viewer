@@ -33,7 +33,7 @@ export class AnnotationService {
 
   public async loadAnnotations(modelName: string) {
 
-    // Der mdelName wird beim Laden eines neuen Modells übergeben und hier gespeichert,
+    // Der modelName wird beim Laden eines neuen Modells übergeben und hier gespeichert,
     // um auch als Referenz für eine neu erstellte Annotation nutzbar zu sein
     this.modelName = modelName;
 
@@ -45,67 +45,46 @@ export class AnnotationService {
     this.unsortedAnnotations = [];
 
     // Alle Marker, die eventuell vom vorherigen Modell noch da sind, sollen gelöscht werden
-    this.annotationmarkerService.deleteAllMarker();
+    await this.annotationmarkerService.deleteAllMarker();
+
+    // Beim ersten Laden eines Mdoells, werden alle in der PuchDB vorhandenen Annotationen in
+    // das Array "allAnnotations" geladen
+    if (this.initialLoading === true) {
+      await this.getAnnotations();
+    }
+
+    // Die Annotationen, die sich auf das aktuelle Model beziehen (also als relatedModel den Namen
+    // des aktuellen Models aufweisen, werden raus gesucht und in das Array für unsortierte Annotationen
+    // gepusht, da sie dort liegen ohne visuelle Elemente zu erzeugen
+
+    await this.getActualAnnotations(modelName);
+
+    // Jetzt sollen die Annotationen sortiert werden und in der richtigen Reihenfolge in das Array geschrieben werden
+    // Achtung: dann gibt es auch direkt einen visuellen Output durch die Components!
+    // Da die Labels erst im nächsten Schritt gezeichnet werden, hängen die Fenster der Annotationen dann kurz ohne Position
+    // in der oberen linken Ecke.
+    // Die Labels werden gezeichnet und die Fenster haben nun einen Orientierungspunkt
+
+    await this.sortAnnotations();
+    // Das neu geladene Modell wird annotierbar, ist aber noch nicht klickbar -> das soll erst passieren,
+    // wenn der Edit-Mode aufgerufen wird
+    this.initializeAnnotationMode(modelName);
+    this.actionService.pickableModel(modelName, false);
+  }
 
 
-    // 1)
-    setTimeout(() => {
-
-      // Beim ersten Laden eines Mdoells, werden alle in der PuchDB vorhandenen Annotationen in
-      // das Array "allAnnotations" geladen
-      if (this.initialLoading) {
-        this.allAnnotations = [];
-        this.allAnnotations = this.fetchData();
-        this.initialLoading = false;
+  private async getActualAnnotations(modelName: string) {
+    for (const annotation of this.allAnnotations) {
+      if (annotation.relatedModel === modelName) {
+        this.unsortedAnnotations.push(annotation);
       }
-      // Ende 1
-    }, 600);
+    }
+  }
 
-
-    // Das darf erst nach 1) passieren
-    // 2)
-    setTimeout(() => {
-
-      // Die Annotationen, die sich auf das aktuelle Model beziehen (also als relatedModel den Namen
-      // des aktuellen Models aufweisen, werden raus gesucht und in das Array für unsortierte Annotationen
-      // gepusht, da sie dort liegen ohne visuelle Elemente zu erzeugen
-      for (const annotation of this.allAnnotations) {
-        if (annotation.relatedModel === modelName) {
-          this.unsortedAnnotations.push(annotation);
-        }
-      }
-    }, 800);
-
-    // Das darf erst nach 2) passieren
-    // 3)
-    setTimeout(() => {
-
-      // Jetzt sollen die Annotationen sortiert werden und in der richtigen Reihenfolge in das Array geschrieben werden
-      // Achtung: dann gibt es auch direkt einen visuellen Output durch die Components!
-      // Da die Labels erst im nächsten Schritt gezeichnet werden, hängen die Fenster der Annotationen dann kurz ohne Position
-      // in der oberen linken Ecke.
-
-      this.sortAnnotations();
-
-    }, 1000);
-
-    // Das darf erst nach 3) passieren
-    // 4)
-    setTimeout(() => {
-
-      // Die Labels werden gezeichnet und die Fenster haben nun einen Orientierungspunkt
-      for (const annotation of this.annotations) {
-        this.annotationmarkerService.createAnnotationMarker(annotation);
-      }
-    }, 1200);
-
-    setTimeout(() => {
-      // Das neu geladene Modell wird annotierbar, ist aber noch nicht klickbar -> das soll erst passieren,
-      // wenn der Edit-Mode aufgerufen wird
-      this.initializeAnnotationMode(modelName);
-      this.actionService.pickableModel(modelName, false);
-    }, 1400);
-
+  private async getAnnotations() {
+    this.allAnnotations = [];
+    this.allAnnotations = await this.fetchData();
+    this.initialLoading = false;
   }
 
   // Das aktuelle Modell wird anklickbar und damit annotierbar
@@ -119,13 +98,13 @@ export class AnnotationService {
   }
 
   // Die Annotationen werden in der richtigen Reihenfolge in das Array für den visuellen Output geschrieben
-  private sortAnnotations() {
+  private async sortAnnotations() {
     this.annotations = this.unsortedAnnotations;
     this.unsortedAnnotations = this.annotations.slice(0);
     this.annotations.splice(0, this.annotations.length);
     this.annotations = this.unsortedAnnotations.slice(0);
 
-    this.annotations.sort((leftSide, rightSide): number => {
+    await this.annotations.sort((leftSide, rightSide): number => {
       if (+leftSide.ranking < +rightSide.ranking) {
         return -1;
       }
@@ -134,6 +113,10 @@ export class AnnotationService {
       }
       return 0;
     });
+
+    for (const annotation of this.annotations) {
+      this.annotationmarkerService.createAnnotationMarker(annotation);
+    }
   }
 
   public createNewAnnotation = function (result: any) {
@@ -173,22 +156,24 @@ export class AnnotationService {
     this.allAnnotations.push(annotation);
   }
 
-  private fetchData(): Array<any> {
+  private async fetchData(): Promise<Array<any>> {
 
-    const annotationList: Array<any> = [];
+    return new Promise<any>((resolve, reject) => {
 
-    this.dataService.fetch().then(result => {
+      const annotationList: Array<any> = [];
 
-      const rows = result.rows;
+      this.dataService.fetch().then(result => {
 
-      for (const row of rows) {
-        annotationList.push(row.doc);
-      }
-    }, error => {
-      console.error(error);
+        const rows = result.rows;
+
+        for (const row of rows) {
+          annotationList.push(row.doc);
+        }
+        resolve(annotationList);
+      }, error => {
+        reject(error);
+      });
     });
-
-    return annotationList;
   }
 
   public deleteAnnotation(annotation: Annotation) {
