@@ -7,15 +7,8 @@ $cardbgr: #111;
 .single-annotation-card {
   z-index: 0;
   position: absolute;
-  opacity: 0.5 !important;
+  opacity: 0.7 !important;
   transition: all .0s ease-in-out;
-}
-
-.single-annotation-card:hover {
-  z-index: 99999;
-  opacity: 1 !important;
-  transform: scale(1.1);
-  transform-origin: top left;
 }
 
 .single-annotation-card .mat-form-field {
