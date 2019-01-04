@@ -18,13 +18,15 @@ export class AnnotationComponent implements OnInit {
   public editMode = false;
   public labelMode = 'edit';
   public labelModeText = 'edit';
+  public positionTop = 0;
   public positionLeft = 0;
-  public positionRight = 0;
   public visibility: boolean;
   public id = '';
   public opacity = '0';
 
-  constructor(private dataService: DataService, private annotationService: AnnotationService, private babylonService: BabylonService) {
+  constructor(private dataService: DataService,
+              private annotationService: AnnotationService,
+              private babylonService: BabylonService) {
     this.visibility = true;
   }
 
@@ -35,24 +37,27 @@ export class AnnotationComponent implements OnInit {
 
     setInterval(() => {
       this.setPosition(this.annotation);
-    }, 10);
+    }, 15);
   }
 
   public setPosition(annotation: Annotation) {
 
-    const _getMesh = this.babylonService.getScene().getMeshByName(annotation._id + '_pick');
-    if (_getMesh != null) {
+    const scene = this.babylonService.getScene(),
+      getMesh = scene.getMeshByName(annotation._id + '_pick');
 
-      const vectorMesh = _getMesh.getBoundingInfo().boundingBox.centerWorld;
+    if (getMesh != null) {
+
+      const engine = this.babylonService.getEngine();
+
       const p = BABYLON.Vector3.Project(
-        vectorMesh,
+        getMesh.getBoundingInfo().boundingBox.centerWorld,
         BABYLON.Matrix.Identity(),
-        this.babylonService.getScene().getTransformMatrix(),
-        this.babylonService.getScene().activeCamera.viewport.toGlobal(this.babylonService.getEngine().getRenderWidth(),
-          this.babylonService.getEngine().getRenderHeight())
+        scene.getTransformMatrix(),
+        scene.activeCamera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight())
       );
-      this.positionLeft = Math.round(p.y);
-      this.positionRight = Math.round(p.x);
+
+      this.positionTop = Math.round(p.y);
+      this.positionLeft = Math.round(p.x);
     }
   }
 
@@ -77,11 +82,13 @@ export class AnnotationComponent implements OnInit {
   public toggleEditViewMode() {
 
     if (this.editMode) {
+
       this.editMode = false;
       this.labelMode = 'edit';
       this.labelModeText = 'edit';
       this.save();
     } else {
+
       this.editMode = true;
       this.labelMode = 'remove_red_eye';
       this.labelModeText = 'view';
