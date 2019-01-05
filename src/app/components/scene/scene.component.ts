@@ -13,7 +13,7 @@ export class SceneComponent implements AfterViewInit {
 
   @HostListener('window:resize', ['$event'])
 
-  public onResize(event) {
+  public onResize() {
     this.babylonService.resize();
   }
 
@@ -22,6 +22,7 @@ export class SceneComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
+
     this.babylonService.updateCanvas(this.canvasRef.nativeElement);
     this.catalogueService.bootstrap();
   }

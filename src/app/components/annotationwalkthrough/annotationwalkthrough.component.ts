@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import * as BABYLON from 'babylonjs';
+import {Vector3} from 'babylonjs';
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {CameraService} from '../../services/camera/camera.service';
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
@@ -12,13 +12,13 @@ import {AnnotationmarkerService} from '../../services/annotationmarker/annotatio
 export class AnnotationwalkthroughComponent implements OnInit {
 
   public title: string;
-  private positionVector: BABYLON.Vector3;
+  private positionVector: Vector3;
   private actualRanking: number;
 
   constructor(public annotationService: AnnotationService, private cameraService: CameraService,
               private annotationmarkerService: AnnotationmarkerService) {
 
-    this.positionVector = BABYLON.Vector3.Zero();
+    this.positionVector = Vector3.Zero();
     this.actualRanking = 0;
     this.title = 'Annotation Walkthrough';
   }
@@ -69,10 +69,13 @@ export class AnnotationwalkthroughComponent implements OnInit {
 
     const test = this.annotationService.annotations[index];
     const test2 = this.annotationService.annotations.length;
+
     console.log('annotation an der Stelle ' + index + ' ist ' + test + 'Array länge ' + test2);
+
     if (this.annotationService.annotations.length) {
+
       this.title = this.annotationService.annotations[index].title;
-      const cameraVector = new BABYLON.Vector3(this.annotationService.annotations[index].cameraPosition[0].value,
+      const cameraVector = new Vector3(this.annotationService.annotations[index].cameraPosition[0].value,
         this.annotationService.annotations[index].cameraPosition[1].value,
         this.annotationService.annotations[index].cameraPosition[2].value);
       this.cameraService.moveCameraToTarget(cameraVector);

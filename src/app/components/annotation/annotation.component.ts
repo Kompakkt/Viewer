@@ -1,9 +1,10 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {AnnotationService} from '../../services/annotation/annotation.service';
-import * as BABYLON from 'babylonjs';
 import {BabylonService} from '../../services/babylon/babylon.service';
 import {Annotation} from '../../interfaces/annotation/annotation';
 import {DataService} from '../../services/data/data.service';
+
+import {Vector3, Matrix} from 'babylonjs';
 
 @Component({
   selector: 'app-annotation',
@@ -49,9 +50,9 @@ export class AnnotationComponent implements OnInit {
 
       const engine = this.babylonService.getEngine();
 
-      const p = BABYLON.Vector3.Project(
+      const p = Vector3.Project(
         getMesh.getBoundingInfo().boundingBox.centerWorld,
-        BABYLON.Matrix.Identity(),
+        Matrix.Identity(),
         scene.getTransformMatrix(),
         scene.activeCamera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight())
       );

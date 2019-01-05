@@ -2,9 +2,10 @@ import {Injectable} from '@angular/core';
 import {Annotation} from 'src/app/interfaces/annotation/annotation';
 import {DataService} from '../data/data.service';
 import {BabylonService} from '../babylon/babylon.service';
-import * as BABYLON from 'babylonjs';
 import {ActionService} from '../action/action.service';
 import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
+
+import {ActionManager} from 'babylonjs';
 
 /**
  * @author Zoe Schubert
@@ -94,7 +95,7 @@ export class AnnotationService {
 
   // Die Annotationsfunktionalität wird zum aktuellen Modell hinzugefügt
   public initializeAnnotationMode(modelName: string) {
-    this.actionService.createActionManager(modelName, BABYLON.ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
+    this.actionService.createActionManager(modelName, ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
   }
 
   // Die Annotationen werden in der richtigen Reihenfolge in das Array für den visuellen Output geschrieben

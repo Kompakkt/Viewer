@@ -16,8 +16,6 @@ export class EditorComponent implements OnInit {
   @Input() modelFileName: string;
 
   constructor(private overlayService: OverlayService,
-              private actionService: ActionService,
-              private babylonService: BabylonService,
               public annotationService: AnnotationService) {
   }
 

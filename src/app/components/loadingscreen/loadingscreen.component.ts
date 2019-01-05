@@ -23,6 +23,7 @@ export class LoadingscreenComponent implements OnInit {
   }
 
   ngOnInit() {
+
     this.logo = this.loadingScreenHandler.logo;
     this.backgroundColor = this.loadingScreenHandler.backgroundColor;
     this.loadingScreenHandler.opacity.subscribe((newOpacity) => this.opacity = newOpacity);

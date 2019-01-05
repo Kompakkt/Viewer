@@ -11,6 +11,7 @@ import {OverlayService} from '../../services/overlay/overlay.service';
   styleUrls: ['./model.component.scss']
 })
 export class ModelComponent implements OnInit {
+
   @Input() model: Model;
 
   constructor(private catalogueService: CatalogueService,

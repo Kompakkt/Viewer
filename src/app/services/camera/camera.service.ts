@@ -2,7 +2,6 @@ import {Injectable} from '@angular/core';
 import * as BABYLON from 'babylonjs';
 
 import {BabylonService} from '../babylon/babylon.service';
-import Vector3 = BABYLON.Vector3;
 
 @Injectable({
   providedIn: 'root'
@@ -31,6 +30,7 @@ export class CameraService {
     private babylonService: BabylonService) {
 
     this.babylonService.CanvasObservable.subscribe((newCanvas) => {
+
       if (newCanvas) {
         this.alpha = 9;
         this.beta = 1.3;
@@ -40,7 +40,7 @@ export class CameraService {
         this.canvas = newCanvas;
 
         this.arcRotateCamera = this.babylonService.createArcRotateCam('arcRotateCamera',
-          this.alpha, this.beta, this.radius, Vector3.Zero());
+          this.alpha, this.beta, this.radius, BABYLON.Vector3.Zero());
 
         this.arcRotateSettings();
 
@@ -96,7 +96,7 @@ export class CameraService {
     this.canvas.focus();
   }
 
-  public setActiveCameraTarget(target: Vector3): void {
+  public setActiveCameraTarget(target: BABYLON.Vector3): void {
     this.arcRotateCamera.setTarget(target);
   }
 
@@ -106,7 +106,7 @@ export class CameraService {
     camera.keysDown.push(83);
     camera.keysLeft.push(65);
     camera.keysRight.push(68);
-    camera.setTarget(Vector3.Zero());
+    camera.setTarget(BABYLON.Vector3.Zero());
   }
 
   private setCameraActive(newActiveCamera: any): void {
@@ -185,7 +185,7 @@ export class CameraService {
       }]);
     this.arcRotateCamera.animations.push(animCamRadius);
 
-    this.arcRotateCamera.setTarget(Vector3.Zero());
+    this.arcRotateCamera.setTarget(BABYLON.Vector3.Zero());
 
     this.scene.beginAnimation(this.arcRotateCamera, 0, 30, false, 1, function () {
     });
@@ -287,7 +287,7 @@ export class CameraService {
       }]);
     this.arcRotateCamera.animations.push(animCamRadius);
 
-    this.arcRotateCamera.setTarget(Vector3.Zero());
+    this.arcRotateCamera.setTarget(BABYLON.Vector3.Zero());
 
     this.scene.beginAnimation(this.arcRotateCamera, 0, 30, false, 1, function () {
     });
@@ -345,7 +345,7 @@ export class CameraService {
       }]);
     this.vrHelper.webVRCamera.animations.push(animCamRadius);
 
-    this.vrHelper.webVRCamera.setTarget(Vector3.Zero());
+    this.vrHelper.webVRCamera.setTarget(BABYLON.Vector3.Zero());
 
     this.scene.beginAnimation(this.vrHelper.webVRCamera, 0, 30, false, 1, function () {
     });
