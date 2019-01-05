@@ -2,6 +2,7 @@
           [style.top.px]="positionTop"
           [style.left.px]="positionLeft"
           [style.opacity]="opacity"
+          [class.editmode]="editMode"
           *ngIf = "visibility"
           id = {{annotation._id}}>
 
@@ -10,7 +11,7 @@
     <mat-card-header>
 
       <mat-card-title>
-        <span *ngIf="!editMode">{{annotation.title | uppercase}}</span>
+        <span *ngIf="!editMode">{{annotation.title}}</span>
         <mat-form-field *ngIf="editMode">
           <input matInput name="title" #title="ngModel" type="text" placeholder="Title" [(ngModel)]="annotation.title">
         </mat-form-field>
@@ -21,7 +22,7 @@
               mat-icon-button
               (click)="closeAnnotation()"
               type="button">
-        <mat-icon aria-label="Close">close</mat-icon>
+        <mat-icon aria-label="Close">cancel</mat-icon>
       </button>
 
     </mat-card-header>
