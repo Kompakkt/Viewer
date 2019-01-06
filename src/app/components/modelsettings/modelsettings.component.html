@@ -1,0 +1,18 @@
+<mat-card class="model-card" *ngIf="this.activeModel != null">
+
+  <mat-card-header>
+
+    <mat-card-title>
+      Select initial perspective
+    </mat-card-title>
+
+  </mat-card-header>
+
+  <img mat-card-image src={{this.activeModel.preview}} (click)="setInitialPerspective()">
+
+  <!--
+  <mat-card-content>
+  </mat-card-content>
+   -->
+
+</mat-card>
