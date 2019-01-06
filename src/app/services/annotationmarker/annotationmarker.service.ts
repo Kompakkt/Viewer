@@ -141,9 +141,7 @@ export class AnnotationmarkerService {
     this.createAnnotationMarker(annotation);
   }
 
-  public hideAllMarker(visibility: boolean) {
-    return new Promise<any>((resolve) => {
-
+  public async hideAllMarker(visibility: boolean) {
       const marker = this.babylonService.getScene().getMeshesByTags('label');
       marker.forEach(function (value) {
         value.isVisible = visibility;
@@ -154,7 +152,6 @@ export class AnnotationmarkerService {
         value.isVisible = visibility;
       });
 
-    });
   }
 
 }

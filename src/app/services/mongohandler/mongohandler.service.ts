@@ -29,6 +29,11 @@ export class MongohandlerService {
     return this.http.post<any>(this.endpoint + '/api/v1/post/screenshot/' + identifier, {data: screenshot});
   }
 
+  public updateCameraPos(identifier: string, cameraPerspective: any): Observable<any> {
+    console.log('Camera soll gespeichert werden');
+    return this.http.post<any>(this.endpoint + '/api/v1/post/cameraPosition/' + identifier, {data: cameraPerspective});
+  }
+
   /* Funktionen aus ObjectsRepository, nur zum Vergleich
     private findSingleInCollection(collection: Collection, identifier: string): Observable<Person | Institute | Tag> {
       return this.http.get<Person | Institute>(`${this.endpoint}/api/v1/get/find/${collection}/${identifier}`);

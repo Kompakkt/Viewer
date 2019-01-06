@@ -358,4 +358,10 @@ export class CameraService {
     return cameraPosition;
   }
 
+  public getActualCameraPosInitialView() {
+    const cameraPosition = [{dimension: 'x', value: this.arcRotateCamera.alpha},
+      {dimension: 'y', value: this.arcRotateCamera.beta},
+      {dimension: 'z', value: this.arcRotateCamera.radius}];
+    return cameraPosition;
+  }
 }

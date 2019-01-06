@@ -124,21 +124,5 @@ export class MenuComponent implements OnInit {
   public takeScreenshot() {
 
     this.babylonService.createScreenshot();
-
-    this.babylonService.createPreviewScreenshot().then((screenshot) => {
-
-      if (this.activeModel !== null) {
-
-        this.mongohandlerService.updateScreenshot(this.activeModel._id, screenshot).subscribe(result => {
-
-          // TODO: Find out why picture isn't refreshed once the server sends the result
-          this.catalogueService.Observables.models.source['value']
-            .filter(model => model._id === this.activeModel._id)
-            .map(model => model.preview = result.value.preview);
-        }, error => {
-          this.message.error(error);
-        });
-      }
-    });
   }
 }

@@ -44,10 +44,10 @@ export class AnnotationsEditorComponent implements OnInit {
     }
   }
 
-  public selectPerspective() {
+  public async selectPerspective() {
     this.annotation.cameraPosition = this.cameraService.getActualCameraPosAnnotation();
-    this.annotationmarkerService.redrawMarker(this.annotation);
-    this.babylonService.createPreviewScreenshot(220).then(detailScreenshot => {
+    await this.annotationmarkerService.hideAllMarker(false);
+    await this.babylonService.createPreviewScreenshot(220).then(detailScreenshot => {
 
       /*
       const i = new Image();
@@ -57,6 +57,8 @@ export class AnnotationsEditorComponent implements OnInit {
       i.src = detailScreenshot;*/
       this.preview = detailScreenshot;
     });
+
+    await this.annotationmarkerService.hideAllMarker(true);
   }
 
   public deleteAnnotation(): void {
