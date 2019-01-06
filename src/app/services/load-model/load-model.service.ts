@@ -39,8 +39,14 @@ export class LoadModelService {
         // Warte auf Antwort von loadModel, da loadModel ein Promise<object> von ImportMeshAync übergibt
         // model ist hier das neu geladene Model, aus dem wir direkt den Namen nehmen können
 
-        // Zentriere auf das neu geladene Model
-        this.cameraService.setActiveCameraTarget(model.meshes[0]._boundingInfo.boundingBox.centerWorld);
+        // Zentriere auf das neu geladene Model oder (falls gesetzt) wähle die default Position
+        if (newModel.cameraPosition[0].value === 0 && newModel.cameraPosition[1].value === 0 && newModel.cameraPosition[2].value === 0) {
+          this.cameraService.setActiveCameraTarget(model.meshes[0]._boundingInfo.boundingBox.centerWorld);
+        } else {
+          const cameraVector = new BABYLON.Vector3(newModel.cameraPosition[0].value,
+            newModel.cameraPosition[1].value, newModel.cameraPosition[2].value);
+          this.cameraService.moveCameraToTarget(cameraVector);
+        }
 
         // Füge Tags hinzu und lade Annotationen
         BABYLON.Tags.AddTagsTo(model.meshes[0], newModel.name);
