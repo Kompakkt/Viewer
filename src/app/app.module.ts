@@ -3,6 +3,8 @@ import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms'; // <-- NgModel lives here
 import { HttpClientModule } from '@angular/common/http';
 import { DeviceDetectorModule } from 'ngx-device-detector';
+import { ColorChromeModule } from 'ngx-color/chrome';
+
 
 
 
@@ -70,7 +72,8 @@ import { ModelsettingsComponent } from './components/modelsettings/modelsettings
     DragDropModule,
     HttpClientModule,
     DragDropModule,
-    DeviceDetectorModule.forRoot()
+    DeviceDetectorModule.forRoot(),
+    ColorChromeModule
   ],
   providers: [],
   bootstrap: [AppComponent]

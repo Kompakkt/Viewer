@@ -105,9 +105,10 @@ export class MenuComponent implements OnInit {
     this.fullscreen = true;
   }
 
+  /*
   public changeSkybox(skyboxID) {
     this.skyboxService.setSkyboxMaterial(skyboxID);
-  }
+  }*/
 
   public saveScene() {
     console.log(this.babylonService.saveScene());

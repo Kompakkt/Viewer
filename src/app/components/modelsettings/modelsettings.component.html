@@ -3,16 +3,18 @@
   <mat-card-header>
 
     <mat-card-title>
-      Select initial perspective
+      Select initial model settings
     </mat-card-title>
 
   </mat-card-header>
-
-  <img mat-card-image src={{this.activeModel.preview}} (click)="setInitialPerspective()">
-
-  <!--
   <mat-card-content>
-  </mat-card-content>
-   -->
+    <h3>Select initial Perspective</h3>
+    <p>Click on image to select a new initial Perspective.</p>
+    <img mat-card-image src={{this.activeModel.preview}} (click)="setInitialPerspective()"/>
+    <h3>Select background</h3>
+    <color-chrome (onChange)="handleChange($event)"></color-chrome>
+    <br>
+    <h3>Select lights</h3>
 
+  </mat-card-content>
 </mat-card>

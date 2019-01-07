@@ -86,11 +86,13 @@ export class BabylonService {
           this.scene.render();
         });
 
-        this.setBackgroundImage(this.backgroundURL);
+       // this.setBackgroundImage(this.backgroundURL);
 
         this.setClearColor(0.2, 0.2, 0.2, 0.8);
 
         this.createHemisphericLight('light1', {x: 0, y: 1, z: 0});
+
+
       }
     });
   }
@@ -113,6 +115,11 @@ export class BabylonService {
 
   public setClearColor(r: number, g: number, b: number, a: number): void {
     this.scene.clearColor = new BABYLON.Color4(r, g, b, a);
+  }
+
+  public setClearColorHex(r: number, g: number, b: number, a: number): void {
+    this.scene.clearColor = new BABYLON.Color4( r / 255, g / 255, b / 255, a);
+
   }
 
   public createHemisphericLight(name: string, position: any): BABYLON.HemisphericLight {

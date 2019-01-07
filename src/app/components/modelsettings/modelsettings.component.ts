@@ -6,6 +6,8 @@ import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {MessageService} from '../../services/message/message.service';
 import {Model} from '../../interfaces/model/model.interface';
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
+import * as BABYLON from 'babylonjs';
+import {ColorEvent} from 'ngx-color';
 
 
 @Component({
@@ -62,5 +64,26 @@ export class ModelsettingsComponent implements OnInit {
 
   }
 
+
+  handleChange($event: ColorEvent) {
+    console.log($event.color);
+    // color = {
+    //   hex: '#333',
+    //   rgb: {
+    //     r: 51,
+    //     g: 51,
+    //     b: 51,
+    //     a: 1,
+    //   },
+    //   hsl: {
+    //     h: 0,
+    //     s: 0,
+    //     l: .20,
+    //     a: 1,
+    //   },
+    // }
+
+    this.babylonService.setClearColorHex($event.color.rgb.r, $event.color.rgb.g, $event.color.rgb.b, $event.color.rgb.a);
+  }
 
 }
