@@ -4,7 +4,6 @@ import {BabylonService} from '../../services/babylon/babylon.service';
 import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {MessageService} from '../../services/message/message.service';
-import {Model} from '../../interfaces/model/model.interface';
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
 import * as BABYLON from 'babylonjs';
 import {ColorEvent} from 'ngx-color';
@@ -18,6 +17,8 @@ import {ColorEvent} from 'ngx-color';
 export class ModelsettingsComponent implements OnInit {
 
   private activeModel;
+  private isChecked = false;
+
 
   constructor(private cameraService: CameraService,
               private babylonService: BabylonService,
@@ -32,6 +33,31 @@ export class ModelsettingsComponent implements OnInit {
     this.catalogueService.Observables.model.subscribe((newModel) => {
       this.activeModel = newModel;
     });
+  }
+
+  private pitch(event: any) {
+    this.babylonService.setLightIntensity(event.value);
+  }
+
+  private pitchLightX(event: any) {
+    console.log(event.value);
+    this.babylonService.setLightPosX(event.value);
+  }
+
+  private pitchLightY(event: any) {
+    console.log(event.value);
+    this.babylonService.setLightPosY(event.value);
+  }
+
+  private pitchLightZ(event: any) {
+    console.log(event.value);
+    this.babylonService.setLightPosZ(event.value);
+  }
+
+  private handleChangeBackground() {
+    this.isChecked = (this.isChecked === true) ? false : true;
+    console.log('Checked value changed.' + this.isChecked);
+    this.babylonService.setBackgroundImage(this.isChecked);
   }
 
   private async setInitialPerspective() {

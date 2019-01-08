@@ -13,8 +13,16 @@
     <img mat-card-image src={{this.activeModel.preview}} (click)="setInitialPerspective()"/>
     <h3>Select background</h3>
     <color-chrome (onChange)="handleChange($event)"></color-chrome>
-    <br>
+    <p>Effect</p>
+    <mat-checkbox (change)="handleChangeBackground()"></mat-checkbox>
     <h3>Select lights</h3>
-
+    <p>Brightness</p>
+    <mat-slider min="0" max="1" step="0.1" value="1" #matslider (input)="pitch($event)"></mat-slider>
+    <p>PosX</p>
+    <mat-slider min="0" max="10" step="1" value="0" #matslider (input)="pitchLightX($event)"></mat-slider>
+    <p>PosY</p>
+    <mat-slider min="0" max="10" step="1" value="1" #matslider (input)="pitchLightY($event)"></mat-slider>
+    <p>PosZ</p>
+    <mat-slider min="0" max="10" step="1" value="0" #matslider (input)="pitchLightZ($event)"></mat-slider>
   </mat-card-content>
 </mat-card>

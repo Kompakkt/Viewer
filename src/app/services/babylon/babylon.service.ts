@@ -37,6 +37,14 @@ export class BabylonService {
   private selectingControl: boolean;
   private selectedControl: boolean;
 
+  private light1: BABYLON.Light;
+  private lightPosX: number;
+  private lightPosY: number;
+  private lightPosZ: number;
+  private lightIntensity: number;
+
+  private background: BABYLON.Layer;
+
   constructor(private message: MessageService,
               private loadingScreenHandler: LoadingscreenhandlerService,
               @Inject(DOCUMENT) private document: any) {
@@ -80,17 +88,28 @@ export class BabylonService {
             // this.actualControl.material = material;
 
           }
+
+
         });
 
         this.engine.runRenderLoop(() => {
           this.scene.render();
         });
 
-       // this.setBackgroundImage(this.backgroundURL);
 
-        this.setClearColor(0.2, 0.2, 0.2, 0.8);
+        this.setClearColor(0.2, 0.2, 0.2, 0.9);
 
-        this.createHemisphericLight('light1', {x: 0, y: 1, z: 0});
+        this.light1 = this.createHemisphericLight('light1', {x: 0, y: 1, z: 0});
+        this.lightPosX = 0;
+        this.lightPosY = 1;
+        this.lightPosZ = 0;
+
+
+        this.setLightIntensity(1);
+        this.lightIntensity = 1;
+
+        // this.background = false;
+        // this.setBackgroundImage(this.background);
 
 
       }
@@ -118,7 +137,7 @@ export class BabylonService {
   }
 
   public setClearColorHex(r: number, g: number, b: number, a: number): void {
-    this.scene.clearColor = new BABYLON.Color4( r / 255, g / 255, b / 255, a);
+    this.scene.clearColor = new BABYLON.Color4(r / 255, g / 255, b / 255, a);
 
   }
 
@@ -197,9 +216,14 @@ export class BabylonService {
     return this.VRHelper;
   }
 
-  public setBackgroundImage(imgUrl: string): void {
-    const background = new BABYLON.Layer('background', imgUrl, this.scene, true);
-    background.isBackground = true;
+  public setBackgroundImage(background: boolean): void {
+    if (background) {
+      this.background = new BABYLON.Layer('background', this.backgroundURL, this.scene, true);
+      this.background.alphaBlendingMode = BABYLON.Engine.ALPHA_ADD;
+      this.background.isBackground = true;
+    } else {
+      this.background.dispose();
+    }
   }
 
   public loadModel(rootUrl: string, filename: string): Promise<any> {
@@ -254,5 +278,40 @@ export class BabylonService {
         });
       }
     });
+  }
+
+  public setLightIntensity(intensity: number) {
+    if (this.light1 != null) {
+      this.lightIntensity = intensity;
+      this.light1.intensity = this.lightIntensity;
+    }
+  }
+
+  public setLightPosX(pos: number) {
+    if (this.light1 != null) {
+
+      this.light1.dispose();
+      this.lightPosX = pos;
+      this.light1 = this.createHemisphericLight('light1', {x: this.lightPosX, y: this.lightPosY, z: this.lightPosZ});
+      this.light1.intensity = this.lightIntensity;
+    }
+  }
+
+  public setLightPosY(pos: number) {
+    if (this.light1 != null) {
+      this.light1.dispose();
+      this.lightPosY = pos;
+      this.light1 = this.createHemisphericLight('light1', {x: this.lightPosX, y: this.lightPosY, z: this.lightPosZ});
+      this.light1.intensity = this.lightIntensity;
+    }
+  }
+
+  public setLightPosZ(pos: number) {
+    if (this.light1 != null) {
+      this.light1.dispose();
+      this.lightPosZ = pos;
+      this.light1 = this.createHemisphericLight('light1', {x: this.lightPosX, y: this.lightPosY, z: this.lightPosZ});
+      this.light1.intensity = this.lightIntensity;
+    }
   }
 }

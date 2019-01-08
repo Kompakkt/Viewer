@@ -22,7 +22,7 @@ import {
   MatTabsModule,
   MatExpansionModule,
   MatFormFieldModule,
-  MatCheckboxModule, MatInputModule, MatListModule, MatDividerModule
+  MatCheckboxModule, MatInputModule, MatListModule, MatDividerModule, MatSliderModule
 } from '@angular/material';
 import {EditorComponent} from './components/editor/editor.component';
 import {AnnotationsEditorComponent} from './components/annotations-editor/annotations-editor.component';
@@ -73,7 +73,8 @@ import { ModelsettingsComponent } from './components/modelsettings/modelsettings
     HttpClientModule,
     DragDropModule,
     DeviceDetectorModule.forRoot(),
-    ColorChromeModule
+    ColorChromeModule,
+    MatSliderModule
   ],
   providers: [],
   bootstrap: [AppComponent]
