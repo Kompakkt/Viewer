@@ -12,6 +12,8 @@ import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreen
 })
 export class LoadModelService {
 
+  private baseUrl: string;
+
   constructor(public babylonService: BabylonService,
               private actionService: ActionService,
               private annotationService: AnnotationService,
@@ -19,7 +21,7 @@ export class LoadModelService {
               private loadingScreenHandler: LoadingscreenhandlerService) {
   }
 
-  public loadModel(newModel: Model, quality?: string) {
+  public loadModel(newModel: Model, quality?: string, initial?: boolean) {
 
     if (!this.loadingScreenHandler.isLoading) {
 
@@ -28,13 +30,18 @@ export class LoadModelService {
       } catch (e) {
       }
 
-      const baseUrl = 'https://blacklodge.hki.uni-koeln.de:8065/';
+
+      if (initial) {
+        this.baseUrl = '';
+      } else {
+        this.baseUrl = 'https://blacklodge.hki.uni-koeln.de:8065/';
+      }
 
       if (quality === undefined) {
         quality = 'low';
       }
 
-      this.babylonService.loadModel(baseUrl, newModel.processed[quality]).then(async (model) => {
+      this.babylonService.loadModel(this.baseUrl, newModel.processed[quality]).then(async (model) => {
 
         // Warte auf Antwort von loadModel, da loadModel ein Promise<object> von ImportMeshAync übergibt
         // model ist hier das neu geladene Model, aus dem wir direkt den Namen nehmen können

@@ -5,7 +5,6 @@ import {MongohandlerService} from '../../services/mongohandler/mongohandler.serv
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {MessageService} from '../../services/message/message.service';
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
-import * as BABYLON from 'babylonjs';
 import {ColorEvent} from 'ngx-color';
 
 

@@ -21,10 +21,12 @@ export class ModelComponent implements OnInit {
 
   ngOnInit() {
 
-    this.catalogueService.Observables.quality.subscribe((result) =>
-      this.loadModelService.loadModel(this.catalogueService.Observables.model.source['_value'], result));
-    this.catalogueService.Observables.model.subscribe((result) =>
-      this.loadModelService.loadModel(result, this.catalogueService.Observables.quality.source['value']));
+    if (!this.catalogueService.isInitialLoad) {
+      this.catalogueService.Observables.quality.subscribe((result) =>
+        this.loadModelService.loadModel(this.catalogueService.Observables.model.source['_value'], result));
+      this.catalogueService.Observables.model.subscribe((result) =>
+        this.loadModelService.loadModel(result, this.catalogueService.Observables.quality.source['value']));
+    }
   }
 
   public async changeModel() {

@@ -17,6 +17,15 @@ export class MongohandlerService {
     this.headers.set('Content-Type', 'application/json');
   }
 
+  public getAllCompilations(): Observable<any> {
+    return this.http.get<any>(this.endpoint + '/api/v1/get/findall/compilation', {headers: this.headers});
+  }
+
+  public getAllModels(): Observable<any> {
+    return this.http.get<any[]>(this.endpoint + '/api/v1/get/findall/model', {headers: this.headers});
+    // return this.http.get<Model[]>(`${this.endpoint}/api/v1/get/findall/${Collection.Model}`).toPromise();
+  }
+
   public getCompilation(identifier: string): Observable<any> {
     return this.http.get<any>(this.endpoint + '/api/v1/get/find/compilation/' + identifier, {headers: this.headers});
   }
