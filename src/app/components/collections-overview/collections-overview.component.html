@@ -1,6 +1,6 @@
 <h2>Catalogue</h2>
 
-<div *ngIf="!singleCollection && !singleModel">
+<div *ngIf="singleCollection == false && singleModel==false">
 
   <h3>Please choose to load collections or models</h3>
   <mat-radio-group (change)="onSelectionDataTypeChange($event)">
