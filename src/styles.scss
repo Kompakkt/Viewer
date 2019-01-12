@@ -65,3 +65,15 @@ html, body {
   width: 100% !important;
 }
 
+#editor,
+#collections {
+  color: #fff;
+  width: 400px;
+  height: 100%;
+  z-index: auto;
+  background: rgba(0, 0, 0, 0.8);
+  box-sizing: border-box;
+  border: 0;
+  padding: 25px;
+  overflow-y: scroll;
+}

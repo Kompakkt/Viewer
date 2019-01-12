@@ -1,12 +1,14 @@
-<h2>Catalogue</h2>
+<div id="collections">
 
-<div *ngIf="!singleCollection && !singleModel">
+  <h2>Catalogue</h2>
 
-  <h3>Please choose to load collections or models</h3>
-  <mat-radio-group (change)="onSelectionDataTypeChange($event)">
-    <mat-radio-button value="model">Load Model</mat-radio-button>
-    <mat-radio-button value="collection">Load Collection</mat-radio-button>
-  </mat-radio-group>
+  <div *ngIf="!singleCollection && !singleModel">
+
+    <h3>Please choose to load collections or models</h3>
+    <mat-radio-group (change)="onSelectionDataTypeChange($event)">
+      <mat-radio-button value="model">Load Model</mat-radio-button>
+      <mat-radio-button value="collection">Load Collection</mat-radio-button>
+    </mat-radio-group>
 
   <div *ngIf="collectionSelected">
     <h3>Select a Collection</h3>
@@ -66,7 +68,9 @@
   </div>
 </div>
 
-<div *ngIf="singleCollection">
-  <app-model class="model-box" *ngFor="let model of actualCollection.models;"
-             [model]=model></app-model>
+  <div *ngIf="singleCollection">
+    <app-model class="model-box" *ngFor="let model of actualCollection.models;"
+               [model]=model></app-model>
+  </div>
+
 </div>
