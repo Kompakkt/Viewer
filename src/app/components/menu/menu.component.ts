@@ -13,6 +13,7 @@ import {MongohandlerService} from '../../services/mongohandler/mongohandler.serv
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {AnnotationvrService} from '../../services/annotationvr/annotationvr.service';
 import {MessageService} from '../../services/message/message.service';
+import {LoadModelService} from '../../services/load-model/load-model.service';
 
 /**
  * @author Zoe Schubert
@@ -26,8 +27,9 @@ import {MessageService} from '../../services/message/message.service';
 })
 export class MenuComponent implements OnInit {
 
-  private activeModel;
   private menuIsEnabled = true;
+  private isSingleModel: boolean;
+  private isSingleCollection: boolean;
 
   constructor(
     private message: MessageService,
@@ -41,6 +43,8 @@ export class MenuComponent implements OnInit {
     private mongohandlerService: MongohandlerService,
     private catalogueService: CatalogueService,
     private annotationVRService: AnnotationvrService,
+    private loadModelService: LoadModelService,
+
     @Inject(DOCUMENT) private document: any) {
 
     iconRegistry.addSvgIcon(
@@ -55,8 +59,13 @@ export class MenuComponent implements OnInit {
   public fullscreen: Boolean = false;
 
   ngOnInit() {
-    this.catalogueService.Observables.model.subscribe((newModel) => {
-      this.activeModel = newModel;
+
+    this.loadModelService.singleModel.subscribe(singleModel => {
+      this.isSingleModel = singleModel;
+    });
+
+    this.loadModelService.singleCollection.subscribe(singleCollection => {
+      this.isSingleCollection = singleCollection;
     });
   }
 
@@ -72,9 +81,10 @@ export class MenuComponent implements OnInit {
     this.cameraService.setBackToDefault();
   }
 
+
   public setModelQuality(quality: string) {
-    if (this.catalogueService.Observables.quality.source['value'] !== quality) {
-      this.catalogueService.updateQuality(quality);
+    if (this.loadModelService.quality !== quality) {
+      this.loadModelService.updateModelQuality(quality);
     }
   }
 
@@ -123,7 +133,6 @@ export class MenuComponent implements OnInit {
   }
 
   public takeScreenshot() {
-
     this.babylonService.createScreenshot();
   }
 }

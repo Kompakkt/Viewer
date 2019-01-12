@@ -1,9 +1,10 @@
+<!--
 <div *ngIf="this.catalogueService.receivedDigitalObject">
   <div> {{this.catalogueService.metadata['digobj_title']}} </div>
   <div> {{this.catalogueService.metadata['digobj_description']}} </div>
 </div>
 
-<!--
+
 TODO: Anzeige folgender Felder (optionale Felder und Mehrfachnennung möglich => *ngIf und length>=1 *ngFor verwenden)
 <div> {{this.catalogueService.metadata['phyObjs']}} </div>
 <div> {{this.catalogueService.metadata['phyobj_place']}} </div>

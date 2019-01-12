@@ -6,6 +6,7 @@ import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {MessageService} from '../../services/message/message.service';
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
 import {ColorEvent} from 'ngx-color';
+import {LoadModelService} from '../../services/load-model/load-model.service';
 
 
 @Component({
@@ -24,12 +25,13 @@ export class ModelsettingsComponent implements OnInit {
               private mongohandlerService: MongohandlerService,
               private catalogueService: CatalogueService,
               private message: MessageService,
-              private annotationmarkerService: AnnotationmarkerService
+              private annotationmarkerService: AnnotationmarkerService,
+              private loadModelService: LoadModelService
   ) {
   }
 
   ngOnInit() {
-    this.catalogueService.Observables.model.subscribe((newModel) => {
+    this.loadModelService.Observables.actualModel.subscribe((newModel) => {
       this.activeModel = newModel;
     });
   }
@@ -61,6 +63,7 @@ export class ModelsettingsComponent implements OnInit {
 
   private async setInitialPerspective() {
 
+    /*
     console.log('die Kamerapos ist : ', this.cameraService.getActualCameraPosInitialView());
     if (this.activeModel !== null) {
       this.mongohandlerService.updateCameraPos(this.activeModel._id, this.cameraService.getActualCameraPosInitialView());
@@ -86,7 +89,7 @@ export class ModelsettingsComponent implements OnInit {
     });
 
     await this.annotationmarkerService.hideAllMarker(true);
-
+*/
   }
 
 

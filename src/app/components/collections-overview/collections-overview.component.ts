@@ -2,6 +2,7 @@ import {Component, HostBinding, OnInit} from '@angular/core';
 import {OverlayService} from '../../services/overlay/overlay.service';
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {Model} from '../../interfaces/model/model.interface';
+import {LoadModelService} from '../../services/load-model/load-model.service';
 
 @Component({
   selector: 'app-collections-overview',
@@ -11,18 +12,22 @@ import {Model} from '../../interfaces/model/model.interface';
 export class CollectionsOverviewComponent implements OnInit {
 
   @HostBinding('class.is-open') private isOpen = false;
+  private isSingleModel: boolean;
+  private isSingleCollection: boolean;
 
-  private model: boolean;
-  private collection: boolean;
   private collectionSelected: boolean;
-  private collectionName: string;
-
   private modelSelected: boolean;
-  private modelName: string;
-  private singleModel: Model;
+
+  private singleCollectionSelected: boolean;
+  private singleModelSelected: boolean;
+
+  private actualCollection: any;
+  private actualModel: Model;
 
   constructor(private overlayService: OverlayService,
-              public catalogueService: CatalogueService) {
+              public catalogueService: CatalogueService,
+              private loadModelService: LoadModelService,
+  ) {
   }
 
   ngOnInit() {
@@ -31,40 +36,48 @@ export class CollectionsOverviewComponent implements OnInit {
       this.isOpen = collectionsOverviewIsOpen;
     });
 
-    this.model = false;
-    this.collection = false;
-    this.collectionSelected = false;
-    this.modelSelected = false;
+    this.loadModelService.singleModel.subscribe(singleModel => {
+      this.isSingleModel = singleModel;
+    });
 
-    this.catalogueService.fetchCollectionData();
-    this.catalogueService.fetchModelData();
+    this.loadModelService.singleCollection.subscribe(singleCollection => {
+      this.isSingleCollection = singleCollection;
+    });
+
+    this.loadModelService.Observables.actualCollection.subscribe(actualCollection => {
+      this.actualCollection = actualCollection;
+    });
+
+    this.loadModelService.Observables.actualModel.subscribe(actualModel => {
+      this.actualModel = actualModel;
+    });
+
+    this.modelSelected = false;
+    this.collectionSelected = false;
   }
 
   onSelectionDataTypeChange(event) {
     if (event.value === 'model') {
-      this.collection = false;
-      this.model = true;
-      this.catalogueService.fetchModelData();
+      this.collectionSelected = false;
+      this.singleCollectionSelected = false;
+      this.modelSelected = true;
     }
     if (event.value === 'collection') {
-      this.model = false;
-      this.collection = true;
+      this.modelSelected = false;
+      this.collectionSelected = true;
     }
   }
 
   handleCollectionChoice(event) {
-    this.catalogueService.isInitialLoad = false;
-    this.collectionSelected = true;
-    this.collectionName = event.value.name;
-    this.catalogueService.fetchData(event.value._id);
+    this.singleCollectionSelected = true;
+    this.singleModelSelected = true;
+    this.catalogueService.selectCollection(event.value);
   }
 
   handleModelChoice(event) {
-    this.singleModel = event.value;
-    this.catalogueService.isInitialLoad = false;
-    this.modelSelected = true;
-    this.modelName = event.value.name;
-    this.catalogueService.updateActiveModel(event.value);
+    this.singleModelSelected = true;
+    this.singleCollectionSelected = false;
+    this.catalogueService.selectModel(event.value, this.collectionSelected);
   }
 
 }

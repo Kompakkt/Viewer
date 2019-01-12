@@ -15,24 +15,13 @@ export class ModelComponent implements OnInit {
   @Input() model: Model;
 
   constructor(private catalogueService: CatalogueService,
-              private loadModelService: LoadModelService,
-              private overlayService: OverlayService) {
+              private loadModelService: LoadModelService) {
   }
 
   ngOnInit() {
-
-    if (!this.catalogueService.isInitialLoad) {
-      this.catalogueService.Observables.quality.subscribe((result) =>
-        this.loadModelService.loadModel(this.catalogueService.Observables.model.source['_value'], result));
-      this.catalogueService.Observables.model.subscribe((result) =>
-        this.loadModelService.loadModel(result, this.catalogueService.Observables.quality.source['value']));
-    }
   }
 
   public async changeModel() {
-
-    this.catalogueService.updateActiveModel(this.model);
-    this.overlayService.closeCollectionsOverview();
-    this.overlayService.closeEditor();
+    this.loadModelService.loadModel(this.model);
   }
 }

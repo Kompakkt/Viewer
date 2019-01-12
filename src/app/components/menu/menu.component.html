@@ -1,6 +1,6 @@
 <div *ngIf="menuIsEnabled">
 
-  <button mat-icon-button (click)="toggleCollectionsOverview()"
+  <button *ngIf="!singleCollection && !singleModel" mat-icon-button (click)="toggleCollectionsOverview()"
           matTooltip="Catalogue" matTooltipPosition="above">
     <mat-icon aria-label="Toggle Collections Overview">collections</mat-icon>
   </button>
@@ -30,7 +30,7 @@
       <span>Cameras</span>
     </button>
 
-    <button mat-menu-item [matMenuTriggerFor]="quality">
+    <button *ngIf="!singleCollection && !singleModel"mat-menu-item [matMenuTriggerFor]="quality">
       <mat-icon>high_quality</mat-icon>
       <span>Quality</span>
     </button>

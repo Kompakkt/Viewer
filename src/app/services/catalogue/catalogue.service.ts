@@ -8,38 +8,22 @@ import {MessageService} from '../message/message.service';
 @Injectable({
   providedIn: 'root'
 })
+
 export class CatalogueService {
 
   private Subjects = {
 
-    model: new BehaviorSubject<Model>(null),
-    quality: new BehaviorSubject<string>('low'),
     models: new BehaviorSubject<Model[]>(Array<Model>()),
-    modelMetadata: new BehaviorSubject<string>(null),
-
-    collection: new BehaviorSubject<any>(null),
-    collections: new BehaviorSubject<any[]>(Array<any>())
-
+    collections: new BehaviorSubject<any[]>(Array<any>()),
   };
 
   public Observables = {
-    model: this.Subjects.model.asObservable(),
-    quality: this.Subjects.quality.asObservable(),
     models: this.Subjects.models.asObservable(),
-    modelMetadata: this.Subjects.modelMetadata.asObservable(),
-
-    collection: this.Subjects.collection.asObservable(),
-    collections: this.Subjects.collections.asObservable()
-
+    collections: this.Subjects.collections.asObservable(),
   };
 
   private unsortedModels: Model[];
   private isFirstLoad = true;
-  public isInitialLoad = true;
-  public receivedDigitalObject = false;
-  public metadata = null;
-  private initialModel: Model;
-
 
   constructor(private mongohandlerService: MongohandlerService,
               private loadModelService: LoadModelService,
@@ -48,40 +32,21 @@ export class CatalogueService {
 
   public bootstrap(): void {
 
-    if (this.isInitialLoad) {
+    if (this.isFirstLoad) {
 
-      this.initialModel = {
-        _id: 'kompakkt',
-        name: 'kompakkt',
-        cameraPosition: [{dimension: 'x', value: 0}, {dimension: 'y', value: 0}, {dimension: 'z', value: 0}],
-        files: ['{file_name: \'kompakkt.babylon\',' +
-        '          file_link: \'assets/models/kompakkt.babylon\',' +
-        '          file_size: 0,' +
-        '          file_format: \'.babylon\'}'],
-        finished: true,
-        online: true,
-        processed: {
-          time: {
-            start: '',
-            end: '',
-            total: ''
-          },
-          low: 'assets/models/kompakkt.babylon',
-          medium: 'assets/models/kompakkt.babylon',
-          high: 'assets/models/kompakkt.babylon',
-          raw: 'assets/models/kompakkt.babylon'
-        }
-      };
-      // this.Subjects.model.next(model);
-      this.loadModelService.loadModel(this.initialModel, 'low', true);
-
-      // this.Subjects.models.next(this.initialModel);
-
-    } else {
-      // TODO: Cleanup
+      // z.B. https://blacklodge.hki.uni-koeln.de:8065/models/testmodel/
+      // ${environment.kompakkt_url}?model=${this.memory.modelPath}
+      // Hinter dem ? komm der Pfad zum Modell
       const url_split = location.href.split('?');
 
-      if (this.isFirstLoad && url_split.length > 1) {
+      if (url_split.length <= 1) {
+        this.isFirstLoad = false;
+        this.loadModelService.loadDefaultModelData();
+        this.fetchCollectionsData();
+        this.fetchModelsData();
+      }
+
+      if (url_split.length > 1) {
 
         const equal_split = url_split[1].split('=');
 
@@ -90,65 +55,38 @@ export class CatalogueService {
           const query = equal_split[1];
           const category = equal_split[0];
 
-          console.log(category + ' ' + query);
-
           // TODO: Cases for audio, video and image
           switch (category) {
 
             case 'model':
-
-              // TODO: pass metadata in query
-              // TODO: load metadata if available
-              this.updateQuality('low');
-
-              this.loadModelService.loadModel({
-                _id: 'PreviewModel',
-                name: 'PreviewModel',
-                finished: false,
-                online: false,
-                files: [
-                  query
-                ],
-                processed: {
-                  time: {
-                    start: '',
-                    end: '',
-                    total: ''
-                  },
-                  low: query,
-                  medium: query,
-                  high: query,
-                  raw: query
-                }
-              }, 'low');
+              this.isFirstLoad = false;
+              this.loadModelService.fetchModelData(query);
               break;
+
             case 'compilation':
-              this.fetchData(query);
+              this.isFirstLoad = false;
+              this.loadModelService.fetchCollectionData(query);
               break;
+
             default:
-              console.log('No valid query passed. Loading test compilation');
-              this.fetchData();
+              this.isFirstLoad = false;
+              console.log('No valid query passed. Loading default model.');
+              this.loadModelService.loadDefaultModelData();
           }
         } else {
-          console.log('No valid query passed. Loading test compilation');
-          this.fetchData();
+          console.log('No valid query passed. Loading default model.');
+          this.isFirstLoad = false;
+          this.loadModelService.loadDefaultModelData();
         }
-      } else {
-        console.log('No valid query passed. Loading test compilation');
-        this.fetchData();
       }
+    } else {
+      console.log('Page has already been initially loaded.');
     }
   }
 
-  public updateQuality(quality: string) {
-    this.Subjects.quality.next(quality);
-  }
 
-  public updateActiveModel(model: Model) {
-    this.Subjects.model.next(model);
-    this.fetchMetadata(model.relatedDigitalObject['_id']);
-  }
 
+/*
   public updateMetadata(metadata: string) {
     this.Subjects.modelMetadata.next(metadata);
     this.metadata = metadata;
@@ -174,7 +112,8 @@ export class CatalogueService {
 
     this.Subjects.models.next(models);
   }
-
+*/
+  /*
   public fetchData(compilation_id?: string) {
 
     if (compilation_id === undefined) {
@@ -198,17 +137,16 @@ export class CatalogueService {
   }
 
   private fetchMetadata(metadata_id?: string) {
-
     this.mongohandlerService.getModelMetadata(metadata_id).subscribe(result => {
-
       this.updateMetadata(result);
       this.receivedDigitalObject = true;
     }, error => {
       this.message.error('Connection to object server refused.');
     });
   }
+*/
 
-  public fetchCollectionData() {
+  private fetchCollectionsData() {
     this.mongohandlerService.getAllCompilations().subscribe(compilation => {
       this.Subjects.collections.next(compilation);
     }, error => {
@@ -216,12 +154,25 @@ export class CatalogueService {
     });
   }
 
-  public fetchModelData() {
+  private fetchModelsData() {
     this.mongohandlerService.getAllModels().subscribe(model => {
       this.Subjects.models.next(model);
     }, error => {
       this.message.error('Connection to object server refused.');
     });
+  }
+
+  public selectCollection(collection: any) {
+    this.loadModelService.updateActiveCollection(collection);
+    this.loadModelService.loadSelectedModelfromCollection(collection.models[0]);
+  }
+
+  public selectModel(model: Model, collection: boolean) {
+    if (collection) {
+      this.loadModelService.loadSelectedModelfromCollection(model);
+    } else {
+      this.loadModelService.loadSelectedModelfromModels(model);
+    }
   }
 
 }

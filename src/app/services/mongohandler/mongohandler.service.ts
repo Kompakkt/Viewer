@@ -26,6 +26,10 @@ export class MongohandlerService {
     // return this.http.get<Model[]>(`${this.endpoint}/api/v1/get/findall/${Collection.Model}`).toPromise();
   }
 
+  public getModel(identifier: string): Observable<any> {
+    return this.http.get<any[]>(this.endpoint + '/api/v1/get/find/model' + identifier, {headers: this.headers});
+    // return this.http.get<Model[]>(`${this.endpoint}/api/v1/get/findall/${Collection.Model}`).toPromise();
+  }
   public getCompilation(identifier: string): Observable<any> {
     return this.http.get<any>(this.endpoint + '/api/v1/get/find/compilation/' + identifier, {headers: this.headers});
   }
