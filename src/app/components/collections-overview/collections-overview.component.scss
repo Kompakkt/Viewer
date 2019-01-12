@@ -1,17 +1,9 @@
 :host {
-  box-sizing: border-box;
   display: none;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-  border: 0;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.5);
-  position: absolute;
-  height: 100%;
-  width: 350px;
-  z-index: 50;
-  top: 0;
-  right: 0;
-  overflow-y: scroll;
+}
+
+:host.is-open {
+  display: block;
 }
 
 :host h3 {
@@ -20,9 +12,6 @@
   margin: 0;
 }
 
-:host.is-open {
-  display: inherit;
-}
 
 #model-overview {
   padding: 25px;

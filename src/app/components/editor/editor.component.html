@@ -1,34 +1,36 @@
-<mat-tab-group mat-align-tabs="left" animationDuration="0ms">
+<div id="editor">
+  <mat-tab-group mat-align-tabs="left" animationDuration="0ms">
 
-  <mat-tab>
-    <ng-template mat-tab-label>
-      <mat-icon class="tab-icon">place</mat-icon>
-    </ng-template>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">place</mat-icon>
+      </ng-template>
 
-    <div cdkDropList class="annotations-list" (cdkDropListDropped)="drop($event)"
-         *ngIf="this.annotationService.annotations.length">
-      <app-annotations-editor class="annotation-box" *ngFor="let annotation of this.annotationService.annotations;"
-                              [annotation]="annotation"
-                              cdkDrag cdkDragLockAxis="y"></app-annotations-editor>
-    </div>
-  </mat-tab>
+      <div cdkDropList class="annotations-list" (cdkDropListDropped)="drop($event)"
+           *ngIf="this.annotationService.annotations.length">
+        <app-annotations-editor class="annotation-box" *ngFor="let annotation of this.annotationService.annotations;"
+                                [annotation]="annotation"
+                                cdkDrag cdkDragLockAxis="y"></app-annotations-editor>
+      </div>
+    </mat-tab>
 
-  <mat-tab>
-    <ng-template mat-tab-label>
-      <mat-icon class="tab-icon">settings</mat-icon>
-    </ng-template>
-    <div>
-      <app-modelsettings></app-modelsettings>
-    </div>
-  </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">settings</mat-icon>
+      </ng-template>
+      <div>
+        <app-modelsettings></app-modelsettings>
+      </div>
+    </mat-tab>
 
-  <mat-tab>
-    <ng-template mat-tab-label>
-      <mat-icon class="tab-icon">information</mat-icon>
-    </ng-template>
-    <div>
-      <app-metadata></app-metadata>
-    </div>
-  </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">information</mat-icon>
+      </ng-template>
+      <div>
+        <app-metadata></app-metadata>
+      </div>
+    </mat-tab>
 
-</mat-tab-group>
+  </mat-tab-group>
+</div>

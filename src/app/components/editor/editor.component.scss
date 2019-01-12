@@ -1,15 +1,5 @@
 :host {
-  box-sizing: border-box;
   display: none;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-  border: 0;
-  padding: 25px;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.7);
-  position: absolute;
-  height: 100%;
-  width: 400px;
-  z-index: 50;
 }
 
 :host.is-open {
