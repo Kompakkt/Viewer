@@ -63,7 +63,8 @@ export class LoadModelService {
   }
 
   public fetchModelData(model: Model) {
-    console.log('Das model ist' , model);
+    this.baseUrl = 'https://blacklodge.hki.uni-koeln.de:8065/';
+    this.quality = 'low';
     this.isSingleLoadModel = true;
     this.singleModel.emit(true);
     this.loadModel(model);
