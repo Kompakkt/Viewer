@@ -19,6 +19,14 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
+    <h4>Select Collection by ID</h4>
+    <ol>
+      <mat-form-field>
+        <input matInput name="identifierCollection" #description="ngModel" type="text"
+               placeholder="What's the ID?" [(ngModel)]="identifierCollection">
+      </mat-form-field>
+      <button mat-raised-button (click)="searchCollectionByID()">Search it</button>
+    </ol>
     <div *ngIf="singleCollectionSelected">
       <h3 *ngIf="actualCollection.name">Selected Collection: {{actualCollection.name}}</h3>
       <div *ngIf="singleModelSelected">
@@ -41,6 +49,14 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
+    <h4>Select Model by ID</h4>
+    <ol>
+      <mat-form-field>
+        <input matInput name="identifierModel" #description="ngModel" type="text"
+               placeholder="What's the ID?" [(ngModel)]="identifierModel">
+      </mat-form-field>
+      <button mat-raised-button (click)="searchModelByID()">Search it</button>
+    </ol>
     <div *ngIf="singleModelSelected">
       <h3 *ngIf="actualModel.name">Selected Model: {{actualModel.name}}</h3>
       <div id="model-overview">
