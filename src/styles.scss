@@ -68,19 +68,12 @@ html, body {
 #editor,
 #collections {
   color: #fff;
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
   width: 400px;
-  z-index: 50;
-  background: rgba(0, 0, 0, 0.7);
+  height: 100%;
+  z-index: auto;
+  background: rgba(0, 0, 0, 0.8);
   box-sizing: border-box;
   border: 0;
   padding: 25px;
   overflow-y: scroll;
-}
-
-#editor .is-open {
-  display: block;
 }

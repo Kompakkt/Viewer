@@ -1,9 +1,15 @@
 :host {
-  display: none;
+  position: absolute;
+  top: 0;
+  left: -400px;
+  height: 100vh;
+  transition: 1s;
+  z-index: 99;
 }
 
 :host.is-open {
-  display: block;
+  transition: 1s;
+  left: 0;
 }
 
 :host h3 {
