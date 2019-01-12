@@ -59,10 +59,28 @@ export class CatalogueService {
           switch (category) {
 
             case 'model':
+              this.loadModelService.fetchModelData({
+                _id: 'PreviewModel',
+                name: 'PreviewModel',
+                finished: false,
+                online: false,
+                files: [
+                  query
+                ],
+                processed: {
+                  time: {
+                    start: '',
+                    end: '',
+                    total: ''
+                  },
+                  low: query,
+                  medium: query,
+                  high: query,
+                  raw: query
+                }
+              });
               this.isFirstLoad = false;
-              this.loadModelService.fetchModelData(query);
               break;
-
             case 'compilation':
               this.isFirstLoad = false;
               this.loadModelService.fetchCollectionData(query);

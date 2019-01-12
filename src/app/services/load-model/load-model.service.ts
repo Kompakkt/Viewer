@@ -62,15 +62,10 @@ export class LoadModelService {
     this.Subjects.actualCollection.next(collection);
   }
 
-  public fetchModelData(identifier: string) {
+  public fetchModelData(model: Model) {
     this.isSingleLoadModel = true;
     this.singleModel.emit(true);
-    this.mongohandlerService.getModel(identifier).subscribe(model => {
-      this.baseUrl = 'https://blacklodge.hki.uni-koeln.de:8065/';
-      this.loadModel(model);
-    }, error => {
-      this.message.error('Connection to object server refused.');
-    });
+    this.loadModel(model);
   }
 
   public fetchCollectionData(identifier: string) {
