@@ -10,47 +10,63 @@
       <mat-radio-button value="collection">Load Collection</mat-radio-button>
     </mat-radio-group>
 
-    <div *ngIf="collectionSelected">
-      <h3>Select a Collection</h3>
-      <h4>Select by List of Collections</h4>
+  <div *ngIf="collectionSelected">
+    <h3>Select a Collection</h3>
+    <h4>Select by List of Collections</h4>
+    <mat-form-field>
+      <mat-select (selectionChange)="handleCollectionChoice($event)" placeholder="Choose Collection">
+        <mat-option *ngFor="let collection of this.catalogueService.Observables.collections.source['value'];"
+                    [value]="collection">
+          {{collection.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <h4>Select Collection by ID</h4>
+    <ol>
       <mat-form-field>
-        <mat-select (selectionChange)="handleCollectionChoice($event)" placeholder="Choose Collection">
-          <mat-option *ngFor="let collection of this.catalogueService.Observables.collections.source['value'];"
-                      [value]="collection">
-            {{collection.name}}
-          </mat-option>
-        </mat-select>
+        <input matInput name="identifierCollection" #description="ngModel" type="text"
+               placeholder="What's the ID?" [(ngModel)]="identifierCollection">
       </mat-form-field>
-      <div *ngIf="singleCollectionSelected">
-        <h3 *ngIf="actualCollection.name">Selected Collection: {{actualCollection.name}}</h3>
-        <div *ngIf="singleModelSelected">
-          <h3 *ngIf="actualModel.name">Selected Model: {{actualModel.name}}</h3>
-        </div>
-        <div *ngIf="actualCollection.models.length">
-          <app-model class="model-box" *ngFor="let model of actualCollection.models;" [model]=model></app-model>
-        </div>
-      </div>
-    </div>
-
-    <div *ngIf="modelSelected">
-      <h3>Select a Model</h3>
-      <h4>Select by List of Models</h4>
-      <mat-form-field>
-        <mat-select (selectionChange)="handleModelChoice($event)" placeholder="Choose Model">
-          <mat-option *ngFor="let model of this.catalogueService.Observables.models.source['value'];"
-                      [value]="model">
-            {{model.name}}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+      <button mat-raised-button (click)="searchCollectionByID()">Search it</button>
+    </ol>
+    <div *ngIf="singleCollectionSelected">
+      <h3 *ngIf="actualCollection.name">Selected Collection: {{actualCollection.name}}</h3>
       <div *ngIf="singleModelSelected">
         <h3 *ngIf="actualModel.name">Selected Model: {{actualModel.name}}</h3>
-        <div id="model-overview">
-          <app-model class="model-box" [model]="actualModel"></app-model>
-        </div>
+      </div>
+      <div *ngIf="actualCollection.models.length">
+        <app-model class="model-box" *ngFor="let model of actualCollection.models;" [model]=model></app-model>
       </div>
     </div>
   </div>
+
+  <div *ngIf="modelSelected">
+    <h3>Select a Model</h3>
+    <h4>Select by List of Models</h4>
+    <mat-form-field>
+      <mat-select (selectionChange)="handleModelChoice($event)" placeholder="Choose Model">
+        <mat-option *ngFor="let model of this.catalogueService.Observables.models.source['value'];"
+                    [value]="model">
+          {{model.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <h4>Select Model by ID</h4>
+    <ol>
+      <mat-form-field>
+        <input matInput name="identifierModel" #description="ngModel" type="text"
+               placeholder="What's the ID?" [(ngModel)]="identifierModel">
+      </mat-form-field>
+      <button mat-raised-button (click)="searchModelByID()">Search it</button>
+    </ol>
+    <div *ngIf="singleModelSelected">
+      <h3 *ngIf="actualModel.name">Selected Model: {{actualModel.name}}</h3>
+      <div id="model-overview">
+        <app-model class="model-box" [model]="actualModel"></app-model>
+      </div>
+    </div>
+  </div>
+</div>
 
   <div *ngIf="singleCollection">
     <app-model class="model-box" *ngFor="let model of actualCollection.models;"

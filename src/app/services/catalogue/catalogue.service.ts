@@ -103,34 +103,34 @@ export class CatalogueService {
   }
 
 
+  /*
+    public updateMetadata(metadata: string) {
+      this.Subjects.modelMetadata.next(metadata);
+      this.metadata = metadata;
+    }
 
-/*
-  public updateMetadata(metadata: string) {
-    this.Subjects.modelMetadata.next(metadata);
-    this.metadata = metadata;
-  }
+    public initializeCatalogue() {
 
-  public initializeCatalogue() {
+      let models = this.Observables.models.source['value'];
 
-    let models = this.Observables.models.source['value'];
+      this.unsortedModels = models.slice(0);
+      models.splice(0, models.length);
+      models = this.unsortedModels.slice(0);
 
-    this.unsortedModels = models.slice(0);
-    models.splice(0, models.length);
-    models = this.unsortedModels.slice(0);
+      models.sort((leftSide, rightSide): number => {
+        if (+leftSide.ranking < +rightSide.ranking) {
+          return -1;
+        }
+        if (+leftSide.ranking > +rightSide.ranking) {
+          return 1;
+        }
+        return 0;
+      });
 
-    models.sort((leftSide, rightSide): number => {
-      if (+leftSide.ranking < +rightSide.ranking) {
-        return -1;
-      }
-      if (+leftSide.ranking > +rightSide.ranking) {
-        return 1;
-      }
-      return 0;
-    });
+      this.Subjects.models.next(models);
+    }
+  */
 
-    this.Subjects.models.next(models);
-  }
-*/
   /*
   public fetchData(compilation_id?: string) {
 
@@ -192,5 +192,52 @@ export class CatalogueService {
       this.loadModelService.loadSelectedModelfromModels(model);
     }
   }
+
+  public selectCollectionbyID(identifierCollection: string): boolean {
+    let collection = this.Observables.collections.source['value'].find(i => i._id === identifierCollection);
+    if (collection === undefined) {
+      console.log('is undefined 1');
+      /* TODO
+      this.mongohandlerService.getCompilation(identifierCollection).subscribe(compilation => {
+        collection = compilation;
+      }, error => {
+        this.message.error('Connection to object server refused.');
+        collection = undefined;
+      });
+      */
+      if (collection === undefined) {
+        console.log('is undefined 2');
+        return false;
+      } else {
+        console.log('is not undefined 1', collection);
+        // this.Subjects.collections.next(collection);
+        this.selectCollection(collection);
+        return true;
+      }
+    } else {
+      console.log('is not undefined 2', collection);
+      this.selectCollection(collection);
+      return true;
+    }
+  }
+
+  public selectModelbyID(identifierModel: string): boolean {
+    let model = this.Observables.models.source['value'].find(i => i._id === identifierModel);
+    if (model !== undefined) {
+      this.selectModel(model, false);
+      return true;
+    } else {
+      // TODO
+      // model = this.mongohandlerService.getModel(identifierModel);
+      if (model !== undefined) {
+        // this.Subjects.models.next(model);
+        this.selectModel(model, false);
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+
 
 }

@@ -3,6 +3,8 @@ import {OverlayService} from '../../services/overlay/overlay.service';
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {Model} from '../../interfaces/model/model.interface';
 import {LoadModelService} from '../../services/load-model/load-model.service';
+import {MessageService} from '../../services/message/message.service';
+
 
 @Component({
   selector: 'app-collections-overview',
@@ -24,9 +26,13 @@ export class CollectionsOverviewComponent implements OnInit {
   private actualCollection: any;
   private actualModel: Model;
 
+  private identifierCollection;
+  private identifierModel;
+
   constructor(private overlayService: OverlayService,
               public catalogueService: CatalogueService,
               private loadModelService: LoadModelService,
+              private message: MessageService
   ) {
   }
 
@@ -78,6 +84,26 @@ export class CollectionsOverviewComponent implements OnInit {
     this.singleModelSelected = true;
     this.singleCollectionSelected = false;
     this.catalogueService.selectModel(event.value, this.collectionSelected);
+  }
+
+  searchCollectionByID() {
+    const isloadable = this.catalogueService.selectCollectionbyID(this.identifierCollection);
+    if (isloadable) {
+      this.singleCollectionSelected = true;
+      this.singleModelSelected = true;
+    } else {
+      this.message.error('Can not find Collection with ID ' + this.identifierCollection + '.');
+    }
+  }
+
+  searchModelByID() {
+    const isloadable = this.catalogueService.selectModelbyID(this.identifierModel);
+    if (isloadable) {
+      this.singleModelSelected = true;
+      this.singleCollectionSelected = false;
+    } else {
+      this.message.error('Can not find Model with ID ' + this.identifierModel + '.');
+    }
   }
 
 }
