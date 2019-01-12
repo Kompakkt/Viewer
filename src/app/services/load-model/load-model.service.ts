@@ -146,12 +146,6 @@ export class LoadModelService {
 
     // TODO
     if (!this.loadingScreenHandler.isLoading) {
-
-      try {
-        this.babylonService.getScene().meshes.map(model => model.dispose());
-      } catch (e) {
-      }
-
       this.babylonService.loadModel(this.baseUrl, newModel.processed[this.quality]).then(async (model) => {
 
         // Warte auf Antwort von loadModel, da loadModel ein Promise<object> von ImportMeshAync übergibt

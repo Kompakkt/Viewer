@@ -233,6 +233,9 @@ export class BabylonService {
 
     engine.displayLoadingUI();
 
+    this.scene.meshes.forEach(mesh => mesh.dispose());
+    this.scene.meshes = [];
+
     return new Promise<any>((resolve, reject) => {
 
       BABYLON.SceneLoader.ImportMeshAsync(null, rootUrl, filename, this.scene, function (progress) {
