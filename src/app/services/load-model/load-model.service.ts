@@ -63,6 +63,7 @@ export class LoadModelService {
   }
 
   public fetchModelData(model: Model) {
+    console.log('Das model ist' , model);
     this.isSingleLoadModel = true;
     this.singleModel.emit(true);
     this.loadModel(model);
@@ -150,7 +151,6 @@ export class LoadModelService {
       } catch (e) {
       }
 
-      console.log(this.quality);
       this.babylonService.loadModel(this.baseUrl, newModel.processed[this.quality]).then(async (model) => {
 
         // Warte auf Antwort von loadModel, da loadModel ein Promise<object> von ImportMeshAync übergibt
