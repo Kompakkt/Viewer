@@ -19,34 +19,27 @@ export class MetadataService {
     this.modelsMetadata.push(metadata);
   }
 
-  public fetchMetadata(metadata_id: string): string {
-
-    this.actualModelMetadata = '';
+  public async fetchMetadata(metadata_id: string): Promise<any> {
     this.actualModelMetadata = this.modelsMetadata.find(e => e['_id'] === metadata_id);
 
-    console.log('Ergebnis der Suche: ',  this.actualModelMetadata);
-    console.log('Ich suche hier: ',  this.modelsMetadata);
-    console.log('nach: ',  metadata_id);
-
-    if (this.actualModelMetadata !== '' && this.actualModelMetadata !== undefined) {
-      console.log('return1: ', this.actualModelMetadata);
+    if (this.actualModelMetadata) {
       return this.actualModelMetadata;
     } else {
       this.actualModelMetadata = '';
-      this.mongohandlerService.getModelMetadata(metadata_id).subscribe(result => {
-        if (result['_id']) {
-          console.log('Das kommt vom Server: ', result);
-          this.updateMetadata(result);
-          this.actualModelMetadata = result;
-          console.log('return2: ', this.actualModelMetadata);
-          return result;
-        } else {
-          this.actualModelMetadata = '';
-          console.log('return3: ', this.actualModelMetadata);
-          return this.actualModelMetadata;
-        }
-      }, error => {
-        this.message.error('Connection to object server refused.');
+      return await new Promise((resolve, reject) => {
+        this.mongohandlerService.getModelMetadata(metadata_id).toPromise().then(result => {
+          if (result['_id']) {
+            this.updateMetadata(result);
+            this.actualModelMetadata = result;
+            resolve(result);
+          } else {
+            this.actualModelMetadata = '';
+            reject(this.actualModelMetadata);
+          }
+        }).catch(error => {
+          this.message.error('Connection to object server refused.');
+          reject(error);
+        });
       });
     }
   }

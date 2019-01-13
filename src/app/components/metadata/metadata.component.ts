@@ -22,28 +22,15 @@ export class MetadataComponent implements OnInit {
 
 
   ngOnInit() {
-
-    this.overlayService.editor.subscribe(editorIsOpen => {
+    this.overlayService.editor.subscribe(async editorIsOpen => {
         this.isOpen = editorIsOpen;
         if (this.isOpen) {
-
           const metadata_id = this.loadModelService.Observables.actualModel.source['value'].relatedDigitalObject._id;
-          console.log('Ich wurde geöffnet und suche nach: ' + metadata_id);
 
-          if (metadata_id !== '' && metadata_id !== undefined) {
-            // erst TODO
-            this.metadata = this.metadataService.fetchMetadata(metadata_id);
-            // dann
-            if (this.metadata !== '' && this.metadata !== undefined) {
-              this.showMetadata = true;
-              console.log('ich weiß ich soll zeigen: ' + this.showMetadata);
-            } else {
-              console.log('ich weiß ich soll zeigen: ' + this.showMetadata);
-              this.showMetadata = false;
-            }
-
+          if (metadata_id && metadata_id !== '') {
+            this.metadata = await this.metadataService.fetchMetadata(metadata_id);
+            this.showMetadata = (this.metadata && this.metadata !== '') ? true : false;
           } else {
-            console.log('ich weiß ich soll zeigen: ' + this.showMetadata);
             this.showMetadata = false;
           }
         }
