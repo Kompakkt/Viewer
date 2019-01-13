@@ -63,33 +63,35 @@ export class ModelsettingsComponent implements OnInit {
 
   private async setInitialPerspective() {
 
-    /*
-    console.log('die Kamerapos ist : ', this.cameraService.getActualCameraPosInitialView());
-    if (this.activeModel !== null) {
-      this.mongohandlerService.updateCameraPos(this.activeModel._id, this.cameraService.getActualCameraPosInitialView());
-    }
-
-    await this.annotationmarkerService.hideAllMarker(false);
-
-    this.babylonService.createPreviewScreenshot(220).then(screenshot => {
-
-      console.log('screenshot erstellt');
+    if (!this.loadModelService.isDefaultLoad) {
+      console.log('die Kamerapos ist : ', this.cameraService.getActualCameraPosInitialView());
       if (this.activeModel !== null) {
-
-        this.mongohandlerService.updateScreenshot(this.activeModel._id, screenshot).subscribe(result => {
-
-          // TODO: Find out why picture isn't refreshed once the server sends the result
-          this.catalogueService.Observables.models.source['value']
-            .filter(model => model._id === this.activeModel._id)
-            .map(model => model.preview = result.value.preview);
-        }, error => {
-          this.message.error(error);
-        });
+        this.mongohandlerService.updateCameraPos(this.activeModel._id, this.cameraService.getActualCameraPosInitialView());
       }
-    });
 
-    await this.annotationmarkerService.hideAllMarker(true);
-*/
+      await this.annotationmarkerService.hideAllMarker(false);
+
+      this.babylonService.createPreviewScreenshot(220).then(screenshot => {
+
+        console.log('screenshot erstellt');
+        if (this.activeModel !== null) {
+
+          this.mongohandlerService.updateScreenshot(this.activeModel._id, screenshot).subscribe(result => {
+
+            // TODO: Find out why picture isn't refreshed once the server sends the result
+            this.catalogueService.Observables.models.source['value']
+              .filter(model => model._id === this.activeModel._id)
+              .map(model => model.preview = result.value.preview);
+          }, error => {
+            this.message.error(error);
+          });
+        }
+      });
+
+      await this.annotationmarkerService.hideAllMarker(true);
+    } else {
+      console.log('Not saved');
+    }
   }
 
 

@@ -17,19 +17,11 @@ export class LoadModelService {
 
   private Subjects = {
     actualModel: new BehaviorSubject<Model>(null),
-
-    // actualModelMetadata: new BehaviorSubject<string>(null),
-    // modelsMetadata: new BehaviorSubject<string[]>(Array<String>()),
-
     actualCollection: new BehaviorSubject<any>(null),
   };
 
   public Observables = {
     actualModel: this.Subjects.actualModel.asObservable(),
-
-    // actualModelMetadata: this.Subjects.actualModelMetadata.asObservable(),
-    // modelsMetadata: this.Subjects.modelMetadata.asObservable(),
-
     actualCollection: this.Subjects.actualCollection.asObservable(),
   };
 
@@ -114,6 +106,7 @@ export class LoadModelService {
   }
 
   public loadSelectedModelfromModels(model: Model) {
+    this.isDefaultLoad = false;
     this.quality = 'low';
     this.singleModel.emit(false);
     this.singleCollection.emit(false);
@@ -123,6 +116,7 @@ export class LoadModelService {
   }
 
   public loadSelectedModelfromCollection(model: Model) {
+    this.isDefaultLoad = false;
     this.quality = 'low';
     this.singleModel.emit(false);
     this.singleCollection.emit(false);
@@ -144,7 +138,6 @@ export class LoadModelService {
 
     this.updateActiveModel(newModel);
 
-    // TODO
     if (!this.loadingScreenHandler.isLoading) {
       this.babylonService.loadModel(this.baseUrl, newModel.processed[this.quality]).then(async (model) => {
 

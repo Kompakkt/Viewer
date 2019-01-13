@@ -104,11 +104,6 @@ export class CatalogueService {
 
 
   /*
-    public updateMetadata(metadata: string) {
-      this.Subjects.modelMetadata.next(metadata);
-      this.metadata = metadata;
-    }
-
     public initializeCatalogue() {
 
       let models = this.Observables.models.source['value'];
@@ -130,39 +125,6 @@ export class CatalogueService {
       this.Subjects.models.next(models);
     }
   */
-
-  /*
-  public fetchData(compilation_id?: string) {
-
-    if (compilation_id === undefined) {
-      compilation_id = 'testcompilation';
-    }
-
-    this.mongohandlerService.getCompilation(compilation_id).subscribe(compilation => {
-
-      if (compilation.models.length > 0) {
-
-        this.Subjects.models.next(compilation.models);
-        if (this.isFirstLoad) {
-
-          this.updateActiveModel(compilation.models[0]);
-          this.isFirstLoad = false;
-        }
-      }
-    }, error => {
-      this.message.error('Connection to object server refused.');
-    });
-  }
-
-  private fetchMetadata(metadata_id?: string) {
-    this.mongohandlerService.getModelMetadata(metadata_id).subscribe(result => {
-      this.updateMetadata(result);
-      this.receivedDigitalObject = true;
-    }, error => {
-      this.message.error('Connection to object server refused.');
-    });
-  }
-*/
 
   private fetchCollectionsData() {
     this.mongohandlerService.getAllCompilations().subscribe(compilation => {
