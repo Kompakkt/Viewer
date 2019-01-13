@@ -1,9 +1,7 @@
 import {Component, HostBinding, Input, OnInit} from '@angular/core';
 import {OverlayService} from '../../services/overlay/overlay.service';
 import {AnnotationService} from '../../services/annotation/annotation.service';
-import {ActionService} from '../../services/action/action.service';
 import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
-import {BabylonService} from '../../services/babylon/babylon.service';
 
 @Component({
   selector: 'app-editor',

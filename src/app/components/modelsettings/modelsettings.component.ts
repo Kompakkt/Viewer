@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {CameraService} from '../../services/camera/camera.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
 import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
