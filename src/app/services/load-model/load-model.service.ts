@@ -9,6 +9,7 @@ import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreen
 import {BehaviorSubject} from 'rxjs/internal/BehaviorSubject';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
 import {MessageService} from '../message/message.service';
+import {MetadataService} from '../metadata/metadata.service';
 
 @Injectable({
   providedIn: 'root'
@@ -43,7 +44,8 @@ export class LoadModelService {
               private cameraService: CameraService,
               private loadingScreenHandler: LoadingscreenhandlerService,
               private mongohandlerService: MongohandlerService,
-              private message: MessageService) {
+              private message: MessageService,
+              private metadataService: MetadataService) {
   }
 
   public updateActiveModel(model: Model) {
@@ -82,7 +84,8 @@ export class LoadModelService {
     this.baseUrl = '';
     this.defaultModel = {
       _id: 'Cube',
-      name: 'Cube',
+      relatedDigitalObject: { _id: 'default_model' },
+    name: 'Cube',
       cameraPosition: [{dimension: 'x', value: 0}, {dimension: 'y', value: 0}, {dimension: 'z', value: 0}],
       files: ['{file_name: \'kompakkt.babylon\',' +
       '          file_link: \'assets/models/kompakkt.babylon\',' +
@@ -103,6 +106,7 @@ export class LoadModelService {
       }
     };
     this.loadModel(this.defaultModel);
+    this.metadataService.addDefaultMetadata();
   }
 
   public loadSelectedModelfromModels(model: Model) {

@@ -1,5 +1,6 @@
 <div *ngIf="menuIsEnabled">
 
+  <!-- funktioniert neuerdings nicht mehr: ngIf="!singleModel"siehe objects repo, wenn ein Modell geladen wird -->
   <button *ngIf="!singleModel"
           mat-icon-button (click)="toggleCollectionsOverview()"
           [class.active]="this.collectionsActive"

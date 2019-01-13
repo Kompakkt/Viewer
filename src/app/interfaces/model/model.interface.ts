@@ -1,6 +1,6 @@
 export interface Model {
     _id?: string;
-    relatedDigitalObject?: string;
+    relatedDigitalObject?: {_id: string};
     name: string;
     cameraPosition?: { dimension: string, value: number }[];
     referencePoint?: { dimension: string, value: number }[];
