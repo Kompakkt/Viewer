@@ -1,11 +1,14 @@
 <div *ngIf="menuIsEnabled">
 
-  <button  *ngIf="!singleModel" mat-icon-button (click)="toggleCollectionsOverview()"
+  <button *ngIf="!singleModel"
+          mat-icon-button (click)="toggleCollectionsOverview()"
+          [class.active]="this.collectionsActive"
           matTooltip="Catalogue" matTooltipPosition="above">
     <mat-icon aria-label="Toggle Collections Overview">collections</mat-icon>
   </button>
 
   <button mat-icon-button (click)="editScene()"
+          [class.active]="this.editActive"
           matTooltip="Edit scene and annotations" matTooltipPosition="above">
     <mat-icon aria-label="Edit scene and annotations">edit</mat-icon>
   </button>

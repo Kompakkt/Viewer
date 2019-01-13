@@ -31,6 +31,9 @@ export class MenuComponent implements OnInit {
   private isSingleModel: boolean;
   private isSingleCollection: boolean;
 
+  private editActive = false;
+  private collectionsActive = false;
+
   constructor(
     private message: MessageService,
     private iconRegistry: MatIconRegistry,
@@ -44,7 +47,6 @@ export class MenuComponent implements OnInit {
     private catalogueService: CatalogueService,
     private annotationVRService: AnnotationvrService,
     private loadModelService: LoadModelService,
-
     @Inject(DOCUMENT) private document: any) {
 
     iconRegistry.addSvgIcon(
@@ -125,11 +127,21 @@ export class MenuComponent implements OnInit {
   }
 
   public editScene(): void {
-    this.overlayService.toggleEditor();
+
+    if (this.collectionsActive) {
+      this.overlayService.toggleCollectionsOverview();
+      this.collectionsActive = false;
+    }
+    this.editActive = this.overlayService.toggleEditor();
   }
 
   public toggleCollectionsOverview(): void {
-    this.overlayService.toggleCollectionsOverview();
+
+    if (this.editActive) {
+      this.overlayService.toggleEditor();
+      this.editActive = false;
+    }
+    this.collectionsActive = this.overlayService.toggleCollectionsOverview();
   }
 
   public takeScreenshot() {

@@ -14,26 +14,17 @@ export class OverlayService {
   @Output() editor: EventEmitter<boolean> = new EventEmitter();
   @Output() collectionsOverview: EventEmitter<boolean> = new EventEmitter();
 
-  public toggleEditor(): void {
+  public toggleEditor(): boolean {
 
     this.editorIsOpen = !this.editorIsOpen;
     this.editor.emit(this.editorIsOpen);
+    return this.editorIsOpen;
   }
 
-  public closeEditor(): void {
-
-    this.editorIsOpen = false;
-    this.editor.emit(false);
-  }
-
-  public toggleCollectionsOverview(): void {
+  public toggleCollectionsOverview(): boolean {
 
     this.collectionsOverviewIsOpen = !this.collectionsOverviewIsOpen;
     this.collectionsOverview.emit(this.collectionsOverviewIsOpen);
-  }
-
-  public closeCollectionsOverview(): void {
-    this.collectionsOverviewIsOpen = false;
-    this.collectionsOverview.emit(false);
+    return this.collectionsOverviewIsOpen;
   }
 }
