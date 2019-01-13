@@ -33,8 +33,8 @@ export class LoadModelService {
 
   private defaultModel: Model;
 
-  public isSingleLoadModel = false;
-  public isSingleLoadCollection = false;
+  public isSingleLoadModel = true;
+  public isSingleLoadCollection = true;
 
   @Output() singleCollection: EventEmitter<boolean> = new EventEmitter();
   @Output() singleModel: EventEmitter<boolean> = new EventEmitter();
@@ -152,10 +152,10 @@ export class LoadModelService {
         // Warte auf Antwort von loadModel, da loadModel ein Promise<object> von ImportMeshAync übergibt
         // model ist hier das neu geladene Model, aus dem wir direkt den Namen nehmen können
 
-        // Zentriere auf das neu geladene Model oder (falls gesetzt) wähle die default Position
+        // Zentriere auf das neu geladene Model TODO: oder (falls gesetzt) wähle die default Position
         this.cameraService.setActiveCameraTarget(model.meshes[0]._boundingInfo.boundingBox.centerWorld);
 
-        /* TODO
+        /*
         if (newModel.cameraPosition[0].value !== undefined && newModel.cameraPosition[1].value
           !== undefined && newModel.cameraPosition[2].value !== undefined) {
 
