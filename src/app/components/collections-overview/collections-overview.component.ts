@@ -87,7 +87,7 @@ export class CollectionsOverviewComponent implements OnInit {
   }
 
   searchCollectionByID() {
-    const isloadable = this.catalogueService.selectCollectionbyID(this.identifierCollection);
+    const isloadable = this.catalogueService.selectCollectionByID(this.identifierCollection);
     if (isloadable) {
       this.singleCollectionSelected = true;
       this.singleModelSelected = true;

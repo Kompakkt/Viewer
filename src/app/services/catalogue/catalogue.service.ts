@@ -12,7 +12,6 @@ import {MessageService} from '../message/message.service';
 export class CatalogueService {
 
   private Subjects = {
-
     models: new BehaviorSubject<Model[]>(Array<Model>()),
     collections: new BehaviorSubject<any[]>(Array<any>()),
   };
@@ -22,7 +21,6 @@ export class CatalogueService {
     collections: this.Subjects.collections.asObservable(),
   };
 
-  private unsortedModels: Model[];
   private isFirstLoad = true;
 
   constructor(private mongohandlerService: MongohandlerService,
@@ -34,9 +32,6 @@ export class CatalogueService {
 
     if (this.isFirstLoad) {
 
-      // z.B. https://blacklodge.hki.uni-koeln.de:8065/models/testmodel/
-      // ${environment.kompakkt_url}?model=${this.memory.modelPath}
-      // Hinter dem ? komm der Pfad zum Modell
       const url_split = location.href.split('?');
 
       if (url_split.length <= 1) {
@@ -81,6 +76,7 @@ export class CatalogueService {
               });
               this.isFirstLoad = false;
               break;
+
             case 'compilation':
               this.isFirstLoad = false;
               this.loadModelService.fetchCollectionData(query);
@@ -101,30 +97,6 @@ export class CatalogueService {
       console.log('Page has already been initially loaded.');
     }
   }
-
-
-  /*
-    public initializeCatalogue() {
-
-      let models = this.Observables.models.source['value'];
-
-      this.unsortedModels = models.slice(0);
-      models.splice(0, models.length);
-      models = this.unsortedModels.slice(0);
-
-      models.sort((leftSide, rightSide): number => {
-        if (+leftSide.ranking < +rightSide.ranking) {
-          return -1;
-        }
-        if (+leftSide.ranking > +rightSide.ranking) {
-          return 1;
-        }
-        return 0;
-      });
-
-      this.Subjects.models.next(models);
-    }
-  */
 
   private fetchCollectionsData() {
     this.mongohandlerService.getAllCompilations().subscribe(compilation => {
@@ -155,51 +127,60 @@ export class CatalogueService {
     }
   }
 
-  public selectCollectionbyID(identifierCollection: string): boolean {
-    let collection = this.Observables.collections.source['value'].find(i => i._id === identifierCollection);
+  /**
+   * @function selectCollectionByID looks up a collection by a given identifier
+   *
+   * @param {string} identifierCollection,
+   * @returns {boolean} collection has been found
+   */
+  public selectCollectionByID(identifierCollection: string): boolean {
+    // Check if collection has been initially loaded and is available in collections
+    const collection = this.Observables.collections.source['value'].find(i => i._id === identifierCollection);
+    // If collection has not been loaded during initial load
     if (collection === undefined) {
-      console.log('is undefined 1');
-      /* TODO
+      // try to find it on the server
       this.mongohandlerService.getCompilation(identifierCollection).subscribe(compilation => {
-        collection = compilation;
+        // collection is available on server
+        if (compilation['_id']) {
+          // add it to collections
+          this.Subjects.collections.next(compilation);
+          // load collection
+          this.selectCollection(compilation);
+          return true;
+        } else {
+          // collection ist nicht erreichbar
+          return false;
+        }
       }, error => {
         this.message.error('Connection to object server refused.');
-        collection = undefined;
-      });
-      */
-      if (collection === undefined) {
-        console.log('is undefined 2');
         return false;
-      } else {
-        console.log('is not undefined 1', collection);
-        // this.Subjects.collections.next(collection);
-        this.selectCollection(collection);
-        return true;
-      }
+      });
+      // collection is available in collections and will be loaded
     } else {
-      console.log('is not undefined 2', collection);
       this.selectCollection(collection);
       return true;
     }
   }
 
   public selectModelbyID(identifierModel: string): boolean {
-    let model = this.Observables.models.source['value'].find(i => i._id === identifierModel);
-    if (model !== undefined) {
+    const model = this.Observables.models.source['value'].find(i => i._id === identifierModel);
+    if (model === undefined) {
+      this.mongohandlerService.getModel(identifierModel).subscribe(actualModel => {
+        if (actualModel['_id']) {
+          this.Subjects.models.next(actualModel);
+          this.selectModel(actualModel, false);
+          return true;
+        } else {
+          return false;
+        }
+      }, error => {
+        this.message.error('Connection to object server refused.');
+        return false;
+      });
+    } else {
       this.selectModel(model, false);
       return true;
-    } else {
-      // TODO
-      // model = this.mongohandlerService.getModel(identifierModel);
-      if (model !== undefined) {
-        // this.Subjects.models.next(model);
-        this.selectModel(model, false);
-        return true;
-      } else {
-        return false;
-      }
     }
   }
-
 
 }
