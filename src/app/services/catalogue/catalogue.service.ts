@@ -116,15 +116,11 @@ export class CatalogueService {
 
   public selectCollection(collection: any) {
     this.loadModelService.updateActiveCollection(collection);
-    this.loadModelService.loadSelectedModelfromCollection(collection.models[0]);
+    this.loadModelService.loadSelectedModel(collection.models[0], true);
   }
 
   public selectModel(model: Model, collection: boolean) {
-    if (collection) {
-      this.loadModelService.loadSelectedModelfromCollection(model);
-    } else {
-      this.loadModelService.loadSelectedModelfromModels(model);
-    }
+    this.loadModelService.loadSelectedModel(model, collection);
   }
 
   /**

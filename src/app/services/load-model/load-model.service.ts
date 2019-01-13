@@ -14,6 +14,7 @@ import {MetadataService} from '../metadata/metadata.service';
 @Injectable({
   providedIn: 'root'
 })
+
 export class LoadModelService {
 
   private Subjects = {
@@ -57,19 +58,22 @@ export class LoadModelService {
   }
 
   public fetchModelData(model: Model) {
-    this.baseUrl = 'https://blacklodge.hki.uni-koeln.de:8065/';
-    this.quality = 'low';
     this.isSingleLoadModel = true;
     this.singleModel.emit(true);
+    this.isDefaultLoad = false;
+    this.baseUrl = 'https://blacklodge.hki.uni-koeln.de:8065/';
+    this.quality = 'low';
     this.loadModel(model);
   }
 
   public fetchCollectionData(identifier: string) {
     this.isSingleLoadCollection = true;
     this.singleCollection.emit(true);
+    this.isDefaultLoad = false;
+    this.baseUrl = 'https://blacklodge.hki.uni-koeln.de:8065/';
+    this.quality = 'low';
     this.mongohandlerService.getCompilation(identifier).subscribe(compilation => {
       this.updateActiveCollection(compilation);
-      this.baseUrl = 'https://blacklodge.hki.uni-koeln.de:8065/';
       this.loadModel(compilation.models[0]);
     }, error => {
       this.message.error('Connection to object server refused.');
@@ -77,15 +81,17 @@ export class LoadModelService {
   }
 
   public loadDefaultModelData() {
-    this.quality = 'low';
-    this.singleModel.emit(false);
-    this.singleCollection.emit(false);
     this.isDefaultLoad = true;
+    this.isSingleLoadModel = false;
+    this.singleModel.emit(false);
+    this.isSingleLoadCollection = false;
+    this.singleCollection.emit(false);
+    this.quality = 'low';
     this.baseUrl = '';
     this.defaultModel = {
       _id: 'Cube',
-      relatedDigitalObject: { _id: 'default_model' },
-    name: 'Cube',
+      relatedDigitalObject: {_id: 'default_model'},
+      name: 'Cube',
       cameraPosition: [{dimension: 'x', value: 0}, {dimension: 'y', value: 0}, {dimension: 'z', value: 0}],
       files: ['{file_name: \'kompakkt.babylon\',' +
       '          file_link: \'assets/models/kompakkt.babylon\',' +
@@ -109,34 +115,32 @@ export class LoadModelService {
     this.metadataService.addDefaultMetadata();
   }
 
-  public loadSelectedModelfromModels(model: Model) {
+  public loadSelectedModel(model: Model, collection: boolean) {
     this.isDefaultLoad = false;
-    this.quality = 'low';
+    this.isSingleLoadModel = false;
     this.singleModel.emit(false);
+    this.isSingleLoadCollection = false;
     this.singleCollection.emit(false);
-    this.updateActiveCollection([]);
+    if (!collection) {
+      this.updateActiveCollection([]);
+    }
     this.baseUrl = 'https://blacklodge.hki.uni-koeln.de:8065/';
-    this.loadModel(model);
-  }
-
-  public loadSelectedModelfromCollection(model: Model) {
-    this.isDefaultLoad = false;
     this.quality = 'low';
-    this.singleModel.emit(false);
-    this.singleCollection.emit(false);
-    this.baseUrl = 'https://blacklodge.hki.uni-koeln.de:8065/';
     this.loadModel(model);
   }
 
   public updateModelQuality(quality: string) {
-    this.quality = quality;
-    if (this.Observables.actualModel.source['value'].processed[this.quality] !== undefined) {
-      this.loadModel(this.Observables.actualModel.source['value']);
+    if (this.quality !== quality) {
+      this.quality = quality;
+      if (this.Observables.actualModel.source['value'].processed[this.quality] !== undefined) {
+        this.loadModel(this.Observables.actualModel.source['value']);
+      } else {
+        this.message.error('Model quality is not available.');
+      }
     } else {
-      this.message.error('Model quality is not available.');
+      return;
     }
   }
-
 
   public loadModel(newModel: Model) {
 
@@ -149,7 +153,9 @@ export class LoadModelService {
         // model ist hier das neu geladene Model, aus dem wir direkt den Namen nehmen können
 
         // Zentriere auf das neu geladene Model oder (falls gesetzt) wähle die default Position
-        // TODO
+        this.cameraService.setActiveCameraTarget(model.meshes[0]._boundingInfo.boundingBox.centerWorld);
+
+        /* TODO
         if (newModel.cameraPosition[0].value !== undefined && newModel.cameraPosition[1].value
           !== undefined && newModel.cameraPosition[2].value !== undefined) {
 
@@ -163,6 +169,7 @@ export class LoadModelService {
         } else {
           this.cameraService.setActiveCameraTarget(model.meshes[0]._boundingInfo.boundingBox.centerWorld);
         }
+        */
 
         // Füge Tags hinzu und lade Annotationen
         BABYLON.Tags.AddTagsTo(model.meshes[0], newModel.name);
