@@ -1,6 +1,6 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {DomSanitizer} from '@angular/platform-browser';
-import {MatIconRegistry} from '@angular/material';
+import {MatDialog, MatDialogConfig, MatIconRegistry} from '@angular/material';
 
 import {DOCUMENT} from '@angular/common';
 
@@ -14,6 +14,7 @@ import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {AnnotationvrService} from '../../services/annotationvr/annotationvr.service';
 import {MessageService} from '../../services/message/message.service';
 import {LoadModelService} from '../../services/load-model/load-model.service';
+import {LoginComponent} from '../login/login.component';
 
 /**
  * @author Zoe Schubert
@@ -47,6 +48,7 @@ export class MenuComponent implements OnInit {
     private catalogueService: CatalogueService,
     private annotationVRService: AnnotationvrService,
     private loadModelService: LoadModelService,
+    public dialog: MatDialog,
     @Inject(DOCUMENT) private document: any) {
 
     iconRegistry.addSvgIcon(
@@ -147,4 +149,14 @@ export class MenuComponent implements OnInit {
   public takeScreenshot() {
     this.babylonService.createScreenshot();
   }
+
+  public loginDialog() {
+    const dialogConfig = new MatDialogConfig();
+
+    dialogConfig.disableClose = true;
+    dialogConfig.autoFocus = true;
+
+    this.dialog.open(LoginComponent, dialogConfig);
+  }
+
 }

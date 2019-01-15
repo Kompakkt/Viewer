@@ -1,14 +1,19 @@
-<form>
-  <h1>Kompakkt Login</h1>
-  <h4>Username and password</h4>
-    <mat-form-field>
-      <input matInput name="username" #description="ngModel" type="text"
-             placeholder="username" [(ngModel)]="username">
-    </mat-form-field>
-    <mat-form-field>
-      <input matInput name="password" #description="ngModel" type="text"
-             placeholder="password" [(ngModel)]="password">
-    </mat-form-field>
-  <button mat-raised-button (click)="login()">Login</button>
-  <button mat-raised-button (click)="withoutlogin()">Go on!</button>
-</form>
+<h2 mat-dialog-title>Kompakkt Login</h2>
+<mat-dialog-content class="mat-typography">
+  <h3>Login to view models from the repository</h3>
+  <p>With your university account you can login to see models from the repository.</p>
+
+  <h3>Username and password</h3>
+  <mat-form-field>
+    <input matInput name="username" #description="ngModel" type="text"
+           placeholder="username" [(ngModel)]="username">
+  </mat-form-field>
+  <mat-form-field>
+    <input matInput name="password" #description="ngModel" type="text"
+           placeholder="password" [(ngModel)]="password">
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close (click)="withoutlogin()">Cancel</button>
+  <button mat-button [mat-dialog-close]="true" cdkFocusInitial (click)="login()">Login</button>
+</mat-dialog-actions>

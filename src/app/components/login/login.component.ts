@@ -20,6 +20,7 @@ export class LoginComponent implements OnInit {
 
 
   public login() {
+    console.log('username:' + this.username);
     this.mongohandlerService.login(this.username, this.password);
   }
 

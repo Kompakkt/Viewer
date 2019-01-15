@@ -22,7 +22,7 @@ import {
   MatTabsModule,
   MatExpansionModule,
   MatFormFieldModule,
-  MatCheckboxModule, MatInputModule, MatListModule, MatDividerModule, MatSliderModule, MatRadioModule,  MatSelectModule
+  MatCheckboxModule, MatInputModule, MatListModule, MatDividerModule, MatSliderModule, MatRadioModule, MatSelectModule, MatDialogModule
 } from '@angular/material';
 import {EditorComponent} from './components/editor/editor.component';
 import {AnnotationsEditorComponent} from './components/annotations-editor/annotations-editor.component';
@@ -78,7 +78,11 @@ import { LoginComponent } from './components/login/login.component';
     ColorChromeModule,
     MatSliderModule,
     MatRadioModule,
-    MatSelectModule
+    MatSelectModule,
+    MatDialogModule
+  ],
+  entryComponents: [
+    LoginComponent
   ],
   providers: [],
   bootstrap: [AppComponent]
