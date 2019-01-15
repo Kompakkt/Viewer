@@ -1,0 +1,14 @@
+<form>
+  <h1>Kompakkt Login</h1>
+  <h4>Username and password</h4>
+    <mat-form-field>
+      <input matInput name="username" #description="ngModel" type="text"
+             placeholder="username" [(ngModel)]="username">
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput name="password" #description="ngModel" type="text"
+             placeholder="password" [(ngModel)]="password">
+    </mat-form-field>
+  <button mat-raised-button (click)="login()">Login</button>
+  <button mat-raised-button (click)="withoutlogin()">Go on!</button>
+</form>

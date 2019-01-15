@@ -35,6 +35,7 @@ import { CollectionsOverviewComponent } from './components/collections-overview/
 import { LoadingscreenComponent } from './components/loadingscreen/loadingscreen.component';
 import { MetadataComponent } from './components/metadata/metadata.component';
 import { ModelsettingsComponent } from './components/modelsettings/modelsettings.component';
+import { LoginComponent } from './components/login/login.component';
 
 @NgModule({
   declarations: [
@@ -50,7 +51,8 @@ import { ModelsettingsComponent } from './components/modelsettings/modelsettings
     CollectionsOverviewComponent,
     LoadingscreenComponent,
     MetadataComponent,
-    ModelsettingsComponent
+    ModelsettingsComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,
