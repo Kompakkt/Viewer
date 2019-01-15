@@ -1,5 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
+import {CatalogueService} from '../../services/catalogue/catalogue.service';
+import {MessageService} from '../../services/message/message.service';
 
 @Component({
   selector: 'app-login',
@@ -11,7 +13,9 @@ export class LoginComponent implements OnInit {
   public username = '';
   public password = '';
 
-  constructor(private mongohandlerService: MongohandlerService) {
+  constructor(private mongohandlerService: MongohandlerService,
+              private catalogueService: CatalogueService,
+              private message: MessageService) {
   }
 
 
@@ -21,7 +25,14 @@ export class LoginComponent implements OnInit {
 
   public login() {
     console.log('username:' + this.username);
-    this.mongohandlerService.login(this.username, this.password);
+    this.mongohandlerService.login(this.username, this.password).subscribe(result => {
+        if (result.status === 'ok') {
+          this.catalogueService.bootstrap();
+        }
+      }, error => {
+        this.message.error('Connection to object server refused.');
+      });
+
   }
 
   public withoutlogin() {

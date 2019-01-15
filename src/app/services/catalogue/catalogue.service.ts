@@ -95,6 +95,8 @@ export class CatalogueService {
       }
     } else {
       console.log('Page has already been initially loaded.');
+      this.fetchCollectionsData();
+      this.fetchModelsData();
     }
   }
 
