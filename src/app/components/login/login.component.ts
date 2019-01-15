@@ -21,11 +21,11 @@ export class LoginComponent implements OnInit {
 
   public login() {
     console.log('username:' + this.username);
-    console.log('password:' + this.password);
     this.mongohandlerService.login(this.username, this.password);
   }
 
   public withoutlogin() {
+    console.log('username:' + this.username);
 
   }
 
