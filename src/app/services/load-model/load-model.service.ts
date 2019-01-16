@@ -6,10 +6,11 @@ import {ActionService} from '../action/action.service';
 import {AnnotationService} from '../annotation/annotation.service';
 import {CameraService} from '../camera/camera.service';
 import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreenhandler.service';
-import {BehaviorSubject} from 'rxjs/internal/BehaviorSubject';
+import {ReplaySubject} from 'rxjs';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
 import {MessageService} from '../message/message.service';
 import {MetadataService} from '../metadata/metadata.service';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -18,8 +19,8 @@ import {MetadataService} from '../metadata/metadata.service';
 export class LoadModelService {
 
   private Subjects = {
-    actualModel: new BehaviorSubject<Model>(null),
-    actualCollection: new BehaviorSubject<any>(null),
+    actualModel: new ReplaySubject<Model>(),
+    actualCollection: new ReplaySubject<any>(),
   };
 
   public Observables = {
@@ -27,7 +28,7 @@ export class LoadModelService {
     actualCollection: this.Subjects.actualCollection.asObservable(),
   };
 
-  private baseUrl: string;
+  private baseUrl = `${environment.express_server_url}:${environment.express_server_port}/`;
   public isDefaultLoad = false;
   public quality = 'low';
 
@@ -61,7 +62,6 @@ export class LoadModelService {
     this.isSingleLoadModel = true;
     this.singleModel.emit(true);
     this.isDefaultLoad = false;
-    this.baseUrl = 'https://blacklodge.hki.uni-koeln.de:8065/';
     this.quality = 'low';
     this.loadModel(model);
   }
@@ -70,7 +70,6 @@ export class LoadModelService {
     this.isSingleLoadCollection = true;
     this.singleCollection.emit(true);
     this.isDefaultLoad = false;
-    this.baseUrl = 'https://blacklodge.hki.uni-koeln.de:8065/';
     this.quality = 'low';
     this.mongohandlerService.getCompilation(identifier).subscribe(compilation => {
       this.updateActiveCollection(compilation);
@@ -87,7 +86,6 @@ export class LoadModelService {
     this.isSingleLoadCollection = false;
     this.singleCollection.emit(false);
     this.quality = 'low';
-    this.baseUrl = '';
     this.defaultModel = {
       _id: 'Cube',
       relatedDigitalObject: {_id: 'default_model'},
@@ -111,7 +109,7 @@ export class LoadModelService {
         raw: 'assets/models/kompakkt.babylon'
       }
     };
-    this.loadModel(this.defaultModel);
+    this.loadModel(this.defaultModel, '');
     this.metadataService.addDefaultMetadata();
   }
 
@@ -124,7 +122,6 @@ export class LoadModelService {
     if (!collection) {
       this.updateActiveCollection([]);
     }
-    this.baseUrl = 'https://blacklodge.hki.uni-koeln.de:8065/';
     this.quality = 'low';
     this.loadModel(model);
   }
@@ -142,12 +139,12 @@ export class LoadModelService {
     }
   }
 
-  public loadModel(newModel: Model) {
-
+  public loadModel(newModel: Model, overrideUrl?: string) {
     this.updateActiveModel(newModel);
+    const URL = (overrideUrl !== undefined) ? overrideUrl : this.baseUrl;
 
     if (!this.loadingScreenHandler.isLoading) {
-      this.babylonService.loadModel(this.baseUrl, newModel.processed[this.quality]).then(async (model) => {
+      this.babylonService.loadModel(URL, newModel.processed[this.quality]).then(async (model) => {
 
         // Warte auf Antwort von loadModel, da loadModel ein Promise<object> von ImportMeshAync übergibt
         // model ist hier das neu geladene Model, aus dem wir direkt den Namen nehmen können
