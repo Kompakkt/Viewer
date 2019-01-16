@@ -123,4 +123,7 @@ export class ModelsettingsComponent implements OnInit {
    * Save & Load Settings
    */
 
+  // TODO Back to Default
+
+  // TODO Save
 }
