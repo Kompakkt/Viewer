@@ -64,7 +64,7 @@ export class ModelsettingsComponent implements OnInit {
       if (this.activeModel !== null) {
         this.mongohandlerService.updateCameraPos(this.activeModel._id, this.cameraService.getActualCameraPosInitialView());
       }
-      this.babylonService.createPreviewScreenshot(220).then(screenshot => {
+      this.babylonService.createPreviewScreenshot(400).then(screenshot => {
         this.mongohandlerService.updateScreenshot(this.activeModel._id, screenshot).subscribe(result => {
           if (result.status === 'ok') {
             this.loadModelService.updateActiveModel({...this.activeModel, preview: result.preview});

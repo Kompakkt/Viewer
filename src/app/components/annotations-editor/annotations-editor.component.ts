@@ -46,7 +46,7 @@ export class AnnotationsEditorComponent implements OnInit {
 
   public async selectPerspective() {
     this.annotation.cameraPosition = this.cameraService.getActualCameraPosAnnotation();
-    await this.babylonService.createPreviewScreenshot(220).then(detailScreenshot => {
+    await this.babylonService.createPreviewScreenshot(400).then(detailScreenshot => {
 
       /*
       const i = new Image();

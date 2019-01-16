@@ -122,7 +122,7 @@ export class AnnotationService {
 
   public createNewAnnotation = function (result: any) {
 
-    this.babylonService.createPreviewScreenshot(220).then(detailScreenshot => {
+    this.babylonService.createPreviewScreenshot(400).then(detailScreenshot => {
 
       const newAnnotation: Annotation = {
         _id: Math.random().toString(36).substr(2, 9),

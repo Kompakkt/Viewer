@@ -281,7 +281,7 @@ export class BabylonService {
     await new Promise<any>((resolve, reject) => this.engine.onEndFrameObservable.add(() => resolve()));
     const result = await new Promise<string>((resolve, reject) => {
       BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera,
-        (width === undefined) ? {width: 250, height: 140} : width,
+        (width === undefined) ? {width: 400, height: 225} : {width: width, height: Math.round((width / 16) * 9)},
         (screenshot) => {
           resolve(screenshot);
       });
