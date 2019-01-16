@@ -28,7 +28,6 @@ export class MongohandlerService {
     return this.http.post(`${this.endpoint}/${path}`, obj, this.httpOptions);
   }
 
-
   // GETs
   public getAllCompilations(): Observable<any> {
     return this.get(`api/v1/get/findall/compilation`);
@@ -51,13 +50,8 @@ export class MongohandlerService {
   }
 
   // POSTs
-  public updateScreenshot(identifier: string, screenshot: string): Observable<any> {
-    return this.post(`api/v1/post/screenshot/${identifier}`, {data: screenshot});
-  }
-
-  public updateCameraPos(identifier: string, cameraPerspective: any): Observable<any> {
-    console.log('Camera soll gespeichert werden');
-    return this.post(`api/v1/post/cameraPosition/${identifier}`, {data: cameraPerspective});
+  public updateSettings(identifier: string, settings: any): Observable<any> {
+    return this.post(`api/v1/post/settings/${identifier}`, settings);
   }
 
   // Auth
@@ -67,10 +61,6 @@ export class MongohandlerService {
 
   public isAuthorized() {
     return this.get(`auth`);
-  }
-
-  public saveInitialData(obj: any) {
-    console.log('this should be saved: ', obj);
   }
 
 }

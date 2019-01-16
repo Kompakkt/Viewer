@@ -57,6 +57,7 @@ export class ModelsettingsComponent implements OnInit {
   setAmbientlightIntensityUp(event: any) {
     this.babylonService.setLightIntensity('ambientlightUp', event.value);
     this.ambientlightUpintensity = event.value;
+    console.log(event.value);
   }
 
   setAmbientlightIntensityDown(event: any) {
@@ -87,13 +88,15 @@ export class ModelsettingsComponent implements OnInit {
 * Initial Perspective & Preview Settings
 */
 
-  setInitialView() {
+  public async setInitialView() {
     this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
-    this.babylonService.createPreviewScreenshot(400).then(screenshot => {
+    return await new Promise<string>((resolve, reject) => this.babylonService.createPreviewScreenshot(400).then(screenshot => {
       this.preview = screenshot;
+      resolve(screenshot);
     }, error => {
       this.message.error(error);
-    });
+      reject(error);
+    }));
   }
 
 
@@ -135,25 +138,27 @@ export class ModelsettingsComponent implements OnInit {
 
   // TODO Save
 
-  saveActualSettings() {
-
-    this.mongohandlerService.saveInitialData({
-      settings: {
+  public async saveActualSettings() {
+    if (!this.cameraPositionInitial && !this.preview) {
+      await this.setInitialView();
+    }
+    const settings = {
         preview: this.preview,
         cameraPositionInitial: this.cameraPositionInitial,
         background: {
-          Color: this.babylonService.getColor(),
+          color: this.babylonService.getColor(),
           effect: this.setEffect
         },
-        lights: [{
-          type: 'HemisphericLight',
-          position: {
-            x: 0,
-            y: -1,
-            z: 0
+        lights: [
+          {
+            type: 'HemisphericLight',
+            position: {
+              x: 0,
+              y: -1,
+              z: 0
+            },
+            intensity: (this.ambientlightDownintensity) ? this.ambientlightDownintensity : 1
           },
-          intensity: this.ambientlightDownintensity
-        },
           {
             type: 'HemisphericLight',
             position: {
@@ -161,9 +166,13 @@ export class ModelsettingsComponent implements OnInit {
               y: 1,
               z: 0
             },
-            intensity: this.ambientlightUpintensity
+            intensity: (this.ambientlightUpintensity) ? this.ambientlightUpintensity : 1
           }
-          // this.babylonService.getPointlightData();
-        ]}});
+        ]
+      };
+    console.log(this.activeModel._id, settings);
+    this.mongohandlerService.updateSettings(this.activeModel._id, settings).subscribe(result => {
+      console.log(result);
+    });
   }
 }
