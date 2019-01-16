@@ -46,7 +46,6 @@ export class AnnotationsEditorComponent implements OnInit {
 
   public async selectPerspective() {
     this.annotation.cameraPosition = this.cameraService.getActualCameraPosAnnotation();
-    await this.annotationmarkerService.hideAllMarker(false);
     await this.babylonService.createPreviewScreenshot(220).then(detailScreenshot => {
 
       /*
@@ -57,8 +56,6 @@ export class AnnotationsEditorComponent implements OnInit {
       i.src = detailScreenshot;*/
       this.preview = detailScreenshot;
     });
-
-    await this.annotationmarkerService.hideAllMarker(true);
   }
 
   public deleteAnnotation(): void {

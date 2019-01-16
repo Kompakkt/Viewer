@@ -141,8 +141,4 @@ export class AnnotationmarkerService {
     this.createAnnotationMarker(annotation);
   }
 
-  public async hideAllMarker(visibility: boolean) {
-    this.babylonService.hideMesh('label', visibility);
-    this.babylonService.hideMesh('plane', visibility);
-  }
 }

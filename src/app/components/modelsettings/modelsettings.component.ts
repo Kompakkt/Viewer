@@ -64,9 +64,6 @@ export class ModelsettingsComponent implements OnInit {
       if (this.activeModel !== null) {
         this.mongohandlerService.updateCameraPos(this.activeModel._id, this.cameraService.getActualCameraPosInitialView());
       }
-
-      await this.annotationmarkerService.hideAllMarker(false);
-
       this.babylonService.createPreviewScreenshot(220).then(screenshot => {
         this.mongohandlerService.updateScreenshot(this.activeModel._id, screenshot).subscribe(result => {
           if (result.status === 'ok') {
@@ -79,8 +76,6 @@ export class ModelsettingsComponent implements OnInit {
           this.message.error(error);
         });
       });
-
-      await this.annotationmarkerService.hideAllMarker(true);
     } else {
       console.log('Not saved');
     }

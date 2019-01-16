@@ -259,44 +259,40 @@ export class BabylonService {
     return BABYLON.SceneSerializer.Serialize(this.scene);
   }
 
-  public createScreenshot(): void {
-    BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, {precision: 2});
+  public async createScreenshot() {
+    this.hideMesh('plane', false);
+    this.hideMesh('label', false);
+    await new Promise<any>((resolve, reject) => this.engine.onEndFrameObservable.add(() => resolve()));
+    const result = await new Promise<string>((resolve, reject) => {
+      BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, {precision: 2},
+        (screenshot) => {
+          fetch(screenshot).then(res => res.blob()).then(blob => BABYLON.Tools.Download(blob, `Kompakkt-${Date.now().toString()}`));
+          resolve(screenshot);
+      });
+    });
+    this.hideMesh('plane', true);
+    this.hideMesh('label', true);
+    return result;
   }
 
-  public createPreviewScreenshot(width?: number): Promise<string> {
-    /*console.log('Aktuelle Höhe des Canvas: ' + this.engine.getRenderHeight() +
-      'Aktuelle Breite des Canvas: ' + this.engine.getRenderWidth());
-*/
-
-    // TODO hide all marker:
-    //
-    // this.hideMesh('label', false);
-    // this.hideMesh('plane', false);
-
-    return new Promise<string>((resolve, reject) => {
-
-      if (width === undefined) {
-        BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, {width: 250, height: 140}, (screenshot) => {
+  public async createPreviewScreenshot(width?: number): Promise<string> {
+    this.hideMesh('plane', false);
+    this.hideMesh('label', false);
+    await new Promise<any>((resolve, reject) => this.engine.onEndFrameObservable.add(() => resolve()));
+    const result = await new Promise<string>((resolve, reject) => {
+      BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera,
+        (width === undefined) ? {width: 250, height: 140} : width,
+        (screenshot) => {
           resolve(screenshot);
-        });
-        // TODO show all marker:
-        //
-        // this.hideMesh('label', true);
-        // this.hideMesh('plane', true);
-
-      } else {
-
-        BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, width, (screenshot) => {
-          resolve(screenshot);
-        });
-      }
+      });
     });
+    this.hideMesh('plane', true);
+    this.hideMesh('label', true);
+    return result;
   }
 
   public hideMesh(tag: string, visibility: boolean) {
-    this.scene.getMeshesByTags(tag).forEach(function (value) {
-      value.isVisible = visibility;
-    });
+    this.scene.getMeshesByTags(tag, mesh => mesh.isVisible = visibility);
   }
 
   public setLightPosY(pos: number) {
