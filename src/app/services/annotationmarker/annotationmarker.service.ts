@@ -142,13 +142,7 @@ export class AnnotationmarkerService {
   }
 
   public async hideAllMarker(visibility: boolean) {
-
-    this.babylonService.getScene().getMeshesByTags('label').forEach(function (value) {
-      value.isVisible = visibility;
-    });
-
-    this.babylonService.getScene().getMeshesByTags('plane').forEach(function (value) {
-      value.isVisible = visibility;
-    });
+    this.babylonService.hideMesh('label', visibility);
+    this.babylonService.hideMesh('plane', visibility);
   }
 }

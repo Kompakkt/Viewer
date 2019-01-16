@@ -268,12 +268,22 @@ export class BabylonService {
       'Aktuelle Breite des Canvas: ' + this.engine.getRenderWidth());
 */
 
+    // TODO hide all marker:
+    //
+    // this.hideMesh('label', false);
+    // this.hideMesh('plane', false);
+
     return new Promise<string>((resolve, reject) => {
 
       if (width === undefined) {
         BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, {width: 250, height: 140}, (screenshot) => {
           resolve(screenshot);
         });
+        // TODO show all marker:
+        //
+        // this.hideMesh('label', true);
+        // this.hideMesh('plane', true);
+
       } else {
 
         BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, width, (screenshot) => {
@@ -283,21 +293,10 @@ export class BabylonService {
     });
   }
 
-  public setLightIntensity(intensity: number) {
-    if (this.light1 != null) {
-      this.lightIntensity = intensity;
-      this.light1.intensity = this.lightIntensity;
-    }
-  }
-
-  public setLightPosX(pos: number) {
-    if (this.light1 != null) {
-
-      this.light1.dispose();
-      this.lightPosX = pos;
-      this.light1 = this.createHemisphericLight('light1', {x: this.lightPosX, y: this.lightPosY, z: this.lightPosZ});
-      this.light1.intensity = this.lightIntensity;
-    }
+  public hideMesh(tag: string, visibility: boolean) {
+    this.scene.getMeshesByTags(tag).forEach(function (value) {
+      value.isVisible = visibility;
+    });
   }
 
   public setLightPosY(pos: number) {
@@ -313,6 +312,23 @@ export class BabylonService {
     if (this.light1 != null) {
       this.light1.dispose();
       this.lightPosZ = pos;
+      this.light1 = this.createHemisphericLight('light1', {x: this.lightPosX, y: this.lightPosY, z: this.lightPosZ});
+      this.light1.intensity = this.lightIntensity;
+    }
+  }
+
+  public setLightIntensity(intensity: number) {
+    if (this.light1 != null) {
+      this.lightIntensity = intensity;
+      this.light1.intensity = this.lightIntensity;
+    }
+  }
+
+  public setLightPosX(pos: number) {
+    if (this.light1 != null) {
+
+      this.light1.dispose();
+      this.lightPosX = pos;
       this.light1 = this.createHemisphericLight('light1', {x: this.lightPosX, y: this.lightPosY, z: this.lightPosZ});
       this.light1.intensity = this.lightIntensity;
     }
