@@ -11,7 +11,7 @@
     <h3 *ngIf="this.loadModelService.isDefaultLoad">Initial Perspective</h3>
     <h3 *ngIf="!this.loadModelService.isDefaultLoad">Select initial Perspective</h3>
     <p *ngIf="!this.loadModelService.isDefaultLoad">Click on image to select a new initial Perspective.</p>
-    <img mat-card-image src={{this.activeModel.preview}} (click)="setInitialPerspective()"/>
+    <img mat-card-image [src]="this.activeModel.preview" (click)="setInitialPerspective()"/>
     <h3>Select background</h3>
     <color-chrome (onChange)="handleChange($event)"></color-chrome>
     <p>Effect</p>
