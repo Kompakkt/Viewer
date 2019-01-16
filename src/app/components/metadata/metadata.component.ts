@@ -25,7 +25,7 @@ export class MetadataComponent implements OnInit {
     this.overlayService.editor.subscribe(async editorIsOpen => {
         this.isOpen = editorIsOpen;
         if (this.isOpen) {
-          const metadata_id = this.loadModelService.Observables.actualModel.source['value'].relatedDigitalObject._id;
+          const metadata_id = this.loadModelService.getCurrentModel().relatedDigitalObject._id;
 
           if (metadata_id && metadata_id !== '') {
             this.metadata = await this.metadataService.fetchMetadata(metadata_id);

@@ -50,6 +50,14 @@ export class LoadModelService {
               private metadataService: MetadataService) {
   }
 
+  public getCurrentModel() {
+    return this.Observables.actualModel.source['_events'].slice(-1)[0];
+  }
+
+  public getCurrentCompilation() {
+    return this.Observables.actualCollection.source['_events'].slice(-1)[0];
+  }
+
   public updateActiveModel(model: Model) {
     this.Subjects.actualModel.next(model);
   }
