@@ -37,16 +37,24 @@ export class BabylonService {
   private selectingControl: boolean;
   private selectedControl: boolean;
 
-  private light1: BABYLON.Light;
-  private light2: BABYLON.Light;
-  private light3: BABYLON.Light;
+  private color: {
+    r: number;
+    g: number;
+    b: number;
+    a: number;
+  };
 
-  private lightPosX: number;
-  private lightPosY: number;
-  private lightPosZ: number;
-  private lightIntensity: number;
+  private pointlight: BABYLON.Light;
+  private ambientlightUp: BABYLON.Light;
+  private ambientlightDown: BABYLON.Light;
+
+  private pointlightPosX: number;
+  private pointlightPosY: number;
+  private pointlightPosZ: number;
+  private pointlightIntensity: number;
 
   private background: BABYLON.Layer;
+  private isBackground: boolean;
 
   constructor(private message: MessageService,
               private loadingScreenHandler: LoadingscreenhandlerService,
@@ -99,18 +107,29 @@ export class BabylonService {
           this.scene.render();
         });
 
-        this.setClearColor(0.2, 0.2, 0.2, 0.9);
+        this.isBackground = false;
 
-        this.light1 = this.createPointLight('light1', {x: 1, y: 10, z: 1});
-        this.setLightIntensity('light1', 1);
-        this.lightIntensity = 1;
-        this.lightPosX = 1;
-        this.lightPosY = 10;
-        this.lightPosY = 1;
-        this.light2 = this.createHemisphericLight('light2', {x: 0, y: 1, z: 0});
-        this.setLightIntensity('light2', 1);
-        this.light3 = this.createHemisphericLight('light3', {x: 0, y: -1, z: 0});
-        this.setLightIntensity('light3', 1);
+        this.color = {
+          r: 0.2,
+          g: 0.2,
+          b: 0.2,
+          a: 0.9
+        };
+
+        this.setClearColor(this.color);
+
+        this.pointlightPosX = 1;
+        this.pointlightPosY = 10;
+        this.pointlightPosZ = 1;
+        this.pointlight = this.createPointLight('pointlight', {x: this.pointlightPosX, y: this.pointlightPosY, z: this.pointlightPosZ});
+        this.pointlightIntensity = 1;
+        this.setLightIntensity('pointlight', this.pointlightIntensity);
+
+        this.ambientlightUp = this.createHemisphericLight('ambientlightUp', {x: 0, y: 1, z: 0});
+        this.setLightIntensity('ambientlightUp', 1);
+
+        this.ambientlightDown = this.createHemisphericLight('ambientlightDown', {x: 0, y: -1, z: 0});
+        this.setLightIntensity('ambientlightDown', 1);
 
       }
     });
@@ -130,14 +149,6 @@ export class BabylonService {
 
   public getScene(): BABYLON.Scene {
     return this.scene;
-  }
-
-  public setClearColor(r: number, g: number, b: number, a: number): void {
-    this.scene.clearColor = new BABYLON.Color4(r, g, b, a);
-  }
-
-  public setClearColorHex(r: number, g: number, b: number, a: number): void {
-    this.scene.clearColor = new BABYLON.Color4(r / 255, g / 255, b / 255, a);
   }
 
   public createPointLight(name: string, position: any): BABYLON.PointLight {
@@ -219,15 +230,6 @@ export class BabylonService {
     return this.VRHelper;
   }
 
-  public setBackgroundImage(background: boolean): void {
-    if (background) {
-      this.background = new BABYLON.Layer('background', this.backgroundURL, this.scene, true);
-      this.background.alphaBlendingMode = BABYLON.Engine.ALPHA_ADD;
-      this.background.isBackground = true;
-    } else {
-      this.background.dispose();
-    }
-  }
 
   public loadModel(rootUrl: string, filename: string): Promise<any> {
 
@@ -298,35 +300,58 @@ export class BabylonService {
     this.scene.getMeshesByTags(tag, mesh => mesh.isVisible = visibility);
   }
 
+  public setBackgroundImage(background: boolean): void {
+    if (background && !this.isBackground) {
+      this.background = new BABYLON.Layer('background', this.backgroundURL, this.scene, true);
+      this.background.alphaBlendingMode = BABYLON.Engine.ALPHA_ADD;
+      this.background.isBackground = true;
+      this.isBackground = true;
+    }
+    if (!background && this.background) {
+      this.background.dispose();
+      this.isBackground = false;
+    } else {
+      return;
+    }
+  }
+
+  public setBackgroundColor(color: any): void {
+    this.color = color;
+    this.scene.clearColor = new BABYLON.Color4(color.r / 255, color.g / 255, color.b / 255, color.a);
+  }
+
+  public setClearColor(color: any): void {
+    this.scene.clearColor = new BABYLON.Color4(color.r, color.g, color.b, color.a);
+  }
+
   public setLightIntensity(light: string, intensity: number) {
-    if (light === 'light1' && this.light1 !== undefined) {
-      this.light1.intensity = intensity;
+    if (light === 'pointlight' && this.pointlight !== undefined) {
+      this.pointlight.intensity = intensity;
     }
-    if (light === 'light2' && this.light2 !== undefined) {
-      this.light2.intensity = intensity;
+    if (light === 'ambientlightUp' && this.ambientlightUp !== undefined) {
+      this.ambientlightUp.intensity = intensity;
     }
-    if (light === 'light3' && this.light3 !== undefined) {
-      this.light2.intensity = intensity;
+    if (light === 'ambientlightDown' && this.ambientlightDown !== undefined) {
+      this.ambientlightDown.intensity = intensity;
     }
   }
 
   public setLightPosition(dimension: string, pos: number) {
-    if (this.light1 != null) {
+    if (this.pointlight != null) {
       switch (dimension) {
         case 'x':
-          this.lightPosX = pos;
+          this.pointlightPosX = pos;
           break;
         case 'y':
-          this.lightPosX = pos;
+          this.pointlightPosX = pos;
           break;
         case 'z':
-          this.lightPosX = pos;
+          this.pointlightPosX = pos;
           break;
       }
-      this.light1.dispose();
-      this.light1 = this.createHemisphericLight('light1', {x: this.lightPosX, y: this.lightPosY, z: this.lightPosZ});
-      this.light1.intensity = this.lightIntensity;
+      this.pointlight.dispose();
+      this.pointlight = this.createHemisphericLight('pointlight', {x: this.pointlightPosX, y: this.pointlightPosY, z: this.pointlightPosZ});
+      this.pointlight.intensity = this.pointlightIntensity;
     }
   }
-
 }

@@ -14,10 +14,21 @@ import {LoadModelService} from '../../services/load-model/load-model.service';
   templateUrl: './modelsettings.component.html',
   styleUrls: ['./modelsettings.component.scss']
 })
+
 export class ModelsettingsComponent implements OnInit {
 
   private activeModel;
-  private isChecked = false;
+  private preview: string;
+  private setEffect = false;
+
+  private cameraPositionInitial: {
+    cameraType: string;
+    position: {
+      x: number;
+      y: number;
+      z: number;
+    };
+  };
 
   constructor(private cameraService: CameraService,
               private babylonService: BabylonService,
@@ -33,64 +44,58 @@ export class ModelsettingsComponent implements OnInit {
   ngOnInit() {
   }
 
-  private pitch1(event: any) {
-    this.babylonService.setLightIntensity('light1', event.value);
+  /*
+   * Light Settings
+   */
+
+  // Ambientlights
+
+  setAmbientlightIntensityUp(event: any) {
+    this.babylonService.setLightIntensity('ambientlightUp', event.value);
   }
 
-  private pitch2(event: any) {
-    this.babylonService.setLightIntensity('light2', event.value);
+  setAmbientlightIntensityDown(event: any) {
+    this.babylonService.setLightIntensity('ambientlightDown', event.value);
   }
 
-  private pitch3(event: any) {
-    this.babylonService.setLightIntensity('light3', event.value);
+  // Pointlight
+
+  setPointlightIntensity(event: any) {
+    this.babylonService.setLightIntensity('pointlight', event.value);
   }
 
-  private pitchLightX(event: any) {
-    console.log(event.value);
+  pointlightPosX(event: any) {
     this.babylonService.setLightPosition('x', event.value);
   }
 
-  private pitchLightY(event: any) {
-    console.log(event.value);
+  pointlightPosY(event: any) {
     this.babylonService.setLightPosition('y', event.value);
   }
 
-  private pitchLightZ(event: any) {
-    console.log(event.value);
+  pointlightPosZ(event: any) {
     this.babylonService.setLightPosition('z', event.value);
   }
 
-  private handleChangeBackground() {
-    this.isChecked = (this.isChecked === true) ? false : true;
-    console.log('Checked value changed.' + this.isChecked);
-    this.babylonService.setBackgroundImage(this.isChecked);
+
+  /*
+* Initial Perspective & Preview Settings
+*/
+
+  setInitialView() {
+    this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
+    this.babylonService.createPreviewScreenshot(400).then(screenshot => {
+      this.preview = screenshot;
+    }, error => {
+      this.message.error(error);
+    });
   }
 
-  private async setInitialPerspective() {
-    if (!this.loadModelService.isDefaultLoad) {
-      console.log('die Kamerapos ist : ', this.cameraService.getActualCameraPosInitialView());
-      if (this.activeModel !== null) {
-        this.mongohandlerService.updateCameraPos(this.activeModel._id, this.cameraService.getActualCameraPosInitialView());
-      }
-      this.babylonService.createPreviewScreenshot(400).then(screenshot => {
-        this.mongohandlerService.updateScreenshot(this.activeModel._id, screenshot).subscribe(result => {
-          if (result.status === 'ok') {
-            this.loadModelService.updateActiveModel({...this.activeModel, preview: result.preview});
-            this.catalogueService.Observables.models.source['value']
-              .filter(model => model._id === this.activeModel._id)
-              .forEach(model => model.preview = result.preview);
-          }
-        }, error => {
-          this.message.error(error);
-        });
-      });
-    } else {
-      console.log('Not saved');
-    }
-  }
 
-  handleChange($event: ColorEvent) {
-    console.log($event.color);
+  /*
+* Background Settings
+*/
+
+  handleChangeColor($event: ColorEvent) {
     // color = {
     //   hex: '#333',
     //   rgb: {
@@ -106,8 +111,16 @@ export class ModelsettingsComponent implements OnInit {
     //     a: 1,
     //   },
     // }
-
-    this.babylonService.setClearColorHex($event.color.rgb.r, $event.color.rgb.g, $event.color.rgb.b, $event.color.rgb.a);
+    this.babylonService.setBackgroundColor($event.color.rgb);
   }
+
+  handleChangeEffekt() {
+    this.setEffect = (this.setEffect === true) ? false : true;
+    this.babylonService.setBackgroundImage(this.setEffect);
+  }
+
+  /*
+   * Save & Load Settings
+   */
 
 }
