@@ -38,6 +38,9 @@ export class BabylonService {
   private selectedControl: boolean;
 
   private light1: BABYLON.Light;
+  private light2: BABYLON.Light;
+  private light3: BABYLON.Light;
+
   private lightPosX: number;
   private lightPosY: number;
   private lightPosZ: number;
@@ -96,21 +99,18 @@ export class BabylonService {
           this.scene.render();
         });
 
-
         this.setClearColor(0.2, 0.2, 0.2, 0.9);
 
-        this.light1 = this.createHemisphericLight('light1', {x: 0, y: 1, z: 0});
-        this.lightPosX = 0;
-        this.lightPosY = 1;
-        this.lightPosZ = 0;
-
-
-        this.setLightIntensity(1);
+        this.light1 = this.createPointLight('light1', {x: 1, y: 10, z: 1});
+        this.setLightIntensity('light1', 1);
         this.lightIntensity = 1;
-
-        // this.background = false;
-        // this.setBackgroundImage(this.background);
-
+        this.lightPosX = 1;
+        this.lightPosY = 10;
+        this.lightPosY = 1;
+        this.light2 = this.createHemisphericLight('light2', {x: 0, y: 1, z: 0});
+        this.setLightIntensity('light2', 1);
+        this.light3 = this.createHemisphericLight('light3', {x: 0, y: -1, z: 0});
+        this.setLightIntensity('light3', 1);
 
       }
     });
@@ -138,7 +138,10 @@ export class BabylonService {
 
   public setClearColorHex(r: number, g: number, b: number, a: number): void {
     this.scene.clearColor = new BABYLON.Color4(r / 255, g / 255, b / 255, a);
+  }
 
+  public createPointLight(name: string, position: any): BABYLON.PointLight {
+    return new BABYLON.PointLight(name, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
   }
 
   public createHemisphericLight(name: string, position: any): BABYLON.HemisphericLight {
@@ -268,7 +271,7 @@ export class BabylonService {
         (screenshot) => {
           fetch(screenshot).then(res => res.blob()).then(blob => BABYLON.Tools.Download(blob, `Kompakkt-${Date.now().toString()}`));
           resolve(screenshot);
-      });
+        });
     });
     this.hideMesh('plane', true);
     this.hideMesh('label', true);
@@ -284,7 +287,7 @@ export class BabylonService {
         (width === undefined) ? {width: 400, height: 225} : {width: width, height: Math.round((width / 16) * 9)},
         (screenshot) => {
           resolve(screenshot);
-      });
+        });
     });
     this.hideMesh('plane', true);
     this.hideMesh('label', true);
@@ -295,38 +298,35 @@ export class BabylonService {
     this.scene.getMeshesByTags(tag, mesh => mesh.isVisible = visibility);
   }
 
-  public setLightPosY(pos: number) {
+  public setLightIntensity(light: string, intensity: number) {
+    if (light === 'light1' && this.light1 !== undefined) {
+      this.light1.intensity = intensity;
+    }
+    if (light === 'light2' && this.light2 !== undefined) {
+      this.light2.intensity = intensity;
+    }
+    if (light === 'light3' && this.light3 !== undefined) {
+      this.light2.intensity = intensity;
+    }
+  }
+
+  public setLightPosition(dimension: string, pos: number) {
     if (this.light1 != null) {
+      switch (dimension) {
+        case 'x':
+          this.lightPosX = pos;
+          break;
+        case 'y':
+          this.lightPosX = pos;
+          break;
+        case 'z':
+          this.lightPosX = pos;
+          break;
+      }
       this.light1.dispose();
-      this.lightPosY = pos;
       this.light1 = this.createHemisphericLight('light1', {x: this.lightPosX, y: this.lightPosY, z: this.lightPosZ});
       this.light1.intensity = this.lightIntensity;
     }
   }
 
-  public setLightPosZ(pos: number) {
-    if (this.light1 != null) {
-      this.light1.dispose();
-      this.lightPosZ = pos;
-      this.light1 = this.createHemisphericLight('light1', {x: this.lightPosX, y: this.lightPosY, z: this.lightPosZ});
-      this.light1.intensity = this.lightIntensity;
-    }
-  }
-
-  public setLightIntensity(intensity: number) {
-    if (this.light1 != null) {
-      this.lightIntensity = intensity;
-      this.light1.intensity = this.lightIntensity;
-    }
-  }
-
-  public setLightPosX(pos: number) {
-    if (this.light1 != null) {
-
-      this.light1.dispose();
-      this.lightPosX = pos;
-      this.light1 = this.createHemisphericLight('light1', {x: this.lightPosX, y: this.lightPosY, z: this.lightPosZ});
-      this.light1.intensity = this.lightIntensity;
-    }
-  }
 }

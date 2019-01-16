@@ -22,7 +22,9 @@ import {
   MatTabsModule,
   MatExpansionModule,
   MatFormFieldModule,
-  MatCheckboxModule, MatInputModule, MatListModule, MatDividerModule, MatSliderModule, MatRadioModule, MatSelectModule, MatDialogModule
+  MatCheckboxModule,
+  MatInputModule,
+  MatListModule, MatDividerModule, MatSliderModule, MatRadioModule, MatSelectModule, MatDialogModule, MatSlideToggleModule
 } from '@angular/material';
 import {EditorComponent} from './components/editor/editor.component';
 import {AnnotationsEditorComponent} from './components/annotations-editor/annotations-editor.component';
@@ -71,7 +73,6 @@ import { LoginComponent } from './components/login/login.component';
     MatInputModule,
     MatListModule,
     MatDividerModule,
-    DragDropModule,
     HttpClientModule,
     DragDropModule,
     DeviceDetectorModule.forRoot(),
@@ -79,7 +80,8 @@ import { LoginComponent } from './components/login/login.component';
     MatSliderModule,
     MatRadioModule,
     MatSelectModule,
-    MatDialogModule
+    MatDialogModule,
+    MatSlideToggleModule
   ],
   entryComponents: [
     LoginComponent

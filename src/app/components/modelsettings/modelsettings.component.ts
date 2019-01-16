@@ -33,23 +33,31 @@ export class ModelsettingsComponent implements OnInit {
   ngOnInit() {
   }
 
-  private pitch(event: any) {
-    this.babylonService.setLightIntensity(event.value);
+  private pitch1(event: any) {
+    this.babylonService.setLightIntensity('light1', event.value);
+  }
+
+  private pitch2(event: any) {
+    this.babylonService.setLightIntensity('light2', event.value);
+  }
+
+  private pitch3(event: any) {
+    this.babylonService.setLightIntensity('light3', event.value);
   }
 
   private pitchLightX(event: any) {
     console.log(event.value);
-    this.babylonService.setLightPosX(event.value);
+    this.babylonService.setLightPosition('x', event.value);
   }
 
   private pitchLightY(event: any) {
     console.log(event.value);
-    this.babylonService.setLightPosY(event.value);
+    this.babylonService.setLightPosition('y', event.value);
   }
 
   private pitchLightZ(event: any) {
     console.log(event.value);
-    this.babylonService.setLightPosZ(event.value);
+    this.babylonService.setLightPosition('z', event.value);
   }
 
   private handleChangeBackground() {

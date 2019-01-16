@@ -1,29 +1,33 @@
 <mat-card class="model-card" *ngIf="this.activeModel != null">
-
   <mat-card-header>
-
     <mat-card-title>
-      Select initial model settings
+      Select model settings
     </mat-card-title>
-
   </mat-card-header>
   <mat-card-content>
     <h3 *ngIf="this.loadModelService.isDefaultLoad">Initial Perspective</h3>
     <h3 *ngIf="!this.loadModelService.isDefaultLoad">Select initial Perspective</h3>
     <p *ngIf="!this.loadModelService.isDefaultLoad">Click on image to select a new initial Perspective.</p>
     <img mat-card-image [src]="this.activeModel.preview" (click)="setInitialPerspective()"/>
-    <h3>Select background</h3>
+    <br><br><br>
+    <h3>Background</h3>
     <color-chrome (onChange)="handleChange($event)"></color-chrome>
-    <p>Effect</p>
-    <mat-checkbox (change)="handleChangeBackground()"></mat-checkbox>
-    <h3>Select lights</h3>
-    <p>Brightness</p>
-    <mat-slider min="0" max="1" step="0.1" value="1" #matslider (input)="pitch($event)"></mat-slider>
-    <p>PosX</p>
-    <mat-slider min="0" max="10" step="1" value="0" #matslider (input)="pitchLightX($event)"></mat-slider>
-    <p>PosY</p>
-    <mat-slider min="0" max="10" step="1" value="1" #matslider (input)="pitchLightY($event)"></mat-slider>
-    <p>PosZ</p>
-    <mat-slider min="0" max="10" step="1" value="0" #matslider (input)="pitchLightZ($event)"></mat-slider>
+    <br>
+    <mat-slide-toggle (change)="handleChangeBackground()">Gradient-Brightness Effect</mat-slide-toggle>
+    <br><br><br>
+    <h3>Lights</h3>
+    <h4>Brightness</h4>
+    <p>Ambient environment lights</p>
+    <h5>Fabulous (up towards the sky)</h5>
+    <mat-slider min="0" max="1" step="0.1" value="1" #matslider (input)="pitch3($event)"></mat-slider>
+    <h5>Sunny (down towards the ground)</h5>
+    <mat-slider min="0" max="1" step="0.1" value="1" #matslider (input)="pitch2($event)"></mat-slider>
+    <br>
+    <p>Pointlight</p>
+    <mat-slider min="0" max="1" step="0.1" value="1" #matslider (input)="pitch1($event)"></mat-slider>
+    <h5>Pointlight Dimensions: X Y Z</h5>
+    <mat-slider min="-10" max="10" step="1" value="0" #matslider (input)="pitchLightX($event)" vertical></mat-slider>
+    <mat-slider min="-10" max="10" step="1" value="1" #matslider (input)="pitchLightY($event)" vertical></mat-slider>
+    <mat-slider min="-10" max="10" step="1" value="0" #matslider (input)="pitchLightZ($event)" vertical></mat-slider>
   </mat-card-content>
 </mat-card>
