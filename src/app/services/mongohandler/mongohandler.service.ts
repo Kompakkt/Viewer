@@ -9,7 +9,7 @@ import {Observable} from 'rxjs';
 export class MongohandlerService {
 
   private endpoint = `${environment.express_server_url}:${environment.express_server_port}`;
-    private httpOptions = {
+  private httpOptions = {
     headers: new HttpHeaders({
       'Content-Type': 'application/json'
     }),
@@ -41,6 +41,7 @@ export class MongohandlerService {
   public getModel(identifier: string): Observable<any> {
     return this.get(`api/v1/get/find/model/${identifier}`);
   }
+
   public getCompilation(identifier: string): Observable<any> {
     return this.get(`api/v1/get/find/compilation//${identifier}`);
   }
@@ -66,6 +67,10 @@ export class MongohandlerService {
 
   public isAuthorized() {
     return this.get(`auth`);
+  }
+
+  public saveInitialData(obj: any) {
+    console.log('this should be saved: ', obj);
   }
 
 }

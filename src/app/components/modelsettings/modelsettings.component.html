@@ -7,7 +7,7 @@
   <mat-card-content>
     <br><br><br>
     <button mat-button>Back to Default</button>
-    <button mat-button>Save as default</button>
+    <button mat-button (click)="saveActualSettings()">Save as default</button>
     <br><br><br>
     <h3 *ngIf="this.loadModelService.isDefaultLoad">Initial Perspective</h3>
     <h3 *ngIf="!this.loadModelService.isDefaultLoad">Select initial Perspective</h3>
@@ -35,6 +35,6 @@
     <mat-slider min="-10" max="10" step="1" value="0" #matslider (input)="pointlightPosZ($event)" vertical></mat-slider>
     <br><br><br>
     <button mat-button>Back to Default</button>
-    <button mat-button>Save as default</button>
+    <button mat-button (click)="saveActualSettings()">Save as default</button>
   </mat-card-content>
 </mat-card>

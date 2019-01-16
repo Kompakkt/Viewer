@@ -354,4 +354,21 @@ export class BabylonService {
       this.pointlight.intensity = this.pointlightIntensity;
     }
   }
+
+  public getColor(): any {
+    return this.color;
+  }
+
+  public getPointlightData(): any {
+    return {
+      type: 'PointLight',
+      position: {
+        x: this.pointlightPosX,
+        y: this.pointlightPosY,
+        z: this.pointlightPosZ
+      },
+      intensity: this.pointlightIntensity
+    };
+  }
+
 }

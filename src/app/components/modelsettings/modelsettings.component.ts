@@ -30,6 +30,10 @@ export class ModelsettingsComponent implements OnInit {
     };
   };
 
+  private ambientlightUpintensity: number;
+  private ambientlightDownintensity: number;
+
+
   constructor(private cameraService: CameraService,
               private babylonService: BabylonService,
               private mongohandlerService: MongohandlerService,
@@ -52,10 +56,12 @@ export class ModelsettingsComponent implements OnInit {
 
   setAmbientlightIntensityUp(event: any) {
     this.babylonService.setLightIntensity('ambientlightUp', event.value);
+    this.ambientlightUpintensity = event.value;
   }
 
   setAmbientlightIntensityDown(event: any) {
     this.babylonService.setLightIntensity('ambientlightDown', event.value);
+    this.ambientlightDownintensity = event.value;
   }
 
   // Pointlight
@@ -123,7 +129,41 @@ export class ModelsettingsComponent implements OnInit {
    * Save & Load Settings
    */
 
+  // TODO Initial Load
+
   // TODO Back to Default
 
   // TODO Save
+
+  saveActualSettings() {
+
+    this.mongohandlerService.saveInitialData({
+      settings: {
+        preview: this.preview,
+        cameraPositionInitial: this.cameraPositionInitial,
+        background: {
+          Color: this.babylonService.getColor(),
+          effect: this.setEffect
+        },
+        lights: [{
+          type: 'HemisphericLight',
+          position: {
+            x: 0,
+            y: -1,
+            z: 0
+          },
+          intensity: this.ambientlightDownintensity
+        },
+          {
+            type: 'HemisphericLight',
+            position: {
+              x: 0,
+              y: 1,
+              z: 0
+            },
+            intensity: this.ambientlightUpintensity
+          }
+          // this.babylonService.getPointlightData();
+        ]}});
+  }
 }
