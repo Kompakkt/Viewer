@@ -43,14 +43,15 @@ export class ModelsettingsComponent implements OnInit {
               private annotationmarkerService: AnnotationmarkerService,
               private loadModelService: LoadModelService
   ) {
-  }
-
-  ngOnInit() {
-
     this.loadModelService.Observables.actualModel.subscribe(actualModel => {
       this.activeModel = actualModel;
       this.setSettings();
     });
+  }
+
+  ngOnInit() {
+
+
 
   }
 
