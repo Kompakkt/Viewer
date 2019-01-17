@@ -148,6 +148,8 @@ export class LoadModelService {
   }
 
   public loadModel(newModel: Model, overrideUrl?: string) {
+
+    console.log('Ich lade: ', newModel);
     this.updateActiveModel(newModel);
     const URL = (overrideUrl !== undefined) ? overrideUrl : this.baseUrl;
 

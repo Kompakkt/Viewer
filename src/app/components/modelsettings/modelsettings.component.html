@@ -12,7 +12,8 @@
     <h3 *ngIf="this.loadModelService.isDefaultLoad">Initial Perspective</h3>
     <h3 *ngIf="!this.loadModelService.isDefaultLoad">Select initial Perspective</h3>
     <p *ngIf="!this.loadModelService.isDefaultLoad">Click on image to select a new initial Perspective.</p>
-    <img mat-card-image [src]="this.activeModel.preview" (click)="setInitialView()"/>
+    <img mat-card-image src={{preview}} (click)="setInitialView()">
+
     <br><br><br>
     <h3>Background</h3>
     <color-chrome (onChange)="handleChangeColor($event)"></color-chrome>
@@ -23,9 +24,9 @@
     <h4>Brightness</h4>
     <p>Ambient environment lights</p>
     <h5>Fabulous (up towards the sky)</h5>
-    <mat-slider min="0" max="1" step="0.1" value="1" #matslider (input)="setAmbientlightIntensityUp($event)"></mat-slider>
+    <mat-slider min="0" max="1" step="0.1" value={{ambientlightUpintensity}} #matslider (input)="setAmbientlightIntensityUp($event)"></mat-slider>
     <h5>Sunny (down towards the ground)</h5>
-    <mat-slider min="0" max="1" step="0.1" value="1" #matslider (input)="setAmbientlightIntensityDown($event)"></mat-slider>
+    <mat-slider min="0" max="1" step="0.1" value={{ambientlightDownintensity}} #matslider (input)="setAmbientlightIntensityDown($event)"></mat-slider>
     <br>
     <p>Pointlight</p>
     <mat-slider min="0" max="1" step="0.1" value="1" #matslider (input)="setPointlightIntensity($event)"></mat-slider>

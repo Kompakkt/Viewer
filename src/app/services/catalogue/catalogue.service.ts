@@ -72,7 +72,7 @@ export class CatalogueService {
                   medium: query,
                   high: query,
                   raw: query
-                }
+                },
               });
               this.isFirstLoad = false;
               break;
