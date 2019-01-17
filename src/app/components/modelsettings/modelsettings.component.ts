@@ -174,6 +174,7 @@ export class ModelsettingsComponent implements OnInit {
     };
     settings.lights.push(this.babylonService.getPointlightData());
     console.log(this.activeModel._id, settings);
+    this.activeModel.settings = settings;
     this.mongohandlerService.updateSettings(this.activeModel._id, settings).subscribe(result => {
       console.log(result);
     });
