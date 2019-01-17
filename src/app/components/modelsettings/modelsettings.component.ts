@@ -35,7 +35,6 @@ export class ModelsettingsComponent implements OnInit {
   private ambientlightDownintensity: number;
 
 
-
   constructor(private cameraService: CameraService,
               private babylonService: BabylonService,
               private mongohandlerService: MongohandlerService,
@@ -193,37 +192,48 @@ export class ModelsettingsComponent implements OnInit {
   }
 
   // TODO Back to default
+  backToDefault() {
+
+    this.preview = this.activeModel.settings.preview;
+
+    const camera = this.activeModel.settings.cameraPositionInitial;
+    const positionVector = new BABYLON.Vector3(camera.position.x,
+      camera.position.y, camera.position.z);
+    this.cameraService.moveCameraToTarget(positionVector);
+
+    this.babylonService.setBackgroundColor(this.activeModel.settings.background.color);
+    this.setEffect = this.activeModel.settings.background.effect;
+    this.babylonService.setBackgroundImage(this.setEffect);
+
+    const pointLight = this.activeModel.settings.lights.filter(obj => obj.type === 'PointLight')[0];
+    this.babylonService.createPointLight('pointlight', pointLight.position);
+    this.babylonService.setLightIntensity('pointlight', pointLight.intensity);
+
+    const hemisphericLightUp = this.activeModel.settings.lights.filter(obj => obj.type === 'HemisphericLight' && obj.position.y === 1)[0];
+    this.babylonService.setLightIntensity('ambientlightUp', hemisphericLightUp.intensity);
+    this.ambientlightUpintensity = hemisphericLightUp.intensity;
+
+    const hemisphericLightDown = this.activeModel.settings.lights.filter(obj => obj.type === 'HemisphericLight' && obj.position.y === -1)[0];
+    this.babylonService.setLightIntensity('ambientlightDown', hemisphericLightDown.intensity);
+    this.ambientlightDownintensity = hemisphericLightDown.intensity;
+  }
 
   private async setSettings() {
 
     if (this.activeModel.settings === undefined) {
       const settings = {
         preview: '',
-        cameraPositionInitial: '',
+        cameraPositionInitial: undefined,
         background: {
-          color: '',
-          effect: ''
-        },
-        lights: [
-          {
-            type: 'HemisphericLight',
-            position: {
-              x: 0,
-              y: -1,
-              z: 0
-            },
-            intensity: (this.ambientlightDownintensity) ? this.ambientlightDownintensity : 1
+          color: {
+            r: 0.2,
+            g: 0.2,
+            b: 0.2,
+            a: 0.9
           },
-          {
-            type: 'HemisphericLight',
-            position: {
-              x: 0,
-              y: 1,
-              z: 0
-            },
-            intensity: this.ambientlightUpintensity ? this.ambientlightUpintensity : 1
-          }
-        ]
+          effect: true,
+        },
+        lights: '',
       };
 
       this.activeModel['settings'] = settings;
@@ -261,7 +271,7 @@ export class ModelsettingsComponent implements OnInit {
         a: 0.9
       };
       this.babylonService.setClearColor(color);
-      this.activeModel.settings.background.color = color;
+      // this.activeModel.settings.background.color = color;
     }
     if (this.activeModel.settings.background.effect !== undefined && this.activeModel.settings.background.effect !== '') {
       this.setEffect = this.activeModel.settings.background.effect;
@@ -276,7 +286,8 @@ export class ModelsettingsComponent implements OnInit {
     if (this.activeModel.settings.lights !== '' && this.activeModel.settings.lights !== undefined) {
 
 
-      const pointLight = this.activeModel.settings.lights.find(e => e['type'] === 'PointLight');
+      const pointLight = this.activeModel.settings.lights.filter(obj => obj.type === 'PointLight')[0];
+
       if (pointLight !== undefined) {
         this.babylonService.createPointLight('pointlight', pointLight.position);
         if (pointLight.intensity !== undefined) {
@@ -363,7 +374,7 @@ export class ModelsettingsComponent implements OnInit {
             y: -1,
             z: 0
           },
-          intensity: (this.ambientlightDownintensity) ? this.ambientlightDownintensity : 1
+          intensity: 1
         },
         {
           type: 'HemisphericLight',
@@ -372,12 +383,13 @@ export class ModelsettingsComponent implements OnInit {
             y: 1,
             z: 0
           },
-          intensity: this.ambientlightUpintensity ? this.ambientlightUpintensity : 1
+          intensity: 1
         }
       ];
 
       lights.push(this.babylonService.getPointlightData());
       this.activeModel.settings.add(lights);
+      console.log('So siehts aus: ', this.activeModel.settings);
 
 
     }

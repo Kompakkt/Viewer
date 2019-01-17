@@ -349,11 +349,11 @@ export class BabylonService {
           console.log('Pos: ' + pos);
           break;
         case 'y':
-          this.pointlightPosX = pos;
+          this.pointlightPosY = pos;
           console.log('Pos: ' + pos);
           break;
         case 'z':
-          this.pointlightPosX = pos;
+          this.pointlightPosZ = pos;
           console.log('Pos: ' + pos);
           break;
       }
