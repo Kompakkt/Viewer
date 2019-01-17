@@ -51,7 +51,7 @@ export class BabylonService {
   private pointlightPosX: number;
   private pointlightPosY: number;
   private pointlightPosZ: number;
-  private pointlightIntensity: number;
+  public pointlightIntensity: number;
 
   private background: BABYLON.Layer;
   private isBackground: boolean;

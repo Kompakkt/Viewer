@@ -35,6 +35,7 @@ export class ModelsettingsComponent implements OnInit {
   private ambientlightDownintensity: number;
 
 
+
   constructor(private cameraService: CameraService,
               private babylonService: BabylonService,
               private mongohandlerService: MongohandlerService,

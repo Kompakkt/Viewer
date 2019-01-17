@@ -29,7 +29,7 @@
     <mat-slider min="0" max="1" step="0.1" value={{ambientlightDownintensity}} #matslider (input)="setAmbientlightIntensityDown($event)"></mat-slider>
     <br>
     <p>Pointlight</p>
-    <mat-slider min="0" max="1" step="0.1" value="1" #matslider (input)="setPointlightIntensity($event)"></mat-slider>
+    <mat-slider min="0" max="1" step="0.1" value={{this.babylonService.pointlightIntensity}} #matslider (input)="setPointlightIntensity($event)"></mat-slider>
     <h5>Pointlight Dimensions: X Y Z</h5>
     <mat-slider min="-10" max="10" step="1" value="0" #matslider (input)="pointlightPosX($event)" vertical></mat-slider>
     <mat-slider min="-10" max="10" step="1" value="1" #matslider (input)="pointlightPosY($event)" vertical></mat-slider>
