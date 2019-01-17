@@ -315,7 +315,8 @@ export class ModelsettingsComponent implements OnInit {
         );
       }
 
-      const hemisphericLightDown = this.activeModel.settings.lights.filter(obj => obj.type === 'HemisphericLight' && obj.position.y === -1)[0];
+      const hemisphericLightDown = this.activeModel.settings.lights.filter(
+        obj => obj.type === 'HemisphericLight' && obj.position.y === -1)[0];
       if (hemisphericLightDown !== undefined && hemisphericLightDown.intensity !== undefined) {
         this.babylonService.createAmbientlightDown('ambientlightDown', hemisphericLightDown.position);
         this.babylonService.setLightIntensity('ambientlightDown', hemisphericLightDown.intensity);

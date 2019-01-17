@@ -356,10 +356,7 @@ export class BabylonService {
           console.log('Pos: ' + pos);
           break;
       }
-      if (this.pointlight !== undefined) {
-        this.pointlight.dispose();
-        console.log('Disp ');
-      }
+
       this.createPointLight('pointlight', {x: this.pointlightPosX, y: this.pointlightPosY, z: this.pointlightPosZ});
     }
   }
