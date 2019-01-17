@@ -292,6 +292,7 @@ export class BabylonService {
   public setLightIntensity(light: string, intensity: number) {
     if (light === 'pointlight' && this.pointlight !== undefined) {
       this.pointlight.intensity = intensity;
+      this.pointlightIntensity = intensity;
       console.log('set Intensity: ', intensity);
     }
     if (light === 'ambientlightUp' && this.ambientlightUp !== undefined) {

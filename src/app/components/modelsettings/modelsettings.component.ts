@@ -280,9 +280,11 @@ export class ModelsettingsComponent implements OnInit {
         this.babylonService.createPointLight('pointlight', pointLight.position);
         if (pointLight.intensity !== undefined) {
           this.babylonService.setLightIntensity('pointlight', pointLight.intensity);
+          console.log('Die Intensität ist: ', pointLight.intensity);
         } else {
           this.babylonService.setLightIntensity('pointlight', 1);
           this.activeModel.settings.lights.push(this.babylonService.getPointlightData());
+          console.log('Die Intensität ist: nicht geladen');
         }
       } else {
         this.babylonService.createPointLight('pointlight', {x: 1, y: 10, z: 1});
