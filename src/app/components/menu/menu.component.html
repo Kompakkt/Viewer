@@ -1,7 +1,7 @@
 <div *ngIf="menuIsEnabled">
 
   <!-- funktioniert neuerdings nicht mehr: ngIf="!singleModel"siehe objects repo, wenn ein Modell geladen wird -->
-  <button *ngIf="!singleModel"
+  <button *ngIf="!isSingleModel"
           mat-icon-button (click)="toggleCollectionsOverview()"
           [class.active]="this.collectionsActive"
           matTooltip="Catalogue" matTooltipPosition="above">
