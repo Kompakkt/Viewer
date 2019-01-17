@@ -389,7 +389,8 @@ export class ModelsettingsComponent implements OnInit {
       ];
 
       lights.push(this.babylonService.getPointlightData());
-      this.activeModel.settings.add(lights);
+      console.log(lights);
+      this.activeModel.settings['lights'] = lights;
       console.log('So siehts aus: ', this.activeModel.settings);
 
 
