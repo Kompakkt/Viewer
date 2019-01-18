@@ -197,10 +197,15 @@ export class ModelsettingsComponent implements OnInit {
 
     this.preview = this.activeModel.settings.preview;
 
-    const camera = this.activeModel.settings.cameraPositionInitial.find(e => e['cameraType'] === 'arcRotateCam');
-    const positionVector = new BABYLON.Vector3(camera.position.x,
-      camera.position.y, camera.position.z);
-    this.cameraService.moveCameraToTarget(positionVector);
+    let camera;
+    if (this.activeModel.settings.cameraPositionInitial.length > 1) {
+      camera = this.activeModel.settings.cameraPositionInitial.filter(obj => obj.cameraType === 'arcRotateCam')[0];
+    } else { camera = this.activeModel.settings.cameraPositionInitial; }
+    if (camera !== undefined) {
+      const positionVector = new BABYLON.Vector3(camera.position.x,
+        camera.position.y, camera.position.z);
+      this.cameraService.moveCameraToTarget(positionVector);
+    }
 
     this.babylonService.setBackgroundColor(this.activeModel.settings.background.color);
     this.setEffect = this.activeModel.settings.background.effect;
@@ -241,7 +246,10 @@ export class ModelsettingsComponent implements OnInit {
       cameraSettings.push(this.cameraService.getActualCameraPosInitialView());
       this.activeModel.settings['cameraPositionInitial'] = cameraSettings;
     } else {
-      const camera = this.activeModel.settings.cameraPositionInitial.find(e => e['cameraType'] === 'arcRotateCam');
+      let camera;
+      if (this.activeModel.settings.cameraPositionInitial.length > 1) {
+      camera = this.activeModel.settings.cameraPositionInitial.filter(obj => obj.cameraType === 'arcRotateCam')[0];
+      } else { camera = this.activeModel.settings.cameraPositionInitial; }
       if (camera !== undefined) {
         const positionVector = new BABYLON.Vector3(camera.position.x,
           camera.position.y, camera.position.z);

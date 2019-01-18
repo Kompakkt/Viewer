@@ -151,6 +151,8 @@ export class LoadModelService {
 
   public loadModel(newModel: Model, overrideUrl?: string) {
 
+    console.log('Ich lade: ', newModel);
+
     const URL = (overrideUrl !== undefined) ? overrideUrl : this.baseUrl;
 
     if (!this.loadingScreenHandler.isLoading) {
