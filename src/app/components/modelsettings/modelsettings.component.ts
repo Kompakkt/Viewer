@@ -197,7 +197,7 @@ export class ModelsettingsComponent implements OnInit {
 
     this.preview = this.activeModel.settings.preview;
 
-    const camera = this.activeModel.settings.cameraPositionInitial;
+    const camera = this.activeModel.settings.cameraPositionInitial.find(e => e['cameraType'] === 'arcRotateCam');
     const positionVector = new BABYLON.Vector3(camera.position.x,
       camera.position.y, camera.position.z);
     this.cameraService.moveCameraToTarget(positionVector);
@@ -214,7 +214,8 @@ export class ModelsettingsComponent implements OnInit {
     this.babylonService.setLightIntensity('ambientlightUp', hemisphericLightUp.intensity);
     this.ambientlightUpintensity = hemisphericLightUp.intensity;
 
-    const hemisphericLightDown = this.activeModel.settings.lights.filter(obj => obj.type === 'HemisphericLight' && obj.position.y === -1)[0];
+    const hemisphericLightDown = this.activeModel.settings.lights.filter(
+      obj => obj.type === 'HemisphericLight' && obj.position.y === -1)[0];
     this.babylonService.setLightIntensity('ambientlightDown', hemisphericLightDown.intensity);
     this.ambientlightDownintensity = hemisphericLightDown.intensity;
   }
@@ -224,19 +225,7 @@ export class ModelsettingsComponent implements OnInit {
     if (this.activeModel.settings === undefined) {
       const settings = {
         preview: '',
-        cameraPositionInitial: undefined,
-        background: {
-          color: {
-            r: 0.2,
-            g: 0.2,
-            b: 0.2,
-            a: 0.9
-          },
-          effect: true,
-        },
-        lights: '',
       };
-
       this.activeModel['settings'] = settings;
     }
 
@@ -248,124 +237,42 @@ export class ModelsettingsComponent implements OnInit {
 
     if (this.activeModel.settings.cameraPositionInitial === undefined) {
       this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
-      this.activeModel.settings.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
+      const cameraSettings = [];
+      cameraSettings.push(this.cameraService.getActualCameraPosInitialView());
+      this.activeModel.settings['cameraPositionInitial'] = cameraSettings;
     } else {
-      // const camera = this.activeModel.settings.cameraPositionInitial.find(e => e['cameraType'] === 'arcRotateCam');
-      const camera = this.activeModel.settings.cameraPositionInitial;
-      if (camera !== undefined && camera !== '') {
+      const camera = this.activeModel.settings.cameraPositionInitial.find(e => e['cameraType'] === 'arcRotateCam');
+      if (camera !== undefined) {
         const positionVector = new BABYLON.Vector3(camera.position.x,
           camera.position.y, camera.position.z);
         this.cameraService.moveCameraToTarget(positionVector);
       } else {
         this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
-        this.activeModel.settings.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
+        this.activeModel.settings.cameraPositionInitial.push(this.cameraService.getActualCameraPosInitialView());
       }
     }
 
-    if (this.activeModel.settings.background.color !== undefined && this.activeModel.settings.background.color !== '') {
-      this.babylonService.setBackgroundColor(this.activeModel.settings.background.color);
-    } else {
-      const color = {
-        r: 0.2,
-        g: 0.2,
-        b: 0.2,
-        a: 0.9
+    if (this.activeModel.settings.background === undefined) {
+      const background = {
+        color: {
+          r: 51,
+          g: 51,
+          b: 51,
+          a: 229.5
+        },
+        effect: false
       };
-      this.babylonService.setClearColor(color);
-      // this.activeModel.settings.background.color = color;
-    }
-    if (this.activeModel.settings.background.effect !== undefined && this.activeModel.settings.background.effect !== '') {
+      this.activeModel.settings['background'] = background;
+      this.babylonService.setBackgroundColor(background.color);
+      this.setEffect = background.effect;
+      this.babylonService.setBackgroundImage(background.effect);
+    } else {
+      this.babylonService.setBackgroundColor(this.activeModel.settings.background.color);
       this.setEffect = this.activeModel.settings.background.effect;
       this.babylonService.setBackgroundImage(this.setEffect);
-    } else {
-      this.activeModel.settings.background.effect = false;
-      this.setEffect = false;
-      this.babylonService.setBackgroundImage(false);
     }
 
-
-    if (this.activeModel.settings.lights !== '' && this.activeModel.settings.lights !== undefined) {
-
-
-      const pointLight = this.activeModel.settings.lights.filter(obj => obj.type === 'PointLight')[0];
-
-      if (pointLight !== undefined) {
-        this.babylonService.createPointLight('pointlight', pointLight.position);
-        if (pointLight.intensity !== undefined) {
-          this.babylonService.setLightIntensity('pointlight', pointLight.intensity);
-          console.log('Die Intensität ist: ', pointLight.intensity);
-        } else {
-          this.babylonService.setLightIntensity('pointlight', 1);
-          this.activeModel.settings.lights.push(this.babylonService.getPointlightData());
-          console.log('Die Intensität ist: nicht geladen');
-        }
-      } else {
-        this.babylonService.createPointLight('pointlight', {x: 1, y: 10, z: 1});
-        this.babylonService.setLightIntensity('pointlight', 1);
-        this.activeModel.settings.lights.push(this.babylonService.getPointlightData());
-      }
-
-      // const hemisphericLightUp = this.activeModel.settings.lights.find(e => e['type'] === 'HemisphericLight' && e['position.y'] === 1);
-      const hemisphericLightUp = this.activeModel.settings.lights.filter(obj => obj.type === 'HemisphericLight' && obj.position.y === 1)[0];
-
-
-      if (hemisphericLightUp !== undefined && hemisphericLightUp.intensity !== undefined) {
-        this.babylonService.createAmbientlightUp('ambientlightUp', hemisphericLightUp.position);
-        this.babylonService.setLightIntensity('ambientlightUp', hemisphericLightUp.intensity);
-        this.ambientlightUpintensity = hemisphericLightUp.intensity;
-      } else {
-        this.babylonService.createAmbientlightUp('ambientlightUp', {x: 0, y: 1, z: 0});
-        this.babylonService.setLightIntensity('ambientlightUp', 1);
-        this.ambientlightUpintensity = 1;
-        this.activeModel.settings.lights.push(
-          {
-            type: 'HemisphericLight',
-            position: {
-              x: 0,
-              y: 1,
-              z: 0
-            },
-            intensity: 1
-          }
-        );
-      }
-
-      const hemisphericLightDown = this.activeModel.settings.lights.filter(
-        obj => obj.type === 'HemisphericLight' && obj.position.y === -1)[0];
-      if (hemisphericLightDown !== undefined && hemisphericLightDown.intensity !== undefined) {
-        this.babylonService.createAmbientlightDown('ambientlightDown', hemisphericLightDown.position);
-        this.babylonService.setLightIntensity('ambientlightDown', hemisphericLightDown.intensity);
-        this.ambientlightDownintensity = hemisphericLightDown.intensity;
-      } else {
-        this.babylonService.createAmbientlightDown('ambientlightDown', {x: 0, y: -1, z: 0});
-        this.babylonService.setLightIntensity('ambientlightUp', 1);
-        this.ambientlightUpintensity = 1;
-        this.activeModel.settings.lights.push(
-          {
-            type: 'HemisphericLight',
-            position: {
-              x: 0,
-              y: -1,
-              z: 0
-            },
-            intensity: 1
-          }
-        );
-      }
-
-    } else {
-
-      this.babylonService.createPointLight('pointlight', {x: 1, y: 10, z: 1});
-      this.babylonService.setLightIntensity('pointlight', 1);
-
-      this.babylonService.createAmbientlightUp('ambientlightUp', {x: 0, y: 1, z: 0});
-      this.babylonService.setLightIntensity('ambientlightUp', 1);
-      this.ambientlightUpintensity = 1;
-
-      this.babylonService.createAmbientlightDown('ambientlightDown', {x: 0, y: -1, z: 0});
-      this.babylonService.setLightIntensity('ambientlightDown', 1);
-      this.ambientlightDownintensity = 1;
-
+    if (this.activeModel.settings.lights === undefined) {
 
       const lights = [
         {
@@ -385,18 +292,47 @@ export class ModelsettingsComponent implements OnInit {
             z: 0
           },
           intensity: 1
+        },
+        {
+          type: 'PointLight',
+          position: {
+            x: 1,
+            y: 10,
+            z: 1
+          },
+          intensity: 1
         }
       ];
 
-      lights.push(this.babylonService.getPointlightData());
-      console.log(lights);
       this.activeModel.settings['lights'] = lights;
-      console.log('So siehts aus: ', this.activeModel.settings);
+
+      this.babylonService.createPointLight('pointlight', {x: 1, y: 10, z: 1});
+      this.babylonService.setLightIntensity('pointlight', 1);
+
+      this.babylonService.createAmbientlightUp('ambientlightUp', {x: 0, y: 1, z: 0});
+      this.babylonService.setLightIntensity('ambientlightUp', 1);
+      this.ambientlightUpintensity = 1;
+
+      this.babylonService.createAmbientlightDown('ambientlightDown', {x: 0, y: -1, z: 0});
+      this.babylonService.setLightIntensity('ambientlightDown', 1);
+      this.ambientlightDownintensity = 1;
+    } else {
+
+      const pointLight = this.activeModel.settings.lights.filter(obj => obj.type === 'PointLight')[0];
+      this.babylonService.createPointLight('pointlight', pointLight.position);
+      this.babylonService.setLightIntensity('pointlight', pointLight.intensity);
 
 
+      const hemisphericLightUp = this.activeModel.settings.lights.filter(obj => obj.type === 'HemisphericLight' && obj.position.y === 1)[0];
+      this.babylonService.createAmbientlightUp('ambientlightUp', hemisphericLightUp.position);
+      this.babylonService.setLightIntensity('ambientlightUp', hemisphericLightUp.intensity);
+      this.ambientlightUpintensity = hemisphericLightUp.intensity;
+
+      const hemisphericLightDown = this.activeModel.settings.lights.filter(
+        obj => obj.type === 'HemisphericLight' && obj.position.y === -1)[0];
+      this.babylonService.createAmbientlightDown('ambientlightDown', hemisphericLightDown.position);
+      this.babylonService.setLightIntensity('ambientlightDown', hemisphericLightDown.intensity);
+      this.ambientlightDownintensity = hemisphericLightDown.intensity;
     }
-
-
   }
-
 }

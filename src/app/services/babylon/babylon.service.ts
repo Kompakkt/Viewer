@@ -285,10 +285,6 @@ export class BabylonService {
     this.scene.clearColor = new BABYLON.Color4(color.r / 255, color.g / 255, color.b / 255, color.a);
   }
 
-  public setClearColor(color: any): void {
-    this.scene.clearColor = new BABYLON.Color4(color.r, color.g, color.b, color.a);
-  }
-
   public setLightIntensity(light: string, intensity: number) {
     if (light === 'pointlight' && this.pointlight !== undefined) {
       this.pointlight.intensity = intensity;

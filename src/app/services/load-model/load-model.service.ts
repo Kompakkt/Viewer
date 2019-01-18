@@ -66,12 +66,14 @@ export class LoadModelService {
     this.Subjects.actualCollection.next(collection);
   }
 
-  public fetchModelData(model: Model) {
-    this.isSingleLoadModel = true;
-    this.singleModel.emit(true);
-    this.isDefaultLoad = false;
-    this.quality = 'low';
-    this.loadModel(model);
+  public fetchModelData(query: string) {
+    this.mongohandlerService.getModel(query).toPromise().then(resultModel => {
+      this.isSingleLoadModel = true;
+      this.singleModel.emit(true);
+      this.isDefaultLoad = false;
+      this.quality = 'low';
+      this.loadModel(resultModel);
+    });
   }
 
   public fetchCollectionData(identifier: string) {
@@ -159,24 +161,8 @@ export class LoadModelService {
         // Warte auf Antwort von loadModel, da loadModel ein Promise<object> von ImportMeshAync übergibt
         // model ist hier das neu geladene Model, aus dem wir direkt den Namen nehmen können
 
-        // Zentriere auf das neu geladene Model TODO: oder (falls gesetzt) wähle die default Position
+        // Zentriere auf das neu geladene Model
         this.cameraService.setActiveCameraTarget(model.meshes[0]._boundingInfo.boundingBox.centerWorld);
-
-        /*
-        if (newModel.cameraPosition[0].value !== undefined && newModel.cameraPosition[1].value
-          !== undefined && newModel.cameraPosition[2].value !== undefined) {
-
-          if (newModel.cameraPosition[0].value === 0 && newModel.cameraPosition[1].value === 0 && newModel.cameraPosition[2].value === 0) {
-            this.cameraService.setActiveCameraTarget(model.meshes[0]._boundingInfo.boundingBox.centerWorld);
-          } else {
-            const cameraVector = new BABYLON.Vector3(newModel.cameraPosition[0].value,
-              newModel.cameraPosition[1].value, newModel.cameraPosition[2].value);
-            this.cameraService.moveCameraToTarget(cameraVector);
-          }
-        } else {
-          this.cameraService.setActiveCameraTarget(model.meshes[0]._boundingInfo.boundingBox.centerWorld);
-        }
-        */
 
         // Füge Tags hinzu und lade Annotationen
         BABYLON.Tags.AddTagsTo(model.meshes[0], newModel.name);
