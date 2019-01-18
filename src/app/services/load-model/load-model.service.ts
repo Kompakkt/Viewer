@@ -167,8 +167,13 @@ export class LoadModelService {
         // Füge Tags hinzu und lade Annotationen
         BABYLON.Tags.AddTagsTo(model.meshes[0], newModel.name);
         this.updateActiveModel(newModel);
-        this.annotationService.loadAnnotations(newModel.name);
+
+          this.annotationService.loadAnnotations(newModel.name);
+        this.annotationService.initializeAnnotationMode(model.meshes[0]);
+
       });
+
+
     }
   }
 }

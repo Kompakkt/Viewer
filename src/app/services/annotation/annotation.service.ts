@@ -69,8 +69,8 @@ export class AnnotationService {
     await this.sortAnnotations();
     // Das neu geladene Modell wird annotierbar, ist aber noch nicht klickbar -> das soll erst passieren,
     // wenn der Edit-Mode aufgerufen wird
-    this.initializeAnnotationMode(modelName);
-    this.actionService.pickableModel(modelName, false);
+   // this.initializeAnnotationMode(modelName);
+   // this.actionService.pickableModel(modelName, false);
   }
 
 
@@ -94,8 +94,8 @@ export class AnnotationService {
   }
 
   // Die Annotationsfunktionalität wird zum aktuellen Modell hinzugefügt
-  public initializeAnnotationMode(modelName: string) {
-    this.actionService.createActionManager(modelName, ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
+  public initializeAnnotationMode(mesh: BABYLON.Mesh) {
+    this.actionService.createActionManager(mesh, ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
   }
 
   // Die Annotationen werden in der richtigen Reihenfolge in das Array für den visuellen Output geschrieben

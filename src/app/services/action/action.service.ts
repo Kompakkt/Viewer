@@ -11,9 +11,10 @@ export class ActionService {
   constructor(private babylonService: BabylonService) {
   }
 
-  public createActionManager(modelName: string, trigger: number, actionExecuted: (result: any) => void) {
+  public createActionManager(mesh: BABYLON.Mesh, trigger: number, actionExecuted: (result: any) => void) {
 
-    const mesh = this.babylonService.getScene().getMeshesByTags(modelName)[0];
+
+   // const mesh = this.babylonService.getScene().getMeshesByTags(modelName)[0];
 
     if (mesh !== null) {
 

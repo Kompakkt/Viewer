@@ -41,7 +41,7 @@ export class ModelsettingsComponent implements OnInit {
               private catalogueService: CatalogueService,
               private message: MessageService,
               private annotationmarkerService: AnnotationmarkerService,
-              private loadModelService: LoadModelService
+              private loadModelService: LoadModelService,
   ) {
   }
 
