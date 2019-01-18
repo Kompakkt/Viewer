@@ -4,6 +4,7 @@ import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {Model} from '../../interfaces/model/model.interface';
 import {LoadModelService} from '../../services/load-model/load-model.service';
 import {MessageService} from '../../services/message/message.service';
+import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
 
 
 @Component({
@@ -29,10 +30,13 @@ export class CollectionsOverviewComponent implements OnInit {
   private identifierCollection;
   private identifierModel;
 
+  private isLoggedin: boolean;
+
   constructor(private overlayService: OverlayService,
               public catalogueService: CatalogueService,
               private loadModelService: LoadModelService,
-              private message: MessageService
+              private message: MessageService,
+              private mongohandlerService: MongohandlerService,
   ) {
   }
 
@@ -40,6 +44,11 @@ export class CollectionsOverviewComponent implements OnInit {
 
     this.overlayService.collectionsOverview.subscribe(collectionsOverviewIsOpen => {
       this.isOpen = collectionsOverviewIsOpen;
+      if (this.isOpen) {
+        const status = this.mongohandlerService.isAuthorized();
+        console.log('Das ist der Status:', status);
+        // if (status.status === 'ok') {
+      }
     });
 
     this.loadModelService.singleModel.subscribe(singleModel => {

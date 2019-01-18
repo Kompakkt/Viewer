@@ -29,16 +29,17 @@ export class LoadModelService {
   };
 
   private baseUrl = `${environment.express_server_url}:${environment.express_server_port}/`;
-  public isDefaultLoad = false;
   public quality = 'low';
 
   private defaultModel: Model;
 
   public isSingleLoadModel = true;
   public isSingleLoadCollection = true;
+  public isDefaultLoad = true;
 
   @Output() singleCollection: EventEmitter<boolean> = new EventEmitter();
   @Output() singleModel: EventEmitter<boolean> = new EventEmitter();
+  @Output() defaultLoad: EventEmitter<boolean> = new EventEmitter();
 
   constructor(public babylonService: BabylonService,
               private actionService: ActionService,
@@ -71,6 +72,7 @@ export class LoadModelService {
       this.isSingleLoadModel = true;
       this.singleModel.emit(true);
       this.isDefaultLoad = false;
+      this.defaultLoad.emit(false);
       this.quality = 'low';
       this.loadModel(resultModel);
     });
@@ -80,6 +82,7 @@ export class LoadModelService {
     this.isSingleLoadCollection = true;
     this.singleCollection.emit(true);
     this.isDefaultLoad = false;
+    this.defaultLoad.emit(false);
     this.quality = 'low';
     this.mongohandlerService.getCompilation(identifier).subscribe(compilation => {
       this.updateActiveCollection(compilation);
@@ -91,6 +94,7 @@ export class LoadModelService {
 
   public loadDefaultModelData() {
     this.isDefaultLoad = true;
+    this.defaultLoad.emit(true);
     this.isSingleLoadModel = false;
     this.singleModel.emit(false);
     this.isSingleLoadCollection = false;
@@ -125,6 +129,7 @@ export class LoadModelService {
 
   public loadSelectedModel(model: Model, collection: boolean) {
     this.isDefaultLoad = false;
+    this.defaultLoad.emit(false);
     this.isSingleLoadModel = false;
     this.singleModel.emit(false);
     this.isSingleLoadCollection = false;
@@ -167,9 +172,10 @@ export class LoadModelService {
         // Füge Tags hinzu und lade Annotationen
         BABYLON.Tags.AddTagsTo(model.meshes[0], newModel.name);
         this.updateActiveModel(newModel);
+        this.annotationService.loadAnnotations(newModel.name, this.isDefaultLoad);
 
-          this.annotationService.loadAnnotations(newModel.name);
         this.annotationService.initializeAnnotationMode(model.meshes[0]);
+
 
       });
 
