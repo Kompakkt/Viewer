@@ -151,8 +151,6 @@ export class LoadModelService {
 
   public loadModel(newModel: Model, overrideUrl?: string) {
 
-    console.log('Ich lade: ', newModel);
-    this.updateActiveModel(newModel);
     const URL = (overrideUrl !== undefined) ? overrideUrl : this.baseUrl;
 
     if (!this.loadingScreenHandler.isLoading) {
@@ -166,6 +164,7 @@ export class LoadModelService {
 
         // Füge Tags hinzu und lade Annotationen
         BABYLON.Tags.AddTagsTo(model.meshes[0], newModel.name);
+        this.updateActiveModel(newModel);
         this.annotationService.loadAnnotations(newModel.name);
       });
     }
