@@ -230,7 +230,7 @@ export class DataService {
       console.log(info);
     });
 
-    this.dumpDB();
+    this.dumpAnnotations();
   }
 
   private destroyDB(): void {
@@ -289,30 +289,35 @@ export class DataService {
     });
   }
 
-  private dumpDB() {
+  public dumpAnnotations() {
 
-    /*
     this.database.allDocs({include_docs: true, attachments: true}).then((result) => {
 
+      let dump;
+
+      /*
       let dump = JSON.stringify(result);
-
       dump = JSON.parse(dump);
+      */
 
+      /*
       dump = this.dbdump;
 
-      for (let row of dump.rows) {
+      let cur;
 
-        // console.log(row.doc);
+      for (const row of dump.rows) {
 
-        this.database.put(row.doc).then((response) => {
+        cur = row.doc;
+        cur._rev = '';
+
+        this.database.put(cur).then((response) => {
           console.log(response);
         }).catch((error) => {
           console.log(error);
         });
       }
-
+      */
     });
-    */
   }
 
 }
