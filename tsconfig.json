@@ -14,7 +14,10 @@
     "typeRoots": [
       "node_modules/@types"
     ],
-    "types": ["babylonjs"],
+    "types": [
+      "babylonjs",
+      "babylonjs-gui"
+    ],
     "lib": [
       "es2017",
       "dom"

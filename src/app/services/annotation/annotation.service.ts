@@ -157,6 +157,21 @@ export class AnnotationService {
     this.allAnnotations.push(annotation);
   }
 
+  public exportAnnotations() {
+
+    return new Promise<any>((resolve, reject) => {
+
+      this.dataService.database.allDocs({include_docs: true, attachments: true}).then((result) => {
+        resolve(JSON.stringify(result));
+      });
+
+    });
+  }
+
+  public importAnnotations() {
+
+  }
+
   private async fetchData(): Promise<Array<any>> {
 
     return new Promise<any>((resolve, reject) => {

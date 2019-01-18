@@ -6,6 +6,17 @@
         <mat-icon class="tab-icon">place</mat-icon>
       </ng-template>
 
+      <div id="annotations-extras">
+
+        <button mat-icon-button
+                matTooltip="Export Annotations to File"
+                matTooltipPosition="below"
+                (click)="exportAnnotations()">
+          <mat-icon aria-label="Export Annotations to File">save</mat-icon>
+        </button>
+
+      </div>
+
       <div cdkDropList class="annotations-list" (cdkDropListDropped)="drop($event)"
            *ngIf="this.annotationService.annotations.length">
         <app-annotations-editor class="annotation-box" *ngFor="let annotation of this.annotationService.annotations;"
