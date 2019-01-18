@@ -52,27 +52,9 @@ export class CatalogueService {
 
           // TODO: Cases for audio, video and image
           switch (category) {
-
             case 'model':
-              this.loadModelService.fetchModelData({
-                _id: 'PreviewModel',
-                name: 'PreviewModel',
-                finished: false,
-                online: false,
-                files: [
-                  query
-                ],
-                processed: {
-                  time: {
-                    start: '',
-                    end: '',
-                    total: ''
-                  },
-                  low: query,
-                  medium: query,
-                  high: query,
-                  raw: query
-                },
+              this.mongohandlerService.getModel(query).toPromise().then(resultModel => {
+                this.loadModelService.fetchModelData(resultModel);
               });
               this.isFirstLoad = false;
               break;
