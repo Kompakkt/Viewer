@@ -2,7 +2,7 @@
 
   <h2>Catalogue</h2>
 
-  <div *ngIf="!singleCollection && !singleModel">
+  <div *ngIf="!singleCollection && !singleModel && isLoggedIn">
 
     <h3>Please choose to load collections or models</h3>
     <mat-radio-group (change)="onSelectionDataTypeChange($event)">
@@ -59,6 +59,8 @@
       </mat-form-field>
       <button mat-raised-button (click)="searchModelByID()">Search it</button>
     </ol>
+  </div>
+
     <div *ngIf="singleModelSelected">
       <h3 *ngIf="actualModel.name">Selected Model: {{actualModel.name}}</h3>
       <div id="model-overview">
@@ -66,11 +68,20 @@
       </div>
     </div>
   </div>
-</div>
+
 
   <div *ngIf="singleCollection">
     <app-model class="model-box" *ngFor="let model of actualCollection.models;"
                [model]=model></app-model>
   </div>
 
+  <div *ngIf="!singleCollection && !singleModel && !isLoggedIn">
+    <p>Please Login with your university account to see data from the repository.</p>
+    <button mat-menu-item (click)="loginDialog()">
+      <mat-icon>account_circle</mat-icon>
+      <span>Login</span>
+    </button>
+  </div>
+
 </div>
+

@@ -5,6 +5,8 @@ import {Model} from '../../interfaces/model/model.interface';
 import {LoadModelService} from '../../services/load-model/load-model.service';
 import {MessageService} from '../../services/message/message.service';
 import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
+import {MatDialog, MatDialogConfig} from '@angular/material';
+import {LoginComponent} from '../login/login.component';
 
 
 @Component({
@@ -30,25 +32,27 @@ export class CollectionsOverviewComponent implements OnInit {
   private identifierCollection;
   private identifierModel;
 
-  private isLoggedin: boolean;
+  private isLoggedIn: boolean;
+  private isLoaded = false;
+
 
   constructor(private overlayService: OverlayService,
               public catalogueService: CatalogueService,
               private loadModelService: LoadModelService,
               private message: MessageService,
               private mongohandlerService: MongohandlerService,
+              public dialog: MatDialog,
   ) {
   }
 
   ngOnInit() {
 
+    this.catalogueService.loggedIn.subscribe(loggedIn => {
+      this.isLoggedIn = loggedIn;
+    });
+
     this.overlayService.collectionsOverview.subscribe(collectionsOverviewIsOpen => {
       this.isOpen = collectionsOverviewIsOpen;
-      if (this.isOpen) {
-        const status = this.mongohandlerService.isAuthorized();
-        console.log('Das ist der Status:', status);
-        // if (status.status === 'ok') {
-      }
     });
 
     this.loadModelService.singleModel.subscribe(singleModel => {
@@ -113,6 +117,15 @@ export class CollectionsOverviewComponent implements OnInit {
     } else {
       this.message.error('Can not find Model with ID ' + this.identifierModel + '.');
     }
+  }
+
+  public loginDialog() {
+    const dialogConfig = new MatDialogConfig();
+
+    dialogConfig.disableClose = true;
+    dialogConfig.autoFocus = true;
+
+    this.dialog.open(LoginComponent, dialogConfig);
   }
 
 }

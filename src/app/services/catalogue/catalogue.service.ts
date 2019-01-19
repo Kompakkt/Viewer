@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {EventEmitter, Injectable, Output} from '@angular/core';
 import {Model} from '../../interfaces/model/model.interface';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
 import {BehaviorSubject} from 'rxjs';
@@ -22,6 +22,9 @@ export class CatalogueService {
   };
 
   private isFirstLoad = true;
+  public isLoggedIn: boolean;
+
+  @Output() loggedIn: EventEmitter<boolean> = new EventEmitter();
 
   constructor(private mongohandlerService: MongohandlerService,
               private loadModelService: LoadModelService,
@@ -37,8 +40,20 @@ export class CatalogueService {
       if (url_split.length <= 1) {
         this.isFirstLoad = false;
         this.loadModelService.loadDefaultModelData();
-        this.fetchCollectionsData();
-        this.fetchModelsData();
+
+        this.mongohandlerService.isAuthorized().toPromise().then(result => {
+          if (result.status === 'ok') {
+            this.fetchCollectionsData();
+            this.fetchModelsData();
+            this.isLoggedIn = true;
+            this.loggedIn.emit(true);
+          } else {
+            this.isLoggedIn = false;
+            this.loggedIn.emit(false);          }
+        }).catch(error => {
+          this.message.error('Can not see if you are logged in.');
+        });
+
       }
 
       if (url_split.length > 1) {
@@ -75,12 +90,23 @@ export class CatalogueService {
       }
     } else {
       console.log('Page has already been initially loaded.');
-      this.fetchCollectionsData();
-      this.fetchModelsData();
+      this.mongohandlerService.isAuthorized().toPromise().then(result => {
+        if (result.status === 'ok') {
+          this.fetchCollectionsData();
+          this.fetchModelsData();
+          this.isLoggedIn = true;
+          this.loggedIn.emit(true);
+        } else {
+          this.isLoggedIn = false;
+          this.loggedIn.emit(false);
+        }
+      }).catch(error => {
+        this.message.error('Can not see if you are logged in.');
+      });
     }
   }
 
-  private fetchCollectionsData() {
+  public fetchCollectionsData() {
     this.mongohandlerService.getAllCompilations().subscribe(compilation => {
       this.Subjects.collections.next(compilation);
     }, error => {
@@ -88,7 +114,7 @@ export class CatalogueService {
     });
   }
 
-  private fetchModelsData() {
+  public fetchModelsData() {
     this.mongohandlerService.getAllModels().subscribe(model => {
       this.Subjects.models.next(model);
     }, error => {

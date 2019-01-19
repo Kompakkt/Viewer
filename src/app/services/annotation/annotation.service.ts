@@ -6,9 +6,8 @@ import {ActionService} from '../action/action.service';
 import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
 
 import {ActionManager} from 'babylonjs';
-import {Model} from '../../interfaces/model/model.interface';
 import PouchDB from 'pouchdb';
-import * as BABYLON from "babylonjs";
+import * as BABYLON from 'babylonjs';
 import {LoadModelService} from '../load-model/load-model.service';
 
 /**

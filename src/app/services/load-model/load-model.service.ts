@@ -3,7 +3,6 @@ import {Model} from '../../interfaces/model/model.interface';
 import {BabylonService} from '../babylon/babylon.service';
 import * as BABYLON from 'babylonjs';
 import {ActionService} from '../action/action.service';
-import {AnnotationService} from '../annotation/annotation.service';
 import {CameraService} from '../camera/camera.service';
 import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreenhandler.service';
 import {ReplaySubject} from 'rxjs';
@@ -160,27 +159,17 @@ export class LoadModelService {
   }
 
   public loadModel(newModel: Model, overrideUrl?: string) {
-
-    console.log('Ich lade: ', newModel);
-
     const URL = (overrideUrl !== undefined) ? overrideUrl : this.baseUrl;
 
     if (!this.loadingScreenHandler.isLoading) {
       this.babylonService.loadModel(URL, newModel.processed[this.quality]).then(async (model) => {
-
         // Warte auf Antwort von loadModel, da loadModel ein Promise<object> von ImportMeshAync übergibt
-        // model ist hier das neu geladene Model, aus dem wir direkt den Namen nehmen können
-
-        // Zentriere auf das neu geladene Model
-        this.cameraService.setActiveCameraTarget(model.meshes[0]._boundingInfo.boundingBox.centerWorld);
-
+        // model ist hier das neu geladene Model
         this.updateActiveModel(newModel);
         this.updateActiveModelMesh(model.meshes[0]);
-        // Füge Tags hinzu und lade Annotationen
 
-        // this.annotationService.loadAnnotations(this.isDefaultLoad);
-
-
+        // Zentriere auf das neu geladene Model, bevor die SettingsEinstellung übernommen wird
+        this.cameraService.setActiveCameraTarget(model.meshes[0]._boundingInfo.boundingBox.centerWorld);
       });
 
 
