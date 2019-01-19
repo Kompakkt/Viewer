@@ -8,6 +8,8 @@ import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.serv
 import {ActionManager} from 'babylonjs';
 import {Model} from '../../interfaces/model/model.interface';
 import PouchDB from 'pouchdb';
+import * as BABYLON from "babylonjs";
+import {LoadModelService} from '../load-model/load-model.service';
 
 /**
  * @author Zoe Schubert
@@ -25,20 +27,35 @@ export class AnnotationService {
   private allAnnotations: Annotation[];
   private modelName: string;
   private initialLoading: boolean;
+  private actualModelMesh: BABYLON.Mesh;
+  private isDefaultLoad: boolean;
 
   constructor(private babylonService: BabylonService,
               private dataService: DataService,
               private actionService: ActionService,
-              private annotationmarkerService: AnnotationmarkerService) {
+              private annotationmarkerService: AnnotationmarkerService,
+              private loadModelService: LoadModelService) {
     this.initialLoading = true;
     this.annotations = [];
+    this.loadModelService.Observables.actualModel.subscribe(actualModel => {
+      this.modelName = actualModel.name;
+    });
+    this.loadModelService.Observables.actualModelMesh.subscribe(actualModelMesh => {
+      this.actualModelMesh = actualModelMesh;
+      this.loadAnnotations();
+    });
+    this.loadModelService.defaultLoad.subscribe(defaultLoad => {
+      this.isDefaultLoad = defaultLoad;
+    });
   }
 
-  public async loadAnnotations(modelName: string, defaultModel?: boolean) {
+  public async loadAnnotations() {
+
+    BABYLON.Tags.AddTagsTo(this.actualModelMesh, this.modelName);
 
     // Der modelName wird beim Laden eines neuen Modells übergeben und hier gespeichert,
     // um auch als Referenz für eine neu erstellte Annotation nutzbar zu sein
-    this.modelName = modelName;
+    // this.modelName = modelName;
 
     // In diesem Array sollten alle Annotationen in der richtigen Reihenfolge liegen, die visuell für das aktuelle
     // Model relevant sind, zu Beginn also erstmal keine
@@ -52,7 +69,7 @@ export class AnnotationService {
 
     // Beim ersten Laden eines Mdoells, werden alle in der PuchDB vorhandenen Annotationen in
     // das Array "allAnnotations" geladen
-    if (this.initialLoading === true && defaultModel === false) {
+    if (this.initialLoading === true && this.isDefaultLoad === false) {
       await this.getAnnotations();
     } else {
       this.allAnnotations = [];
@@ -62,7 +79,7 @@ export class AnnotationService {
     // Die Annotationen, die sich auf das aktuelle Model beziehen (also als relatedModel den Namen
     // des aktuellen Models aufweisen, werden raus gesucht und in das Array für unsortierte Annotationen
     // gepusht, da sie dort liegen ohne visuelle Elemente zu erzeugen
-    await this.getActualAnnotations(modelName);
+    await this.getActualAnnotations(this.modelName);
 
     // Jetzt sollen die Annotationen sortiert werden und in der richtigen Reihenfolge in das Array geschrieben werden
     // Achtung: dann gibt es auch direkt einen visuellen Output durch die Components!
@@ -75,6 +92,8 @@ export class AnnotationService {
     // wenn der Edit-Mode aufgerufen wird
     // this.initializeAnnotationMode(modelName);
     // this.actionService.pickableModel(modelName, false);
+    this.initializeAnnotationMode();
+
   }
 
 
@@ -94,12 +113,13 @@ export class AnnotationService {
 
   // Das aktuelle Modell wird anklickbar und damit annotierbar
   public annotationMode(value: boolean) {
-    this.actionService.pickableModel(this.modelName, value);
+    this.actionService.pickableModel(this.actualModelMesh, value);
   }
 
   // Die Annotationsfunktionalität wird zum aktuellen Modell hinzugefügt
-  public initializeAnnotationMode(mesh: BABYLON.Mesh) {
-    this.actionService.createActionManager(mesh, ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
+  public initializeAnnotationMode() {
+    this.actionService.createActionManager(this.actualModelMesh, ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
+    this.annotationMode(false);
   }
 
   // Die Annotationen werden in der richtigen Reihenfolge in das Array für den visuellen Output geschrieben

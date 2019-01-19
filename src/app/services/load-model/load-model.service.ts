@@ -20,11 +20,13 @@ export class LoadModelService {
 
   private Subjects = {
     actualModel: new ReplaySubject<Model>(),
+    actualModelMesh: new ReplaySubject<BABYLON.Mesh>(),
     actualCollection: new ReplaySubject<any>(),
   };
 
   public Observables = {
     actualModel: this.Subjects.actualModel.asObservable(),
+    actualModelMesh: this.Subjects.actualModelMesh.asObservable(),
     actualCollection: this.Subjects.actualCollection.asObservable(),
   };
 
@@ -43,7 +45,6 @@ export class LoadModelService {
 
   constructor(public babylonService: BabylonService,
               private actionService: ActionService,
-              private annotationService: AnnotationService,
               private cameraService: CameraService,
               private loadingScreenHandler: LoadingscreenhandlerService,
               private mongohandlerService: MongohandlerService,
@@ -65,6 +66,10 @@ export class LoadModelService {
 
   public updateActiveCollection(collection: any) {
     this.Subjects.actualCollection.next(collection);
+  }
+
+  public updateActiveModelMesh(mesh: BABYLON.Mesh) {
+    this.Subjects.actualModelMesh.next(mesh);
   }
 
   public fetchModelData(query: string) {
@@ -169,12 +174,11 @@ export class LoadModelService {
         // Zentriere auf das neu geladene Model
         this.cameraService.setActiveCameraTarget(model.meshes[0]._boundingInfo.boundingBox.centerWorld);
 
-        // Füge Tags hinzu und lade Annotationen
-        BABYLON.Tags.AddTagsTo(model.meshes[0], newModel.name);
         this.updateActiveModel(newModel);
-        this.annotationService.loadAnnotations(newModel.name, this.isDefaultLoad);
+        this.updateActiveModelMesh(model.meshes[0]);
+        // Füge Tags hinzu und lade Annotationen
 
-        this.annotationService.initializeAnnotationMode(model.meshes[0]);
+        // this.annotationService.loadAnnotations(this.isDefaultLoad);
 
 
       });

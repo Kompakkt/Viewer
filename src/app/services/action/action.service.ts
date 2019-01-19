@@ -31,8 +31,9 @@ export class ActionService {
     }
   }
 
-  public pickableModel(modelName: string, pickable: boolean) {
-    this.babylonService.getScene().getMeshesByTags(modelName).map(model => model.isPickable = pickable);
+  public pickableModel(mesh: BABYLON.Mesh, pickable: boolean) {
+    mesh.isPickable = pickable;
+    // this.babylonService.getScene().getMeshesByTags(modelName).map(model => model.isPickable = pickable);
   }
 
 }
