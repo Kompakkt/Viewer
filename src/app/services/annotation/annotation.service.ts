@@ -72,6 +72,7 @@ export class AnnotationService {
       await this.getAnnotations();
     } else {
       this.allAnnotations = [];
+
       this.allAnnotations.push(this.createDefaultAnnotation());
     }
 
@@ -181,21 +182,12 @@ export class AnnotationService {
   }
 
   public exportAnnotations() {
-
-    return new Promise<any>((resolve, reject) => {
-
-      this.dataService.database.allDocs({include_docs: true, attachments: true}).then((result) => {
-        resolve(JSON.stringify(result));
-      });
-
-    });
+    return JSON.stringify(this.annotations);
   }
 
   public deleteAllAnnotations() {
 
-    for (const annotation of this.allAnnotations) {
-      this.annotationmarkerService.deleteMarker(annotation._id);
-    }
+    this.annotationmarkerService.deleteAllMarker();
 
     this.annotations.length = 0;
     this.allAnnotations.length = 0;
@@ -205,8 +197,21 @@ export class AnnotationService {
     });
   }
 
-  public importAnnotations() {
+  public async importAnnotations(annotationsFile) {
 
+    const annotations = JSON.parse(annotationsFile);
+
+    this.unsortedAnnotations.length = 0;
+    await this.annotationmarkerService.deleteAllMarker();
+
+    for (const annotation of annotations) {
+
+      this.unsortedAnnotations.push(annotation);
+      this.annotationmarkerService.createAnnotationMarker(annotation);
+    }
+
+    this.dataService.database.bulkDocs(this.unsortedAnnotations);
+    await this.sortAnnotations();
   }
 
   private async fetchData(): Promise<Array<any>> {

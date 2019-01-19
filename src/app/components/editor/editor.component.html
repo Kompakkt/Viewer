@@ -7,7 +7,6 @@
       </ng-template>
 
       <div id="annotations-extras">
-
         <div *ngIf="this.annotationService.annotations.length > 0">
 
           <button mat-icon-button
@@ -24,7 +23,20 @@
           </button>
 
         </div>
+      </div>
 
+      <div id="annotations-import">
+        <input type="file"
+               style="display: none;"
+               #importInput
+               (change)="importAnnotations($event.target.files)">
+
+        <button mat-icon-button
+                matTooltip="Import Annotations"
+                matTooltipPosition="below"
+                (click)="importInput.click()">
+          <mat-icon aria-label="Import Annotations">save_alt</mat-icon>
+        </button>
       </div>
 
       <div cdkDropList class="annotations-list" (cdkDropListDropped)="drop($event)"

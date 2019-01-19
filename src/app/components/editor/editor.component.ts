@@ -34,11 +34,28 @@ export class EditorComponent implements OnInit {
   }
 
   public exportAnnotations() {
+      saveAs(new Blob([this.annotationService.exportAnnotations()],
+        {type: 'text/plain;charset=utf-8'}), 'annotations.json');
+  }
 
-    this.annotationService.exportAnnotations().then((dump) => {
+  public importAnnotations(files: FileList): void {
 
-      saveAs(new Blob([dump], {type: 'text/plain;charset=utf-8'}), 'annotations.json');
-    });
+    const fileToUpload = files.item(0),
+      fileReader: FileReader = new FileReader();
+
+    fileReader.onload = (e) => {
+
+      if (typeof fileReader.result === 'string') {
+
+        this.deleteAnnotations();
+        this.annotationService.importAnnotations(fileReader.result);
+      }
+    };
+
+    if (fileToUpload) {
+      fileReader.readAsText(fileToUpload);
+    }
+
   }
 
   public deleteAnnotations() {
