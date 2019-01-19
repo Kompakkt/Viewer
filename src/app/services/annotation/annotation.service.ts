@@ -7,6 +7,7 @@ import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.serv
 
 import {ActionManager} from 'babylonjs';
 import {Model} from '../../interfaces/model/model.interface';
+import PouchDB from 'pouchdb';
 
 /**
  * @author Zoe Schubert
@@ -168,6 +169,20 @@ export class AnnotationService {
         resolve(JSON.stringify(result));
       });
 
+    });
+  }
+
+  public deleteAllAnnotations() {
+
+    for (const annotation of this.allAnnotations) {
+      this.annotationmarkerService.deleteMarker(annotation._id);
+    }
+
+    this.annotations.length = 0;
+    this.allAnnotations.length = 0;
+
+    this.dataService.database.destroy().then(() => {
+      this.dataService.database = new PouchDB('annotationdb');
     });
   }
 

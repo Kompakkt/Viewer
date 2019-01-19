@@ -41,4 +41,8 @@ export class EditorComponent implements OnInit {
     });
   }
 
+  public deleteAnnotations() {
+    this.annotationService.deleteAllAnnotations();
+  }
+
 }

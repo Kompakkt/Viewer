@@ -8,12 +8,22 @@
 
       <div id="annotations-extras">
 
-        <button mat-icon-button
-                matTooltip="Export Annotations to File"
-                matTooltipPosition="below"
-                (click)="exportAnnotations()">
-          <mat-icon aria-label="Export Annotations to File">save</mat-icon>
-        </button>
+        <div *ngIf="this.annotationService.annotations.length > 0">
+
+          <button mat-icon-button
+                  matTooltip="Export Annotations to File"
+                  matTooltipPosition="below"
+                  (click)="exportAnnotations()">
+            <mat-icon aria-label="Export Annotations to File">save</mat-icon>
+          </button>
+          <button mat-icon-button
+                  matTooltip="Delete Annotations"
+                  matTooltipPosition="below"
+                  (click)="deleteAnnotations()">
+            <mat-icon aria-label="Delete Annotations">delete</mat-icon>
+          </button>
+
+        </div>
 
       </div>
 

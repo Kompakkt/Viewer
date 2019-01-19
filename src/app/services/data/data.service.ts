@@ -26,7 +26,7 @@ export class DataService {
     });
   }
 
-  private destroyDB(): void {
+  public destroyDB(): void {
     this.database.destroy();
   }
 
@@ -39,10 +39,11 @@ export class DataService {
   }
 
   public delete(id: string, rev: string) {
-    this.database.remove(id, rev, function (error, response) {
-      if (error) {
-        return console.log(error);
-      }
+
+    this.database.remove(id, rev).then(function (result) {
+      // console.log(result);
+    }).catch(function (error) {
+      console.log(error);
     });
   }
 
