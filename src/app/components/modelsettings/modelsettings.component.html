@@ -8,10 +8,10 @@
     <br><br><br>
     <button mat-button (click)="backToDefault()">Back to Default</button>
     <button mat-button *ngIf="!isDefault" (click)="saveActualSettings()">Save as default</button>
-    <br><br><br>
-    <h3 *ngIf="this.loadModelService.isDefaultLoad">Initial Perspective</h3>
-    <h3 *ngIf="!this.loadModelService.isDefaultLoad">Select initial Perspective</h3>
-    <p *ngIf="!this.loadModelService.isDefaultLoad">Click on image to select a new initial Perspective.</p>
+    <br><br>
+    <h3>Initial Perspective</h3>
+    <p>Click on this image to select a new initial Perspective.</p>
+    <br><br>
     <img mat-card-image src={{preview}} (click)="setInitialView()">
 
     <br><br><br>
