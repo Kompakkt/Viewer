@@ -197,7 +197,6 @@ export class ModelsettingsComponent implements OnInit {
     }));
   }
 
-  // TODO Back to default
   backToDefault() {
 
     this.preview = this.activeModel.settings.preview;

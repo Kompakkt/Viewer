@@ -61,7 +61,7 @@
     </ol>
   </div>
 
-    <div *ngIf="singleModelSelected">
+    <div *ngIf="singleModelSelected && !collectionSelected">
       <h3 *ngIf="actualModel.name">Selected Model: {{actualModel.name}}</h3>
       <div id="model-overview">
         <app-model class="model-box" [model]="actualModel"></app-model>
