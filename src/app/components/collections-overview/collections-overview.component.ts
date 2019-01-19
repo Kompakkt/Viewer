@@ -33,7 +33,6 @@ export class CollectionsOverviewComponent implements OnInit {
   private identifierModel;
 
   private isLoggedIn: boolean;
-  private isLoaded = false;
 
 
   constructor(private overlayService: OverlayService,

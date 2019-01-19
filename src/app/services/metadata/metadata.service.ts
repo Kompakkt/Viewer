@@ -50,7 +50,7 @@ export class MetadataService {
         _id: 'default_model',
       digobj_type: 'type_3d',
       digobj_title: 'Kompakkt',
-      digobj_description: 'Kompakkt brings your 3D models to the web and makes it annotatable! See our code here: ' +
+      digobj_description: 'Kompakkt brings your 3D models to the web and makes them annotatable! See our code here: ' +
       'https://github.com/DH-Cologne/Kompakkt',
       digobj_licence: 'MIT License'});
   }
