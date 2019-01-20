@@ -7,31 +7,10 @@ import {isUndefined} from 'util';
 })
 export class DataService {
 
-  private isInstantiated: boolean;
-
   public database: any;
-  public annotations: Array<any>;
 
   public constructor() {
-
-    if (!this.isInstantiated) {
-      this.database = new PouchDB('annotationdb');
-      this.isInstantiated = true;
-    }
-
-    // this.destroyDB();
-
-    this.database.info().then(function (info) {
-      console.log(info);
-    });
-  }
-
-  public destroyDB(): void {
-    this.database.destroy();
-  }
-
-  public put(document) {
-    this.database.put(document);
+    this.database = new PouchDB('annotationdb');
   }
 
   public fetch() {
@@ -48,6 +27,7 @@ export class DataService {
   }
 
   public updateAnnotation(id: string, title: string, description: string, preview?: string, cameraPosition?, validated?: boolean): void {
+
     const db = this.database;
     db.get(id).then(function (doc) {
       // update
@@ -74,7 +54,9 @@ export class DataService {
   }
 
   public updateAnnotationRanking(id: string, ranking: string) {
+
     const db = this.database;
+
     db.get(id).then(function (doc) {
       // update
       doc.ranking = ranking;
