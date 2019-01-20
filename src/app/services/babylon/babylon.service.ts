@@ -108,6 +108,10 @@ export class BabylonService {
     });
   }
 
+  public getActiveCamera() {
+    return this.scene.activeCamera;
+  }
+
   public updateCanvas(newCanvas: HTMLCanvasElement) {
     this.CanvasSubject.next(newCanvas);
   }

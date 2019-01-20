@@ -34,6 +34,7 @@ export class AnnotationService {
               private actionService: ActionService,
               private annotationmarkerService: AnnotationmarkerService,
               private loadModelService: LoadModelService) {
+
     this.initialLoading = true;
     this.annotations = [];
     this.loadModelService.Observables.actualModel.subscribe(actualModel => {
@@ -98,6 +99,7 @@ export class AnnotationService {
 
 
   private async getActualAnnotations(modelName: string) {
+
     for (const annotation of this.allAnnotations) {
       if (annotation.relatedModel === modelName) {
         this.unsortedAnnotations.push(annotation);
@@ -106,6 +108,7 @@ export class AnnotationService {
   }
 
   private async getAnnotations() {
+
     this.allAnnotations = [];
     this.allAnnotations = await this.fetchData();
     this.initialLoading = false;
@@ -118,12 +121,14 @@ export class AnnotationService {
 
   // Die Annotationsfunktionalität wird zum aktuellen Modell hinzugefügt
   public initializeAnnotationMode() {
+
     this.actionService.createActionManager(this.actualModelMesh, ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
     this.annotationMode(false);
   }
 
   // Die Annotationen werden in der richtigen Reihenfolge in das Array für den visuellen Output geschrieben
   private async sortAnnotations() {
+
     this.annotations = this.unsortedAnnotations;
     this.unsortedAnnotations = this.annotations.slice(0);
     this.annotations.splice(0, this.annotations.length);
@@ -144,7 +149,9 @@ export class AnnotationService {
     }
   }
 
-  public createNewAnnotation = function (result: any) {
+  public createNewAnnotation(result: any) {
+
+    const camera = <BABYLON.ArcRotateCamera> this.babylonService.getActiveCamera();
 
     this.babylonService.createPreviewScreenshot(400).then(detailScreenshot => {
 
@@ -160,9 +167,9 @@ export class AnnotationService {
           {dimension: 'y', value: result.getNormal(true, true).y}, {
             dimension: 'z', value: result.getNormal(true, true).z
           }],
-        cameraPosition: [{dimension: 'x', value: this.babylonService.getScene().activeCamera.alpha},
-          {dimension: 'y', value: this.babylonService.getScene().activeCamera.beta},
-          {dimension: 'z', value: this.babylonService.getScene().activeCamera.radius}],
+        cameraPosition: [{dimension: 'x', value: camera.alpha},
+          {dimension: 'y', value: camera.beta},
+          {dimension: 'z', value: camera.radius}],
         preview: detailScreenshot,
         originatorID: 'userID',
         validated: false,
@@ -173,7 +180,7 @@ export class AnnotationService {
       this.add(newAnnotation);
       this.annotationmarkerService.createAnnotationMarker(newAnnotation);
     });
-  };
+  }
 
   private add(annotation): void {
     this.dataService.database.put(annotation);
