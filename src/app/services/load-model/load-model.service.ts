@@ -64,6 +64,9 @@ export class LoadModelService {
   }
 
   public updateActiveModel(model: Model) {
+    if (model.settings && model.settings.preview) {
+      model.settings.preview = `${environment.express_server_url}:${environment.express_server_port}${model.settings.preview}`;
+    }
     this.Subjects.actualModel.next(model);
   }
 
