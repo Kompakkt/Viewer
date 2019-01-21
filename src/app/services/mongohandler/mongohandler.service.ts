@@ -49,6 +49,10 @@ export class MongohandlerService {
     return this.get(`api/v1/get/find/digitalobject/${identifier}`);
   }
 
+  public getCurrentUserData(): Observable<any> {
+    return this.get(`api/v1/get/ldata`);
+  }
+
   // POSTs
   public updateSettings(identifier: string, settings: any): Observable<any> {
     return this.post(`api/v1/post/settings/${identifier}`, settings);
