@@ -8,8 +8,6 @@ import {AnnotationmarkerService} from '../../services/annotationmarker/annotatio
 import {ColorEvent} from 'ngx-color';
 import {LoadModelService} from '../../services/load-model/load-model.service';
 import * as BABYLON from 'babylonjs';
-import {isDefaultChangeDetectionStrategy} from '@angular/core/src/change_detection/constants';
-
 
 @Component({
   selector: 'app-modelsettings',
@@ -23,6 +21,7 @@ export class ModelsettingsComponent implements OnInit {
   private preview: string;
   private setEffect = false;
   private isDefault: boolean;
+  private isModelOwner: boolean;
 
   private cameraPositionInitial: {
     cameraType: string;
@@ -58,6 +57,9 @@ export class ModelsettingsComponent implements OnInit {
       this.isDefault = isDefaultLoad;
     });
 
+    this.loadModelService.modelOwner.subscribe(isModelOwner => {
+      this.isModelOwner = isModelOwner;
+    });
   }
 
   /*

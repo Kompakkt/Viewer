@@ -7,7 +7,7 @@
   <mat-card-content>
     <br><br><br>
     <button mat-button (click)="backToDefault()">Back to Default</button>
-    <button mat-button *ngIf="!isDefault" (click)="saveActualSettings()">Save as default</button>
+    <button mat-button *ngIf="!isDefault && isModelOwner" (click)="saveActualSettings()">Save as default</button>
     <br><br>
     <h3>Initial Perspective</h3>
     <p>Click on this image to select a new initial Perspective.</p>
@@ -36,6 +36,6 @@
     <mat-slider min="-10" max="10" step="1" value={{this.babylonService.pointlightPosZ}} #matslider (input)="pointlightPosZ($event)" vertical></mat-slider>
     <br><br><br>
     <button mat-button (click)="backToDefault()">Back to Default</button>
-    <button mat-button *ngIf="!isDefault" (click)="saveActualSettings()">Save as default</button>
+    <button mat-button *ngIf="!isDefault && isModelOwner" (click)="saveActualSettings()">Save as default</button>
   </mat-card-content>
 </mat-card>

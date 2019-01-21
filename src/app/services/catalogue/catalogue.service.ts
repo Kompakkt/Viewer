@@ -45,6 +45,7 @@ export class CatalogueService {
           if (result.status === 'ok') {
             this.fetchCollectionsData();
             this.fetchModelsData();
+            this.loadModelService.getUserData();
             this.isLoggedIn = true;
             this.loggedIn.emit(true);
           } else {
@@ -94,6 +95,7 @@ export class CatalogueService {
         if (result.status === 'ok') {
           this.fetchCollectionsData();
           this.fetchModelsData();
+          this.loadModelService.getUserData();
           this.isLoggedIn = true;
           this.loggedIn.emit(true);
         } else {

@@ -22,17 +22,13 @@ export class LoginComponent implements OnInit {
               private overlayService: OverlayService) {
   }
 
-
   ngOnInit() {
     this.overlayService.collectionsOverview.subscribe(collectionsOverviewIsOpen => {
       this.isOpen = collectionsOverviewIsOpen;
     });
   }
 
-
-
   public login() {
-    console.log('username:' + this.username);
     this.mongohandlerService.login(this.username, this.password).subscribe(result => {
       if (result.status === 'ok') {
         this.success = true;
@@ -46,7 +42,6 @@ export class LoginComponent implements OnInit {
 
   public withoutlogin() {
     console.log('username:' + this.username);
-
   }
 
 }

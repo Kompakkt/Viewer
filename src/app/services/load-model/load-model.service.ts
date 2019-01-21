@@ -29,6 +29,8 @@ export class LoadModelService {
     actualCollection: this.Subjects.actualCollection.asObservable(),
   };
 
+  private userOwnedModels: Array<any> = [];
+
   private baseUrl = `${environment.express_server_url}:${environment.express_server_port}/`;
   public quality = 'low';
 
@@ -37,10 +39,12 @@ export class LoadModelService {
   public isSingleLoadModel = true;
   public isSingleLoadCollection = true;
   public isDefaultLoad = true;
+  public isModelOwner = false;
 
   @Output() singleCollection: EventEmitter<boolean> = new EventEmitter();
   @Output() singleModel: EventEmitter<boolean> = new EventEmitter();
   @Output() defaultLoad: EventEmitter<boolean> = new EventEmitter();
+  @Output() modelOwner: EventEmitter<boolean> = new EventEmitter();
 
   constructor(public babylonService: BabylonService,
               private actionService: ActionService,
@@ -170,9 +174,38 @@ export class LoadModelService {
 
         // Zentriere auf das neu geladene Model, bevor die SettingsEinstellung übernommen wird
         this.cameraService.setActiveCameraTarget(model.meshes[0]._boundingInfo.boundingBox.centerWorld);
+
+        this.checkOwnerState(newModel._id);
       });
 
 
     }
   }
+
+  public getUserData() {
+    this.mongohandlerService.getCurrentUserData().subscribe(userData => {
+      if (userData.data.models.length > 0) {
+        this.userOwnedModels = userData.data.models;
+      } else {
+        console.log('User owns no models.');
+      }
+    }, error => {
+      this.message.error('Connection to object server refused.');
+    });
+  }
+
+
+  private checkOwnerState(identifier: string) {
+
+    const model = this.userOwnedModels.filter(obj => obj._id === identifier)[0];
+
+    if (model !== undefined) {
+      this.isModelOwner = true;
+      this.modelOwner.emit(true);
+    } else {
+      this.isModelOwner = false;
+      this.modelOwner.emit(false);
+    }
+  }
+
 }
