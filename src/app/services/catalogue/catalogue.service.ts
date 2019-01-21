@@ -71,11 +71,13 @@ export class CatalogueService {
             case 'model':
               this.loadModelService.fetchModelData(query);
               this.isFirstLoad = false;
+              this.loadModelService.getUserData();
               break;
 
             case 'compilation':
               this.isFirstLoad = false;
               this.loadModelService.fetchCollectionData(query);
+              this.loadModelService.getUserData();
               break;
 
             default:
