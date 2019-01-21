@@ -15,7 +15,8 @@ export class AnnotationwalkthroughComponent implements OnInit {
   private positionVector: Vector3;
   private actualRanking: number;
 
-  constructor(public annotationService: AnnotationService, private cameraService: CameraService,
+  constructor(private cameraService: CameraService,
+              public annotationService: AnnotationService,
               private annotationmarkerService: AnnotationmarkerService) {
 
     this.positionVector = Vector3.Zero();
@@ -25,32 +26,39 @@ export class AnnotationwalkthroughComponent implements OnInit {
 
   public previousAnnotation() {
 
-    if (this.annotationService.annotations.length) {
+    const annotations = this.annotationService.annotations;
+
+    if (annotations.length) {
+
       if (this.actualRanking === 0) {
-        this.actualRanking = this.annotationService.annotations.length;
-      }
-      if (this.actualRanking !== 0) {
+        this.actualRanking = annotations.length;
+      } else {
         this.actualRanking = this.actualRanking - 1;
       }
     }
+
     if (this.actualRanking < 0) {
       this.actualRanking = 0;
     }
-    if (this.actualRanking > this.annotationService.annotations.length) {
-      this.actualRanking = this.annotationService.annotations.length;
+
+    if (this.actualRanking > annotations.length) {
+      this.actualRanking = annotations.length;
     }
     this.getAction(this.actualRanking);
   }
 
   public nextAnnotation() {
 
-    if (this.annotationService.annotations.length) {
-      if (this.actualRanking > this.annotationService.annotations.length - 1) {
-        this.actualRanking = this.annotationService.annotations.length - 1;
+    const annotations = this.annotationService.annotations;
+
+    if (annotations.length) {
+
+      if (this.actualRanking > annotations.length - 1) {
+        this.actualRanking = annotations.length - 1;
       } else {
         this.actualRanking = this.actualRanking + 1;
       }
-      if (this.actualRanking === this.annotationService.annotations.length) {
+      if (this.actualRanking === annotations.length) {
         this.actualRanking = 0;
       }
     } else {
@@ -59,7 +67,7 @@ export class AnnotationwalkthroughComponent implements OnInit {
     if (this.actualRanking < 1) {
       this.actualRanking = 0;
     }
-    if (this.actualRanking > this.annotationService.annotations.length) {
+    if (this.actualRanking > annotations.length) {
       this.actualRanking = 0;
     }
     this.getAction(this.actualRanking);
@@ -67,19 +75,21 @@ export class AnnotationwalkthroughComponent implements OnInit {
 
   private getAction(index: number) {
 
-    const test = this.annotationService.annotations[index];
-    const test2 = this.annotationService.annotations.length;
+    const annotations = this.annotationService.annotations;
+
+    const test = annotations[index];
+    const test2 = annotations.length;
 
     console.log('annotation an der Stelle ' + index + ' ist ' + test + 'Array länge ' + test2);
 
-    if (this.annotationService.annotations.length) {
+    if (annotations.length) {
 
-      this.title = this.annotationService.annotations[index].title;
-      const cameraVector = new Vector3(this.annotationService.annotations[index].cameraPosition[0].value,
-        this.annotationService.annotations[index].cameraPosition[1].value,
-        this.annotationService.annotations[index].cameraPosition[2].value);
+      this.title = annotations[index].title;
+      const cameraVector = new Vector3(annotations[index].cameraPosition[0].value,
+        annotations[index].cameraPosition[1].value,
+        annotations[index].cameraPosition[2].value);
       this.cameraService.moveCameraToTarget(cameraVector);
-      this.annotationmarkerService.toggleCreatorPopup(this.annotationService.annotations[index]._id);
+      this.annotationmarkerService.toggleCreatorPopup(annotations[index]._id);
     } else {
       this.actualRanking = 0;
     }
