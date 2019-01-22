@@ -365,6 +365,7 @@ export class ModelsettingsComponent implements OnInit {
         this.babylonService.setLightIntensity('ambientlightDown', hemisphericLightDown.intensity);
         this.ambientlightDownintensity = hemisphericLightDown.intensity;
       }
+      this.backToDefault();
     }
   }
 
