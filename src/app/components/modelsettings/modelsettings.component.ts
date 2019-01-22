@@ -189,7 +189,7 @@ export class ModelsettingsComponent implements OnInit {
 
 
   private async createMissingInitialDefaultScreenshot() {
-    return await new Promise<string>((resolve, reject) => this.babylonService.createPreviewScreenshot(400).then(screenshot => {
+    await new Promise<string>((resolve, reject) => this.babylonService.createPreviewScreenshot(400).then(screenshot => {
       this.preview = screenshot;
       this.activeModel.settings.preview = screenshot;
       resolve(screenshot);
@@ -233,7 +233,7 @@ export class ModelsettingsComponent implements OnInit {
     this.ambientlightDownintensity = hemisphericLightDown.intensity;
   }
 
-  private setSettings() {
+  private async setSettings() {
 
     if (this.isDefault) {
       this.activeModel['settings'] = this.getDefaultLoadSettings();
@@ -259,7 +259,7 @@ export class ModelsettingsComponent implements OnInit {
       if (this.activeModel.settings.preview !== undefined && this.activeModel.settings.preview !== '') {
         this.preview = this.activeModel.settings.preview;
       } else {
-        this.createMissingInitialDefaultScreenshot();
+        await this.createMissingInitialDefaultScreenshot();
       }
 
       if (this.activeModel.settings.cameraPositionInitial === undefined) {
