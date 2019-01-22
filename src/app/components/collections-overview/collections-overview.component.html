@@ -29,7 +29,7 @@
       </mat-form-field>
       <button mat-raised-button (click)="searchCollectionByID()">Search it</button>
     </ol>
-    <div *ngIf="singleCollectionSelected">
+    <div *ngIf="singleCollectionSelected && actualCollection">
       <h3 *ngIf="actualCollection.name">Selected Collection: {{actualCollection.name}}</h3>
       <div *ngIf="singleModelSelected">
         <h3 *ngIf="actualModel.name">Selected Model: {{actualModel.name}}</h3>

@@ -8,7 +8,7 @@
 
   </mat-card-header>
 
-  <img mat-card-image src={{model.settings.preview}} (click)="changeModel()">
+  <img *ngIf="model && model.settings && model.settings.preview" mat-card-image src={{model.settings.preview}} (click)="changeModel()">
 
   <!--
   <mat-card-content>

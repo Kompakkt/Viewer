@@ -30,8 +30,14 @@ export class MongohandlerService {
 
     return new Promise<any>((resolve, reject) => {
       promise.then(result => {
-        if (Array.isArray(result)) {
+        if (Array.isArray(result) && result[0] && !result[0].models) {
           result = result.map(model => update(model));
+        } else if (Array.isArray(result) && result[0] && result[0].models) {
+          for (const compilation of result) {
+            for (let model of compilation.models) {
+              model = update(model);
+            }
+          }
         } else if (result.models) {
           result.models = result.models.map(model => update(model));
         } else {
@@ -65,7 +71,7 @@ export class MongohandlerService {
   }
 
   public getCompilation(identifier: string): Promise<any> {
-    return this.get(`api/v1/get/find/compilation//${identifier}`);
+    return this.get(`api/v1/get/find/compilation/${identifier}`);
   }
 
   public getModelMetadata(identifier: string): Promise<any> {
