@@ -233,7 +233,7 @@ export class ModelsettingsComponent implements OnInit {
     this.ambientlightDownintensity = hemisphericLightDown.intensity;
   }
 
-  private async setSettings() {
+  private setSettings() {
 
     if (this.isDefault) {
       this.activeModel['settings'] = this.getDefaultLoadSettings();
@@ -259,7 +259,7 @@ export class ModelsettingsComponent implements OnInit {
       if (this.activeModel.settings.preview !== undefined && this.activeModel.settings.preview !== '') {
         this.preview = this.activeModel.settings.preview;
       } else {
-        await this.createMissingInitialDefaultScreenshot();
+        this.createMissingInitialDefaultScreenshot();
       }
 
       if (this.activeModel.settings.cameraPositionInitial === undefined) {
