@@ -64,9 +64,6 @@ export class LoadModelService {
   }
 
   public updateActiveModel(model: Model) {
-    if (model.settings && model.settings.preview) {
-      model.settings.preview = `${environment.express_server_url}:${environment.express_server_port}${model.settings.preview}`;
-    }
     this.Subjects.actualModel.next(model);
   }
 
@@ -79,7 +76,7 @@ export class LoadModelService {
   }
 
   public fetchModelData(query: string) {
-    this.mongohandlerService.getModel(query).toPromise().then(resultModel => {
+    this.mongohandlerService.getModel(query).then(resultModel => {
       this.isSingleLoadModel = true;
       this.singleModel.emit(true);
       this.isDefaultLoad = false;
@@ -95,7 +92,7 @@ export class LoadModelService {
     this.isDefaultLoad = false;
     this.defaultLoad.emit(false);
     this.quality = 'low';
-    this.mongohandlerService.getCompilation(identifier).subscribe(compilation => {
+    this.mongohandlerService.getCompilation(identifier).then(compilation => {
       this.updateActiveCollection(compilation);
       this.loadModel(compilation.models[0]);
     }, error => {
@@ -186,7 +183,7 @@ export class LoadModelService {
   }
 
   public getUserData() {
-    this.mongohandlerService.getCurrentUserData().subscribe(userData => {
+    this.mongohandlerService.getCurrentUserData().then(userData => {
       if (userData.data.models.length > 0) {
         this.userOwnedModels = userData.data.models;
       } else {

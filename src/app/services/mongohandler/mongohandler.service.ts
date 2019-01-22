@@ -19,9 +19,32 @@ export class MongohandlerService {
   constructor(private http: HttpClient) {
   }
 
+  // Helper
+  private updatePreviewURL(promise: Promise<any>) {
+    const update = (obj) => {
+      if (obj && obj.settings && obj.settings.preview && obj.settings.preview.indexOf('base64') === -1) {
+        obj.settings.preview = `${this.endpoint}${obj.settings.preview}`;
+      }
+      return obj;
+    };
+
+    return new Promise<any>((resolve, reject) => {
+      promise.then(result => {
+        if (Array.isArray(result)) {
+          result = result.map(model => update(model));
+        } else if (result.models) {
+          result.models = result.models.map(model => update(model));
+        } else {
+          result = update(result);
+        }
+        resolve(result);
+      }).catch(e => reject(e));
+    });
+  }
+
   // Override GET and POST to use HttpOptions which is needed for auth
-  private get(path: string): Observable<any> {
-    return this.http.get(`${this.endpoint}/${path}`, this.httpOptions);
+  private get(path: string): Promise<any> {
+    return this.updatePreviewURL(this.http.get(`${this.endpoint}/${path}`, this.httpOptions).toPromise());
   }
 
   private post(path: string, obj: any): Observable<any> {
@@ -29,27 +52,27 @@ export class MongohandlerService {
   }
 
   // GETs
-  public getAllCompilations(): Observable<any> {
+  public getAllCompilations(): Promise<any> {
     return this.get(`api/v1/get/findall/compilation`);
   }
 
-  public getAllModels(): Observable<any> {
+  public getAllModels(): Promise<any> {
     return this.get(`api/v1/get/findall/model`);
   }
 
-  public getModel(identifier: string): Observable<any> {
+  public getModel(identifier: string): Promise<any> {
     return this.get(`api/v1/get/find/model/${identifier}`);
   }
 
-  public getCompilation(identifier: string): Observable<any> {
+  public getCompilation(identifier: string): Promise<any> {
     return this.get(`api/v1/get/find/compilation//${identifier}`);
   }
 
-  public getModelMetadata(identifier: string): Observable<any> {
+  public getModelMetadata(identifier: string): Promise<any> {
     return this.get(`api/v1/get/find/digitalobject/${identifier}`);
   }
 
-  public getCurrentUserData(): Observable<any> {
+  public getCurrentUserData(): Promise<any> {
     return this.get(`api/v1/get/ldata`);
   }
 
