@@ -152,8 +152,9 @@ export class LoadModelService {
   public updateModelQuality(quality: string) {
     if (this.quality !== quality) {
       this.quality = quality;
-      if (this.Observables.actualModel.source['value'].processed[this.quality] !== undefined) {
-        this.loadModel(this.Observables.actualModel.source['value']);
+      const _model = this.Observables.actualModel.source['_events'].slice(-1)[0];
+      if (_model.processed[this.quality] !== undefined) {
+        this.loadModel(_model);
       } else {
         this.message.error('Model quality is not available.');
       }
