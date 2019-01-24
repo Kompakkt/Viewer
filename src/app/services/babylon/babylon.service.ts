@@ -69,34 +69,35 @@ export class BabylonService {
         this.engine.loadingScreen = new LoadingScreen(newCanvas, '',
           '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
 
-          this.scene.registerBeforeRender(() => {
+        this.scene.registerBeforeRender(() => {
 
-            // VR-Annotation-Text-Walk
-            if (this.actualControl && this.selectingControl && !this.selectedControl) {
-              
-              this.actualControl.scaling.x += 0.005;
-              this.actualControl.scaling.y += 0.005;
-              this.actualControl.material.diffuseColor = BABYLON.Color3.Red();
-  
-              if (this.actualControl.scaling.x >= 1.5) {
-                this.selectedControl = true;
-              }
-            }
-  
-            if (this.selectedControl) {
-  
-              this.actualControl.metadata = "1";  
-              this.actualControl.scaling.x = 1;
-              this.actualControl.scaling.y = 1;
-              this.actualControl.material.diffuseColor = BABYLON.Color3.Black();
-              this.selectedControl = false;
-              this.actualControl = false;         
-            }
+          // VR-Annotation-Text-Walk
+          if (this.actualControl && this.selectingControl && !this.selectedControl) {
 
-            // Annotation_Marker -- Fixed_Size_On_Zoom
-            let radius = Math.abs(this.scene.getCameraByName('arcRotateCamera')['radius']);
-            this.scene.getMeshesByTags('plane', mesh => mesh.scalingDeterminant = radius/35);
-          });
+            this.actualControl.scaling.x += 0.005;
+            this.actualControl.scaling.y += 0.005;
+            this.actualControl.material.diffuseColor = BABYLON.Color3.Red();
+
+            if (this.actualControl.scaling.x >= 1.5) {
+              this.selectedControl = true;
+            }
+          }
+
+          if (this.selectedControl) {
+
+            this.actualControl.metadata = '1';
+            this.actualControl.scaling.x = 1;
+            this.actualControl.scaling.y = 1;
+            this.actualControl.material.diffuseColor = BABYLON.Color3.Black();
+            this.selectedControl = false;
+            this.actualControl = false;
+          }
+
+          // Annotation_Marker -- Fixed_Size_On_Zoom
+          const radius = Math.abs(this.scene.getCameraByName('arcRotateCamera')['radius']);
+          this.scene.getMeshesByTags('plane', mesh => mesh.scalingDeterminant = radius / 35);
+          this.scene.getMeshesByTags('label', mesh => mesh.scalingDeterminant = radius / 35);
+        });
 
         this.engine.runRenderLoop(() => {
           this.scene.render();
@@ -334,7 +335,7 @@ export class BabylonService {
 
   public createAmbientlightUp(name: string, position: any) {
     if (this.ambientlightUp !== undefined) {
-    this.ambientlightUp.dispose();
+      this.ambientlightUp.dispose();
     }
     const hemiLight = new BABYLON.HemisphericLight(name, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
     console.log('created light: ', hemiLight);
