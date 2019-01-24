@@ -38,6 +38,7 @@ import { LoadingscreenComponent } from './components/loadingscreen/loadingscreen
 import { MetadataComponent } from './components/metadata/metadata.component';
 import { ModelsettingsComponent } from './components/modelsettings/modelsettings.component';
 import { LoginComponent } from './components/login/login.component';
+import { PasswordComponent } from './components/password/password.component';
 
 @NgModule({
   declarations: [
@@ -54,7 +55,8 @@ import { LoginComponent } from './components/login/login.component';
     LoadingscreenComponent,
     MetadataComponent,
     ModelsettingsComponent,
-    LoginComponent
+    LoginComponent,
+    PasswordComponent
   ],
   imports: [
     BrowserModule,
@@ -84,7 +86,8 @@ import { LoginComponent } from './components/login/login.component';
     MatSlideToggleModule
   ],
   entryComponents: [
-    LoginComponent
+    LoginComponent,
+    PasswordComponent
   ],
   providers: [],
   bootstrap: [AppComponent]

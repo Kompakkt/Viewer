@@ -141,32 +141,33 @@ export class CatalogueService {
    * @param {string} identifierCollection,
    * @returns {boolean} collection has been found
    */
-  public selectCollectionByID(identifierCollection: string): boolean {
+  public async selectCollectionByID(identifierCollection: string): Promise<any> {
     // Check if collection has been initially loaded and is available in collections
     const collection = this.Observables.collections.source['value'].find(i => i._id === identifierCollection);
     // If collection has not been loaded during initial load
     if (collection === undefined) {
       // try to find it on the server
+      return await new Promise((resolve, reject) => {
       this.mongohandlerService.getCompilation(identifierCollection).then(compilation => {
         // collection is available on server
         if (compilation['_id']) {
-          // add it to collections
-          this.Subjects.collections.next(compilation);
-          // load collection
-          this.selectCollection(compilation);
-          return true;
+          this.addAndLoadCollection(compilation);
+          resolve('loaded');
+        } else if (compilation['status'] === 'ok' && compilation['message'] === 'Password protected compilation') {
+          resolve('password');
         } else {
           // collection ist nicht erreichbar
-          return false;
+          resolve('missing');
         }
       }, error => {
         this.message.error('Connection to object server refused.');
-        return false;
+        reject('missing');
+      });
       });
       // collection is available in collections and will be loaded
     } else {
       this.selectCollection(collection);
-      return true;
+      return 'loaded';
     }
   }
 
@@ -189,6 +190,13 @@ export class CatalogueService {
       this.selectModel(model, false);
       return true;
     }
+  }
+
+  public addAndLoadCollection(compilation: any) {
+    // add it to collections TODO
+    // this.Subjects.collections.next(compilation);
+    // load collection
+    this.selectCollection(compilation);
   }
 
 }
