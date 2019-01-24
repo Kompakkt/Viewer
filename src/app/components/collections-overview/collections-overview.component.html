@@ -51,11 +51,11 @@
         </mat-select>
       </mat-form-field>
       <h4>Select Model by ID</h4>
-        <mat-form-field>
-          <input matInput name="identifierModel" #description="ngModel" type="text"
-                 placeholder="What's the ID?" [(ngModel)]="identifierModel">
-        </mat-form-field>
-        <button mat-raised-button (click)="searchModelByID()">Search it</button>
+      <mat-form-field>
+        <input matInput name="identifierModel" #description="ngModel" type="text"
+               placeholder="What's the ID?" [(ngModel)]="identifierModel">
+      </mat-form-field>
+      <button mat-raised-button (click)="searchModelByID()">Search it</button>
 
     </div>
 
@@ -75,8 +75,13 @@
   </div>
 
   <div *ngIf="isSingleCollection">
-    <app-model class="model-box" *ngFor="let model of actualCollection.models;"
-               [model]=model></app-model>
+    <div class="category" *ngIf="actualCollection.name">Selected Collection: {{actualCollection.name}}</div>
+    <div *ngIf="singleModelSelected">
+      <div class="category" *ngIf="actualModel.name">Selected Model: {{actualModel.name}}</div>
+    </div>
+    <div *ngIf="actualCollection.models.length">
+      <app-model class="model-box" *ngFor="let model of actualCollection.models;" [model]=model></app-model>
+    </div>
   </div>
 
   <div *ngIf="!singleCollection && !singleModel && !isLoggedIn">
