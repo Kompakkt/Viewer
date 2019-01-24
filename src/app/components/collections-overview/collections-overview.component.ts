@@ -59,6 +59,9 @@ export class CollectionsOverviewComponent implements OnInit {
 
     this.loadModelService.singleCollection.subscribe(singleCollection => {
       this.isSingleCollection = singleCollection;
+      if (this.isSingleCollection) {
+        this.overlayService.toggleCollectionsOverview();
+      }
     });
 
     this.loadModelService.Observables.actualCollection.subscribe(actualCollection => {
