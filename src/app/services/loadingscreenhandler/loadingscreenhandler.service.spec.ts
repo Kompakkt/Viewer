@@ -1,6 +1,6 @@
-import { TestBed } from '@angular/core/testing';
+import {TestBed} from '@angular/core/testing';
 
-import { LoadingscreenhandlerService } from './loadingscreenhandler.service';
+import {LoadingscreenhandlerService} from './loadingscreenhandler.service';
 
 describe('LoadingscreenhandlerService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));

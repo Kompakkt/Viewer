@@ -33,7 +33,10 @@ export class AnnotationComponent implements OnInit {
 
   ngOnInit() {
 
-    this.id = this.annotation._id;
+    if (this.annotation){
+      this.id = this.annotation._id;
+    }
+
     this.opacity = '1';
 
     setInterval(() => {

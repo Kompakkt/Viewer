@@ -1,11 +1,13 @@
-import { TestBed, inject } from '@angular/core/testing';
+import {TestBed, inject} from '@angular/core/testing';
 
-import { SkyboxService } from './skybox.service';
+import {SkyboxService} from './skybox.service';
+import {MatSnackBarModule} from '@angular/material';
 
 describe('SkyboxService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [SkyboxService]
+      providers: [SkyboxService],
+      imports: [MatSnackBarModule]
     });
   });
 

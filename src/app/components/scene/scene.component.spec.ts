@@ -1,6 +1,10 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { SceneComponent } from './scene.component';
+import {SceneComponent} from './scene.component';
+import {MatCardModule, MatDialogActions, MatDialogContent, MatFormFieldModule, MatIconModule, MatTooltipModule} from '@angular/material';
+import {AnnotationwalkthroughComponent} from '../annotationwalkthrough/annotationwalkthrough.component';
+import {AnnotationcardsComponent} from '../annotationcards/annotationcards.component';
+import {AnnotationComponent} from '../annotation/annotation.component';
 
 describe('SceneComponent', () => {
   let component: SceneComponent;
@@ -8,9 +12,15 @@ describe('SceneComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SceneComponent ]
+      declarations: [SceneComponent,
+        AnnotationComponent,
+        AnnotationwalkthroughComponent,
+        AnnotationcardsComponent,
+        MatDialogContent,
+        MatDialogActions],
+      imports: [MatCardModule, MatTooltipModule, MatFormFieldModule, MatIconModule]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

@@ -1,6 +1,14 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { AnnotationComponent } from './annotation.component';
+import {AnnotationComponent} from './annotation.component';
+import {
+  MatCardModule,
+  MatFormFieldModule,
+  MatIconModule, MatSnackBarModule,
+  MatTooltipModule
+} from '@angular/material';
+import {FormsModule} from '@angular/forms';
+import {HttpClientModule} from '@angular/common/http';
 
 describe('AnnotationComponent', () => {
   let component: AnnotationComponent;
@@ -8,9 +16,10 @@ describe('AnnotationComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ AnnotationComponent ]
+      declarations: [AnnotationComponent],
+      imports: [MatFormFieldModule, MatCardModule, MatIconModule, MatSnackBarModule, MatTooltipModule, FormsModule, HttpClientModule]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

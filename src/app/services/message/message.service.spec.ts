@@ -1,11 +1,13 @@
-import { TestBed, inject } from '@angular/core/testing';
+import {TestBed, inject} from '@angular/core/testing';
 
-import { MessageService } from './message.service';
+import {MessageService} from './message.service';
+import {MatSnackBarModule} from '@angular/material';
 
 describe('MessageService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [MessageService]
+      providers: [MessageService],
+      imports: [MatSnackBarModule]
     });
   });
 

@@ -1,6 +1,6 @@
 import {TestBed, inject} from '@angular/core/testing';
 
-import {OverlayService} from './sidenav.service';
+import {OverlayService} from './overlay.service';
 
 describe('SidenavService', () => {
   beforeEach(() => {

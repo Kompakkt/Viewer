@@ -1,11 +1,13 @@
-import { TestBed, inject } from '@angular/core/testing';
+import {TestBed, inject} from '@angular/core/testing';
 
-import { BabylonService } from './babylon.service';
+import {BabylonService} from './babylon.service';
+import {MatSnackBarModule} from '@angular/material';
 
 describe('BabylonService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [BabylonService]
+      providers: [BabylonService],
+      imports: [MatSnackBarModule]
     });
   });
 

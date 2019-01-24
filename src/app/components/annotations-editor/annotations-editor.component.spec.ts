@@ -1,6 +1,7 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { AnnotationsEditorComponent } from './annotations-editor.component';
+import {AnnotationsEditorComponent} from './annotations-editor.component';
+import {MatCardModule} from '@angular/material';
 
 describe('AnnotationsEditorComponent', () => {
   let component: AnnotationsEditorComponent;
@@ -8,9 +9,10 @@ describe('AnnotationsEditorComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ AnnotationsEditorComponent ]
+      declarations: [AnnotationsEditorComponent],
+      imports: [MatCardModule]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
