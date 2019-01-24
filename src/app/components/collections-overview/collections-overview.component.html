@@ -2,7 +2,7 @@
 
   <h2>Catalogue</h2>
 
-  <div *ngIf="!singleCollection && !singleModel && isLoggedIn">
+  <div *ngIf="!singleCollection && !singleModel && isLoggedIn && !sSingleCollection">
 
     Please choose to load collections or model:
     <mat-radio-group (change)="onSelectionDataTypeChange($event)">
@@ -69,8 +69,12 @@
 
   </div>
 
-
   <div *ngIf="singleCollection">
+    <app-model class="model-box" *ngFor="let model of actualCollection.models;"
+               [model]=model></app-model>
+  </div>
+
+  <div *ngIf="isSingleCollection">
     <app-model class="model-box" *ngFor="let model of actualCollection.models;"
                [model]=model></app-model>
   </div>
