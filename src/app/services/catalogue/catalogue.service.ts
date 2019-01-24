@@ -71,13 +71,33 @@ export class CatalogueService {
             case 'model':
               this.loadModelService.fetchModelData(query);
               this.isFirstLoad = false;
-              this.loadModelService.getUserData();
+              this.mongohandlerService.isAuthorized().then(result => {
+                if (result.status === 'ok') {
+                  this.loadModelService.getUserData();
+                  this.isLoggedIn = true;
+                  this.loggedIn.emit(true);
+                } else {
+                  this.isLoggedIn = false;
+                  this.loggedIn.emit(false);          }
+              }).catch(error => {
+                this.message.error('Can not see if you are logged in.');
+              });
               break;
 
             case 'compilation':
               this.isFirstLoad = false;
               this.loadModelService.fetchCollectionData(query);
-              this.loadModelService.getUserData();
+              this.mongohandlerService.isAuthorized().then(result => {
+                if (result.status === 'ok') {
+                  this.loadModelService.getUserData();
+                  this.isLoggedIn = true;
+                  this.loggedIn.emit(true);
+                } else {
+                  this.isLoggedIn = false;
+                  this.loggedIn.emit(false);          }
+              }).catch(error => {
+                this.message.error('Can not see if you are logged in.');
+              });
               break;
 
             default:

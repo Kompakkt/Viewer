@@ -86,6 +86,7 @@ export class CollectionsOverviewComponent implements OnInit {
   }
 
   handleCollectionChoice(event) {
+    console.log('Ausgewählt: ', event.value);
     this.singleCollectionSelected = true;
     this.singleModelSelected = true;
     this.catalogueService.selectCollection(event.value);
