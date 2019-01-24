@@ -70,8 +70,9 @@ export class MongohandlerService {
     return this.get(`api/v1/get/find/model/${identifier}`);
   }
 
-  public getCompilation(identifier: string): Promise<any> {
-    return this.get(`api/v1/get/find/compilation/${identifier}`);
+  public getCompilation(identifier: string, password?: string): Promise<any> {
+    return (password) ? this.get(`api/v1/get/find/compilation/${identifier}/${password}`)
+      : this.get(`api/v1/get/find/compilation/${identifier}`);
   }
 
   public getModelMetadata(identifier: string): Promise<any> {
