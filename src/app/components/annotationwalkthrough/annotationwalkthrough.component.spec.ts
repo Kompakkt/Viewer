@@ -1,6 +1,8 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { AnnotationwalkthroughComponent } from './annotationwalkthrough.component';
+import {AnnotationwalkthroughComponent} from './annotationwalkthrough.component';
+import {MatIconModule, MatSnackBarModule} from '@angular/material';
+import {HttpClientModule} from '@angular/common/http';
 
 describe('AnnotationwalkthroughComponent', () => {
   let component: AnnotationwalkthroughComponent;
@@ -8,9 +10,14 @@ describe('AnnotationwalkthroughComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ AnnotationwalkthroughComponent ]
+      declarations: [AnnotationwalkthroughComponent],
+      imports: [
+        MatIconModule,
+        MatSnackBarModule,
+        HttpClientModule
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
@@ -18,6 +25,7 @@ describe('AnnotationwalkthroughComponent', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
+
 
   it('should create', () => {
     expect(component).toBeTruthy();

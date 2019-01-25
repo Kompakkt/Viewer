@@ -1,7 +1,24 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { EditorComponent } from './editor.component';
-import {MatIconModule} from '@angular/material';
+import {EditorComponent} from './editor.component';
+import {
+  MatCardModule,
+  MatCheckboxModule,
+  MatFormFieldModule,
+  MatIconModule,
+  MatSliderModule,
+  MatSlideToggleModule,
+  MatSnackBarModule,
+  MatTabsModule,
+  MatTooltipModule
+} from '@angular/material';
+import {AnnotationsEditorComponent} from '../annotations-editor/annotations-editor.component';
+import {ModelsettingsComponent} from '../modelsettings/modelsettings.component';
+import {MetadataComponent} from '../metadata/metadata.component';
+import {FormsModule} from '@angular/forms';
+import {ColorChromeModule} from 'ngx-color/chrome';
+import {HttpClientModule} from '@angular/common/http';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 describe('EditorComponent', () => {
   let component: EditorComponent;
@@ -9,10 +26,24 @@ describe('EditorComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ EditorComponent ],
-      imports: [MatIconModule]
+      declarations: [EditorComponent, AnnotationsEditorComponent, ModelsettingsComponent, MetadataComponent],
+      imports: [
+        MatIconModule,
+        MatTabsModule,
+        FormsModule,
+        MatFormFieldModule,
+        MatCardModule,
+        MatCheckboxModule,
+        MatTooltipModule,
+        ColorChromeModule,
+        MatSlideToggleModule,
+        MatSliderModule,
+        MatSnackBarModule,
+        HttpClientModule,
+        BrowserAnimationsModule
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

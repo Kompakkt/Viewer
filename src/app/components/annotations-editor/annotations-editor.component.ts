@@ -31,7 +31,10 @@ export class AnnotationsEditorComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.preview = this.annotation.preview;
+
+    if (this.annotation) {
+      this.preview = this.annotation.preview;
+    }
   }
 
   public getValidation(validated) {
