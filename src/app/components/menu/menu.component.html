@@ -88,7 +88,7 @@
   <!-- VR Button -->
   <!-- Click event gets handled by Babylon's VRExperienceHelper -->
   <button id="vrbutton"
-          mat-icon-button
+          mat-icon-button (click)="pressVrButton()"
           matTooltip="VR Camera" matTooltipPosition="above">
     <mat-icon aria-label="VR Camera" svgIcon="cardboard"></mat-icon>
   </button>
