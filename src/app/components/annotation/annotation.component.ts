@@ -46,8 +46,13 @@ export class AnnotationComponent implements OnInit {
 
   public setPosition(annotation: Annotation) {
 
-    const scene = this.babylonService.getScene(),
-      getMesh = scene.getMeshByName(annotation._id + '_pick');
+    const scene = this.babylonService.getScene();
+
+    if (!scene) {
+      return false;
+    }
+
+    const getMesh = scene.getMeshByName(annotation._id + '_pick');
 
     if (getMesh != null) {
 

@@ -30,7 +30,8 @@ describe('CollectionsOverviewComponent', () => {
         MatIconModule,
         MatCardModule,
         HttpClientModule,
-        MatSnackBarModule]
+        MatSnackBarModule,
+      ]
     })
       .compileComponents();
   }));

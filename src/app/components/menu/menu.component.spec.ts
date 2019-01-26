@@ -1,7 +1,8 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {MenuComponent} from './menu.component';
-import {MatIconModule} from '@angular/material';
+import {MatDialogModule, MatIconModule, MatMenuModule, MatSnackBarModule} from '@angular/material';
+import {HttpClientModule} from '@angular/common/http';
 
 describe('MenuComponent', () => {
   let component: MenuComponent;
@@ -10,7 +11,12 @@ describe('MenuComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [MenuComponent],
-      imports: [MatIconModule]
+      imports: [
+        MatIconModule,
+        MatMenuModule,
+        MatSnackBarModule,
+        HttpClientModule,
+        MatDialogModule]
     })
       .compileComponents();
   }));

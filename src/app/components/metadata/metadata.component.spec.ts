@@ -1,6 +1,8 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { MetadataComponent } from './metadata.component';
+import {MetadataComponent} from './metadata.component';
+import {HttpClientModule} from '@angular/common/http';
+import {MatSnackBarModule} from '@angular/material';
 
 describe('MetadataComponent', () => {
   let component: MetadataComponent;
@@ -8,9 +10,13 @@ describe('MetadataComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ MetadataComponent ]
+      declarations: [MetadataComponent],
+      imports: [
+        HttpClientModule,
+        MatSnackBarModule
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

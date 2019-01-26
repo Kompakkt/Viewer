@@ -1,6 +1,9 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { ModelsettingsComponent } from './modelsettings.component';
+import {ModelsettingsComponent} from './modelsettings.component';
+import {MatCardModule, MatDialogModule, MatDialogRef, MatSliderModule, MatSlideToggleModule, MatSnackBarModule} from '@angular/material';
+import {ColorChromeModule} from 'ngx-color/chrome';
+import {HttpClientModule} from '@angular/common/http';
 
 describe('ModelsettingsComponent', () => {
   let component: ModelsettingsComponent;
@@ -8,9 +11,17 @@ describe('ModelsettingsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ModelsettingsComponent ]
+      declarations: [ModelsettingsComponent],
+      imports: [
+        MatCardModule,
+        ColorChromeModule,
+        MatSlideToggleModule,
+        MatSliderModule,
+        MatSnackBarModule,
+        HttpClientModule,
+        MatDialogModule]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
