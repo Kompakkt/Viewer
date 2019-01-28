@@ -142,10 +142,9 @@ export class BabylonService {
       customVRButton: vrButton
     });
 
+    // this.VRHelper.gazeTrackerMesh = BABYLON.Mesh.CreateSphere("sphere1", 32, 0.1, this.scene);
     this.VRHelper.enableInteractions();
-
-    // funktioniert nicht...
-    this.VRHelper.displayGaze = true;
+    // this.VRHelper.displayGaze = true;
 
     this.VRHelper.onNewMeshSelected.add((mesh) => {
 
@@ -185,9 +184,6 @@ export class BabylonService {
       }
 
     });
-
-    // // VR BUTTON
-    // this.VRHelper.enterVR();
     
     this.VRHelper.onEnteringVRObservable.add(() => {
       this.vrModeIsActive.emit(true);
