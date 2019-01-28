@@ -33,7 +33,7 @@ export class AnnotationComponent implements OnInit {
 
   ngOnInit() {
 
-    if (this.annotation){
+    if (this.annotation) {
       this.id = this.annotation._id;
     }
 
@@ -65,8 +65,8 @@ export class AnnotationComponent implements OnInit {
         scene.activeCamera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight())
       );
 
-      this.positionTop = Math.round(p.y);
-      this.positionLeft = Math.round(p.x);
+      this.positionTop = Math.round(p.y) + 5;
+      this.positionLeft = Math.round(p.x) + 5;
     }
   }
 
