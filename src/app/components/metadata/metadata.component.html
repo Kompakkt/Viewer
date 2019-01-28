@@ -1,12 +1,124 @@
 <div *ngIf="showMetadata">
-  <div> {{this.metadata['digobj_title']}} </div>
-  <div> {{this.metadata['digobj_description']}} </div>
+  <br>
+  <br>
+  <div *ngIf="this.metadata['digobj_title']">
+    <strong> {{this.metadata['digobj_title']}} </strong>
+  </div>
+  <br>
+  <div *ngIf="this.metadata['digobj_description']"> {{this.metadata['digobj_description']}}</div>
+  <br>
+  <div *ngIf="this.metadata['digobj_licence']">
+
+    <div *ngIf="this.metadata['digobj_licence'] === 'BY'">
+      <img class="licence" src="assets/img/by.png">
+    </div>
+
+    <div *ngIf="this.metadata['digobj_licence'] === 'BYSA'">
+      <img class="licence" src="assets/img/bysa.png">
+    </div>
+
+    <div *ngIf="this.metadata['digobj_licence'] === 'BYNC'">
+      <img class="licence" src="assets/img/bync.png">
+    </div>
+
+    <div *ngIf="this.metadata['digobj_licence'] === 'BYNCSA'">
+      <img class="licence" src="assets/img/byncsa.png">
+    </div>
+
+    <div *ngIf="this.metadata['digobj_licence'] === 'BYND'">
+      <img class="licence" src="assets/img/bynd.png">
+    </div>
+
+    <div *ngIf="this.metadata['digobj_licence'] === 'BYNCND'">
+      <img class="licence" src="assets/img/byncnd.png">
+    </div>
+
+    <div *ngIf="this.metadata['digobj_licence'] === 'MIT'">
+      <img class="licence" src="assets/img/mit.png">
+    </div>
+
+  </div>
+  <br>
+  <br>
+
+  <div *ngIf="this.metadata['digobj_rightsowner_person']">
+    <div *ngIf="this.metadata['digobj_rightsowner_person'].length>=1">
+      <mat-icon>account_circle</mat-icon>
+      <div *ngFor="let digobj_rightsowner_person of this.metadata['digobj_rightsowner_person']; let i = index">
+        <div>
+          <div>
+            {{digobj_rightsowner_person['person_prename']}}
+            {{digobj_rightsowner_person['person_surname']}}
+          </div>
+          <div *ngIf="digobj_rightsowner_person['person_email']">
+            <mat-icon>alternate_email</mat-icon>{{digobj_rightsowner_person['person_email']}}
+          </div>
+          <div *ngIf="digobj_rightsowner_person['person_phonenumber']">
+            <mat-icon>local_phone</mat-icon>{{digobj_rightsowner_person['person_phonenumber']}}
+          </div>
+          <div *ngIf="digobj_rightsowner_person['person_institution']">
+            <div>
+              {{digobj_rightsowner_person['person_institution']}}
+            </div>
+            <div>
+              {{digobj_rightsowner_person['person_institution_data'][0]['institution_name']}}
+            </div>
+          </div>
+          <div *ngIf="digobj_rightsowner_person['person_note']">
+            {{digobj_rightsowner_person['person_note']}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="this.metadata['digobj_rightsowner_institution']">
+    <div *ngIf="this.metadata['digobj_rightsowner_institution'].length>=1">
+      <div
+        *ngFor="let digobj_rightsowner_institution of this.metadata['digobj_rightsowner_institution']; let i = index">
+        <div>
+          <div>
+            <mat-icon>account_balance</mat-icon><br>{{digobj_rightsowner_institution['institution_name']}}
+          </div>
+          <div>
+            <mat-icon>home</mat-icon><br>
+            {{digobj_rightsowner_institution['institution_address']['address_street']}}
+            {{digobj_rightsowner_institution['institution_address']['address_number']}},<br>
+            {{digobj_rightsowner_institution['institution_address']['address_postcode']}}
+            {{digobj_rightsowner_institution['institution_address']['address_city']}}<br>
+            {{digobj_rightsowner_institution['institution_address']['address_building']}}
+          </div>
+          <div>
+            {{digobj_rightsowner_institution['institution_address']['address_country']}}
+          </div>
+          <div>
+            {{digobj_rightsowner_institution['institution_note']}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <br>
+  <br>
+  <div *ngIf="this.metadata['contact_person'].length>=1">
+    <mat-icon>account_circle</mat-icon>
+    <div
+      *ngFor="let contact_person of this.metadata['contact_person']; let i = index">
+      <div>
+        <div>
+          {{contact_person['person_prename']}}
+          {{contact_person['person_surname']}}
+        </div>
+        <div>
+          {{contact_person['person_email']}}
+        </div>
+        <div>
+          {{contact_person['person_phonenumber']}}
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
-<!--
-TODO: Anzeige folgender Felder (optionale Felder und Mehrfachnennung möglich => *ngIf und length>=1 *ngFor verwenden)
-<div> {{this.metadata['phyObjs']}} </div>
-<div> {{this.metadata['phyobj_place']}} </div>
-<div> {{this.metadata['digobj_tags']}} </div>
-<div> {{this.metadata['digobj_licence']}} </div>
--->
