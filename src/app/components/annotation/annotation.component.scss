@@ -57,3 +57,10 @@ $max-width: 500px;
 .editmode {
   width: $max-width !important;
 }
+
+.mat-card-content {
+  max-height: 250px;
+  overflow-y: auto;
+  padding-right: 15px;
+  margin-bottom: 0;
+}
