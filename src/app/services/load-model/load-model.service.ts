@@ -19,13 +19,13 @@ export class LoadModelService {
 
   private Subjects = {
     actualModel: new ReplaySubject<Model>(),
-    actualModelMesh: new ReplaySubject<BABYLON.Mesh>(),
+    actualModelMeshes: new ReplaySubject<BABYLON.Mesh[]>(),
     actualCollection: new ReplaySubject<any>(),
   };
 
   public Observables = {
     actualModel: this.Subjects.actualModel.asObservable(),
-    actualModelMesh: this.Subjects.actualModelMesh.asObservable(),
+    actualModelMeshes: this.Subjects.actualModelMeshes.asObservable(),
     actualCollection: this.Subjects.actualCollection.asObservable(),
   };
 
@@ -71,8 +71,8 @@ export class LoadModelService {
     this.Subjects.actualCollection.next(collection);
   }
 
-  public updateActiveModelMesh(mesh: BABYLON.Mesh) {
-    this.Subjects.actualModelMesh.next(mesh);
+  public updateActiveModelMeshes(meshes: BABYLON.Mesh[]) {
+    this.Subjects.actualModelMeshes.next(meshes);
   }
 
   public fetchModelData(query: string) {
@@ -171,7 +171,7 @@ export class LoadModelService {
         // Warte auf Antwort von loadModel, da loadModel ein Promise<object> von ImportMeshAync übergibt
         // model ist hier das neu geladene Model
         this.updateActiveModel(newModel);
-        this.updateActiveModelMesh(model.meshes[0]);
+        this.updateActiveModelMeshes(model.meshes);
 
         // Zentriere auf das neu geladene Model, bevor die SettingsEinstellung übernommen wird
         this.cameraService.setActiveCameraTarget(model.meshes[0]._boundingInfo.boundingBox.centerWorld);

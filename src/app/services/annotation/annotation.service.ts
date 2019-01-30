@@ -26,7 +26,7 @@ export class AnnotationService {
   private allAnnotations: Annotation[];
   private modelName: string;
   private initialLoading: boolean;
-  private actualModelMesh: BABYLON.Mesh;
+  private actualModelMeshes: BABYLON.Mesh[];
   private isDefaultLoad: boolean;
 
   constructor(private babylonService: BabylonService,
@@ -40,8 +40,8 @@ export class AnnotationService {
     this.loadModelService.Observables.actualModel.subscribe(actualModel => {
       this.modelName = actualModel.name;
     });
-    this.loadModelService.Observables.actualModelMesh.subscribe(actualModelMesh => {
-      this.actualModelMesh = actualModelMesh;
+    this.loadModelService.Observables.actualModelMeshes.subscribe(actualModelMeshes => {
+      this.actualModelMeshes = actualModelMeshes;
       this.loadAnnotations();
     });
     this.loadModelService.defaultLoad.subscribe(defaultLoad => {
@@ -51,7 +51,7 @@ export class AnnotationService {
 
   public async loadAnnotations() {
 
-    BABYLON.Tags.AddTagsTo(this.actualModelMesh, this.modelName);
+    BABYLON.Tags.AddTagsTo(this.actualModelMeshes, this.modelName);
 
     // Der modelName wird beim Laden eines neuen Modells übergeben und hier gespeichert,
     // um auch als Referenz für eine neu erstellte Annotation nutzbar zu sein
@@ -116,13 +116,16 @@ export class AnnotationService {
 
   // Das aktuelle Modell wird anklickbar und damit annotierbar
   public annotationMode(value: boolean) {
-    this.actionService.pickableModel(this.actualModelMesh, value);
+    this.actualModelMeshes.forEach(mesh => {
+      this.actionService.pickableModel(mesh, value);
+    });
   }
 
   // Die Annotationsfunktionalität wird zum aktuellen Modell hinzugefügt
   public initializeAnnotationMode() {
-
-    this.actionService.createActionManager(this.actualModelMesh, ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
+    this.actualModelMeshes.forEach(mesh => {
+      this.actionService.createActionManager(mesh, ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
+    });
     this.annotationMode(false);
   }
 
