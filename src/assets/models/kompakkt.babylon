@@ -1,6 +1,6 @@
 {"producer":{"name":"Blender","version":"2.76 (sub 0)","exporter_version":"5.6.4","file":"kompakkt.babylon"},
 "autoClear":true,"clearColor":[0.0509,0.0509,0.0509],"ambientColor":[0,0,0],"gravity":[0,-9.81,0],
-"materials":[{"name":"kompakkt.Material","id":"kompakkt.Material","ambient":[0,0.3419,0.7454],"diffuse":[0,0.2735,0.5963],"specular":[0,0,0],"emissive":[0,0,0],"specularPower":50,"alpha":1,"backFaceCulling":true,"checkReadyOnlyOnce":false,"maxSimultaneousLights":4},
+"materials":[{"name":"kompakkt.Material","id":"kompakkt.Material","ambient":[0,0.3419,0.7454],"diffuse":[0,0.3419,0.7454],"specular":[0,0,0],"emissive":[0,0.3419,0.7454],"specularPower":50,"alpha":1,"backFaceCulling":true,"checkReadyOnlyOnce":false,"maxSimultaneousLights":4},
 {"name":"kompakkt.Material.001","id":"kompakkt.Material.001","ambient":[0.8,0.8,0.8],"diffuse":[0.8,0.8,0.8],"specular":[0,0,0],"emissive":[0,0,0],"specularPower":50,"alpha":1,"backFaceCulling":true,"checkReadyOnlyOnce":false,"maxSimultaneousLights":4},
 {"name":"kompakkt.Material.002","id":"kompakkt.Material.002","ambient":[0.8,0.8,0.8],"diffuse":[0.8,0.8,0.8],"specular":[0,0,0],"emissive":[0,0,0],"specularPower":50,"alpha":1,"backFaceCulling":true,"checkReadyOnlyOnce":false,"maxSimultaneousLights":4},
 {"name":"kompakkt.Material.005","id":"kompakkt.Material.005","ambient":[0.8,0.8,0.8],"diffuse":[0.8,0.8,0.8],"specular":[0,0,0],"emissive":[0,0,0],"specularPower":50,"alpha":1,"backFaceCulling":true,"checkReadyOnlyOnce":false,"maxSimultaneousLights":4},
