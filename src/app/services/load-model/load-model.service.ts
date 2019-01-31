@@ -205,10 +205,7 @@ export class LoadModelService {
 
 
   private checkOwnerState(identifier: string) {
-
-    const model = this.userOwnedModels.filter(obj => obj._id === identifier)[0];
-
-    if (model !== undefined) {
+    if (this.userOwnedModels.filter(obj => obj && obj._id === identifier).length === 1) {
       this.isModelOwner = true;
       this.modelOwner.emit(true);
     } else {
