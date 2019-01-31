@@ -2,8 +2,10 @@
   position: absolute;
   bottom: 5px;
   left: 50%;
-  width: 600px;
-  margin-left: -300px;
+  width: 380px;
+  margin-left: -190px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
   color: #fff;
   text-align: center;
 }
@@ -17,8 +19,8 @@
   display: inline-block;
   text-overflow: ellipsis;
   text-transform: uppercase;
-  max-width: 500px !important;
+  margin-bottom: -5px;
   white-space: nowrap;
   overflow: hidden;
-  margin-bottom: -5px;
+  width: 300px;
 }
