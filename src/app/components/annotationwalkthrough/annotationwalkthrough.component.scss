@@ -2,8 +2,8 @@
   position: absolute;
   bottom: 5px;
   left: 50%;
-  width: 380px;
-  margin-left: -190px;
+  width: 300px;
+  margin-left: -150px;
   background-color: rgba(0, 0, 0, 0.3);
   border-radius: 5px;
   color: #fff;
@@ -22,5 +22,10 @@
   margin-bottom: -5px;
   white-space: nowrap;
   overflow: hidden;
-  width: 300px;
+  width: 230px;
+}
+
+#btn-next,
+#btn-previous {
+  width: 30px;
 }
