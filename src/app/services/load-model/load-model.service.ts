@@ -163,8 +163,12 @@ export class LoadModelService {
     }
   }
 
-  public loadModel(newModel: Model, overrideUrl?: string) {
+  public async loadModel(newModel: Model, overrideUrl?: string) {
     const URL = (overrideUrl !== undefined) ? overrideUrl : this.baseUrl;
+
+    if (this.userOwnedModels.length === 0) {
+      await this.getUserData();
+    }
 
     if (!this.loadingScreenHandler.isLoading) {
       this.babylonService.loadModel(URL, newModel.processed[this.quality]).then(async (model) => {
@@ -183,15 +187,19 @@ export class LoadModelService {
     }
   }
 
-  public getUserData() {
-    this.mongohandlerService.getCurrentUserData().then(userData => {
-      if (userData.data.models.length > 0) {
-        this.userOwnedModels = userData.data.models;
-      } else {
-        console.log('User owns no models.');
-      }
-    }, error => {
-      this.message.error('Connection to object server refused.');
+  public async getUserData() {
+    return new Promise((resolve, reject) => {
+      this.mongohandlerService.getCurrentUserData().then(userData => {
+        if (userData.data.models.length > 0) {
+          this.userOwnedModels = userData.data.models;
+        } else {
+          console.log('User owns no models.');
+        }
+        resolve();
+      }, error => {
+        this.message.error('Connection to object server refused.');
+        reject();
+      });
     });
   }
 
