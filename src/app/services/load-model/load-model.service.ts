@@ -188,12 +188,18 @@ export class LoadModelService {
   }
 
   public async getUserData() {
+
     return new Promise((resolve, reject) => {
+
       this.mongohandlerService.getCurrentUserData().then(userData => {
-        if (userData.data.models.length > 0) {
-          this.userOwnedModels = userData.data.models;
-        } else {
-          console.log('User owns no models.');
+
+        if (userData.data) {
+
+          if (userData.data.models.length > 0) {
+            this.userOwnedModels = userData.data.models;
+          } else {
+            console.log('User owns no models.');
+          }
         }
         resolve();
       }, error => {
