@@ -65,6 +65,6 @@ describe('AnnotationComponent', () => {
   it('should create', () => {
 
     fixture.detectChanges();
-    expect(component).toBeFalsy();
+    expect(component).toBeTruthy();
   });
 });
