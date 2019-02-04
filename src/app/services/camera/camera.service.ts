@@ -57,9 +57,6 @@ export class CameraService {
         this.yRot = this.universalCamera.rotation.y;
 
         this.arcRotateCamera.attachControl(newCanvas, false);
-
-        // VR BUTTON
-        // this.vrHelper = this.babylonService.createVRHelper();
       }
     });
   }
@@ -303,59 +300,60 @@ export class CameraService {
 
   public moveVRCameraToTarget(positionVector: BABYLON.Vector3) {
 
-
-    this.scene.activeCamera = this.vrHelper.webVRCamera;
-    this.vrHelper.webVRCamera.attachControl(this.canvas, false);
-
+    // ANIMATION
     const name = 'animCam',
       frames = 30;
 
-    const animCamAlpha = new BABYLON.Animation(name, 'alpha', frames,
+    const animCamAlpha = new BABYLON.Animation(name, 'position.x', frames,
       BABYLON.Animation.ANIMATIONTYPE_FLOAT,
       BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 
     animCamAlpha.setKeys([
       {
         frame: 0,
-        value: this.vrHelper.webVRCamera.alpha
+        value: this.scene.activeCamera.position.x
       }, {
         frame: 30,
-        value: positionVector.x
+        value: positionVector.x - 15
       }
     ]);
-    this.vrHelper.webVRCamera.animations.push(animCamAlpha);
+    this.scene.activeCamera.animations.push(animCamAlpha);
 
-    const animCamBeta = new BABYLON.Animation(name, 'beta', frames,
+    const animCamBeta = new BABYLON.Animation(name, 'position.y', frames,
       BABYLON.Animation.ANIMATIONTYPE_FLOAT,
       BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 
     animCamBeta.setKeys([
       {
         frame: 0,
-        value: this.vrHelper.webVRCamera.beta
+        value: this.scene.activeCamera.position.y
       }, {
         frame: 30,
-        value: positionVector.y
+        value: positionVector.y + 15
       }]);
-    this.vrHelper.webVRCamera.animations.push(animCamBeta);
+      this.scene.activeCamera.animations.push(animCamBeta);
 
-    const animCamRadius = new BABYLON.Animation(name, 'radius', frames,
+    const animCamRadius = new BABYLON.Animation(name, 'position.z', frames,
       BABYLON.Animation.ANIMATIONTYPE_FLOAT,
       BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 
     animCamRadius.setKeys([
       {
         frame: 0,
-        value: this.vrHelper.webVRCamera.radius
+        value: this.scene.activeCamera.position.z
       }, {
         frame: 30,
-        value: positionVector.z
+        value: positionVector.z  - 15
       }]);
-    this.vrHelper.webVRCamera.animations.push(animCamRadius);
+      this.scene.activeCamera.animations.push(animCamRadius);
 
-    this.vrHelper.webVRCamera.setTarget(BABYLON.Vector3.Zero());
+    this.scene.beginAnimation(this.scene.activeCamera, 0, 30, false, 1, function () {
+    }).onAnimationEndObservable.add(() => {
 
-    this.scene.beginAnimation(this.vrHelper.webVRCamera, 0, 30, false, 1, function () {
+      // FOR VR-HUD
+      // console.log("Active-Camera - 0 Sek After Animation");
+      // console.log(this.scene.activeCamera.position);
+      this.babylonService.vrJump = true;
     });
   }
 

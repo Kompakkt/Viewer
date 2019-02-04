@@ -56,6 +56,9 @@ export class BabylonService {
   private background: BABYLON.Layer;
   private isBackground: boolean;
 
+  // FOR VR-HUD
+  public vrJump: boolean;
+
   constructor(private message: MessageService,
               private loadingScreenHandler: LoadingscreenhandlerService,
               @Inject(DOCUMENT) private document: any) {
@@ -97,12 +100,35 @@ export class BabylonService {
           const radius = Math.abs(this.scene.getCameraByName('arcRotateCamera')['radius']);
           this.scene.getMeshesByTags('plane', mesh => mesh.scalingDeterminant = radius / 35);
           this.scene.getMeshesByTags('label', mesh => mesh.scalingDeterminant = radius / 35);
+
+          // FOR VR-HUD
+          if (this.vrJump) {
+
+            this.vrJump = false;
+            let i = 1;
+            this.scene.getMeshesByTags('control', mesh => {
+              
+              let newPosition = new BABYLON.Vector3();
+              if((i%2) != 0 ) {
+
+                newPosition.x = this.getActiveCamera().position.x - 5;
+                newPosition.y = this.getActiveCamera().position.y;
+                newPosition.z = this.getActiveCamera().position.z ;
+                i++;
+              }else {
+
+                newPosition.x = this.getActiveCamera().position.x + 5;
+                newPosition.y = this.getActiveCamera().position.y;
+                newPosition.z = this.getActiveCamera().position.z ;
+              }
+              mesh.setAbsolutePosition(newPosition);
+            });
+          }
         });
 
         this.engine.runRenderLoop(() => {
           this.scene.render();
         });
-
       }
     });
   }
@@ -138,6 +164,7 @@ export class BabylonService {
     this.VRHelper = this.scene.createDefaultVRExperience({
       // Camera für VR ohne Cardboard!
       createDeviceOrientationCamera: false,
+      // createDeviceOrientationCamera: false,
       useCustomVRButton: true,
       customVRButton: vrButton
     });
@@ -148,21 +175,15 @@ export class BabylonService {
 
     this.VRHelper.onNewMeshSelected.add((mesh) => {
 
-      // const material = new BABYLON.StandardMaterial('meshMaterial', this.scene);
-
       switch (mesh.name) {
 
         case 'controlPrevious':
-          // material.diffuseColor = BABYLON.Color3.Blue();
-          //  mesh.material = material;
           this.selectingControl = true;
           this.actualControl = mesh;
           this.selectingControl = true;
           break;
 
         case 'controlNext':
-          //  material.diffuseColor = BABYLON.Color3.Red();
-          //  mesh.material = material;
           this.selectingControl = true;
           this.actualControl = mesh;
           this.selectingControl = true;
@@ -173,8 +194,6 @@ export class BabylonService {
           this.selectedControl = false;
 
           if (this.actualControl !== false) {
-            //   material.diffuseColor = BABYLON.Color3.White();
-            //  this.actualControl.material = material;
             this.actualControl.scaling.x = 1;
             this.actualControl.scaling.y = 1;
             this.actualControl = false;
@@ -182,7 +201,6 @@ export class BabylonService {
           }
           break;
       }
-
     });
     
     this.VRHelper.onEnteringVRObservable.add(() => {
@@ -198,7 +216,6 @@ export class BabylonService {
   public getVRHelper() {
     return this.VRHelper;
   }
-
 
   public loadModel(rootUrl: string, filename: string): Promise<any> {
 
