@@ -17,12 +17,10 @@ export class DataService {
     return this.database.allDocs({include_docs: true});
   }
 
-  public delete(id: string, rev: string) {
+  public delete(id: string) {
 
-    this.database.remove(id, rev).then(function (result) {
-      // console.log(result);
-    }).catch(function (error) {
-      console.log(error);
+    this.database.get(id).then((doc) => {
+      return this.database.remove(doc);
     });
   }
 
