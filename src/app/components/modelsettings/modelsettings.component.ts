@@ -209,7 +209,7 @@ export class ModelsettingsComponent implements OnInit {
     } else {
       camera = this.activeModel.settings.cameraPositionInitial;
     }
-    if (camera !== undefined) {
+    if (camera && camera.position) {
       const positionVector = new BABYLON.Vector3(camera.position.x,
         camera.position.y, camera.position.z);
       this.cameraService.moveCameraToTarget(positionVector);
