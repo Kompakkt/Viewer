@@ -72,8 +72,8 @@ export class AnnotationService {
     if (this.initialLoading === true && this.isDefaultLoad === false) {
       await this.getAnnotations();
     } else {
-      this.allAnnotations = [];
 
+      this.allAnnotations = [];
       this.allAnnotations.push(this.createDefaultAnnotation());
     }
 
@@ -247,7 +247,7 @@ export class AnnotationService {
   public deleteAnnotation(annotation: Annotation) {
 
     this.annotationmarkerService.deleteMarker(annotation._id);
-    this.dataService.delete(annotation._id, annotation._rev);
+    this.dataService.delete(annotation._id);
     const index: number = this.annotations.indexOf(annotation);
 
     if (index !== -1) {
