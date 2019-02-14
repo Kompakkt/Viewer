@@ -406,6 +406,7 @@ export class ModelsettingsComponent implements OnInit {
       }
 
 
+
       console.log('Actual Values: ', this.activeModel.settings.rotation,
         this.activeModel.settings.scale, this.isModelOwner, this.isFinished, this.initialSettingsMode, this.isDefault );
       if (this.activeModel.settings.rotation === undefined || this.activeModel.settings.scale === undefined) {
