@@ -144,6 +144,7 @@ export class ModelsettingsService {
     this.destroyBoundingBox();
     this.destroyWorldAxis();
     this.destroyLocalAxis();
+    this.destroyGround();
   }
 
   private initializeVariablesforSettings() {

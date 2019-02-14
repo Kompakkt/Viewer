@@ -176,6 +176,7 @@ export class LoadModelService {
       this.babylonService.loadModel(URL, newModel.processed[this.quality]).then(async (model) => {
         // Warte auf Antwort von loadModel, da loadModel ein Promise<object> von ImportMeshAync übergibt
         // model ist hier das neu geladene Model
+        // TODO  erst die Werte setzen, dann aktualisieren
         this.updateActiveModel(newModel);
         this.updateActiveModelMeshes(model.meshes);
 
