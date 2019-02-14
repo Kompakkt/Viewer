@@ -117,9 +117,9 @@ export class ModelsettingsService {
 
     const arrQ = new Quaternion[2];
     arrQ[0] = new Quaternion(point.x, point.y, point.z, 0);
-    arrQ[1] = new Quaternion(-this.center.rotation.x, -this.center.rotation.y, -this.center.rotation.z, this.center.rotation.w);
+    arrQ[1] = new Quaternion(-this.center.rotation.x, -this.center.rotation.y, -this.center.rotation.z);
 
-    const qSoFar = new Quaternion(-this.center.rotation.x, -this.center.rotation.y, -this.center.rotation.z, this.center.rotation.w);
+    const qSoFar = new Quaternion(-this.center.rotation.x, -this.center.rotation.y, -this.center.rotation.z);
     for (let i = 0; i < arrQ.length; i++) {
       const temp = arrQ[i];
       const next = new Quaternion(temp.x, temp.y, temp.z, temp.w);
