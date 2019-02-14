@@ -104,6 +104,21 @@ export class AnnotationComponent implements OnInit {
     }
   }
 
+  public setEditMode(mode: boolean) {
+    if (!mode && this.editMode) {
+      this.editMode = false;
+      this.labelMode = 'edit';
+      this.labelModeText = 'edit';
+      this.save();
+    } else if (mode && !this.editMode) {
+      this.editMode = true;
+      this.labelMode = 'remove_red_eye';
+      this.labelModeText = 'view';
+    } else {
+      return;
+    }
+  }
+
   private save(): void {
     this.dataService.updateAnnotation(this.annotation._id, this.annotation.title, this.annotation.description);
   }

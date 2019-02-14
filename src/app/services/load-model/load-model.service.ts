@@ -40,11 +40,13 @@ export class LoadModelService {
   public isSingleLoadCollection = true;
   public isDefaultLoad = true;
   public isModelOwner = false;
+  public isFinished = true;
 
   @Output() singleCollection: EventEmitter<boolean> = new EventEmitter();
   @Output() singleModel: EventEmitter<boolean> = new EventEmitter();
   @Output() defaultLoad: EventEmitter<boolean> = new EventEmitter();
   @Output() modelOwner: EventEmitter<boolean> = new EventEmitter();
+  @Output() finished: EventEmitter<boolean> = new EventEmitter();
 
   constructor(public babylonService: BabylonService,
               private actionService: ActionService,
@@ -181,6 +183,15 @@ export class LoadModelService {
         this.cameraService.setActiveCameraTarget(model.meshes[0]._boundingInfo.boundingBox.centerWorld);
 
         this.checkOwnerState(newModel._id);
+
+        if (!newModel.finished) {
+          this.finished.emit(false);
+          this.isFinished = false;
+        } else {
+          this.finished.emit(true);
+          this.isFinished = true;
+        }
+
       });
 
 

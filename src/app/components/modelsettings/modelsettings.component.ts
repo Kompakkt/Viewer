@@ -8,6 +8,7 @@ import {AnnotationmarkerService} from '../../services/annotationmarker/annotatio
 import {ColorEvent} from 'ngx-color';
 import {LoadModelService} from '../../services/load-model/load-model.service';
 import * as BABYLON from 'babylonjs';
+import {ModelsettingsService} from '../../services/modelsettings/modelsettings.service';
 
 @Component({
   selector: 'app-modelsettings',
@@ -22,6 +23,9 @@ export class ModelsettingsComponent implements OnInit {
   private setEffect = false;
   private isDefault: boolean;
   private isModelOwner: boolean;
+  private isFinished: boolean;
+  private initialSettingsMode = false;
+
 
   private cameraPositionInitial: {
     cameraType: string;
@@ -31,6 +35,7 @@ export class ModelsettingsComponent implements OnInit {
       z: number;
     };
   };
+
 
   private ambientlightUpintensity: number;
   private ambientlightDownintensity: number;
@@ -43,6 +48,7 @@ export class ModelsettingsComponent implements OnInit {
               private message: MessageService,
               private annotationmarkerService: AnnotationmarkerService,
               private loadModelService: LoadModelService,
+              private modelSettingsService: ModelsettingsService
   ) {
   }
 
@@ -50,6 +56,10 @@ export class ModelsettingsComponent implements OnInit {
 
     this.loadModelService.Observables.actualModel.subscribe(actualModel => {
       this.activeModel = actualModel;
+      // this.setSettings();
+    });
+
+    this.loadModelService.Observables.actualModelMeshes.subscribe(actualModelMeshes => {
       this.setSettings();
     });
 
@@ -60,7 +70,13 @@ export class ModelsettingsComponent implements OnInit {
     this.loadModelService.modelOwner.subscribe(isModelOwner => {
       this.isModelOwner = isModelOwner;
     });
+
+    this.loadModelService.finished.subscribe(isFinished => {
+      this.isFinished = isFinished;
+    });
+
   }
+
 
   /*
    * Light Settings
@@ -141,16 +157,16 @@ export class ModelsettingsComponent implements OnInit {
     this.babylonService.setBackgroundImage(this.setEffect);
   }
 
+
   /*
    * Save & Load Settings
    */
 
-  // TODO Initial Load
-
-
   public async saveActualSettings() {
 
     console.log('save');
+    this.initialSettingsMode = false;
+    this.modelSettingsService.decomposeAfterSetting();
 
     const settings = {
       preview: this.preview,
@@ -178,7 +194,13 @@ export class ModelsettingsComponent implements OnInit {
           },
           intensity: this.ambientlightUpintensity ? this.ambientlightUpintensity : 1
         }
-      ]
+      ],
+      rotation: {
+        x: this.modelSettingsService.rotationX,
+        y: this.modelSettingsService.rotationY,
+        z: this.modelSettingsService.rotationZ
+      },
+      scale: this.modelSettingsService.scalingFactor
     };
     settings.lights.push(this.babylonService.getPointlightData());
     this.activeModel.settings = settings;
@@ -231,11 +253,26 @@ export class ModelsettingsComponent implements OnInit {
       obj => obj.type === 'HemisphericLight' && obj.position.y === -1)[0];
     this.babylonService.setLightIntensity('ambientlightDown', hemisphericLightDown.intensity);
     this.ambientlightDownintensity = hemisphericLightDown.intensity;
+
+    if (!this.isDefault && !this.initialSettingsMode) {
+      this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
+        this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
+    }
+    if (!this.isDefault && this.initialSettingsMode) {
+      this.modelSettingsService.decomposeAfterSetting();
+      this.modelSettingsService.loadSettings(1,
+        0, 0, 0);
+      this.modelSettingsService.createVisualSettings();
+    }
+
   }
 
   private async setSettings() {
 
+    console.log('Settings sind: ', this.activeModel.settings);
+
     if (this.isDefault) {
+
       this.activeModel['settings'] = this.getDefaultLoadSettings();
 
       this.babylonService.createAmbientlightUp('ambientlightUp', {x: 0, y: 1, z: 0});
@@ -278,6 +315,7 @@ export class ModelsettingsComponent implements OnInit {
           const positionVector = new BABYLON.Vector3(camera.position.x,
             camera.position.y, camera.position.z);
           this.cameraService.moveCameraToTarget(positionVector);
+          this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
         } else {
           this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
           this.activeModel.settings.cameraPositionInitial.push(this.cameraService.getActualCameraPosInitialView());
@@ -354,7 +392,8 @@ export class ModelsettingsComponent implements OnInit {
         this.babylonService.createPointLight('pointlight', pointLight.position);
         this.babylonService.setLightIntensity('pointlight', pointLight.intensity);
 
-        const hemisphericLightUp = this.activeModel.settings.lights.filter(obj => obj.type === 'HemisphericLight' && obj.position.y === 1)[0];
+        const hemisphericLightUp = this.activeModel.settings.lights.filter(
+          obj => obj.type === 'HemisphericLight' && obj.position.y === 1)[0];
         this.babylonService.createAmbientlightUp('ambientlightUp', hemisphericLightUp.position);
         this.babylonService.setLightIntensity('ambientlightUp', hemisphericLightUp.intensity);
         this.ambientlightUpintensity = hemisphericLightUp.intensity;
@@ -364,6 +403,37 @@ export class ModelsettingsComponent implements OnInit {
         this.babylonService.createAmbientlightDown('ambientlightDown', hemisphericLightDown.position);
         this.babylonService.setLightIntensity('ambientlightDown', hemisphericLightDown.intensity);
         this.ambientlightDownintensity = hemisphericLightDown.intensity;
+      }
+
+
+      if (this.activeModel.settings.rotation === undefined || this.activeModel.settings.scale === undefined) {
+
+        if (this.isModelOwner && !this.isFinished) {
+
+          this.modelSettingsService.createVisualSettings();
+          this.initialSettingsMode = true;
+
+        } else {
+
+          if (this.activeModel.settings.rotation === undefined) {
+            const rotation = {
+              x: 0,
+              y: 0,
+              z: 0
+            };
+            this.activeModel.settings['rotation'] = rotation;
+          }
+
+          if (this.activeModel.settings.scale === undefined) {
+
+            const scale = 1;
+            this.activeModel.settings['scale'] = scale;
+          }
+        }
+      } else {
+
+        this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
+          this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
       }
       this.backToDefault();
     }
@@ -419,6 +489,13 @@ export class ModelsettingsComponent implements OnInit {
           intensity: 1
         }
       ],
+      rotation: {
+        x: 0,
+        y: 0,
+        z: 0
+      },
+      scale: 1
     };
   }
+
 }

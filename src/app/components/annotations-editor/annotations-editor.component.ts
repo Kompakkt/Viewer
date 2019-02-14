@@ -1,6 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {Annotation} from '../../interfaces/annotation/annotation';
-
 import {DataService} from '../../services/data/data.service';
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
@@ -50,7 +49,6 @@ export class AnnotationsEditorComponent implements OnInit {
   public async selectPerspective() {
     this.annotation.cameraPosition = this.cameraService.getActualCameraPosAnnotation();
     await this.babylonService.createPreviewScreenshot(400).then(detailScreenshot => {
-
       /*
       const i = new Image();
       i.onload = function() {
@@ -86,6 +84,22 @@ export class AnnotationsEditorComponent implements OnInit {
 
   public onSubmit(event) {
     console.log(event);
+  }
+
+  public setEditMode(mode: boolean) {
+    if (!mode && this.editMode) {
+      this.editMode = false;
+      this.labelMode = 'edit';
+      this.labelModeText = 'edit';
+      this.save();
+    } else if (mode && !this.editMode) {
+      this.collapsed = false;
+      this.editMode = true;
+      this.labelMode = 'remove_red_eye';
+      this.labelModeText = 'view';
+    } else {
+      return;
+    }
   }
 }
 
