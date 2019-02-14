@@ -1,9 +1,17 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {ModelsettingsComponent} from './modelsettings.component';
-import {MatCardModule, MatDialogModule, MatDialogRef, MatSliderModule, MatSlideToggleModule, MatSnackBarModule} from '@angular/material';
+import {
+  MatCardModule,
+  MatCheckboxModule,
+  MatDialogModule, MatFormFieldModule, MatIconModule,
+  MatSliderModule,
+  MatSlideToggleModule,
+  MatSnackBarModule
+} from '@angular/material';
 import {ColorChromeModule} from 'ngx-color/chrome';
 import {HttpClientModule} from '@angular/common/http';
+import {FormsModule} from '@angular/forms';
 
 describe('ModelsettingsComponent', () => {
   let component: ModelsettingsComponent;
@@ -19,7 +27,11 @@ describe('ModelsettingsComponent', () => {
         MatSliderModule,
         MatSnackBarModule,
         HttpClientModule,
-        MatDialogModule]
+        MatDialogModule,
+        MatCheckboxModule,
+        MatFormFieldModule,
+        FormsModule,
+        MatIconModule]
     })
       .compileComponents();
   }));
