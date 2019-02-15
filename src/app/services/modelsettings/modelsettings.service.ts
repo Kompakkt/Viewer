@@ -516,7 +516,7 @@ export class ModelsettingsService {
 
   public setScalingFactor(event: any) {
     this.scalingFactor = event.value;
-    this.boundingBox.scaling = new BABYLON.Vector3(event.value, event.value, event.value);
+    this.center.scaling = new BABYLON.Vector3(event.value, event.value, event.value);
 
     const bi = this.boundingBox.getBoundingInfo();
     const minimum = bi.boundingBox.minimumWorld;
