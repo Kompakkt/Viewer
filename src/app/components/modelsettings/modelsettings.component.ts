@@ -25,6 +25,7 @@ export class ModelsettingsComponent implements OnInit {
   private isModelOwner: boolean;
   private isFinished: boolean;
   private initialSettingsMode = false;
+  private isLoaded = false;
 
 
   private cameraPositionInitial: {
@@ -54,13 +55,25 @@ export class ModelsettingsComponent implements OnInit {
 
   ngOnInit() {
 
+
+    /*
     this.loadModelService.Observables.actualModel.subscribe(actualModel => {
       this.activeModel = actualModel;
-      // this.setSettings();
-    });
+      console.log('Das active Model ist: ', actualModel);
+      console.log('Man bekommt: ', this.loadModelService.getCurrentModel());
+    });*/
 
-    this.loadModelService.Observables.actualModelMeshes.subscribe(actualModelMeshes => {
-      this.setSettings();
+    this.loadModelService.loaded.subscribe(isLoaded => {
+      this.isLoaded = isLoaded;
+      console.log('Stand ist ', isLoaded);
+      if (isLoaded) {
+        console.log('If passiert mit:  ', isLoaded);
+        console.log('Man bekommt: ', this.loadModelService.getCurrentModel());
+
+        this.activeModel = this.loadModelService.getCurrentModel();
+        console.log('Das active Model ist: ', this.activeModel, this.activeModel.settings);
+        this.setSettings();
+      }
     });
 
     this.loadModelService.defaultLoad.subscribe(isDefaultLoad => {
