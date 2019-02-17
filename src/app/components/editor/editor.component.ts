@@ -5,6 +5,8 @@ import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
 
 import {saveAs} from 'file-saver';
 
+import {environment} from '../../../environments/environment.prod';
+
 @Component({
   selector: 'app-editor',
   templateUrl: './editor.component.html',
@@ -14,6 +16,8 @@ export class EditorComponent implements OnInit {
 
   @HostBinding('class.is-open') private isOpen = false;
   @Input() modelFileName: string;
+
+  public version: string = environment.version;
 
   constructor(private overlayService: OverlayService,
               public annotationService: AnnotationService) {
