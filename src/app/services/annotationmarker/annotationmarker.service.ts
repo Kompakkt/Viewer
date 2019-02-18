@@ -5,7 +5,9 @@ import {BabylonService} from '../babylon/babylon.service';
 import {BehaviorSubject} from 'rxjs/internal/BehaviorSubject';
 import {Observable} from 'rxjs/internal/Observable';
 import {CameraService} from '../camera/camera.service';
-import {Annotation} from '../../interfaces/annotation/annotation';
+// 11/02/19
+import {Annotation} from 'src/app/interfaces/annotation2/annotation2';
+// import {Annotation} from '../../interfaces/annotation/annotation';
 
 @Injectable({
   providedIn: 'root'
@@ -35,12 +37,25 @@ export class AnnotationmarkerService {
 
   public createAnnotationMarker(annotation) {
 
-    const positionVector = new BABYLON.Vector3(annotation.referencePoint[0].value,
-      annotation.referencePoint[1].value, annotation.referencePoint[2].value);
-    const normalVector = new BABYLON.Vector3(annotation.referencePointNormal[0].value,
-      annotation.referencePointNormal[1].value, annotation.referencePointNormal[2].value);
-    const cameraVector = new BABYLON.Vector3(annotation.cameraPosition[0].value,
-      annotation.cameraPosition[1].value, annotation.cameraPosition[2].value);
+    // 11/02/19
+    const positionVector = new BABYLON.Vector3(
+      annotation.target.selector.referencePoint.x,
+      annotation.target.selector.referencePoint.y, 
+      annotation.target.selector.referencePoint.z);
+    const normalVector = new BABYLON.Vector3(
+      annotation.target.selector.referenceNormal.x,
+      annotation.target.selector.referenceNormal.y, 
+      annotation.target.selector.referenceNormal.z);
+    const cameraVector = new BABYLON.Vector3(
+      annotation.body.content.relatedPerspective.vector.x,
+      annotation.body.content.relatedPerspective.vector.y, 
+      annotation.body.content.relatedPerspective.vector.z);
+    // const positionVector = new BABYLON.Vector3(annotation.referencePoint[0].value,
+    //   annotation.referencePoint[1].value, annotation.referencePoint[2].value);
+    // const normalVector = new BABYLON.Vector3(annotation.referencePointNormal[0].value,
+    //   annotation.referencePointNormal[1].value, annotation.referencePointNormal[2].value);
+    // const cameraVector = new BABYLON.Vector3(annotation.cameraPosition[0].value,
+    //   annotation.cameraPosition[1].value, annotation.cameraPosition[2].value);
 
     // two Labels: one is for isOccluded true, one for false -> alpha 0.5 for transparancy
 

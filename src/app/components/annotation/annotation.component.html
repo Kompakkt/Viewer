@@ -11,9 +11,12 @@
     <mat-card-header>
 
       <mat-card-title>
-        <span *ngIf="!editMode">{{annotation.title}}</span>
+        <!-- 11/02/19 -->
+        <span *ngIf="!editMode">{{annotation.body.content.title}}</span>
+        <span *ngIf="!editMode">{{annotation.body.content.title}}</span>
         <mat-form-field *ngIf="editMode">
-          <input matInput name="title" #title="ngModel" type="text" placeholder="Title" [(ngModel)]="annotation.title">
+          <!-- 11/02/19 -->
+          <input matInput name="title" #title="ngModel" type="text" placeholder="Title" [(ngModel)]="annotation.body.content.title">
         </mat-form-field>
       </mat-card-title>
 
@@ -29,10 +32,12 @@
 
     <mat-card-content>
 
-      <p *ngIf="!editMode"> {{annotation.description}}</p>
+      <!-- 11/02/19 -->
+      <p *ngIf="!editMode"> {{annotation.body.content.description}}</p>
       <mat-form-field *ngIf="editMode">
+        <!-- 11/02/19 -->
         <textarea matInput name="description" #description="ngModel" type="text" placeholder="Description"
-                  [(ngModel)]="annotation.description"></textarea>
+                  [(ngModel)]="annotation.body.content.description"></textarea>
       </mat-form-field>
 
     </mat-card-content>

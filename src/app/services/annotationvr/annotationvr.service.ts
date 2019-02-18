@@ -201,9 +201,11 @@ export class AnnotationvrService {
   private getAction(index: number) {
 
     if (this.annotationService.annotations.length) {
-      
       // FOR VR-HUD
-      this.text1.text = this.annotationService.annotations[index].title;
+      
+      // 11/02/19
+      this.text1.text = this.annotationService.annotations[index].body.content.title;
+      // this.text1.text = this.annotationService.annotations[index].title;
 
       let cameraVector;
       let i = 1;

@@ -1,7 +1,9 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
-import {Annotation} from '../../interfaces/annotation/annotation';
+// 11/02/19
+import {Annotation} from 'src/app/interfaces/annotation2/annotation2';
+// import {Annotation} from '../../interfaces/annotation/annotation';
 import {DataService} from '../../services/data/data.service';
 
 import {Vector3, Matrix} from 'babylonjs';
@@ -135,7 +137,8 @@ export class AnnotationComponent implements OnInit {
   }
 
   private save(): void {
-    this.dataService.updateAnnotation(this.annotation._id, this.annotation.title, this.annotation.description);
+    // 11/02/19
+    this.dataService.updateAnnotation(this.annotation._id, this.annotation.body.content.title, this.annotation.body.content.description);
   }
 
   public onSumbit(event) {

@@ -358,9 +358,15 @@ export class CameraService {
   }
 
   public getActualCameraPosAnnotation() {
-    const cameraPosition = [{dimension: 'x', value: this.arcRotateCamera.alpha},
-      {dimension: 'y', value: this.arcRotateCamera.beta},
-      {dimension: 'z', value: this.arcRotateCamera.radius}];
+    // 11/02/19
+    const cameraPosition = {
+      x: this.arcRotateCamera.alpha,
+      y: this.arcRotateCamera.beta,
+      z: this.arcRotateCamera.radius
+    };
+    // const cameraPosition = [{dimension: 'x', value: this.arcRotateCamera.alpha},
+    //   {dimension: 'y', value: this.arcRotateCamera.beta},
+    //   {dimension: 'z', value: this.arcRotateCamera.radius}];
     return cameraPosition;
   }
 

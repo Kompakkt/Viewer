@@ -1,5 +1,7 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {Annotation} from '../../interfaces/annotation/annotation';
+// 11/02/19
+import {Annotation} from 'src/app/interfaces/annotation2/annotation2';
+// import {Annotation} from '../../interfaces/annotation/annotation';
 import {DataService} from '../../services/data/data.service';
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
@@ -32,7 +34,9 @@ export class AnnotationsEditorComponent implements OnInit {
   ngOnInit() {
 
     if (this.annotation) {
-      this.preview = this.annotation.preview;
+        // 11/02/19
+      // this.preview = this.annotation.preview;
+      this.preview = this.annotation.body.content.relatedPerspective.preview;
 
       // 15/02/19
       // EditMode -- OnInit -- newly creaded annotation (by double click)
@@ -57,7 +61,9 @@ export class AnnotationsEditorComponent implements OnInit {
   }
 
   public async selectPerspective() {
-    this.annotation.cameraPosition = this.cameraService.getActualCameraPosAnnotation();
+    // 11/02/19
+    this.annotation.body.content.relatedPerspective.vector = this.cameraService.getActualCameraPosAnnotation();
+    // this.annotation.cameraPosition = this.cameraService.getActualCameraPosAnnotation();
     await this.babylonService.createPreviewScreenshot(400).then(detailScreenshot => {
       /*
       const i = new Image();
@@ -88,8 +94,10 @@ export class AnnotationsEditorComponent implements OnInit {
   }
 
   private save(): void {
-    this.dataService.updateAnnotation(this.annotation._id, this.annotation.title, this.annotation.description,
-      this.preview, this.annotation.cameraPosition, this.annotation.validated);
+    this.dataService.updateAnnotation(this.annotation._id, this.annotation.body.content.title, this.annotation.body.content.description,
+      this.preview, this.annotation.body.content.relatedPerspective.vector, this.annotation.validated);
+    // this.dataService.updateAnnotation(this.annotation._id, this.annotation.title, this.annotation.description,
+    //   this.preview, this.annotation.cameraPosition, this.annotation.validated);
   }
 
   public onSubmit(event) {
