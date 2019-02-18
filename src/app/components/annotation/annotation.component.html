@@ -13,7 +13,6 @@
       <mat-card-title>
         <!-- 11/02/19 -->
         <span *ngIf="!editMode">{{annotation.body.content.title}}</span>
-        <span *ngIf="!editMode">{{annotation.body.content.title}}</span>
         <mat-form-field *ngIf="editMode">
           <!-- 11/02/19 -->
           <input matInput name="title" #title="ngModel" type="text" placeholder="Title" [(ngModel)]="annotation.body.content.title">
