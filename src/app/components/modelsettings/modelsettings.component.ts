@@ -277,6 +277,12 @@ export class ModelsettingsComponent implements OnInit {
         0, 0, 0);
       this.modelSettingsService.createVisualSettings();
     }
+    if (this.isDefault) {
+      this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
+        this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
+      this.modelSettingsService.createVisualSettings();
+      this.initialSettingsMode = true;
+    }
 
   }
 
@@ -295,9 +301,6 @@ export class ModelsettingsComponent implements OnInit {
       this.babylonService.createAmbientlightDown('ambientlightDown', {x: 0, y: -1, z: 0});
       this.babylonService.setLightIntensity('ambientlightDown', 1);
       this.ambientlightDownintensity = 1;
-
-      this.modelSettingsService.createVisualSettings();
-      this.initialSettingsMode = true;
 
       this.backToDefault();
     } else {
