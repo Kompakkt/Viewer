@@ -10,7 +10,6 @@
     <button mat-button *ngIf="!isDefault && isModelOwner" (click)="saveActualSettings()">Save as default</button>
     <br><br>
 
-    <div *ngIf="!isDefault && isModelOwner && !isFinished && initialSettingsMode">
 
     <h3>Mesh</h3>
     <h4>General Information & Helpers</h4>
@@ -129,7 +128,6 @@
             type="button">
       <mat-icon aria-label="Rotate 90°">redo</mat-icon>
     </button>
-    </div>
 
     <h3>Initial Perspective</h3>
 

@@ -65,7 +65,6 @@ export class ModelsettingsService {
     console.log('Ich lade jetzt: ', scalingFactor, rotX, rotY, rotZ);
     this.loadScalingFactor(scalingFactor);
 
-
     this.rotationFunc('x', rotX);
     this.rotationFunc('y', rotY);
     this.rotationFunc('z', rotZ);
