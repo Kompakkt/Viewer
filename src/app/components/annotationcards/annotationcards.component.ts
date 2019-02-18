@@ -3,7 +3,6 @@ import {AnnotationService} from '../../services/annotation/annotation.service';
 import {AnnotationComponent} from '../annotation/annotation.component';
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
 
-
 @Component({
   selector: 'app-annotationcards',
   templateUrl: './annotationcards.component.html',
@@ -13,7 +12,6 @@ export class AnnotationcardsComponent implements OnInit, AfterViewInit {
 
   public popup_is_open = '';
 
-
   // @ViewChildren(AnnotationComponent) annotations : QueryList<AnnotationComponent>;
   @ViewChildren(AnnotationComponent)
   annotationsList: QueryList<AnnotationComponent>;
@@ -22,17 +20,20 @@ export class AnnotationcardsComponent implements OnInit, AfterViewInit {
 
   }
 
-
   ngOnInit() {
-
   }
 
-
   ngAfterViewInit(): void {
-    this.annotationsList.changes
-      .subscribe(() => this.annotationsList.forEach(function (value) {
-        })
-      );
+    
+    this.annotationsList.changes.subscribe(() => {
+      
+      // 15/02/19
+      // setVisabile only for newly created annotation (double click on mesh)
+      this.setVisability(this.annotationmarkerService.open_popup, true);
+
+      this.annotationsList.forEach(function (value) {
+      })
+    });
 
     this.annotationmarkerService.popupIsOpen().subscribe(
       popup_is_open => this.setVisability(popup_is_open, true)

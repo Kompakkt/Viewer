@@ -33,6 +33,16 @@ export class AnnotationsEditorComponent implements OnInit {
 
     if (this.annotation) {
       this.preview = this.annotation.preview;
+
+      // 15/02/19
+      // EditMode -- OnInit -- newly creaded annotation (by double click)
+      if (this.annotationmarkerService.open_popup === this.annotation._id){
+              
+        this.collapsed = true;
+        this.editMode = false;
+        this.labelMode = 'edit';
+        this.labelModeText = 'edit';
+      }
     }
   }
 

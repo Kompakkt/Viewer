@@ -5,6 +5,8 @@ import {Annotation} from '../../interfaces/annotation/annotation';
 import {DataService} from '../../services/data/data.service';
 
 import {Vector3, Matrix} from 'babylonjs';
+// 15/02/19
+import { AnnotationmarkerService } from 'src/app/services/annotationmarker/annotationmarker.service';
 
 @Component({
   selector: 'app-annotation',
@@ -27,14 +29,27 @@ export class AnnotationComponent implements OnInit {
 
   constructor(private dataService: DataService,
               private annotationService: AnnotationService,
-              private babylonService: BabylonService) {
-    this.visibility = true;
+              private babylonService: BabylonService,
+              private annotationmarkerService: AnnotationmarkerService
+              ) {
+    // 15/02/19
+    // CLOSED ANNOTATION-CARDS ON LOADED-MODEL
+    this.visibility = false;
   }
 
   ngOnInit() {
 
     if (this.annotation) {
       this.id = this.annotation._id;
+
+      // 15/02/19
+      // EditMode on newly creaded annotation (double click)
+      if (this.annotationmarkerService.open_popup === this.annotation._id){
+        this.visibility = true;
+        this.editMode = true;
+        this.labelMode = 'remove_red_eye';
+        this.labelModeText = 'view';
+      }
     }
 
     this.opacity = '1';
