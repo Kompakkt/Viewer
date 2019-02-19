@@ -8,6 +8,13 @@ import { Observable } from 'rxjs';
 })
 export class MongohandlerService {
 
+  // Needed for ObjectId gen
+  private genIndex = parseInt((Math.random() * 0xFFFFFF).toString(), 10);
+  private MACHINE_ID = Math.floor(Math.random() * 0xFFFFFF);
+  private pid = (typeof process === 'undefined' || typeof process.pid !== 'number'
+      ? Math.floor(Math.random() * 100000) : process.pid) % 0xFFFF;
+
+  //
   private endpoint = `${environment.express_server_url}:${environment.express_server_port}`;
   private httpOptions = {
     headers: new HttpHeaders({
@@ -17,6 +24,11 @@ export class MongohandlerService {
   };
 
   constructor(private http: HttpClient) {
+    let arr: any[] = [];
+    for (let i = 0; i < 100; i++) {
+      arr.push(this.generateObjectId());
+    }
+    console.log(JSON.stringify(arr));
   }
 
   // Helper
@@ -106,13 +118,8 @@ export class MongohandlerService {
    * This is used as fallback when we cannot get an ObjectId from Server
    */
   public generateObjectId(): string {
-    const MACHINE_ID = Math.floor(Math.random() * 0xFFFFFF);
-    let index = parseInt((Math.random() * 0xFFFFFF).toString(), 10);
-    const pid = (typeof process === 'undefined' || typeof process.pid !== 'number'
-      ? Math.floor(Math.random() * 100000) : process.pid) % 0xFFFF;
-
     const next = () => {
-      return index = (index + 1) % 0xFFFFFF;
+      return this.genIndex = (this.genIndex + 1) % 0xFFFFFF;
     };
 
     const hex = (length, n) => {
@@ -122,6 +129,6 @@ export class MongohandlerService {
 
     const time = parseInt((Date.now() / 1000).toString(), 10) % 0xFFFFFFFF;
 
-    return hex(8, time) + hex(6, MACHINE_ID) + hex(4, pid) + hex(6, next());
+    return hex(8, time) + hex(6, this.MACHINE_ID) + hex(4, this.pid) + hex(6, next());
   }
 }
