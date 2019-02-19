@@ -23,7 +23,7 @@ export class ActionService {
       mesh.actionManager.registerAction(new ExecuteCodeAction(
         trigger, function (evt) {
           const pickResult = scene.pick(scene.pointerX, scene.pointerY,
-            undefined, false, scene.activeCamera);
+            null, false, scene.activeCamera);
           console.log(pickResult);
           actionExecuted(pickResult);
         }));

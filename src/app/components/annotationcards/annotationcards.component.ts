@@ -24,9 +24,9 @@ export class AnnotationcardsComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-
+    
     this.annotationsList.changes.subscribe(() => {
-
+      
       // 15/02/19
       // setVisabile only for newly created annotation (double click on mesh)
       this.setVisability(this.annotationmarkerService.open_popup, true);
@@ -41,10 +41,9 @@ export class AnnotationcardsComponent implements OnInit, AfterViewInit {
   }
 
   public setVisability(id: string, visibility: boolean) {
-    const found = this.annotationsList.find(annotation => annotation.id === id);
-    if (found) {
+    if (this.annotationsList.find(annotation => annotation.id === id) != null) {
       this.hideAllCards();
-      found.visabilityAnnotationCard(visibility);
+      this.annotationsList.find(annotation => annotation.id === id).visabilityAnnotationCard(visibility);
     }
   }
 

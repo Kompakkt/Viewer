@@ -8,7 +8,7 @@ import {LoadingscreenhandlerService} from '../../services/loadingscreenhandler/l
 })
 export class LoadingscreenComponent implements OnInit {
 
-  public logo: string;
+  public logo: string = null;
   public loadingText = 'Loading...';
   public opacity = '1';
   public backgroundColor = '#111111';
@@ -23,6 +23,7 @@ export class LoadingscreenComponent implements OnInit {
   }
 
   ngOnInit() {
+
     this.logo = this.loadingScreenHandler.logo;
     this.backgroundColor = this.loadingScreenHandler.backgroundColor;
     this.loadingScreenHandler.opacity.subscribe((newOpacity) => this.opacity = newOpacity);

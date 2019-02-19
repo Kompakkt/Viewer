@@ -209,7 +209,7 @@ export class LoadModelService {
       await this.getUserData();
     }
 
-    if (!this.loadingScreenHandler.isLoading && newModel.processed) {
+    if (!this.loadingScreenHandler.isLoading) {
       await this.babylonService.loadModel(URL, newModel.processed[this.quality]).then(async (model) => {
         // Warte auf Antwort von loadModel, da loadModel ein Promise<object> von ImportMeshAync übergibt
         // model ist hier das neu geladene Model
@@ -219,7 +219,7 @@ export class LoadModelService {
         // Zentriere auf das neu geladene Model, bevor die SettingsEinstellung übernommen wird
         this.cameraService.setActiveCameraTarget(model.meshes[0]._boundingInfo.boundingBox.centerWorld);
 
-        if (newModel._id) this.checkOwnerState(newModel._id);
+        this.checkOwnerState(newModel._id);
 
         if (!newModel.finished) {
           this.finished.emit(false);

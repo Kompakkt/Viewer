@@ -314,8 +314,7 @@ export class ModelsettingsComponent implements OnInit {
 
       if (this.activeModel.settings.cameraPositionInitial === undefined) {
         this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
-        // TODO: Camera Setting Interface
-        const cameraSettings: any[] = [];
+        const cameraSettings = [];
         cameraSettings.push(this.cameraService.getActualCameraPosInitialView());
         this.activeModel.settings['cameraPositionInitial'] = cameraSettings;
       } else {

@@ -1,15 +1,15 @@
-import { EventEmitter, Inject, Injectable, Output } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import {EventEmitter, Inject, Injectable, Output} from '@angular/core';
+import {DOCUMENT} from '@angular/common';
 
 import * as BABYLON from 'babylonjs';
 
-import { MessageService } from '../message/message.service';
+import {MessageService} from '../message/message.service';
 
 import 'babylonjs-loaders';
-import { LoadingScreen } from './loadingscreen';
-import { LoadingscreenhandlerService } from '../loadingscreenhandler/loadingscreenhandler.service';
+import {LoadingScreen} from './loadingscreen';
+import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreenhandler.service';
 
-import { ReplaySubject } from 'rxjs';
+import {BehaviorSubject} from 'rxjs';
 import ActionEvent = BABYLON.ActionEvent;
 
 /**
@@ -28,7 +28,7 @@ export class BabylonService {
   private engine: BABYLON.Engine;
   private VRHelper: BABYLON.VRExperienceHelper;
 
-  private CanvasSubject = new ReplaySubject<HTMLCanvasElement>();
+  private CanvasSubject = new BehaviorSubject<HTMLCanvasElement>(null);
   public CanvasObservable = this.CanvasSubject.asObservable();
 
   private backgroundURL = 'assets/textures/backgrounds/darkgrey.jpg';
@@ -60,14 +60,14 @@ export class BabylonService {
   public vrJump: boolean;
 
   constructor(private message: MessageService,
-    private loadingScreenHandler: LoadingscreenhandlerService,
-    @Inject(DOCUMENT) private document: any) {
+              private loadingScreenHandler: LoadingscreenhandlerService,
+              @Inject(DOCUMENT) private document: any) {
 
     this.CanvasObservable.subscribe(newCanvas => {
 
       if (newCanvas) {
 
-        this.engine = new BABYLON.Engine(newCanvas, true, { preserveDrawingBuffer: true, stencil: true });
+        this.engine = new BABYLON.Engine(newCanvas, true, {preserveDrawingBuffer: true, stencil: true});
         this.scene = new BABYLON.Scene(this.engine);
         this.engine.loadingScreen = new LoadingScreen(newCanvas, '',
           '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
@@ -97,30 +97,29 @@ export class BabylonService {
           }
 
           // Annotation_Marker -- Fixed_Size_On_Zoom
-          const _cam = this.scene.getCameraByName('arcRotateCamera');
-          if (_cam && _cam['radius']) {
-            const radius = Math.abs(_cam['radius']);
-            this.scene.getMeshesByTags('plane', mesh => mesh.scalingDeterminant = radius / 35);
-            this.scene.getMeshesByTags('label', mesh => mesh.scalingDeterminant = radius / 35);
-          }
+          const radius = Math.abs(this.scene.getCameraByName('arcRotateCamera')['radius']);
+          this.scene.getMeshesByTags('plane', mesh => mesh.scalingDeterminant = radius / 35);
+          this.scene.getMeshesByTags('label', mesh => mesh.scalingDeterminant = radius / 35);
 
           // FOR VR-HUD
-          const _activeCamera = this.getActiveCamera();
-          if (this.vrJump && _activeCamera) {
+          if (this.vrJump) {
+
             this.vrJump = false;
             let i = 1;
             this.scene.getMeshesByTags('control', mesh => {
-
+              
               let newPosition = new BABYLON.Vector3();
-              if ((i % 2) != 0) {
-                newPosition.x = _activeCamera.position.x - 5;
-                newPosition.y = _activeCamera.position.y;
-                newPosition.z = _activeCamera.position.z;
+              if((i%2) != 0 ) {
+
+                newPosition.x = this.getActiveCamera().position.x - 5;
+                newPosition.y = this.getActiveCamera().position.y;
+                newPosition.z = this.getActiveCamera().position.z ;
                 i++;
-              } else {
-                newPosition.x = _activeCamera.position.x + 5;
-                newPosition.y = _activeCamera.position.y;
-                newPosition.z = _activeCamera.position.z;
+              }else {
+
+                newPosition.x = this.getActiveCamera().position.x + 5;
+                newPosition.y = this.getActiveCamera().position.y;
+                newPosition.z = this.getActiveCamera().position.z ;
               }
               mesh.setAbsolutePosition(newPosition);
             });
@@ -203,7 +202,7 @@ export class BabylonService {
           break;
       }
     });
-
+    
     this.VRHelper.onEnteringVRObservable.add(() => {
       this.vrModeIsActive.emit(true);
     });
@@ -230,15 +229,15 @@ export class BabylonService {
 
     return new Promise<any>((resolve, reject) => {
 
-      BABYLON.SceneLoader.ImportMeshAsync(null, rootUrl, filename, this.scene, function(progress) {
+      BABYLON.SceneLoader.ImportMeshAsync(null, rootUrl, filename, this.scene, function (progress) {
 
         if (progress.lengthComputable) {
           engine.loadingUIText = (progress.loaded * 100 / progress.total).toFixed() + '%';
         }
-      }).then(function(result) {
+      }).then(function (result) {
         engine.hideLoadingUI();
         resolve(result);
-      }, function(error) {
+      }, function (error) {
 
         engine.hideLoadingUI();
         message.error(error);
@@ -256,14 +255,11 @@ export class BabylonService {
     this.hideMesh('label', false);
     await new Promise<any>((resolve, reject) => this.engine.onEndFrameObservable.add(() => resolve()));
     const result = await new Promise<string>((resolve, reject) => {
-      const _activeCamera = this.getScene().activeCamera;
-      if (_activeCamera instanceof BABYLON.Camera) {
-        BABYLON.Tools.CreateScreenshot(this.getEngine(), _activeCamera, { precision: 2 },
-          (screenshot) => {
-            fetch(screenshot).then(res => res.blob()).then(blob => BABYLON.Tools.Download(blob, `Kompakkt-${Date.now().toString()}`));
-            resolve(screenshot);
-          });
-      }
+      BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera, {precision: 2},
+        (screenshot) => {
+          fetch(screenshot).then(res => res.blob()).then(blob => BABYLON.Tools.Download(blob, `Kompakkt-${Date.now().toString()}`));
+          resolve(screenshot);
+        });
     });
     this.hideMesh('plane', true);
     this.hideMesh('label', true);
@@ -275,16 +271,13 @@ export class BabylonService {
     this.hideMesh('label', false);
     await new Promise<any>((resolve, reject) => this.engine.onEndFrameObservable.add(() => resolve()));
     const result = await new Promise<string>((resolve, reject) => {
-      const _activeCamera = this.getScene().activeCamera;
-      if (_activeCamera instanceof BABYLON.Camera) {
-        BABYLON.Tools.CreateScreenshot(this.getEngine(), _activeCamera,
-          (width === undefined) ? { width: 400, height: 225 } : { width: width, height: Math.round((width / 16) * 9) },
-          (screenshot) => {
-            resolve(screenshot);
-          });
-      }
+      BABYLON.Tools.CreateScreenshot(this.getEngine(), this.getScene().activeCamera,
+        (width === undefined) ? {width: 400, height: 225} : {width: width, height: Math.round((width / 16) * 9)},
+        (screenshot) => {
+          resolve(screenshot);
+        });
     });
-      this.hideMesh('plane', true);
+    this.hideMesh('plane', true);
     this.hideMesh('label', true);
     return result;
   }
@@ -382,7 +375,7 @@ export class BabylonService {
           break;
       }
 
-      this.createPointLight('pointlight', { x: this.pointlightPosX, y: this.pointlightPosY, z: this.pointlightPosZ });
+      this.createPointLight('pointlight', {x: this.pointlightPosX, y: this.pointlightPosY, z: this.pointlightPosZ});
     }
   }
 
