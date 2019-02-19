@@ -1,4 +1,4 @@
-import {Component, HostBinding, OnInit} from '@angular/core';
+import {Component, HostBinding, AfterViewInit, ChangeDetectorRef} from '@angular/core';
 import {OverlayService} from '../../services/overlay/overlay.service';
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {Model} from '../../interfaces/model/model.interface';
@@ -14,7 +14,7 @@ import {PasswordComponent} from '../password/password.component';
   templateUrl: './collections-overview.component.html',
   styleUrls: ['./collections-overview.component.scss']
 })
-export class CollectionsOverviewComponent implements OnInit {
+export class CollectionsOverviewComponent implements AfterViewInit {
 
   @HostBinding('class.is-open') private isOpen = false;
   private isSingleModel: boolean;
@@ -40,11 +40,11 @@ export class CollectionsOverviewComponent implements OnInit {
               private loadModelService: LoadModelService,
               private message: MessageService,
               public dialog: MatDialog,
+              private _changeDetectionRef: ChangeDetectorRef
   ) {
   }
 
-  ngOnInit() {
-
+  ngAfterViewInit() {
     this.catalogueService.loggedIn.subscribe(loggedIn => {
       this.isLoggedIn = loggedIn;
     });
@@ -74,6 +74,8 @@ export class CollectionsOverviewComponent implements OnInit {
 
     this.modelSelected = false;
     this.collectionSelected = false;
+
+    this._changeDetectionRef.detectChanges();
   }
 
   onSelectionDataTypeChange(event) {
