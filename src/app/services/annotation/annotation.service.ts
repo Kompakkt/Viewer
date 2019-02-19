@@ -178,10 +178,8 @@ export class AnnotationService {
     }
 
     this.babylonService.createPreviewScreenshot(400).then(async detailScreenshot => {
-      let generatedId: any = null;
+      let generatedId: string = this.mongo.generateObjectId();
       await this.mongo.getUnusedObjectId().then(id => generatedId = id).catch(e => console.error(e));
-      if (!generatedId) return;
-      console.log(generatedId);
       const newAnnotation: Annotation = {
         validated: false,
         _id: generatedId,

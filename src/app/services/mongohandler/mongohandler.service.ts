@@ -1,7 +1,7 @@
-import {Injectable} from '@angular/core';
-import {environment} from '../../../environments/environment';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -94,11 +94,34 @@ export class MongohandlerService {
 
   // Auth
   public login(username: string, password: string): Observable<any> {
-    return this.post(`login`, {username: username, password: password});
+    return this.post(`login`, { username: username, password: password });
   }
 
   public isAuthorized() {
     return this.get(`auth`);
   }
 
+  /**
+   * Generates an ObjectId
+   * This is used as fallback when we cannot get an ObjectId from Server
+   */
+  public generateObjectId(): string {
+    const MACHINE_ID = Math.floor(Math.random() * 0xFFFFFF);
+    let index = parseInt((Math.random() * 0xFFFFFF).toString(), 10);
+    const pid = (typeof process === 'undefined' || typeof process.pid !== 'number'
+      ? Math.floor(Math.random() * 100000) : process.pid) % 0xFFFF;
+
+    const next = () => {
+      return index = (index + 1) % 0xFFFFFF;
+    };
+
+    const hex = (length, n) => {
+      n = n.toString(16);
+      return (n.length === length) ? n : '00000000'.substring(n.length, length) + n;
+    };
+
+    const time = parseInt((Date.now() / 1000).toString(), 10) % 0xFFFFFFFF;
+
+    return hex(8, time) + hex(6, MACHINE_ID) + hex(4, pid) + hex(6, next());
+  }
 }
