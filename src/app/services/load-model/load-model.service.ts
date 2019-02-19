@@ -241,11 +241,11 @@ export class LoadModelService {
       this.mongohandlerService.getCurrentUserData().then(userData => {
         resolve(userData);
         if (userData && userData.message === 'Invalid session') {
-          this.message.error('User not logged in');
+          this.message.info('User not logged in');
         } else if (!userData || !userData.data) {
-          this.message.error('No valid userdata received');
+          this.message.info('No valid userdata received');
         } else if (userData.data.models.length === 0) {
-          this.message.error('No user models');
+          this.message.info('No user models');
         } else {
           this.currentUserData = userData;
           this.userOwnedModels = userData.data.models;

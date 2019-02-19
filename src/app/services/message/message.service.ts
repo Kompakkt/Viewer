@@ -6,10 +6,15 @@ import {MatSnackBar} from '@angular/material';
 })
 export class MessageService {
 
-  constructor(public snackBar: MatSnackBar) {
+  constructor(private snackBar: MatSnackBar) {
   }
 
   public error(message: string) {
     this.snackBar.open(message, 'OK');
+  }
+
+  public info(message: string) {
+    const instance = this.snackBar.open(message);
+    setTimeout(() => instance.dismiss(), 5000);
   }
 }
