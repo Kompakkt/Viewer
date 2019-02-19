@@ -30,6 +30,7 @@ export class LoadModelService {
   };
 
   private userOwnedModels: Array<any> = [];
+  public currentUserData: any;
 
   private baseUrl = `${environment.express_server_url}:${environment.express_server_port}/`;
   public quality = 'low';
@@ -240,19 +241,16 @@ export class LoadModelService {
     return new Promise((resolve, reject) => {
 
       this.mongohandlerService.getCurrentUserData().then(userData => {
-
-        if (userData.data) {
-
-          if (userData.data.models.length > 0) {
-            this.userOwnedModels = userData.data.models;
-          } else {
-            console.log('User owns no models.');
-          }
-        }
-        resolve();
+        if (!userData) reject('No valid userdata received');
+        if (userData.message === 'Invalid session') resolve('User not logged in');
+        if (!userData.data) reject('User has no data');
+        if (userData.data.models.length === 0) resolve('No user models');
+        this.currentUserData = userData;
+        this.userOwnedModels = userData.data.models;
+        resolve(this.userOwnedModels);
       }, error => {
         this.message.error('Connection to object server refused.');
-        reject();
+        reject('Connection to object server refused.');
       });
     });
   }
