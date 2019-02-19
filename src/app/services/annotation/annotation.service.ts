@@ -9,7 +9,6 @@ import {ActionManager} from 'babylonjs';
 import PouchDB from 'pouchdb';
 import * as BABYLON from 'babylonjs';
 import {LoadModelService} from '../load-model/load-model.service';
-import {ulid} from 'ulid';
 import {environment} from '../../../environments/environment';
 
 /**
