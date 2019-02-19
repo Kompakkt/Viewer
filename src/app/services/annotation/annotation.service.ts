@@ -27,8 +27,6 @@ export class AnnotationService {
   private unsortedAnnotations: Annotation[];
   private allAnnotations: Annotation[];
   private modelName: string;
-  // 11/02/19
-  public initialLoading: boolean;
   // private initialLoading: boolean;
   private actualModelMeshes: BABYLON.Mesh[];
   private isDefaultLoad: boolean;
@@ -39,7 +37,7 @@ export class AnnotationService {
               private annotationmarkerService: AnnotationmarkerService,
               private loadModelService: LoadModelService) {
 
-    this.initialLoading = true;
+    // this.initialLoading = true;
     this.annotations = [];
     this.loadModelService.Observables.actualModel.subscribe(actualModel => {
       this.modelName = actualModel.name;
@@ -72,10 +70,10 @@ export class AnnotationService {
     await this.annotationmarkerService.deleteAllMarker();
 
     // 11/02/19
-    // In Zukunft von der Datenbank...?
     // Beim ersten Laden eines Mdoells, werden alle in der PuchDB vorhandenen Annotationen in
     // das Array "allAnnotations" geladen
-    if (this.initialLoading === true && this.isDefaultLoad === false) {
+    if (this.isDefaultLoad === false) {
+    // if (this.initialLoading === true && this.isDefaultLoad === false) {
       await this.getAnnotations();
     } else {
 
@@ -121,7 +119,8 @@ export class AnnotationService {
 
     this.allAnnotations = [];
     this.allAnnotations = await this.fetchData();
-    this.initialLoading = false;
+    // this.initialLoading = false;
+    this.annotationmarkerService.toggleCreatorPopup('');
   }
 
   // Das aktuelle Modell wird anklickbar und damit annotierbar
