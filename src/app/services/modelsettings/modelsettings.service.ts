@@ -97,7 +97,9 @@ export class ModelsettingsService {
   public createVisualSettings() {
     this.initializeVariablesforSettings();
     this.generateHelpers();
-    this.createBoundingBox();
+
+    //TODO
+    // this.createBoundingBox();
     this.showBoundingBoxModel = false;
     this.boundingBox.visibility = 0;
     this.createWorldAxis(18);
@@ -237,13 +239,16 @@ export class ModelsettingsService {
     this.createCenter();
     this.initialSize = this.max.subtract(this.min);
 
-    this.height = this.initialSize.y;
-    this.width = this.initialSize.x;
-    this.depth = this.initialSize.z;
+    this.height = Math.round(this.initialSize.y);
+    this.width = Math.round(this.initialSize.x);
+    this.depth = Math.round(this.initialSize.z);
+
+    // TODO only for testing with Default Model
+    this.createBoundingBox();
   }
 
 
-  private createCenter() {
+  private async createCenter() {
     this.center = BABYLON.MeshBuilder.CreateBox('center', {size: 1}, this.babylonService.getScene());
     BABYLON.Tags.AddTagsTo(this.center, 'center');
     this.center.isVisible = false;
@@ -251,6 +256,7 @@ export class ModelsettingsService {
       const mesh = this.actualModelMeshes[_i];
       mesh.parent = this.center;
     }
+
   }
 
   private destroyCenter() {
@@ -521,19 +527,9 @@ export class ModelsettingsService {
     const minimum = bi.boundingBox.minimumWorld;
     const maximum = bi.boundingBox.maximumWorld;
     const size = maximum.subtract(minimum);
-    this.height = size.y;
-    this.width = size.x;
-    this.depth = size.z;
-    this.lastHeight = size.y;
-    this.lastWidth = size.x;
-    this.lastDepth = size.z;
-
-    // this.boundingBox.position = new BABYLON.Vector3(0, Math.abs(size.y) / 2,  0);
-  }
-
-  private loadScalingFactor(factor: number) {
-    this.scalingFactor = factor;
-    this.center.scaling = new BABYLON.Vector3(factor, factor, factor);
+    this.height = Math.round(size.y);
+    this.width = Math.round(size.x);
+    this.depth = Math.round(size.z);
 
 
     // this.boundingBox.position = new BABYLON.Vector3(0, Math.abs(size.y) / 2,  0);
@@ -541,19 +537,19 @@ export class ModelsettingsService {
 
   public handleChangeHeight() {
 
+    console.log('Höhe: ' + this.height);
     // originalSize.x => 1 scale
-    // originalSize.x  * factor = this.height
+    // originalSize.y * factor = this.height
     const factor = this.height / this.initialSize.y;
     this.scalingFactor = factor;
     this.center.scaling = new BABYLON.Vector3(factor, factor, factor);
 
-    const bi = this.center.getBoundingInfo();
+    const bi = this.boundingBox.getBoundingInfo();
     const minimum = bi.boundingBox.minimumWorld;
     const maximum = bi.boundingBox.maximumWorld;
     const size = maximum.subtract(minimum);
-    this.height = size.y;
-    this.width = size.x;
-    this.depth = size.z;
+    this.width = Math.round(size.x);
+    this.depth = Math.round(size.z);
   }
 
   public handleChangeWidth() {
@@ -564,13 +560,13 @@ export class ModelsettingsService {
     this.scalingFactor = factor;
     this.center.scaling = new BABYLON.Vector3(factor, factor, factor);
 
-    const bi = this.center.getBoundingInfo();
+    const bi = this.boundingBox.getBoundingInfo();
     const minimum = bi.boundingBox.minimumWorld;
     const maximum = bi.boundingBox.maximumWorld;
     const size = maximum.subtract(minimum);
-    this.height = size.y;
-    this.width = size.x;
-    this.depth = size.z;
+    this.height = Math.round(size.y);
+    this.depth = Math.round(size.z);
+
   }
 
   public handleChangeDepth() {
@@ -579,16 +575,29 @@ export class ModelsettingsService {
     // originalSize.x  * factor = this.height
     const factor = this.depth / this.initialSize.z;
     this.scalingFactor = factor;
-    this.boundingBox.scaling = new BABYLON.Vector3(factor, factor, factor);
+    this.center.scaling = new BABYLON.Vector3(factor, factor, factor);
 
     const bi = this.boundingBox.getBoundingInfo();
     const minimum = bi.boundingBox.minimumWorld;
     const maximum = bi.boundingBox.maximumWorld;
     const size = maximum.subtract(minimum);
-    this.height = size.y;
-    this.width = size.x;
-    this.depth = size.z;
+    this.height = Math.round(size.y);
+    this.width = Math.round(size.x);
+
   }
+
+
+  private loadScalingFactor(factor: number) {
+    this.scalingFactor = factor;
+    this.center.scaling = new BABYLON.Vector3(factor, factor, factor);
+
+
+    // this.boundingBox.position = new BABYLON.Vector3(0, Math.abs(size.y) / 2,  0);
+  }
+
+
+
+
 
   private rotationFunc(axisName: string, degree: number) {
 
@@ -608,7 +617,6 @@ export class ModelsettingsService {
         this.lastRotationZ = this.lastRotationZ + degree;
         break;
     }
-
 
     if (!this.center.rotationQuaternion) {
       this.center.rotationQuaternion = BABYLON.Quaternion.RotationYawPitchRoll(0, 0, 0);
