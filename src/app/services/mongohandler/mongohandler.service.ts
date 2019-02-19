@@ -24,11 +24,6 @@ export class MongohandlerService {
   };
 
   constructor(private http: HttpClient) {
-    let arr: any[] = [];
-    for (let i = 0; i < 100; i++) {
-      arr.push(this.generateObjectId());
-    }
-    console.log(JSON.stringify(arr));
   }
 
   // Helper
