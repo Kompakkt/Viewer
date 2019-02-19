@@ -63,13 +63,13 @@ export class CameraService {
 
   // VR BUTTON
   public createVrHelperInCamera(): void {
-    
+
     this.vrHelper = this.babylonService.createVRHelper();
     this.babylonService.getVRHelper().enterVR();
   }
 
   public setCamArcRotate(): void {
-
+    if (!this.scene.activeCamera) return;
     if (this.scene.activeCamera.getClassName() !== 'ArcRotateCamera') {
 
       this.setCameraActive(this.arcRotateCamera);
@@ -78,7 +78,7 @@ export class CameraService {
   }
 
   public setCamUniversal(): void {
-
+    if (!this.scene.activeCamera) return;
     if (this.scene.activeCamera.getClassName() !== 'UniversalCamera') {
 
       this.setCameraActive(this.universalCamera);
@@ -87,7 +87,7 @@ export class CameraService {
   }
 
   public setBackToDefault(): void {
-
+    if (!this.scene.activeCamera) return;
     switch (this.scene.activeCamera.getClassName()) {
 
       case 'ArcRotateCamera':
@@ -115,6 +115,7 @@ export class CameraService {
   }
 
   private setCameraActive(newActiveCamera: any): void {
+    if (!this.scene.activeCamera) return;
     this.scene.activeCamera.detachControl(this.canvas);
     this.scene.activeCamera = newActiveCamera;
     newActiveCamera.attachControl(this.canvas, false);
@@ -299,6 +300,8 @@ export class CameraService {
   }
 
   public moveVRCameraToTarget(positionVector: BABYLON.Vector3) {
+
+    if (!this.scene.activeCamera) return;
 
     // ANIMATION
     const name = 'animCam',

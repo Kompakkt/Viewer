@@ -71,8 +71,7 @@ export class AnnotationComponent implements OnInit {
 
     const getMesh = scene.getMeshByName(annotation._id + '_pick');
 
-    if (getMesh != null) {
-
+    if (getMesh && scene.activeCamera) {
       const engine = this.babylonService.getEngine();
 
       const p = Vector3.Project(

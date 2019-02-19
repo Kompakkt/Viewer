@@ -206,10 +206,9 @@ export class CatalogueService {
         this.message.error('Connection to object server refused.');
         return false;
       });
-    } else {
-      this.selectModel(model, false);
-      return true;
     }
+    this.selectModel(model, false);
+    return true;
   }
 
   public addAndLoadCollection(compilation: any) {
