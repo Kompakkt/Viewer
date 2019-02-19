@@ -237,17 +237,19 @@ export class LoadModelService {
   }
 
   public async getUserData() {
-
     return new Promise((resolve, reject) => {
-
       this.mongohandlerService.getCurrentUserData().then(userData => {
-        if (!userData) reject('No valid userdata received');
-        if (userData.message === 'Invalid session') resolve('User not logged in');
-        if (!userData.data) reject('User has no data');
-        if (userData.data.models.length === 0) resolve('No user models');
-        this.currentUserData = userData;
-        this.userOwnedModels = userData.data.models;
-        resolve(this.userOwnedModels);
+        resolve(userData);
+        if (userData && userData.message === 'Invalid session') {
+          this.message.error('User not logged in');
+        } else if (!userData || !userData.data) {
+          this.message.error('No valid userdata received');
+        } else if (userData.data.models.length === 0) {
+          this.message.error('No user models');
+        } else {
+          this.currentUserData = userData;
+          this.userOwnedModels = userData.data.models;
+        }
       }, error => {
         this.message.error('Connection to object server refused.');
         reject('Connection to object server refused.');
