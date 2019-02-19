@@ -40,15 +40,15 @@ export class AnnotationmarkerService {
     // 11/02/19
     const positionVector = new BABYLON.Vector3(
       annotation.target.selector.referencePoint.x,
-      annotation.target.selector.referencePoint.y, 
+      annotation.target.selector.referencePoint.y,
       annotation.target.selector.referencePoint.z);
     const normalVector = new BABYLON.Vector3(
       annotation.target.selector.referenceNormal.x,
-      annotation.target.selector.referenceNormal.y, 
+      annotation.target.selector.referenceNormal.y,
       annotation.target.selector.referenceNormal.z);
     const cameraVector = new BABYLON.Vector3(
       annotation.body.content.relatedPerspective.vector.x,
-      annotation.body.content.relatedPerspective.vector.y, 
+      annotation.body.content.relatedPerspective.vector.y,
       annotation.body.content.relatedPerspective.vector.z);
     // const positionVector = new BABYLON.Vector3(annotation.referencePoint[0].value,
     //   annotation.referencePoint[1].value, annotation.referencePoint[2].value);
@@ -64,7 +64,7 @@ export class AnnotationmarkerService {
 
     GUI.AdvancedDynamicTexture.CreateForMesh(plane1).addControl(label1);
     label1.addControl(this.createRankingNumber(annotation._id, annotation.ranking));
-    plane1.material.alpha = 1;
+    if (plane1.material) plane1.material.alpha = 1;
     plane1.renderingGroupId = 0;
 
     const plane2 = this.createPlane(annotation._id + '_pick', 1, 1, annotation._id, positionVector, normalVector);
@@ -72,7 +72,7 @@ export class AnnotationmarkerService {
 
     GUI.AdvancedDynamicTexture.CreateForMesh(plane2).addControl(label2);
     label2.addControl(this.createRankingNumber(annotation._id, annotation.ranking));
-    plane2.material.alpha = 0.5;
+    if (plane2.material) plane2.material.alpha = 0.5;
     // TODO: click is not working if renderingGroup == 1 and Object is behind another object
     plane2.renderingGroupId = 1;
   }

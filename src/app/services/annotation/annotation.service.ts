@@ -72,6 +72,7 @@ export class AnnotationService {
     // 11/02/19
     // Beim ersten Laden eines Mdoells, werden alle in der PuchDB vorhandenen Annotationen in
     // das Array "allAnnotations" geladen
+    
     if (this.isDefaultLoad === false) {
     // if (this.initialLoading === true && this.isDefaultLoad === false) {
       await this.getAnnotations();
