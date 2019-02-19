@@ -1,16 +1,16 @@
 import {Injectable} from '@angular/core';
-// 11/02/19
 import {Annotation} from 'src/app/interfaces/annotation2/annotation2';
-// import {Annotation} from 'src/app/interfaces/annotation/annotation';
 import {DataService} from '../data/data.service';
 import {BabylonService} from '../babylon/babylon.service';
 import {ActionService} from '../action/action.service';
+import {MongohandlerService} from '../mongohandler/mongohandler.service';
 import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
-
 import {ActionManager} from 'babylonjs';
 import PouchDB from 'pouchdb';
 import * as BABYLON from 'babylonjs';
 import {LoadModelService} from '../load-model/load-model.service';
+import {ulid} from 'ulid';
+import {environment} from '../../../environments/environment';
 
 /**
  * @author Zoe Schubert
@@ -27,6 +27,8 @@ export class AnnotationService {
   private unsortedAnnotations: Annotation[];
   private allAnnotations: Annotation[];
   private modelName: string;
+  private currentModel: any;
+  private currentCompilation: any;
   // private initialLoading: boolean;
   private actualModelMeshes: BABYLON.Mesh[];
   private isDefaultLoad: boolean;
@@ -35,12 +37,17 @@ export class AnnotationService {
               private dataService: DataService,
               private actionService: ActionService,
               private annotationmarkerService: AnnotationmarkerService,
-              private loadModelService: LoadModelService) {
+              private loadModelService: LoadModelService,
+              private mongo: MongohandlerService) {
 
     // this.initialLoading = true;
     this.annotations = [];
     this.loadModelService.Observables.actualModel.subscribe(actualModel => {
       this.modelName = actualModel.name;
+      this.currentModel = actualModel;
+    });
+    this.loadModelService.Observables.actualCollection.subscribe(actualCompilation => {
+      this.currentCompilation = actualCompilation;
     });
     this.loadModelService.Observables.actualModelMeshes.subscribe(actualModelMeshes => {
       this.actualModelMeshes = actualModelMeshes;
@@ -53,7 +60,7 @@ export class AnnotationService {
 
   public async loadAnnotations() {
 
-    BABYLON.Tags.AddTagsTo(this.actualModelMeshes, this.modelName);
+    BABYLON.Tags.AddTagsTo(this.actualModelMeshes, this.currentModel._id);
 
     // Der modelName wird beim Laden eines neuen Modells übergeben und hier gespeichert,
     // um auch als Referenz für eine neu erstellte Annotation nutzbar zu sein
@@ -72,7 +79,7 @@ export class AnnotationService {
     // 11/02/19
     // Beim ersten Laden eines Mdoells, werden alle in der PuchDB vorhandenen Annotationen in
     // das Array "allAnnotations" geladen
-    
+
     if (this.isDefaultLoad === false) {
     // if (this.initialLoading === true && this.isDefaultLoad === false) {
       await this.getAnnotations();
@@ -87,7 +94,7 @@ export class AnnotationService {
     // Die Annotationen, die sich auf das aktuelle Model beziehen (also als relatedModel den Namen
     // des aktuellen Models aufweisen, werden raus gesucht und in das Array für unsortierte Annotationen
     // gepusht, da sie dort liegen ohne visuelle Elemente zu erzeugen
-    await this.getActualAnnotations(this.modelName);
+    await this.getActualAnnotations(this.currentModel._id);
 
     // Jetzt sollen die Annotationen sortiert werden und in der richtigen Reihenfolge in das Array geschrieben werden
     // Achtung: dann gibt es auch direkt einen visuellen Output durch die Components!
@@ -166,41 +173,40 @@ export class AnnotationService {
 
     const camera = <BABYLON.ArcRotateCamera> this.babylonService.getActiveCamera();
 
-    this.babylonService.createPreviewScreenshot(400).then(detailScreenshot => {
+    if (!this.loadModelService.currentUserData) {
+      console.warn('User not logged in. Annotation not created');
+      return;
+    }
 
+    this.babylonService.createPreviewScreenshot(400).then(async detailScreenshot => {
+      let generatedId: any = null;
+      await this.mongo.getUnusedObjectId().then(id => generatedId = id).catch(e => console.error(e));
+      if (!generatedId) return;
+      console.log(generatedId);
       const newAnnotation: Annotation = {
-
-        // 11/02/19
-        // _id über Datenbank ersellen
-        _id: Math.random().toString(36).substr(2, 9),
         validated: false,
-        // Semantische ID
-        identifier: Math.random().toString(36).substr(2, 9),
-        ranking: String(this.annotations.length + 1),
-        // User from DB?
+        _id: generatedId,
+        identifier: generatedId,
+        ranking: this.annotations.length + 1,
         creator: {
-          type: 'Person',
-          name: 'Get User Name',
-          id: 'Get User ID',
-          role: ['Get User Roles[]'],
+          type: 'person',
+          name: this.loadModelService.currentUserData.fullname,
+          _id: this.loadModelService.currentUserData._id,
+          role: ['// TODO: Add roles'],
         },
         created: new Date().toISOString(),
-        // User from DB?
         generator: {
-          type: 'Person',
-          name: 'Get User Name',
-          id: 'Get User ID',
-          role: ['Get User Roles[]'],
+          type: 'software',
+          name: environment.version,
+          _id: this.loadModelService.currentUserData._id,
+          role: ['// TODO: Add roles'],
         },
-        generated: 'Creation-Timestamp by Server',
         motivation: 'defaultMotivation',
-        lastModificationDate: 'Last-Manipulation-Timestamp by Server',
-        // User from DB?
         lastModifiedBy: {
-          type: 'Person',
-          name: 'Get User Name',
-          id: 'Get User ID',
-          role: ['Get User Roles[]'],
+          type: 'person',
+          name: this.loadModelService.currentUserData.fullname,
+          _id: this.loadModelService.currentUserData._id,
+          role: ['// TODO: Add roles'],
         },
         body: {
           type: 'annotation',
@@ -216,12 +222,13 @@ export class AnnotationService {
                 z: camera.radius
               },
               preview: detailScreenshot
-            } 
+            }
           }
         },
         target: {
           source: {
-            relatedModel: this.modelName            
+            relatedModel: this.currentModel._id,
+            relatedCompilation: (this.currentCompilation) ? this.currentCompilation._id : '',
           },
           selector: {
             referencePoint: {
@@ -237,7 +244,7 @@ export class AnnotationService {
           }
         }
 
-         
+
         // relatedModel: this.modelName,
         // referencePoint: [{dimension: 'x', value: result.pickedPoint.x}, {dimension: 'y', value: result.pickedPoint.y}, {
         //   dimension: 'z', value: result.pickedPoint.z
@@ -307,7 +314,7 @@ export class AnnotationService {
     await this.sortAnnotations();
   }
 
-  // 11/02/19 
+  // 11/02/19
     // aus Datenbank mit spezifischen Such-Parametern (ModelID, CollectionID, Benutzer)...
   private async fetchData(): Promise<Array<any>> {
 
@@ -330,7 +337,6 @@ export class AnnotationService {
   }
 
   public deleteAnnotation(annotation: Annotation) {
-
     this.annotationmarkerService.deleteMarker(annotation._id);
     this.dataService.delete(annotation._id);
     const index: number = this.annotations.indexOf(annotation);
@@ -349,12 +355,10 @@ export class AnnotationService {
   }
 
   public changedRankingPositions() {
-
     let i = 0;
 
     for (const annotation of this.annotations) {
-
-      annotation.ranking = String(i + 1);
+      annotation.ranking = i + 1;
       this.annotationmarkerService.deleteMarker(annotation._id);
       this.annotationmarkerService.createAnnotationMarker(annotation);
       this.dataService.updateAnnotationRanking(annotation._id, annotation.ranking);
@@ -368,21 +372,21 @@ export class AnnotationService {
 
      // 11/02/19
      return {
-      _id: '7wz2vuqt8',
       validated: true,
+      _id: 'DefaultAnnotation',
       identifier: 'DefaultAnnotation',
-      ranking: '1',
+      ranking: 1,
       creator: {
         type: 'Person',
         name: 'Get User Name',
-        id: 'userID',
+        _id: 'userID',
         role: ['Get User Roles[]'],
       },
       created: '2019-01-18T22:05:31.230Z',
       generator: {
         type: 'Person',
         name: 'Get User Name',
-        id: 'Get User ID',
+        _id: 'Get User ID',
         role: ['Get User Roles[]'],
       },
       generated: 'Creation-Timestamp by Server',
@@ -391,7 +395,7 @@ export class AnnotationService {
       lastModifiedBy: {
         type: 'Person',
         name: 'Get User Name',
-        id: 'Get User ID',
+        _id: 'Get User ID',
         role: ['Get User Roles[]'],
       },
       body: {
@@ -408,7 +412,7 @@ export class AnnotationService {
               z: 90.44884111420268
             },
            preview: 'data:image/png;base64,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KfdQBMipjnPPPTcmTJgQw4YNK/f26quvlsGyefPmHhk5mUBfCAiQvlB2jaYEzjjjjJgyZUo899xzZZ19+/bFmjVrjv9Fv2jRsQA58WJTp06NadOmRfHKqKtj8ODBMXbs2PJppfir2+cv/ij+6ZXfxs//cuyxV1jrtx+KWX9+dVli//79sXr178Kk87Fz58548skny2A73VGE23XXXRcTJ048bdAVNYq9jRs3rtx/YVEEysKFC4VKU3eVxSkEBEgKRTWSC4waNSrmzp0b1157bRw+fDi2bNkSxS/nUx2ff/55PP744w3vofhlPHv27PIJ5HTHmDFjYuvWrfH111+Xp51zzjlx4MCBk5bs3bs3HnnkkXKfzR433HBDQ6FSXGf8+PHla7kzzzwz1q1bFwsWLCg/c+kuvJrdo/UEfi8gQNwLLSEwaNCgmDVrVhSvdo4ePRrFL+VTvRYqNvvNN9/EkiVLunziqNJQ8dRQhFbx9NHIUezx5ZdfLp8GevMoPh+58cYb44ILLiiDorujeIoaOnRo+fprw4YNpdOHH354LAS7W+/nBHoiIEB6ouXcpALFL7o333yzrHnkyJEyMIpXQ6c6iqeA++67L+n1T1fs9ttvL1+bnX322ced9u6778bzzz/fZ/s41YWKz0luueWWGDlyZPlKq7ujeNIqwrEIoCL4XnzxxXj77bfj22+P/7ynuzp+TuBEAQHinugzgeK/7u+55564++67y2sWr56KV1NdHdu2bYsnnniiz/ZX5wsVQTdjxozy22aNHEUIFh/+Owg0IyBAmtGztluByZMnx7PPPlu+UimOFStWlK+gujrmz58fK1euLP9L2VFdoAjr4ttot95660lPUUXVZ555pnpxKwn8v4AAcSskFyg+oL733nvLusWH0MWTxOlelzz44IOn/HA6+cYyL1i8wrrwwgvLMC/+kKODQLMCAqRZQetPEii+Mjtz5swuZd5666147bXXfFvIvUOg5gICpOYDbMXtX3755XH//fcft7V58+aV3wpyECDQPgICpH1m2VKdFN8OKr6CumPHjpbal80QIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQGpCulEgECBAjkJCBAcpq2XgkQIJBQQIAkxFSKAAECOQkIkJymrVcCBAgkFBAgCTGVIkCAQE4CAiSnaeuVAAECCQUESEJMpQgQIJCTgADJadp6JUCAQEIBAZIQUykCBAjkJCBAcpq2XgkQIJBQQIAkxFSKAAECOQkIkJymrVcCBAgkFBAgCTGVIkCAQE4CAiSnaeuVAAECCQUESEJMpQgQIJCTgADJadp6JUCAQEIBAZIQUykCBAjkJCBAcpq2XgkQIJBQQIAkxFSKAAECOQkIkJymrVcCBAgkFBAgCTGVIkCAQE4CAiSnaeuVAAECCQUESEJMpQgQIJCTgADJadp6JUCAQEIBAZIQUykCBAjkJCBAcpq2XgkQIJBQQIAkxFSKAAECOQkIkJymrVcCBAgkFBAgCTGVIkCAQE4C/weLi1NGQXXHbQAAAABJRU5ErkJggg==',
-          } 
+          }
         }
       },
       target: {

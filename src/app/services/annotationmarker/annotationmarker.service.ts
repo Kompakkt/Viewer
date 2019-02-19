@@ -35,7 +35,7 @@ export class AnnotationmarkerService {
   // Ein und Ausblenden des Markers
   // Zahl verändern/ aktualisieren
 
-  public createAnnotationMarker(annotation) {
+  public createAnnotationMarker(annotation: Annotation) {
 
     // 11/02/19
     const positionVector = new BABYLON.Vector3(
@@ -111,9 +111,9 @@ export class AnnotationmarkerService {
     this.cameraService.moveCameraToTarget(cameraVector);
   }
 
-  public createRankingNumber(annotationID: string, rankingNumber: string) {
+  public createRankingNumber(annotationID: string, rankingNumber: number) {
     const number = new GUI.TextBlock();
-    number.text = rankingNumber;
+    number.text = rankingNumber.toString();
     number.color = 'white';
     number.fontSize = 1000;
     BABYLON.Tags.AddTagsTo(number, annotationID + ' number');

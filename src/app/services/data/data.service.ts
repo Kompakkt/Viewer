@@ -30,7 +30,7 @@ export class DataService {
 
     const db = this.database;
     db.get(id).then(function (doc) {
-    
+
       doc.body.content.title = title;
       doc.body.content.description = description;
       // doc.title = title;
@@ -59,7 +59,7 @@ export class DataService {
   }
 
 
-  public updateAnnotationRanking(id: string, ranking: string) {
+  public updateAnnotationRanking(id: string, ranking: number) {
 
     const db = this.database;
 

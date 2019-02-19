@@ -40,8 +40,7 @@ export class AnnotationsEditorComponent implements OnInit {
 
       // 15/02/19
       // EditMode -- OnInit -- newly creaded annotation (by double click)
-      if (this.annotationmarkerService.open_popup === this.annotation._id){
-              
+      if (this.annotationmarkerService.open_popup === this.annotation._id) {
         this.collapsed = true;
         this.editMode = false;
         this.labelMode = 'edit';
@@ -94,8 +93,9 @@ export class AnnotationsEditorComponent implements OnInit {
   }
 
   private save(): void {
-    this.dataService.updateAnnotation(this.annotation._id, this.annotation.body.content.title, this.annotation.body.content.description,
-      this.preview, this.annotation.body.content.relatedPerspective.vector, this.annotation.validated);
+    this.dataService.updateAnnotation(this.annotation._id, this.annotation.body.content.title,
+      this.annotation.body.content.description, this.preview,
+      this.annotation.body.content.relatedPerspective.vector, this.annotation.validated);
     // this.dataService.updateAnnotation(this.annotation._id, this.annotation.title, this.annotation.description,
     //   this.preview, this.annotation.cameraPosition, this.annotation.validated);
   }

@@ -1,13 +1,9 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
-// 11/02/19
 import {Annotation} from 'src/app/interfaces/annotation2/annotation2';
-// import {Annotation} from '../../interfaces/annotation/annotation';
 import {DataService} from '../../services/data/data.service';
-
 import {Vector3, Matrix} from 'babylonjs';
-// 15/02/19
 import { AnnotationmarkerService } from 'src/app/services/annotationmarker/annotationmarker.service';
 
 @Component({
@@ -46,7 +42,7 @@ export class AnnotationComponent implements OnInit {
 
       // 15/02/19
       // EditMode on newly creaded annotation (double click)
-      if (this.annotationmarkerService.open_popup === this.annotation._id){
+      if (this.annotationmarkerService.open_popup === this.annotation._id) {
         this.visibility = true;
         this.editMode = true;
         this.labelMode = 'remove_red_eye';
@@ -136,8 +132,8 @@ export class AnnotationComponent implements OnInit {
   }
 
   private save(): void {
-    // 11/02/19
-    this.dataService.updateAnnotation(this.annotation._id, this.annotation.body.content.title, this.annotation.body.content.description);
+    this.dataService.updateAnnotation(this.annotation._id,
+      this.annotation.body.content.title, this.annotation.body.content.description);
   }
 
   public onSumbit(event) {
