@@ -3,6 +3,7 @@ import {Annotation} from 'src/app/interfaces/annotation2/annotation2';
 import {DataService} from '../data/data.service';
 import {BabylonService} from '../babylon/babylon.service';
 import {ActionService} from '../action/action.service';
+import {MessageService} from '../message/message.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
 import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
 import {ActionManager} from 'babylonjs';
@@ -37,7 +38,8 @@ export class AnnotationService {
               private actionService: ActionService,
               private annotationmarkerService: AnnotationmarkerService,
               private loadModelService: LoadModelService,
-              private mongo: MongohandlerService) {
+              private mongo: MongohandlerService,
+              private message: MessageService) {
 
     // this.initialLoading = true;
     this.annotations = [];
@@ -168,12 +170,16 @@ export class AnnotationService {
     }
   }
 
-  public createNewAnnotation(result: any) {
+  public async createNewAnnotation(result: any) {
 
     const camera = <BABYLON.ArcRotateCamera> this.babylonService.getActiveCamera();
 
+    // Fetch userData if not existing
+    if (!this.loadModelService.currentUserData) await this.loadModelService.getUserData();
+
+    // Inform user if userData still doesn't exist
     if (!this.loadModelService.currentUserData) {
-      console.warn('User not logged in. Annotation not created');
+      this.message.error(`Login check failed. Try again`);
       return;
     }
 
