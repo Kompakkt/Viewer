@@ -2,7 +2,7 @@
 
   <h2>Catalogue</h2>
 
-  <div *ngIf="!singleModel && isLoggedIn && !isSingleCollection">
+  <div *ngIf="!isSingleModel && isLoggedIn && !isSingleCollection">
 
     Please choose to load collections or model:
     <mat-radio-group (change)="onSelectionDataTypeChange($event)">

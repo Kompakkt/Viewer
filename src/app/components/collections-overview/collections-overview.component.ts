@@ -17,7 +17,7 @@ import {PasswordComponent} from '../password/password.component';
 export class CollectionsOverviewComponent implements AfterViewInit {
 
   @HostBinding('class.is-open') private isOpen = false;
-  private isSingleModel: boolean;
+  public isSingleModel: boolean;
   public isSingleCollection: boolean;
 
   private collectionSelected: boolean;
