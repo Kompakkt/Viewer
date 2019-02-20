@@ -18,7 +18,7 @@ export class CollectionsOverviewComponent implements AfterViewInit {
 
   @HostBinding('class.is-open') private isOpen = false;
   private isSingleModel: boolean;
-  private isSingleCollection: boolean;
+  public isSingleCollection: boolean;
 
   private collectionSelected: boolean;
   private modelSelected: boolean;
@@ -32,7 +32,7 @@ export class CollectionsOverviewComponent implements AfterViewInit {
   private identifierCollection;
   private identifierModel;
 
-  private isLoggedIn: boolean;
+  public isLoggedIn: boolean;
 
 
   constructor(private overlayService: OverlayService,

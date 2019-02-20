@@ -28,7 +28,7 @@ import {LoginComponent} from '../login/login.component';
 })
 export class MenuComponent implements OnInit {
 
-  private menuIsEnabled = true;
+  public menuIsEnabled = true;
   private isSingleModel: boolean;
   private isSingleCollection: boolean;
 
@@ -99,7 +99,7 @@ export class MenuComponent implements OnInit {
 
   // VR BUTTON
   public pressVrButton() {
-    
+
     this.cameraService.createVrHelperInCamera();
   }
 

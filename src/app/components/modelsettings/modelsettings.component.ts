@@ -18,7 +18,7 @@ import {ModelsettingsService} from '../../services/modelsettings/modelsettings.s
 
 export class ModelsettingsComponent implements OnInit {
 
-  private activeModel;
+  public activeModel;
   private preview: string;
   private setEffect = false;
   private isDefault: boolean;
