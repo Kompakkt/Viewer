@@ -274,7 +274,7 @@ export class ModelsettingsComponent implements OnInit {
         this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
       */
     } else {
-      this.modelSettingsService.decomposeAfterSetting();
+     // this.modelSettingsService.decomposeAfterSetting();
     }
 
   }
@@ -295,8 +295,8 @@ export class ModelsettingsComponent implements OnInit {
       this.ambientlightDownintensity = 1;
 
       // Only for DEV
-      this.modelSettingsService.createVisualSettings();
-      this.initialSettingsMode = true;
+      //this.modelSettingsService.createVisualSettings();
+      //this.initialSettingsMode = true;
       // End
 
       this.backToDefault();
@@ -439,6 +439,7 @@ export class ModelsettingsComponent implements OnInit {
 
         // during upload process
         if (this.isModelOwner && !this.isFinished) {
+          /*
           this.initialSettingsMode = true;
           this.modelSettingsService.createVisualSettings();
 
@@ -451,7 +452,7 @@ export class ModelsettingsComponent implements OnInit {
 
           const scale = 1;
           this.activeModel.settings['scale'] = scale;
-
+*/
         } else {
           // Not during upload process but settings not set (should never happen)
           if (this.activeModel.settings.rotation === undefined) {
