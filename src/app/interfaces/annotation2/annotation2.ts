@@ -24,13 +24,14 @@ export interface Agent {
   type: string;
   name: string;
   _id: string;
-  role: string[];
+  homepage?: string;
 }
 
 export interface Body {
 
   type: string;
   content: Content;
+
 }
 
 export interface Content {
@@ -40,6 +41,7 @@ export interface Content {
   description: string;
   link?: string;
   relatedPerspective: CameraPerspective;
+  [key: string]: any;
 }
 
 export interface CameraPerspective {
