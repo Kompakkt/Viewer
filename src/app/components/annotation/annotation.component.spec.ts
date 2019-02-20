@@ -7,8 +7,14 @@ import {
   MatIconModule, MatSnackBarModule,
   MatTooltipModule
 } from '@angular/material';
+<<<<<<< HEAD
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+=======
+import {FormsModule} from '@angular/forms';
+import {HttpClientModule} from '@angular/common/http';
+import {Annotation} from '../../interfaces/annotation2/annotation2';
+>>>>>>> origin/master
 
 describe('AnnotationComponent', () => {
   let component: AnnotationComponent;
