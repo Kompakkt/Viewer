@@ -178,6 +178,7 @@ export class AnnotationService {
     }
 
     this.babylonService.createPreviewScreenshot(400).then(async detailScreenshot => {
+      // TODO: Detect if user is offline
       let generatedId: string = this.mongo.generateObjectId();
       await this.mongo.getUnusedObjectId().then(id => generatedId = id).catch(e => console.error(e));
       const newAnnotation: Annotation = {
@@ -189,21 +190,20 @@ export class AnnotationService {
           type: 'person',
           name: this.loadModelService.currentUserData.fullname,
           _id: this.loadModelService.currentUserData._id,
-          role: ['// TODO: Add roles'],
         },
         created: new Date().toISOString(),
         generator: {
           type: 'software',
           name: environment.version,
           _id: this.loadModelService.currentUserData._id,
-          role: ['// TODO: Add roles'],
+          homepage: 'https://github.com/DH-Cologne/Kompakkt',
         },
         motivation: 'defaultMotivation',
+        // TODO: Overwrite when updating annotation
         lastModifiedBy: {
           type: 'person',
           name: this.loadModelService.currentUserData.fullname,
           _id: this.loadModelService.currentUserData._id,
-          role: ['// TODO: Add roles'],
         },
         body: {
           type: 'annotation',
@@ -377,14 +377,12 @@ export class AnnotationService {
         type: 'Person',
         name: 'Get User Name',
         _id: 'userID',
-        role: ['Get User Roles[]'],
       },
       created: '2019-01-18T22:05:31.230Z',
       generator: {
         type: 'Person',
         name: 'Get User Name',
         _id: 'Get User ID',
-        role: ['Get User Roles[]'],
       },
       generated: 'Creation-Timestamp by Server',
       motivation: 'defaultMotivation',
@@ -393,7 +391,6 @@ export class AnnotationService {
         type: 'Person',
         name: 'Get User Name',
         _id: 'Get User ID',
-        role: ['Get User Roles[]'],
       },
       body: {
         type: 'annotation',
