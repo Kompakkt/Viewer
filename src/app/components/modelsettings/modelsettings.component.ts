@@ -55,23 +55,10 @@ export class ModelsettingsComponent implements OnInit {
 
   ngOnInit() {
 
-
-    /*
-    this.loadModelService.Observables.actualModel.subscribe(actualModel => {
-      this.activeModel = actualModel;
-      console.log('Das active Model ist: ', actualModel);
-      console.log('Man bekommt: ', this.loadModelService.getCurrentModel());
-    });*/
-
     this.loadModelService.loaded.subscribe(isLoaded => {
       this.isLoaded = isLoaded;
-      console.log('Stand ist ', isLoaded);
       if (isLoaded) {
-        console.log('If passiert mit:  ', isLoaded);
-        console.log('Man bekommt: ', this.loadModelService.getCurrentModel());
-
         this.activeModel = this.loadModelService.getCurrentModel();
-        console.log('Das active Model ist: ', this.activeModel, this.activeModel.settings);
         this.setSettings();
       }
     });
@@ -127,8 +114,8 @@ export class ModelsettingsComponent implements OnInit {
 
 
   /*
-* Initial Perspective & Preview Settings
-*/
+   * Initial Perspective & Preview Settings
+   */
 
   public async setInitialView() {
     this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
@@ -143,8 +130,8 @@ export class ModelsettingsComponent implements OnInit {
 
 
   /*
-* Background Settings
-*/
+   * Background Settings
+   */
 
   handleChangeColor($event: ColorEvent) {
     // color = {
@@ -177,7 +164,6 @@ export class ModelsettingsComponent implements OnInit {
 
   public async saveActualSettings() {
 
-    console.log('save');
     this.initialSettingsMode = false;
     this.modelSettingsService.decomposeAfterSetting();
 
@@ -216,7 +202,9 @@ export class ModelsettingsComponent implements OnInit {
       scale: this.modelSettingsService.scalingFactor
     };
     settings.lights.push(this.babylonService.getPointlightData());
+
     this.activeModel.settings = settings;
+
     this.mongohandlerService.updateSettings(this.activeModel._id, settings).subscribe(result => {
       console.log(result);
     });
@@ -233,6 +221,7 @@ export class ModelsettingsComponent implements OnInit {
       reject(error);
     }));
   }
+
 
   backToDefault() {
 
@@ -267,6 +256,8 @@ export class ModelsettingsComponent implements OnInit {
     this.babylonService.setLightIntensity('ambientlightDown', hemisphericLightDown.intensity);
     this.ambientlightDownintensity = hemisphericLightDown.intensity;
 
+
+    /*
     if (!this.isDefault && !this.initialSettingsMode) {
       this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
         this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
@@ -276,20 +267,21 @@ export class ModelsettingsComponent implements OnInit {
       this.modelSettingsService.loadSettings(1,
         0, 0, 0);
       this.modelSettingsService.createVisualSettings();
-    }
+    }*/
     if (this.isDefault) {
-
+      /*
       this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
         this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
-
+      */
+    } else {
+      this.modelSettingsService.decomposeAfterSetting();
     }
 
   }
 
   private async setSettings() {
 
-    console.log('Settings sind: ', this.activeModel.settings);
-
+    // Default Model
     if (this.isDefault) {
 
       this.activeModel['settings'] = this.getDefaultLoadSettings();
@@ -302,12 +294,17 @@ export class ModelsettingsComponent implements OnInit {
       this.babylonService.setLightIntensity('ambientlightDown', 1);
       this.ambientlightDownintensity = 1;
 
+      // Only for DEV
       this.modelSettingsService.createVisualSettings();
       this.initialSettingsMode = true;
+      // End
 
       this.backToDefault();
     } else {
 
+      // Nicht Default Modell
+
+      // No settings (upload)
       if (this.activeModel.settings === undefined) {
         const settings = {
           preview: '',
@@ -315,12 +312,14 @@ export class ModelsettingsComponent implements OnInit {
         this.activeModel['settings'] = settings;
       }
 
+      // Preview
       if (this.activeModel.settings.preview !== undefined && this.activeModel.settings.preview !== '') {
         this.preview = this.activeModel.settings.preview;
       } else {
         await this.createMissingInitialDefaultScreenshot();
       }
 
+      // Camera
       if (this.activeModel.settings.cameraPositionInitial === undefined) {
         this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
         // TODO: Camera Setting Interface
@@ -345,6 +344,7 @@ export class ModelsettingsComponent implements OnInit {
         }
       }
 
+      // Background
       if (this.activeModel.settings.background === undefined) {
         const background = {
           color: {
@@ -365,6 +365,7 @@ export class ModelsettingsComponent implements OnInit {
         this.babylonService.setBackgroundImage(this.setEffect);
       }
 
+      // Lights
       if (this.activeModel.settings.lights === undefined) {
 
         const lights = [
@@ -428,21 +429,31 @@ export class ModelsettingsComponent implements OnInit {
         this.ambientlightDownintensity = hemisphericLightDown.intensity;
       }
 
-
+      // Mesh (rotation & size)
 
       console.log('Actual Values: ', this.activeModel.settings.rotation,
-        this.activeModel.settings.scale, this.isModelOwner, this.isFinished, this.initialSettingsMode, this.isDefault );
+        this.activeModel.settings.scale, this.isModelOwner, this.isFinished, this.initialSettingsMode, this.isDefault);
+
+      // Not defined
       if (this.activeModel.settings.rotation === undefined || this.activeModel.settings.scale === undefined) {
 
+        // during upload process
         if (this.isModelOwner && !this.isFinished) {
-
-          this.modelSettingsService.createVisualSettings();
           this.initialSettingsMode = true;
-          console.log('Actual Values: ', this.activeModel.settings.rotation, this.activeModel.settings.scale,
-            this.isModelOwner, this.isFinished, this.initialSettingsMode, this.isDefault );
+          this.modelSettingsService.createVisualSettings();
+
+          const rotation = {
+            x: 0,
+            y: 0,
+            z: 0
+          };
+          this.activeModel.settings['rotation'] = rotation;
+
+          const scale = 1;
+          this.activeModel.settings['scale'] = scale;
 
         } else {
-
+          // Not during upload process but settings not set (should never happen)
           if (this.activeModel.settings.rotation === undefined) {
             const rotation = {
               x: 0,
@@ -453,15 +464,15 @@ export class ModelsettingsComponent implements OnInit {
           }
 
           if (this.activeModel.settings.scale === undefined) {
-
             const scale = 1;
             this.activeModel.settings['scale'] = scale;
           }
         }
       } else {
-
+        // settings exist
+        /*
         this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
-          this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
+          this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);*/
       }
       this.backToDefault();
     }
@@ -522,7 +533,7 @@ export class ModelsettingsComponent implements OnInit {
         y: 0,
         z: 0
       },
-      scale: 1
+      scale: 3
     };
   }
 
