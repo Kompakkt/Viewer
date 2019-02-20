@@ -5,23 +5,19 @@
     </mat-card-title>
   </mat-card-header>
   <mat-card-content>
-    <br><br><br>
+
     <button mat-button (click)="backToDefault()">Back to Default</button>
     <button mat-button *ngIf="!isDefault && isModelOwner" (click)="saveActualSettings()">Save as default</button>
-    <br><br>
 
     <h3>Initial Perspective</h3>
 
     <p>Click on this image to select a new initial Perspective.</p>
-    <br><br>
-    <img mat-card-image src={{preview}} (click)="setInitialView()">
+    <img class="previewimage" src={{preview}} (click)="setInitialView()">
 
-    <br><br><br>
     <h3>Background</h3>
     <color-chrome (onChange)="handleChangeColor($event)"></color-chrome>
     <br>
     <mat-slide-toggle (change)="handleChangeEffekt()">Gradient-Brightness Effect</mat-slide-toggle>
-    <br><br><br>
     <h3>Lights</h3>
     <h4>Brightness</h4>
     <p>Ambient environment lights</p>

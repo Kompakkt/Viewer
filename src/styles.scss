@@ -68,12 +68,43 @@ html, body {
 #editor,
 #collections {
   color: #fff;
-  width: 400px;
+  width: 300px;
   height: 100%;
   z-index: auto;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.9);
   box-sizing: border-box;
   border: 0;
-  padding: 25px;
+  padding: 0;
   overflow-y: auto;
+}
+
+#editor .material-icons {
+  font-size: 20px;
+}
+
+#editor .mat-card {
+  padding: 10px;
+  background-color: rgba(0, 176, 255,0.1);
+}
+
+#editor .mat-tab-group .mat-tab-label-active {
+  background-color: rgba(0, 176, 255,0.1);
+}
+
+#editor .mat-card-avatar {
+  height: 25px;
+  width: 25px;
+}
+
+#editor .mat-card-header .mat-card-title {
+  font-size: 15px;
+  word-wrap: break-word;
+}
+
+#editor .mat-card-header-text {
+  margin: 0 0 0  15px;
+}
+
+#editor .mat-card-image {
+
 }

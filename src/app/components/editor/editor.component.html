@@ -6,6 +6,13 @@
         <mat-icon class="tab-icon">place</mat-icon>
       </ng-template>
 
+      <div cdkDropList class="annotations-list" (cdkDropListDropped)="drop($event)"
+           *ngIf="this.annotationService.annotations.length">
+        <app-annotations-editor class="annotation-box" *ngFor="let annotation of this.annotationService.annotations;"
+                                [annotation]="annotation"
+                                cdkDrag cdkDragLockAxis="y"></app-annotations-editor>
+      </div>
+
       <button *ngIf="this.annotationService.annotations.length > 0"
               mat-icon-button
               matTooltip="Export Annotations to File"
@@ -33,13 +40,6 @@
               (click)="deleteAnnotations()">
         <mat-icon aria-label="Delete Annotations">delete</mat-icon>
       </button>
-
-      <div cdkDropList class="annotations-list" (cdkDropListDropped)="drop($event)"
-           *ngIf="this.annotationService.annotations.length">
-        <app-annotations-editor class="annotation-box" *ngFor="let annotation of this.annotationService.annotations;"
-                                [annotation]="annotation"
-                                cdkDrag cdkDragLockAxis="y"></app-annotations-editor>
-      </div>
 
       <div *ngIf="this.annotationService.annotations.length < 1">
         To add annotations, simply double-click on the model.
@@ -69,9 +69,16 @@
       <ng-template mat-tab-label>
         <mat-icon class="tab-icon">info</mat-icon>
       </ng-template>
-      <div>
-        Kompakt v{{version}}
-      </div>
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>
+            About
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          Kompakt v{{version}} is developed at the Institute for Digital Humanities @ University of Cologne, Germany.
+        </mat-card-content>
+      </mat-card>
     </mat-tab>
 
   </mat-tab-group>
