@@ -377,14 +377,12 @@ export class AnnotationService {
         type: 'Person',
         name: 'Get User Name',
         _id: 'userID',
-        role: ['Get User Roles[]'],
       },
       created: '2019-01-18T22:05:31.230Z',
       generator: {
         type: 'Person',
         name: 'Get User Name',
         _id: 'Get User ID',
-        role: ['Get User Roles[]'],
       },
       generated: 'Creation-Timestamp by Server',
       motivation: 'defaultMotivation',
@@ -393,7 +391,6 @@ export class AnnotationService {
         type: 'Person',
         name: 'Get User Name',
         _id: 'Get User ID',
-        role: ['Get User Roles[]'],
       },
       body: {
         type: 'annotation',
