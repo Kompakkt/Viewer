@@ -244,8 +244,6 @@ export class LoadModelService {
           this.message.info('User not logged in');
         } else if (!userData || !userData.data) {
           this.message.info('No valid userdata received');
-        } else if (userData.data.models.length === 0) {
-          this.message.info('No user models');
         } else {
           this.currentUserData = userData;
           this.userOwnedModels = userData.data.models;
