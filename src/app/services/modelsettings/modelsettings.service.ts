@@ -4,8 +4,7 @@ import {LoadModelService} from '../load-model/load-model.service';
 
 import {ColorEvent} from 'ngx-color';
 import {Injectable} from '@angular/core';
-import Quaternion = BABYLON.Quaternion;
-import double = BABYLON.double;
+
 
 @Injectable({
   providedIn: 'root'
@@ -46,6 +45,8 @@ export class ModelsettingsService {
   public scalingFactorLocalAxis = 1;
   public scalingFactorWorldAxis = 1;
 
+  private rotQuat = new BABYLON.Quaternion();
+
 
   constructor(private babylonService: BabylonService,
               private loadModelService: LoadModelService) {
@@ -55,51 +56,125 @@ export class ModelsettingsService {
     });
   }
 
-  public loadSettings(scalingFactor, rotX, rotY, rotZ) {
-    this.initializeVariablesforLoading();
-    this.generateHelpers();
-    this.setSettings(scalingFactor, rotX, rotY, rotZ);
+  public async loadSettings(scalingFactor, rotX, rotY, rotZ) {
+    await this.initializeVariablesforLoading();
+    await this.generateHelpers();
+    await this.setSettings(scalingFactor, rotX, rotY, rotZ);
   }
 
-  private setSettings(scalingFactor, rotX, rotY, rotZ) {
-    console.log('Ich lade jetzt: ', scalingFactor, rotX, rotY, rotZ);
-    this.loadScalingFactor(scalingFactor);
+  private async initializeVariablesforLoading() {
+    this.min = BABYLON.Vector3.Zero();
+    this.max = BABYLON.Vector3.Zero();
+    this.initialSize = BABYLON.Vector3.Zero();
 
-    this.rotationFunc('x', rotX);
-    this.rotationFunc('y', rotY);
-    this.rotationFunc('z', rotZ);
-    this.decomposeAfterLoading();
-  }
+    this.lastRotationX = 0;
+    this.lastRotationY = 0;
+    this.lastRotationZ = 0;
 
-  public decomposeAfterLoading() {
-    this.unparentModel();
-    this.destroyCenter();
-  }
-
-  private unparentModel() {
+    this.height = 0;
+    this.width = 0;
+    this.depth = 0;
+    this.lastHeight = 0;
+    this.lastWidth = 0;
+    this.lastDepth = 0;
 
     for (let _i = 0; _i < this.actualModelMeshes.length; _i++) {
       const mesh = this.actualModelMeshes[_i];
+      this.getMinMax(mesh, true);
+    }
+  }
 
-      const rotatedPoint = this.multiplyPoint(mesh.position);
-      mesh.position.x = rotatedPoint.x * this.center.scaling.x + this.center.position.x;
-      mesh.position.y = rotatedPoint.y * this.center.scaling.y + this.center.position.y;
-      mesh.position.z = rotatedPoint.z * this.center.scaling.z + this.center.position.z;
+
+  private async generateHelpers() {
+    await this.createCenter();
+    this.initialSize = await this.max.subtract(this.min);
+    this.height = this.initialSize.y;
+    this.width = this.initialSize.x;
+    this.depth = this.initialSize.z;
+    this.lastHeight = this.initialSize.y;
+    this.lastWidth = this.initialSize.x;
+    this.lastDepth = this.initialSize.z;
+  }
+
+  private async setSettings(scalingFactor, rotX, rotY, rotZ) {
+    console.log('Ich lade jetzt: ', scalingFactor, rotX, rotY, rotZ);
+    await this.loadScalingFactor(scalingFactor);
+    await this.loadRotation(this.center, rotX, rotY, rotZ);
+    await this.decomposeAfterLoading();
+  }
+
+  private loadScalingFactor(factor: number) {
+    this.scalingFactor = factor;
+    this.center.scaling = new BABYLON.Vector3(factor, factor, factor);
+  }
+
+
+  private loadRotation(mesh, rotX, rotY, rotZ) {
+
+    // Math.PI / 2 -> 90 Grad
+
+    const axisX = BABYLON.Axis['X'];
+    const axisY = BABYLON.Axis['Y'];
+    const axisZ = BABYLON.Axis['Z'];
+
+    if (!mesh.rotationQuaternion) {
+      mesh.rotationQuaternion = BABYLON.Quaternion.RotationYawPitchRoll(0, 0, 0);
+    }
+
+    const rotationQuaternionX = BABYLON.Quaternion.RotationAxis(axisX, Math.PI / 180 * rotX);
+    let end = rotationQuaternionX.multiply(mesh.rotationQuaternion);
+
+    const rotationQuaternionY = BABYLON.Quaternion.RotationAxis(axisY, Math.PI / 180 * rotY);
+    end = rotationQuaternionY.multiply(end);
+
+    const rotationQuaternionZ = BABYLON.Quaternion.RotationAxis(axisZ, Math.PI / 180 * rotZ);
+    end = rotationQuaternionZ.multiply(end);
+
+    this.rotQuat = end;
+
+    mesh.rotationQuaternion = end;
+  }
+
+
+  public async decomposeAfterLoading() {
+    await this.unparentModel();
+    await this.destroyCenter();
+  }
+
+
+  private async unparentModel() {
+
+    for (let _i = 0; _i < this.actualModelMeshes.length; _i++) {
+
+      const mesh = this.actualModelMeshes[_i];
+
+      this.center.computeWorldMatrix();
+      mesh.computeWorldMatrix();
+
+      const abs = mesh.absolutePosition;
+
+      if (!mesh.rotationQuaternion) {
+        mesh.rotationQuaternion = BABYLON.Quaternion.RotationYawPitchRoll(mesh.rotation.y, mesh.rotation.x, mesh.rotation.z);
+      }
+      mesh.parent = null;
+      mesh.position = abs;
+
+      const meshRotation = mesh.rotationQuaternion;
+      mesh.rotationQuaternion = this.rotQuat.multiply(meshRotation);
 
       mesh.scaling.x *= this.center.scaling.x;
       mesh.scaling.y *= this.center.scaling.y;
       mesh.scaling.z *= this.center.scaling.z;
-      mesh.rotation = this.center.rotation.add(mesh.rotation);
-      mesh.parent = null;
     }
   }
 
-  public createVisualSettings() {
-    this.initializeVariablesforSettings();
-    this.generateHelpers();
 
-    //TODO
-    // this.createBoundingBox();
+  public async createVisualSettings() {
+    console.log('create visual Settings');
+    this.initializeVariablesforSettings();
+    await this.generateHelpers();
+
+    this.createBoundingBox();
     this.showBoundingBoxModel = false;
     this.boundingBox.visibility = 0;
     this.createWorldAxis(18);
@@ -114,38 +189,15 @@ export class ModelsettingsService {
   }
 
 
-  public multiplyPoint(point) {
-
-    const arrQ = new Quaternion[2];
-    arrQ[0] = new Quaternion(point.x, point.y, point.z, 0);
-    arrQ[1] = new Quaternion(-this.center.rotation.x, -this.center.rotation.y, -this.center.rotation.z);
-
-    const qSoFar = new Quaternion(-this.center.rotation.x, -this.center.rotation.y, -this.center.rotation.z);
-    for (let i = 0; i < arrQ.length; i++) {
-      const temp = arrQ[i];
-      const next = new Quaternion(temp.x, temp.y, temp.z, temp.w);
-
-      const w: double = qSoFar.w * next.w - qSoFar.x * next.x - qSoFar.y * next.y - qSoFar.z * next.z;
-      const x: double = qSoFar.x * next.w + qSoFar.w * next.x + qSoFar.y * next.z - qSoFar.z * next.y;
-      const y: double = qSoFar.y * next.w + qSoFar.w * next.y + qSoFar.z * next.x - qSoFar.x * next.z;
-      const z: double = qSoFar.z * next.w + qSoFar.w * next.z + qSoFar.x * next.y - qSoFar.y * next.x;
-
-      qSoFar.x = x;
-      qSoFar.y = y;
-      qSoFar.z = z;
-      qSoFar.w = w;
+  public async decomposeAfterSetting() {
+    if (this.center) {
+      await this.unparentModel();
+      await this.destroyCenter();
+      await this.destroyBoundingBox();
+      await this.destroyWorldAxis();
+      await this.destroyLocalAxis();
+      await this.destroyGround();
     }
-    return qSoFar;
-  }
-
-
-  public decomposeAfterSetting() {
-    this.unparentModel();
-    this.destroyCenter();
-    this.destroyBoundingBox();
-    this.destroyWorldAxis();
-    this.destroyLocalAxis();
-    this.destroyGround();
   }
 
   private initializeVariablesforSettings() {
@@ -162,13 +214,14 @@ export class ModelsettingsService {
     this.lastRotationZ = 0;
     this.scalingFactor = 1;
 
-    this.showBoundingBoxModel = false;
     this.height = 0;
     this.width = 0;
     this.depth = 0;
     this.lastHeight = 0;
     this.lastWidth = 0;
     this.lastDepth = 0;
+
+    this.showBoundingBoxModel = false;
 
     this.showGround = false;
     this.scalingFactorGround = 1;
@@ -178,24 +231,15 @@ export class ModelsettingsService {
 
     this.scalingFactorLocalAxis = 1;
     this.scalingFactorWorldAxis = 1;
+
+    for (let _i = 0; _i < this.actualModelMeshes.length; _i++) {
+      const mesh = this.actualModelMeshes[_i];
+      this.getMinMax(mesh, true);
+    }
+
+
   }
 
-  private initializeVariablesforLoading() {
-    this.min = BABYLON.Vector3.Zero();
-    this.max = BABYLON.Vector3.Zero();
-    this.initialSize = BABYLON.Vector3.Zero();
-
-    this.lastRotationX = 0;
-    this.lastRotationY = 0;
-    this.lastRotationZ = 0;
-
-    this.height = 0;
-    this.width = 0;
-    this.depth = 0;
-    this.lastHeight = 0;
-    this.lastWidth = 0;
-    this.lastDepth = 0;
-  }
 
   private getMinMax(mesh, computeWorldMatrix) {
 
@@ -229,25 +273,6 @@ export class ModelsettingsService {
 
   }
 
-  // TODO async
-  private generateHelpers() {
-    for (let _i = 0; _i < this.actualModelMeshes.length; _i++) {
-      const mesh = this.actualModelMeshes[_i];
-      this.getMinMax(mesh, true);
-    }
-
-    this.createCenter();
-    this.initialSize = this.max.subtract(this.min);
-
-    this.height = Math.round(this.initialSize.y);
-    this.width = Math.round(this.initialSize.x);
-    this.depth = Math.round(this.initialSize.z);
-
-    // TODO only for testing with Default Model
-    this.createBoundingBox();
-  }
-
-
   private async createCenter() {
     this.center = BABYLON.MeshBuilder.CreateBox('center', {size: 1}, this.babylonService.getScene());
     BABYLON.Tags.AddTagsTo(this.center, 'center');
@@ -256,14 +281,21 @@ export class ModelsettingsService {
       const mesh = this.actualModelMeshes[_i];
       mesh.parent = this.center;
     }
+    console.log('center gebaut');
 
   }
 
   private destroyCenter() {
     this.babylonService.getScene().getMeshesByTags('center').map(mesh => mesh.dispose());
+    console.log('deleted center.');
+
   }
 
   private createBoundingBox() {
+    console.log('Create Bounding Box');
+    console.log('Max', this.max);
+    console.log('Initial', this.initialSize);
+
 
     this.boundingBox = BABYLON.MeshBuilder.CreateBox('boundingBox', {
       width: this.initialSize.x, height: this.initialSize.y, depth: this.initialSize.z
@@ -520,16 +552,16 @@ export class ModelsettingsService {
 
 
   public setScalingFactor(event: any) {
-    this.scalingFactor = event.value;
+    this.scalingFactor = event.value.toFixed(1);
     this.center.scaling = new BABYLON.Vector3(event.value, event.value, event.value);
 
     const bi = this.boundingBox.getBoundingInfo();
     const minimum = bi.boundingBox.minimumWorld;
     const maximum = bi.boundingBox.maximumWorld;
     const size = maximum.subtract(minimum);
-    this.height = Math.round(size.y);
-    this.width = Math.round(size.x);
-    this.depth = Math.round(size.z);
+    this.height = size.y.toFixed(2);
+    this.width = size.x.toFixed(2);
+    this.depth = size.z.toFixed(2);
 
 
     // this.boundingBox.position = new BABYLON.Vector3(0, Math.abs(size.y) / 2,  0);
@@ -537,19 +569,19 @@ export class ModelsettingsService {
 
   public handleChangeHeight() {
 
-    console.log('Höhe: ' + this.height);
     // originalSize.x => 1 scale
     // originalSize.y * factor = this.height
     const factor = this.height / this.initialSize.y;
     this.scalingFactor = factor;
+    // factor.toFixed(1);
     this.center.scaling = new BABYLON.Vector3(factor, factor, factor);
 
     const bi = this.boundingBox.getBoundingInfo();
     const minimum = bi.boundingBox.minimumWorld;
     const maximum = bi.boundingBox.maximumWorld;
     const size = maximum.subtract(minimum);
-    this.width = Math.round(size.x);
-    this.depth = Math.round(size.z);
+    this.width = size.x.toFixed(2);
+    this.depth = size.z.toFixed(2);
   }
 
   public handleChangeWidth() {
@@ -558,14 +590,15 @@ export class ModelsettingsService {
     // originalSize.x  * factor = this.height
     const factor = this.width / this.initialSize.x;
     this.scalingFactor = factor;
+    // .toFixed(1);
     this.center.scaling = new BABYLON.Vector3(factor, factor, factor);
 
     const bi = this.boundingBox.getBoundingInfo();
     const minimum = bi.boundingBox.minimumWorld;
     const maximum = bi.boundingBox.maximumWorld;
     const size = maximum.subtract(minimum);
-    this.height = Math.round(size.y);
-    this.depth = Math.round(size.z);
+    this.height = size.y.toFixed(2);
+    this.depth = size.z.toFixed(2);
 
   }
 
@@ -575,28 +608,17 @@ export class ModelsettingsService {
     // originalSize.x  * factor = this.height
     const factor = this.depth / this.initialSize.z;
     this.scalingFactor = factor;
+    // .toFixed(1);
     this.center.scaling = new BABYLON.Vector3(factor, factor, factor);
 
     const bi = this.boundingBox.getBoundingInfo();
     const minimum = bi.boundingBox.minimumWorld;
     const maximum = bi.boundingBox.maximumWorld;
     const size = maximum.subtract(minimum);
-    this.height = Math.round(size.y);
-    this.width = Math.round(size.x);
+    this.height = size.y.toFixed(2);
+    this.width = size.x.toFixed(2);
 
   }
-
-
-  private loadScalingFactor(factor: number) {
-    this.scalingFactor = factor;
-    this.center.scaling = new BABYLON.Vector3(factor, factor, factor);
-
-
-    // this.boundingBox.position = new BABYLON.Vector3(0, Math.abs(size.y) / 2,  0);
-  }
-
-
-
 
 
   private rotationFunc(axisName: string, degree: number) {

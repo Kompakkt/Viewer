@@ -223,7 +223,9 @@ export class ModelsettingsComponent implements OnInit {
   }
 
 
-  backToDefault() {
+  async backToDefault() {
+
+    console.log('Default: ', this.isDefault, 'Settings: ', this.initialSettingsMode);
 
     this.preview = this.activeModel.settings.preview;
 
@@ -257,24 +259,19 @@ export class ModelsettingsComponent implements OnInit {
     this.ambientlightDownintensity = hemisphericLightDown.intensity;
 
 
-    /*
     if (!this.isDefault && !this.initialSettingsMode) {
+      await this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
+        this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
+    }
+    if (this.isDefault && this.initialSettingsMode) {
+      // TODO Werte wieder auf null setzen
+    }
+    if (this.isDefault && !this.initialSettingsMode) {
       this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
         this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
     }
     if (!this.isDefault && this.initialSettingsMode) {
-      this.modelSettingsService.decomposeAfterSetting();
-      this.modelSettingsService.loadSettings(1,
-        0, 0, 0);
-      this.modelSettingsService.createVisualSettings();
-    }*/
-    if (this.isDefault) {
-      /*
-      this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
-        this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
-      */
-    } else {
-     // this.modelSettingsService.decomposeAfterSetting();
+      // TODO Werte wieder auf null setzen
     }
 
   }
@@ -294,12 +291,14 @@ export class ModelsettingsComponent implements OnInit {
       this.babylonService.setLightIntensity('ambientlightDown', 1);
       this.ambientlightDownintensity = 1;
 
-      // Only for DEV
-      //this.modelSettingsService.createVisualSettings();
-      //this.initialSettingsMode = true;
+      // Only for DEV - uncomment the 2 following lines
+     //await this.modelSettingsService.createVisualSettings();
+     // this.initialSettingsMode = true;
       // End
 
-      this.backToDefault();
+      await this.backToDefault();
+
+
     } else {
 
       // Nicht Default Modell
@@ -439,7 +438,6 @@ export class ModelsettingsComponent implements OnInit {
 
         // during upload process
         if (this.isModelOwner && !this.isFinished) {
-          /*
           this.initialSettingsMode = true;
           this.modelSettingsService.createVisualSettings();
 
@@ -452,7 +450,7 @@ export class ModelsettingsComponent implements OnInit {
 
           const scale = 1;
           this.activeModel.settings['scale'] = scale;
-*/
+
         } else {
           // Not during upload process but settings not set (should never happen)
           if (this.activeModel.settings.rotation === undefined) {
@@ -471,9 +469,8 @@ export class ModelsettingsComponent implements OnInit {
         }
       } else {
         // settings exist
-        /*
         this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
-          this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);*/
+          this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
       }
       this.backToDefault();
     }
@@ -534,7 +531,7 @@ export class ModelsettingsComponent implements OnInit {
         y: 0,
         z: 0
       },
-      scale: 3
+      scale: 1
     };
   }
 
