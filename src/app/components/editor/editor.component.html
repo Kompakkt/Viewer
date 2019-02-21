@@ -6,6 +6,14 @@
         <mat-icon class="tab-icon">place</mat-icon>
       </ng-template>
 
+      <mat-card class="titlecard">
+        <mat-card-header>
+          <mat-card-title>
+            Annotations
+          </mat-card-title>
+        </mat-card-header>
+      </mat-card>
+
       <div cdkDropList class="annotations-list" (cdkDropListDropped)="drop($event)"
            *ngIf="this.annotationService.annotations.length">
         <app-annotations-editor class="annotation-box" *ngFor="let annotation of this.annotationService.annotations;"
@@ -13,36 +21,38 @@
                                 cdkDrag cdkDragLockAxis="y"></app-annotations-editor>
       </div>
 
-      <button *ngIf="this.annotationService.annotations.length > 0"
-              mat-icon-button
-              matTooltip="Export Annotations to File"
-              matTooltipPosition="below"
-              (click)="exportAnnotations()">
-        <mat-icon aria-label="Export Annotations to File">save</mat-icon>
-      </button>
-
-      <input type="file"
-             style="display: none;"
-             #importInput
-             (change)="importAnnotations($event.target.files)">
-
-      <button mat-icon-button
-              matTooltip="Import Annotations"
-              matTooltipPosition="below"
-              (click)="importInput.click()">
-        <mat-icon aria-label="Import Annotations">save_alt</mat-icon>
-      </button>
-
-      <button *ngIf="this.annotationService.annotations.length > 0"
-              mat-icon-button
-              matTooltip="Delete Annotations"
-              matTooltipPosition="below"
-              (click)="deleteAnnotations()">
-        <mat-icon aria-label="Delete Annotations">delete</mat-icon>
-      </button>
-
-      <div *ngIf="this.annotationService.annotations.length < 1">
+      <mat-card *ngIf="this.annotationService.annotations.length < 1">
         To add annotations, simply double-click on the model.
+      </mat-card>
+
+      <div id="annotations-eximport">
+        <button *ngIf="this.annotationService.annotations.length > 0"
+                mat-icon-button
+                matTooltip="Export Annotations to File"
+                matTooltipPosition="below"
+                (click)="exportAnnotations()">
+          <mat-icon aria-label="Export Annotations to File">save</mat-icon>
+        </button>
+
+        <input type="file"
+               style="display: none;"
+               #importInput
+               (change)="importAnnotations($event.target.files)">
+
+        <button mat-icon-button
+                matTooltip="Import Annotations"
+                matTooltipPosition="below"
+                (click)="importInput.click()">
+          <mat-icon aria-label="Import Annotations">save_alt</mat-icon>
+        </button>
+
+        <button *ngIf="this.annotationService.annotations.length > 0"
+                mat-icon-button
+                matTooltip="Delete Annotations"
+                matTooltipPosition="below"
+                (click)="deleteAnnotations()">
+          <mat-icon aria-label="Delete Annotations">delete</mat-icon>
+        </button>
       </div>
 
     </mat-tab>
@@ -69,16 +79,23 @@
       <ng-template mat-tab-label>
         <mat-icon class="tab-icon">info</mat-icon>
       </ng-template>
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>
-            About
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          Kompakt v{{version}} is developed at the Institute for Digital Humanities @ University of Cologne, Germany.
-        </mat-card-content>
-      </mat-card>
+
+      <div id="editor-about">
+
+        <mat-card class="titlecard">
+          <mat-card-header>
+            <mat-card-title>
+              About
+            </mat-card-title>
+          </mat-card-header>
+        </mat-card>
+
+        <mat-card>
+          <mat-card-content>
+            Kompakt v{{version}} is developed at the Institute for Digital Humanities @ University of Cologne, Germany.
+          </mat-card-content>
+        </mat-card>
+      </div>
     </mat-tab>
 
   </mat-tab-group>

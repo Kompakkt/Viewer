@@ -84,11 +84,11 @@ html, body {
 
 #editor .mat-card {
   padding: 10px;
-  background-color: rgba(0, 176, 255,0.1);
+  background-color: rgba(0, 176, 255, 0.2);
 }
 
 #editor .mat-tab-group .mat-tab-label-active {
-  background-color: rgba(0, 176, 255,0.1);
+  background-color: rgba(0, 176, 255, 0.3);
 }
 
 #editor .mat-card-avatar {
@@ -101,10 +101,39 @@ html, body {
   word-wrap: break-word;
 }
 
-#editor .mat-card-header-text {
-  margin: 0 0 0  15px;
+#editor .annotations-list .mat-card-header-text {
+  margin: 0 0 0 15px;
 }
 
-#editor .mat-card-image {
+#editor-metadata .mat-card-header-text,
+#editor-modelsettings .mat-card-header-text,
+#editor-about .mat-card-header-text {
+  margin: 0;
+}
 
+#editor-metadata .mat-card,
+#editor-modelsettings .mat-card,
+#editor-about .mat-card {
+  margin-bottom: 1px;
+}
+
+#editor-metadata .mat-card-content,
+#editor-modelsettings .mat-card-content,
+#editor-about .mat-card-content {
+  line-height: 23px;
+}
+
+.mat-card.titlecard {
+  padding: 7px 7px 7px 10px !important;
+  background-color: rgba(0, 176, 255, 0.1) !important;
+}
+
+.titlecard .mat-card-header-text {
+  margin: 0 !important;
+}
+
+.titlecard .mat-card-header .mat-card-title {
+  font-size: 11px !important;
+  font-weight: lighter;
+  margin-bottom: 0 !important;
 }
