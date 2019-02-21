@@ -68,12 +68,72 @@ html, body {
 #editor,
 #collections {
   color: #fff;
-  width: 400px;
+  width: 300px;
   height: 100%;
   z-index: auto;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.9);
   box-sizing: border-box;
   border: 0;
-  padding: 25px;
+  padding: 0;
   overflow-y: auto;
+}
+
+#editor .material-icons {
+  font-size: 20px;
+}
+
+#editor .mat-card {
+  padding: 10px;
+  background-color: rgba(0, 176, 255, 0.2);
+}
+
+#editor .mat-tab-group .mat-tab-label-active {
+  background-color: rgba(0, 176, 255, 0.3);
+}
+
+#editor .mat-card-avatar {
+  height: 25px;
+  width: 25px;
+}
+
+#editor .mat-card-header .mat-card-title {
+  font-size: 15px;
+  word-wrap: break-word;
+}
+
+#editor .annotations-list .mat-card-header-text {
+  margin: 0 0 0 15px;
+}
+
+#editor-metadata .mat-card-header-text,
+#editor-modelsettings .mat-card-header-text,
+#editor-about .mat-card-header-text {
+  margin: 0;
+}
+
+#editor-metadata .mat-card,
+#editor-modelsettings .mat-card,
+#editor-about .mat-card {
+  margin-bottom: 1px;
+}
+
+#editor-metadata .mat-card-content,
+#editor-modelsettings .mat-card-content,
+#editor-about .mat-card-content {
+  line-height: 23px;
+}
+
+.mat-card.titlecard {
+  padding: 7px 7px 7px 10px !important;
+  background-color: rgba(0, 176, 255, 0.1) !important;
+}
+
+.titlecard .mat-card-header-text {
+  margin: 0 !important;
+}
+
+.titlecard .mat-card-header .mat-card-title {
+  font-size: 11px !important;
+  font-weight: lighter;
+  margin-bottom: 0 !important;
 }

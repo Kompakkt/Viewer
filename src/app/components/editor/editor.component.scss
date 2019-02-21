@@ -1,7 +1,7 @@
 :host {
   position: absolute;
   top: 0;
-  left: -400px;
+  left: -300px;
   height: 100vh;
   transition: 1s;
   z-index: 99;
@@ -67,4 +67,8 @@
 
 .annotations-list.cdk-drop-list-dragging .annotation-box:not(.cdk-drag-placeholder) {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+#annotations-eximport {
+  background-color: rgba(0, 176, 255, 0.3);
 }

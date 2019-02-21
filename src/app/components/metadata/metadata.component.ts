@@ -12,7 +12,7 @@ export class MetadataComponent implements OnInit {
 
   @HostBinding('class.is-open') private isOpen = false;
 
-  private metadata = '';
+  public metadata;
   public showMetadata = false;
 
   constructor(private overlayService: OverlayService,

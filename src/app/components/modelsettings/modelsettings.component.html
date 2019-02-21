@@ -1,49 +1,95 @@
-<mat-card class="model-card" *ngIf="this.activeModel != null">
-  <mat-card-header>
-    <mat-card-title>
-      Model Settings
-    </mat-card-title>
-  </mat-card-header>
-  <mat-card-content>
-    <br><br><br>
-    <button mat-button (click)="backToDefault()">Back to Default</button>
-    <button mat-button *ngIf="!isDefault && isModelOwner" (click)="saveActualSettings()">Save as default</button>
-    <br><br>
+<div *ngIf="this.activeModel != null" id="editor-modelsettings">
 
-    <h3>Initial Perspective</h3>
+  <mat-card class="titlecard">
+    <mat-card-header>
+      <mat-card-title>
+        Model Settings
+      </mat-card-title>
+    </mat-card-header>
+  </mat-card>
 
-    <p>Click on this image to select a new initial Perspective.</p>
-    <br><br>
-    <img mat-card-image src={{preview}} (click)="setInitialView()">
+  <mat-card>
+    <mat-card-content>
 
-    <br><br><br>
-    <h3>Background</h3>
-    <color-chrome (onChange)="handleChangeColor($event)"></color-chrome>
-    <br>
-    <mat-slide-toggle (change)="handleChangeEffekt()">Gradient-Brightness Effect</mat-slide-toggle>
-    <br><br><br>
-    <h3>Lights</h3>
-    <h4>Brightness</h4>
-    <p>Ambient environment lights</p>
-    <h5>Fabulous (up towards the sky)</h5>
-    <mat-slider min="0" max="1" step="0.1" value={{ambientlightUpintensity}} #matslider
-                (input)="setAmbientlightIntensityUp($event)"></mat-slider>
-    <h5>Sunny (down towards the ground)</h5>
-    <mat-slider min="0" max="1" step="0.1" value={{ambientlightDownintensity}} #matslider
-                (input)="setAmbientlightIntensityDown($event)"></mat-slider>
-    <br>
-    <p>Pointlight</p>
-    <mat-slider min="0" max="1" step="0.1" value={{this.babylonService.pointlightIntensity}} #matslider
-                (input)="setPointlightIntensity($event)"></mat-slider>
-    <h5>Pointlight Dimensions: X Y Z</h5>
-    <mat-slider min="-10" max="10" step="1" value={{this.babylonService.pointlightPosX}} #matslider
-                (input)="pointlightPosX($event)" vertical></mat-slider>
-    <mat-slider min="-10" max="10" step="1" value={{this.babylonService.pointlightPosY}} #matslider
-                (input)="pointlightPosY($event)" vertical></mat-slider>
-    <mat-slider min="-10" max="10" step="1" value={{this.babylonService.pointlightPosZ}} #matslider
-                (input)="pointlightPosZ($event)" vertical></mat-slider>
-    <br><br><br>
-    <button mat-button (click)="backToDefault()">Back to Default</button>
-    <button mat-button *ngIf="!isDefault && isModelOwner" (click)="saveActualSettings()">Save as default</button>
-  </mat-card-content>
-</mat-card>
+      <button mat-raised-button
+              (click)="backToDefault()">Back to Default</button>
+      <button mat-raised-button
+              *ngIf="!isDefault && isModelOwner"
+              (click)="saveActualSettings()">Save as default
+      </button>
+
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        Initial Perspective
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+
+      Click on the image to select a new initial perspective:
+      <img class="previewimage" src={{preview}} (click)="setInitialView()">
+
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        Background
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+
+      <color-chrome (onChange)="handleChangeColor($event)"></color-chrome>
+      <br>
+      <mat-slide-toggle (change)="handleChangeEffekt()">Gradient-Brightness Effect</mat-slide-toggle>
+
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        Lights
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+
+      <h4>Brightness</h4>
+      <p>Ambient environment lights</p>
+      <h5>Fabulous (up towards the sky)</h5>
+      <mat-slider min="0" max="1" step="0.1" value={{ambientlightUpintensity}} #matslider
+                  (input)="setAmbientlightIntensityUp($event)"></mat-slider>
+      <h5>Sunny (down towards the ground)</h5>
+      <mat-slider min="0" max="1" step="0.1" value={{ambientlightDownintensity}} #matslider
+                  (input)="setAmbientlightIntensityDown($event)"></mat-slider>
+      <br>
+      <p>Pointlight</p>
+      <mat-slider min="0" max="1" step="0.1" value={{this.babylonService.pointlightIntensity}} #matslider
+                  (input)="setPointlightIntensity($event)"></mat-slider>
+      <h5>Pointlight Dimensions: X Y Z</h5>
+      <mat-slider min="-10" max="10" step="1" value={{this.babylonService.pointlightPosX}} #matslider
+                  (input)="pointlightPosX($event)" vertical></mat-slider>
+      <mat-slider min="-10" max="10" step="1" value={{this.babylonService.pointlightPosY}} #matslider
+                  (input)="pointlightPosY($event)" vertical></mat-slider>
+      <mat-slider min="-10" max="10" step="1" value={{this.babylonService.pointlightPosZ}} #matslider
+                  (input)="pointlightPosZ($event)" vertical></mat-slider>
+
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-content>
+      <button mat-raised-button
+              (click)="backToDefault()">Back to Default</button>
+      <button mat-raised-button
+              *ngIf="!isDefault && isModelOwner"
+              (click)="saveActualSettings()">Save as default
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+</div>
