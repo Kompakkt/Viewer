@@ -1,94 +1,112 @@
 <div id="collections">
 
-  <h2>Catalogue</h2>
+  <mat-card class="titlecard">
+    <mat-card-header>
+      <mat-card-title>
+        Collections
+      </mat-card-title>
+    </mat-card-header>
+  </mat-card>
 
-  <div *ngIf="!isSingleModel && isLoggedIn && !isSingleCollection">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        Catalogue
+      </mat-card-title>
+    </mat-card-header>
 
-    Please choose to load collections or model:
-    <mat-radio-group (change)="onSelectionDataTypeChange($event)">
-      <mat-radio-button value="model">Load Model</mat-radio-button>
-      <mat-radio-button value="collection">Load Collection</mat-radio-button>
-    </mat-radio-group>
+    <mat-card-content>
 
-    <div *ngIf="collectionSelected">
+      <div *ngIf="!isSingleModel && isLoggedIn && !isSingleCollection">
 
-      <h4>Select by List of Collections</h4>
+        Please choose to load collections or model:
+        <mat-radio-group (change)="onSelectionDataTypeChange($event)">
+          <mat-radio-button value="model">Load Model</mat-radio-button>
+          <mat-radio-button value="collection">Load Collection</mat-radio-button>
+        </mat-radio-group>
 
-      <mat-form-field>
-        <mat-select (selectionChange)="handleCollectionChoice($event)" placeholder="Choose Collection">
-          <mat-option *ngFor="let collection of this.catalogueService.Observables.collections.source['value'];"
-                      [value]="collection">
-            {{collection.name}}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-      <h4>Select Collection by ID</h4>
-      <mat-form-field>
-        <input matInput name="identifierCollection" #description="ngModel" type="text"
-               placeholder="What's the ID?" [(ngModel)]="identifierCollection">
-      </mat-form-field>
-      <button mat-raised-button (click)="searchCollectionByID()">Search it</button>
-      <div *ngIf="singleCollectionSelected && actualCollection">
-        <div class="category" *ngIf="actualCollection.name">Selected Collection: {{actualCollection.name}}</div>
-        <div *ngIf="singleModelSelected">
-          <div class="category" *ngIf="actualModel.name">Selected Model: {{actualModel.name}}</div>
+        <div *ngIf="collectionSelected">
+
+          <h4>Select by List of Collections</h4>
+
+          <mat-form-field>
+            <mat-select (selectionChange)="handleCollectionChoice($event)" placeholder="Choose Collection">
+              <mat-option *ngFor="let collection of this.catalogueService.Observables.collections.source['value'];"
+                          [value]="collection">
+                {{collection.name}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <h4>Select Collection by ID</h4>
+          <mat-form-field>
+            <input matInput name="identifierCollection" #description="ngModel" type="text"
+                   placeholder="What's the ID?" [(ngModel)]="identifierCollection">
+          </mat-form-field>
+          <button mat-raised-button (click)="searchCollectionByID()">Search it</button>
+          <div *ngIf="singleCollectionSelected && actualCollection">
+            <div class="category" *ngIf="actualCollection.name">Selected Collection: {{actualCollection.name}}</div>
+            <div *ngIf="singleModelSelected">
+              <div class="category" *ngIf="actualModel.name">Selected Model: {{actualModel.name}}</div>
+            </div>
+            <div *ngIf="actualCollection.models.length">
+              <app-model class="model-box" *ngFor="let model of actualCollection.models;" [model]=model></app-model>
+            </div>
+          </div>
         </div>
+
+        <div *ngIf="modelSelected">
+
+          <h4>Select by List of Models</h4>
+          <mat-form-field>
+            <mat-select (selectionChange)="handleModelChoice($event)" placeholder="Choose Model">
+              <mat-option *ngFor="let model of this.catalogueService.Observables.models.source['value'];"
+                          [value]="model">
+                {{model.name}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <h4>Select Model by ID</h4>
+          <mat-form-field>
+            <input matInput name="identifierModel" #description="ngModel" type="text"
+                   placeholder="What's the ID?" [(ngModel)]="identifierModel">
+          </mat-form-field>
+          <button mat-raised-button (click)="searchModelByID()">Search it</button>
+
+        </div>
+
+        <div *ngIf="singleModelSelected && !collectionSelected">
+
+          <div class="category" *ngIf="actualModel.name">Selected Model: {{actualModel.name}}</div>
+          <div id="model-overview">
+            <app-model class="model-box" [model]="actualModel"></app-model>
+          </div>
+        </div>
+
+      </div>
+
+      <div *ngIf="isSingleCollection">
+        <app-model class="model-box" *ngFor="let model of actualCollection.models;"
+                   [model]=model></app-model>
+      </div>
+
+      <div *ngIf="isSingleCollection">
+        <div class="category" *ngIf="actualCollection.name">Selected Collection: {{actualCollection.name}}</div>
+        <div class="category" *ngIf="actualModel.name">Selected Model: {{actualModel.name}}</div>
         <div *ngIf="actualCollection.models.length">
           <app-model class="model-box" *ngFor="let model of actualCollection.models;" [model]=model></app-model>
         </div>
       </div>
-    </div>
 
-    <div *ngIf="modelSelected">
-
-      <h4>Select by List of Models</h4>
-      <mat-form-field>
-        <mat-select (selectionChange)="handleModelChoice($event)" placeholder="Choose Model">
-          <mat-option *ngFor="let model of this.catalogueService.Observables.models.source['value'];"
-                      [value]="model">
-            {{model.name}}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-      <h4>Select Model by ID</h4>
-      <mat-form-field>
-        <input matInput name="identifierModel" #description="ngModel" type="text"
-               placeholder="What's the ID?" [(ngModel)]="identifierModel">
-      </mat-form-field>
-      <button mat-raised-button (click)="searchModelByID()">Search it</button>
-
-    </div>
-
-    <div *ngIf="singleModelSelected && !collectionSelected">
-
-      <div class="category" *ngIf="actualModel.name">Selected Model: {{actualModel.name}}</div>
-      <div id="model-overview">
-        <app-model class="model-box" [model]="actualModel"></app-model>
+      <div *ngIf="!isSingleCollection && !isSingleModel && !isLoggedIn">
+        <p>Please Login with your university account to see data from the repository.</p>
+        <button mat-menu-item (click)="loginDialog()">
+          <mat-icon>account_circle</mat-icon>
+          <span>Login</span>
+        </button>
       </div>
-    </div>
 
-  </div>
-
-  <div *ngIf="isSingleCollection">
-    <app-model class="model-box" *ngFor="let model of actualCollection.models;"
-               [model]=model></app-model>
-  </div>
-
-  <div *ngIf="isSingleCollection">
-    <div class="category" *ngIf="actualCollection.name">Selected Collection: {{actualCollection.name}}</div>
-    <div class="category" *ngIf="actualModel.name">Selected Model: {{actualModel.name}}</div>
-    <div *ngIf="actualCollection.models.length">
-      <app-model class="model-box" *ngFor="let model of actualCollection.models;" [model]=model></app-model>
-    </div>
-  </div>
-
-  <div *ngIf="!isSingleCollection && !isSingleModel && !isLoggedIn">
-    <p>Please Login with your university account to see data from the repository.</p>
-    <button mat-menu-item (click)="loginDialog()">
-      <mat-icon>account_circle</mat-icon>
-      <span>Login</span>
-    </button>
-  </div>
+    </mat-card-content>
+  </mat-card>
 
 </div>
 

@@ -82,7 +82,8 @@ html, body {
   font-size: 20px;
 }
 
-#editor .mat-card {
+#editor .mat-card,
+#collections .mat-card {
   padding: 10px;
   background-color: rgba(0, 176, 255, 0.2);
 }
@@ -107,19 +108,22 @@ html, body {
 
 #editor-metadata .mat-card-header-text,
 #editor-modelsettings .mat-card-header-text,
-#editor-about .mat-card-header-text {
+#editor-about .mat-card-header-text,
+#collections .mat-card-header-text {
   margin: 0;
 }
 
 #editor-metadata .mat-card,
 #editor-modelsettings .mat-card,
-#editor-about .mat-card {
+#editor-about .mat-card,
+#collections .mat-card {
   margin-bottom: 1px;
 }
 
 #editor-metadata .mat-card-content,
 #editor-modelsettings .mat-card-content,
-#editor-about .mat-card-content {
+#editor-about .mat-card-content,
+#collections .mat-card-content {
   line-height: 23px;
 }
 
