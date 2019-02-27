@@ -1,4 +1,4 @@
-<div *ngIf="this.activeModel != null" id="editor-modelsettings">
+<div *ngIf="activeModel != null" id="editor-modelsettings">
 
   <mat-card class="titlecard">
     <mat-card-header>
@@ -19,133 +19,142 @@
               (click)="saveActualSettings()">Save as default
       </button>
 
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-content>
+
       <div *ngIf="initialSettingsMode">
         <h3>Mesh</h3>
         <h4>General Information & Helpers</h4>
         <h5>Background</h5>
         <color-chrome (onChange)="handleChangeColor($event)"></color-chrome>
         <br>
-        <mat-checkbox [checked]="this.modelSettingsService.showBoundingBoxModel"
-                      (change)="this.modelSettingsService.handleChangeBoundingBoxModel()"><h5>Bounding Box Model</h5>
+        <mat-checkbox [checked]="modelSettingsService.showBoundingBoxModel"
+                      (change)="modelSettingsService.handleChangeBoundingBoxModel()"><h5>Bounding Box Model</h5>
         </mat-checkbox>
         <br>
-        <h5>Number of meshes: {{this.modelSettingsService.actualModelMeshes.length}}</h5>
-        <mat-checkbox [checked]="this.modelSettingsService.showBoundingBoxMeshes"
-                      (change)="this.modelSettingsService.handleChangeBoundingBoxMeshes()"><h5>Bounding Box Meshes</h5>
+        <h5>Number of meshes: {{modelSettingsService.actualModelMeshes.length}}</h5>
+        <mat-checkbox [checked]="modelSettingsService.showBoundingBoxMeshes"
+                      (change)="modelSettingsService.handleChangeBoundingBoxMeshes()"><h5>Bounding Box
+          Meshes</h5>
         </mat-checkbox>
         <br>
-        <mat-checkbox [checked]="this.modelSettingsService.showWorldAxis"
-                      (change)="this.modelSettingsService.handleChangeWorldAxis()"><h5>World Axis</h5>
+        <mat-checkbox [checked]="modelSettingsService.showWorldAxis"
+                      (change)="modelSettingsService.handleChangeWorldAxis()"><h5>World Axis</h5>
         </mat-checkbox>
-        <div *ngIf="this.modelSettingsService.showWorldAxis">
+        <div *ngIf="modelSettingsService.showWorldAxis">
           <h6>Size</h6>
-          <mat-slider min="0.1" max="8" step="0.1" value={{this.modelSettingsService.scalingFactorWorldAxis}}
+          <mat-slider min="0.1" max="8" step="0.1" value={{modelSettingsService.scalingFactorWorldAxis}}
                       #matslider
-                      (input)="this.modelSettingsService.setScalingFactorWorldAxis($event)"></mat-slider>
+                      (input)="modelSettingsService.setScalingFactorWorldAxis($event)"></mat-slider>
         </div>
         <br>
-        <mat-checkbox [checked]="this.modelSettingsService.showLocalAxis"
-                      (change)="this.modelSettingsService.handleChangeLocalAxis()"><h5>Local Axis</h5>
+        <mat-checkbox [checked]="modelSettingsService.showLocalAxis"
+                      (change)="modelSettingsService.handleChangeLocalAxis()"><h5>Local Axis</h5>
         </mat-checkbox>
-        <div *ngIf="this.modelSettingsService.showLocalAxis">
+        <div *ngIf="modelSettingsService.showLocalAxis">
           <h6>Size</h6>
-          <mat-slider min="0.1" max="8" step="0.1" value={{this.modelSettingsService.scalingFactorLocalAxis}}
+          <mat-slider min="0.1" max="8" step="0.1" value={{modelSettingsService.scalingFactorLocalAxis}}
                       #matslider
-                      (input)="this.modelSettingsService.setScalingFactorLocalAxis($event)"></mat-slider>
+                      (input)="modelSettingsService.setScalingFactorLocalAxis($event)"></mat-slider>
         </div>
         <br>
-        <mat-checkbox [checked]="this.modelSettingsService.showGround"
-                      (change)="this.modelSettingsService.handleChangeGround()"><h5>Ground</h5>
+        <mat-checkbox [checked]="modelSettingsService.showGround"
+                      (change)="modelSettingsService.handleChangeGround()"><h5>Ground</h5>
         </mat-checkbox>
-        <div *ngIf="this.modelSettingsService.showGround">
+        <div *ngIf="modelSettingsService.showGround">
           <h6>Size</h6>
-          <mat-slider min="0" max="10" step="1" value={{this.modelSettingsService.scalingFactorGround}} #matslider
-                      (input)="this.modelSettingsService.setScalingFactorGround($event)"></mat-slider>
+          <mat-slider min="0" max="10" step="1" value={{modelSettingsService.scalingFactorGround}} #matslider
+                      (input)="modelSettingsService.setScalingFactorGround($event)"></mat-slider>
           <h6>Color</h6>
-          <color-chrome (onChange)="this.modelSettingsService.handleChangeColorGround($event)"></color-chrome>
+          <color-chrome (onChange)="modelSettingsService.handleChangeColorGround($event)"></color-chrome>
         </div>
         <br>
-
 
         <h3>Model Mesh Settings</h3>
         <h4>Scale</h4>
         <h5>Please scale Model for right size</h5>
         <h6>Height:
           <mat-form-field>
-            <input matInput min="0" max={{this.modelSettingsService.height*5}}
-                   [(ngModel)]="this.modelSettingsService.height" type="number" step="0.5"
-                   (input)="this.modelSettingsService.handleChangeHeight()">
+            <input matInput min="0" max={{modelSettingsService.height*5}}
+                   [(ngModel)]="modelSettingsService.height" type="number" step="0.5"
+                   (input)="modelSettingsService.handleChangeHeight()">
           </mat-form-field>
         </h6>
 
         <h6>Width:
           <mat-form-field>
-            <input matInput min="0" max={{this.modelSettingsService.width*5}}
-                   [(ngModel)]="this.modelSettingsService.width" type="number" step="0.5"
-                   (input)="this.modelSettingsService.handleChangeWidth()">
+            <input matInput min="0" max={{modelSettingsService.width*5}}
+                   [(ngModel)]="modelSettingsService.width" type="number" step="0.5"
+                   (input)="modelSettingsService.handleChangeWidth()">
           </mat-form-field>
         </h6>
 
         <h6>Depth:
           <mat-form-field>
-            <input matInput min="0" max={{this.modelSettingsService.depth*5}}
-                   [(ngModel)]="this.modelSettingsService.depth" type="number" step="0.5"
-                   (input)="this.modelSettingsService.handleChangeDepth()">
+            <input matInput min="0" max={{modelSettingsService.depth*5}}
+                   [(ngModel)]="modelSettingsService.depth" type="number" step="0.5"
+                   (input)="modelSettingsService.handleChangeDepth()">
           </mat-form-field>
         </h6>
 
-        <h6>Scale factor: {{this.modelSettingsService.scalingFactor}}</h6>
-        <mat-slider min="0.0" max="5" step="0.05" value={{this.modelSettingsService.scalingFactor}} #matslider
-                    (input)="this.modelSettingsService.setScalingFactor($event)"></mat-slider>
+        <h6>Scale factor: {{modelSettingsService.scalingFactor}}</h6>
+        <mat-slider min="0.0" max="5" step="0.05" value={{modelSettingsService.scalingFactor}} #matslider
+                    (input)="modelSettingsService.setScalingFactor($event)"></mat-slider>
 
 
-    <h4>Orientation</h4>
-    <p>Rotate Model for right alignment</p>
-    <h5>X</h5>
-    <button mat-icon-button (click)="this.modelSettingsService.handleChangeRotationX(-90)"
-            matTooltip="Rotate -90°" matTooltipPosition="above"
-            type="button">
-      <mat-icon aria-label="Rotate -90°">undo</mat-icon>
-    </button>
-    <mat-form-field>
-      <input matInput min="0" max="360" [(ngModel)]="this.modelSettingsService.rotationX" type="number" step="1" (input)="this.modelSettingsService.handleChangeRotationX(0)">
-    </mat-form-field>
-    <button mat-icon-button (click)="this.modelSettingsService.handleChangeRotationX(+90)"
-            matTooltip="Rotate 90°" matTooltipPosition="above"
-            type="button">
-      <mat-icon aria-label="Rotate 90°">redo</mat-icon>
-    </button>
+        <h4>Orientation</h4>
+        <p>Rotate Model for right alignment</p>
+        <h5>X</h5>
+        <button mat-icon-button (click)="modelSettingsService.handleChangeRotationX(-90)"
+                matTooltip="Rotate -90°" matTooltipPosition="above"
+                type="button">
+          <mat-icon aria-label="Rotate -90°">undo</mat-icon>
+        </button>
+        <mat-form-field>
+          <input matInput min="0" max="360" [(ngModel)]="modelSettingsService.rotationX" type="number" step="1"
+                 (input)="modelSettingsService.handleChangeRotationX(0)">
+        </mat-form-field>
+        <button mat-icon-button (click)="modelSettingsService.handleChangeRotationX(+90)"
+                matTooltip="Rotate 90°" matTooltipPosition="above"
+                type="button">
+          <mat-icon aria-label="Rotate 90°">redo</mat-icon>
+        </button>
 
-    <h5>Y</h5>
-    <button mat-icon-button (click)="this.modelSettingsService.handleChangeRotationY(-90)"
-            matTooltip="Rotate -90°" matTooltipPosition="above"
-            type="button">
-      <mat-icon aria-label="Rotate -90°">undo</mat-icon>
-    </button>
-    <mat-form-field>
-      <input matInput min="0" max="360" [(ngModel)]="this.modelSettingsService.rotationY" type="number" step="1" (input)="this.modelSettingsService.handleChangeRotationY(0)">
-    </mat-form-field>
-    <button mat-icon-button (click)="this.modelSettingsService.handleChangeRotationY(+90)"
-            matTooltip="Rotate 90°" matTooltipPosition="above"
-            type="button">
-      <mat-icon aria-label="Rotate 90°">redo</mat-icon>
-    </button>
+        <h5>Y</h5>
+        <button mat-icon-button (click)="modelSettingsService.handleChangeRotationY(-90)"
+                matTooltip="Rotate -90°" matTooltipPosition="above"
+                type="button">
+          <mat-icon aria-label="Rotate -90°">undo</mat-icon>
+        </button>
+        <mat-form-field>
+          <input matInput min="0" max="360" [(ngModel)]="modelSettingsService.rotationY" type="number" step="1"
+                 (input)="modelSettingsService.handleChangeRotationY(0)">
+        </mat-form-field>
+        <button mat-icon-button (click)="modelSettingsService.handleChangeRotationY(+90)"
+                matTooltip="Rotate 90°" matTooltipPosition="above"
+                type="button">
+          <mat-icon aria-label="Rotate 90°">redo</mat-icon>
+        </button>
 
-    <h5>Z</h5>
-    <button mat-icon-button (click)="this.modelSettingsService.handleChangeRotationZ(-90)"
-            matTooltip="Rotate -90°" matTooltipPosition="above"
-            type="button">
-      <mat-icon aria-label="Rotate -90">undo</mat-icon>
-    </button>
-    <mat-form-field>
-      <input matInput min="0" max="360" [(ngModel)]="this.modelSettingsService.rotationZ" type="number" step="1" (input)="this.modelSettingsService.handleChangeRotationZ(0)">
-    </mat-form-field>
-    <button mat-icon-button (click)="this.modelSettingsService.handleChangeRotationZ(+90)"
-            matTooltip="Rotate 90°" matTooltipPosition="above"
-            type="button">
-      <mat-icon aria-label="Rotate 90°">redo</mat-icon>
-    </button>
-    </div>
+        <h5>Z</h5>
+        <button mat-icon-button (click)="modelSettingsService.handleChangeRotationZ(-90)"
+                matTooltip="Rotate -90°" matTooltipPosition="above"
+                type="button">
+          <mat-icon aria-label="Rotate -90">undo</mat-icon>
+        </button>
+        <mat-form-field>
+          <input matInput min="0" max="360" [(ngModel)]="modelSettingsService.rotationZ" type="number" step="1"
+                 (input)="modelSettingsService.handleChangeRotationZ(0)">
+        </mat-form-field>
+        <button mat-icon-button (click)="modelSettingsService.handleChangeRotationZ(+90)"
+                matTooltip="Rotate 90°" matTooltipPosition="above"
+                type="button">
+          <mat-icon aria-label="Rotate 90°">redo</mat-icon>
+        </button>
+      </div>
 
       Click on the image to select a new initial perspective:
       <img class="previewimage" src={{preview}} (click)="setInitialView()">
@@ -186,14 +195,14 @@
                   (input)="setAmbientlightIntensityDown($event)"></mat-slider>
       <br>
       <p>Pointlight</p>
-      <mat-slider min="0" max="1" step="0.1" value={{this.babylonService.pointlightIntensity}} #matslider
+      <mat-slider min="0" max="1" step="0.1" value={{babylonService.pointlightIntensity}} #matslider
                   (input)="setPointlightIntensity($event)"></mat-slider>
       <h5>Pointlight Dimensions: X Y Z</h5>
-      <mat-slider min="-10" max="10" step="1" value={{this.babylonService.pointlightPosX}} #matslider
+      <mat-slider min="-10" max="10" step="1" value={{babylonService.pointlightPosX}} #matslider
                   (input)="pointlightPosX($event)" vertical></mat-slider>
-      <mat-slider min="-10" max="10" step="1" value={{this.babylonService.pointlightPosY}} #matslider
+      <mat-slider min="-10" max="10" step="1" value={{babylonService.pointlightPosY}} #matslider
                   (input)="pointlightPosY($event)" vertical></mat-slider>
-      <mat-slider min="-10" max="10" step="1" value={{this.babylonService.pointlightPosZ}} #matslider
+      <mat-slider min="-10" max="10" step="1" value={{babylonService.pointlightPosZ}} #matslider
                   (input)="pointlightPosZ($event)" vertical></mat-slider>
 
     </mat-card-content>
