@@ -4,9 +4,12 @@ import {FormsModule} from '@angular/forms'; // <-- NgModel lives here
 import { HttpClientModule } from '@angular/common/http';
 import { DeviceDetectorModule } from 'ngx-device-detector';
 import { ColorChromeModule } from 'ngx-color/chrome';
-
-
-
+import {SocketIoModule, SocketIoConfig} from 'ngx-socket-io';
+import {environment} from '../environments/environment';
+const socketConfig: SocketIoConfig = {
+  url: `${environment.express_server_url}:${environment.express_server_port}`,
+  options: {}
+};
 
 import {AppComponent} from './app.component';
 import {SceneComponent} from './components/scene/scene.component';
@@ -83,7 +86,8 @@ import { PasswordComponent } from './components/password/password.component';
     MatRadioModule,
     MatSelectModule,
     MatDialogModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    SocketIoModule.forRoot(socketConfig)
   ],
   entryComponents: [
     LoginComponent,
