@@ -39,7 +39,7 @@
         </mat-checkbox>
         <div *ngIf="this.modelSettingsService.showWorldAxis">
           <h6>Size</h6>
-          <mat-slider min="0.1" max="30" step="0.1" value={{this.modelSettingsService.scalingFactorWorldAxis}}
+          <mat-slider min="0.1" max="8" step="0.1" value={{this.modelSettingsService.scalingFactorWorldAxis}}
                       #matslider
                       (input)="this.modelSettingsService.setScalingFactorWorldAxis($event)"></mat-slider>
         </div>
@@ -49,7 +49,7 @@
         </mat-checkbox>
         <div *ngIf="this.modelSettingsService.showLocalAxis">
           <h6>Size</h6>
-          <mat-slider min="0.1" max="30" step="0.1" value={{this.modelSettingsService.scalingFactorLocalAxis}}
+          <mat-slider min="0.1" max="8" step="0.1" value={{this.modelSettingsService.scalingFactorLocalAxis}}
                       #matslider
                       (input)="this.modelSettingsService.setScalingFactorLocalAxis($event)"></mat-slider>
         </div>
@@ -59,7 +59,7 @@
         </mat-checkbox>
         <div *ngIf="this.modelSettingsService.showGround">
           <h6>Size</h6>
-          <mat-slider min="0.1" max="30" step="0.1" value={{this.modelSettingsService.scalingFactorGround}} #matslider
+          <mat-slider min="0" max="10" step="1" value={{this.modelSettingsService.scalingFactorGround}} #matslider
                       (input)="this.modelSettingsService.setScalingFactorGround($event)"></mat-slider>
           <h6>Color</h6>
           <color-chrome (onChange)="this.modelSettingsService.handleChangeColorGround($event)"></color-chrome>
@@ -95,7 +95,7 @@
         </h6>
 
         <h6>Scale factor: {{this.modelSettingsService.scalingFactor}}</h6>
-        <mat-slider min="0.0" max="5" step="0.1" value={{this.modelSettingsService.scalingFactor}} #matslider
+        <mat-slider min="0.0" max="5" step="0.05" value={{this.modelSettingsService.scalingFactor}} #matslider
                     (input)="this.modelSettingsService.setScalingFactor($event)"></mat-slider>
 
 
