@@ -292,8 +292,8 @@ export class ModelsettingsComponent implements OnInit {
       this.ambientlightDownintensity = 1;
 
       // Only for DEV - uncomment the 2 following lines
-       await this.modelSettingsService.createVisualSettings();
-       this.initialSettingsMode = true;
+      // await this.modelSettingsService.createVisualSettings();
+      // this.initialSettingsMode = true;
       // End
 
       await this.backToDefault();
