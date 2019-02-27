@@ -49,7 +49,7 @@ export class ModelsettingsComponent implements OnInit {
               private message: MessageService,
               private annotationmarkerService: AnnotationmarkerService,
               private loadModelService: LoadModelService,
-              private modelSettingsService: ModelsettingsService
+              public modelSettingsService: ModelsettingsService
   ) {
   }
 
