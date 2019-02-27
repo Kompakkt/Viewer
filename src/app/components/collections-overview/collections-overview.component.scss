@@ -29,9 +29,9 @@
   height: 100%;
 }
 
-.mat-radio-button ~ .mat-radio-button {
-  padding: 25px;
-  margin-left: 16px;
+.mat-radio-button {
+  display: block;
+  margin-top: 5px;
 }
 
 .mat-form-field {
