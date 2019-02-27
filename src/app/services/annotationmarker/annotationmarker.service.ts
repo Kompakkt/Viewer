@@ -18,6 +18,7 @@ export class AnnotationmarkerService {
   public open_popup = '';
   private isOpen: BehaviorSubject<string> = new BehaviorSubject('');
 
+
   public toggleCreatorPopup(id: string) {
     this.open_popup = id;
     this.isOpen.next(this.open_popup);

@@ -12,12 +12,10 @@ export class AnnotationcardsComponent implements OnInit, AfterViewInit {
 
   public popup_is_open = '';
 
-  // @ViewChildren(AnnotationComponent) annotations : QueryList<AnnotationComponent>;
   @ViewChildren(AnnotationComponent)
   annotationsList: QueryList<AnnotationComponent>;
 
   constructor(public annotationService: AnnotationService, private annotationmarkerService: AnnotationmarkerService) {
-
   }
 
   ngOnInit() {
@@ -26,16 +24,12 @@ export class AnnotationcardsComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
 
     this.annotationsList.changes.subscribe(() => {
-
-      // 15/02/19
-      // setVisabile only for newly created annotation (double click on mesh)
+      // setVisabile for newly created annotation by double click on mesh
       this.setVisability(this.annotationmarkerService.open_popup, true);
-
-      this.annotationsList.forEach(function (value) {
-      })
     });
 
     this.annotationmarkerService.popupIsOpen().subscribe(
+      // setVisabile for newly on-clicked annotationmarkers
       popup_is_open => this.setVisability(popup_is_open, true)
     );
   }
@@ -43,17 +37,28 @@ export class AnnotationcardsComponent implements OnInit, AfterViewInit {
   public setVisability(id: string, visibility: boolean) {
     const found = this.annotationsList.find(annotation => annotation.id === id);
     if (found) {
-      this.hideAllCards();
-      found.visabilityAnnotationCard(visibility);
+      // 21/02/19
+      // save "found editMode" befor changing editMode of all Annotations
+      const foundID = found.id;
+      this.hideAllCards(foundID);
     }
   }
 
-  public hideAllCards() {
-    if (this.annotationsList != null) {
-      this.annotationsList.forEach(function (value) {
-        value.visabilityAnnotationCard(false);
-      });
-    }
+  // 22/02/19
+  public hideAllCards(foundID) {
+    this.annotationsList.forEach(function (value) {
+      if (value.id != foundID){
+        // Hide all not-clicked annotations and set to view-mode 
+        value.visabilityAnnotationCard(false);      
+        if (value.editMode){
+          value.toggleEditViewMode();
+        }
+      }
+      else{
+        // show clicked one
+        value.visabilityAnnotationCard(true);     
+      }
+    });
   }
 
 

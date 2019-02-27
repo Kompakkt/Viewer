@@ -29,7 +29,6 @@ export class AnnotationService {
   private modelName: string;
   private currentModel: any;
   private currentCompilation: any;
-  // private initialLoading: boolean;
   private actualModelMeshes: BABYLON.Mesh[];
   private isDefaultLoad: boolean;
 
@@ -41,7 +40,6 @@ export class AnnotationService {
               private mongo: MongohandlerService,
               private message: MessageService) {
 
-    // this.initialLoading = true;
     this.annotations = [];
     this.loadModelService.Observables.actualModel.subscribe(actualModel => {
       this.modelName = actualModel.name;
@@ -176,6 +174,8 @@ export class AnnotationService {
 
     // Fetch userData if not existing
     if (!this.loadModelService.currentUserData) await this.loadModelService.getUserData();
+    // 22/02/19
+    this.loadModelService.currentUserData = this.loadModelService.getUserData();
 
     // Inform user if userData still doesn't exist
     if (!this.loadModelService.currentUserData) {
@@ -268,7 +268,6 @@ export class AnnotationService {
       this.add(newAnnotation);
       this.annotationmarkerService.createAnnotationMarker(newAnnotation);
 
-      // 15/02/19
       // set created annotation as is_open in annotationmarker.service ((on double click) created annotation)
       this.annotationmarkerService.toggleCreatorPopup(newAnnotation._id);
     });
