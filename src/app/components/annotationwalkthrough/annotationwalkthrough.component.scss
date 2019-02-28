@@ -9,6 +9,7 @@
   color: #fff;
   text-align: center;
   z-index: 1;
+  padding: 5px;
 }
 
 :host a {
@@ -29,4 +30,6 @@
 #btn-next,
 #btn-previous {
   width: 30px;
+  height: 30px;
+  line-height: 30px;
 }
