@@ -206,7 +206,7 @@ export class LoadModelService {
   public async loadModel(newModel: Model, overrideUrl?: string) {
     const URL = (overrideUrl !== undefined) ? overrideUrl : this.baseUrl;
 
-    if (this.userOwnedModels.length === 0) {
+    if (this.userOwnedModels.length === 0 && !this.isDefaultLoad) {
       await this.getUserData();
     }
 
@@ -220,7 +220,7 @@ export class LoadModelService {
         // Zentriere auf das neu geladene Model, bevor die SettingsEinstellung übernommen wird
         this.cameraService.setActiveCameraTarget(model.meshes[0]._boundingInfo.boundingBox.centerWorld);
 
-        if (newModel._id) this.checkOwnerState(newModel._id);
+        if (newModel._id && !this.isDefaultLoad) { this.checkOwnerState(newModel._id); }
 
         if (!newModel.finished) {
           this.finished.emit(false);
