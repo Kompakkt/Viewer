@@ -82,6 +82,7 @@
                    [(ngModel)]="modelSettingsService.height" type="number" step="0.5"
                    (input)="modelSettingsService.handleChangeHeight()">
           </mat-form-field>
+          cm
         </h6>
 
         <h6>Width:
@@ -90,6 +91,7 @@
                    [(ngModel)]="modelSettingsService.width" type="number" step="0.5"
                    (input)="modelSettingsService.handleChangeWidth()">
           </mat-form-field>
+          cm
         </h6>
 
         <h6>Depth:
@@ -98,6 +100,7 @@
                    [(ngModel)]="modelSettingsService.depth" type="number" step="0.5"
                    (input)="modelSettingsService.handleChangeDepth()">
           </mat-form-field>
+          cm
         </h6>
 
         <h6>Scale factor: {{modelSettingsService.scalingFactor}}</h6>
@@ -117,6 +120,7 @@
           <input matInput min="0" max="360" [(ngModel)]="modelSettingsService.rotationX" type="number" step="1"
                  (input)="modelSettingsService.handleChangeRotationX(0)">
         </mat-form-field>
+        °
         <button mat-icon-button (click)="modelSettingsService.handleChangeRotationX(+90)"
                 matTooltip="Rotate 90°" matTooltipPosition="above"
                 type="button">
@@ -133,6 +137,7 @@
           <input matInput min="0" max="360" [(ngModel)]="modelSettingsService.rotationY" type="number" step="1"
                  (input)="modelSettingsService.handleChangeRotationY(0)">
         </mat-form-field>
+        °
         <button mat-icon-button (click)="modelSettingsService.handleChangeRotationY(+90)"
                 matTooltip="Rotate 90°" matTooltipPosition="above"
                 type="button">
@@ -149,6 +154,7 @@
           <input matInput min="0" max="360" [(ngModel)]="modelSettingsService.rotationZ" type="number" step="1"
                  (input)="modelSettingsService.handleChangeRotationZ(0)">
         </mat-form-field>
+        °
         <button mat-icon-button (click)="modelSettingsService.handleChangeRotationZ(+90)"
                 matTooltip="Rotate 90°" matTooltipPosition="above"
                 type="button">
