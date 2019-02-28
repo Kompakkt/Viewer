@@ -19,11 +19,9 @@
 
       <div *ngIf="!isSingleModel && isLoggedIn && !isSingleCollection">
 
-        Please choose to load collections or model:
-        <mat-radio-group (change)="onSelectionDataTypeChange($event)">
-          <mat-radio-button value="model">Load Model</mat-radio-button>
-          <mat-radio-button value="collection">Load Collection</mat-radio-button>
-        </mat-radio-group>
+        Please choose to
+        <button class="inline-button" mat-raised-button (click)="loadCollection()">load Collection</button> or
+        <button class="inline-button" mat-raised-button (click)="loadModel()">load Model</button>.
 
         <div *ngIf="collectionSelected">
 

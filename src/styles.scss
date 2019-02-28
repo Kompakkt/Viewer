@@ -141,3 +141,8 @@ html, body {
   font-weight: lighter;
   margin-bottom: 0 !important;
 }
+
+#editor .mat-raised-button:not([disabled]),
+#collections .mat-raised-button:not([disabled]) {
+  background-color: rgba(0, 176, 255, 0.3);
+}
