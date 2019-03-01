@@ -147,6 +147,10 @@ html, body {
   background-color: rgba(0, 176, 255, 0.3);
 }
 
+#editor .button-set-default {
+  width: 100%;
+}
+
 #collections .mat-raised-button:not([disabled]) .mat-icon {
   margin-right: 10px;
 }
