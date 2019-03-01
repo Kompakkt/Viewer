@@ -5,7 +5,7 @@ import {Model} from '../../interfaces/model/model.interface';
 import {LoadModelService} from '../../services/load-model/load-model.service';
 import {MessageService} from '../../services/message/message.service';
 import {MatDialog, MatDialogConfig} from '@angular/material';
-import {LoginComponent} from '../dialogues/dialog-login/login.component';
+import {LoginComponent} from '../dialogs/dialog-login/login.component';
 import {PasswordComponent} from '../password/password.component';
 
 

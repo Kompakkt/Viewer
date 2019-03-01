@@ -14,7 +14,7 @@ import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {AnnotationvrService} from '../../services/annotationvr/annotationvr.service';
 import {MessageService} from '../../services/message/message.service';
 import {LoadModelService} from '../../services/load-model/load-model.service';
-import {LoginComponent} from '../dialogues/dialog-login/login.component';
+import {LoginComponent} from '../dialogs/dialog-login/login.component';
 
 /**
  * @author Zoe Schubert

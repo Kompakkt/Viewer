@@ -40,7 +40,7 @@ import { CollectionsOverviewComponent } from './components/collections-overview/
 import { LoadingscreenComponent } from './components/loadingscreen/loadingscreen.component';
 import { MetadataComponent } from './components/metadata/metadata.component';
 import { ModelsettingsComponent } from './components/modelsettings/modelsettings.component';
-import { LoginComponent } from './components/dialogues/dialog-login/login.component';
+import { LoginComponent } from './components/dialogs/dialog-login/login.component';
 import { PasswordComponent } from './components/password/password.component';
 
 @NgModule({
