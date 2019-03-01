@@ -1,8 +1,8 @@
 import {Component, OnInit} from '@angular/core';
-import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
-import {CatalogueService} from '../../services/catalogue/catalogue.service';
-import {MessageService} from '../../services/message/message.service';
-import {OverlayService} from '../../services/overlay/overlay.service';
+import {MongohandlerService} from '../../../services/mongohandler/mongohandler.service';
+import {CatalogueService} from '../../../services/catalogue/catalogue.service';
+import {MessageService} from '../../../services/message/message.service';
+import {OverlayService} from '../../../services/overlay/overlay.service';
 
 @Component({
   selector: 'app-login',
