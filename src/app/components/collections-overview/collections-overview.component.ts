@@ -20,8 +20,8 @@ export class CollectionsOverviewComponent implements AfterViewInit {
   public isSingleModel: boolean;
   public isSingleCollection: boolean;
 
-  private collectionSelected: boolean;
-  private modelSelected: boolean;
+  public collectionSelected: boolean;
+  public modelSelected: boolean;
 
   private singleCollectionSelected: boolean;
   private singleModelSelected: boolean;
