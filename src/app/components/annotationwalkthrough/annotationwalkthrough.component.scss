@@ -1,4 +1,4 @@
-:host {
+#annotationwalkthrough {
   position: absolute;
   bottom: 5px;
   left: 50%;
@@ -12,12 +12,12 @@
   padding: 5px;
 }
 
-:host a {
+#annotationwalkthrough a {
   text-decoration: none;
   color: #fff;
 }
 
-#walktertitle {
+#annotationwalkthrough #walktertitle {
   display: inline-block;
   text-overflow: ellipsis;
   text-transform: uppercase;
@@ -27,8 +27,8 @@
   width: 230px;
 }
 
-#btn-next,
-#btn-previous {
+#annotationwalkthrough #btn-next,
+#annotationwalkthrough #btn-previous {
   width: 30px;
   height: 30px;
   line-height: 30px;
