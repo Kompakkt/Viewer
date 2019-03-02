@@ -11,11 +11,11 @@
   <mat-card>
     <mat-card-content>
 
-      <button class="button-set-default"
+      <button class="fullwidth-button"
               mat-raised-button
               (click)="backToDefault()">Back to Default
       </button>
-      <button class="button-set-default"
+      <button class="fullwidth-button"
               mat-raised-button
               *ngIf="!isDefault && isModelOwner"
               (click)="saveActualSettings()">Save as default
@@ -218,11 +218,11 @@
 
   <mat-card>
     <mat-card-content>
-      <button class="button-set-default"
+      <button class="fullwidth-button"
               mat-raised-button
               (click)="backToDefault()">Back to Default
       </button>
-      <button class="button-set-default"
+      <button class="fullwidth-button"
               mat-raised-button
               *ngIf="!isDefault && isModelOwner"
               (click)="saveActualSettings()">Save as default
