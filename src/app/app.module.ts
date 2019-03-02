@@ -42,6 +42,7 @@ import { MetadataComponent } from './components/metadata/metadata.component';
 import { ModelsettingsComponent } from './components/modelsettings/modelsettings.component';
 import { LoginComponent } from './components/dialogs/dialog-login/login.component';
 import { PasswordComponent } from './components/password/password.component';
+import { DialogDeleteAnnotationsComponent } from './components/dialogs/dialog-delete-annotations/dialog-delete-annotations.component';
 
 @NgModule({
   declarations: [
@@ -59,7 +60,8 @@ import { PasswordComponent } from './components/password/password.component';
     MetadataComponent,
     ModelsettingsComponent,
     LoginComponent,
-    PasswordComponent
+    PasswordComponent,
+    DialogDeleteAnnotationsComponent
   ],
   imports: [
     BrowserModule,
@@ -91,7 +93,8 @@ import { PasswordComponent } from './components/password/password.component';
   ],
   entryComponents: [
     LoginComponent,
-    PasswordComponent
+    PasswordComponent,
+    DialogDeleteAnnotationsComponent
   ],
   providers: [],
   bootstrap: [AppComponent]

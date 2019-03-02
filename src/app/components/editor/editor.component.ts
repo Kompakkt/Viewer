@@ -6,6 +6,8 @@ import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
 import {saveAs} from 'file-saver';
 
 import {environment} from '../../../environments/environment.prod';
+import {MatDialog} from '@angular/material';
+import {DialogDeleteAnnotationsComponent} from '../dialogs/dialog-delete-annotations/dialog-delete-annotations.component';
 
 @Component({
   selector: 'app-editor',
@@ -20,7 +22,8 @@ export class EditorComponent implements OnInit {
   public version: string = environment.version;
 
   constructor(private overlayService: OverlayService,
-              public annotationService: AnnotationService) {
+              public annotationService: AnnotationService,
+              public dialog: MatDialog) {
   }
 
   ngOnInit() {
@@ -38,8 +41,8 @@ export class EditorComponent implements OnInit {
   }
 
   public exportAnnotations() {
-      saveAs(new Blob([this.annotationService.exportAnnotations()],
-        {type: 'text/plain;charset=utf-8'}), 'annotations.json');
+    saveAs(new Blob([this.annotationService.exportAnnotations()],
+      {type: 'text/plain;charset=utf-8'}), 'annotations.json');
   }
 
   public importAnnotations(files: FileList): void {
@@ -63,7 +66,15 @@ export class EditorComponent implements OnInit {
   }
 
   public deleteAnnotations() {
-    this.annotationService.deleteAllAnnotations();
+
+    const dialogRef = this.dialog.open(DialogDeleteAnnotationsComponent);
+
+    dialogRef.afterClosed().subscribe(deleteAll => {
+
+      if (deleteAll) {
+        this.annotationService.deleteAllAnnotations();
+      }
+    });
   }
 
 }
