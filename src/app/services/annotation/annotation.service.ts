@@ -11,6 +11,8 @@ import PouchDB from 'pouchdb';
 import * as BABYLON from 'babylonjs';
 import {LoadModelService} from '../load-model/load-model.service';
 import {environment} from '../../../environments/environment';
+import { SocketService } from '../socket/socket.service';
+
 
 /**
  * @author Zoe Schubert
@@ -21,9 +23,40 @@ import {environment} from '../../../environments/environment';
   providedIn: 'root'
 })
 
+
+// FALL:
+
+// DEFAULT ANNOTATIONEN NUR VON MODEL_OWNER
+      // NUR IM MODEL_VIEW nicht im COLLECTION_VIEW
+// 
+// 
+// ANNOTATIONS KATALOG
+
+    
+
 export class AnnotationService {
 
+  // Alle Annotationen der Collaborators im SocketRoom
+  public collaboratorsAnnotations: Annotation[];
+  // Über Socket empfangen
+  // Filter über Benutzer-ID
+        // Farbe(n)
+        // Aus-/Einblenden
+  // Senden 
+        // 1. Alle (checken bzw. unvermeidbar)
+        // danach nur manipulierte (bearbeiten/löschen/erstellen)
+
+
+  // HTML ELEMENTE  -- FÜR SOCKET.IO
+  
+
   public annotations: Annotation[];
+  // Eigene Annotationen an Socket Senden
+      // Senden
+          // 1. Alle (checken bzw. unvermeidbar)
+          // Danach nur manipulierte (bearbeiten/löschen/erstellen)
+
+
   private unsortedAnnotations: Annotation[];
   private allAnnotations: Annotation[];
   private modelName: string;
@@ -38,7 +71,61 @@ export class AnnotationService {
               private annotationmarkerService: AnnotationmarkerService,
               private loadModelService: LoadModelService,
               private mongo: MongohandlerService,
-              private message: MessageService) {
+              private message: MessageService,
+              private socketService: SocketService
+              ) 
+  {
+
+    // EVENTS 
+    
+    // EVENT SENDEN
+                // Beispiel:
+                // this.socketService.socket.emit('message', 'Hellooo!');
+                // this.socketService.socket.emit(eventName, data);
+
+      // -- PouchDB Manipulation
+                // - Annotation erstellen (und aufs Auge klicken)
+                // - Annotation bearbeiten (und aufs Auge klicken)
+                // - Ranking der Annotation ändern
+                // - Löschen der Annotation
+
+      // -- Verbinden (Raum)
+
+      // -- Verbindung trennen (Raum)
+
+      // -- Wählen eines anderen Modells/Collection
+                // -  Verbindung trennen (alter Raum) --> Verbinden (neuer Raum)
+    
+    // EVENT EMPFANGEN
+                // Beispiel:
+                // push get to 'collaboratorsAnnotations'
+                // this.socketService.socket.fromEvent('message').subscribe(result => console.log(result));
+                // this.socketService.socket.fromEvent('eventName').subscribe(data);
+                // -- Wenn eine Person eine Annotation erstellt
+      // -- Wenn eine Person eine Annotation bearbeitet
+      // -- Wenn eine Person eine Annotaiton löscht
+      // -- Wenn eine Person das Ranking bearbeitet
+      // -- Wenn eine Person die Verbindung verliert
+      // -- Wenn eine neue Person dazu kommt
+    
+    // EVENT NAMEN
+      // -- createAnnotation
+      // -- editAnnotation
+      // -- deleteAnnotation
+      // -- changeRanking
+      // -- newUser
+      // -- lostConnection
+      // -- onlineCollaborators
+      // -- changeRoom
+
+    
+      this.socketService.socket.emit('message', 'Hellooo!');  
+      
+      // this.loadModelService.currentUserData = this.loadModelService.getUserData();
+    // this.socketService.socket.emit('changeRoom', this.loadModelService.currentUserData.fullname);
+    // this.socketService.socket.fromEvent('changeRoom').subscribe(result => console.log(result));
+                 
+    
 
     this.annotations = [];
     this.loadModelService.Observables.actualModel.subscribe(actualModel => {
