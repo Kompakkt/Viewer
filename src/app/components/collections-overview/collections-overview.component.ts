@@ -78,16 +78,17 @@ export class CollectionsOverviewComponent implements AfterViewInit {
     this._changeDetectionRef.detectChanges();
   }
 
-  onSelectionDataTypeChange(event) {
-    if (event.value === 'model') {
-      this.collectionSelected = false;
-      this.singleCollectionSelected = false;
-      this.modelSelected = true;
-    }
-    if (event.value === 'collection') {
-      this.modelSelected = false;
-      this.collectionSelected = true;
-    }
+  private loadCollection(): void {
+
+    this.modelSelected = false;
+    this.collectionSelected = true;
+  }
+
+  private loadModel(): void {
+
+    this.collectionSelected = false;
+    this.singleCollectionSelected = false;
+    this.modelSelected = true;
   }
 
   handleCollectionChoice(event) {

@@ -52,7 +52,7 @@ export class CatalogueService {
             this.isLoggedIn = false;
             this.loggedIn.emit(false);          }
         }).catch(error => {
-          this.message.error('Can not see if you are logged in.');
+          this.message.error('Models and Collections are only available in the Cologne University Network for logged in Users.');
         });
 
       }

@@ -4,10 +4,11 @@
   left: 50%;
   width: 300px;
   margin-left: -150px;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.7);
   border-radius: 5px;
   color: #fff;
   text-align: center;
+  z-index: 1;
 }
 
 :host a {
