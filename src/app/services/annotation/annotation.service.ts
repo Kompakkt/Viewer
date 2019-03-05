@@ -63,7 +63,7 @@ export class AnnotationService {
               private loadModelService: LoadModelService,
               private mongo: MongohandlerService,
               private message: MessageService,
-              private socketService: SocketService) 
+              public socketService: SocketService) 
   {
 
     // 1.
@@ -100,7 +100,8 @@ export class AnnotationService {
                     // 1.1.5
                     // -- Verbinden (Raum)
                                           // this.socketService.socket.emit(eventName, data);
-                                          // emit "newUser"
+                                          // emit "changeRoom"
+                                          // emit "newUser" (für andere)
                     // 1.1.6
                     // -- Verbindung trennen (Raum)
                                           // this.socketService.socket.emit(eventName, data);
@@ -223,11 +224,10 @@ export class AnnotationService {
                               // get "fromEvent('onlineCollaborators').subscribe(data)"
 
                               // NACH RAUM BEITRITT UND ERSTELLEN DER COLLABORATORS_ANNOTATIONS
-                              // CREATE ANNOTATIONMARKERS FÜR ELEMENTE DER COLLABORATORS   ===> UM EINZELNE BENUTZER-ID ERWEITERN FÜR FARBE
+                              // CREATE ANNOTATIONMARKERS FÜR ELEMENTE DER COLLABORATORS   ===> UM EINZELNE BENUTZER-ID ERWEITERN FÜR FARBE (BENUTZER-FARBEN ???)
                               // for (const annotation of this.collaboratorsAnnotations) {
                               //   this.annotationmarkerService.createAnnotationMarker(annotation);
                               // }
-                              // ANDERE FARBE ???
     });
     this.socketService.socket.fromEvent('changeRoom').subscribe(result => { 
       console.log(result);
@@ -240,6 +240,32 @@ export class AnnotationService {
   }
 
 
+  public async loginSocket(){
+    // 1.1.5
+    // -- Verbinden (Raum)
+                          // this.socketService.socket.emit(eventName, data);
+                          // emit "changeRoom"
+                          // emit "newUser"
+                          // emit "onlineCollaborators"
+                          this.socketService.socket.emit('message', 'Socket Room ' + this.currentModel + this.currentCompilation + ' beitgetreten!');
+    
+    // EINTRITT ÜBER HTML-ELEMENT                        
+  }
+
+
+  // ---------- VERBINDUNGSABBRUNCH PRÜFEN ---------- GIBTS SCHON!
+  // 1.1.6
+  // -- Verbindung trennen (Raum)
+                        // this.socketService.socket.emit(eventName, data);
+                        // emit "lostConnection"
+
+
+
+  // ---------- MODEL-WECHSEL PRÜFEN ---------- GIBTS SCHON!
+  // 1.2.7
+  // -- Wenn eine Person den Raum verlässt
+                          // get "fromEvent('changeRoom').subscribe(data)"
+                          // delete "data" (Person-Annotations) from 'collaboratorsAnnotations'
 
 
   public async loadAnnotations() {
@@ -440,6 +466,7 @@ export class AnnotationService {
                   // emit "createAnnotation"
     // if (inSocket){
     //   this.socketService.socket.emit("createAnnotation", annotation);
+    this.socketService.socket.emit('message', 'Annotation erstellen!');
     // }
   }
 
@@ -506,6 +533,7 @@ export class AnnotationService {
     // - Löschen der Annotation
             // this.socketService.socket.emit(eventName, data);
             // emit "deleteAnnotation"
+            this.socketService.socket.emit('message', 'Annotation löschen!');
   }
 
 
@@ -525,6 +553,8 @@ export class AnnotationService {
             // this.socketService.socket.emit(eventName, data);
             // emit "changeRanking"
         // changedRankingPositions() mit collaboratorsAnnotations ?
+        this.socketService.socket.emit('message', 'Ranking bearbeiten!');
+        
   }
 
 
