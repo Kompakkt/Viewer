@@ -30,8 +30,6 @@ export class AnnotationComponent implements OnInit {
               private babylonService: BabylonService,
               private annotationmarkerService: AnnotationmarkerService
               ) {
-    // 15/02/19
-    // CLOSED ANNOTATION-CARDS ON LOADED-MODEL
     this.visibility = false;
   }
 
@@ -40,8 +38,6 @@ export class AnnotationComponent implements OnInit {
     if (this.annotation) {
       this.id = this.annotation._id;
 
-      // 15/02/19
-      // EditMode on newly creaded annotation (double click)
       if (this.annotationmarkerService.open_popup === this.annotation._id) {
         this.visibility = true;
         this.editMode = true;
@@ -133,6 +129,11 @@ export class AnnotationComponent implements OnInit {
 
   private save(): void {
     this.dataService.updateAnnotation(this.annotation);
+    // 1.1.2
+    // - Annotation bearbeiten (und aufs Auge klicken)
+            // this.socketService.socket.emit(eventName, data);
+            // emit "editAnnotation"
+            this.annotationService.socketService.socket.emit('message', 'Annotation bearbeiten!');
   }
 
   public onSumbit(event) {

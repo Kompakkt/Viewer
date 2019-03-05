@@ -203,15 +203,12 @@ export class AnnotationvrService {
     if (this.annotationService.annotations.length) {
       // FOR VR-HUD
       
-      // 11/02/19
       this.text1.text = this.annotationService.annotations[index].body.content.title;
-      // this.text1.text = this.annotationService.annotations[index].title;
 
       let cameraVector;
       let i = 1;
       this.babylonService.getScene().getMeshesByTags('plane', mesh => {
 
-        // DEBUG
         if (Math.abs(i % 2) != 1){
           i++;
         }
@@ -221,7 +218,6 @@ export class AnnotationvrService {
           const annoID = this.annotationService.annotations[index]["_id"] + "_pick";
 
           if (annoID === mesh.name){
-
             // console.log("Active-Camera - Before Animation");
             // console.log(this.babylonService.getActiveCamera().position);
             cameraVector = mesh.position;

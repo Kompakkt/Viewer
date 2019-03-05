@@ -7,7 +7,7 @@ import { Socket } from 'ngx-socket-io';
 export class SocketService {
 
   constructor(public socket: Socket) {
-    this.socket.emit('message', 'Hello!');
-    this.socket.fromEvent('message').subscribe(result => console.log(result));
+
+    // this.socket.fromEvent('message').subscribe(result => console.log(result));
   }
 }

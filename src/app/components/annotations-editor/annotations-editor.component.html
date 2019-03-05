@@ -2,12 +2,12 @@
   <form class="annotation-form" (ngSubmit)="onSubmit($event)">
 
 
-    <mat-card-header (click)="!editMode ? collapsed = !collapsed : false">
+
+    <mat-card-header (click)="!editMode ? collapsed = !collapsed : false" (click)="changeOpenPopup()">
 
       <div mat-card-avatar class="annotation-header-image"><span>{{annotation.ranking}}</span></div>
 
       <mat-card-title>
-        <!-- 11/02/19 -->
         <span *ngIf="!editMode">{{annotation.body.content.title | uppercase}}</span>
         <mat-form-field *ngIf="editMode">
           <input matInput name="title" #title="ngModel" type="text" placeholder="Title" [(ngModel)]="annotation.body.content.title">
@@ -19,16 +19,15 @@
 
     </mat-card-header>
 
+
+
     <img mat-card-image src={{preview}} *ngIf="!collapsed">
 
     <mat-card-content *ngIf="!collapsed">
 
-      <!-- 11/02/19 -->
       <p *ngIf="!editMode"> {{annotation.body.content.description}}</p>
-      <!-- <p *ngIf="!editMode"> {{annotation.description}}</p> -->
 
       <mat-form-field *ngIf="editMode" class="description">
-        <!-- 11/02/19 -->
         <textarea matInput name="description" #description="ngModel" type="text" placeholder="Description"
                   [(ngModel)]="annotation.body.content.description"></textarea>
       </mat-form-field>
