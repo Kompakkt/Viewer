@@ -6,6 +6,8 @@ import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
 
 import {saveAs} from 'file-saver';
 import {environment} from '../../../environments/environment.prod';
+import {MatDialog} from '@angular/material';
+import {DialogDeleteAnnotationsComponent} from '../dialogs/dialog-delete-annotations/dialog-delete-annotations.component';
 
 import {AnnotationsEditorComponent} from '../annotations-editor/annotations-editor.component';
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
@@ -28,7 +30,8 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
   constructor(private overlayService: OverlayService,
               public annotationService: AnnotationService,
-              private annotationmarkerService: AnnotationmarkerService) {
+              private annotationmarkerService: AnnotationmarkerService,
+              public dialog: MatDialog) {
   }
 
   ngOnInit() {
@@ -40,7 +43,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    
+
     // setVisabile for newly created annotation by double click on mesh
     this.annotationsList.changes.subscribe(() => {
       this.setVisability(this.annotationmarkerService.open_popup);
@@ -75,8 +78,8 @@ export class EditorComponent implements OnInit, AfterViewInit {
   }
 
   public exportAnnotations() {
-      saveAs(new Blob([this.annotationService.exportAnnotations()],
-        {type: 'text/plain;charset=utf-8'}), 'annotations.json');
+    saveAs(new Blob([this.annotationService.exportAnnotations()],
+      {type: 'text/plain;charset=utf-8'}), 'annotations.json');
   }
 
   public importAnnotations(files: FileList): void {
@@ -100,7 +103,15 @@ export class EditorComponent implements OnInit, AfterViewInit {
   }
 
   public deleteAnnotations() {
-    this.annotationService.deleteAllAnnotations();
+
+    const dialogRef = this.dialog.open(DialogDeleteAnnotationsComponent);
+
+    dialogRef.afterClosed().subscribe(deleteAll => {
+
+      if (deleteAll) {
+        this.annotationService.deleteAllAnnotations();
+      }
+    });
   }
 
 }

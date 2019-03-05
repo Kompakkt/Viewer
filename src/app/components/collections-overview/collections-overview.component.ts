@@ -5,7 +5,7 @@ import {Model} from '../../interfaces/model/model.interface';
 import {LoadModelService} from '../../services/load-model/load-model.service';
 import {MessageService} from '../../services/message/message.service';
 import {MatDialog, MatDialogConfig} from '@angular/material';
-import {LoginComponent} from '../login/login.component';
+import {LoginComponent} from '../dialogs/dialog-login/login.component';
 import {PasswordComponent} from '../password/password.component';
 
 
@@ -20,8 +20,8 @@ export class CollectionsOverviewComponent implements AfterViewInit {
   public isSingleModel: boolean;
   public isSingleCollection: boolean;
 
-  private collectionSelected: boolean;
-  private modelSelected: boolean;
+  public collectionSelected: boolean;
+  public modelSelected: boolean;
 
   private singleCollectionSelected: boolean;
   private singleModelSelected: boolean;
