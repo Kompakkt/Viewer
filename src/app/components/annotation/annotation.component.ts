@@ -132,8 +132,7 @@ export class AnnotationComponent implements OnInit {
   }
 
   private save(): void {
-    this.dataService.updateAnnotation(this.annotation._id,
-      this.annotation.body.content.title, this.annotation.body.content.description);
+    this.dataService.updateAnnotation(this.annotation);
   }
 
   public onSumbit(event) {

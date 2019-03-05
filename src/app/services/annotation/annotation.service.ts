@@ -7,7 +7,6 @@ import {MessageService} from '../message/message.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
 import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
 import {ActionManager} from 'babylonjs';
-import PouchDB from 'pouchdb';
 import * as BABYLON from 'babylonjs';
 import {LoadModelService} from '../load-model/load-model.service';
 import {environment} from '../../../environments/environment';
@@ -276,7 +275,7 @@ export class AnnotationService {
   // 11/02/19
   // Annotation in der Datenbank speichern, nicht zur lokalen PouchDB...
   private add(annotation): void {
-    this.dataService.database.put(annotation);
+    this.dataService.putAnnotation(annotation);
     this.annotations.push(annotation);
     this.allAnnotations.push(annotation);
   }
@@ -294,9 +293,7 @@ export class AnnotationService {
     this.annotations.length = 0;
     this.allAnnotations.length = 0;
 
-    this.dataService.database.destroy().then(() => {
-      this.dataService.database = new PouchDB('annotationdb');
-    });
+    this.dataService.cleanAndRenewDatabase();
   }
 
   public async importAnnotations(annotationsFile) {
@@ -312,7 +309,7 @@ export class AnnotationService {
       this.annotationmarkerService.createAnnotationMarker(annotation);
     }
 
-    this.dataService.database.bulkDocs(this.unsortedAnnotations);
+    this.dataService.pouchdb.bulkDocs(this.unsortedAnnotations);
     await this.sortAnnotations();
   }
 
@@ -340,7 +337,7 @@ export class AnnotationService {
 
   public deleteAnnotation(annotation: Annotation) {
     this.annotationmarkerService.deleteMarker(annotation._id);
-    this.dataService.delete(annotation._id);
+    this.dataService.deleteAnnotation(annotation._id);
     const index: number = this.annotations.indexOf(annotation);
 
     if (index !== -1) {

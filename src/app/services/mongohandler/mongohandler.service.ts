@@ -99,6 +99,10 @@ export class MongohandlerService {
     return this.post(`api/v1/post/settings/${identifier}`, settings);
   }
 
+  public updateAnnotation(annotation: any): Observable<any> {
+    return this.post(`api/v1/post/push/annotation`, annotation);
+  }
+
   // Auth
   public login(username: string, password: string): Observable<any> {
     return this.post(`login`, { username: username, password: password });

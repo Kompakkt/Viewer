@@ -31,16 +31,16 @@ export class AnnotationsEditorComponent implements OnInit {
   ngOnInit() {
 
     if (this.annotation) {
-      
-      this.preview = this.annotation.body.content.relatedPerspective.preview;      
-      
+
+      this.preview = this.annotation.body.content.relatedPerspective.preview;
+
       // // EditMode -- OnInit -- newly creaded annotation (by double click)
       // if (this.annotationmarkerService.open_popup === this.annotation._id) {
       //   // 21/02/19
       //   this.collapsed = false;
       //   this.editMode = true;
       //   this.labelMode = 'remove_red_eye';
-      //   this.labelModeText = 'view'; 
+      //   this.labelModeText = 'view';
       // }
     }
   }
@@ -56,11 +56,11 @@ export class AnnotationsEditorComponent implements OnInit {
   }
 
   public async selectPerspective() {
-    
+
     this.annotation.body.content.relatedPerspective.vector = this.cameraService.getActualCameraPosAnnotation();
-    
+
     await this.babylonService.createPreviewScreenshot(400).then(detailScreenshot => {
-    
+
       this.preview = detailScreenshot;
     });
   }
@@ -84,9 +84,7 @@ export class AnnotationsEditorComponent implements OnInit {
   }
 
   private save(): void {
-    this.dataService.updateAnnotation(this.annotation._id, this.annotation.body.content.title,
-      this.annotation.body.content.description, this.preview,
-      this.annotation.body.content.relatedPerspective.vector, this.annotation.validated);
+    this.dataService.updateAnnotation(this.annotation);
   }
 
   public onSubmit(event) {
@@ -109,5 +107,3 @@ export class AnnotationsEditorComponent implements OnInit {
     }
   }
 }
-
-
