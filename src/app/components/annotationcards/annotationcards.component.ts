@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, Input, OnInit, QueryList, ViewChildren} from '@angular/core';
 import {AnnotationService} from '../../services/annotation/annotation.service';
-import {AnnotationComponent} from '../annotation/annotation.component';
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
+import {AnnotationComponent} from '../annotation/annotation.component';
 
 @Component({
   selector: 'app-annotationcards',
@@ -23,28 +23,28 @@ export class AnnotationcardsComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
 
+    // setVisabile for newly created annotation by double click on mesh
     this.annotationsList.changes.subscribe(() => {
-      // setVisabile for newly created annotation by double click on mesh
-      this.setVisability(this.annotationmarkerService.open_popup, true);
+      this.setVisability(this.annotationmarkerService.open_popup);
+
+      
     });
 
+    // setVisabile for freshly clicked annotationmarkers
     this.annotationmarkerService.popupIsOpen().subscribe(
-      // setVisabile for newly on-clicked annotationmarkers
-      popup_is_open => this.setVisability(popup_is_open, true)
+      popup_is_open => this.setVisability(popup_is_open)
     );
   }
 
-  public setVisability(id: string, visibility: boolean) {
+  public setVisability(id: string) {
     const found = this.annotationsList.find(annotation => annotation.id === id);
     if (found) {
-      // 21/02/19
       // save "found editMode" befor changing editMode of all Annotations
       const foundID = found.id;
       this.hideAllCards(foundID);
     }
   }
 
-  // 22/02/19
   public hideAllCards(foundID) {
     this.annotationsList.forEach(function (value) {
       if (value.id != foundID){

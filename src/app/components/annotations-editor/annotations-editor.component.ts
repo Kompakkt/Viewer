@@ -16,11 +16,13 @@ export class AnnotationsEditorComponent implements OnInit {
 
   @Input() annotation: Annotation;
 
-  public collapsed = true;
-  public editMode = false;
-  public labelMode = 'edit';
-  public labelModeText = 'edit';
+  public collapsed = false;
+  public editMode = true;
+  public labelMode = 'remove_red_eye';
+  public labelModeText = 'view';
   public preview = '';
+
+  public id = '';
 
   constructor(private dataService: DataService, private annotationService: AnnotationService,
               private babylonService: BabylonService, private cameraService: CameraService,
@@ -31,19 +33,23 @@ export class AnnotationsEditorComponent implements OnInit {
   ngOnInit() {
 
     if (this.annotation) {
-      
+
+      this.id = this.annotation._id;
       this.preview = this.annotation.body.content.relatedPerspective.preview;      
-      
-      // // EditMode -- OnInit -- newly creaded annotation (by double click)
-      // if (this.annotationmarkerService.open_popup === this.annotation._id) {
-      //   // 21/02/19
-      //   this.collapsed = false;
-      //   this.editMode = true;
-      //   this.labelMode = 'remove_red_eye';
-      //   this.labelModeText = 'view'; 
-      // }
     }
   }
+
+  public toViewMode() {
+    this.editMode = false;
+    this.labelMode = 'edit';
+    this.labelModeText = 'edit';
+    this.collapsed = true;
+  }
+
+  public changeOpenPopup() {
+    this.annotationmarkerService.toggleCreatorPopup(this.id);
+  }
+
 
   public getValidation(validated) {
     if (validated) {
@@ -87,6 +93,11 @@ export class AnnotationsEditorComponent implements OnInit {
     this.dataService.updateAnnotation(this.annotation._id, this.annotation.body.content.title,
       this.annotation.body.content.description, this.preview,
       this.annotation.body.content.relatedPerspective.vector, this.annotation.validated);
+
+    // 1.1.2
+    // - Annotation bearbeiten (und aufs Auge klicken)
+            // this.socketService.socket.emit(eventName, data);
+            // emit "editAnnotation"
   }
 
   public onSubmit(event) {

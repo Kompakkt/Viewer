@@ -13,7 +13,6 @@ import {LoadModelService} from '../load-model/load-model.service';
 import {environment} from '../../../environments/environment';
 import { SocketService } from '../socket/socket.service';
 
-
 /**
  * @author Zoe Schubert
  * @author Jan G. Wieners
@@ -23,40 +22,32 @@ import { SocketService } from '../socket/socket.service';
   providedIn: 'root'
 })
 
+// 2.
+// SOCKET.IO
+// -----------------------------------------------------------------------------------------------------------------------
+// HTML ELEMENTE 
+              // -- LOGIN // AUSTRITT  (BUTTON)
+              // -- FILTER (BEI LOGGED-IN)
+                      // USER-LISTE 
+                                // USER-X (Aus-/Einblenden)
 
-// FALL:
 
-// DEFAULT ANNOTATIONEN NUR VON MODEL_OWNER
-      // NUR IM MODEL_VIEW nicht im COLLECTION_VIEW
-// 
-// 
-// ANNOTATIONS KATALOG
+// 3.
+// -----------------------------------------------------------------------------------------------------------------------
+// BABYLON ELEMENTE  
+              // --  "public collaboratorsAnnotations: Annotation[];"
+                      // -- MARKER-FARBEN 
+                              // (NACH USER-ID)
 
     
 
 export class AnnotationService {
 
-  // Alle Annotationen der Collaborators im SocketRoom
+  // SOCKET_VARIABLES
+  // SOCKET-ANNOTATIONS_OF_COLLABORATORS
   public collaboratorsAnnotations: Annotation[];
-  // Über Socket empfangen
-  // Filter über Benutzer-ID
-        // Farbe(n)
-        // Aus-/Einblenden
-  // Senden 
-        // 1. Alle (checken bzw. unvermeidbar)
-        // danach nur manipulierte (bearbeiten/löschen/erstellen)
-
-
-  // HTML ELEMENTE  -- FÜR SOCKET.IO
   
-
   public annotations: Annotation[];
-  // Eigene Annotationen an Socket Senden
-      // Senden
-          // 1. Alle (checken bzw. unvermeidbar)
-          // Danach nur manipulierte (bearbeiten/löschen/erstellen)
-
-
   private unsortedAnnotations: Annotation[];
   private allAnnotations: Annotation[];
   private modelName: string;
@@ -72,43 +63,13 @@ export class AnnotationService {
               private loadModelService: LoadModelService,
               private mongo: MongohandlerService,
               private message: MessageService,
-              private socketService: SocketService
-              ) 
+              private socketService: SocketService) 
   {
 
+    // 1.
     // EVENTS 
     
-    // EVENT SENDEN
-                // Beispiel:
-                // this.socketService.socket.emit('message', 'Hellooo!');
-                // this.socketService.socket.emit(eventName, data);
-
-      // -- PouchDB Manipulation
-                // - Annotation erstellen (und aufs Auge klicken)
-                // - Annotation bearbeiten (und aufs Auge klicken)
-                // - Ranking der Annotation ändern
-                // - Löschen der Annotation
-
-      // -- Verbinden (Raum)
-
-      // -- Verbindung trennen (Raum)
-
-      // -- Wählen eines anderen Modells/Collection
-                // -  Verbindung trennen (alter Raum) --> Verbinden (neuer Raum)
-    
-    // EVENT EMPFANGEN
-                // Beispiel:
-                // push get to 'collaboratorsAnnotations'
-                // this.socketService.socket.fromEvent('message').subscribe(result => console.log(result));
-                // this.socketService.socket.fromEvent('eventName').subscribe(data);
-                // -- Wenn eine Person eine Annotation erstellt
-      // -- Wenn eine Person eine Annotation bearbeitet
-      // -- Wenn eine Person eine Annotaiton löscht
-      // -- Wenn eine Person das Ranking bearbeitet
-      // -- Wenn eine Person die Verbindung verliert
-      // -- Wenn eine neue Person dazu kommt
-    
-    // EVENT NAMEN
+    // (EVENT-NAMEN)
       // -- createAnnotation
       // -- editAnnotation
       // -- deleteAnnotation
@@ -117,16 +78,80 @@ export class AnnotationService {
       // -- lostConnection
       // -- onlineCollaborators
       // -- changeRoom
-
     
-      this.socketService.socket.emit('message', 'Hellooo!');  
-      
-      // this.loadModelService.currentUserData = this.loadModelService.getUserData();
-    // this.socketService.socket.emit('changeRoom', this.loadModelService.currentUserData.fullname);
-    // this.socketService.socket.fromEvent('changeRoom').subscribe(result => console.log(result));
-                 
-    
+    // 1.1  
+    // EVENT SENDEN                                                                                     // this.socketService.socket.emit(eventName, data);
+                    // 1.1.1
+                    // - Annotation erstellen (und aufs Auge klicken)
+                                          // this.socketService.socket.emit(eventName, data);
+                                          // emit "createAnnotation"
+                    // 1.1.2
+                    // - Annotation bearbeiten (und aufs Auge klicken)
+                                          // this.socketService.socket.emit(eventName, data);
+                                          // emit "editAnnotation"
+                    // 1.1.3
+                    // - Ranking der Annotation ändern
+                                          // this.socketService.socket.emit(eventName, data);
+                                          // emit "changeRanking"
+                    // 1.1.4
+                    // - Löschen der Annotation
+                                          // this.socketService.socket.emit(eventName, data);
+                                          // emit "deleteAnnotation"
+                    // 1.1.5
+                    // -- Verbinden (Raum)
+                                          // this.socketService.socket.emit(eventName, data);
+                                          // emit "newUser"
+                    // 1.1.6
+                    // -- Verbindung trennen (Raum)
+                                          // this.socketService.socket.emit(eventName, data);
+                                          // emit "lostConnection"
+                    // 1.1.7
+                    // -- Wählen eines anderen Modells/Collection       ---  Verbindung trennen (alter Raum) --> Verbinden (neuer Raum)
+                                          // this.socketService.socket.emit(eventName, data);
+                                          // emit "changeRoom"
 
+
+    // 1.2
+    // EVENT EMPFANGEN                                                                                 // this.socketService.socket.fromEvent('eventName').subscribe(result => console.log(result));
+                    // 1.2.1
+                    // -- Wenn man dem Raum beitritt
+                                            // emit "onlineCollaborators"
+                                            // get "fromEvent('onlineCollaborators').subscribe(data)"
+                    // 1.2.2
+                    // -- Wenn eine Person eine Annotation erstellt
+                                            // get "fromEvent('createAnnotation').subscribe(data)"
+                                            // push "data" (Person-Annotation) to 'collaboratorsAnnotations'
+                    // 1.2.3
+                    // -- Wenn eine Person eine Annotation bearbeitet
+                                            // get "fromEvent('editAnnotation').subscribe(data)"
+                                            // delete "data-id" & push "data" (Person-Annotation) from & to 'collaboratorsAnnotations'
+                    // 1.2.4
+                    // -- Wenn eine Person eine Annotaiton löscht
+                                            // get "fromEvent('deleteAnnotation').subscribe(data)"
+                                            // delete "data" (Person-Annotation) from 'collaboratorsAnnotations'
+                    // 1.2.5
+                    // -- Wenn eine Person das Ranking bearbeitet
+                                            // get "fromEvent('changeRanking').subscribe(data)"
+                                            // get "data" (new ranking Person-Annotations) to 'collaboratorsAnnotations' 
+                    // 1.2.6 
+                    // -- Wenn eine Person die Verbindung verliert
+                                            // get "fromEvent('lostConnection').subscribe(data)"
+                                            // delete "data" (Person-Annotations) from 'collaboratorsAnnotations'
+                    // 1.2.7
+                    // -- Wenn eine neue Person dazu kommt
+                                            // get "fromEvent('newUser').subscribe(data)"
+                                            // push "data" (Person-AnnotationS) to 'collaboratorsAnnotations'
+                    // 1.2.8
+                    // -- Wenn eine Person den Raum verlässt
+                                            // get "fromEvent('changeRoom').subscribe(data)"
+                                            // delete "data" (Person-Annotations) from 'collaboratorsAnnotations'
+                  
+    
+    this.socketService.socket.emit('message', 'Hellooo!');
+
+    // SOCKET_ROOM -- ANNOTATIONS OF COLLABORATORS
+    this.collaboratorsAnnotations = [];
+                     
     this.annotations = [];
     this.loadModelService.Observables.actualModel.subscribe(actualModel => {
       this.modelName = actualModel.name;
@@ -142,15 +167,87 @@ export class AnnotationService {
     this.loadModelService.defaultLoad.subscribe(defaultLoad => {
       this.isDefaultLoad = defaultLoad;
     });
+
+
+    this.socketService.socket.fromEvent('message').subscribe(result => { 
+      console.log(result);
+    });
+
+    this.socketService.socket.fromEvent('createAnnotation').subscribe(result => { 
+      console.log(result);
+      // 1.2.2
+      // -- Wenn eine Person eine Annotation erstellt
+                              // get "fromEvent('createAnnotation').subscribe(data)"
+                              // push "data" (Person-Annotation) to 'collaboratorsAnnotations'
+    });
+    this.socketService.socket.fromEvent('editAnnotation').subscribe(result => { 
+      console.log(result);
+      // 1.2.3
+      // -- Wenn eine Person eine Annotation bearbeitet
+                              // get "fromEvent('editAnnotation').subscribe(data)"
+                              // delete "data-id" & push "data" (Person-Annotation) from & to 'collaboratorsAnnotations'
+    });
+    this.socketService.socket.fromEvent('deleteAnnotation').subscribe(result => { 
+      console.log(result);
+      // 1.2.4
+      // -- Wenn eine Person eine Annotaiton löscht
+                              // get "fromEvent('deleteAnnotation').subscribe(data)"
+                              // delete "data" (Person-Annotation) from 'collaboratorsAnnotations'
+    });
+    this.socketService.socket.fromEvent('changeRanking').subscribe(result => { 
+      console.log(result);
+      // 1.2.5
+      // -- Wenn eine Person das Ranking bearbeitet
+                              // get "fromEvent('changeRanking').subscribe(data)"
+                              // get "data" (new ranking Person-Annotations) to 'collaboratorsAnnotations' 
+    });
+    this.socketService.socket.fromEvent('newUser').subscribe(result => { 
+      console.log(result);
+      // 1.2.7
+      // -- Wenn eine neue Person dazu kommt
+                              // get "fromEvent('newUser').subscribe(data)"
+                              // push "data" (Person-AnnotationS) to 'collaboratorsAnnotations'
+    });
+    this.socketService.socket.fromEvent('lostConnection').subscribe(result => { 
+      console.log(result);
+      // 1.2.6 
+      // -- Wenn eine Person die Verbindung verliert
+                              // get "fromEvent('lostConnection').subscribe(data)"
+                              // delete "data" (Person-Annotations) from 'collaboratorsAnnotations'
+    });
+    this.socketService.socket.fromEvent('onlineCollaborators').subscribe(result => { 
+      console.log(result);
+      // 1.2.1
+      // -- Wenn man dem Raum beitritt
+                              // emit "onlineCollaborators"
+                              // get "fromEvent('onlineCollaborators').subscribe(data)"
+
+                              // NACH RAUM BEITRITT UND ERSTELLEN DER COLLABORATORS_ANNOTATIONS
+                              // CREATE ANNOTATIONMARKERS FÜR ELEMENTE DER COLLABORATORS   ===> UM EINZELNE BENUTZER-ID ERWEITERN FÜR FARBE
+                              // for (const annotation of this.collaboratorsAnnotations) {
+                              //   this.annotationmarkerService.createAnnotationMarker(annotation);
+                              // }
+                              // ANDERE FARBE ???
+    });
+    this.socketService.socket.fromEvent('changeRoom').subscribe(result => { 
+      console.log(result);
+      // 1.2.8
+      // -- Wenn eine Person den Raum verlässt
+                              // get "fromEvent('changeRoom').subscribe(data)"
+                              // delete "data" (Person-Annotations) from 'collaboratorsAnnotations'
+    });
+
   }
+
+
+
 
   public async loadAnnotations() {
 
     BABYLON.Tags.AddTagsTo(this.actualModelMeshes, this.currentModel._id);
-
-    // Der modelName wird beim Laden eines neuen Modells übergeben und hier gespeichert,
-    // um auch als Referenz für eine neu erstellte Annotation nutzbar zu sein
-    // this.modelName = modelName;
+    
+    // SOCKET_ROOM -- ANNOTATIONS OF COLLABORATORS
+    // this.collaboratorsAnnotations = [];
 
     // In diesem Array sollten alle Annotationen in der richtigen Reihenfolge liegen, die visuell für das aktuelle
     // Model relevant sind, zu Beginn also erstmal keine
@@ -162,21 +259,15 @@ export class AnnotationService {
     // Alle Marker, die eventuell vom vorherigen Modell noch da sind, sollen gelöscht werden
     await this.annotationmarkerService.deleteAllMarker();
 
-    // 11/02/19
-    // Beim ersten Laden eines Mdoells, werden alle in der PuchDB vorhandenen Annotationen in
+    // Beim Laden eines Mdoells, werden alle in der PuchDB vorhandenen Annotationen in
     // das Array "allAnnotations" geladen
-
     if (this.isDefaultLoad === false) {
-    // if (this.initialLoading === true && this.isDefaultLoad === false) {
       await this.getAnnotations();
     } else {
-
       this.allAnnotations = [];
       this.allAnnotations.push(this.createDefaultAnnotation());
     }
 
-    // 11/02/19
-    // Muss/Soll auch an Benutzer//Sammlung gekoppelt werden?
     // Die Annotationen, die sich auf das aktuelle Model beziehen (also als relatedModel den Namen
     // des aktuellen Models aufweisen, werden raus gesucht und in das Array für unsortierte Annotationen
     // gepusht, da sie dort liegen ohne visuelle Elemente zu erzeugen
@@ -191,48 +282,28 @@ export class AnnotationService {
 
     // Das neu geladene Modell wird annotierbar, ist aber noch nicht klickbar -> das soll erst passieren,
     // wenn der Edit-Mode aufgerufen wird
-    // this.initializeAnnotationMode(modelName);
-    // this.actionService.pickableModel(modelName, false);
     this.initializeAnnotationMode();
 
+  }
+
+
+  private async getAnnotations() {
+
+    this.allAnnotations = [];
+    this.allAnnotations = await this.fetchData();
+    this.annotationmarkerService.toggleCreatorPopup('');
   }
 
 
   private async getActualAnnotations(modelName: string) {
 
     for (const annotation of this.allAnnotations) {
-      // 11/02/19
       if (annotation.target.source.relatedModel === modelName) {
-      // if (annotation.relatedModel === modelName) {
         this.unsortedAnnotations.push(annotation);
       }
     }
   }
 
-  private async getAnnotations() {
-
-    this.allAnnotations = [];
-    this.allAnnotations = await this.fetchData();
-    // this.initialLoading = false;
-    this.annotationmarkerService.toggleCreatorPopup('');
-  }
-
-  // Das aktuelle Modell wird anklickbar und damit annotierbar
-  public annotationMode(value: boolean) {
-    this.actualModelMeshes.forEach(mesh => {
-      this.actionService.pickableModel(mesh, value);
-    });
-  }
-
-  // Die Annotationsfunktionalität wird zum aktuellen Modell hinzugefügt
-  public initializeAnnotationMode() {
-    this.actualModelMeshes.forEach(mesh => {
-      this.actionService.createActionManager(mesh, ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
-    });
-    this.annotationMode(false);
-  }
-
-  // Die Annotationen werden in der richtigen Reihenfolge in das Array für den visuellen Output geschrieben
   private async sortAnnotations() {
 
     this.annotations = this.unsortedAnnotations;
@@ -249,10 +320,28 @@ export class AnnotationService {
       }
       return 0;
     });
-
+    // THIS.ANNOTATIONS SIND GELADEN // SORTIERTE ANNOTATIONS DES BENUTZERS (LOCAL POUCH-DB) FÜR DAS JEWEILIGE MODEL
     for (const annotation of this.annotations) {
+      // VISUAL OUTPUT (MARKER)
       this.annotationmarkerService.createAnnotationMarker(annotation);
     }
+  }
+
+
+  // Die Annotationsfunktionalität wird zum aktuellen Modell hinzugefügt
+  public initializeAnnotationMode() {
+    this.actualModelMeshes.forEach(mesh => {
+      this.actionService.createActionManager(mesh, ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
+    });
+    this.annotationMode(false);
+  }
+
+
+  // Das aktuelle Modell wird anklickbar und damit annotierbar
+  public annotationMode(value: boolean) {
+    this.actualModelMeshes.forEach(mesh => {
+      this.actionService.pickableModel(mesh, value); 
+    });
   }
 
   public async createNewAnnotation(result: any) {
@@ -261,9 +350,7 @@ export class AnnotationService {
 
     // Fetch userData if not existing
     if (!this.loadModelService.currentUserData) await this.loadModelService.getUserData();
-    // 22/02/19
     this.loadModelService.currentUserData = this.loadModelService.getUserData();
-
     // Inform user if userData still doesn't exist
     if (!this.loadModelService.currentUserData) {
       this.message.error(`Login check failed. Try again`);
@@ -333,54 +420,37 @@ export class AnnotationService {
             }
           }
         }
-
-
-        // relatedModel: this.modelName,
-        // referencePoint: [{dimension: 'x', value: result.pickedPoint.x}, {dimension: 'y', value: result.pickedPoint.y}, {
-        //   dimension: 'z', value: result.pickedPoint.z
-        // }],
-        // referencePointNormal: [{dimension: 'x', value: result.getNormal(true, true).x},
-        //   {dimension: 'y', value: result.getNormal(true, true).y}, {
-        //     dimension: 'z', value: result.getNormal(true, true).z
-        //   }],
-        // cameraPosition: [{dimension: 'x', value: camera.alpha},
-        //   {dimension: 'y', value: camera.beta},
-        //   {dimension: 'z', value: camera.radius}],
-        // preview: detailScreenshot,
-        // originatorID: 'userID',
-        // title: '',
-        // description: '',
-        // date: new Date().toISOString()
       };
       this.add(newAnnotation);
       this.annotationmarkerService.createAnnotationMarker(newAnnotation);
-
       // set created annotation as is_open in annotationmarker.service ((on double click) created annotation)
       this.annotationmarkerService.toggleCreatorPopup(newAnnotation._id);
+
     });
   }
-
-  // 11/02/19
-  // Annotation in der Datenbank speichern, nicht zur lokalen PouchDB...
+  
   private add(annotation): void {
     this.dataService.database.put(annotation);
     this.annotations.push(annotation);
     this.allAnnotations.push(annotation);
+
+    // 1.1.1
+    // - Annotation erstellen (und aufs Auge klicken)
+                  // this.socketService.socket.emit(eventName, data);
+                  // emit "createAnnotation"
+    // if (inSocket){
+    //   this.socketService.socket.emit("createAnnotation", annotation);
+    // }
   }
 
   public exportAnnotations() {
     return JSON.stringify(this.annotations);
   }
 
-  // 11/02/19
-  // Annotationen in der Datenbank löschen...
   public deleteAllAnnotations() {
-
     this.annotationmarkerService.deleteAllMarker();
-
     this.annotations.length = 0;
     this.allAnnotations.length = 0;
-
     this.dataService.database.destroy().then(() => {
       this.dataService.database = new PouchDB('annotationdb');
     });
@@ -389,32 +459,24 @@ export class AnnotationService {
   public async importAnnotations(annotationsFile) {
 
     const annotations = JSON.parse(annotationsFile);
-
     this.unsortedAnnotations.length = 0;
     await this.annotationmarkerService.deleteAllMarker();
-
     for (const annotation of annotations) {
-
       this.unsortedAnnotations.push(annotation);
       this.annotationmarkerService.createAnnotationMarker(annotation);
     }
-
     this.dataService.database.bulkDocs(this.unsortedAnnotations);
     await this.sortAnnotations();
   }
 
-  // 11/02/19
-    // aus Datenbank mit spezifischen Such-Parametern (ModelID, CollectionID, Benutzer)...
   private async fetchData(): Promise<Array<any>> {
-
+    
     return new Promise<any>((resolve, reject) => {
 
       const annotationList: Array<any> = [];
-
       this.dataService.fetch().then(result => {
-
+    
         const rows = result.rows;
-
         for (const row of rows) {
           annotationList.push(row.doc);
         }
@@ -426,6 +488,7 @@ export class AnnotationService {
   }
 
   public deleteAnnotation(annotation: Annotation) {
+                          
     this.annotationmarkerService.deleteMarker(annotation._id);
     this.dataService.delete(annotation._id);
     const index: number = this.annotations.indexOf(annotation);
@@ -433,33 +496,39 @@ export class AnnotationService {
     if (index !== -1) {
       this.annotations.splice(index, 1);
     }
-
     const indexb: number = this.allAnnotations.indexOf(annotation);
-
     if (indexb !== -1) {
       this.allAnnotations.splice(indexb, 1);
     }
-
     this.changedRankingPositions();
+
+    // 1.1.4
+    // - Löschen der Annotation
+            // this.socketService.socket.emit(eventName, data);
+            // emit "deleteAnnotation"
   }
 
-  public changedRankingPositions() {
-    let i = 0;
 
+  public changedRankingPositions() {
+  
+    let i = 0;
     for (const annotation of this.annotations) {
       annotation.ranking = i + 1;
       this.annotationmarkerService.deleteMarker(annotation._id);
       this.annotationmarkerService.createAnnotationMarker(annotation);
       this.dataService.updateAnnotationRanking(annotation._id, annotation.ranking);
-
       i++;
     }
 
+    // 1.1.3
+    // - Ranking der Annotation ändern
+            // this.socketService.socket.emit(eventName, data);
+            // emit "changeRanking"
+        // changedRankingPositions() mit collaboratorsAnnotations ?
   }
 
-  public createDefaultAnnotation(): Annotation {
 
-     // 11/02/19
+  public createDefaultAnnotation(): Annotation {
      return {
       validated: true,
       _id: 'DefaultAnnotation',
@@ -518,29 +587,7 @@ export class AnnotationService {
           }
         }
       }
-
-      // title: 'Welcome to Kompakkt',
-      // relatedModel: 'Cube',
-      // referencePointNormal: [
-      //   {dimension: 'x', value: -0.8949183602315889},
-      //   {dimension: 'y', value: 0.011999712324764563},
-      //   {dimension: 'z', value: -0.44606853220612525}
-      // ],
-      // referencePoint: [
-      //   {dimension: 'x', value: -10.204414220764392},
-      //   {dimension: 'y', value: 10.142734374740286},
-      //   {dimension: 'z', value: -3.9197811803792177}
-      // ],
-      // preview: 'data:image/png;base64,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KfdQBMipjnPPPTcmTJgQw4YNK/f26quvlsGyefPmHhk5mUBfCAiQvlB2jaYEzjjjjJgyZUo899xzZZ19+/bFmjVrjv9Fv2jRsQA58WJTp06NadOmRfHKqKtj8ODBMXbs2PJppfir2+cv/ij+6ZXfxs//cuyxV1jrtx+KWX9+dVli//79sXr178Kk87Fz58548skny2A73VGE23XXXRcTJ048bdAVNYq9jRs3rtx/YVEEysKFC4VKU3eVxSkEBEgKRTWSC4waNSrmzp0b1157bRw+fDi2bNkSxS/nUx2ff/55PP744w3vofhlPHv27PIJ5HTHmDFjYuvWrfH111+Xp51zzjlx4MCBk5bs3bs3HnnkkXKfzR433HBDQ6FSXGf8+PHla7kzzzwz1q1bFwsWLCg/c+kuvJrdo/UEfi8gQNwLLSEwaNCgmDVrVhSvdo4ePRrFL+VTvRYqNvvNN9/EkiVLunziqNJQ8dRQhFbx9NHIUezx5ZdfLp8GevMoPh+58cYb44ILLiiDorujeIoaOnRo+fprw4YNpdOHH354LAS7W+/nBHoiIEB6ouXcpALFL7o333yzrHnkyJEyMIpXQ6c6iqeA++67L+n1T1fs9ttvL1+bnX322ced9u6778bzzz/fZ/s41YWKz0luueWWGDlyZPlKq7ujeNIqwrEIoCL4XnzxxXj77bfj22+P/7ynuzp+TuBEAQHinugzgeK/7u+55564++67y2sWr56KV1NdHdu2bYsnnniiz/ZX5wsVQTdjxozy22aNHEUIFh/+Owg0IyBAmtGztluByZMnx7PPPlu+UimOFStWlK+gujrmz58fK1euLP9L2VFdoAjr4ttot95660lPUUXVZ555pnpxKwn8v4AAcSskFyg+oL733nvLusWH0MWTxOlelzz44IOn/HA6+cYyL1i8wrrwwgvLMC/+kKODQLMCAqRZQetPEii+Mjtz5swuZd5666147bXXfFvIvUOg5gICpOYDbMXtX3755XH//fcft7V58+aV3wpyECDQPgICpH1m2VKdFN8OKr6CumPHjpbal80QIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQGpCulEgECBAjkJCBAcpq2XgkQIJBQQIAkxFSKAAECOQkIkJymrVcCBAgkFBAgCTGVIkCAQE4CAiSnaeuVAAECCQUESEJMpQgQIJCTgADJadp6JUCAQEIBAZIQUykCBAjkJCBAcpq2XgkQIJBQQIAkxFSKAAECOQkIkJymrVcCBAgkFBAgCTGVIkCAQE4CAiSnaeuVAAECCQUESEJMpQgQIJCTgADJadp6JUCAQEIBAZIQUykCBAjkJCBAcpq2XgkQIJBQQIAkxFSKAAECOQkIkJymrVcCBAgkFBAgCTGVIkCAQE4CAiSnaeuVAAECCQUESEJMpQgQIJCTgADJadp6JUCAQEIBAZIQUykCBAjkJCBAcpq2XgkQIJBQQIAkxFSKAAECOQkIkJymrVcCBAgkFBAgCTGVIkCAQE4C/weLi1NGQXXHbQAAAABJRU5ErkJggg==',
-      // originatorID: 'userID',
-      // description: 'Hi! I am an annotation of this cool logo. Please feel free to add a friend for me by clicking on the edit button in the corner on the right bottom and double click this 3D logo!',
-      // date: '2019-01-18T22:05:31.230Z',
-      // cameraPosition: [
-      //   {dimension: 'x', value: 2.7065021761026817},
-      //   {dimension: 'y', value: 1.3419080619941322},
-      //   {dimension: 'z', value: 90.44884111420268}]
     };
-
   }
 
 }

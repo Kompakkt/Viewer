@@ -84,16 +84,11 @@ export class AnnotationwalkthroughComponent implements OnInit {
 
     if (annotations.length) {
 
-            // 11/02/19
             this.title = annotations[index].body.content.title;
             const cameraVector = new Vector3(
               annotations[index].body.content.relatedPerspective.vector.x,
               annotations[index].body.content.relatedPerspective.vector.y,
               annotations[index].body.content.relatedPerspective.vector.z);
-            // this.title = annotations[index].title;
-            // const cameraVector = new Vector3(annotations[index].cameraPosition[0].value,
-            //   annotations[index].cameraPosition[1].value,
-            //   annotations[index].cameraPosition[2].value);
       this.cameraService.moveCameraToTarget(cameraVector);
       this.annotationmarkerService.toggleCreatorPopup(annotations[index]._id);
     } else {
