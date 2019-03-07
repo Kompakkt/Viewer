@@ -95,10 +95,12 @@ export class AnnotationsEditorComponent implements OnInit {
       this.annotation.body.content.relatedPerspective.vector, this.annotation.validated);
 
     // 1.1.2
-    // - Annotation bearbeiten (und aufs Auge klicken)
-            // this.socketService.socket.emit(eventName, data);
-            // emit "editAnnotation"
-            this.annotationService.socketService.socket.emit('message', 'Annotation bearbeiten!');
+    // - Annotation bearbeiten (auf's Auge klicken)
+    if (this.annotationService.socketService.socket){
+      this.annotationService.socketService.socket.emit('message', 'Annotation bearbeiten!');
+      this.annotationService.socketService.socket.emit('editAnnotation', this.annotation);
+    }
+    
   }
 
   public onSubmit(event) {

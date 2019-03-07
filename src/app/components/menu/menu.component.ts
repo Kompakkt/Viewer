@@ -28,6 +28,9 @@ import {LoginComponent} from '../login/login.component';
 })
 export class MenuComponent implements OnInit {
 
+  // 1.1.5
+  public toggleChecked= false;
+
   public menuIsEnabled = true;
   private isSingleModel: boolean;
   private isSingleCollection: boolean;
@@ -165,4 +168,15 @@ export class MenuComponent implements OnInit {
     this.dialog.open(LoginComponent, dialogConfig);
   }
 
+  // 1.1.5
+  private onSocketToggleChange() {
+    if (this.toggleChecked){
+      this.annotationService.loginToSocket();
+    }
+    else{
+      this.annotationService.lostConnectionSocket();
+    }
+  } 
+
 }
+

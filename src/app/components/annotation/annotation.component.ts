@@ -132,10 +132,12 @@ export class AnnotationComponent implements OnInit {
       this.annotation.body.content.title, this.annotation.body.content.description);
 
     // 1.1.2
-    // - Annotation bearbeiten (und aufs Auge klicken)
-            // this.socketService.socket.emit(eventName, data);
-            // emit "editAnnotation"
-            this.annotationService.socketService.socket.emit('message', 'Annotation bearbeiten!');
+    // - Annotation bearbeiten (auf's Auge klicken)
+    if (this.annotationService.socketService.socket){
+      this.annotationService.socketService.socket.emit('message', 'Annotation bearbeiten!');
+      this.annotationService.socketService.socket.emit('editAnnotation', this.annotation);
+    }
+    
   }
 
   public onSumbit(event) {
