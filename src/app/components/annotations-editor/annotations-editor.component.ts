@@ -35,7 +35,7 @@ export class AnnotationsEditorComponent implements OnInit {
     if (this.annotation) {
 
       this.id = this.annotation._id;
-      this.preview = this.annotation.body.content.relatedPerspective.preview;      
+      this.preview = this.annotation.body.content.relatedPerspective.preview;
     }
   }
 
@@ -62,11 +62,11 @@ export class AnnotationsEditorComponent implements OnInit {
   }
 
   public async selectPerspective() {
-    
+
     this.annotation.body.content.relatedPerspective.vector = this.cameraService.getActualCameraPosAnnotation();
-    
+
     await this.babylonService.createPreviewScreenshot(400).then(detailScreenshot => {
-    
+
       this.preview = detailScreenshot;
     });
   }
@@ -90,9 +90,7 @@ export class AnnotationsEditorComponent implements OnInit {
   }
 
   private save(): void {
-    this.dataService.updateAnnotation(this.annotation._id, this.annotation.body.content.title,
-      this.annotation.body.content.description, this.preview,
-      this.annotation.body.content.relatedPerspective.vector, this.annotation.validated);
+    this.dataService.updateAnnotation(this.annotation);
 
     // 1.1.2
     // - Annotation bearbeiten (auf's Auge klicken)
@@ -123,5 +121,3 @@ export class AnnotationsEditorComponent implements OnInit {
     }
   }
 }
-
-

@@ -128,9 +128,7 @@ export class AnnotationComponent implements OnInit {
   }
 
   private save(): void {
-    this.dataService.updateAnnotation(this.annotation._id,
-      this.annotation.body.content.title, this.annotation.body.content.description);
-
+    this.dataService.updateAnnotation(this.annotation);
     // 1.1.2
     // - Annotation bearbeiten (auf's Auge klicken)
     if (this.annotationService.socketService.socket){

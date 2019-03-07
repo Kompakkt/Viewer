@@ -1,67 +1,61 @@
-import {Injectable, EventEmitter} from '@angular/core';
+import {Injectable} from '@angular/core';
 import PouchDB from 'pouchdb';
-import {isUndefined} from 'util';
+import {Annotation} from '../../interfaces/annotation2/annotation2';
+import {MongohandlerService} from '../mongohandler/mongohandler.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DataService {
 
-  public database: any;
+  public pouchdb: any;
 
-  public constructor() {
-    this.database = new PouchDB('annotationdb');
+  public constructor(private mongo: MongohandlerService) {
+    this.pouchdb = new PouchDB('annotationdb');
   }
 
   public fetch() {
-    return this.database.allDocs({include_docs: true});
+    return this.pouchdb.allDocs({include_docs: true});
   }
 
-  public delete(id: string) {
+  public putAnnotation(annotation: any) {
+    if (annotation._id === 'DefaultAnnotation') return;
+    this.pouchdb.put(annotation);
+    /*this.mongo.updateAnnotation(annotation).toPromise()
+      .then(result => console.log(result))
+      .catch(error => console.error(error));*/
+  }
 
-    this.database.get(id).then((doc) => {
-      return this.database.remove(doc);
+  public cleanAndRenewDatabase() {
+    this.pouchdb.destroy().then(() => {
+      this.pouchdb = new PouchDB('annotationdb');
     });
   }
 
-  
-  public updateAnnotation(id: string, title: string, description: string, preview?: string, cameraPosition?, validated?: boolean): void {
-
-    const db = this.database;
-    db.get(id).then(function (doc) {
-
-      doc.body.content.title = title;
-      doc.body.content.description = description;
-
-      if (!isUndefined(preview)) {
-
-        doc.body.content.relatedPerspective.preview = preview;
-      }
-      if (!isUndefined(cameraPosition)) {
-
-        doc.body.content.relatedPerspective.vector;
-      }
-      if (!isUndefined(validated)) {
-        console.log(isUndefined(doc.validated));
-
-        doc.validated = validated;
-      }
-      console.log(doc);
-
-      return db.put(doc);
-    });
+  public deleteAnnotation(id: string) {
+    if (id === 'DefaultAnnotation') return;
+    this.pouchdb.get(id).then((result: Annotation) =>
+      this.pouchdb.remove(result)
+    ).catch((error: any) =>
+      console.log('Failed removing annotation', error)
+    );
   }
 
+  public updateAnnotation(annotation: Annotation): void {
+    if (annotation._id === 'DefaultAnnotation') return;
+    this.pouchdb.get(annotation._id).then((result: Annotation) => {
+      console.log('Updating annotation', annotation);
+      result = annotation;
+      return result;
+    });
+  }
 
   public updateAnnotationRanking(id: string, ranking: number) {
-
-    const db = this.database;
-
-    db.get(id).then(function (doc) {
-      // update
-      doc.ranking = ranking;
-      // put them back
-      return db.put(doc);
+    if (id === 'DefaultAnnotation') return;
+    this.pouchdb.get(id).then((result: Annotation) => {
+      console.log('Updating ranking', result, ranking);
+      result.ranking = ranking;
+      return result;
     });
   }
 }

@@ -7,7 +7,6 @@ import {MessageService} from '../message/message.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
 import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
 import {ActionManager} from 'babylonjs';
-import PouchDB from 'pouchdb';
 import * as BABYLON from 'babylonjs';
 import {LoadModelService} from '../load-model/load-model.service';
 import {environment} from '../../../environments/environment';
@@ -29,7 +28,7 @@ import { SocketService } from '../socket/socket.service';
 
               // -- LOGIN // AUSTRITT  (BUTTON)
               // -- FILTER (BEI LOGGED-IN)
-                      // USER-LISTE 
+                      // USER-LISTE
                                 // USER-X (Aus-/Einblenden)
 
 
@@ -39,10 +38,10 @@ import { SocketService } from '../socket/socket.service';
 
         // CREATE MARKER 
               // --  "public collaboratorsAnnotations: Annotation[];"
-                      // -- MARKER-FARBEN 
+                      // -- MARKER-FARBEN
                               // (NACH USER-ID)
 
-    
+
 
 export class AnnotationService {
 
@@ -51,7 +50,7 @@ export class AnnotationService {
   public inSocket: boolean;
   // SOCKET-ANNOTATIONS_OF_COLLABORATORS
   public collaboratorsAnnotations: Annotation[];
-  
+
   public annotations: Annotation[];
   private unsortedAnnotations: Annotation[];
   private allAnnotations: Annotation[];
@@ -68,12 +67,12 @@ export class AnnotationService {
               private loadModelService: LoadModelService,
               private mongo: MongohandlerService,
               private message: MessageService,
-              public socketService: SocketService) 
+              public socketService: SocketService)
   {
 
     // 1.
-    // EVENTS 
-    
+    // EVENTS
+
     // (EVENT-NAMEN)
       // -- createAnnotation
       // -- editAnnotation
@@ -83,8 +82,8 @@ export class AnnotationService {
       // -- lostConnection
       // -- onlineCollaborators (needed (see changeRoom) ???)
       // -- changeRoom
-    
-    // 1.1  
+
+    // 1.1
     // EVENT SENDEN                                                                                     // this.socketService.socket.emit(eventName, data);
                     // 1.1.1
                     // - Annotation erstellen
@@ -138,8 +137,8 @@ export class AnnotationService {
                     // 1.2.5
                     // -- Wenn eine Person das Ranking bearbeitet
                                             // get "fromEvent('changeRanking').subscribe(data)"
-                                            // get "data" (new ranking Person-Annotations) to 'collaboratorsAnnotations' 
-                    // 1.2.6 
+                                            // get "data" (new ranking Person-Annotations) to 'collaboratorsAnnotations'
+                    // 1.2.6
                     // -- Wenn eine Person die Verbindung verliert
                                             // get "fromEvent('lostConnection').subscribe(data)"
                                             // delete "data" (Person-Annotations) from 'collaboratorsAnnotations'
@@ -151,15 +150,15 @@ export class AnnotationService {
                     // -- Wenn eine Person den Raum verlässt
                                             // get "fromEvent('changeRoom').subscribe(data)"
                                             // delete "data" (Person-Annotations) from 'collaboratorsAnnotations'
-                  
-    
+
+
     this.socketService.socket.emit('message', 'Hellooo!');
 
     // IN-SOCKET
     this.inSocket = false;
     // SOCKET_ROOM -- ANNOTATIONS OF COLLABORATORS
     this.collaboratorsAnnotations = [];
-                     
+
     this.annotations = [];
     this.loadModelService.Observables.actualModel.subscribe(actualModel => {
       this.modelName = actualModel.name;
@@ -393,7 +392,7 @@ export class AnnotationService {
   // Das aktuelle Modell wird anklickbar und damit annotierbar
   public annotationMode(value: boolean) {
     this.actualModelMeshes.forEach(mesh => {
-      this.actionService.pickableModel(mesh, value); 
+      this.actionService.pickableModel(mesh, value);
     });
   }
 
@@ -481,9 +480,9 @@ export class AnnotationService {
 
     });
   }
-  
+
   private add(annotation): void {
-    this.dataService.database.put(annotation);
+    this.dataService.putAnnotation(annotation);
     this.annotations.push(annotation);
     this.allAnnotations.push(annotation);
 
@@ -504,9 +503,8 @@ export class AnnotationService {
     this.annotationmarkerService.deleteAllMarker();
     this.annotations.length = 0;
     this.allAnnotations.length = 0;
-    this.dataService.database.destroy().then(() => {
-      this.dataService.database = new PouchDB('annotationdb');
-    });
+
+    this.dataService.cleanAndRenewDatabase();
   }
 
   public async importAnnotations(annotationsFile) {
@@ -518,17 +516,18 @@ export class AnnotationService {
       this.unsortedAnnotations.push(annotation);
       this.annotationmarkerService.createAnnotationMarker(annotation);
     }
-    this.dataService.database.bulkDocs(this.unsortedAnnotations);
+
+    this.dataService.pouchdb.bulkDocs(this.unsortedAnnotations);
     await this.sortAnnotations();
   }
 
   private async fetchData(): Promise<Array<any>> {
-    
+
     return new Promise<any>((resolve, reject) => {
 
       const annotationList: Array<any> = [];
       this.dataService.fetch().then(result => {
-    
+
         const rows = result.rows;
         for (const row of rows) {
           annotationList.push(row.doc);
@@ -541,9 +540,9 @@ export class AnnotationService {
   }
 
   public deleteAnnotation(annotation: Annotation) {
-                          
+
     this.annotationmarkerService.deleteMarker(annotation._id);
-    this.dataService.delete(annotation._id);
+    this.dataService.deleteAnnotation(annotation._id);
     const index: number = this.annotations.indexOf(annotation);
 
     if (index !== -1) {
@@ -566,7 +565,7 @@ export class AnnotationService {
 
 
   public changedRankingPositions() {
-  
+
     let i = 0;
     for (const annotation of this.annotations) {
       annotation.ranking = i + 1;
