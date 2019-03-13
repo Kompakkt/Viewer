@@ -15,7 +15,7 @@ import {
   MatOptionModule,
   MatRadioModule,
   MatSelectModule, MatSliderModule, MatSlideToggleModule, MatSnackBarModule,
-  MatTabsModule, MatTooltipModule
+  MatTabsModule, MatTooltipModule, MatStepperModule
 } from '@angular/material';
 import {FormsModule} from '@angular/forms';
 import {AnnotationsEditorComponent} from './components/annotations-editor/annotations-editor.component';
@@ -42,7 +42,7 @@ describe('AppComponent', () => {
         MetadataComponent,
         ModelsettingsComponent,
         ModelComponent,
-        AnnotationComponent
+        AnnotationComponent,
       ],
       imports: [
         FormsModule,
@@ -61,7 +61,9 @@ describe('AppComponent', () => {
         ColorChromeModule,
         MatSnackBarModule,
         HttpClientModule,
-        MatDialogModule]
+        MatDialogModule,
+        MatStepperModule
+      ]
     }).compileComponents();
   }));
   it('should create the app', async(() => {

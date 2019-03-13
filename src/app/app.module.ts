@@ -27,7 +27,7 @@ import {
   MatFormFieldModule,
   MatCheckboxModule,
   MatInputModule,
-  MatListModule, MatDividerModule, MatSliderModule, MatRadioModule, MatSelectModule, MatDialogModule, MatSlideToggleModule
+  MatListModule, MatDividerModule, MatSliderModule, MatRadioModule, MatSelectModule, MatDialogModule, MatSlideToggleModule, MatStepperModule
 } from '@angular/material';
 import {EditorComponent} from './components/editor/editor.component';
 import {AnnotationsEditorComponent} from './components/annotations-editor/annotations-editor.component';
@@ -43,6 +43,7 @@ import { ModelsettingsComponent } from './components/modelsettings/modelsettings
 import { LoginComponent } from './components/dialogs/dialog-login/login.component';
 import { PasswordComponent } from './components/password/password.component';
 import { DialogDeleteAnnotationsComponent } from './components/dialogs/dialog-delete-annotations/dialog-delete-annotations.component';
+import { DialogMeshsettingsComponent } from './components/dialogs/dialog-meshsettings/dialog-meshsettings.component';
 
 @NgModule({
   declarations: [
@@ -61,7 +62,8 @@ import { DialogDeleteAnnotationsComponent } from './components/dialogs/dialog-de
     ModelsettingsComponent,
     LoginComponent,
     PasswordComponent,
-    DialogDeleteAnnotationsComponent
+    DialogDeleteAnnotationsComponent,
+    DialogMeshsettingsComponent
   ],
   imports: [
     BrowserModule,
@@ -89,12 +91,14 @@ import { DialogDeleteAnnotationsComponent } from './components/dialogs/dialog-de
     MatSelectModule,
     MatDialogModule,
     MatSlideToggleModule,
+    MatStepperModule,
     SocketIoModule.forRoot(socketConfig)
   ],
   entryComponents: [
     LoginComponent,
     PasswordComponent,
-    DialogDeleteAnnotationsComponent
+    DialogDeleteAnnotationsComponent,
+    DialogMeshsettingsComponent
   ],
   providers: [],
   bootstrap: [AppComponent]

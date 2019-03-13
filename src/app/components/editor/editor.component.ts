@@ -1,4 +1,4 @@
-import {Component, HostBinding, Input, OnInit} from '@angular/core';
+import {Component, HostBinding, Input, OnInit, ViewChild} from '@angular/core';
 import {OverlayService} from '../../services/overlay/overlay.service';
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
@@ -18,8 +18,15 @@ export class EditorComponent implements OnInit {
 
   @HostBinding('class.is-open') private isOpen = false;
   @Input() modelFileName: string;
+  @ViewChild('tabGroup') tabGroup;
+
 
   public version: string = environment.version;
+
+  public selectedTab;
+  public meshSettingsMode;
+  public defaultAnnotationsMode;
+
 
   constructor(private overlayService: OverlayService,
               public annotationService: AnnotationService,
@@ -32,12 +39,40 @@ export class EditorComponent implements OnInit {
       this.isOpen = editorIsOpen;
       this.annotationService.annotationMode(this.isOpen);
     });
+
+    this.overlayService.editorSetting.subscribe(meshSettingsMode => {
+      this.meshSettingsMode = meshSettingsMode;
+      if (this.isOpen) {
+        if (meshSettingsMode) {
+          this.annotationService.annotationMode(false);
+          this.changeTab(1);
+        } else {
+          this.annotationService.annotationMode(true);
+        }
+      }
+    });
+
+    this.overlayService.defaultAnnotations.subscribe(annotationsMode => {
+      this.defaultAnnotationsMode = annotationsMode;
+      if (this.isOpen && annotationsMode) {
+        this.annotationService.annotationMode(true);
+        this.changeTab(0);
+      }
+    });
   }
 
   drop(event: CdkDragDrop<string[]>) {
 
     moveItemInArray(this.annotationService.annotations, event.previousIndex, event.currentIndex);
     this.annotationService.changedRankingPositions();
+  }
+
+  private changeTab(tabIndex) {
+    console.log('Gerade ausgewählt: ', this.tabGroup.selectedIndex, tabIndex);
+
+    if (tabIndex <= 3 && tabIndex >= 0) {
+      this.tabGroup.selectedIndex = tabIndex;
+    }
   }
 
   public exportAnnotations() {

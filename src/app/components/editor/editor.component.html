@@ -1,5 +1,5 @@
 <div id="editor">
-  <mat-tab-group mat-align-tabs="left" animationDuration="0ms">
+  <mat-tab-group #tabGroup mat-align-tabs="left" animationDuration="0ms" [(selectedIndex)]="selectedTab">
 
     <mat-tab>
       <ng-template mat-tab-label>
@@ -14,6 +14,11 @@
         </mat-card-header>
       </mat-card>
 
+      <mat-card *ngIf="meshSettingsMode">
+        Please set and save the settings before you add annotations.
+      </mat-card>
+
+      <div *ngIf="!meshSettingsMode">
       <div cdkDropList class="annotations-list" (cdkDropListDropped)="drop($event)"
            *ngIf="this.annotationService.annotations.length">
         <app-annotations-editor class="annotation-box" *ngFor="let annotation of this.annotationService.annotations;"
@@ -54,7 +59,7 @@
           <mat-icon aria-label="Delete Annotations">delete</mat-icon>
         </button>
       </div>
-
+      </div>
     </mat-tab>
 
     <mat-tab>

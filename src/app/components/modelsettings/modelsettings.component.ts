@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {CameraService} from '../../services/camera/camera.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
 import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
@@ -9,6 +9,9 @@ import {ColorEvent} from 'ngx-color';
 import {LoadModelService} from '../../services/load-model/load-model.service';
 import * as BABYLON from 'babylonjs';
 import {ModelsettingsService} from '../../services/modelsettings/modelsettings.service';
+import {MatDialog} from '@angular/material';
+import {DialogMeshsettingsComponent} from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
+import {OverlayService} from '../../services/overlay/overlay.service';
 
 @Component({
   selector: 'app-modelsettings',
@@ -18,6 +21,9 @@ import {ModelsettingsService} from '../../services/modelsettings/modelsettings.s
 
 export class ModelsettingsComponent implements OnInit {
 
+  @ViewChild('stepper') stepper;
+
+
   public activeModel;
   private preview: string;
   private setEffect = false;
@@ -26,6 +32,13 @@ export class ModelsettingsComponent implements OnInit {
   private isFinished: boolean;
   private initialSettingsMode = false;
   private isLoaded = false;
+  public showHelpers = false;
+  public showHelperBackground = false;
+  public showScaling = false;
+  public showOrientation = false;
+  public showPreview = false;
+  public showBackground = false;
+  public showLights = false;
 
 
   private cameraPositionInitial: {
@@ -42,14 +55,16 @@ export class ModelsettingsComponent implements OnInit {
   private ambientlightDownintensity: number;
 
 
-  constructor(private cameraService: CameraService,
+  constructor(private overlayService: OverlayService,
+              private cameraService: CameraService,
               private babylonService: BabylonService,
               private mongohandlerService: MongohandlerService,
               private catalogueService: CatalogueService,
               private message: MessageService,
               private annotationmarkerService: AnnotationmarkerService,
               private loadModelService: LoadModelService,
-              public modelSettingsService: ModelsettingsService
+              public modelSettingsService: ModelsettingsService,
+              public dialog: MatDialog
   ) {
   }
 
@@ -77,6 +92,102 @@ export class ModelsettingsComponent implements OnInit {
 
   }
 
+  public showNextAlertFirstStep() {
+    const dialogRef = this.dialog.open(DialogMeshsettingsComponent);
+
+    dialogRef.afterClosed().subscribe(finish => {
+
+      if (finish) {
+        this.resetHelpers();
+        this.stepper.selected.completed = true;
+        this.stepper.selected.editable = false;
+        this.stepper.next();
+      }
+    });
+  }
+
+  public nextSecondStep() {
+    this.setInitialView();
+    this.showPreview = false;
+    this.showLights = false;
+    this.showBackground = false;
+    this.stepper.selected.completed = true;
+    this.stepper.selected.editable = true;
+    this.stepper.next();
+  }
+
+  public saveLastStep() {
+    this.saveActualSettings();
+  }
+
+  public toggleHelpers() {
+    this.showHelpers = (this.showHelpers === true) ? false : true;
+    if (this.showHelpers) {
+      this.showOrientation = false;
+      this.showScaling = false;
+    }
+  }
+
+  public toggleHelperBackground() {
+    this.showHelperBackground = (this.showHelperBackground === true) ? false : true;
+  }
+
+  public toggleScaling() {
+    this.showScaling = (this.showScaling === true) ? false : true;
+    if (this.showScaling) {
+      this.showOrientation = false;
+      this.showHelpers = false;
+    }
+  }
+
+  public toggleOrientation() {
+    this.showOrientation = (this.showOrientation === true) ? false : true;
+    if (this.showOrientation) {
+      this.showScaling = false;
+      this.showHelpers = false;
+    }
+  }
+
+
+  public togglePreview() {
+    this.showPreview = (this.showPreview === true) ? false : true;
+    if (this.showPreview) {
+      this.showBackground = false;
+      this.showLights = false;
+    }
+  }
+
+  public toggleBackground() {
+    this.showBackground = (this.showBackground === true) ? false : true;
+    if (this.showBackground) {
+      this.showPreview = false;
+      this.showLights = false;
+    }
+  }
+
+  public toggleLights() {
+    this.showLights = (this.showLights === true) ? false : true;
+    if (this.showLights) {
+      this.showPreview = false;
+      this.showBackground = false;
+    }
+  }
+
+  public resetHelpers() {
+    this.modelSettingsService.resetVisualSettingsHelper();
+    this.babylonService.setBackgroundColor(this.activeModel.settings.background.color);
+    this.setEffect = this.activeModel.settings.background.effect;
+    this.babylonService.setBackgroundImage(this.setEffect);
+    this.showHelpers = false;
+  }
+
+  public resetMeshSize() {
+    this.modelSettingsService.resetMeshSize();
+  }
+
+  public resetMeshRotation() {
+    this.modelSettingsService.resetMeshRotation();
+  }
 
   /*
    * Light Settings
@@ -166,6 +277,8 @@ export class ModelsettingsComponent implements OnInit {
 
     this.initialSettingsMode = false;
     this.modelSettingsService.decomposeAfterSetting();
+    // allow Annotations
+    this.overlayService.deactivateMeshSettings();
 
     const settings = {
       preview: this.preview,
@@ -205,9 +318,11 @@ export class ModelsettingsComponent implements OnInit {
 
     this.activeModel.settings = settings;
 
-    this.mongohandlerService.updateSettings(this.activeModel._id, settings).subscribe(result => {
-      console.log(result);
-    });
+    if (!this.isDefault) {
+      this.mongohandlerService.updateSettings(this.activeModel._id, settings).subscribe(result => {
+        console.log(result);
+      });
+    }
   }
 
 
@@ -264,14 +379,14 @@ export class ModelsettingsComponent implements OnInit {
         this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
     }
     if (this.isDefault && this.initialSettingsMode) {
-      // TODO Werte wieder auf null setzen
+      this.resetHelpers();
     }
     if (this.isDefault && !this.initialSettingsMode) {
       this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
         this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
     }
     if (!this.isDefault && this.initialSettingsMode) {
-      // TODO Werte wieder auf null setzen
+      this.resetHelpers();
     }
 
   }
@@ -291,9 +406,11 @@ export class ModelsettingsComponent implements OnInit {
       this.babylonService.setLightIntensity('ambientlightDown', 1);
       this.ambientlightDownintensity = 1;
 
-      // Only for DEV - uncomment the 2 following lines
-       // await this.modelSettingsService.createVisualSettings();
+      // Only for DEV - uncomment the 3 following lines
+      // await this.modelSettingsService.createVisualSettings();
       // this.initialSettingsMode = true;
+      // this.overlayService.activateSettingsTab();
+
       // End
 
       await this.backToDefault();
@@ -440,6 +557,7 @@ export class ModelsettingsComponent implements OnInit {
         if (this.isModelOwner && !this.isFinished) {
           this.initialSettingsMode = true;
           this.modelSettingsService.createVisualSettings();
+          this.overlayService.activateSettingsTab();
 
           const rotation = {
             x: 0,
