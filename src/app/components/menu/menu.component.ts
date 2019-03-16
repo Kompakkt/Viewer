@@ -16,6 +16,8 @@ import {MessageService} from '../../services/message/message.service';
 import {LoadModelService} from '../../services/load-model/load-model.service';
 import {LoginComponent} from '../dialogs/dialog-login/login.component';
 
+import {SocketService} from '../../services/socket/socket.service';
+
 /**
  * @author Zoe Schubert
  * @author Jan G. Wieners
@@ -52,6 +54,7 @@ export class MenuComponent implements OnInit {
     private annotationVRService: AnnotationvrService,
     private loadModelService: LoadModelService,
     public dialog: MatDialog,
+    private socketService: SocketService,
     @Inject(DOCUMENT) private document: any) {
 
     iconRegistry.addSvgIcon(
@@ -171,10 +174,10 @@ export class MenuComponent implements OnInit {
   // 1.1.5
   private onSocketToggleChange() {
     if (this.toggleChecked){
-      this.annotationService.loginToSocket();
+      this.socketService.loginToSocket();
     }
     else{
-      this.annotationService.lostConnectionSocket();
+      this.socketService.disconnectSocket();
     }
   } 
 

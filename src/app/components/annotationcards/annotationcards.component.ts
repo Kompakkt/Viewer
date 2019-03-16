@@ -2,6 +2,7 @@ import {AfterViewInit, Component, Input, OnInit, QueryList, ViewChildren} from '
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
 import {AnnotationComponent} from '../annotation/annotation.component';
+import { int } from 'babylonjs';
 
 @Component({
   selector: 'app-annotationcards',
@@ -25,21 +26,19 @@ export class AnnotationcardsComponent implements OnInit, AfterViewInit {
 
     // setVisabile for newly created annotation by double click on mesh
     this.annotationsList.changes.subscribe(() => {
-      this.setVisability(this.annotationmarkerService.open_popup);
-
-      
+      this.setVisability(this.annotationmarkerService.open_popup, 123);
     });
 
-    // setVisabile for freshly clicked annotationmarkers
+    // setVisabile for clicked annotationmarkers
     this.annotationmarkerService.popupIsOpen().subscribe(
-      popup_is_open => this.setVisability(popup_is_open)
+      popup_is_open => this.setVisability(popup_is_open, 321)
     );
   }
 
-  public setVisability(id: string) {
+  public setVisability(id: string, code: int) {
     const found = this.annotationsList.find(annotation => annotation.id === id);
+    
     if (found) {
-      // save "found editMode" befor changing editMode of all Annotations
       const foundID = found.id;
       this.hideAllCards(foundID);
     }

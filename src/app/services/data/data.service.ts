@@ -44,7 +44,7 @@ export class DataService {
   public updateAnnotation(annotation: Annotation): void {
     if (annotation._id === 'DefaultAnnotation') return;
     this.pouchdb.get(annotation._id).then((result: Annotation) => {
-      console.log('Updating annotation', annotation);
+      // console.log('Updating annotation', annotation);
       result = annotation;
       return result;
     });
@@ -53,7 +53,7 @@ export class DataService {
   public updateAnnotationRanking(id: string, ranking: number) {
     if (id === 'DefaultAnnotation') return;
     this.pouchdb.get(id).then((result: Annotation) => {
-      console.log('Updating ranking', result, ranking);
+      // console.log('Updating ranking', result, ranking);
       result.ranking = ranking;
       return result;
     });

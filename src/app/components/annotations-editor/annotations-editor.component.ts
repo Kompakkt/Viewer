@@ -5,7 +5,7 @@ import {AnnotationService} from '../../services/annotation/annotation.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
 import {CameraService} from '../../services/camera/camera.service';
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
-
+import {SocketService} from '../../services/socket/socket.service';
 
 @Component({
   selector: 'app-annotations-editor',
@@ -24,9 +24,12 @@ export class AnnotationsEditorComponent implements OnInit {
 
   public id = '';
 
-  constructor(private dataService: DataService, private annotationService: AnnotationService,
-              private babylonService: BabylonService, private cameraService: CameraService,
-              private annotationmarkerService: AnnotationmarkerService
+  constructor(private dataService: DataService, 
+              private annotationService: AnnotationService,
+              private babylonService: BabylonService, 
+              private cameraService: CameraService,
+              private annotationmarkerService: AnnotationmarkerService,
+              private socketService: SocketService
   ) {
   }
 
@@ -94,9 +97,8 @@ export class AnnotationsEditorComponent implements OnInit {
 
     // 1.1.2
     // - Annotation bearbeiten (auf's Auge klicken)
-    if (this.annotationService.socketService.socket){
-      this.annotationService.socketService.socket.emit('message', 'Annotation bearbeiten!');
-      this.annotationService.socketService.socket.emit('editAnnotation', this.annotation);
+    if (this.socketService.socket){
+      this.socketService.socket.emit('editAnnotation', [this.annotationService.socketRoom, this.annotation]);
     }
     
   }

@@ -6,6 +6,8 @@ import {DataService} from '../../services/data/data.service';
 import {Vector3, Matrix} from 'babylonjs';
 import { AnnotationmarkerService } from 'src/app/services/annotationmarker/annotationmarker.service';
 
+import {SocketService} from '../../services/socket/socket.service';
+
 @Component({
   selector: 'app-annotation',
   templateUrl: './annotation.component.html',
@@ -21,16 +23,16 @@ export class AnnotationComponent implements OnInit {
   public labelModeText = 'edit';
   public positionTop = 0;
   public positionLeft = 0;
-  public visibility: boolean;
+  public visibility = false;
   public id = '';
   public opacity = '0';
 
   constructor(private dataService: DataService,
               private annotationService: AnnotationService,
               private babylonService: BabylonService,
-              private annotationmarkerService: AnnotationmarkerService
+              private annotationmarkerService: AnnotationmarkerService,
+              private socketService: SocketService
               ) {
-    this.visibility = false;
   }
 
   ngOnInit() {
@@ -39,8 +41,8 @@ export class AnnotationComponent implements OnInit {
       this.id = this.annotation._id;
 
       if (this.annotationmarkerService.open_popup === this.annotation._id) {
-        this.visibility = true;
         this.editMode = true;
+        this.visibility = true;
         this.labelMode = 'remove_red_eye';
         this.labelModeText = 'view';
       }
@@ -131,9 +133,8 @@ export class AnnotationComponent implements OnInit {
     this.dataService.updateAnnotation(this.annotation);
     // 1.1.2
     // - Annotation bearbeiten (auf's Auge klicken)
-    if (this.annotationService.socketService.socket){
-      this.annotationService.socketService.socket.emit('message', 'Annotation bearbeiten!');
-      this.annotationService.socketService.socket.emit('editAnnotation', this.annotation);
+    if (this.socketService.socket){
+      this.socketService.socket.emit('editAnnotation', [this.annotationService.socketRoom, this.annotation]);
     }
     
   }
