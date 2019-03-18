@@ -195,6 +195,87 @@ export class ModelsettingsService {
     this.babylonService.getScene().getMeshesByTags('ground').map(mesh => mesh.visibility = 0);
   }
 
+  public resetVisualSettingsHelper() {
+    this.showBoundingBoxModel = false;
+    this.boundingBox.visibility = 0;
+
+    this.showBoundingBoxMeshes = false;
+    for (let _i = 0; _i < this.actualModelMeshes.length; _i++) {
+      const mesh = this.actualModelMeshes[_i];
+      mesh.showBoundingBox = false;
+    }
+
+    this.showWorldAxis = false;
+    this.babylonService.getScene().getMeshesByTags('worldAxis').map(mesh => mesh.visibility = 0);
+    this.scalingFactorWorldAxis = 1;
+    const postemp = 1 * 0.9 * 18;
+    this.babylonService.getScene().getMeshesByTags('worldAxis').map(
+      mesh => mesh.scaling = new BABYLON.Vector3(1, 1, 1));
+    this.babylonService.getScene().getMeshesByTags('worldAxisX').map(
+      mesh => mesh.position = new BABYLON.Vector3(0.9 * postemp, -0.05 * postemp, 0));
+    this.babylonService.getScene().getMeshesByTags('worldAxisY').map(
+      mesh => mesh.position = new BABYLON.Vector3(0, 0.9 * postemp, -0.05 * postemp));
+    this.babylonService.getScene().getMeshesByTags('worldAxisZ').map(
+      mesh => mesh.position = new BABYLON.Vector3(0, 0.05 * postemp, 0.9 * postemp));
+
+    this.showLocalAxis = false;
+    this.babylonService.getScene().getMeshesByTags('localAxis').map(mesh => mesh.visibility = 0);
+    this.scalingFactorLocalAxis = 1;
+    const posxz = 1 * 0.9 * 12;
+    this.babylonService.getScene().getMeshesByTags('localAxis').map(
+      mesh => mesh.scaling = new BABYLON.Vector3(1, 1, 1));
+    this.babylonService.getScene().getMeshesByTags('localAxisX').map(
+      mesh => mesh.position = new BABYLON.Vector3(0.9 * posxz, -0.05 * posxz, 0));
+    this.babylonService.getScene().getMeshesByTags('localAxisY').map(
+      mesh => mesh.position = new BABYLON.Vector3(0, 0.9 * posxz, -0.05 * posxz));
+    this.babylonService.getScene().getMeshesByTags('localAxisZ').map(
+      mesh => mesh.position = new BABYLON.Vector3(0, 0.05 * posxz, 0.9 * posxz));
+
+    this.showGround = false;
+    this.babylonService.getScene().getMeshesByTags('ground').map(mesh => mesh.visibility = 0);
+    this.scalingFactorGround = 1;
+    this.ground.scaling = new BABYLON.Vector3(1, 1, 1);
+    const material = new BABYLON.StandardMaterial('GroundPlaneMaterial', this.babylonService.getScene());
+    material.diffuseColor = new BABYLON.Color3(255 / 255, 255 / 255, 255 / 255);
+    this.ground.material = material;
+  }
+
+  public resetMeshSize() {
+
+    this.scalingFactor = 1;
+    this.center.scaling = new BABYLON.Vector3(1, 1, 1);
+
+    this.height = this.initialSize.y.toFixed(2);
+    this.width = this.initialSize.x.toFixed(2);
+    this.depth = this.initialSize.z.toFixed(2);
+  }
+
+  public resetMeshRotation() {
+    this.rotationX = 0;
+    this.lastRotationX = 0;
+    this.rotationY = 0;
+    this.lastRotationY = 0;
+    this.rotationZ = 0;
+    this.lastRotationZ = 0;
+
+
+    if (!this.center.rotationQuaternion) {
+      this.center.rotationQuaternion = BABYLON.Quaternion.RotationYawPitchRoll(0, 0, 0);
+    }
+
+    const start = this.center.rotationQuaternion;
+
+    const end = BABYLON.Quaternion.RotationYawPitchRoll(0, 0, 0);
+    const anim = new BABYLON.Animation('anim', 'rotationQuaternion',
+      120, BABYLON.Animation.ANIMATIONTYPE_QUATERNION, BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE);
+    const frame = [{frame: 0, value: start},
+      {frame: 100, value: end}];
+    anim.setKeys(frame);
+    this.center.animations = [];
+    this.center.animations.push(anim);
+    this.babylonService.getScene().beginAnimation(this.center, 0, 100, false);
+
+  }
 
   public async decomposeAfterSetting() {
     if (this.center) {
