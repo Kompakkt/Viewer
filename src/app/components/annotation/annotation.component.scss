@@ -14,6 +14,36 @@ $max-width: 500px;
   transition: all .0s ease-in-out;
 }
 
+.single-annotation-card.resizable {
+  overflow: hidden;
+  resize: both;
+  width: 350px;
+  max-width: 100% !important;
+
+  padding: 15px 35px 20px 20px !important;
+  min-height: 125px;
+}
+
+.single-annotation-card.resizable.editmode {
+  overflow-y: scroll;
+  resize: none;
+}
+
+.single-annotation-card.resizable .mat-card-content {
+  overflow-y: scroll;
+  height: 100% !important;
+}
+
+.single-annotation-card.resizable .mat-card-actions {
+  position: absolute;
+  top: 37px;
+  right: 15px;
+}
+
+.single-annotation-card.resizable .mat-card-actions .mat-icon-button {
+  display: block !important;
+}
+
 .single-annotation-card .mat-form-field {
   width: 100% !important;
 }
@@ -21,7 +51,7 @@ $max-width: 500px;
 #closeButton {
   position: absolute;
   top: 3px;
-  right: 5px;
+  right: 7px;
 }
 
 .mat-card {
@@ -50,7 +80,7 @@ $max-width: 500px;
 }
 
 .editmode {
-  opacity: 1 !important;
+  // opacity: 1 !important;
 }
 
 .mat-form-field-infix,
