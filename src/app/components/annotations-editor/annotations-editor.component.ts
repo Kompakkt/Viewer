@@ -97,7 +97,7 @@ export class AnnotationsEditorComponent implements OnInit {
 
     // 1.1.2
     // - Annotation bearbeiten (auf's Auge klicken)
-    if (this.socketService.socket){
+    if (this.annotationService.inSocket){
       this.socketService.socket.emit('editAnnotation', [this.annotationService.socketRoom, this.annotation]);
     }
     

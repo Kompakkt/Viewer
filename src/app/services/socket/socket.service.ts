@@ -30,7 +30,6 @@ import {LoadModelService} from '../load-model/load-model.service';
 export class SocketService {
 
   // SOCKET_VARIABLES 
-  public inSocket: boolean;
   public collaboratorsAnnotations: Annotation[];
   public collaborators: String[];
 
@@ -120,10 +119,33 @@ export class SocketService {
                                             // delete "data" (Person-Annotations) from 'collaboratorsAnnotations'
     
 
-    // SOCKET
-    this.inSocket = false;
+    // SOCKET_Variables
+    this.annotationService.inSocket = false;
     this.collaboratorsAnnotations = [];
     this.collaborators = [];
+
+    // SET SOCKETROOM (this.annotationService.socketRoom)
+    this.loadModelService.Observables.actualModel.subscribe(actualModel => {
+
+      const oldSocketRoom = this.annotationService.socketRoom;
+
+      if (this.annotationService.currentCompilation !== undefined){
+        if (this.annotationService.currentCompilation.name != undefined){
+          this.annotationService.socketRoom = this.annotationService.currentCompilation.name + '_' + this.annotationService.modelName;
+        }
+        else {
+          this.annotationService.socketRoom = this.annotationService.modelName;
+        }
+      }
+      else {
+        this.annotationService.socketRoom = this.annotationService.modelName;
+      }
+
+      // Emit 'changeRoom'
+      if (this.annotationService.inSocket){
+        this.changeSocketRoom(oldSocketRoom);
+      }
+    });
 
 
     // 1.2.0
@@ -188,8 +210,12 @@ export class SocketService {
 
       }
 
-      // console.log("this.collaboratorsAnnotations");
-      // console.log(JSON.parse(JSON.stringify(this.collaboratorsAnnotations)));
+      console.log("SOCKET.IO INFO");
+      console.log("--------------");
+      console.log("this.collaborators:");
+      console.log(JSON.parse(JSON.stringify(this.collaborators)));
+      console.log("this.collaboratorsAnnotations");
+      console.log(JSON.parse(JSON.stringify(this.collaboratorsAnnotations)));
     });
     
 
@@ -200,7 +226,12 @@ export class SocketService {
       this.collaboratorsAnnotations.push(result[1]);
       console.log(`Online User '${result[0]}' created a new Annotation.`); 
 
-      // console.log("this.collaboratorsAnnotations");
+
+      console.log("SOCKET.IO INFO");
+      console.log("--------------");
+      console.log("this.collaborators:");
+      console.log(JSON.parse(JSON.stringify(this.collaborators)));
+      console.log("this.collaboratorsAnnotations");
       console.log(JSON.parse(JSON.stringify(this.collaboratorsAnnotations)));
     });
     
@@ -218,7 +249,12 @@ export class SocketService {
         }
         i++;
       }
-      // console.log("this.collaboratorsAnnotations");
+
+      console.log("SOCKET.IO INFO");
+      console.log("--------------");
+      console.log("this.collaborators:");
+      console.log(JSON.parse(JSON.stringify(this.collaborators)));
+      console.log("this.collaboratorsAnnotations");
       console.log(JSON.parse(JSON.stringify(this.collaboratorsAnnotations)));
     });
 
@@ -237,6 +273,11 @@ export class SocketService {
         i++;
       }
 
+
+      console.log("SOCKET.IO INFO");
+      console.log("--------------");
+      console.log("this.collaborators:");
+      console.log(JSON.parse(JSON.stringify(this.collaborators)));
       console.log("this.collaboratorsAnnotations");
       console.log(JSON.parse(JSON.stringify(this.collaboratorsAnnotations)));
     });
@@ -258,6 +299,11 @@ export class SocketService {
       }    
       console.log(`Online User '${result[0]}' in Room ${this.annotationService.socketRoom} changed ranking of his/her Annotations (for this.CollaboratorsAnnotation)`);     
 
+
+      console.log("SOCKET.IO INFO");
+      console.log("--------------");
+      console.log("this.collaborators:");
+      console.log(JSON.parse(JSON.stringify(this.collaborators)));
       console.log("this.collaboratorsAnnotations");
       console.log(JSON.parse(JSON.stringify(this.collaboratorsAnnotations)));
     });
@@ -269,27 +315,34 @@ export class SocketService {
     this.socket.on('lostConnection', result => { // [user, annotations]);
       
       console.log(`User '${result[0]}' in Room ${this.annotationService.socketRoom} logged out from Socket.io`);     
+      console.log(`Delete his/her information's in collaborator's!`);     
       
       // delete user from collaborators
       let userCounter = 0;
       for (const collaborator of this.collaborators){
         if (collaborator === result[0]){
           this.collaborators.splice(userCounter, 1);
-          console.log(`Deletet User '${result[0]}' from this.collaborators`);     
+          // console.log(`Deletet User '${result[0]}' from this.collaborators`);     
         }
         userCounter++;
       }
       // delete his/her annotations from collaboratorsAnnotations
-      let i = 0;
-      for (const annotation of this.collaboratorsAnnotations){
-        if (annotation._id === result[1]._id){
-            this.collaboratorsAnnotations.splice(i, 1);
-            console.log(`Deletet Annotation ${i} of User '${result[0]}' from this.collaboratorsAnnotations`);     
+      for (const logoutAnnotation of result[1]){
+        let i = 0;
+        for (const collaboratorsAnnotation of this.collaboratorsAnnotations){
+          if (collaboratorsAnnotation._id === logoutAnnotation._id){
+              this.collaboratorsAnnotations.splice(i, 1);
+              // console.log(`Deletet Annotation '${logoutAnnotation._id}' of User '${result[0]}' from this.collaboratorsAnnotations`);     
+          }
+          i++;
         }
-        i++;
       }
 
       
+      console.log("SOCKET.IO INFO");
+      console.log("--------------");
+      console.log("this.collaborators:");
+      console.log(JSON.parse(JSON.stringify(this.collaborators)));
       console.log("this.collaboratorsAnnotations");
       console.log(JSON.parse(JSON.stringify(this.collaboratorsAnnotations)));
     });
@@ -352,7 +405,12 @@ export class SocketService {
         }
       }
     
-      console.log("this.collaboratorsAnnotations");
+
+      console.log("SOCKET.IO INFO");
+      console.log("--------------");
+      console.log("this.collaborators:");
+      console.log(JSON.parse(JSON.stringify(this.collaborators)));
+      console.log("this.collaboratorsAnnotations:");
       console.log(JSON.parse(JSON.stringify(this.collaboratorsAnnotations)));
       
       // Send this User's annotations to the 'newUser'
@@ -361,25 +419,78 @@ export class SocketService {
 
 
 
+
+
     // 1.2.8
     // -- Wenn eine Person den Raum verlässt
-    this.socket.on('changeRoom', result => { 
+    this.socket.on('changeRoom', result => {  // [socket.id(User), annotations]
+       
+      // delete Data of old room-member
+      console.log(`Member '${result[0]}' of your Room ${this.annotationService.socketRoom} changed the Socket-Room`);     
+      console.log(`Delete his/her information's in this Room!`)
       
-      let i=0;
-      for (const annotation of this.collaboratorsAnnotations){
-        if (annotation.creator._id === result){
-          this.collaboratorsAnnotations.splice(i, 1);
+      // delete user from collaborators
+      let userCounter = 0;
+      for (const collaborator of this.collaborators){
+        if (collaborator === result[0]){
+          this.collaborators.splice(userCounter, 1);
         }
-        i++;
+        userCounter++;
       }
+
+
+      // !!!
+      // 
+      // CHANGE ROOM EMIT -- BEFORE MODEL CHANGE -- OR IN WHAT WAY TO TRANSMIT THE ANNOTATIONS OF THE OLD ROOM-MEMBER (TO OLD ROOM AT FIRST)
+      // 
+      // !!!
+
+      // delete his/her annotations from collaboratorsAnnotations
+      for (const changeRoomAnnotation of result[1]){
+        let i = 0;
+        for (const collaboratorsAnnotation of this.collaboratorsAnnotations){
+          if (collaboratorsAnnotation._id === changeRoomAnnotation._id){
+              this.collaboratorsAnnotations.splice(i, 1);
+              // console.log(`Deletet Annotation '${logoutAnnotation._id}' of User '${result[0]}' from this.collaboratorsAnnotations`);     
+          }
+          i++;
+        }
+      }
+
+      console.log("SOCKET.IO INFO");
+      console.log("--------------");
+      console.log("this.collaborators:");
+      console.log(JSON.parse(JSON.stringify(this.collaborators)));
+      console.log("this.collaboratorsAnnotations");
+      console.log(JSON.parse(JSON.stringify(this.collaboratorsAnnotations)));
     });
+
+
+
+
+    // 1.2.6.2
+    this.socket.on('logout', result => { // socket.id
+
+      console.log(`You are logging out from Socket.io ...`); 
+      this.socket.disconnect();
+      console.log(`DISCONNECTED FROM SOCKET.IO`);
+    }); 
+
+
+    // 1.2.7.2
+    this.socket.on('myNewRoom', result => { // newSocketRoom
+
+      console.log(`LEFT ROOM: ${result[0]}'`); 
+      console.log(`JOINING ROOM: ${result[1]}'...`); 
+    }); 
+
   }
 
 
   // 1.1.5
   // -- Mit Socket Verbinden
   public async loginToSocket(){
-    this.inSocket = true; 
+    this.annotationService.inSocket = true; 
     this.socket.connect(); 
     console.log(`LOGGED TO SOCKET.IO \n To Room '${this.annotationService.socketRoom}'`);
     // emit "you" as newUser to other online members of your current room  
@@ -391,20 +502,23 @@ export class SocketService {
   // -- Verbindung trennen (Socket)
   public async disconnectSocket(){
     
-    this.inSocket = false; 
+    this.annotationService.inSocket = false; 
     this.collaborators = [];
     this.collaboratorsAnnotations = [];
 
+    // send info to other Room members
+    // then
+    // emit 'logout' from Socket.id for this User 
     await this.socket.emit('lostConnection', [this.annotationService.socketRoom, this.annotationService.annotations]);
-
-    // this.socket.disconnect();
-
-    console.log(`DISCONNECTED FROM SOCKET.IO`);
   }
+
 
   // 1.1.7
   // -- Wenn eine Person den Raum verlässt
-  public async changeSocketRoom(){
-  //  ... 
+  public async changeSocketRoom(oldSocketRoom){
+      
+      this.collaborators = [];
+      this.collaboratorsAnnotations = [];
+      this.socket.emit('changeRoom', [oldSocketRoom, this.annotationService.socketRoom, this.annotationService.annotations]);
   }
 }

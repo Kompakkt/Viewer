@@ -12,7 +12,7 @@ import {LoadModelService} from '../load-model/load-model.service';
 import {environment} from '../../../environments/environment';
 
 import { Socket } from 'ngx-socket-io';
-import { empty } from 'rxjs';
+import {ReplaySubject} from 'rxjs';
 
 /**
  * @author Zoe Schubert
@@ -26,14 +26,16 @@ import { empty } from 'rxjs';
 export class AnnotationService {
 
   // SOCKETROOM
+  public inSocket: boolean;
   public socketRoom: string;
+
 
   public annotations: Annotation[];
   private unsortedAnnotations: Annotation[];
   private allAnnotations: Annotation[];
   public modelName: string;
   private currentModel: any;
-  private currentCompilation: any;
+  public currentCompilation: any;
   private actualModelMeshes: BABYLON.Mesh[];
   private isDefaultLoad: boolean;
 
@@ -46,16 +48,13 @@ export class AnnotationService {
               private message: MessageService,
               public socket: Socket)
   {
+
     this.annotations = [];
+
     this.loadModelService.Observables.actualModel.subscribe(actualModel => {
       this.modelName = actualModel.name;
       this.currentModel = actualModel;
-
-      // SOCKETROOM
-      this.socketRoom = this.currentCompilation + this.modelName;
-      // this.socket.emit('changeRoom', this.socketRoom);
     });
-    
     this.loadModelService.Observables.actualCollection.subscribe(actualCompilation => {
       this.currentCompilation = actualCompilation;
     });
@@ -83,7 +82,7 @@ export class AnnotationService {
     // Alle Marker, die eventuell vom vorherigen Modell noch da sind, sollen gelöscht werden
     await this.annotationmarkerService.deleteAllMarker();
 
-    // Beim Laden eines Mdoells, werden alle in der PuchDB vorhandenen Annotationen in
+    // Beim Laden eines Modells, werden alle in der PuchDB vorhandenen Annotationen in
     // das Array "allAnnotations" geladen
     if (this.isDefaultLoad === false) {
       await this.getAnnotations();
@@ -158,6 +157,10 @@ export class AnnotationService {
       this.actionService.createActionManager(mesh, ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
     });
     this.annotationMode(false);
+
+    if(this.inSocket){
+      this.socket.emit('myNewRoom', [this.socketRoom, this.annotations]);
+    }
   }
 
 
@@ -260,7 +263,7 @@ export class AnnotationService {
 
     // 1.1.1
     // - Annotation erstellen 
-    if (this.socket){
+    if (this.inSocket){
       this.socket.emit("createAnnotation", [this.socketRoom, annotation]);
     }
 
@@ -326,7 +329,7 @@ export class AnnotationService {
 
     // 1.1.4
     // - Löschen der Annotation
-    if (this.socket){ 
+    if (this.inSocket){ 
       this.socket.emit('deleteAnnotation', [this.socketRoom, annotation]);
     }
 
@@ -347,7 +350,7 @@ export class AnnotationService {
 
     // 1.1.3
     // - Ranking der Annotation ändern
-    if (this.socket){
+    if (this.inSocket){
       let IdArray = new Array();
       let RankingArray = new Array();
       for (const annotation of this.annotations) {
@@ -355,7 +358,9 @@ export class AnnotationService {
         RankingArray.push(annotation.ranking);
       }
       // Send ID's & new Ranking of changed annotations 
-      this.socket.emit('changeRanking', [this.socketRoom, IdArray, RankingArray]);
+      if(this.inSocket){
+        this.socket.emit('changeRanking', [this.socketRoom, IdArray, RankingArray]);
+      }
     }
         
   }
