@@ -94,7 +94,7 @@ export class AnnotationService {
     // Die Annotationen, die sich auf das aktuelle Model beziehen (also als relatedModel den Namen
     // des aktuellen Models aufweisen, werden raus gesucht und in das Array für unsortierte Annotationen
     // gepusht, da sie dort liegen ohne visuelle Elemente zu erzeugen
-    await this.getActualAnnotations(this.currentModel._id);
+    await this.getActualAnnotations(this.currentModel._id, this.currentCompilation);
 
     // Jetzt sollen die Annotationen sortiert werden und in der richtigen Reihenfolge in das Array geschrieben werden
     // Achtung: dann gibt es auch direkt einen visuellen Output durch die Components!
@@ -118,11 +118,23 @@ export class AnnotationService {
   }
 
 
-  private async getActualAnnotations(modelName: string) {
+  private async getActualAnnotations(modelName: string, compilation: any) {
 
     for (const annotation of this.allAnnotations) {
+
+      // MODEL
       if (annotation.target.source.relatedModel === modelName) {
-        this.unsortedAnnotations.push(annotation);
+
+        // + COMPILATION
+        if(compilation !== undefined){
+          if (annotation.target.source.relatedCompilation === compilation._id){
+            this.unsortedAnnotations.push(annotation);
+          }
+        }
+        else {
+          this.unsortedAnnotations.push(annotation);
+        }
+
       }
     }
   }

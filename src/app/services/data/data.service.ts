@@ -11,7 +11,11 @@ export class DataService {
   public pouchdb: any;
 
   public constructor(private mongo: MongohandlerService) {
+    
+    PouchDB.plugin(require('pouchdb-upsert'));
+
     this.pouchdb = new PouchDB('annotationdb');
+
   }
 
   public fetch() {
@@ -43,8 +47,9 @@ export class DataService {
 
   public updateAnnotation(annotation: Annotation): void {
     if (annotation._id === 'DefaultAnnotation') return;
-    this.pouchdb.get(annotation._id).then((result: Annotation) => {
-      // console.log('Updating annotation', annotation);
+
+    this.pouchdb.upsert(annotation._id, function (result) {
+      // console.log('Updating annotation in PouchDB:');
       result = annotation;
       return result;
     });
@@ -52,10 +57,16 @@ export class DataService {
 
   public updateAnnotationRanking(id: string, ranking: number) {
     if (id === 'DefaultAnnotation') return;
-    this.pouchdb.get(id).then((result: Annotation) => {
-      // console.log('Updating ranking', result, ranking);
+    
+    this.pouchdb.upsert(id, function (result) {
+      console.log('Updating ranking in PouchDB:');
       result.ranking = ranking;
       return result;
     });
+    // this.pouchdb.get(id).then((result: Annotation) => {
+    //   console.log('Updating ranking in PouchDB', result, ranking);
+    //   result.ranking = ranking;
+    //   return result;
+    // });
   }
 }
