@@ -49,7 +49,6 @@ export class DataService {
     if (annotation._id === 'DefaultAnnotation') return;
 
     this.pouchdb.upsert(annotation._id, function (result) {
-      // console.log('Updating annotation in PouchDB:');
       result = annotation;
       return result;
     });
@@ -57,16 +56,10 @@ export class DataService {
 
   public updateAnnotationRanking(id: string, ranking: number) {
     if (id === 'DefaultAnnotation') return;
-    
     this.pouchdb.upsert(id, function (result) {
       console.log('Updating ranking in PouchDB:');
       result.ranking = ranking;
       return result;
     });
-    // this.pouchdb.get(id).then((result: Annotation) => {
-    //   console.log('Updating ranking in PouchDB', result, ranking);
-    //   result.ranking = ranking;
-    //   return result;
-    // });
   }
 }

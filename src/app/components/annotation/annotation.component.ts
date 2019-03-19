@@ -132,7 +132,6 @@ export class AnnotationComponent implements OnInit {
   private save(): void {
     this.dataService.updateAnnotation(this.annotation);
     // 1.1.2
-    // - Annotation bearbeiten (auf's Auge klicken)
     if (this.annotationService.inSocket){
       this.socketService.socket.emit('editAnnotation', [this.annotationService.socketRoom, this.annotation]);
     }
