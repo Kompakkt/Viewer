@@ -4,21 +4,21 @@
 
 // Original:
 // 
-// export const environment = {
-//   production: false,
-//   express_server_url: 'https://miskatonic.hki.uni-koeln.de',
-//   express_server_port: 1337,
-//   version: require('../../package.json').version
-// };
+export const environment = {
+  production: false,
+  express_server_url: 'https://miskatonic.hki.uni-koeln.de',
+  express_server_port: 1337,
+  version: require('../../package.json').version
+};
 
 // Local:
 // 
-export const environment = {
-  production: false,
-  express_server_url: 'http://localhost',
-  express_server_port: 8080,
-  version: require('../../package.json').version
-};
+// export const environment = {
+//   production: false,
+//   express_server_url: 'http://localhost',
+//   express_server_port: 8080,
+//   version: require('../../package.json').version
+// };
 
 /*
  * In development mode, to ignore zone related error stack frames such as
