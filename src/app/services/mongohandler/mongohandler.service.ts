@@ -29,7 +29,10 @@ export class MongohandlerService {
   // Helper
   private updatePreviewURL(promise: Promise<any>) {
     const update = (obj) => {
-      if (obj && obj.settings && obj.settings.preview && obj.settings.preview.indexOf('base64') === -1) {
+      // Only update if it's a relative path and not a URL
+      if (obj && obj.settings && obj.settings.preview
+        && obj.settings.preview.indexOf('base64') === -1
+        && obj.settings.preview.indexOf('http') === -1) {
         obj.settings.preview = `${this.endpoint}${obj.settings.preview}`;
       }
       return obj;
