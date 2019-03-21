@@ -29,6 +29,8 @@ export class LoadModelService {
     actualCollection: this.Subjects.actualCollection.asObservable(),
   };
 
+  public personalCollections: Array<any> = [];
+
   private userOwnedModels: Array<any> = [];
   public currentUserData: any;
 
@@ -247,6 +249,9 @@ export class LoadModelService {
         } else {
           this.currentUserData = userData;
           this.userOwnedModels = userData.data.models;
+          if (userData.data && userData.data.compilations) {
+          this.personalCollections = userData.data.compilations;
+          }
         }
       }, error => {
         this.message.error('Connection to object server refused.');

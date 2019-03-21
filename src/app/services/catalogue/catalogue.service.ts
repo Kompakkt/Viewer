@@ -13,12 +13,12 @@ export class CatalogueService {
 
   private Subjects = {
     models: new BehaviorSubject<Model[]>(Array<Model>()),
-    collections: new BehaviorSubject<any[]>(Array<any>()),
+    collections: new BehaviorSubject<any[]>(Array<any>())
   };
 
   public Observables = {
     models: this.Subjects.models.asObservable(),
-    collections: this.Subjects.collections.asObservable(),
+    collections: this.Subjects.collections.asObservable()
   };
 
   private isFirstLoad = true;

@@ -37,7 +37,7 @@ export class CollectionsOverviewComponent implements AfterViewInit {
 
   constructor(private overlayService: OverlayService,
               public catalogueService: CatalogueService,
-              private loadModelService: LoadModelService,
+              public loadModelService: LoadModelService,
               private message: MessageService,
               public dialog: MatDialog,
               private _changeDetectionRef: ChangeDetectorRef
