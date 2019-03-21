@@ -1,6 +1,7 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { DialogMeshsettingsComponent } from './dialog-meshsettings.component';
+import {DialogMeshsettingsComponent} from './dialog-meshsettings.component';
+import {MatDialogModule} from '@angular/material';
 
 describe('DialogMeshsettingsComponent', () => {
   let component: DialogMeshsettingsComponent;
@@ -8,9 +9,10 @@ describe('DialogMeshsettingsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DialogMeshsettingsComponent ]
+      declarations: [DialogMeshsettingsComponent],
+      imports: [MatDialogModule]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

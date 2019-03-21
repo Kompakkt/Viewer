@@ -1,6 +1,7 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { DialogDeleteAnnotationsComponent } from './dialog-delete-annotations.component';
+import {DialogDeleteAnnotationsComponent} from './dialog-delete-annotations.component';
+import {MatDialogModule} from '@angular/material';
 
 describe('DialogDeleteAnnotationsComponent', () => {
   let component: DialogDeleteAnnotationsComponent;
@@ -8,9 +9,12 @@ describe('DialogDeleteAnnotationsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DialogDeleteAnnotationsComponent ]
+      declarations: [DialogDeleteAnnotationsComponent],
+      imports: [
+        MatDialogModule
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

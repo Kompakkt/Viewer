@@ -15,6 +15,8 @@ import {AnnotationcardsComponent} from '../annotationcards/annotationcards.compo
 import {AnnotationComponent} from '../annotation/annotation.component';
 import {FormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
+import {SocketIoModule} from 'ngx-socket-io';
+import {environment} from '../../../environments/environment';
 
 describe('SceneComponent', () => {
   let component: SceneComponent;
@@ -37,7 +39,11 @@ describe('SceneComponent', () => {
         MatFormFieldModule,
         MatIconModule,
         MatSnackBarModule,
-        HttpClientModule]
+        HttpClientModule,
+        SocketIoModule.forRoot({
+          url: `${environment.express_server_url}:${environment.express_server_port}`,
+          options: {}
+        })]
     })
       .compileComponents();
   }));
