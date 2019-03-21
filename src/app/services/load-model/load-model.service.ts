@@ -30,8 +30,7 @@ export class LoadModelService {
   };
 
   public personalCollections: Array<any> = [];
-
-  private userOwnedModels: Array<any> = [];
+  public userOwnedModels: Array<any> = [];
   public currentUserData: any;
 
   private baseUrl = `${environment.express_server_url}:${environment.express_server_port}/`;
