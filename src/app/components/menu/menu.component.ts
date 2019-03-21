@@ -29,11 +29,13 @@ import {LoginComponent} from '../dialogs/dialog-login/login.component';
 export class MenuComponent implements OnInit {
 
   // 1.1.5
-  public toggleChecked= false;
+  public toggleChecked = false;
 
   public menuIsEnabled = true;
   private isSingleModel: boolean;
   private isSingleCollection: boolean;
+
+  public isLoggedIn: boolean;
 
   private editActive = false;
   private collectionsActive = false;
@@ -73,6 +75,10 @@ export class MenuComponent implements OnInit {
 
     this.loadModelService.singleCollection.subscribe(singleCollection => {
       this.isSingleCollection = singleCollection;
+    });
+
+    this.catalogueService.loggedIn.subscribe(loggedIn => {
+      this.isLoggedIn = loggedIn;
     });
   }
 
@@ -168,15 +174,21 @@ export class MenuComponent implements OnInit {
     this.dialog.open(LoginComponent, dialogConfig);
   }
 
+  public logout() {
+    this.mongohandlerService.logout().then(() => {
+      this.catalogueService.bootstrap();
+    });
+  }
+
   // 1.1.5
   private onSocketToggleChange() {
-    if (this.toggleChecked){
+    if (this.toggleChecked) {
       this.annotationService.loginToSocket();
     }
-    else{
+    else {
       this.annotationService.lostConnectionSocket();
     }
-  } 
+  }
 
 }
 
