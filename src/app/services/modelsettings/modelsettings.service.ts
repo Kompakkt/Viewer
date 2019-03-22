@@ -289,7 +289,8 @@ export class ModelsettingsService {
       this.cameraService.setUpperRadiusLimit(Math.max(this.max.x, this.max.y, this.max.z) * this.scalingFactor * 5);
 
       for (let _i = 0; _i < this.actualModelMeshes.length; _i++) {
-        mesh.parent = null;
+        const mesh = this.actualModelMeshes[_i];
+        mesh.parent = this.center;
       }
 
       await this.destroyCenter();
