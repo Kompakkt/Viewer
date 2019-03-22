@@ -15,7 +15,7 @@ import {
   MatOptionModule,
   MatRadioModule,
   MatSelectModule, MatSliderModule, MatSlideToggleModule, MatSnackBarModule,
-  MatTabsModule, MatTooltipModule, MatStepperModule
+  MatTabsModule, MatTooltipModule, MatStepperModule, MatProgressSpinnerModule
 } from '@angular/material';
 import {FormsModule} from '@angular/forms';
 import {AnnotationsEditorComponent} from './components/annotations-editor/annotations-editor.component';
@@ -66,6 +66,7 @@ describe('AppComponent', () => {
         HttpClientModule,
         MatDialogModule,
         MatStepperModule,
+        MatProgressSpinnerModule,
         SocketIoModule.forRoot({
           url: `${environment.express_server_url}:${environment.express_server_port}`,
           options: {}

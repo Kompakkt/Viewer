@@ -5,7 +5,7 @@ import {
   MatCardModule,
   MatDialogModule,
   MatIconModule,
-  MatOptionModule,
+  MatOptionModule, MatProgressSpinnerModule,
   MatRadioModule,
   MatSelectModule,
   MatSnackBarModule
@@ -30,7 +30,8 @@ describe('CollectionsOverviewComponent', () => {
         MatIconModule,
         MatCardModule,
         HttpClientModule,
-        MatSnackBarModule
+        MatSnackBarModule,
+        MatProgressSpinnerModule
       ]
     })
       .compileComponents();
