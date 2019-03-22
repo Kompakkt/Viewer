@@ -25,9 +25,12 @@ import {ModelComponent} from './components/model/model.component';
 import {AnnotationComponent} from './components/annotation/annotation.component';
 import {ColorChromeModule} from 'ngx-color/chrome';
 import {HttpClientModule} from '@angular/common/http';
+import {SocketIoModule} from 'ngx-socket-io';
+import {environment} from '../environments/environment';
 
 describe('AppComponent', () => {
   beforeEach(async(() => {
+
     TestBed.configureTestingModule({
       declarations: [
         AppComponent,
@@ -62,13 +65,18 @@ describe('AppComponent', () => {
         MatSnackBarModule,
         HttpClientModule,
         MatDialogModule,
-        MatStepperModule
+        MatStepperModule,
+        SocketIoModule.forRoot({
+          url: `${environment.express_server_url}:${environment.express_server_port}`,
+          options: {}
+        })
       ]
     }).compileComponents();
-  }));
-  it('should create the app', async(() => {
+  }
+  ));
+  it('should create the app', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.debugElement.componentInstance;
     expect(app).toBeTruthy();
-  }));
+  });
 });

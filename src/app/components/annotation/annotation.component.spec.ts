@@ -4,12 +4,14 @@ import { AnnotationComponent } from './annotation.component';
 import {
   MatCardModule,
   MatFormFieldModule,
-  MatIconModule, MatSnackBarModule,
+  MatIconModule, MatSnackBarModule, MatStepperModule,
   MatTooltipModule
 } from '@angular/material';
 import {FormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 import {Annotation} from '../../interfaces/annotation2/annotation2';
+import {SocketIoModule} from 'ngx-socket-io';
+import {environment} from '../../../environments/environment';
 
 describe('AnnotationComponent', () => {
   let component: AnnotationComponent;
@@ -26,7 +28,11 @@ describe('AnnotationComponent', () => {
         MatSnackBarModule,
         MatTooltipModule,
         FormsModule,
-        HttpClientModule]
+        HttpClientModule,
+        SocketIoModule.forRoot({
+          url: `${environment.express_server_url}:${environment.express_server_port}`,
+          options: {}
+        })]
     })
       .compileComponents();
   }));

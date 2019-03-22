@@ -7,7 +7,7 @@ import {
   MatDialogModule, MatFormFieldModule, MatIconModule,
   MatSliderModule,
   MatSlideToggleModule,
-  MatSnackBarModule
+  MatSnackBarModule, MatStepperModule
 } from '@angular/material';
 import {ColorChromeModule} from 'ngx-color/chrome';
 import {HttpClientModule} from '@angular/common/http';
@@ -31,7 +31,8 @@ describe('ModelsettingsComponent', () => {
         MatCheckboxModule,
         MatFormFieldModule,
         FormsModule,
-        MatIconModule]
+        MatIconModule,
+        MatStepperModule]
     })
       .compileComponents();
   }));
