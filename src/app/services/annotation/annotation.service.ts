@@ -10,12 +10,8 @@ import {ActionManager} from 'babylonjs';
 import * as BABYLON from 'babylonjs';
 import {LoadModelService} from '../load-model/load-model.service';
 import {environment} from '../../../environments/environment';
-import { SocketService } from '../socket/socket.service';
+import {SocketService} from '../socket/socket.service';
 
-/**
- * @author Zoe Schubert
- * @author Jan G. Wieners
- */
 
 @Injectable({
   providedIn: 'root'
@@ -26,21 +22,20 @@ import { SocketService } from '../socket/socket.service';
 // -----------------------------------------------------------------------------------------------------------------------
 // HTML ELEMENTE 
 
-              // -- LOGIN // AUSTRITT  (BUTTON)
-              // -- FILTER (BEI LOGGED-IN)
-                      // USER-LISTE
-                                // USER-X (Aus-/Einblenden)
+// -- LOGIN // AUSTRITT  (BUTTON)
+// -- FILTER (BEI LOGGED-IN)
+// USER-LISTE
+// USER-X (Aus-/Einblenden)
 
 
 // 3.
 // -----------------------------------------------------------------------------------------------------------------------
 // BABYLON ELEMENTE  
 
-        // CREATE MARKER 
-              // --  "public collaboratorsAnnotations: Annotation[];"
-                      // -- MARKER-FARBEN
-                              // (NACH USER-ID)
-
+// CREATE MARKER
+// --  "public collaboratorsAnnotations: Annotation[];"
+// -- MARKER-FARBEN
+// (NACH USER-ID)
 
 
 export class AnnotationService {
@@ -59,6 +54,9 @@ export class AnnotationService {
   private currentCompilation: any;
   private actualModelMeshes: BABYLON.Mesh[];
   private isDefaultLoad: boolean;
+  private isSingleModel: boolean;
+  private isModelOwner: boolean;
+
 
   constructor(private babylonService: BabylonService,
               private dataService: DataService,
@@ -67,89 +65,88 @@ export class AnnotationService {
               private loadModelService: LoadModelService,
               private mongo: MongohandlerService,
               private message: MessageService,
-              public socketService: SocketService)
-  {
+              public socketService: SocketService) {
 
     // 1.
     // EVENTS
 
     // (EVENT-NAMEN)
-      // -- createAnnotation
-      // -- editAnnotation
-      // -- deleteAnnotation
-      // -- changeRanking
-      // -- newUser
-      // -- lostConnection
-      // -- onlineCollaborators (needed (see changeRoom) ???)
-      // -- changeRoom
+    // -- createAnnotation
+    // -- editAnnotation
+    // -- deleteAnnotation
+    // -- changeRanking
+    // -- newUser
+    // -- lostConnection
+    // -- onlineCollaborators (needed (see changeRoom) ???)
+    // -- changeRoom
 
     // 1.1
     // EVENT SENDEN                                                                                     // this.socketService.socket.emit(eventName, data);
-                    // 1.1.1
-                    // - Annotation erstellen
-                                          // this.socketService.socket.emit(eventName, data);
-                                          // emit "createAnnotation"
-                    // 1.1.2
-                    // - Annotation bearbeiten (und aufs Auge klicken)
-                                          // this.socketService.socket.emit(eventName, data);
-                                          // emit "editAnnotation"
-                    // 1.1.3
-                    // - Ranking der Annotation ändern
-                                          // this.socketService.socket.emit(eventName, data);
-                                          // emit "changeRanking"
-                    // 1.1.4
-                    // - Löschen der Annotation
-                                          // this.socketService.socket.emit(eventName, data);
-                                          // emit "deleteAnnotation"
-                    // 1.1.5
-                    // -- Verbinden (Raum)
-                                          // this.socketService.socket.emit(eventName, data);
-                                          // emit "changeRoom" (for miself)
-                                          // emit "newUser" (für andere)
-                    // 1.1.6
-                    // -- Verbindung trennen (Raum)
-                                          // this.socketService.socket.emit(eventName, data);
-                                          // emit "lostConnection"
-                    // 1.1.7
-                    // -- Wählen eines anderen Modells/Collection       ---  Verbindung trennen (alter Raum) --> Verbinden (neuer Raum)
-                                          // this.socketService.socket.emit(eventName, data);
-                                          // emit "changeRoom"
+    // 1.1.1
+    // - Annotation erstellen
+    // this.socketService.socket.emit(eventName, data);
+    // emit "createAnnotation"
+    // 1.1.2
+    // - Annotation bearbeiten (und aufs Auge klicken)
+    // this.socketService.socket.emit(eventName, data);
+    // emit "editAnnotation"
+    // 1.1.3
+    // - Ranking der Annotation ändern
+    // this.socketService.socket.emit(eventName, data);
+    // emit "changeRanking"
+    // 1.1.4
+    // - Löschen der Annotation
+    // this.socketService.socket.emit(eventName, data);
+    // emit "deleteAnnotation"
+    // 1.1.5
+    // -- Verbinden (Raum)
+    // this.socketService.socket.emit(eventName, data);
+    // emit "changeRoom" (for miself)
+    // emit "newUser" (für andere)
+    // 1.1.6
+    // -- Verbindung trennen (Raum)
+    // this.socketService.socket.emit(eventName, data);
+    // emit "lostConnection"
+    // 1.1.7
+    // -- Wählen eines anderen Modells/Collection       ---  Verbindung trennen (alter Raum) --> Verbinden (neuer Raum)
+    // this.socketService.socket.emit(eventName, data);
+    // emit "changeRoom"
 
 
     // 1.2
     // EVENT EMPFANGEN                                                                                 // this.socketService.socket.fromEvent('eventName').subscribe(result => console.log(result));
-                    // 1.2.1
-                    // -- Wenn man dem Raum beitritt
-                                            // emit "onlineCollaborators"
-                                            // get "fromEvent('onlineCollaborators').subscribe(data)"
-                    // 1.2.2
-                    // -- Wenn eine Person eine Annotation erstellt
-                                            // get "fromEvent('createAnnotation').subscribe(data)"
-                                            // push "data" (Person-Annotation) to 'collaboratorsAnnotations'
-                    // 1.2.3
-                    // -- Wenn eine Person eine Annotation bearbeitet
-                                            // get "fromEvent('editAnnotation').subscribe(data)"
-                                            // delete "data-id" & push "data" (Person-Annotation) from & to 'collaboratorsAnnotations'
-                    // 1.2.4
-                    // -- Wenn eine Person eine Annotaiton löscht
-                                            // get "fromEvent('deleteAnnotation').subscribe(data)"
-                                            // delete "data" (Person-Annotation) from 'collaboratorsAnnotations'
-                    // 1.2.5
-                    // -- Wenn eine Person das Ranking bearbeitet
-                                            // get "fromEvent('changeRanking').subscribe(data)"
-                                            // get "data" (new ranking Person-Annotations) to 'collaboratorsAnnotations'
-                    // 1.2.6
-                    // -- Wenn eine Person die Verbindung verliert
-                                            // get "fromEvent('lostConnection').subscribe(data)"
-                                            // delete "data" (Person-Annotations) from 'collaboratorsAnnotations'
-                    // 1.2.7
-                    // -- Wenn eine neue Person dazu kommt
-                                            // get "fromEvent('newUser').subscribe(data)"
-                                            // push "data" (Person-AnnotationS) to 'collaboratorsAnnotations'
-                    // 1.2.8
-                    // -- Wenn eine Person den Raum verlässt
-                                            // get "fromEvent('changeRoom').subscribe(data)"
-                                            // delete "data" (Person-Annotations) from 'collaboratorsAnnotations'
+    // 1.2.1
+    // -- Wenn man dem Raum beitritt
+    // emit "onlineCollaborators"
+    // get "fromEvent('onlineCollaborators').subscribe(data)"
+    // 1.2.2
+    // -- Wenn eine Person eine Annotation erstellt
+    // get "fromEvent('createAnnotation').subscribe(data)"
+    // push "data" (Person-Annotation) to 'collaboratorsAnnotations'
+    // 1.2.3
+    // -- Wenn eine Person eine Annotation bearbeitet
+    // get "fromEvent('editAnnotation').subscribe(data)"
+    // delete "data-id" & push "data" (Person-Annotation) from & to 'collaboratorsAnnotations'
+    // 1.2.4
+    // -- Wenn eine Person eine Annotaiton löscht
+    // get "fromEvent('deleteAnnotation').subscribe(data)"
+    // delete "data" (Person-Annotation) from 'collaboratorsAnnotations'
+    // 1.2.5
+    // -- Wenn eine Person das Ranking bearbeitet
+    // get "fromEvent('changeRanking').subscribe(data)"
+    // get "data" (new ranking Person-Annotations) to 'collaboratorsAnnotations'
+    // 1.2.6
+    // -- Wenn eine Person die Verbindung verliert
+    // get "fromEvent('lostConnection').subscribe(data)"
+    // delete "data" (Person-Annotations) from 'collaboratorsAnnotations'
+    // 1.2.7
+    // -- Wenn eine neue Person dazu kommt
+    // get "fromEvent('newUser').subscribe(data)"
+    // push "data" (Person-AnnotationS) to 'collaboratorsAnnotations'
+    // 1.2.8
+    // -- Wenn eine Person den Raum verlässt
+    // get "fromEvent('changeRoom').subscribe(data)"
+    // delete "data" (Person-Annotations) from 'collaboratorsAnnotations'
 
 
     this.socketService.socket.emit('message', 'Hellooo!');
@@ -174,34 +171,40 @@ export class AnnotationService {
     this.loadModelService.defaultLoad.subscribe(defaultLoad => {
       this.isDefaultLoad = defaultLoad;
     });
+    this.loadModelService.modelOwner.subscribe(isModelOwner => {
+      this.isModelOwner = isModelOwner;
+    });
+    this.loadModelService.singleModel.subscribe(singleModel => {
+      this.isSingleModel = singleModel;
+    });
 
 
     // this.socketService.socket.fromEvent('message').subscribe(result => { 
     //   console.log(result);
     // });
-    this.socketService.socket.on('message', result => { 
+    this.socketService.socket.on('message', result => {
       console.log(result);
     });
 
     // 1.2.1
     // -- Wenn man dem Raum beitritt
-    this.socketService.socket.on('onlineCollaborators', result => { 
+    this.socketService.socket.on('onlineCollaborators', result => {
       console.log(result);
-      for (const annotation of result){
+      for (const annotation of result) {
         this.collaboratorsAnnotations.push(annotation);
       }
       // CREATE ANNOTATIONMARKERS FÜR ELEMENTE DER COLLABORATORS  ===> UM EINZELNE BENUTZER-ID ERWEITERN FÜR FARBE (BENUTZER-FARBEN ???)
     });
-    
+
     // 1.2.2
     // -- Wenn eine Person eine Annotation erstellt
-    this.socketService.socket.on('createAnnotation', result => { 
+    this.socketService.socket.on('createAnnotation', result => {
       this.collaboratorsAnnotations.push(result);
     });
-    
+
     // 1.2.3
     // -- Wenn eine Person eine Annotation bearbeitet
-    this.socketService.socket.on('editAnnotation', result => { 
+    this.socketService.socket.on('editAnnotation', result => {
       const index: number = this.collaboratorsAnnotations.indexOf(result);
       if (index !== -1) {
         this.collaboratorsAnnotations[index] = result;
@@ -210,7 +213,7 @@ export class AnnotationService {
 
     // 1.2.4
     // -- Wenn eine Person eine Annotation löscht
-    this.socketService.socket.on('deleteAnnotation', result => { 
+    this.socketService.socket.on('deleteAnnotation', result => {
       const index: number = this.collaboratorsAnnotations.indexOf(result);
       if (index !== -1) {
         this.collaboratorsAnnotations.splice(index, 1);
@@ -219,40 +222,40 @@ export class AnnotationService {
 
     // 1.2.5
     // -- Wenn eine Person das Ranking bearbeitet
-    this.socketService.socket.on('changeRanking', result => { 
+    this.socketService.socket.on('changeRanking', result => {
       let i = 0;
-      for (const annotation of this.collaboratorsAnnotations){       
-        for (let j=0; j < result[0].length; j++){
-          if (result[0][j] === annotation._id){
+      for (const annotation of this.collaboratorsAnnotations) {
+        for (let j = 0; j < result[0].length; j++) {
+          if (result[0][j] === annotation._id) {
             this.collaboratorsAnnotations[i].ranking = result[1][j];
           }
         }
         i++;
-      }        
+      }
     });
 
     // 1.2.6 
     // -- Wenn eine Person die Verbindung verliert
-    this.socketService.socket.on('lostConnection', result => { 
+    this.socketService.socket.on('lostConnection', result => {
       console.log(result);
       // Delete all user's annotations? ||| or draw markrs gray?
     });
 
     // 1.2.7
     // -- Wenn eine neue Person dazu kommt
-    this.socketService.socket.on('newUser', result => { 
-      for (const annotation of result){
+    this.socketService.socket.on('newUser', result => {
+      for (const annotation of result) {
         this.collaboratorsAnnotations.push(annotation);
       }
     });
 
     // 1.2.8
     // -- Wenn eine Person den Raum verlässt
-    this.socketService.socket.on('changeRoom', result => { 
-      
-      let i=0;
-      for (const annotation of this.collaboratorsAnnotations){
-        if (annotation.creator._id === result){
+    this.socketService.socket.on('changeRoom', result => {
+
+      let i = 0;
+      for (const annotation of this.collaboratorsAnnotations) {
+        if (annotation.creator._id === result) {
           this.collaboratorsAnnotations.splice(i, 1);
         }
         i++;
@@ -263,21 +266,21 @@ export class AnnotationService {
 
   // 1.1.5
   // -- Verbinden (Raum)            // EINTRITT ÜBER HTML-ELEMENT
-  public async loginToSocket(){
-    this.inSocket = true; 
+  public async loginToSocket() {
+    this.inSocket = true;
     this.socketService.socket.connect();
-    this.socketService.socket.emit('message', 'onlineCollaborators');                                         
+    this.socketService.socket.emit('message', 'onlineCollaborators');
     this.socketService.socket.emit('onlineCollaborators', [this.currentModel, this.currentCompilation]);      // to me only
-    this.socketService.socket.emit('message', 'newUser');                                                     
+    this.socketService.socket.emit('message', 'newUser');
     this.socketService.socket.emit('newUser', this.annotations); // broadcast
   }
 
 
   // 1.1.6
   // -- Verbindung trennen (Raum)                 // ---------- VERBINDUNGSABBRUNCH PRÜFEN ---------- GIBTS SCHON (!?!)
-  public async lostConnectionSocket(){
-    this.inSocket = false; 
-    if (!this.inSocket){
+  public async lostConnectionSocket() {
+    this.inSocket = false;
+    if (!this.inSocket) {
       this.socketService.socket.emit('message', 'lostConnection User:' + this.loadModelService.currentUserData._id);
       this.socketService.socket.emit('message', 'disconnect User:' + this.loadModelService.currentUserData._id);
       this.socketService.socket.emit('lostConnection', this.loadModelService.currentUserData._id);
@@ -287,14 +290,13 @@ export class AnnotationService {
 
   // 1.1.7
   // -- Wenn eine Person den Raum verlässt          // ---------- MODEL-WECHSEL PRÜFEN ---------- GIBTS SCHON (!?!)
-  public async changeModelSocket(){
-    if (this.inSocket){
+  public async changeModelSocket() {
+    if (this.inSocket) {
       this.socketService.socket.emit('message', 'changeRoom');
       this.socketService.socket.emit('changeRoom', this.loadModelService.currentUserData._id);  // broadcast
       this.loginToSocket();
     }
   }
-
 
 
   public async loadAnnotations() {
@@ -473,12 +475,38 @@ export class AnnotationService {
           }
         }
       };
-      this.add(newAnnotation);
+
+      // 3 Fälle werden beim speichern unterschieden
+      // 1) Model nicht über Collection geladen
+      if (this.isSingleModel) {
+        // Darf Default Annotationen hinzufügen
+        if (this.isModelOwner) {
+          this.addDefault(newAnnotation);
+        } else {
+          this.addLocal(newAnnotation);
+        }
+        // Model über collection geladen
+      } else {
+        this.add(newAnnotation);
+      }
       this.annotationmarkerService.createAnnotationMarker(newAnnotation);
       // set created annotation as is_open in annotationmarker.service ((on double click) created annotation)
       this.annotationmarkerService.toggleCreatorPopup(newAnnotation._id);
 
     });
+  }
+
+  private addDefault(annotation): void {
+    // TODO add to MongoDB
+    this.dataService.putAnnotation(annotation);
+    this.annotations.push(annotation);
+    this.allAnnotations.push(annotation);
+  }
+
+  private addLocal(annotation): void {
+    this.dataService.putAnnotation(annotation);
+    this.annotations.push(annotation);
+    this.allAnnotations.push(annotation);
   }
 
   private add(annotation): void {
@@ -488,10 +516,13 @@ export class AnnotationService {
 
     // 1.1.1
     // - Annotation erstellen 
-    if (this.socketService.socket){
+    if (this.socketService.socket) {
       this.socketService.socket.emit('message', 'Annotation erstellen!');
-      this.socketService.socket.emit("createAnnotation", annotation);
+      this.socketService.socket.emit('createAnnotation', annotation);
     }
+
+    // TODO add to MongoDB
+
 
   }
 
@@ -500,6 +531,21 @@ export class AnnotationService {
   }
 
   public deleteAllAnnotations() {
+
+    // 3 Fälle werden beim löschen unterschieden
+    // 1) Model nicht über Collection geladen
+    if (this.isSingleModel) {
+      // Darf Default Annotationen löschen
+      if (this.isModelOwner) {
+        // TODO delete in MongoDB
+      } else {
+      }
+      // Model über collection geladen
+    } else {
+      // TODO delete in MongoDB -> Soll nur der Annotation Owner die Annotation löschen dürfen?
+    }
+
+
     this.annotationmarkerService.deleteAllMarker();
     this.annotations.length = 0;
     this.allAnnotations.length = 0;
@@ -541,6 +587,25 @@ export class AnnotationService {
 
   public deleteAnnotation(annotation: Annotation) {
 
+    // 3 Fälle werden beim löschen unterschieden
+    // 1) Model nicht über Collection geladen
+    if (this.isSingleModel) {
+      // Darf Default Annotationen löschen
+      if (this.isModelOwner) {
+        // TODO delete in MongoDB
+      } else {
+      }
+      // Model über collection geladen
+    } else {
+      // TODO delete in MongoDB -> Soll nur der Annotation Owner die Annotation löschen dürfen?
+      // 1.1.4
+      // - Löschen der Annotation
+      if (this.socketService.socket) {
+        this.socketService.socket.emit('message', 'Annotation löschen!');
+        this.socketService.socket.emit('deleteAnnotation', annotation._id);
+      }
+    }
+
     this.annotationmarkerService.deleteMarker(annotation._id);
     this.dataService.deleteAnnotation(annotation._id);
     const index: number = this.annotations.indexOf(annotation);
@@ -551,13 +616,6 @@ export class AnnotationService {
     const indexb: number = this.allAnnotations.indexOf(annotation);
     if (indexb !== -1) {
       this.allAnnotations.splice(indexb, 1);
-    }
-
-    // 1.1.4
-    // - Löschen der Annotation
-    if (this.socketService.socket){ 
-      this.socketService.socket.emit('message', 'Annotation löschen!');
-      this.socketService.socket.emit('deleteAnnotation', annotation._id);
     }
 
     this.changedRankingPositions();
@@ -577,7 +635,7 @@ export class AnnotationService {
 
     // 1.1.3
     // - Ranking der Annotation ändern
-    if (this.socketService.socket){
+    if (this.socketService.socket) {
       this.socketService.socket.emit('message', 'Ranking bearbeiten!');
       let IdArray = new Array();
       let RankingArray = new Array();
@@ -590,14 +648,14 @@ export class AnnotationService {
       IdandRankingArray.push(IdArray);
       IdandRankingArray.push(RankingArray);
       // Send ID's & Ranking of annotations 
-      this.socketService.socket.emit("changeRanking", IdandRankingArray);
+      this.socketService.socket.emit('changeRanking', IdandRankingArray);
     }
-        
+
   }
 
 
   public createDefaultAnnotation(): Annotation {
-     return {
+    return {
       validated: true,
       _id: 'DefaultAnnotation',
       identifier: 'DefaultAnnotation',
@@ -634,7 +692,7 @@ export class AnnotationService {
               y: 1.3419080619941322,
               z: 90.44884111420268
             },
-           preview: 'data:image/png;base64,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KfdQBMipjnPPPTcmTJgQw4YNK/f26quvlsGyefPmHhk5mUBfCAiQvlB2jaYEzjjjjJgyZUo899xzZZ19+/bFmjVrjv9Fv2jRsQA58WJTp06NadOmRfHKqKtj8ODBMXbs2PJppfir2+cv/ij+6ZXfxs//cuyxV1jrtx+KWX9+dVli//79sXr178Kk87Fz58548skny2A73VGE23XXXRcTJ048bdAVNYq9jRs3rtx/YVEEysKFC4VKU3eVxSkEBEgKRTWSC4waNSrmzp0b1157bRw+fDi2bNkSxS/nUx2ff/55PP744w3vofhlPHv27PIJ5HTHmDFjYuvWrfH111+Xp51zzjlx4MCBk5bs3bs3HnnkkXKfzR433HBDQ6FSXGf8+PHla7kzzzwz1q1bFwsWLCg/c+kuvJrdo/UEfi8gQNwLLSEwaNCgmDVrVhSvdo4ePRrFL+VTvRYqNvvNN9/EkiVLunziqNJQ8dRQhFbx9NHIUezx5ZdfLp8GevMoPh+58cYb44ILLiiDorujeIoaOnRo+fprw4YNpdOHH354LAS7W+/nBHoiIEB6ouXcpALFL7o333yzrHnkyJEyMIpXQ6c6iqeA++67L+n1T1fs9ttvL1+bnX322ced9u6778bzzz/fZ/s41YWKz0luueWWGDlyZPlKq7ujeNIqwrEIoCL4XnzxxXj77bfj22+P/7ynuzp+TuBEAQHinugzgeK/7u+55564++67y2sWr56KV1NdHdu2bYsnnniiz/ZX5wsVQTdjxozy22aNHEUIFh/+Owg0IyBAmtGztluByZMnx7PPPlu+UimOFStWlK+gujrmz58fK1euLP9L2VFdoAjr4ttot95660lPUUXVZ555pnpxKwn8v4AAcSskFyg+oL733nvLusWH0MWTxOlelzz44IOn/HA6+cYyL1i8wrrwwgvLMC/+kKODQLMCAqRZQetPEii+Mjtz5swuZd5666147bXXfFvIvUOg5gICpOYDbMXtX3755XH//fcft7V58+aV3wpyECDQPgICpH1m2VKdFN8OKr6CumPHjpbal80QIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQGpCulEgECBAjkJCBAcpq2XgkQIJBQQIAkxFSKAAECOQkIkJymrVcCBAgkFBAgCTGVIkCAQE4CAiSnaeuVAAECCQUESEJMpQgQIJCTgADJadp6JUCAQEIBAZIQUykCBAjkJCBAcpq2XgkQIJBQQIAkxFSKAAECOQkIkJymrVcCBAgkFBAgCTGVIkCAQE4CAiSnaeuVAAECCQUESEJMpQgQIJCTgADJadp6JUCAQEIBAZIQUykCBAjkJCBAcpq2XgkQIJBQQIAkxFSKAAECOQkIkJymrVcCBAgkFBAgCTGVIkCAQE4CAiSnaeuVAAECCQUESEJMpQgQIJCTgADJadp6JUCAQEIBAZIQUykCBAjkJCBAcpq2XgkQIJBQQIAkxFSKAAECOQkIkJymrVcCBAgkFBAgCTGVIkCAQE4C/weLi1NGQXXHbQAAAABJRU5ErkJggg==',
+            preview: 'data:image/png;base64,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KfdQBMipjnPPPTcmTJgQw4YNK/f26quvlsGyefPmHhk5mUBfCAiQvlB2jaYEzjjjjJgyZUo899xzZZ19+/bFmjVrjv9Fv2jRsQA58WJTp06NadOmRfHKqKtj8ODBMXbs2PJppfir2+cv/ij+6ZXfxs//cuyxV1jrtx+KWX9+dVli//79sXr178Kk87Fz58548skny2A73VGE23XXXRcTJ048bdAVNYq9jRs3rtx/YVEEysKFC4VKU3eVxSkEBEgKRTWSC4waNSrmzp0b1157bRw+fDi2bNkSxS/nUx2ff/55PP744w3vofhlPHv27PIJ5HTHmDFjYuvWrfH111+Xp51zzjlx4MCBk5bs3bs3HnnkkXKfzR433HBDQ6FSXGf8+PHla7kzzzwz1q1bFwsWLCg/c+kuvJrdo/UEfi8gQNwLLSEwaNCgmDVrVhSvdo4ePRrFL+VTvRYqNvvNN9/EkiVLunziqNJQ8dRQhFbx9NHIUezx5ZdfLp8GevMoPh+58cYb44ILLiiDorujeIoaOnRo+fprw4YNpdOHH354LAS7W+/nBHoiIEB6ouXcpALFL7o333yzrHnkyJEyMIpXQ6c6iqeA++67L+n1T1fs9ttvL1+bnX322ced9u6778bzzz/fZ/s41YWKz0luueWWGDlyZPlKq7ujeNIqwrEIoCL4XnzxxXj77bfj22+P/7ynuzp+TuBEAQHinugzgeK/7u+55564++67y2sWr56KV1NdHdu2bYsnnniiz/ZX5wsVQTdjxozy22aNHEUIFh/+Owg0IyBAmtGztluByZMnx7PPPlu+UimOFStWlK+gujrmz58fK1euLP9L2VFdoAjr4ttot95660lPUUXVZ555pnpxKwn8v4AAcSskFyg+oL733nvLusWH0MWTxOlelzz44IOn/HA6+cYyL1i8wrrwwgvLMC/+kKODQLMCAqRZQetPEii+Mjtz5swuZd5666147bXXfFvIvUOg5gICpOYDbMXtX3755XH//fcft7V58+aV3wpyECDQPgICpH1m2VKdFN8OKr6CumPHjpbal80QIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQESDpLlQgQIJCVgADJatyaJUCAQDoBAZLOUiUCBAhkJSBAshq3ZgkQIJBOQICks1SJAAECWQkIkKzGrVkCBAikExAg6SxVIkCAQFYCAiSrcWuWAAEC6QQGpCulEgECBAjkJCBAcpq2XgkQIJBQQIAkxFSKAAECOQkIkJymrVcCBAgkFBAgCTGVIkCAQE4CAiSnaeuVAAECCQUESEJMpQgQIJCTgADJadp6JUCAQEIBAZIQUykCBAjkJCBAcpq2XgkQIJBQQIAkxFSKAAECOQkIkJymrVcCBAgkFBAgCTGVIkCAQE4CAiSnaeuVAAECCQUESEJMpQgQIJCTgADJadp6JUCAQEIBAZIQUykCBAjkJCBAcpq2XgkQIJBQQIAkxFSKAAECOQkIkJymrVcCBAgkFBAgCTGVIkCAQE4CAiSnaeuVAAECCQUESEJMpQgQIJCTgADJadp6JUCAQEIBAZIQUykCBAjkJCBAcpq2XgkQIJBQQIAkxFSKAAECOQkIkJymrVcCBAgkFBAgCTGVIkCAQE4C/weLi1NGQXXHbQAAAABJRU5ErkJggg==',
           }
         }
       },
