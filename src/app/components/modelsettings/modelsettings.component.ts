@@ -184,14 +184,17 @@ export class ModelsettingsComponent implements OnInit {
     this.setEffect = this.activeModel.settings.background.effect;
     this.babylonService.setBackgroundImage(this.setEffect);
     this.showHelpers = false;
+    this.cameraService.backToDefault();
   }
 
   public resetMeshSize() {
     this.modelSettingsService.resetMeshSize();
+    this.cameraService.backToDefault();
   }
 
   public resetMeshRotation() {
     this.modelSettingsService.resetMeshRotation();
+    this.cameraService.backToDefault();
   }
 
   /*
@@ -287,7 +290,6 @@ export class ModelsettingsComponent implements OnInit {
 
     if (this.initialSettingsMode) {
       this.initialSettingsMode = false;
-      // TODO
       this.modelSettingsService.decomposeAfterSetting();
       // allow Annotations
       this.overlayService.deactivateMeshSettings();
@@ -335,6 +337,8 @@ export class ModelsettingsComponent implements OnInit {
     if (!this.isDefault) {
       this.mongohandlerService.updateSettings(this.activeModel._id, settings).subscribe(result => {
         console.log(result);
+        this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
+          this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
       });
     }
   }

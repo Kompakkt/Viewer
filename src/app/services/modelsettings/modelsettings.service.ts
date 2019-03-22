@@ -287,7 +287,11 @@ export class ModelsettingsService {
   public async decomposeAfterSetting() {
     if (this.center) {
       this.cameraService.setUpperRadiusLimit(Math.max(this.max.x, this.max.y, this.max.z) * this.scalingFactor * 5);
-      await this.unparentModel();
+
+      for (let _i = 0; _i < this.actualModelMeshes.length; _i++) {
+        mesh.parent = null;
+      }
+
       await this.destroyCenter();
       await this.destroyBoundingBox();
       await this.destroyWorldAxis();
