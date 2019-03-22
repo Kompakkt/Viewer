@@ -29,6 +29,7 @@ export class ModelsettingsComponent implements OnInit {
   private setEffect = false;
   private isDefault: boolean;
   private isModelOwner: boolean;
+  public isSingleModel: boolean;
   private isFinished: boolean;
   private initialSettingsMode = false;
   private isLoaded = false;
@@ -88,6 +89,10 @@ export class ModelsettingsComponent implements OnInit {
 
     this.loadModelService.finished.subscribe(isFinished => {
       this.isFinished = isFinished;
+    });
+
+    this.loadModelService.singleModel.subscribe(singleModel => {
+      this.isSingleModel = singleModel;
     });
 
   }

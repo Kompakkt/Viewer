@@ -40,6 +40,8 @@ export class MenuComponent implements OnInit {
   private editActive = false;
   private collectionsActive = false;
 
+  public isShowCatalogue: boolean;
+
   constructor(
     private message: MessageService,
     private iconRegistry: MatIconRegistry,
@@ -79,6 +81,10 @@ export class MenuComponent implements OnInit {
 
     this.catalogueService.loggedIn.subscribe(loggedIn => {
       this.isLoggedIn = loggedIn;
+    });
+
+    this.catalogueService.showCatalogue.subscribe(showCatalogue => {
+      this.isShowCatalogue = showCatalogue;
     });
   }
 

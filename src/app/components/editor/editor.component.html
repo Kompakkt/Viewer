@@ -19,46 +19,57 @@
       </mat-card>
 
       <div *ngIf="!meshSettingsMode">
-      <div cdkDropList class="annotations-list" (cdkDropListDropped)="drop($event)"
-           *ngIf="this.annotationService.annotations.length">
-        <app-annotations-editor class="annotation-box" *ngFor="let annotation of this.annotationService.annotations;"
-                                [annotation]="annotation"
-                                cdkDrag cdkDragLockAxis="y"></app-annotations-editor>
-      </div>
 
-      <mat-card *ngIf="this.annotationService.annotations.length < 1">
-        To add annotations, simply double-click on the model.
-      </mat-card>
+        <mat-card *ngIf="isSingleModel && !isModelOwner">
+          Annotations are not saved on server. Load model from a collection to save your annotations to make them
+          visible for others.
+        </mat-card>
 
-      <div id="annotations-eximport">
-        <button *ngIf="this.annotationService.annotations.length > 0"
-                mat-icon-button
-                matTooltip="Export Annotations to File"
-                matTooltipPosition="below"
-                (click)="exportAnnotations()">
-          <mat-icon aria-label="Export Annotations to File">save</mat-icon>
-        </button>
+        <mat-card *ngIf="isModelOwner && isSingleModel">
+          All annotations here are default annotations and visible for everyone who can access the model. If you don't
+          want that, load model from a collection.
+        </mat-card>
 
-        <input type="file"
-               style="display: none;"
-               #importInput
-               (change)="importAnnotations($event.target.files)">
+        <div cdkDropList class="annotations-list" (cdkDropListDropped)="drop($event)"
+             *ngIf="this.annotationService.annotations.length">
+          <app-annotations-editor class="annotation-box" *ngFor="let annotation of this.annotationService.annotations;"
+                                  [annotation]="annotation"
+                                  cdkDrag cdkDragLockAxis="y"></app-annotations-editor>
+        </div>
 
-        <button mat-icon-button
-                matTooltip="Import Annotations"
-                matTooltipPosition="below"
-                (click)="importInput.click()">
-          <mat-icon aria-label="Import Annotations">save_alt</mat-icon>
-        </button>
+        <mat-card *ngIf="this.annotationService.annotations.length < 1">
+          To add annotations, simply double-click on the model.
+        </mat-card>
 
-        <button *ngIf="this.annotationService.annotations.length > 0"
-                mat-icon-button
-                matTooltip="Delete Annotations"
-                matTooltipPosition="below"
-                (click)="deleteAnnotations()">
-          <mat-icon aria-label="Delete Annotations">delete</mat-icon>
-        </button>
-      </div>
+        <div id="annotations-eximport">
+          <button *ngIf="this.annotationService.annotations.length > 0"
+                  mat-icon-button
+                  matTooltip="Export Annotations to File"
+                  matTooltipPosition="below"
+                  (click)="exportAnnotations()">
+            <mat-icon aria-label="Export Annotations to File">save</mat-icon>
+          </button>
+
+          <input type="file"
+                 style="display: none;"
+                 #importInput
+                 (change)="importAnnotations($event.target.files)">
+
+          <button mat-icon-button
+                  matTooltip="Import Annotations"
+                  matTooltipPosition="below"
+                  (click)="importInput.click()">
+            <mat-icon aria-label="Import Annotations">save_alt</mat-icon>
+          </button>
+
+          <button *ngIf="this.annotationService.annotations.length > 0"
+                  mat-icon-button
+                  matTooltip="Delete Annotations"
+                  matTooltipPosition="below"
+                  (click)="deleteAnnotations()">
+            <mat-icon aria-label="Delete Annotations">delete</mat-icon>
+          </button>
+        </div>
       </div>
     </mat-tab>
 

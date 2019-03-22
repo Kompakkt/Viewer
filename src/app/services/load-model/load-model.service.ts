@@ -167,12 +167,17 @@ export class LoadModelService {
     this.loaded.emit(false);
     this.isDefaultLoad = false;
     this.defaultLoad.emit(false);
-    this.isSingleLoadModel = false;
-    this.singleModel.emit(false);
-    this.isSingleLoadCollection = false;
-    this.singleCollection.emit(false);
     if (!collection) {
       this.updateActiveCollection([]);
+      this.isSingleLoadModel = true;
+      this.singleModel.emit(true);
+      this.isSingleLoadCollection = false;
+      this.singleCollection.emit(false);
+    } else {
+      this.isSingleLoadModel = false;
+      this.singleModel.emit(false);
+      this.isSingleLoadCollection = true;
+      this.singleCollection.emit(true);
     }
     this.quality = 'low';
     this.loadModel(model).then(result => {
@@ -221,7 +226,9 @@ export class LoadModelService {
         // Zentriere auf das neu geladene Model, bevor die SettingsEinstellung übernommen wird
         this.cameraService.setActiveCameraTarget(model.meshes[0]._boundingInfo.boundingBox.centerWorld);
 
-        if (newModel._id && !this.isDefaultLoad) { this.checkOwnerState(newModel._id); }
+        if (newModel._id && !this.isDefaultLoad) {
+          this.checkOwnerState(newModel._id);
+        }
 
         if (!newModel.finished) {
           this.finished.emit(false);
@@ -249,7 +256,7 @@ export class LoadModelService {
           this.currentUserData = userData;
           this.userOwnedModels = userData.data.models;
           if (userData.data && userData.data.compilations) {
-          this.personalCollections = userData.data.compilations;
+            this.personalCollections = userData.data.compilations;
           }
         }
       }, error => {

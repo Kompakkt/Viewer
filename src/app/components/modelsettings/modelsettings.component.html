@@ -309,7 +309,7 @@
         </button>
         <button class="fullwidth-button"
                 mat-raised-button
-                *ngIf="!isDefault && isModelOwner"
+                *ngIf="!isDefault && isModelOwner && isSingleModel"
                 (click)="saveActualSettings()">Save as default
         </button>
       </mat-card-content>
@@ -377,7 +377,7 @@
         </button>
         <button class="fullwidth-button"
                 mat-raised-button
-                *ngIf="!isDefault && isModelOwner"
+                *ngIf="!isDefault && isModelOwner && isSingleModel"
                 (click)="saveActualSettings()">Save as default
         </button>
       </mat-card-content>

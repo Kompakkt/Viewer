@@ -9,8 +9,7 @@
           aria-label="Login to Socket.Io">
   </mat-slide-toggle>
 
-  <!-- funktioniert neuerdings nicht mehr: ngIf="!singleModel"siehe objects repo, wenn ein Modell geladen wird -->
-  <button *ngIf="!isSingleModel"
+  <button *ngIf="isShowCatalogue "
           mat-icon-button (click)="toggleCollectionsOverview()"
           [class.active]="this.collectionsActive"
           matTooltip="Catalogue" matTooltipPosition="above">
