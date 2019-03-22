@@ -104,7 +104,7 @@ export class ModelsettingsService {
     this.lastDepth = this.initialSize.z;
 
     this.cameraService.setUpperRadiusLimit(Math.max(this.max.x, this.max.y, this.max.z) * this.scalingFactor * 5);
-    this.cameraService.setDefaultPosition(0, 0, Math.max(this.max.x, this.max.y, this.max.z) + 50);
+    this.cameraService.setDefaultPosition(0, 10, Math.max(this.max.x, this.max.y, this.max.z) + 50);
   }
 
   private async setSettings(scalingFactor, rotX, rotY, rotZ) {
