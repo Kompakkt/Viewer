@@ -49,7 +49,7 @@ export class CameraService {
         this.arcRotateCamera.keysDown.push(83);
         this.arcRotateCamera.keysLeft.push(65);
         this.arcRotateCamera.keysRight.push(68);
-        this.arcRotateCamera.attachControl(newCanvas, true);
+        this.arcRotateCamera.attachControl(newCanvas, false);
 
         /*
         this.universalCamera = new BABYLON.UniversalCamera('universalCamera',
