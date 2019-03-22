@@ -155,7 +155,7 @@ export class BabylonService {
   }
 
   public createArcRotateCam(alpha: number, beta: number, radius: number): BABYLON.ArcRotateCamera {
-    return new BABYLON.ArcRotateCamera('arcRotateCamera', alpha, beta, radius, new BABYLON.Vector3(0, 0, 0), this.scene);
+    return new BABYLON.ArcRotateCamera('arcRotateCamera', alpha, beta, radius, BABYLON.Vector3.Zero(), this.scene);
   }
 
   public createVRHelper() {

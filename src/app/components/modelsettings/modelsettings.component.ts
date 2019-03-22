@@ -287,6 +287,7 @@ export class ModelsettingsComponent implements OnInit {
 
     if (this.initialSettingsMode) {
       this.initialSettingsMode = false;
+      // TODO
       this.modelSettingsService.decomposeAfterSetting();
       // allow Annotations
       this.overlayService.deactivateMeshSettings();

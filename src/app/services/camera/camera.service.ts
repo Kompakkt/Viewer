@@ -42,7 +42,7 @@ export class CameraService {
 
         // Arc Rotate Camera
         // Parameters (initial Position): alpha, beta, radius, target position, scene
-        this.arcRotateCamera = this.babylonService.createArcRotateCam(0, 0, 100);
+        this.arcRotateCamera = this.babylonService.createArcRotateCam(0, 10, 100);
         this.arcRotateCamera.allowUpsideDown = false;
         this.arcRotateCamera.panningSensibility = 25;
         this.arcRotateCamera.keysUp.push(87);
