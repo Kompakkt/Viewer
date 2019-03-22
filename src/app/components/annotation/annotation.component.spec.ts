@@ -1,15 +1,14 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { AnnotationComponent } from './annotation.component';
+import {AnnotationComponent} from './annotation.component';
 import {
   MatCardModule,
   MatFormFieldModule,
-  MatIconModule, MatSnackBarModule, MatStepperModule,
+  MatIconModule, MatSnackBarModule,
   MatTooltipModule
 } from '@angular/material';
 import {FormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
-import {Annotation} from '../../interfaces/annotation2/annotation2';
 import {SocketIoModule} from 'ngx-socket-io';
 import {environment} from '../../../environments/environment';
 

@@ -1,7 +1,6 @@
 import {TestBed} from '@angular/core/testing';
 
 import {SocketService} from './socket.service';
-import {HttpClientModule} from '@angular/common/http';
 import {SocketIoModule} from 'ngx-socket-io';
 import {environment} from '../../../environments/environment';
 

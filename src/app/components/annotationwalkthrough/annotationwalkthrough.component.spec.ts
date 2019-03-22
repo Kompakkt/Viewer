@@ -1,7 +1,7 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {AnnotationwalkthroughComponent} from './annotationwalkthrough.component';
-import {MatIconModule, MatSnackBarModule, MatStepperModule} from '@angular/material';
+import {MatIconModule, MatSnackBarModule} from '@angular/material';
 import {HttpClientModule} from '@angular/common/http';
 import {SocketIoModule} from 'ngx-socket-io';
 import {environment} from '../../../environments/environment';
