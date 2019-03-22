@@ -223,9 +223,6 @@ export class LoadModelService {
         this.updateActiveModel(newModel);
         this.updateActiveModelMeshes(model.meshes);
 
-        // Zentriere auf das neu geladene Model, bevor die SettingsEinstellung übernommen wird
-        this.cameraService.setActiveCameraTarget(model.meshes[0]._boundingInfo.boundingBox.centerWorld);
-
         if (newModel._id && !this.isDefaultLoad) {
           this.checkOwnerState(newModel._id);
         }

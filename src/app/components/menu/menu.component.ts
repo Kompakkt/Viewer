@@ -88,16 +88,17 @@ export class MenuComponent implements OnInit {
     });
   }
 
+  /*
   public setCamArcRotate() {
     this.cameraService.setCamArcRotate();
   }
 
   public setCamUniversal() {
     this.cameraService.setCamUniversal();
-  }
+  }*/
 
   public setBackToDefault() {
-    this.cameraService.setBackToDefault();
+    this.cameraService.backToDefault();
   }
 
 
