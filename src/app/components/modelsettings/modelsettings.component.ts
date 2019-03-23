@@ -49,6 +49,11 @@ export class ModelsettingsComponent implements OnInit {
       y: number;
       z: number;
     };
+    target: {
+      x: number;
+      y: number;
+      z: number;
+    }
   };
 
 
@@ -238,11 +243,10 @@ export class ModelsettingsComponent implements OnInit {
 
   public async setInitialView() {
     this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
-    this.cameraService.setDefaultPosition(this.cameraService.arcRotateCamera.alpha, this.cameraService.arcRotateCamera.beta,
-      this.cameraService.arcRotateCamera.radius);
-    this.cameraPositionInitial.position.x = this.cameraService.arcRotateCamera.alpha;
-    this.cameraPositionInitial.position.y = this.cameraService.arcRotateCamera.beta;
-    this.cameraPositionInitial.position.z = this.cameraService.arcRotateCamera.radius;
+    this.cameraService.setDefaultPosition(this.cameraService.arcRotateCamera.alpha,
+      this.cameraService.arcRotateCamera.beta, this.cameraService.arcRotateCamera.radius,
+      this.cameraService.arcRotateCamera.target.x, this.cameraService.arcRotateCamera.target.y,
+      this.cameraService.arcRotateCamera.target.z);
     return await new Promise<string>((resolve, reject) => this.babylonService.createPreviewScreenshot(400).then(screenshot => {
       this.preview = screenshot;
       resolve(screenshot);
@@ -446,8 +450,19 @@ export class ModelsettingsComponent implements OnInit {
       }
       if (camera !== undefined) {
         const positionVector = new BABYLON.Vector3(camera.position.x, camera.position.y, camera.position.z);
-        this.cameraService.setDefaultPosition(camera.position.x, camera.position.y, camera.position.z);
+        let targetVector: BABYLON.Vector3;
+        // TODO if Abfrage nicht mehr nötig, wenn Modelle resetet sind
+        if (camera.target) {
+          targetVector = new BABYLON.Vector3(camera.target.x, camera.target.y, camera.target.z);
+          this.cameraService.setDefaultPosition(camera.position.x, camera.position.y, camera.position.z,
+            camera.target.x, camera.target.y, camera.target.z);
+        } else {
+          targetVector = BABYLON.Vector3.Zero();
+          this.cameraService.setDefaultPosition(camera.position.x, camera.position.y, camera.position.z,
+            0, 0, 0);
+        }
         this.cameraService.moveCameraToTarget(positionVector);
+        this.cameraService.arcRotateCamera.setTarget(targetVector);
         this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
       } else {
         this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
@@ -559,6 +574,7 @@ export class ModelsettingsComponent implements OnInit {
 
       this.activeModel['settings'] = this.getDefaultLoadSettings();
 
+      // TODO load settings
       this.babylonService.createAmbientlightUp('ambientlightUp', {x: 0, y: 1, z: 0});
       this.babylonService.setLightIntensity('ambientlightUp', 1);
       this.ambientlightUpintensity = 1;
@@ -577,7 +593,7 @@ export class ModelsettingsComponent implements OnInit {
         this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
 
       this.cameraService.setUpperRadiusLimit(500);
-      this.cameraService.setDefaultPosition(2.7065021761026817, 1.3419080619941322, 90.44884111420268);
+      this.cameraService.setDefaultPosition(2.7065021761026817, 1.3419080619941322, 90.44884111420268, 0, 0, 0);
 
     } else {
 
@@ -619,6 +635,11 @@ export class ModelsettingsComponent implements OnInit {
           x: 2.7065021761026817,
           y: 1.3419080619941322,
           z: 90.44884111420268
+        },
+        target: {
+          x: 0,
+          y: 0,
+          z: 0
         }
       },
       background: {

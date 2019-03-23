@@ -21,14 +21,13 @@ export class CameraService {
   public alpha: number;
   public beta: number;
   public radius: number;
-
+  // target
+  public x: number;
+  public y: number;
+  public z: number;
   /*
-  private x: 0;
-  private y: 0;
-  private z: 10;
-
-  private xRot: number;
-  private yRot: number;*/
+    private xRot: number;
+    private yRot: number;*/
 
   constructor(
     private babylonService: BabylonService) {
@@ -52,14 +51,14 @@ export class CameraService {
 
         this.arcRotateCamera.attachControl(newCanvas, false);
 
-              /*
-        this.universalCamera = new BABYLON.UniversalCamera('universalCamera',
-          new BABYLON.Vector3(this.x, this.y, this.z), this.scene);
+        /*
+  this.universalCamera = new BABYLON.UniversalCamera('universalCamera',
+    new BABYLON.Vector3(this.x, this.y, this.z), this.scene);
 
-        this.universalSettings();
+  this.universalSettings();
 
-        this.xRot = this.universalCamera.rotation.x;
-        this.yRot = this.universalCamera.rotation.y;
+  this.xRot = this.universalCamera.rotation.x;
+  this.yRot = this.universalCamera.rotation.y;
 */
       }
     });
@@ -93,13 +92,18 @@ export class CameraService {
   public backToDefault(): void {
     const positionVector = new BABYLON.Vector3(this.alpha, this.beta, this.radius);
     this.moveCameraToTarget(positionVector);
+    const positionTarget = new BABYLON.Vector3(this.x, this.y, this.z);
+    this.arcRotateCamera.setTarget(positionTarget);
+
   }
 
-  public setDefaultPosition(alpha: number, beta: number, radius: number) {
-    console.log('SET DEFAULT:', alpha, beta, radius);
+  public setDefaultPosition(alpha: number, beta: number, radius: number, x: number, y: number, z: number) {
     this.alpha = alpha;
     this.beta = beta;
     this.radius = radius;
+    this.x = x;
+    this.y = y;
+    this.z = z;
   }
 
   public setUpperRadiusLimit(radius: number) {
@@ -250,9 +254,6 @@ export class CameraService {
   }*/
 
   public moveCameraToTarget(positionVector: BABYLON.Vector3) {
-    console.log('CAM STARTS:', this.arcRotateCamera.alpha, this.arcRotateCamera.beta, this.arcRotateCamera.radius);
-
-console.log('MOVE CAM TO:', positionVector);
 
     const name = 'animCam',
       frames = 30;
@@ -299,7 +300,6 @@ console.log('MOVE CAM TO:', positionVector);
         value: positionVector.z
       }]);
     this.arcRotateCamera.animations.push(animCamRadius);
-
 
 
     this.scene.beginAnimation(this.arcRotateCamera, 0, 30, false, 1, function () {
@@ -390,6 +390,11 @@ console.log('MOVE CAM TO:', positionVector);
         x: this.arcRotateCamera.alpha,
         y: this.arcRotateCamera.beta,
         z: this.arcRotateCamera.radius
+      },
+      target: {
+        x: this.arcRotateCamera.target.x,
+        y: this.arcRotateCamera.target.y,
+        z: this.arcRotateCamera.target.z
       }
     };
   }
