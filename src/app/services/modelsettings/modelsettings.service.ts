@@ -290,7 +290,7 @@ export class ModelsettingsService {
 
       for (let _i = 0; _i < this.actualModelMeshes.length; _i++) {
         const mesh = this.actualModelMeshes[_i];
-        mesh.parent = this.center;
+        mesh.parent = null;
       }
 
       await this.destroyCenter();
