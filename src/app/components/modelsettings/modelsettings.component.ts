@@ -288,14 +288,6 @@ export class ModelsettingsComponent implements OnInit {
 
   public async saveActualSettings() {
 
-    if (this.initialSettingsMode) {
-      this.initialSettingsMode = false;
-      this.modelSettingsService.decomposeAfterSetting();
-      // allow Annotations
-      this.overlayService.deactivateMeshSettings();
-    }
-
-
     const settings = {
       preview: this.preview,
       cameraPositionInitial: this.cameraPositionInitial,
@@ -337,8 +329,17 @@ export class ModelsettingsComponent implements OnInit {
     if (!this.isDefault) {
       this.mongohandlerService.updateSettings(this.activeModel._id, settings).subscribe(result => {
         console.log(result);
-        this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
-          this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
+
+        if (this.initialSettingsMode) {
+
+          this.initialSettingsMode = false;
+          this.modelSettingsService.decomposeAfterSetting();
+          // allow Annotations
+          this.overlayService.deactivateMeshSettings();
+
+          this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
+            this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
+        }
       });
     }
   }
