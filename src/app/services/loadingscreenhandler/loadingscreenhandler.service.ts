@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class LoadingscreenhandlerService {
 
@@ -16,7 +16,7 @@ export class LoadingscreenhandlerService {
     left: '0px',
     top: '0px',
     width: '100%',
-    height: '100%'
+    height: '100%',
   });
 
   public loadingStyle = this.StyleSubject.asObservable();

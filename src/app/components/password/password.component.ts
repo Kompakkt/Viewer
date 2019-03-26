@@ -1,13 +1,14 @@
 import {Component, Inject, OnInit} from '@angular/core';
-import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {MessageService} from '../../services/message/message.service';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
 
 @Component({
   selector: 'app-password',
   templateUrl: './password.component.html',
-  styleUrls: ['./password.component.scss']
+  styleUrls: ['./password.component.scss'],
 })
 export class PasswordComponent implements OnInit {
 
@@ -41,7 +42,7 @@ export class PasswordComponent implements OnInit {
           this.message.error('Password is wrong. ' + this.identifierCollection + '.');
         }
 
-      }, error => {
+      },                                                                                     error => {
         this.message.error('Connection to object server refused.');
         this.dialogRef.close();
       });

@@ -1,13 +1,14 @@
 import {Component, OnInit} from '@angular/core';
 import {Vector3} from 'babylonjs';
+
 import {AnnotationService} from '../../services/annotation/annotation.service';
-import {CameraService} from '../../services/camera/camera.service';
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
+import {CameraService} from '../../services/camera/camera.service';
 
 @Component({
   selector: 'app-annotationwalkthrough',
   templateUrl: './annotationwalkthrough.component.html',
-  styleUrls: ['./annotationwalkthrough.component.scss']
+  styleUrls: ['./annotationwalkthrough.component.scss'],
 })
 export class AnnotationwalkthroughComponent implements OnInit {
 
@@ -89,8 +90,8 @@ export class AnnotationwalkthroughComponent implements OnInit {
               annotations[index].body.content.relatedPerspective.vector.x,
               annotations[index].body.content.relatedPerspective.vector.y,
               annotations[index].body.content.relatedPerspective.vector.z);
-      this.cameraService.moveCameraToTarget(cameraVector);
-      this.annotationmarkerService.toggleCreatorPopup(annotations[index]._id);
+            this.cameraService.moveCameraToTarget(cameraVector);
+            this.annotationmarkerService.toggleCreatorPopup(annotations[index]._id);
     } else {
       this.actualRanking = 0;
     }

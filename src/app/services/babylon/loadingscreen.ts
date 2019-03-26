@@ -1,4 +1,5 @@
 import * as BABYLON from 'babylonjs';
+
 import Nullable = BABYLON.Nullable;
 import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreenhandler.service';
 
@@ -76,7 +77,7 @@ export class LoadingScreen implements BABYLON.ILoadingScreen {
       top: canvasRect.top + 'px',
       left: canvasRect.left + 'px',
       width: canvasRect.width + 'px',
-      height: canvasRect.height + 'px'
+      height: canvasRect.height + 'px',
     });
   }
 }

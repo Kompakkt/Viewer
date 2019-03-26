@@ -1,10 +1,10 @@
 import {Injectable} from '@angular/core';
-
 import * as BABYLON from 'babylonjs';
+
 import {BabylonService} from '../babylon/babylon.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SkyboxService {
 
@@ -14,7 +14,7 @@ export class SkyboxService {
     'assets/textures/skybox/white/white',
     'assets/textures/skybox/lightgrey/lightgrey',
     'assets/textures/skybox/blue/blue',
-    'assets/textures/skybox/marineblue/marineblue'
+    'assets/textures/skybox/marineblue/marineblue',
   ];
 
   constructor(private babylonService: BabylonService) {}
@@ -23,7 +23,7 @@ export class SkyboxService {
   private preloadSkyboxes() {
 
     const scene = this.babylonService.getScene();
-    for (let skybox of this.skyboxes) {
+    for (const skybox of this.skyboxes) {
       new BABYLON.CubeTexture(skybox, scene);
     }
   }
@@ -45,7 +45,7 @@ export class SkyboxService {
 
   public createSkybox() {
 
-    this.skybox = BABYLON.Mesh.CreateBox('skyBox', 500.0, this.babylonService.getScene());
+    this.skybox = BABYLON.Mesh.CreateBox('skyBox', 500, this.babylonService.getScene());
 
     this.preloadSkyboxes();
 

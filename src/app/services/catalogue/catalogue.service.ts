@@ -1,24 +1,25 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
-import {Model} from '../../interfaces/model/model.interface';
-import {MongohandlerService} from '../mongohandler/mongohandler.service';
 import {BehaviorSubject} from 'rxjs';
+
+import {Model} from '../../interfaces/model/model.interface';
 import {LoadModelService} from '../load-model/load-model.service';
 import {MessageService} from '../message/message.service';
+import {MongohandlerService} from '../mongohandler/mongohandler.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 
 export class CatalogueService {
 
   private Subjects = {
     models: new BehaviorSubject<Model[]>(Array<Model>()),
-    collections: new BehaviorSubject<any[]>(Array<any>())
+    collections: new BehaviorSubject<any[]>(Array<any>()),
   };
 
   public Observables = {
     models: this.Subjects.models.asObservable(),
-    collections: this.Subjects.collections.asObservable()
+    collections: this.Subjects.collections.asObservable(),
   };
 
   private isFirstLoad = true;
@@ -145,7 +146,7 @@ export class CatalogueService {
   public fetchCollectionsData() {
     this.mongohandlerService.getAllCompilations().then(compilation => {
       this.Subjects.collections.next(compilation);
-    }, error => {
+    },                                                 error => {
       this.message.error('Connection to object server refused.');
     });
   }
@@ -153,7 +154,7 @@ export class CatalogueService {
   public fetchModelsData() {
     this.mongohandlerService.getAllModels().then(model => {
       this.Subjects.models.next(model);
-    }, error => {
+    },                                           error => {
       this.message.error('Connection to object server refused.');
     });
   }
@@ -179,7 +180,7 @@ export class CatalogueService {
     // If collection has not been loaded during initial load
     if (collection === undefined) {
       // try to find it on the server
-      return await new Promise((resolve, reject) => {
+      return new Promise((resolve, reject) => {
       this.mongohandlerService.getCompilation(identifierCollection).then(compilation => {
         // collection is available on server
         if (compilation['_id']) {
@@ -191,7 +192,7 @@ export class CatalogueService {
           // collection ist nicht erreichbar
           resolve('missing');
         }
-      }, error => {
+      },                                                                 error => {
         this.message.error('Connection to object server refused.');
         reject('missing');
       });
@@ -214,7 +215,7 @@ export class CatalogueService {
         } else {
           return false;
         }
-      }, error => {
+      },                                                      error => {
         this.message.error('Connection to object server refused.');
         return false;
       });

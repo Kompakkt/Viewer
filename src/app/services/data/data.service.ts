@@ -1,17 +1,18 @@
 import {Injectable} from '@angular/core';
 import PouchDB from 'pouchdb';
+
 import {Annotation} from '../../interfaces/annotation2/annotation2';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DataService {
 
   public pouchdb: any;
 
   public constructor(private mongo: MongohandlerService) {
-    
+
     PouchDB.plugin(require('pouchdb-upsert'));
 
     this.pouchdb = new PouchDB('annotationdb');
@@ -23,7 +24,7 @@ export class DataService {
   }
 
   public putAnnotation(annotation: any) {
-    if (annotation._id === 'DefaultAnnotation') return;
+    if (annotation._id === 'DefaultAnnotation') { return; }
     this.pouchdb.put(annotation);
     /*this.mongo.updateAnnotation(annotation).toPromise()
       .then(result => console.log(result))
@@ -37,26 +38,26 @@ export class DataService {
   }
 
   public deleteAnnotation(id: string) {
-    if (id === 'DefaultAnnotation') return;
+    if (id === 'DefaultAnnotation') { return; }
     this.pouchdb.get(id).then((result: Annotation) =>
-      this.pouchdb.remove(result)
+      this.pouchdb.remove(result),
     ).catch((error: any) =>
-      console.log('Failed removing annotation', error)
+      console.log('Failed removing annotation', error),
     );
   }
 
   public updateAnnotation(annotation: Annotation): void {
-    if (annotation._id === 'DefaultAnnotation') return;
+    if (annotation._id === 'DefaultAnnotation') { return; }
 
-    this.pouchdb.upsert(annotation._id, function (result) {
+    this.pouchdb.upsert(annotation._id, function(result) {
       result = annotation;
       return result;
     });
   }
 
   public updateAnnotationRanking(id: string, ranking: number) {
-    if (id === 'DefaultAnnotation') return;
-    this.pouchdb.upsert(id, function (result) {
+    if (id === 'DefaultAnnotation') { return; }
+    this.pouchdb.upsert(id, function(result) {
       console.log('Updating ranking in PouchDB:');
       result.ranking = ranking;
       return result;

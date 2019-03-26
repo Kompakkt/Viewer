@@ -1,22 +1,20 @@
-import {Component, Inject, OnInit} from '@angular/core';
-import {DomSanitizer} from '@angular/platform-browser';
-import {MatDialog, MatDialogConfig, MatIconRegistry} from '@angular/material';
-
 import {DOCUMENT} from '@angular/common';
+import {Component, Inject, OnInit} from '@angular/core';
+import {MatDialog, MatDialogConfig, MatIconRegistry} from '@angular/material';
+import {DomSanitizer} from '@angular/platform-browser';
 
-import {CameraService} from '../../services/camera/camera.service';
-import {BabylonService} from '../../services/babylon/babylon.service';
-import {SkyboxService} from '../../services/skybox/skybox.service';
-import {OverlayService} from '../../services/overlay/overlay.service';
 import {AnnotationService} from '../../services/annotation/annotation.service';
-import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
-import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {AnnotationvrService} from '../../services/annotationvr/annotationvr.service';
-import {MessageService} from '../../services/message/message.service';
+import {BabylonService} from '../../services/babylon/babylon.service';
+import {CameraService} from '../../services/camera/camera.service';
+import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {LoadModelService} from '../../services/load-model/load-model.service';
-import {LoginComponent} from '../dialogs/dialog-login/login.component';
-
+import {MessageService} from '../../services/message/message.service';
+import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
+import {OverlayService} from '../../services/overlay/overlay.service';
+import {SkyboxService} from '../../services/skybox/skybox.service';
 import {SocketService} from '../../services/socket/socket.service';
+import {LoginComponent} from '../dialogs/dialog-login/login.component';
 
 /**
  * @author Zoe Schubert
@@ -26,7 +24,7 @@ import {SocketService} from '../../services/socket/socket.service';
 @Component({
   selector: 'app-menu',
   templateUrl: './menu.component.html',
-  styleUrls: ['./menu.component.scss']
+  styleUrls: ['./menu.component.scss'],
 })
 export class MenuComponent implements OnInit {
 
@@ -103,7 +101,6 @@ export class MenuComponent implements OnInit {
   public setBackToDefault() {
     this.cameraService.backToDefault();
   }
-
 
   public setModelQuality(quality: string) {
     if (this.loadModelService.quality !== quality) {
@@ -192,13 +189,11 @@ export class MenuComponent implements OnInit {
 
   // 1.1.5
   private onSocketToggleChange() {
-    if (this.toggleChecked){
+    if (this.toggleChecked) {
       this.socketService.loginToSocket();
-    }
-    else{
+    } else {
       this.socketService.disconnectSocket();
     }
   }
 
 }
-

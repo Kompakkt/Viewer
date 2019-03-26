@@ -1,7 +1,7 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class OverlayService {
 
@@ -13,12 +13,10 @@ export class OverlayService {
   private editorSettingIsOpen = false;
   private defaultAnnotationsIsOpen = false;
 
-
   @Output() editor: EventEmitter<boolean> = new EventEmitter();
   @Output() collectionsOverview: EventEmitter<boolean> = new EventEmitter();
   @Output() editorSetting: EventEmitter<boolean> = new EventEmitter();
   @Output() defaultAnnotations: EventEmitter<boolean> = new EventEmitter();
-
 
   public toggleEditor(): boolean {
 

@@ -1,11 +1,12 @@
 import {AfterViewInit, Component, ElementRef, HostListener, ViewChild} from '@angular/core';
+
 import {BabylonService} from '../../services/babylon/babylon.service';
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
 
 @Component({
   selector: 'app-scene',
   templateUrl: './scene.component.html',
-  styleUrls: ['./scene.component.scss']
+  styleUrls: ['./scene.component.scss'],
 })
 export class SceneComponent implements AfterViewInit {
 

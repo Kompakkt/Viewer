@@ -1,29 +1,27 @@
+import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
 import {Component, HostBinding, Input, OnInit, ViewChild} from '@angular/core';
 import {AfterViewInit, QueryList, ViewChildren} from '@angular/core';
-import {OverlayService} from '../../services/overlay/overlay.service';
-import {AnnotationService} from '../../services/annotation/annotation.service';
-import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
-
-import {saveAs} from 'file-saver';
-import {environment} from '../../../environments/environment.prod';
 import {MatDialog} from '@angular/material';
-import {DialogDeleteAnnotationsComponent} from '../dialogs/dialog-delete-annotations/dialog-delete-annotations.component';
+import {saveAs} from 'file-saver';
 
-import {AnnotationsEditorComponent} from '../annotations-editor/annotations-editor.component';
+import {environment} from '../../../environments/environment.prod';
+import {AnnotationService} from '../../services/annotation/annotation.service';
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
 import {LoadModelService} from '../../services/load-model/load-model.service';
+import {OverlayService} from '../../services/overlay/overlay.service';
+import {AnnotationsEditorComponent} from '../annotations-editor/annotations-editor.component';
+import {DialogDeleteAnnotationsComponent} from '../dialogs/dialog-delete-annotations/dialog-delete-annotations.component';
 
 @Component({
   selector: 'app-editor',
   templateUrl: './editor.component.html',
-  styleUrls: ['./editor.component.scss']
+  styleUrls: ['./editor.component.scss'],
 })
 export class EditorComponent implements OnInit, AfterViewInit {
 
   @HostBinding('class.is-open') private isOpen = false;
   @Input() modelFileName: string;
   @ViewChild('tabGroup') tabGroup;
-
 
   public version: string = environment.version;
 
@@ -32,7 +30,6 @@ export class EditorComponent implements OnInit, AfterViewInit {
   public defaultAnnotationsMode;
   public isModelOwner: boolean;
   public isSingleModel: boolean;
-
 
   public popup_is_open = '';
   @ViewChildren(AnnotationsEditorComponent)
@@ -92,7 +89,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
     // setVisabile for freshly clicked annotation-List-elements
     this.annotationmarkerService.popupIsOpen().subscribe(
-      popup_is_open => this.setVisability(popup_is_open)
+      popup_is_open => this.setVisability(popup_is_open),
     );
   }
 
@@ -100,17 +97,15 @@ export class EditorComponent implements OnInit, AfterViewInit {
     const found = this.annotationsList.find(annotation => annotation.id === id);
     if (found) {
       const foundID = found.id;
-      this.annotationsList.forEach(function (value) {
-        if (value.id != foundID){
+      this.annotationsList.forEach(function(value) {
+        if (value.id != foundID) {
           value.toViewMode();
-        }
-        else{
+        } else {
           value.collapsed = false;
         }
       });
     }
   }
-
 
   drop(event: CdkDragDrop<string[]>) {
 
@@ -128,7 +123,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
   public exportAnnotations() {
     saveAs(new Blob([this.annotationService.exportAnnotations()],
-      {type: 'text/plain;charset=utf-8'}), 'annotations.json');
+                    {type: 'text/plain;charset=utf-8'}), 'annotations.json');
   }
 
   public importAnnotations(files: FileList): void {
@@ -136,7 +131,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
     const fileToUpload = files.item(0),
       fileReader: FileReader = new FileReader();
 
-    fileReader.onload = (e) => {
+    fileReader.onload =e => {
 
       if (typeof fileReader.result === 'string') {
 

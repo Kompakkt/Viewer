@@ -1,15 +1,14 @@
 import {Injectable} from '@angular/core';
-
+import { text } from '@angular/core/src/render3';
 import * as BABYLON from 'babylonjs';
 import * as GUI from 'babylonjs-gui';
 
+import {AnnotationService} from '../annotation/annotation.service';
 import {BabylonService} from '../babylon/babylon.service';
 import {CameraService} from '../camera/camera.service';
-import {AnnotationService} from '../annotation/annotation.service';
-import { text } from '@angular/core/src/render3';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AnnotationvrService {
 
@@ -42,18 +41,18 @@ export class AnnotationvrService {
     this.posXcontrolNext = 5;
     this.posYcontrolNext = -1;
     this.posZcontrolNext = 2.5;
-    
+
     this.babylonService.vrModeIsActive.subscribe(vrModeIsActive => {
       if (vrModeIsActive) {
-        
+
         // FOR VR-HUD
-        this.advancedTextureFullscreen = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("myUI2");
+        this.advancedTextureFullscreen = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI('myUI2');
         this.advancedTextureFullscreen.isForeground = true;
 
         this.createVRAnnotationControls();
         this.createVRAnnotationContentField();
       } else {
- 
+
         this.deleteVRElements();
       }
     });
@@ -77,7 +76,7 @@ export class AnnotationvrService {
 
     const label = this.createLabel();
     GUI.AdvancedDynamicTexture.CreateForMesh(this.controlPrevious).addControl(label);
-    
+
     // Next Control
     this.controlNext = BABYLON.MeshBuilder.CreatePlane('controlNext', {height: 1, width: 1}, this.babylonService.getScene());
     this.controlNext.parent = this.babylonService.getScene().activeCamera;
@@ -89,9 +88,9 @@ export class AnnotationvrService {
     this.controlNext.renderingGroupId = 1;
     this.controlNext.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
     BABYLON.Tags.AddTagsTo(this.controlNext, 'control');
-    
-    const label2 = this.createLabel2();    
-    GUI.AdvancedDynamicTexture.CreateForMesh(this.controlNext).addControl(label2); 
+
+    const label2 = this.createLabel2();
+    GUI.AdvancedDynamicTexture.CreateForMesh(this.controlNext).addControl(label2);
   }
 
   private createLabel() {
@@ -105,12 +104,12 @@ export class AnnotationvrService {
     label.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
 
     label.onPointerMoveObservable.add(() => {
-      if(this.controlPrevious.metadata){
+      if (this.controlPrevious.metadata) {
         this.controlPrevious.metadata = null;
         this.previousAnnotation();
       }
     });
-   return label;
+    return label;
   }
 
   private createLabel2() {
@@ -124,7 +123,7 @@ export class AnnotationvrService {
     label.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
 
     label.onPointerMoveObservable.add(() => {
-      if(this.controlNext.metadata){
+      if (this.controlNext.metadata) {
         this.controlNext.metadata = null;
         this.nextAnnotation();
       }
@@ -132,18 +131,16 @@ export class AnnotationvrService {
     return label;
   }
 
-
   public createVRAnnotationContentField() {
 
     // FOR VR-HUD
     this.text1 = new BABYLON.GUI.TextBlock();
-    this.text1.text = "Look around to start the annotation tour. \n Look at black button => next annotation \n Look at white button => previous annotation";
-    this.text1.color = "white";
+    this.text1.text = 'Look around to start the annotation tour. \n Look at black button => next annotation \n Look at white button => previous annotation';
+    this.text1.color = 'white';
     this.text1.fontSize = 24;
     this.text1.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
     this.advancedTextureFullscreen.addControl(this.text1);
   }
-  
 
   public deleteVRElements() {
 
@@ -151,7 +148,7 @@ export class AnnotationvrService {
     this.advancedTextureFullscreen.isForeground = false;
     this.advancedTextureFullscreen.removeControl(this.text1);
 
-    this.babylonService.getScene().getMeshesByTags('control').forEach(function (value) {
+    this.babylonService.getScene().getMeshesByTags('control').forEach(function(value) {
       value.dispose();
     });
   }
@@ -202,22 +199,21 @@ export class AnnotationvrService {
 
     if (this.annotationService.annotations.length) {
       // FOR VR-HUD
-      
+
       this.text1.text = this.annotationService.annotations[index].body.content.title;
 
       let cameraVector;
       let i = 1;
       this.babylonService.getScene().getMeshesByTags('plane', mesh => {
 
-        if (Math.abs(i % 2) != 1){
+        if (Math.abs(i % 2) != 1) {
           i++;
-        }
-        else {
+        } else {
           i++;
-          
-          const annoID = this.annotationService.annotations[index]["_id"] + "_pick";
 
-          if (annoID === mesh.name){
+          const annoID = this.annotationService.annotations[index]['_id'] + '_pick';
+
+          if (annoID === mesh.name) {
             // console.log("Active-Camera - Before Animation");
             // console.log(this.babylonService.getActiveCamera().position);
             cameraVector = mesh.position;
@@ -229,6 +225,5 @@ export class AnnotationvrService {
       this.actualRanking = 0;
     }
   }
-
 
 }

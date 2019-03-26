@@ -1,12 +1,13 @@
 import {Component, HostBinding, OnInit} from '@angular/core';
-import {OverlayService} from '../../services/overlay/overlay.service';
+
 import {LoadModelService} from '../../services/load-model/load-model.service';
 import {MetadataService} from '../../services/metadata/metadata.service';
+import {OverlayService} from '../../services/overlay/overlay.service';
 
 @Component({
   selector: 'app-metadata',
   templateUrl: './metadata.component.html',
-  styleUrls: ['./metadata.component.scss']
+  styleUrls: ['./metadata.component.scss'],
 })
 export class MetadataComponent implements OnInit {
 
@@ -19,7 +20,6 @@ export class MetadataComponent implements OnInit {
               private metadataService: MetadataService,
               private loadModelService: LoadModelService) {
   }
-
 
   ngOnInit() {
     this.overlayService.editor.subscribe(async editorIsOpen => {
@@ -34,11 +34,9 @@ export class MetadataComponent implements OnInit {
             this.showMetadata = false;
           }
         }
-      }
+      },
     );
 
   }
 
-
 }
-

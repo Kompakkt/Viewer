@@ -1,16 +1,17 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {Annotation} from 'src/app/interfaces/annotation2/annotation2';
-import {DataService} from '../../services/data/data.service';
+
 import {AnnotationService} from '../../services/annotation/annotation.service';
+import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
 import {CameraService} from '../../services/camera/camera.service';
-import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
+import {DataService} from '../../services/data/data.service';
 import {SocketService} from '../../services/socket/socket.service';
 
 @Component({
   selector: 'app-annotations-editor',
   templateUrl: './annotations-editor.component.html',
-  styleUrls: ['./annotations-editor.component.scss']
+  styleUrls: ['./annotations-editor.component.scss'],
 })
 export class AnnotationsEditorComponent implements OnInit {
 
@@ -24,12 +25,12 @@ export class AnnotationsEditorComponent implements OnInit {
 
   public id = '';
 
-  constructor(private dataService: DataService, 
+  constructor(private dataService: DataService,
               private annotationService: AnnotationService,
-              private babylonService: BabylonService, 
+              private babylonService: BabylonService,
               private cameraService: CameraService,
               private annotationmarkerService: AnnotationmarkerService,
-              private socketService: SocketService
+              private socketService: SocketService,
   ) {
   }
 
@@ -52,7 +53,6 @@ export class AnnotationsEditorComponent implements OnInit {
   public changeOpenPopup() {
     this.annotationmarkerService.toggleCreatorPopup(this.id);
   }
-
 
   public getValidation(validated) {
     if (validated) {
@@ -95,7 +95,7 @@ export class AnnotationsEditorComponent implements OnInit {
   private save(): void {
     this.dataService.updateAnnotation(this.annotation);
     // 1.1.2
-    if (this.annotationService.inSocket){
+    if (this.annotationService.inSocket) {
       this.socketService.socket.emit('editAnnotation', [this.annotationService.socketRoom, this.annotation]);
     }
   }

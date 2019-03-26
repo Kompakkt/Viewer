@@ -1,18 +1,19 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
-import {Model} from '../../interfaces/model/model.interface';
-import {BabylonService} from '../babylon/babylon.service';
 import * as BABYLON from 'babylonjs';
+import {ReplaySubject} from 'rxjs';
+
+import {environment} from '../../../environments/environment';
+import {Model} from '../../interfaces/model/model.interface';
 import {ActionService} from '../action/action.service';
+import {BabylonService} from '../babylon/babylon.service';
 import {CameraService} from '../camera/camera.service';
 import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreenhandler.service';
-import {ReplaySubject} from 'rxjs';
-import {MongohandlerService} from '../mongohandler/mongohandler.service';
 import {MessageService} from '../message/message.service';
 import {MetadataService} from '../metadata/metadata.service';
-import {environment} from '../../../environments/environment';
+import {MongohandlerService} from '../mongohandler/mongohandler.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 
 export class LoadModelService {
@@ -29,8 +30,8 @@ export class LoadModelService {
     actualCollection: this.Subjects.actualCollection.asObservable(),
   };
 
-  public personalCollections: Array<any> = [];
-  public userOwnedModels: Array<any> = [];
+  public personalCollections: any[] = [];
+  public userOwnedModels: any[] = [];
   public currentUserData: any;
 
   private baseUrl = `${environment.express_server_url}:${environment.express_server_port}/`;
@@ -93,7 +94,7 @@ export class LoadModelService {
       this.loadModel(resultModel).then(result => {
         this.isLoaded = true;
         this.loaded.emit(true);
-      }, error => {
+      },                               error => {
         this.message.error('Loading not possible');
       });
     });
@@ -112,10 +113,10 @@ export class LoadModelService {
       this.loadModel(compilation.models[0]).then(result => {
         this.isLoaded = true;
         this.loaded.emit(true);
-      }, error => {
+      },                                         error => {
         this.message.error('Loading not possible');
       });
-    }, error => {
+    },                                                       error => {
       this.message.error('Connection to object server refused.');
     });
   }
@@ -145,18 +146,18 @@ export class LoadModelService {
         time: {
           start: '',
           end: '',
-          total: ''
+          total: '',
         },
         low: 'assets/models/kompakkt.babylon',
         medium: 'assets/models/kompakkt.babylon',
         high: 'assets/models/kompakkt.babylon',
-        raw: 'assets/models/kompakkt.babylon'
-      }
+        raw: 'assets/models/kompakkt.babylon',
+      },
     };
     this.loadModel(this.defaultModel, '').then(result => {
       this.isLoaded = true;
       this.loaded.emit(true);
-    }, error => {
+    },                                         error => {
       this.message.error('Loading not possible');
     });
     this.metadataService.addDefaultMetadata();
@@ -183,7 +184,7 @@ export class LoadModelService {
     this.loadModel(model).then(result => {
       this.isLoaded = true;
       this.loaded.emit(true);
-    }, error => {
+    },                         error => {
       this.message.error('Loading not possible');
     });
   }
@@ -198,7 +199,7 @@ export class LoadModelService {
         this.loadModel(_model).then(result => {
           this.isLoaded = true;
           this.loaded.emit(true);
-        }, error => {
+        },                          error => {
           this.message.error('Loading not possible');
         });
       } else {
@@ -217,7 +218,7 @@ export class LoadModelService {
     }
 
     if (!this.loadingScreenHandler.isLoading && newModel.processed) {
-      await this.babylonService.loadModel(URL, newModel.processed[this.quality]).then(async (model) => {
+      await this.babylonService.loadModel(URL, newModel.processed[this.quality]).then(async model => {
         // Warte auf Antwort von loadModel, da loadModel ein Promise<object> von ImportMeshAync übergibt
         // model ist hier das neu geladene Model
         this.updateActiveModel(newModel);
@@ -237,7 +238,6 @@ export class LoadModelService {
 
       });
 
-
     }
   }
 
@@ -256,13 +256,12 @@ export class LoadModelService {
             this.personalCollections = userData.data.compilations;
           }
         }
-      }, error => {
+      },                                                 error => {
         this.message.error('Connection to object server refused.');
         reject('Connection to object server refused.');
       });
     });
   }
-
 
   private checkOwnerState(identifier: string) {
     if (this.userOwnedModels.filter(obj => obj && obj._id === identifier).length === 1) {

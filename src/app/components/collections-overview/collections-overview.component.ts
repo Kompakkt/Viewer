@@ -1,18 +1,18 @@
-import {Component, HostBinding, AfterViewInit, ChangeDetectorRef} from '@angular/core';
-import {OverlayService} from '../../services/overlay/overlay.service';
-import {CatalogueService} from '../../services/catalogue/catalogue.service';
+import {AfterViewInit, ChangeDetectorRef, Component, HostBinding} from '@angular/core';
+import {MatDialog, MatDialogConfig} from '@angular/material';
+
 import {Model} from '../../interfaces/model/model.interface';
+import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {LoadModelService} from '../../services/load-model/load-model.service';
 import {MessageService} from '../../services/message/message.service';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {OverlayService} from '../../services/overlay/overlay.service';
 import {LoginComponent} from '../dialogs/dialog-login/login.component';
 import {PasswordComponent} from '../password/password.component';
-
 
 @Component({
   selector: 'app-collections-overview',
   templateUrl: './collections-overview.component.html',
-  styleUrls: ['./collections-overview.component.scss']
+  styleUrls: ['./collections-overview.component.scss'],
 })
 export class CollectionsOverviewComponent implements AfterViewInit {
 
@@ -34,13 +34,12 @@ export class CollectionsOverviewComponent implements AfterViewInit {
 
   public isLoggedIn: boolean;
 
-
   constructor(private overlayService: OverlayService,
               public catalogueService: CatalogueService,
               public loadModelService: LoadModelService,
               private message: MessageService,
               public dialog: MatDialog,
-              private _changeDetectionRef: ChangeDetectorRef
+              private _changeDetectionRef: ChangeDetectorRef,
   ) {
   }
 
@@ -106,7 +105,6 @@ export class CollectionsOverviewComponent implements AfterViewInit {
 
   async searchCollectionByID() {
 
-
     this.catalogueService.selectCollectionByID(this.identifierCollection).then(result => {
       switch (result) {
         case 'loaded':
@@ -126,7 +124,7 @@ export class CollectionsOverviewComponent implements AfterViewInit {
         default:
           this.message.error('Can not find Collection with ID ' + this.identifierCollection + '.');
       }
-    }, error => {
+    },                                                                         error => {
       this.message.error('Connection to object server refused.');
     });
   }
@@ -157,7 +155,7 @@ export class CollectionsOverviewComponent implements AfterViewInit {
     dialogConfig.autoFocus = true;
 
     dialogConfig.data = {
-      id: this.identifierCollection
+      id: this.identifierCollection,
     };
     console.log('password');
 

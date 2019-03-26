@@ -1,15 +1,13 @@
-import { EventEmitter, Inject, Injectable, Output } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-
+import { EventEmitter, Inject, Injectable, Output } from '@angular/core';
 import * as BABYLON from 'babylonjs';
+import 'babylonjs-loaders';
+import { ReplaySubject } from 'rxjs';
 
+import { LoadingscreenhandlerService } from '../loadingscreenhandler/loadingscreenhandler.service';
 import { MessageService } from '../message/message.service';
 
-import 'babylonjs-loaders';
 import { LoadingScreen } from './loadingscreen';
-import { LoadingscreenhandlerService } from '../loadingscreenhandler/loadingscreenhandler.service';
-
-import { ReplaySubject } from 'rxjs';
 import ActionEvent = BABYLON.ActionEvent;
 
 /**
@@ -18,7 +16,7 @@ import ActionEvent = BABYLON.ActionEvent;
  */
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class BabylonService {
 
@@ -60,8 +58,8 @@ export class BabylonService {
   public vrJump: boolean;
 
   constructor(private message: MessageService,
-    private loadingScreenHandler: LoadingscreenhandlerService,
-    @Inject(DOCUMENT) private document: any) {
+              private loadingScreenHandler: LoadingscreenhandlerService,
+              @Inject(DOCUMENT) private document: any) {
 
     this.CanvasObservable.subscribe(newCanvas => {
 
@@ -70,7 +68,7 @@ export class BabylonService {
         this.engine = new BABYLON.Engine(newCanvas, true, { preserveDrawingBuffer: true, stencil: true });
         this.scene = new BABYLON.Scene(this.engine);
         this.engine.loadingScreen = new LoadingScreen(newCanvas, '',
-          '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
+                                                      '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
 
         this.scene.registerBeforeRender(() => {
 
@@ -111,7 +109,7 @@ export class BabylonService {
             let i = 1;
             this.scene.getMeshesByTags('control', mesh => {
 
-              let newPosition = new BABYLON.Vector3();
+              const newPosition = new BABYLON.Vector3();
               if ((i % 2) != 0) {
                 newPosition.x = _activeCamera.position.x - 5;
                 newPosition.y = _activeCamera.position.y;
@@ -167,14 +165,14 @@ export class BabylonService {
       createDeviceOrientationCamera: false,
       // createDeviceOrientationCamera: false,
       useCustomVRButton: true,
-      customVRButton: vrButton
+      customVRButton: vrButton,
     });
 
     // this.VRHelper.gazeTrackerMesh = BABYLON.Mesh.CreateSphere("sphere1", 32, 0.1, this.scene);
     this.VRHelper.enableInteractions();
     // this.VRHelper.displayGaze = true;
 
-    this.VRHelper.onNewMeshSelected.add((mesh) => {
+    this.VRHelper.onNewMeshSelected.add(mesh => {
 
       switch (mesh.name) {
 
@@ -200,7 +198,6 @@ export class BabylonService {
             this.actualControl = false;
 
           }
-          break;
       }
     });
 
@@ -238,7 +235,7 @@ export class BabylonService {
       }).then(function(result) {
         engine.hideLoadingUI();
         resolve(result);
-      }, function(error) {
+      },      function(error) {
 
         engine.hideLoadingUI();
         message.error(error);
@@ -254,12 +251,11 @@ export class BabylonService {
   public async createScreenshot() {
     this.hideMesh('plane', false);
     this.hideMesh('label', false);
-    await new Promise<any>((resolve, reject) => this.engine.onEndFrameObservable.add(() => resolve()));
+    await new Promise<any>((resolve, reject) => this.engine.onEndFrameObservable.add(resolve));
     const result = await new Promise<string>((resolve, reject) => {
       const _activeCamera = this.getScene().activeCamera;
       if (_activeCamera instanceof BABYLON.Camera) {
-        BABYLON.Tools.CreateScreenshot(this.getEngine(), _activeCamera, { precision: 2 },
-          (screenshot) => {
+        BABYLON.Tools.CreateScreenshot(this.getEngine(), _activeCamera, { precision: 2 },screenshot => {
             fetch(screenshot).then(res => res.blob()).then(blob => BABYLON.Tools.Download(blob, `Kompakkt-${Date.now().toString()}`));
             resolve(screenshot);
           });
@@ -273,18 +269,17 @@ export class BabylonService {
   public async createPreviewScreenshot(width?: number): Promise<string> {
     this.hideMesh('plane', false);
     this.hideMesh('label', false);
-    await new Promise<any>((resolve, reject) => this.engine.onEndFrameObservable.add(() => resolve()));
+    await new Promise<any>((resolve, reject) => this.engine.onEndFrameObservable.add(resolve));
     const result = await new Promise<string>((resolve, reject) => {
       const _activeCamera = this.getScene().activeCamera;
       if (_activeCamera instanceof BABYLON.Camera) {
         BABYLON.Tools.CreateScreenshot(this.getEngine(), _activeCamera,
-          (width === undefined) ? { width: 400, height: 225 } : { width: width, height: Math.round((width / 16) * 9) },
-          (screenshot) => {
+                                       (width === undefined) ? { width: 400, height: 225 } : { width, height: Math.round((width / 16) * 9) },screenshot => {
             resolve(screenshot);
           });
       }
     });
-      this.hideMesh('plane', true);
+    this.hideMesh('plane', true);
     this.hideMesh('label', true);
     return result;
   }
@@ -338,7 +333,6 @@ export class BabylonService {
     this.pointlight = pointLight;
     this.pointlight.intensity = this.pointlightIntensity;
 
-
     // return this.pointlight;
   }
 
@@ -369,7 +363,6 @@ export class BabylonService {
           break;
         case 'z':
           this.pointlightPosZ = pos;
-          break;
       }
 
       this.createPointLight('pointlight', { x: this.pointlightPosX, y: this.pointlightPosY, z: this.pointlightPosZ });
@@ -386,9 +379,9 @@ export class BabylonService {
       position: {
         x: this.pointlightPosX,
         y: this.pointlightPosY,
-        z: this.pointlightPosZ
+        z: this.pointlightPosZ,
       },
-      intensity: this.pointlightIntensity ? this.pointlightIntensity : 1
+      intensity: this.pointlightIntensity ? this.pointlightIntensity : 1,
     };
   }
 

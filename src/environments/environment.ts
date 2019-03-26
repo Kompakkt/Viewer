@@ -3,16 +3,16 @@
 // The list of file replacements can be found in `angular.json`.
 
 // Original:
-// 
+//
 export const environment = {
   production: false,
   express_server_url: 'https://miskatonic.hki.uni-koeln.de',
   express_server_port: 1337,
-  version: require('../../package.json').version
+  version: require('../../package.json').version,
 };
 
 // Local:
-// 
+//
 // export const environment = {
 //   production: false,
 //   express_server_url: 'http://localhost',

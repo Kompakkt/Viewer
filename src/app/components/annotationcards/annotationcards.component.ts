@@ -1,13 +1,14 @@
 import {AfterViewInit, Component, Input, OnInit, QueryList, ViewChildren} from '@angular/core';
+import { int } from 'babylonjs';
+
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
 import {AnnotationComponent} from '../annotation/annotation.component';
-import { int } from 'babylonjs';
 
 @Component({
   selector: 'app-annotationcards',
   templateUrl: './annotationcards.component.html',
-  styleUrls: ['./annotationcards.component.scss']
+  styleUrls: ['./annotationcards.component.scss'],
 })
 export class AnnotationcardsComponent implements OnInit, AfterViewInit {
 
@@ -31,13 +32,13 @@ export class AnnotationcardsComponent implements OnInit, AfterViewInit {
 
     // setVisabile for clicked annotationmarkers
     this.annotationmarkerService.popupIsOpen().subscribe(
-      popup_is_open => this.setVisability(popup_is_open, 321)
+      popup_is_open => this.setVisability(popup_is_open, 321),
     );
   }
 
   public setVisability(id: string, code: int) {
     const found = this.annotationsList.find(annotation => annotation.id === id);
-    
+
     if (found) {
       const foundID = found.id;
       this.hideAllCards(foundID);
@@ -45,20 +46,18 @@ export class AnnotationcardsComponent implements OnInit, AfterViewInit {
   }
 
   public hideAllCards(foundID) {
-    this.annotationsList.forEach(function (value) {
-      if (value.id != foundID){
-        // Hide all not-clicked annotations and set to view-mode 
-        value.visabilityAnnotationCard(false);      
-        if (value.editMode){
+    this.annotationsList.forEach(function(value) {
+      if (value.id != foundID) {
+        // Hide all not-clicked annotations and set to view-mode
+        value.visabilityAnnotationCard(false);
+        if (value.editMode) {
           value.toggleEditViewMode();
         }
-      }
-      else{
+      } else {
         // show clicked one
-        value.visabilityAnnotationCard(true);     
+        value.visabilityAnnotationCard(true);
       }
     });
   }
-
 
 }

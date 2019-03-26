@@ -1,17 +1,17 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {AnnotationService} from '../../services/annotation/annotation.service';
-import {BabylonService} from '../../services/babylon/babylon.service';
+import {Matrix, Vector3} from 'babylonjs';
 import {Annotation} from 'src/app/interfaces/annotation2/annotation2';
-import {DataService} from '../../services/data/data.service';
-import {Vector3, Matrix} from 'babylonjs';
 import { AnnotationmarkerService } from 'src/app/services/annotationmarker/annotationmarker.service';
 
+import {AnnotationService} from '../../services/annotation/annotation.service';
+import {BabylonService} from '../../services/babylon/babylon.service';
+import {DataService} from '../../services/data/data.service';
 import {SocketService} from '../../services/socket/socket.service';
 
 @Component({
   selector: 'app-annotation',
   templateUrl: './annotation.component.html',
-  styleUrls: ['./annotation.component.scss']
+  styleUrls: ['./annotation.component.scss'],
 })
 
 export class AnnotationComponent implements OnInit {
@@ -31,7 +31,7 @@ export class AnnotationComponent implements OnInit {
               private annotationService: AnnotationService,
               private babylonService: BabylonService,
               private annotationmarkerService: AnnotationmarkerService,
-              private socketService: SocketService
+              private socketService: SocketService,
               ) {
   }
 
@@ -52,7 +52,7 @@ export class AnnotationComponent implements OnInit {
 
     setInterval(() => {
       this.setPosition(this.annotation);
-    }, 15);
+    },          15);
   }
 
   public setPosition(annotation: Annotation) {
@@ -72,7 +72,7 @@ export class AnnotationComponent implements OnInit {
         getMesh.getBoundingInfo().boundingBox.centerWorld,
         Matrix.Identity(),
         scene.getTransformMatrix(),
-        scene.activeCamera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight())
+        scene.activeCamera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight()),
       );
 
       this.positionTop = Math.round(p.y) + 5;
@@ -132,10 +132,10 @@ export class AnnotationComponent implements OnInit {
   private save(): void {
     this.dataService.updateAnnotation(this.annotation);
     // 1.1.2
-    if (this.annotationService.inSocket){
+    if (this.annotationService.inSocket) {
       this.socketService.socket.emit('editAnnotation', [this.annotationService.socketRoom, this.annotation]);
     }
-    
+
   }
 
   public onSumbit(event) {

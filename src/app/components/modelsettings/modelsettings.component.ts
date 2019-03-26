@@ -1,28 +1,28 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {CameraService} from '../../services/camera/camera.service';
-import {BabylonService} from '../../services/babylon/babylon.service';
-import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
-import {CatalogueService} from '../../services/catalogue/catalogue.service';
-import {MessageService} from '../../services/message/message.service';
-import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
-import {ColorEvent} from 'ngx-color';
-import {LoadModelService} from '../../services/load-model/load-model.service';
-import * as BABYLON from 'babylonjs';
-import {ModelsettingsService} from '../../services/modelsettings/modelsettings.service';
 import {MatDialog} from '@angular/material';
-import {DialogMeshsettingsComponent} from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
+import * as BABYLON from 'babylonjs';
+import {ColorEvent} from 'ngx-color';
+
+import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
+import {BabylonService} from '../../services/babylon/babylon.service';
+import {CameraService} from '../../services/camera/camera.service';
+import {CatalogueService} from '../../services/catalogue/catalogue.service';
+import {LoadModelService} from '../../services/load-model/load-model.service';
+import {MessageService} from '../../services/message/message.service';
+import {ModelsettingsService} from '../../services/modelsettings/modelsettings.service';
+import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
 import {OverlayService} from '../../services/overlay/overlay.service';
+import {DialogMeshsettingsComponent} from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
 
 @Component({
   selector: 'app-modelsettings',
   templateUrl: './modelsettings.component.html',
-  styleUrls: ['./modelsettings.component.scss']
+  styleUrls: ['./modelsettings.component.scss'],
 })
 
 export class ModelsettingsComponent implements OnInit {
 
   @ViewChild('stepper') stepper;
-
 
   public activeModel;
   private preview: string;
@@ -41,7 +41,6 @@ export class ModelsettingsComponent implements OnInit {
   public showBackground = false;
   public showLights = false;
 
-
   private cameraPositionInitial: {
     cameraType: string;
     position: {
@@ -53,13 +52,11 @@ export class ModelsettingsComponent implements OnInit {
       x: number;
       y: number;
       z: number;
-    }
+    };
   };
-
 
   private ambientlightUpintensity: number;
   private ambientlightDownintensity: number;
-
 
   constructor(private overlayService: OverlayService,
               private cameraService: CameraService,
@@ -70,7 +67,7 @@ export class ModelsettingsComponent implements OnInit {
               private annotationmarkerService: AnnotationmarkerService,
               private loadModelService: LoadModelService,
               public modelSettingsService: ModelsettingsService,
-              public dialog: MatDialog
+              public dialog: MatDialog,
   ) {
   }
 
@@ -131,7 +128,7 @@ export class ModelsettingsComponent implements OnInit {
   }
 
   public toggleHelpers() {
-    this.showHelpers = (this.showHelpers === true) ? false : true;
+    this.showHelpers = (this.showHelpers) ? false : true;
     if (this.showHelpers) {
       this.showOrientation = false;
       this.showScaling = false;
@@ -139,11 +136,11 @@ export class ModelsettingsComponent implements OnInit {
   }
 
   public toggleHelperBackground() {
-    this.showHelperBackground = (this.showHelperBackground === true) ? false : true;
+    this.showHelperBackground = (this.showHelperBackground) ? false : true;
   }
 
   public toggleScaling() {
-    this.showScaling = (this.showScaling === true) ? false : true;
+    this.showScaling = (this.showScaling) ? false : true;
     if (this.showScaling) {
       this.showOrientation = false;
       this.showHelpers = false;
@@ -151,16 +148,15 @@ export class ModelsettingsComponent implements OnInit {
   }
 
   public toggleOrientation() {
-    this.showOrientation = (this.showOrientation === true) ? false : true;
+    this.showOrientation = (this.showOrientation) ? false : true;
     if (this.showOrientation) {
       this.showScaling = false;
       this.showHelpers = false;
     }
   }
 
-
   public togglePreview() {
-    this.showPreview = (this.showPreview === true) ? false : true;
+    this.showPreview = (this.showPreview) ? false : true;
     if (this.showPreview) {
       this.showBackground = false;
       this.showLights = false;
@@ -168,7 +164,7 @@ export class ModelsettingsComponent implements OnInit {
   }
 
   public toggleBackground() {
-    this.showBackground = (this.showBackground === true) ? false : true;
+    this.showBackground = (this.showBackground) ? false : true;
     if (this.showBackground) {
       this.showPreview = false;
       this.showLights = false;
@@ -176,7 +172,7 @@ export class ModelsettingsComponent implements OnInit {
   }
 
   public toggleLights() {
-    this.showLights = (this.showLights === true) ? false : true;
+    this.showLights = (this.showLights) ? false : true;
     if (this.showLights) {
       this.showPreview = false;
       this.showBackground = false;
@@ -236,7 +232,6 @@ export class ModelsettingsComponent implements OnInit {
     this.babylonService.setLightPosition('z', event.value);
   }
 
-
   /*
    * Initial Perspective & Preview Settings
    */
@@ -244,18 +239,17 @@ export class ModelsettingsComponent implements OnInit {
   public async setInitialView() {
     this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
     this.cameraService.setDefaultPosition(this.cameraService.arcRotateCamera.alpha,
-      this.cameraService.arcRotateCamera.beta, this.cameraService.arcRotateCamera.radius,
-      this.cameraService.arcRotateCamera.target.x, this.cameraService.arcRotateCamera.target.y,
-      this.cameraService.arcRotateCamera.target.z);
-    return await new Promise<string>((resolve, reject) => this.babylonService.createPreviewScreenshot(400).then(screenshot => {
+                                          this.cameraService.arcRotateCamera.beta, this.cameraService.arcRotateCamera.radius,
+                                          this.cameraService.arcRotateCamera.target.x, this.cameraService.arcRotateCamera.target.y,
+                                          this.cameraService.arcRotateCamera.target.z);
+    return new Promise<string>((resolve, reject) => this.babylonService.createPreviewScreenshot(400).then(screenshot => {
       this.preview = screenshot;
       resolve(screenshot);
-    }, error => {
+    },                                                                                                    error => {
       this.message.error(error);
       reject(error);
     }));
   }
-
 
   /*
    * Background Settings
@@ -281,10 +275,9 @@ export class ModelsettingsComponent implements OnInit {
   }
 
   handleChangeEffekt() {
-    this.setEffect = (this.setEffect === true) ? false : true;
+    this.setEffect = (this.setEffect) ? false : true;
     this.babylonService.setBackgroundImage(this.setEffect);
   }
-
 
   /*
    * Save & Load Settings
@@ -297,7 +290,7 @@ export class ModelsettingsComponent implements OnInit {
       cameraPositionInitial: this.cameraPositionInitial,
       background: {
         color: this.babylonService.getColor(),
-        effect: this.setEffect
+        effect: this.setEffect,
       },
       lights: [
         {
@@ -305,26 +298,26 @@ export class ModelsettingsComponent implements OnInit {
           position: {
             x: 0,
             y: -1,
-            z: 0
+            z: 0,
           },
-          intensity: (this.ambientlightDownintensity) ? this.ambientlightDownintensity : 1
+          intensity: (this.ambientlightDownintensity) ? this.ambientlightDownintensity : 1,
         },
         {
           type: 'HemisphericLight',
           position: {
             x: 0,
             y: 1,
-            z: 0
+            z: 0,
           },
-          intensity: this.ambientlightUpintensity ? this.ambientlightUpintensity : 1
-        }
+          intensity: this.ambientlightUpintensity ? this.ambientlightUpintensity : 1,
+        },
       ],
       rotation: {
         x: this.modelSettingsService.rotationX,
         y: this.modelSettingsService.rotationY,
-        z: this.modelSettingsService.rotationZ
+        z: this.modelSettingsService.rotationZ,
       },
-      scale: this.modelSettingsService.scalingFactor
+      scale: this.modelSettingsService.scalingFactor,
     };
     settings.lights.push(this.babylonService.getPointlightData());
 
@@ -342,24 +335,22 @@ export class ModelsettingsComponent implements OnInit {
           this.overlayService.deactivateMeshSettings();
 
           this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
-            this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
+                                                 this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
         }
       });
     }
   }
-
 
   private async createMissingInitialDefaultScreenshot() {
     await new Promise<string>((resolve, reject) => this.babylonService.createPreviewScreenshot(400).then(screenshot => {
       this.preview = screenshot;
       this.activeModel.settings.preview = screenshot;
       resolve(screenshot);
-    }, error => {
+    },                                                                                                   error => {
       this.message.error(error);
       reject(error);
     }));
   }
-
 
   async backToDefault() {
 
@@ -384,7 +375,6 @@ export class ModelsettingsComponent implements OnInit {
     this.babylonService.setLightIntensity('ambientlightDown', hemisphericLightDown.intensity);
     this.ambientlightDownintensity = hemisphericLightDown.intensity;
 
-
     if (this.initialSettingsMode) {
       this.resetHelpers();
     }
@@ -404,7 +394,7 @@ export class ModelsettingsComponent implements OnInit {
         const rotation = {
           x: 0,
           y: 0,
-          z: 0
+          z: 0,
         };
         this.activeModel.settings['rotation'] = rotation;
 
@@ -417,7 +407,7 @@ export class ModelsettingsComponent implements OnInit {
           const rotation = {
             x: 0,
             y: 0,
-            z: 0
+            z: 0,
           };
           this.activeModel.settings['rotation'] = rotation;
         }
@@ -430,7 +420,7 @@ export class ModelsettingsComponent implements OnInit {
     } else {
       // settings exist
       await this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
-        this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
+                                                   this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
     }
   }
 
@@ -455,11 +445,11 @@ export class ModelsettingsComponent implements OnInit {
         if (camera.target) {
           targetVector = new BABYLON.Vector3(camera.target.x, camera.target.y, camera.target.z);
           this.cameraService.setDefaultPosition(camera.position.x, camera.position.y, camera.position.z,
-            camera.target.x, camera.target.y, camera.target.z);
+                                                camera.target.x, camera.target.y, camera.target.z);
         } else {
           targetVector = BABYLON.Vector3.Zero();
           this.cameraService.setDefaultPosition(camera.position.x, camera.position.y, camera.position.z,
-            0, 0, 0);
+                                                0, 0, 0);
         }
         this.cameraService.moveCameraToTarget(positionVector);
         this.cameraService.arcRotateCamera.setTarget(targetVector);
@@ -479,9 +469,9 @@ export class ModelsettingsComponent implements OnInit {
           r: 51,
           g: 51,
           b: 51,
-          a: 229.5
+          a: 229.5,
         },
-        effect: false
+        effect: false,
       };
       this.activeModel.settings['background'] = background;
       this.babylonService.setBackgroundColor(background.color);
@@ -502,28 +492,28 @@ export class ModelsettingsComponent implements OnInit {
           position: {
             x: 0,
             y: -1,
-            z: 0
+            z: 0,
           },
-          intensity: 1
+          intensity: 1,
         },
         {
           type: 'HemisphericLight',
           position: {
             x: 0,
             y: 1,
-            z: 0
+            z: 0,
           },
-          intensity: 1
+          intensity: 1,
         },
         {
           type: 'PointLight',
           position: {
             x: 1,
             y: 10,
-            z: 1
+            z: 1,
           },
-          intensity: 1
-        }
+          intensity: 1,
+        },
       ];
 
       this.activeModel.settings['lights'] = lights;
@@ -590,7 +580,7 @@ export class ModelsettingsComponent implements OnInit {
       // End
 
       await this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
-        this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
+                                                   this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
 
       this.cameraService.setUpperRadiusLimit(500);
       this.cameraService.setDefaultPosition(2.7065021761026817, 1.3419080619941322, 90.44884111420268, 0, 0, 0);
@@ -616,7 +606,6 @@ export class ModelsettingsComponent implements OnInit {
       // Lights & Background
       await this.setLightBackground();
 
-
       // Preview
       await this.setPreview();
 
@@ -634,22 +623,22 @@ export class ModelsettingsComponent implements OnInit {
         position: {
           x: 2.7065021761026817,
           y: 1.3419080619941322,
-          z: 90.44884111420268
+          z: 90.44884111420268,
         },
         target: {
           x: 0,
           y: 0,
-          z: 0
-        }
+          z: 0,
+        },
       },
       background: {
         color: {
           r: 0,
           g: 158,
           b: 224,
-          a: 1
+          a: 1,
         },
-        effect: true
+        effect: true,
       },
       lights: [
         {
@@ -657,35 +646,35 @@ export class ModelsettingsComponent implements OnInit {
           position: {
             x: 0,
             y: -1,
-            z: 0
+            z: 0,
           },
-          intensity: 1
+          intensity: 1,
         },
         {
           type: 'HemisphericLight',
           position: {
             x: 0,
             y: 1,
-            z: 0
+            z: 0,
           },
-          intensity: 1
+          intensity: 1,
         },
         {
           type: 'PointLight',
           position: {
             x: -9,
             y: 8,
-            z: 7
+            z: 7,
           },
-          intensity: 1
-        }
+          intensity: 1,
+        },
       ],
       rotation: {
         x: 0,
         y: 0,
-        z: 0
+        z: 0,
       },
-      scale: 1
+      scale: 1,
     };
   }
 

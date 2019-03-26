@@ -2,9 +2,9 @@ export interface Annotation {
   _id: string;
   relatedModel: string;
   ranking: string;
-  referencePoint: { dimension: string, value: number }[];
-  referencePointNormal: { dimension: string, value: number }[];
-  cameraPosition: { dimension: string, value: number }[];
+  referencePoint: Array<{ dimension: string; value: number }>;
+  referencePointNormal: Array<{ dimension: string; value: number }>;
+  cameraPosition: Array<{ dimension: string; value: number }>;
   preview: any;
   originatorID: string;
   validated: boolean;

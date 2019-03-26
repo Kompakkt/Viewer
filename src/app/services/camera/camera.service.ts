@@ -4,7 +4,7 @@ import * as BABYLON from 'babylonjs';
 import {BabylonService} from '../babylon/babylon.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CameraService {
 
@@ -32,7 +32,7 @@ export class CameraService {
   constructor(
     private babylonService: BabylonService) {
 
-    this.babylonService.CanvasObservable.subscribe((newCanvas) => {
+    this.babylonService.CanvasObservable.subscribe(newCanvas => {
 
       if (newCanvas) {
 
@@ -112,7 +112,6 @@ export class CameraService {
     }
   }
 
-
   /*
    private setCameraDefaults(camera: any): void {
 
@@ -122,7 +121,6 @@ export class CameraService {
      camera.keysRight.push(68);
      camera.setTarget(BABYLON.Vector3.Zero());
    }
-
 
    private setCameraActive(newActiveCamera: any): void {
      if (!this.scene.activeCamera) { return; }
@@ -138,7 +136,6 @@ export class CameraService {
      this.setCameraDefaults(this.arcRotateCamera);
      this.canvas.focus();
    }
-
 
    private universalSettings(): void {
 
@@ -208,7 +205,6 @@ export class CameraService {
     });
   }
 
-
   private setCamUniversalDefault() {
 
     const setBackAnm = new BABYLON.Animation('animCam', 'position', 30,
@@ -259,50 +255,49 @@ export class CameraService {
       frames = 30;
 
     const animCamAlpha = new BABYLON.Animation(name, 'alpha', frames,
-      BABYLON.Animation.ANIMATIONTYPE_FLOAT,
-      BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+                                               BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+                                               BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 
     animCamAlpha.setKeys([
       {
         frame: 0,
-        value: this.arcRotateCamera.alpha
+        value: this.arcRotateCamera.alpha,
       }, {
         frame: 30,
-        value: positionVector.x
-      }
+        value: positionVector.x,
+      },
     ]);
     this.arcRotateCamera.animations.push(animCamAlpha);
 
     const animCamBeta = new BABYLON.Animation(name, 'beta', frames,
-      BABYLON.Animation.ANIMATIONTYPE_FLOAT,
-      BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+                                              BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+                                              BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 
     animCamBeta.setKeys([
       {
         frame: 0,
-        value: this.arcRotateCamera.beta
+        value: this.arcRotateCamera.beta,
       }, {
         frame: 30,
-        value: positionVector.y
+        value: positionVector.y,
       }]);
     this.arcRotateCamera.animations.push(animCamBeta);
 
     const animCamRadius = new BABYLON.Animation(name, 'radius', frames,
-      BABYLON.Animation.ANIMATIONTYPE_FLOAT,
-      BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+                                                BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+                                                BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 
     animCamRadius.setKeys([
       {
         frame: 0,
-        value: this.arcRotateCamera.radius
+        value: this.arcRotateCamera.radius,
       }, {
         frame: 30,
-        value: positionVector.z
+        value: positionVector.z,
       }]);
     this.arcRotateCamera.animations.push(animCamRadius);
 
-
-    this.scene.beginAnimation(this.arcRotateCamera, 0, 30, false, 1, function () {
+    this.scene.beginAnimation(this.arcRotateCamera, 0, 30, false, 1, function() {
     });
 
   }
@@ -318,49 +313,49 @@ export class CameraService {
       frames = 30;
 
     const animCamAlpha = new BABYLON.Animation(name, 'position.x', frames,
-      BABYLON.Animation.ANIMATIONTYPE_FLOAT,
-      BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+                                               BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+                                               BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 
     animCamAlpha.setKeys([
       {
         frame: 0,
-        value: this.scene.activeCamera.position.x
+        value: this.scene.activeCamera.position.x,
       }, {
         frame: 30,
-        value: positionVector.x - 15
-      }
+        value: positionVector.x - 15,
+      },
     ]);
     this.scene.activeCamera.animations.push(animCamAlpha);
 
     const animCamBeta = new BABYLON.Animation(name, 'position.y', frames,
-      BABYLON.Animation.ANIMATIONTYPE_FLOAT,
-      BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+                                              BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+                                              BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 
     animCamBeta.setKeys([
       {
         frame: 0,
-        value: this.scene.activeCamera.position.y
+        value: this.scene.activeCamera.position.y,
       }, {
         frame: 30,
-        value: positionVector.y + 15
+        value: positionVector.y + 15,
       }]);
     this.scene.activeCamera.animations.push(animCamBeta);
 
     const animCamRadius = new BABYLON.Animation(name, 'position.z', frames,
-      BABYLON.Animation.ANIMATIONTYPE_FLOAT,
-      BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+                                                BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+                                                BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 
     animCamRadius.setKeys([
       {
         frame: 0,
-        value: this.scene.activeCamera.position.z
+        value: this.scene.activeCamera.position.z,
       }, {
         frame: 30,
-        value: positionVector.z - 15
+        value: positionVector.z - 15,
       }]);
     this.scene.activeCamera.animations.push(animCamRadius);
 
-    this.scene.beginAnimation(this.scene.activeCamera, 0, 30, false, 1, function () {
+    this.scene.beginAnimation(this.scene.activeCamera, 0, 30, false, 1, function() {
     }).onAnimationEndObservable.add(() => {
 
       // FOR VR-HUD
@@ -375,7 +370,7 @@ export class CameraService {
     const cameraPosition = {
       x: this.arcRotateCamera.alpha,
       y: this.arcRotateCamera.beta,
-      z: this.arcRotateCamera.radius
+      z: this.arcRotateCamera.radius,
     };
     // const cameraPosition = [{dimension: 'x', value: this.arcRotateCamera.alpha},
     //   {dimension: 'y', value: this.arcRotateCamera.beta},
@@ -389,13 +384,13 @@ export class CameraService {
       position: {
         x: this.arcRotateCamera.alpha,
         y: this.arcRotateCamera.beta,
-        z: this.arcRotateCamera.radius
+        z: this.arcRotateCamera.radius,
       },
       target: {
         x: this.arcRotateCamera.target.x,
         y: this.arcRotateCamera.target.y,
-        z: this.arcRotateCamera.target.z
-      }
+        z: this.arcRotateCamera.target.z,
+      },
     };
   }
 

@@ -2,10 +2,10 @@ export interface Model {
   _id?: string;
   relatedDigitalObject?: { _id: string };
   name: string;
-  cameraPosition?: { dimension: string, value: number }[];
-  referencePoint?: { dimension: string, value: number }[];
+  cameraPosition?: Array<{ dimension: string; value: number }>;
+  referencePoint?: Array<{ dimension: string; value: number }>;
   ranking?: number;
-  files: Array<string>;
+  files: string[];
   finished: boolean;
   online: boolean;
   processed?: {
@@ -23,14 +23,14 @@ export interface Model {
   settings?: {
     preview: string;
 
-    cameraPositionInitial: {
+    cameraPositionInitial: Array<{
       cameraType: string;
       position: {
         x: number;
         y: number;
         z: number;
       };
-    }[];
+    }>;
 
     background: {
       color: {
@@ -42,7 +42,7 @@ export interface Model {
       effect: boolean;
     };
 
-    lights: {
+    lights: Array<{
       type: string;
       position: {
         x: number;
@@ -50,6 +50,6 @@ export interface Model {
         z: number;
       };
       intensity: number;
-    } [];
+    }>;
   };
 }

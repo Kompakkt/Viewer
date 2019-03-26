@@ -1,48 +1,79 @@
 {
-  "rulesDirectory": [
-    "node_modules/codelyzer"
-  ],
+  "extends": "tslint:all",
+  "linterOptions": {
+    "exclude": [
+      "**/*.spec.ts",
+      "bin",
+      "dist",
+      "e2e/**/*.*",
+      "src/polyfills.ts",
+      "src/test.ts"
+    ]
+  },
   "rules": {
+    "arrow-parens": [
+      true,
+      "ban-single-arg-parens"
+    ],
     "arrow-return-shorthand": true,
     "callable-types": true,
     "class-name": true,
     "comment-format": [
       true,
-      "check-space"
+      "check-space",
+      {
+        "ignore-words": [
+          "TODO"
+        ]
+      }
     ],
-    "curly": true,
-    "deprecation": {
-      "severity": "warn"
-    },
+    "completed-docs": false,
+    "component-class-suffix": true,
+    "curly": [
+      true,
+      "ignore-same-line"
+    ],
+    "deprecation": [
+      true,
+      {
+        "severity": "error"
+      }
+    ],
+    "directive-class-suffix": true,
     "eofline": true,
+    "file-name-casing": false,
     "forin": true,
     "import-blacklist": [
       true,
       "rxjs/Rx"
     ],
     "import-spacing": true,
+    "increment-decrement": false,
     "indent": [
       true,
-      "spaces"
+      "spaces",
+      4
     ],
     "interface-over-type-literal": true,
     "label-position": true,
     "max-line-length": [
       true,
-      140
+      100
     ],
     "member-access": false,
     "member-ordering": [
       true,
       {
         "order": [
-          "static-field",
           "instance-field",
-          "static-method",
-          "instance-method"
+          "instance-method",
+          "static-field",
+          "static-method"
         ]
       }
     ],
+    "newline-before-return": false,
+    "no-any": false,
     "no-arg": true,
     "no-bitwise": true,
     "no-console": [
@@ -63,31 +94,45 @@
       true,
       "ignore-params"
     ],
+    "no-input-rename": true,
     "no-misused-new": true,
     "no-non-null-assertion": true,
+    "no-output-on-prefix": true,
+    "no-output-rename": true,
+    "no-parameter-properties": false,
     "no-shadowed-variable": true,
     "no-string-literal": false,
     "no-string-throw": true,
-    "no-switch-case-fall-through": true,
+    "no-submodule-imports": false,
+    "no-switch-case-fall-through": false,
     "no-trailing-whitespace": true,
+    "no-unbound-method": false,
     "no-unnecessary-initializer": true,
+    "no-unsafe-any": false,
     "no-unused-expression": true,
     "no-use-before-declare": true,
     "no-var-keyword": true,
+    "no-void-expression": [
+      true,
+      "ignore-arrow-function-shorthand"
+    ],
     "object-literal-sort-keys": false,
     "one-line": [
       true,
-      "check-open-brace",
       "check-catch",
       "check-else",
+      "check-open-brace",
       "check-whitespace"
     ],
     "prefer-const": true,
+    "prefer-function-over-method": false,
+    "prefer-readonly": false,
     "quotemark": [
       true,
       "single"
     ],
     "radix": true,
+    "strict-boolean-expressions": false,
     "semicolon": [
       true,
       "always"
@@ -96,6 +141,7 @@
       true,
       "allow-null-check"
     ],
+    "typedef": false,
     "typedef-whitespace": [
       true,
       {
@@ -107,6 +153,11 @@
       }
     ],
     "unified-signatures": true,
+    "use-host-property-decorator": true,
+    "use-input-property-decorator": true,
+    "use-life-cycle-interface": true,
+    "use-output-property-decorator": true,
+    "use-pipe-transform-interface": true,
     "variable-name": false,
     "whitespace": [
       true,
@@ -115,16 +166,9 @@
       "check-operator",
       "check-separator",
       "check-type"
-    ],
-    "no-output-on-prefix": true,
-    "use-input-property-decorator": true,
-    "use-output-property-decorator": true,
-    "use-host-property-decorator": true,
-    "no-input-rename": true,
-    "no-output-rename": true,
-    "use-life-cycle-interface": true,
-    "use-pipe-transform-interface": true,
-    "component-class-suffix": true,
-    "directive-class-suffix": true
-  }
+    ]
+  },
+  "rulesDirectory": [
+    "node_modules/codelyzer"
+  ]
 }

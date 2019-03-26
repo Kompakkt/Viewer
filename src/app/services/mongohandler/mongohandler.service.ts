@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core';
-import { environment } from '../../../environments/environment';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
+import { environment } from '../../../environments/environment';
+
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MongohandlerService {
 
@@ -18,9 +19,9 @@ export class MongohandlerService {
   private endpoint = `${environment.express_server_url}:${environment.express_server_port}`;
   private httpOptions = {
     headers: new HttpHeaders({
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     }),
-    withCredentials: true
+    withCredentials: true,
   };
 
   constructor(private http: HttpClient) {
@@ -28,7 +29,7 @@ export class MongohandlerService {
 
   // Helper
   private updatePreviewURL(promise: Promise<any>) {
-    const update = (obj) => {
+    const update =obj => {
       // Only update if it's a relative path and not a URL
       if (obj && obj.settings && obj.settings.preview
         && obj.settings.preview.indexOf('base64') === -1
@@ -41,7 +42,7 @@ export class MongohandlerService {
     return new Promise<any>((resolve, reject) => {
       promise.then(result => {
         if (Array.isArray(result) && result[0] && !result[0].models) {
-          result = result.map(model => update(model));
+          result = result.map(update);
         } else if (Array.isArray(result) && result[0] && result[0].models) {
           for (const compilation of result) {
             for (let model of compilation.models) {
@@ -49,12 +50,12 @@ export class MongohandlerService {
             }
           }
         } else if (result.models) {
-          result.models = result.models.map(model => update(model));
+          result.models = result.models.map(update);
         } else {
           result = update(result);
         }
         resolve(result);
-      }).catch(e => reject(e));
+      }).catch(reject);
     });
   }
 
@@ -108,7 +109,7 @@ export class MongohandlerService {
 
   // Auth
   public login(username: string, password: string): Observable<any> {
-    return this.post(`login`, { username: username, password: password });
+    return this.post(`login`, { username, password });
   }
 
   public logout(): Promise<any> {

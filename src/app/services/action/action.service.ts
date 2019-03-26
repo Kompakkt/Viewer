@@ -1,10 +1,10 @@
 import {Injectable} from '@angular/core';
-import {BabylonService} from '../babylon/babylon.service';
-
 import {ActionManager, ExecuteCodeAction} from 'babylonjs';
 
+import {BabylonService} from '../babylon/babylon.service';
+
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ActionService {
 
@@ -13,7 +13,6 @@ export class ActionService {
 
   public createActionManager(mesh: BABYLON.Mesh, trigger: number, actionExecuted: (result: any) => void) {
 
-
    // const mesh = this.babylonService.getScene().getMeshesByTags(modelName)[0];
 
     if (mesh !== null) {
@@ -21,9 +20,9 @@ export class ActionService {
       const scene = this.babylonService.getScene();
       mesh.actionManager = new ActionManager(scene);
       mesh.actionManager.registerAction(new ExecuteCodeAction(
-        trigger, function (evt) {
+        trigger, function(evt) {
           const pickResult = scene.pick(scene.pointerX, scene.pointerY,
-            undefined, false, scene.activeCamera);
+                                        undefined, false, scene.activeCamera);
           console.log(pickResult);
           actionExecuted(pickResult);
         }));
