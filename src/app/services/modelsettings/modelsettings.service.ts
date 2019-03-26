@@ -3,6 +3,7 @@ import * as BABYLON from 'babylonjs';
 import {LoadModelService} from '../load-model/load-model.service';
 import {ColorEvent} from 'ngx-color';
 import {Injectable} from '@angular/core';
+import {CameraService} from '../camera/camera.service';
 
 
 @Injectable({
@@ -48,6 +49,7 @@ export class ModelsettingsService {
 
 
   constructor(private babylonService: BabylonService,
+              private cameraService: CameraService,
               private loadModelService: LoadModelService) {
 
     this.loadModelService.Observables.actualModelMeshes.subscribe(actualModelMeshes => {
@@ -62,6 +64,7 @@ export class ModelsettingsService {
    */
 
   public async loadSettings(scalingFactor, rotX, rotY, rotZ) {
+    this.scalingFactor = scalingFactor;
     await this.initializeVariablesforLoading();
     await this.generateHelpers();
     await this.setSettings(scalingFactor, rotX, rotY, rotZ);
@@ -99,6 +102,9 @@ export class ModelsettingsService {
     this.lastHeight = this.initialSize.y;
     this.lastWidth = this.initialSize.x;
     this.lastDepth = this.initialSize.z;
+
+    this.cameraService.setUpperRadiusLimit(Math.max(this.max.x, this.max.y, this.max.z) * this.scalingFactor * 5);
+    this.cameraService.setDefaultPosition(2.7, 1.3, Math.max(this.max.x, this.max.y, this.max.z) + 50, 0, 0, 0);
   }
 
   private async setSettings(scalingFactor, rotX, rotY, rotZ) {
@@ -193,6 +199,7 @@ export class ModelsettingsService {
     this.createGround(20);
     this.showGround = false;
     this.babylonService.getScene().getMeshesByTags('ground').map(mesh => mesh.visibility = 0);
+
   }
 
   public resetVisualSettingsHelper() {
@@ -279,7 +286,13 @@ export class ModelsettingsService {
 
   public async decomposeAfterSetting() {
     if (this.center) {
-      await this.unparentModel();
+      this.cameraService.setUpperRadiusLimit(Math.max(this.max.x, this.max.y, this.max.z) * this.scalingFactor * 5);
+
+      for (let _i = 0; _i < this.actualModelMeshes.length; _i++) {
+        const mesh = this.actualModelMeshes[_i];
+        mesh.parent = null;
+      }
+
       await this.destroyCenter();
       await this.destroyBoundingBox();
       await this.destroyWorldAxis();
@@ -695,7 +708,6 @@ export class ModelsettingsService {
 
   private rotationFunc(axisName: string, degree: number) {
 
-    console.log('rotated', axisName, degree);
     // Math.PI / 2 -> 90 Grad
 
     const axis = BABYLON.Axis[axisName.toUpperCase()];
@@ -743,7 +755,6 @@ export class ModelsettingsService {
       }
     } else {
       const check = this.rotationX;
-      console.log('this.rotationX', this.rotationX, 'rotation', rotation, 'this.lastRotationX', this.lastRotationX);
 
       if (0 <= check && check <= 360) {
         this.rotationFunc('x', this.rotationX - this.lastRotationX);

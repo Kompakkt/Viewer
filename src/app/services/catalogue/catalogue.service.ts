@@ -13,18 +13,20 @@ export class CatalogueService {
 
   private Subjects = {
     models: new BehaviorSubject<Model[]>(Array<Model>()),
-    collections: new BehaviorSubject<any[]>(Array<any>()),
+    collections: new BehaviorSubject<any[]>(Array<any>())
   };
 
   public Observables = {
     models: this.Subjects.models.asObservable(),
-    collections: this.Subjects.collections.asObservable(),
+    collections: this.Subjects.collections.asObservable()
   };
 
   private isFirstLoad = true;
   public isLoggedIn: boolean;
+  public isShowCatalogue = false;
 
   @Output() loggedIn: EventEmitter<boolean> = new EventEmitter();
+  @Output() showCatalogue: EventEmitter<boolean> = new EventEmitter();
 
   constructor(private mongohandlerService: MongohandlerService,
               private loadModelService: LoadModelService,
@@ -38,6 +40,8 @@ export class CatalogueService {
       const url_split = location.href.split('?');
 
       if (url_split.length <= 1) {
+        this.isShowCatalogue = true;
+        this.showCatalogue.emit(true);
         this.isFirstLoad = false;
         this.loadModelService.loadDefaultModelData();
 
@@ -69,6 +73,8 @@ export class CatalogueService {
           // TODO: Cases for audio, video and image
           switch (category) {
             case 'model':
+              this.isShowCatalogue = false;
+              this.showCatalogue.emit(false);
               this.loadModelService.fetchModelData(query);
               this.isFirstLoad = false;
               this.mongohandlerService.isAuthorized().then(result => {
@@ -85,6 +91,8 @@ export class CatalogueService {
               break;
 
             case 'compilation':
+              this.isShowCatalogue = false;
+              this.showCatalogue.emit(false);
               this.isFirstLoad = false;
               this.loadModelService.fetchCollectionData(query);
               this.mongohandlerService.isAuthorized().then(result => {
@@ -101,6 +109,8 @@ export class CatalogueService {
               break;
 
             default:
+              this.isShowCatalogue = true;
+              this.showCatalogue.emit(true);
               this.isFirstLoad = false;
               console.log('No valid query passed. Loading default model.');
               this.loadModelService.loadDefaultModelData();
@@ -109,6 +119,8 @@ export class CatalogueService {
           console.log('No valid query passed. Loading default model.');
           this.isFirstLoad = false;
           this.loadModelService.loadDefaultModelData();
+          this.isShowCatalogue = true;
+          this.showCatalogue.emit(true);
         }
       }
     } else {

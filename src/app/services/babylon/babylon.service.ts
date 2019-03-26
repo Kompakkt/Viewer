@@ -154,8 +154,8 @@ export class BabylonService {
     return this.scene;
   }
 
-  public createArcRotateCam(name: string, alpha: number, beta: number, radius: number, position: any): BABYLON.ArcRotateCamera {
-    return new BABYLON.ArcRotateCamera(name, alpha, beta, radius, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
+  public createArcRotateCam(alpha: number, beta: number, radius: number): BABYLON.ArcRotateCamera {
+    return new BABYLON.ArcRotateCamera('arcRotateCamera', alpha, beta, radius, BABYLON.Vector3.Zero(), this.scene);
   }
 
   public createVRHelper() {
@@ -317,22 +317,18 @@ export class BabylonService {
     if (light === 'pointlight' && this.pointlight !== undefined) {
       this.pointlight.intensity = intensity;
       this.pointlightIntensity = intensity;
-      console.log('set Intensity: ', intensity);
     }
     if (light === 'ambientlightUp' && this.ambientlightUp !== undefined) {
       this.ambientlightUp.intensity = intensity;
-      console.log('set Intensity: ', intensity);
     }
     if (light === 'ambientlightDown' && this.ambientlightDown !== undefined) {
       this.ambientlightDown.intensity = intensity;
-      console.log('set Intensity: ', intensity);
     }
   }
 
   public createPointLight(name: string, position: any) {
     if (this.pointlight !== undefined && this.pointlight !== null) {
       this.pointlight.dispose();
-      console.log('Disp 2');
     }
     const pointLight = new BABYLON.PointLight(name, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
     this.pointlightPosX = position.x;
@@ -340,7 +336,6 @@ export class BabylonService {
     this.pointlightPosZ = position.z;
 
     this.pointlight = pointLight;
-    console.log('Created', this.pointlight);
     this.pointlight.intensity = this.pointlightIntensity;
 
 
@@ -352,7 +347,6 @@ export class BabylonService {
       this.ambientlightDown.dispose();
     }
     const hemiLight = new BABYLON.HemisphericLight(name, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
-    console.log('created light: ', hemiLight);
     this.ambientlightDown = hemiLight;
   }
 
@@ -361,7 +355,6 @@ export class BabylonService {
       this.ambientlightUp.dispose();
     }
     const hemiLight = new BABYLON.HemisphericLight(name, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
-    console.log('created light: ', hemiLight);
     this.ambientlightUp = hemiLight;
   }
 
@@ -370,15 +363,12 @@ export class BabylonService {
       switch (dimension) {
         case 'x':
           this.pointlightPosX = pos;
-          console.log('Pos: ' + pos);
           break;
         case 'y':
           this.pointlightPosY = pos;
-          console.log('Pos: ' + pos);
           break;
         case 'z':
           this.pointlightPosZ = pos;
-          console.log('Pos: ' + pos);
           break;
       }
 

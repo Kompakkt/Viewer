@@ -1,10 +1,19 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {AnnotationsEditorComponent} from './annotations-editor.component';
-import {MatCardModule, MatCheckboxModule, MatFormFieldModule, MatIconModule, MatSnackBarModule, MatTooltipModule} from '@angular/material';
+import {
+  MatCardModule,
+  MatCheckboxModule, MatDialogModule,
+  MatFormFieldModule,
+  MatIconModule, MatInputModule,
+  MatSnackBarModule,
+  MatTooltipModule
+} from '@angular/material';
 import {FormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
-import {Annotation} from '../../interfaces/annotation2/annotation2';
+import {SocketIoModule} from 'ngx-socket-io';
+import {environment} from '../../../environments/environment';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 describe('AnnotationsEditorComponent', () => {
   let component: AnnotationsEditorComponent;
@@ -21,7 +30,14 @@ describe('AnnotationsEditorComponent', () => {
         MatIconModule,
         MatTooltipModule,
         MatSnackBarModule,
-        HttpClientModule]
+        HttpClientModule,
+        MatDialogModule,
+        MatInputModule,
+        BrowserAnimationsModule,
+        SocketIoModule.forRoot({
+          url: `${environment.express_server_url}:${environment.express_server_port}`,
+          options: {}
+        })]
     })
       .compileComponents();
   }));

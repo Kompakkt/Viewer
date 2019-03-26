@@ -111,6 +111,10 @@ export class MongohandlerService {
     return this.post(`login`, { username: username, password: password });
   }
 
+  public logout(): Promise<any> {
+    return this.get(`logout`);
+  }
+
   public isAuthorized() {
     return this.get(`auth`);
   }

@@ -11,6 +11,7 @@ import {DialogDeleteAnnotationsComponent} from '../dialogs/dialog-delete-annotat
 
 import {AnnotationsEditorComponent} from '../annotations-editor/annotations-editor.component';
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
+import {LoadModelService} from '../../services/load-model/load-model.service';
 
 @Component({
   selector: 'app-editor',
@@ -29,6 +30,8 @@ export class EditorComponent implements OnInit, AfterViewInit {
   public selectedTab;
   public meshSettingsMode;
   public defaultAnnotationsMode;
+  public isModelOwner: boolean;
+  public isSingleModel: boolean;
 
 
   public popup_is_open = '';
@@ -38,6 +41,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
   constructor(private overlayService: OverlayService,
               public annotationService: AnnotationService,
               private annotationmarkerService: AnnotationmarkerService,
+              private loadModelService: LoadModelService,
               public dialog: MatDialog) {
   }
 
@@ -66,6 +70,16 @@ export class EditorComponent implements OnInit, AfterViewInit {
         this.annotationService.annotationMode(true);
         this.changeTab(0);
       }
+    });
+
+    this.loadModelService.modelOwner.subscribe(isModelOwner => {
+      this.isModelOwner = isModelOwner;
+      console.log('Owner:', isModelOwner);
+    });
+
+    this.loadModelService.singleModel.subscribe(singleModel => {
+      this.isSingleModel = singleModel;
+      console.log('Single:', singleModel);
     });
   }
 

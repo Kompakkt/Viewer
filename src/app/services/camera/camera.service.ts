@@ -11,20 +11,23 @@ export class CameraService {
   private canvas: HTMLCanvasElement;
   private scene: BABYLON.Scene;
 
-  private arcRotateCamera: BABYLON.ArcRotateCamera;
-  private universalCamera: BABYLON.UniversalCamera;
+  public arcRotateCamera: BABYLON.ArcRotateCamera;
+  // private universalCamera: BABYLON.UniversalCamera;
   private vrCamera: BABYLON.VRDeviceOrientationFreeCamera | BABYLON.VRDeviceOrientationArcRotateCamera;
 
   private vrHelper;
 
-  private alpha: number;
-  private beta: number;
-  private radius: number;
-  private x: number;
-  private y: number;
-  private z: number;
-  private xRot: number;
-  private yRot: number;
+  // Parameters (initial Position): alpha, beta, radius,
+  public alpha: number;
+  public beta: number;
+  public radius: number;
+  // target
+  public x: number;
+  public y: number;
+  public z: number;
+  /*
+    private xRot: number;
+    private yRot: number;*/
 
   constructor(
     private babylonService: BabylonService) {
@@ -32,42 +35,42 @@ export class CameraService {
     this.babylonService.CanvasObservable.subscribe((newCanvas) => {
 
       if (newCanvas) {
-        this.alpha = 9;
-        this.beta = 1.3;
-        this.radius = 100;
 
         this.scene = this.babylonService.getScene();
         this.canvas = newCanvas;
 
-        this.arcRotateCamera = this.babylonService.createArcRotateCam('arcRotateCamera',
-          this.alpha, this.beta, this.radius, BABYLON.Vector3.Zero());
-
-        this.arcRotateSettings();
-
-        this.x = 0;
-        this.y = 50;
-        this.z = 100;
-
-        this.universalCamera = new BABYLON.UniversalCamera('universalCamera',
-          new BABYLON.Vector3(this.x, this.y, this.z), this.scene);
-
-        this.universalSettings();
-
-        this.xRot = this.universalCamera.rotation.x;
-        this.yRot = this.universalCamera.rotation.y;
+        // Arc Rotate Camera
+        // Parameters (initial Position): alpha, beta, radius, target position, scene
+        this.arcRotateCamera = this.babylonService.createArcRotateCam(0, 10, 100);
+        this.arcRotateCamera.allowUpsideDown = false;
+        this.arcRotateCamera.panningSensibility = 25;
+        this.arcRotateCamera.keysUp.push(87);
+        this.arcRotateCamera.keysDown.push(83);
+        this.arcRotateCamera.keysLeft.push(65);
+        this.arcRotateCamera.keysRight.push(68);
 
         this.arcRotateCamera.attachControl(newCanvas, false);
+
+        /*
+  this.universalCamera = new BABYLON.UniversalCamera('universalCamera',
+    new BABYLON.Vector3(this.x, this.y, this.z), this.scene);
+
+  this.universalSettings();
+
+  this.xRot = this.universalCamera.rotation.x;
+  this.yRot = this.universalCamera.rotation.y;
+*/
       }
     });
   }
 
   // VR BUTTON
   public createVrHelperInCamera(): void {
-
     this.vrHelper = this.babylonService.createVRHelper();
     this.babylonService.getVRHelper().enterVR();
   }
 
+  /*
   public setCamArcRotate(): void {
     if (!this.scene.activeCamera) return;
     if (this.scene.activeCamera.getClassName() !== 'ArcRotateCamera') {
@@ -84,61 +87,69 @@ export class CameraService {
       this.setCameraActive(this.universalCamera);
       this.universalSettings();
     }
+  }*/
+
+  public backToDefault(): void {
+    const positionVector = new BABYLON.Vector3(this.alpha, this.beta, this.radius);
+    this.moveCameraToTarget(positionVector);
+    const positionTarget = new BABYLON.Vector3(this.x, this.y, this.z);
+    this.arcRotateCamera.setTarget(positionTarget);
+
   }
 
-  public setBackToDefault(): void {
-    if (!this.scene.activeCamera) return;
-    switch (this.scene.activeCamera.getClassName()) {
+  public setDefaultPosition(alpha: number, beta: number, radius: number, x: number, y: number, z: number) {
+    this.alpha = alpha;
+    this.beta = beta;
+    this.radius = radius;
+    this.x = x;
+    this.y = y;
+    this.z = z;
+  }
 
-      case 'ArcRotateCamera':
-        this.setCamArcRotateDefault();
-        break;
-      case 'UniversalCamera':
-        this.setCamUniversalDefault();
-        break;
+  public setUpperRadiusLimit(radius: number) {
+    if (this.arcRotateCamera) {
+      this.arcRotateCamera.upperRadiusLimit = radius;
     }
-
-    this.canvas.focus();
   }
 
-  public setActiveCameraTarget(target: BABYLON.Vector3): void {
-    this.arcRotateCamera.setTarget(target);
-  }
 
-  private setCameraDefaults(camera: any): void {
+  /*
+   private setCameraDefaults(camera: any): void {
 
-    camera.keysUp.push(87);
-    camera.keysDown.push(83);
-    camera.keysLeft.push(65);
-    camera.keysRight.push(68);
-    camera.setTarget(BABYLON.Vector3.Zero());
-  }
+     camera.keysUp.push(87);
+     camera.keysDown.push(83);
+     camera.keysLeft.push(65);
+     camera.keysRight.push(68);
+     camera.setTarget(BABYLON.Vector3.Zero());
+   }
 
-  private setCameraActive(newActiveCamera: any): void {
-    if (!this.scene.activeCamera) return;
-    this.scene.activeCamera.detachControl(this.canvas);
-    this.scene.activeCamera = newActiveCamera;
-    newActiveCamera.attachControl(this.canvas, false);
-  }
 
-  private arcRotateSettings(): void {
+   private setCameraActive(newActiveCamera: any): void {
+     if (!this.scene.activeCamera) { return; }
+     this.scene.activeCamera.detachControl(this.canvas);
+     this.scene.activeCamera = newActiveCamera;
+     newActiveCamera.attachControl(this.canvas, false);
+   }
 
-    this.arcRotateCamera.panningSensibility = 25;
-    this.arcRotateCamera.upperRadiusLimit = 500;
-    this.setCameraDefaults(this.arcRotateCamera);
-    this.canvas.focus();
-  }
+   private arcRotateSettings(): void {
 
-  private universalSettings(): void {
+     this.arcRotateCamera.panningSensibility = 25;
+     this.arcRotateCamera.upperRadiusLimit = 500;
+     this.setCameraDefaults(this.arcRotateCamera);
+     this.canvas.focus();
+   }
 
-    this.universalCamera.position.x = this.x;
-    this.universalCamera.position.y = this.y;
-    this.universalCamera.position.z = this.z;
-    this.universalCamera.ellipsoid = new BABYLON.Vector3(10, 10, 10);
-    this.universalCamera.checkCollisions = true;
-    this.setCameraDefaults(this.universalCamera);
-    this.canvas.focus();
-  }
+
+   private universalSettings(): void {
+
+     this.universalCamera.position.x = this.x;
+     this.universalCamera.position.y = this.y;
+     this.universalCamera.position.z = this.z;
+     this.universalCamera.ellipsoid = new BABYLON.Vector3(10, 10, 10);
+     this.universalCamera.checkCollisions = true;
+     this.setCameraDefaults(this.universalCamera);
+     this.canvas.focus();
+   }
 
   private setCamArcRotateDefault() {
 
@@ -197,6 +208,7 @@ export class CameraService {
     });
   }
 
+
   private setCamUniversalDefault() {
 
     const setBackAnm = new BABYLON.Animation('animCam', 'position', 30,
@@ -239,13 +251,9 @@ export class CameraService {
 
     this.scene.beginAnimation(this.universalCamera, 0, 30, false, 1, function () {
     });
-  }
+  }*/
 
   public moveCameraToTarget(positionVector: BABYLON.Vector3) {
-
-
-    this.scene.activeCamera = this.arcRotateCamera;
-    this.arcRotateCamera.attachControl(this.canvas, false);
 
     const name = 'animCam',
       frames = 30;
@@ -293,15 +301,17 @@ export class CameraService {
       }]);
     this.arcRotateCamera.animations.push(animCamRadius);
 
-    this.arcRotateCamera.setTarget(BABYLON.Vector3.Zero());
 
     this.scene.beginAnimation(this.arcRotateCamera, 0, 30, false, 1, function () {
     });
+
   }
 
   public moveVRCameraToTarget(positionVector: BABYLON.Vector3) {
 
-    if (!this.scene.activeCamera) return;
+    if (!this.scene.activeCamera) {
+      return;
+    }
 
     // ANIMATION
     const name = 'animCam',
@@ -334,7 +344,7 @@ export class CameraService {
         frame: 30,
         value: positionVector.y + 15
       }]);
-      this.scene.activeCamera.animations.push(animCamBeta);
+    this.scene.activeCamera.animations.push(animCamBeta);
 
     const animCamRadius = new BABYLON.Animation(name, 'position.z', frames,
       BABYLON.Animation.ANIMATIONTYPE_FLOAT,
@@ -346,9 +356,9 @@ export class CameraService {
         value: this.scene.activeCamera.position.z
       }, {
         frame: 30,
-        value: positionVector.z  - 15
+        value: positionVector.z - 15
       }]);
-      this.scene.activeCamera.animations.push(animCamRadius);
+    this.scene.activeCamera.animations.push(animCamRadius);
 
     this.scene.beginAnimation(this.scene.activeCamera, 0, 30, false, 1, function () {
     }).onAnimationEndObservable.add(() => {
@@ -380,6 +390,11 @@ export class CameraService {
         x: this.arcRotateCamera.alpha,
         y: this.arcRotateCamera.beta,
         z: this.arcRotateCamera.radius
+      },
+      target: {
+        x: this.arcRotateCamera.target.x,
+        y: this.arcRotateCamera.target.y,
+        z: this.arcRotateCamera.target.z
       }
     };
   }

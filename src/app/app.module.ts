@@ -27,7 +27,9 @@ import {
   MatFormFieldModule,
   MatCheckboxModule,
   MatInputModule,
-  MatListModule, MatDividerModule, MatSliderModule, MatRadioModule, MatSelectModule, MatDialogModule, MatSlideToggleModule, MatStepperModule
+  MatListModule, MatDividerModule, MatSliderModule, MatRadioModule, MatSelectModule, MatDialogModule, MatSlideToggleModule,
+  MatStepperModule,
+  MatProgressSpinnerModule
 } from '@angular/material';
 import {EditorComponent} from './components/editor/editor.component';
 import {AnnotationsEditorComponent} from './components/annotations-editor/annotations-editor.component';
@@ -92,6 +94,7 @@ import { DialogMeshsettingsComponent } from './components/dialogs/dialog-meshset
     MatDialogModule,
     MatSlideToggleModule,
     MatStepperModule,
+    MatProgressSpinnerModule,
     SocketIoModule.forRoot(socketConfig)
   ],
   entryComponents: [

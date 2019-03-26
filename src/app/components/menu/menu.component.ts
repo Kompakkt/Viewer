@@ -31,14 +31,18 @@ import {SocketService} from '../../services/socket/socket.service';
 export class MenuComponent implements OnInit {
 
   // 1.1.5
-  public toggleChecked= false;
+  public toggleChecked = false;
 
   public menuIsEnabled = true;
   private isSingleModel: boolean;
   private isSingleCollection: boolean;
 
+  public isLoggedIn: boolean;
+
   private editActive = false;
   private collectionsActive = false;
+
+  public isShowCatalogue: boolean;
 
   constructor(
     private message: MessageService,
@@ -77,18 +81,27 @@ export class MenuComponent implements OnInit {
     this.loadModelService.singleCollection.subscribe(singleCollection => {
       this.isSingleCollection = singleCollection;
     });
+
+    this.catalogueService.loggedIn.subscribe(loggedIn => {
+      this.isLoggedIn = loggedIn;
+    });
+
+    this.catalogueService.showCatalogue.subscribe(showCatalogue => {
+      this.isShowCatalogue = showCatalogue;
+    });
   }
 
+  /*
   public setCamArcRotate() {
     this.cameraService.setCamArcRotate();
   }
 
   public setCamUniversal() {
     this.cameraService.setCamUniversal();
-  }
+  }*/
 
   public setBackToDefault() {
-    this.cameraService.setBackToDefault();
+    this.cameraService.backToDefault();
   }
 
 
@@ -171,6 +184,12 @@ export class MenuComponent implements OnInit {
     this.dialog.open(LoginComponent, dialogConfig);
   }
 
+  public logout() {
+    this.mongohandlerService.logout().then(() => {
+      this.catalogueService.bootstrap();
+    });
+  }
+
   // 1.1.5
   private onSocketToggleChange() {
     if (this.toggleChecked){
@@ -179,7 +198,7 @@ export class MenuComponent implements OnInit {
     else{
       this.socketService.disconnectSocket();
     }
-  } 
+  }
 
 }
 
