@@ -232,6 +232,9 @@ export class LoadModelService {
 
         if (this.isSingleLoadCollection) {
           this.checkOwnerStateCollection();
+        } else {
+          this.isCollectionOwner = false;
+          this.collectionOwner.emit(false);
         }
 
         if (!newModel.finished) {
