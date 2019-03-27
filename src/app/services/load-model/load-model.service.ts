@@ -240,26 +240,11 @@ export class LoadModelService {
           this.collectionOwner.emit(false);
         }
 
-        if (newModel.processed['low'] !== undefined) {
-          this.low = newModel.processed['low'];
-        } else {
-          this.low = '';
-        }
-        if (newModel.processed['high'] !== undefined && newModel.processed['high'] !== newModel.processed['low']) {
-          this.high = newModel.processed['high'];
-        } else {
-          this.high = '';
-        }
-        if (newModel.processed['medium'] !== undefined && newModel.processed['medium'] !== newModel.processed['low']) {
-          this.medium = newModel.processed['medium'];
-        } else {
-          this.medium = '';
-        }
-
         if (!newModel.finished) {
           this.finished.emit(false);
           this.isFinished = false;
         } else {
+          this.checkAvailableQuality();
           this.finished.emit(true);
           this.isFinished = true;
         }
@@ -308,6 +293,26 @@ export class LoadModelService {
     } else {
       this.isCollectionOwner = false;
       this.collectionOwner.emit(false);
+    }
+  }
+
+  private checkAvailableQuality() {
+    const _model = this.Observables.actualModel.source['_events'].slice(-1)[0];
+
+    if (_model.processed['low'] !== undefined) {
+      this.low = _model.processed['low'];
+    } else {
+      this.low = '';
+    }
+    if (_model.processed['high'] !== undefined && _model.processed['high'] !== _model.processed['low']) {
+      this.high = _model.processed['high'];
+    } else {
+      this.high = '';
+    }
+    if (_model.processed['medium'] !== undefined && _model.processed['medium'] !== _model.processed['low']) {
+      this.medium = _model.processed['medium'];
+    } else {
+      this.medium = '';
     }
   }
 
