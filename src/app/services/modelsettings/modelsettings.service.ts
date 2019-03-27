@@ -629,19 +629,16 @@ export class ModelsettingsService {
     this.showLocalAxis = false;
   }
 
-  public setScalingFactor(event: any) {
+  public async setScalingFactor(event: any) {
+
     this.scalingFactor = event.value.toFixed(2);
-    this.center.scaling = new BABYLON.Vector3(event.value, event.value, event.value);
-
-    const bi = this.boundingBox.getBoundingInfo();
-    const minimum = bi.boundingBox.minimumWorld;
-    const maximum = bi.boundingBox.maximumWorld;
-    const size = maximum.subtract(minimum);
-    this.height = size.y.toFixed(2);
-    this.width = size.x.toFixed(2);
-    this.depth = size.z.toFixed(2);
-
+    this.height = this.initialSize.y.toFixed(2) * this.scalingFactor;
+    this.width = this.initialSize.x.toFixed(2) * this.scalingFactor;
+    this.depth = this.initialSize.z.toFixed(2) * this.scalingFactor;
+    this.center.scaling = new BABYLON.Vector3(this.scalingFactor, this.scalingFactor, this.scalingFactor);
   }
+
+
 
   public handleChangeHeight() {
 
