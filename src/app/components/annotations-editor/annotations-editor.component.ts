@@ -32,8 +32,7 @@ export class AnnotationsEditorComponent implements OnInit {
               private cameraService: CameraService,
               private annotationmarkerService: AnnotationmarkerService,
               private socketService: SocketService,
-              public loadModelService: LoadModelService
-  ) {
+              public loadModelService: LoadModelService) {
   }
 
   ngOnInit() {
