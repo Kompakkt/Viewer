@@ -261,6 +261,7 @@ export class AnnotationService {
       if (this.isSingleModel) {
         // Darf Default Annotationen hinzufügen
         if (this.isModelOwner) {
+          newAnnotation.validated = true;
           this.addDefault(newAnnotation);
         } else {
           this.addLocal(newAnnotation);

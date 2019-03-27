@@ -230,7 +230,7 @@ export class LoadModelService {
           this.checkOwnerState(newModel._id);
         }
 
-        if (this.isSingleLoadCollection) {
+        if (this.isSingleLoadCollection && !this.isDefaultLoad) {
           this.checkOwnerStateCollection();
         } else {
           this.isCollectionOwner = false;
