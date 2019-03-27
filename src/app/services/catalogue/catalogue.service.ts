@@ -5,6 +5,7 @@ import {Model} from '../../interfaces/model/model.interface';
 import {LoadModelService} from '../load-model/load-model.service';
 import {MessageService} from '../message/message.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
+import {OverlayService} from '../overlay/overlay.service';
 
 @Injectable({
   providedIn: 'root',
@@ -31,7 +32,8 @@ export class CatalogueService {
 
   constructor(private mongohandlerService: MongohandlerService,
               private loadModelService: LoadModelService,
-              private message: MessageService) {
+              private message: MessageService,
+              private overlayService: OverlayService) {
   }
 
   public bootstrap(): void {
@@ -99,6 +101,7 @@ export class CatalogueService {
               this.mongohandlerService.isAuthorized().then(result => {
                 if (result.status === 'ok') {
                   this.loadModelService.getUserData();
+                  this.overlayService.toggleCollectionsOverview();
                   this.isLoggedIn = true;
                   this.loggedIn.emit(true);
                 } else {
@@ -162,11 +165,11 @@ export class CatalogueService {
 
   public selectCollection(collection: any) {
     this.loadModelService.updateActiveCollection(collection);
-    this.loadModelService.loadSelectedModel(collection.models[0], true);
+    this.loadModelService.loadSelectedModel(collection.models[0]);
   }
 
   public selectModel(model: Model, collection: boolean) {
-    this.loadModelService.loadSelectedModel(model, collection);
+    this.loadModelService.loadSelectedModel(model);
   }
 
   /**
