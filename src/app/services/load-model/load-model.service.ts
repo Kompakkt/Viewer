@@ -45,6 +45,7 @@ export class LoadModelService {
   public isModelOwner = false;
   public isFinished = true;
   public isLoaded = false;
+  public isCollectionOwner = false;
 
   @Output() singleCollection: EventEmitter<boolean> = new EventEmitter();
   @Output() singleModel: EventEmitter<boolean> = new EventEmitter();
@@ -52,6 +53,7 @@ export class LoadModelService {
   @Output() modelOwner: EventEmitter<boolean> = new EventEmitter();
   @Output() finished: EventEmitter<boolean> = new EventEmitter();
   @Output() loaded: EventEmitter<boolean> = new EventEmitter();
+  @Output() collectionOwner: EventEmitter<boolean> = new EventEmitter();
 
   constructor(public babylonService: BabylonService,
               private actionService: ActionService,
@@ -228,6 +230,10 @@ export class LoadModelService {
           this.checkOwnerState(newModel._id);
         }
 
+        if (this.isSingleLoadCollection) {
+          this.checkOwnerStateCollection();
+        }
+
         if (!newModel.finished) {
           this.finished.emit(false);
           this.isFinished = false;
@@ -270,6 +276,16 @@ export class LoadModelService {
     } else {
       this.isModelOwner = false;
       this.modelOwner.emit(false);
+    }
+  }
+
+  private checkOwnerStateCollection() {
+    if (this.personalCollections.filter(obj => obj && obj._id === this.getCurrentCompilation()._id).length === 1) {
+      this.isCollectionOwner = true;
+      this.collectionOwner.emit(true);
+    } else {
+      this.isCollectionOwner = false;
+      this.collectionOwner.emit(false);
     }
   }
 

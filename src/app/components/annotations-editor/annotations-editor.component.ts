@@ -7,6 +7,7 @@ import {BabylonService} from '../../services/babylon/babylon.service';
 import {CameraService} from '../../services/camera/camera.service';
 import {DataService} from '../../services/data/data.service';
 import {SocketService} from '../../services/socket/socket.service';
+import {LoadModelService} from '../../services/load-model/load-model.service';
 
 @Component({
   selector: 'app-annotations-editor',
@@ -31,6 +32,7 @@ export class AnnotationsEditorComponent implements OnInit {
               private cameraService: CameraService,
               private annotationmarkerService: AnnotationmarkerService,
               private socketService: SocketService,
+              public loadModelService: LoadModelService
   ) {
   }
 
