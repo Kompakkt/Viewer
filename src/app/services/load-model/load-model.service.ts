@@ -168,23 +168,16 @@ export class LoadModelService {
     this.metadataService.addDefaultMetadata();
   }
 
-  public loadSelectedModel(model: Model, collection: boolean) {
+  public loadSelectedModel(model: Model) {
     this.isLoaded = false;
     this.loaded.emit(false);
     this.isDefaultLoad = false;
     this.defaultLoad.emit(false);
-    if (!collection) {
-      this.updateActiveCollection([]);
-      this.isSingleLoadModel = true;
-      this.singleModel.emit(true);
-      this.isSingleLoadCollection = false;
-      this.singleCollection.emit(false);
-    } else {
-      this.isSingleLoadModel = false;
-      this.singleModel.emit(false);
-      this.isSingleLoadCollection = true;
-      this.singleCollection.emit(true);
-    }
+    this.updateActiveCollection([]);
+    this.isSingleLoadModel = true;
+    this.singleModel.emit(true);
+    this.isSingleLoadCollection = false;
+    this.singleCollection.emit(false);
     this.quality = 'low';
     this.loadModel(model).then(result => {
       this.isLoaded = true;

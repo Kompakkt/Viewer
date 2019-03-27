@@ -92,8 +92,8 @@ export class CatalogueService {
               break;
 
             case 'compilation':
-              this.isShowCatalogue = false;
-              this.showCatalogue.emit(false);
+              this.isShowCatalogue = true;
+              this.showCatalogue.emit(true);
               this.isFirstLoad = false;
               this.loadModelService.fetchCollectionData(query);
               this.mongohandlerService.isAuthorized().then(result => {
@@ -153,6 +153,7 @@ export class CatalogueService {
 
   public fetchModelsData() {
     this.mongohandlerService.getAllModels().then(model => {
+      console.log('MOdelle: ', model);
       this.Subjects.models.next(model);
     },                                           error => {
       this.message.error('Connection to object server refused.');
