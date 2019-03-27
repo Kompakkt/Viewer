@@ -36,6 +36,9 @@ export class LoadModelService {
 
   private baseUrl = `${environment.express_server_url}:${environment.express_server_port}/`;
   public quality = 'low';
+  public high = '';
+  public low = '';
+  public medium = '';
 
   private defaultModel: Model;
 
@@ -235,6 +238,22 @@ export class LoadModelService {
         } else {
           this.isCollectionOwner = false;
           this.collectionOwner.emit(false);
+        }
+
+        if (newModel.processed['low'] !== undefined) {
+          this.low = newModel.processed['low'];
+        } else {
+          this.low = '';
+        }
+        if (newModel.processed['high'] !== undefined && newModel.processed['high'] !== newModel.processed['low']) {
+          this.high = newModel.processed['high'];
+        } else {
+          this.high = '';
+        }
+        if (newModel.processed['medium'] !== undefined && newModel.processed['medium'] !== newModel.processed['low']) {
+          this.medium = newModel.processed['medium'];
+        } else {
+          this.medium = '';
         }
 
         if (!newModel.finished) {
