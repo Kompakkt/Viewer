@@ -244,7 +244,7 @@ export class LoadModelService {
           this.finished.emit(false);
           this.isFinished = false;
         } else {
-          this.checkAvailableQuality();
+          // this.checkAvailableQuality();
           this.finished.emit(true);
           this.isFinished = true;
         }
