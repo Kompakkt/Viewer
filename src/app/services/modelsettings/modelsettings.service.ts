@@ -632,9 +632,10 @@ export class ModelsettingsService {
   public async setScalingFactor(event: any) {
 
     this.scalingFactor = event.value.toFixed(2);
-    this.height = this.initialSize.y.toFixed(2) * this.scalingFactor;
-    this.width = this.initialSize.x.toFixed(2) * this.scalingFactor;
-    this.depth = this.initialSize.z.toFixed(2) * this.scalingFactor;
+
+    this.height = parseFloat((this.initialSize.y * this.scalingFactor).toFixed(2));
+    this.width = parseFloat((this.initialSize.x * this.scalingFactor).toFixed(2));
+    this.depth = parseFloat((this.initialSize.z * this.scalingFactor).toFixed(2));
     this.center.scaling = new BABYLON.Vector3(this.scalingFactor, this.scalingFactor, this.scalingFactor);
   }
 
