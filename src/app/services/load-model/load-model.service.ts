@@ -233,12 +233,13 @@ export class LoadModelService {
           this.checkOwnerState(newModel._id);
         }
 
+        /*
         if (this.isSingleLoadCollection && !this.isDefaultLoad) {
           this.checkOwnerStateCollection();
         } else {
           this.isCollectionOwner = false;
           this.collectionOwner.emit(false);
-        }
+        }*/
 
         if (!newModel.finished) {
           this.finished.emit(false);

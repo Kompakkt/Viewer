@@ -574,13 +574,13 @@ export class ModelsettingsComponent implements OnInit {
       this.ambientlightDownintensity = 1;
 
       // Only for DEV - uncomment the 3 following lines
-      // await this.modelSettingsService.createVisualSettings();
-      // this.initialSettingsMode = true;
-      // this.overlayService.activateSettingsTab();
+      await this.modelSettingsService.createVisualSettings();
+      this.initialSettingsMode = true;
+      this.overlayService.activateSettingsTab();
       // End
 
-      await this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
-                                                   this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
+     // await this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
+      //                                             this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
 
       this.cameraService.setUpperRadiusLimit(500);
       this.cameraService.setDefaultPosition(2.7065021761026817, 1.3419080619941322, 90.44884111420268, 0, 0, 0);
