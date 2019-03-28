@@ -44,6 +44,17 @@ export class AnnotationsEditorComponent implements OnInit {
       this.id = this.annotation._id;
       this.preview = this.annotation.body.content.relatedPerspective.preview;
     }
+
+    this.annotationmarkerService.popupIsOpen().subscribe(
+      popup_is_open => this.hiddenAnnotation(popup_is_open),
+    );
+  }
+
+  private hiddenAnnotation(ID) {
+    if (this.annotation._id === ID) {
+      this.showAnnotation = true;
+      this.labelVisibility = 'Hide';
+    }
   }
 
   public toViewMode() {
