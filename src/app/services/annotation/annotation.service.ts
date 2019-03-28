@@ -13,6 +13,7 @@ import {DataService} from '../data/data.service';
 import {LoadModelService} from '../load-model/load-model.service';
 import {MessageService} from '../message/message.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
+import {CatalogueService} from '../catalogue/catalogue.service';
 
 @Injectable({
   providedIn: 'root',
@@ -42,7 +43,8 @@ export class AnnotationService {
               private loadModelService: LoadModelService,
               private mongo: MongohandlerService,
               private message: MessageService,
-              public socket: Socket) {
+              public socket: Socket,
+              private catalogueService: CatalogueService) {
 
     this.annotations = [];
 
@@ -63,7 +65,7 @@ export class AnnotationService {
     this.loadModelService.modelOwner.subscribe(isModelOwner => {
       this.isModelOwner = isModelOwner;
     });
-    this.loadModelService.singleModel.subscribe(singleModel => {
+    this.catalogueService.singleObject.subscribe(singleModel => {
       this.isSingleModel = singleModel;
     });
   }

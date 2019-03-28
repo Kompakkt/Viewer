@@ -72,7 +72,7 @@ export class MenuComponent implements OnInit {
 
   ngOnInit() {
 
-    this.loadModelService.singleModel.subscribe(singleModel => {
+    this.catalogueService.singleObject.subscribe(singleModel => {
       this.isSingleModel = singleModel;
     });
 
