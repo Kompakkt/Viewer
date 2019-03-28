@@ -15,7 +15,7 @@
       Please choose to
       <button class="inline-button" mat-raised-button (click)="loadCollection()">load Collection</button>
       or
-      <button class="inline-button" mat-raised-button (click)="loadModel()">load Model</button>
+      <button class="inline-button" mat-raised-button (click)="loadModel()">load Object</button>
       .
 
     </mat-card-content>
@@ -105,18 +105,18 @@
       <mat-card>
 
         <mat-card-header>
-          Select by List of Models
+          Select by List of Objects
         </mat-card-header>
 
         <mat-card-content>
 
           <mat-checkbox *ngIf="this.loadModelService.userOwnedModels.length" [checked]="filterPersonal"
-                        (change)="filterPersonal = !filterPersonal">Show only my Models
+                        (change)="filterPersonal = !filterPersonal">Show only my Objects
           </mat-checkbox>
 
           <div *ngIf="!filterPersonal">
             <mat-form-field>
-              <mat-select (selectionChange)="handleModelChoice($event)" placeholder="Choose Model">
+              <mat-select (selectionChange)="handleModelChoice($event)" placeholder="Choose Object">
 
                 <mat-option *ngFor="let model of this.catalogueService.Observables.models.source['value'];"
                             [value]="model">
@@ -128,7 +128,7 @@
 
           <div *ngIf="filterPersonal">
             <mat-form-field>
-              <mat-select (selectionChange)="searchModelByID($event)" placeholder="Choose Model">
+              <mat-select (selectionChange)="searchModelByID($event)" placeholder="Choose Object">
                 <mat-option *ngFor="let model of this.loadModelService.userOwnedModels;"
                             [value]="model">
                   {{model.name}}
@@ -143,7 +143,7 @@
 
       <mat-card>
         <mat-card-header>
-          Select Model by ID
+          Select Object by ID
         </mat-card-header>
 
         <mat-card-content>
