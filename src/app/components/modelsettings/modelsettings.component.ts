@@ -93,7 +93,7 @@ export class ModelsettingsComponent implements OnInit {
       this.isFinished = isFinished;
     });
 
-    this.loadModelService.singleModel.subscribe(singleModel => {
+    this.catalogueService.singleObject.subscribe(singleModel => {
       this.isSingleModel = singleModel;
     });
 
