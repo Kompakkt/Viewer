@@ -18,7 +18,6 @@ export class CollectionsOverviewComponent implements AfterViewInit {
 
   @HostBinding('class.is-open') private isOpen = false;
   public isSingleModel: boolean;
-  public isSingleCollection: boolean;
 
   public collectionSelected: boolean;
   public modelSelected: boolean;
@@ -33,6 +32,8 @@ export class CollectionsOverviewComponent implements AfterViewInit {
   private identifierModel;
 
   public isLoggedIn: boolean;
+  public isSingleObject: boolean;
+  public isSingleCollection: boolean;
 
   constructor(private overlayService: OverlayService,
               public catalogueService: CatalogueService,
@@ -56,11 +57,23 @@ export class CollectionsOverviewComponent implements AfterViewInit {
       this.isSingleModel = singleModel;
     });
 
+    /*
     this.loadModelService.singleCollection.subscribe(singleCollection => {
       this.isSingleCollection = singleCollection;
       if (this.isSingleCollection) {
         this.overlayService.toggleCollectionsOverview();
       }
+    });*/
+
+    this.catalogueService.singleCollection.subscribe(singleCollection => {
+      this.isSingleCollection = singleCollection;
+      if (this.isSingleCollection) {
+        this.overlayService.toggleCollectionsOverview();
+      }
+    });
+
+    this.catalogueService.singleObject.subscribe(singleObject => {
+      this.isSingleObject = singleObject;
     });
 
     this.loadModelService.Observables.actualCollection.subscribe(actualCollection => {

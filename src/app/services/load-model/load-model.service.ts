@@ -213,7 +213,6 @@ export class LoadModelService {
   }
 
   public async loadModel(newModel: Model, overrideUrl?: string) {
-    console.log('Single', this.isSingleLoadCollection, this.isSingleLoadModel);
     const URL = (overrideUrl !== undefined) ? overrideUrl : this.baseUrl;
 
     if (this.userOwnedModels.length === 0 && !this.isDefaultLoad) {

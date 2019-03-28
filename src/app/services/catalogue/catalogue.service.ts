@@ -5,7 +5,6 @@ import {Model} from '../../interfaces/model/model.interface';
 import {LoadModelService} from '../load-model/load-model.service';
 import {MessageService} from '../message/message.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
-import {OverlayService} from '../overlay/overlay.service';
 
 @Injectable({
   providedIn: 'root',
@@ -26,14 +25,17 @@ export class CatalogueService {
   private isFirstLoad = true;
   public isLoggedIn: boolean;
   public isShowCatalogue = false;
+  private isSingleObject: boolean;
+  private isSingleCollection: boolean;
 
   @Output() loggedIn: EventEmitter<boolean> = new EventEmitter();
   @Output() showCatalogue: EventEmitter<boolean> = new EventEmitter();
+  @Output() singleObject: EventEmitter<boolean> = new EventEmitter();
+  @Output() singleCollection: EventEmitter<boolean> = new EventEmitter();
 
   constructor(private mongohandlerService: MongohandlerService,
               private loadModelService: LoadModelService,
-              private message: MessageService,
-              private overlayService: OverlayService) {
+              private message: MessageService) {
   }
 
   public bootstrap(): void {
@@ -47,6 +49,10 @@ export class CatalogueService {
         this.showCatalogue.emit(true);
         this.isFirstLoad = false;
         this.loadModelService.loadDefaultModelData();
+        this.isSingleObject = false;
+        this.singleObject.emit(false);
+        this.isSingleCollection = false;
+        this.singleCollection.emit(false);
 
         this.mongohandlerService.isAuthorized().then(result => {
           if (result.status === 'ok') {
@@ -85,9 +91,18 @@ export class CatalogueService {
                   this.loadModelService.getUserData();
                   this.isLoggedIn = true;
                   this.loggedIn.emit(true);
+                  this.isSingleObject = true;
+                  this.singleObject.emit(true);
+                  this.isSingleCollection = false;
+                  this.singleCollection.emit(false);
                 } else {
                   this.isLoggedIn = false;
-                  this.loggedIn.emit(false);          }
+                  this.loggedIn.emit(false);
+                  this.isSingleObject = false;
+                  this.singleObject.emit(false);
+                  this.isSingleCollection = false;
+                  this.singleCollection.emit(false);
+                }
               }).catch(error => {
                 this.message.error('Can not see if you are logged in.');
               });
@@ -101,12 +116,20 @@ export class CatalogueService {
               this.mongohandlerService.isAuthorized().then(result => {
                 if (result.status === 'ok') {
                   this.loadModelService.getUserData();
-                  this.overlayService.toggleCollectionsOverview();
                   this.isLoggedIn = true;
                   this.loggedIn.emit(true);
+                  this.isSingleObject = false;
+                  this.singleObject.emit(false);
+                  this.isSingleCollection = true;
+                  this.singleCollection.emit(true);
                 } else {
                   this.isLoggedIn = false;
-                  this.loggedIn.emit(false);          }
+                  this.loggedIn.emit(false);
+                  this.isSingleObject = false;
+                  this.singleObject.emit(false);
+                  this.isSingleCollection = false;
+                  this.singleCollection.emit(false);
+                }
               }).catch(error => {
                 this.message.error('Can not see if you are logged in.');
               });
@@ -116,6 +139,10 @@ export class CatalogueService {
               this.isShowCatalogue = true;
               this.showCatalogue.emit(true);
               this.isFirstLoad = false;
+              this.isSingleObject = false;
+              this.singleObject.emit(false);
+              this.isSingleCollection = false;
+              this.singleCollection.emit(false);
               console.log('No valid query passed. Loading default model.');
               this.loadModelService.loadDefaultModelData();
           }
@@ -125,6 +152,10 @@ export class CatalogueService {
           this.loadModelService.loadDefaultModelData();
           this.isShowCatalogue = true;
           this.showCatalogue.emit(true);
+          this.isSingleObject = false;
+          this.singleObject.emit(false);
+          this.isSingleCollection = false;
+          this.singleCollection.emit(false);
         }
       }
     } else {
