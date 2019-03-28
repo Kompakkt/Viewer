@@ -11,6 +11,7 @@ import {LoadModelService} from '../../services/load-model/load-model.service';
 import {OverlayService} from '../../services/overlay/overlay.service';
 import {AnnotationsEditorComponent} from '../annotations-editor/annotations-editor.component';
 import {DialogDeleteAnnotationsComponent} from '../dialogs/dialog-delete-annotations/dialog-delete-annotations.component';
+import {CatalogueService} from '../../services/catalogue/catalogue.service';
 
 @Component({
   selector: 'app-editor',
@@ -39,7 +40,8 @@ export class EditorComponent implements OnInit, AfterViewInit {
               public annotationService: AnnotationService,
               private annotationmarkerService: AnnotationmarkerService,
               private loadModelService: LoadModelService,
-              public dialog: MatDialog) {
+              public dialog: MatDialog,
+              private catalogueService: CatalogueService) {
   }
 
   ngOnInit() {
@@ -73,8 +75,8 @@ export class EditorComponent implements OnInit, AfterViewInit {
         this.isModelOwner = isModelOwner;
     });
 
-    this.loadModelService.singleModel.subscribe(singleModel => {
-        this.isSingleModel = singleModel;
+    this.catalogueService.singleObject.subscribe(singleObject => {
+      this.isSingleModel = singleObject;
     });
   }
 
