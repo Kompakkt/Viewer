@@ -32,6 +32,7 @@ export class LoadModelService {
 
   public personalCollections: any[] = [];
   public userOwnedModels: any[] = [];
+  public userOwnedFinishedModels: any[] = [];
   public currentUserData: any;
 
   private baseUrl = `${environment.express_server_url}:${environment.express_server_port}/`;
@@ -262,10 +263,11 @@ export class LoadModelService {
           this.message.info('No valid userdata received');
         } else {
           this.currentUserData = userData;
+          this.userOwnedModels = userData.data.models;
           if (userData.data && userData.data.models) {
             userData.data.models.forEach(model => {
               if (model !== null) {
-                this.userOwnedModels.push(model);
+                this.userOwnedFinishedModels.push(model);
               }
             });
 

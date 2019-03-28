@@ -110,7 +110,7 @@
 
         <mat-card-content>
 
-          <mat-checkbox *ngIf="this.loadModelService.userOwnedModels.length" [checked]="filterPersonal"
+          <mat-checkbox *ngIf="this.loadModelService.userOwnedFinishedModels.length" [checked]="filterPersonal"
                         (change)="filterPersonal = !filterPersonal">Show only my Objects
           </mat-checkbox>
 
@@ -129,7 +129,7 @@
           <div *ngIf="filterPersonal">
             <mat-form-field>
               <mat-select (selectionChange)="searchModelByID($event)" placeholder="Choose Object">
-                <mat-option *ngFor="let model of this.loadModelService.userOwnedModels;"
+                <mat-option *ngFor="let model of this.loadModelService.userOwnedFinishedModels;"
                             [value]="model">
                   {{model.name}}
                 </mat-option>
