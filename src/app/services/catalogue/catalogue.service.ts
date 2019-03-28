@@ -156,7 +156,6 @@ export class CatalogueService {
 
   public fetchModelsData() {
     this.mongohandlerService.getAllModels().then(model => {
-      console.log('MOdelle: ', model);
       this.Subjects.models.next(model);
     },                                           error => {
       this.message.error('Connection to object server refused.');
@@ -165,11 +164,11 @@ export class CatalogueService {
 
   public selectCollection(collection: any) {
     this.loadModelService.updateActiveCollection(collection);
-    this.loadModelService.loadSelectedModel(collection.models[0]);
+    this.loadModelService.loadSelectedModel(collection.models[0], true);
   }
 
   public selectModel(model: Model, collection: boolean) {
-    this.loadModelService.loadSelectedModel(model);
+    this.loadModelService.loadSelectedModel(model, collection);
   }
 
   /**
