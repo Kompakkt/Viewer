@@ -70,13 +70,11 @@ export class EditorComponent implements OnInit, AfterViewInit {
     });
 
     this.loadModelService.modelOwner.subscribe(isModelOwner => {
-      this.isModelOwner = isModelOwner;
-      console.log('Owner:', isModelOwner);
+        this.isModelOwner = isModelOwner;
     });
 
     this.loadModelService.singleModel.subscribe(singleModel => {
-      this.isSingleModel = singleModel;
-      console.log('Single:', singleModel);
+        this.isSingleModel = singleModel;
     });
   }
 
@@ -123,7 +121,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
   public exportAnnotations() {
     saveAs(new Blob([this.annotationService.exportAnnotations()],
-                    {type: 'text/plain;charset=utf-8'}), 'annotations.json');
+      {type: 'text/plain;charset=utf-8'}), 'annotations.json');
   }
 
   public importAnnotations(files: FileList): void {
@@ -131,7 +129,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
     const fileToUpload = files.item(0),
       fileReader: FileReader = new FileReader();
 
-    fileReader.onload =e => {
+    fileReader.onload = e => {
 
       if (typeof fileReader.result === 'string') {
 

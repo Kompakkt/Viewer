@@ -35,6 +35,9 @@ export class CollectionsOverviewComponent implements AfterViewInit {
   public isSingleObject: boolean;
   public isSingleCollection: boolean;
 
+  public filterPersonal = false;
+  public filterPersonalCollections = false;
+
   constructor(private overlayService: OverlayService,
               public catalogueService: CatalogueService,
               public loadModelService: LoadModelService,
@@ -116,9 +119,14 @@ export class CollectionsOverviewComponent implements AfterViewInit {
     this.catalogueService.selectModel(event.value, this.collectionSelected);
   }
 
-  async searchCollectionByID() {
-
-    this.catalogueService.selectCollectionByID(this.identifierCollection).then(result => {
+  async searchCollectionByID(event?) {
+    let id = '';
+    if (event) {
+      id = event.value._id;
+    } else {
+      id = this.identifierCollection;
+    }
+    this.catalogueService.selectCollectionByID(id).then(result => {
       switch (result) {
         case 'loaded':
           this.singleCollectionSelected = true;
@@ -137,18 +145,25 @@ export class CollectionsOverviewComponent implements AfterViewInit {
         default:
           this.message.error('Can not find Collection with ID ' + this.identifierCollection + '.');
       }
-    },                                                                         error => {
+    }, error => {
       this.message.error('Connection to object server refused.');
     });
   }
 
-  searchModelByID() {
-    const isloadable = this.catalogueService.selectModelbyID(this.identifierModel);
+  searchModelByID(event?) {
+    let id = '';
+    if (event) {
+      id = event.value._id;
+    } else {
+      id = this.identifierModel;
+    }
+
+    const isloadable = this.catalogueService.selectModelbyID(id);
     if (isloadable) {
       this.singleModelSelected = true;
       this.singleCollectionSelected = false;
     } else {
-      this.message.error('Can not find Model with ID ' + this.identifierModel + '.');
+      this.message.error('Can not find Model with ID ' + id + '.');
     }
   }
 
