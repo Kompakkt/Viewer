@@ -3,12 +3,12 @@
   <mat-card class="titlecard">
     <mat-card-header>
       <mat-card-title>
-        Collections
+        Catalogue
       </mat-card-title>
     </mat-card-header>
   </mat-card>
 
-  <mat-card *ngIf="!isSingleModel && isLoggedIn && !isSingleCollection">
+  <mat-card *ngIf="!isSingleModel && !isSingleCollection && isLoggedIn">
 
     <mat-card-content>
 
@@ -102,9 +102,9 @@
 
   <div *ngIf="modelSelected">
 
-    <mat-spinner *ngIf="!this.catalogueService.Observables.models.source['value'];"></mat-spinner>
+    <mat-spinner *ngIf="!this.catalogueService.Observables.models;"></mat-spinner>
 
-    <div *ngIf="this.catalogueService.Observables.models.source['value']">
+    <div *ngIf="this.catalogueService.Observables.models">
 
       <mat-card>
 

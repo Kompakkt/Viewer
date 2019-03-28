@@ -42,13 +42,13 @@ export class LoadModelService {
 
   private defaultModel: Model;
 
-  public isSingleLoadModel = true;
-  public isSingleLoadCollection = true;
-  public isDefaultLoad = true;
-  public isModelOwner = false;
-  public isFinished = true;
-  public isLoaded = false;
-  public isCollectionOwner = false;
+  public isSingleLoadModel: boolean;
+  public isSingleLoadCollection: boolean;
+  public isDefaultLoad: boolean;
+  public isModelOwner: boolean;
+  public isFinished: boolean;
+  public isLoaded: boolean;
+  public isCollectionOwner: boolean;
 
   @Output() singleCollection: EventEmitter<boolean> = new EventEmitter();
   @Output() singleModel: EventEmitter<boolean> = new EventEmitter();
@@ -93,6 +93,8 @@ export class LoadModelService {
       this.loaded.emit(false);
       this.isSingleLoadModel = true;
       this.singleModel.emit(true);
+      this.isSingleLoadCollection = false;
+      this.singleCollection.emit(false);
       this.isDefaultLoad = false;
       this.defaultLoad.emit(false);
       this.quality = 'low';
@@ -211,6 +213,7 @@ export class LoadModelService {
   }
 
   public async loadModel(newModel: Model, overrideUrl?: string) {
+    console.log('Single', this.isSingleLoadCollection, this.isSingleLoadModel);
     const URL = (overrideUrl !== undefined) ? overrideUrl : this.baseUrl;
 
     if (this.userOwnedModels.length === 0 && !this.isDefaultLoad) {

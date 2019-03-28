@@ -157,6 +157,7 @@ export class CatalogueService {
   public fetchModelsData() {
     this.mongohandlerService.getAllModels().then(model => {
       this.Subjects.models.next(model);
+      console.log('Loaded Model:', model);
     },                                           error => {
       this.message.error('Connection to object server refused.');
     });
