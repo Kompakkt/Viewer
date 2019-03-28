@@ -23,6 +23,8 @@ export class AnnotationsEditorComponent implements OnInit {
   public labelMode = 'remove_red_eye';
   public labelModeText = 'view';
   public preview = '';
+  public showAnnotation = true;
+  public labelVisibility = 'Hide';
 
   public id = '';
 
@@ -118,6 +120,21 @@ export class AnnotationsEditorComponent implements OnInit {
       this.labelModeText = 'view';
     } else {
       return;
+    }
+  }
+
+  public toggleVisibility() {
+    if (this.showAnnotation) {
+      this.showAnnotation = false;
+      this.labelVisibility = 'Show';
+      this.annotationmarkerService.closeCreatorPopup(this.annotation._id);
+      this.babylonService.hideMesh(this.annotation._id, false);
+
+    } else {
+      this.showAnnotation = true;
+      this.labelVisibility = 'Hide';
+      this.annotationmarkerService.toggleCreatorPopup(this.annotation._id);
+      this.babylonService.hideMesh(this.annotation._id, true);
     }
   }
 }

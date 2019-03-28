@@ -50,6 +50,12 @@
 
     <mat-card-actions>
 
+      <mat-slide-toggle
+        [checked]="showAnnotation"
+        (change)="toggleVisibility()">
+        {{labelVisibility}}
+      </mat-slide-toggle>
+
       <button mat-icon-button (click)="toggleEditViewMode()"
               matTooltip={{labelModeText}} matTooltipPosition="above"
               type="button">

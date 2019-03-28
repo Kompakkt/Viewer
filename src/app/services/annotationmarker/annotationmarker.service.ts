@@ -8,6 +8,7 @@ import {Annotation} from 'src/app/interfaces/annotation2/annotation2';
 
 import {BabylonService} from '../babylon/babylon.service';
 import {CameraService} from '../camera/camera.service';
+
 // import {Annotation} from '../../interfaces/annotation/annotation';
 
 @Injectable({
@@ -18,13 +19,34 @@ export class AnnotationmarkerService {
   public open_popup = '';
   private isOpen: BehaviorSubject<string> = new BehaviorSubject('');
 
+  public hide_popup = '';
+  private isHidden: BehaviorSubject<string> = new BehaviorSubject('');
+
   public toggleCreatorPopup(id: string) {
     this.open_popup = id;
     this.isOpen.next(this.open_popup);
+    if (this.hide_popup === this.open_popup) {
+      this.hide_popup = '';
+      this.isHidden.next('');
+    }
+
+  }
+
+  public closeCreatorPopup(id: string) {
+    if (this.open_popup === id) {
+      this.open_popup = '';
+      this.isOpen.next('');
+      this.hide_popup = id;
+      this.isHidden.next(id);
+    }
   }
 
   popupIsOpen(): Observable<any> {
     return this.isOpen.asObservable();
+  }
+
+  popupIsHidden(): Observable<any> {
+    return this.isHidden.asObservable();
   }
 
   constructor(private babylonService: BabylonService, private cameraService: CameraService) {
@@ -63,7 +85,9 @@ export class AnnotationmarkerService {
 
     GUI.AdvancedDynamicTexture.CreateForMesh(plane1).addControl(label1);
     label1.addControl(this.createRankingNumber(annotation._id, annotation.ranking));
-    if (plane1.material) { plane1.material.alpha = 1; }
+    if (plane1.material) {
+      plane1.material.alpha = 1;
+    }
     plane1.renderingGroupId = 0;
 
     const plane2 = this.createPlane(annotation._id + '_pick', 1, 1, annotation._id, positionVector, normalVector);
@@ -71,14 +95,16 @@ export class AnnotationmarkerService {
 
     GUI.AdvancedDynamicTexture.CreateForMesh(plane2).addControl(label2);
     label2.addControl(this.createRankingNumber(annotation._id, annotation.ranking));
-    if (plane2.material) { plane2.material.alpha = 0.5; }
+    if (plane2.material) {
+      plane2.material.alpha = 0.5;
+    }
     // TODO: click is not working if renderingGroup == 1 and Object is behind another object
     plane2.renderingGroupId = 1;
   }
 
   private createPlane(name: string, height: number, width: number, tag: string, position: BABYLON.Vector3, normal: BABYLON.Vector3) {
     const plane = BABYLON.MeshBuilder.CreatePlane(name,
-                                                  {height, width}, this.babylonService.getScene());
+      {height, width}, this.babylonService.getScene());
     BABYLON.Tags.AddTagsTo(plane, tag + ' plane');
     plane.position = position;
     plane.translate(normal, 1, BABYLON.Space.WORLD);
@@ -133,7 +159,7 @@ export class AnnotationmarkerService {
 
   public deleteMarker(annotationID: string) {
     const marker = this.babylonService.getScene().getMeshesByTags(annotationID);
-    marker.forEach(function(value) {
+    marker.forEach(function (value) {
       value.dispose();
     });
   }
@@ -145,7 +171,7 @@ export class AnnotationmarkerService {
 
   public redrawAllMarker(annotations: Annotation[]) {
     this.deleteAllMarker();
-    annotations.forEach(function(value) {
+    annotations.forEach(function (value) {
       this.createAnnotationMarker(value);
     });
   }

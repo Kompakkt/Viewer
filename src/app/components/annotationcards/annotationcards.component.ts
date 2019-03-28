@@ -34,6 +34,21 @@ export class AnnotationcardsComponent implements OnInit, AfterViewInit {
     this.annotationmarkerService.popupIsOpen().subscribe(
       popup_is_open => this.setVisability(popup_is_open, 321),
     );
+
+    this.annotationmarkerService.popupIsHidden().subscribe(
+      popup_is_hidden => this.setHiddenCard(popup_is_hidden),
+    );
+  }
+
+  public setHiddenCard(id: string) {
+    const found = this.annotationsList.find(annotation => annotation.id === id);
+
+    if (found) {
+      found.visabilityAnnotationCard(false);
+      if (found.editMode) {
+        found.toggleEditViewMode();
+      }
+    }
   }
 
   public setVisability(id: string, code: int) {
@@ -47,7 +62,7 @@ export class AnnotationcardsComponent implements OnInit, AfterViewInit {
 
   public hideAllCards(foundID) {
     this.annotationsList.forEach(function(value) {
-      if (value.id != foundID) {
+      if (value.id !== foundID) {
         // Hide all not-clicked annotations and set to view-mode
         value.visabilityAnnotationCard(false);
         if (value.editMode) {
