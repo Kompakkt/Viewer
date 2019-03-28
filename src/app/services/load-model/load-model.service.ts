@@ -262,7 +262,15 @@ export class LoadModelService {
           this.message.info('No valid userdata received');
         } else {
           this.currentUserData = userData;
-          this.userOwnedModels = userData.data.models;
+          if (userData.data && userData.data.models) {
+            userData.data.models.forEach(model => {
+              if (model !== null) {
+                this.userOwnedModels.push(model);
+              }
+            });
+
+            console.log('eigene Mdoell: ', this.userOwnedModels);
+          }
           if (userData.data && userData.data.compilations) {
             this.personalCollections = userData.data.compilations;
           }
@@ -282,7 +290,6 @@ export class LoadModelService {
       this.isModelOwner = false;
       this.modelOwner.emit(false);
     }
-
   }
 
   private checkOwnerStateCollection() {

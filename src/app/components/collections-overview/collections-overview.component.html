@@ -8,7 +8,7 @@
     </mat-card-header>
   </mat-card>
 
-  <mat-card *ngIf="!isSingleModel && !isSingleCollection && isLoggedIn">
+  <mat-card *ngIf="!isSingleObject && !isSingleCollection && isLoggedIn">
 
     <mat-card-content>
 
@@ -127,7 +127,28 @@
 
       </mat-card>
 
+      <mat-card *ngIf="this.loadModelService.userOwnedModels.length">
 
+        <mat-card-header>
+          Personal Models
+        </mat-card-header>
+
+        <mat-card-content>
+
+          <mat-form-field>
+            <mat-select (selectionChange)="handleModelChoice($event)" placeholder="Choose Model">
+
+              <mat-option *ngFor="let model of this.loadModelService.userOwnedModels;"
+                          [value]="model">
+                {{model.name}}
+              </mat-option>
+
+            </mat-select>
+          </mat-form-field>
+
+        </mat-card-content>
+
+      </mat-card>
 
       <mat-card>
         <mat-card-header>
