@@ -4,6 +4,7 @@ import {Vector3} from 'babylonjs';
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
 import {CameraService} from '../../services/camera/camera.service';
+import {BabylonService} from '../../services/babylon/babylon.service';
 
 @Component({
   selector: 'app-annotationwalkthrough',
@@ -18,7 +19,8 @@ export class AnnotationwalkthroughComponent implements OnInit {
 
   constructor(private cameraService: CameraService,
               public annotationService: AnnotationService,
-              private annotationmarkerService: AnnotationmarkerService) {
+              private annotationmarkerService: AnnotationmarkerService,
+              private babylonService: BabylonService) {
 
     this.positionVector = Vector3.Zero();
     this.actualRanking = 0;
@@ -92,6 +94,7 @@ export class AnnotationwalkthroughComponent implements OnInit {
               annotations[index].body.content.relatedPerspective.vector.z);
             this.cameraService.moveCameraToTarget(cameraVector);
             this.annotationmarkerService.toggleCreatorPopup(annotations[index]._id);
+            this.babylonService.hideMesh(annotations[index]._id, true);
     } else {
       this.actualRanking = 0;
     }

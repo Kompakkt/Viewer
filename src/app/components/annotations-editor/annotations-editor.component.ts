@@ -55,6 +55,9 @@ export class AnnotationsEditorComponent implements OnInit {
 
   public changeOpenPopup() {
     this.annotationmarkerService.toggleCreatorPopup(this.id);
+    this.babylonService.hideMesh(this.id, true);
+    this.showAnnotation = true;
+    this.labelVisibility = 'Hide';
   }
 
   public getValidation(validated) {
