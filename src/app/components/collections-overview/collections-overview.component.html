@@ -120,7 +120,7 @@
 
                 <mat-option *ngFor="let model of this.catalogueService.Observables.models.source['value'];"
                             [value]="model">
-                  {{model.name}}
+                  {{model.name}} ( {{model.processed['low'] | mediaType}} )
                 </mat-option>
               </mat-select>
             </mat-form-field>

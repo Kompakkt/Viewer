@@ -2,6 +2,7 @@ import {AfterViewInit, ChangeDetectorRef, Component, HostBinding} from '@angular
 import {MatDialog, MatDialogConfig} from '@angular/material';
 
 import {Model} from '../../interfaces/model/model.interface';
+import {MediaTypePipe} from '../../pipes/media-type.pipe';
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {LoadModelService} from '../../services/load-model/load-model.service';
 import {MessageService} from '../../services/message/message.service';
@@ -13,6 +14,7 @@ import {PasswordComponent} from '../password/password.component';
   selector: 'app-collections-overview',
   templateUrl: './collections-overview.component.html',
   styleUrls: ['./collections-overview.component.scss'],
+  providers: [MediaTypePipe],
 })
 export class CollectionsOverviewComponent implements AfterViewInit {
 
