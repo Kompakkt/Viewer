@@ -131,7 +131,7 @@
               <mat-select (selectionChange)="searchModelByID($event)" placeholder="Choose Object">
                 <mat-option *ngFor="let model of this.loadModelService.userOwnedFinishedModels;"
                             [value]="model">
-                  {{model.name}}
+                  {{model.name}} ( {{model.processed['low'] | mediaType}} )
                 </mat-option>
               </mat-select>
             </mat-form-field>
