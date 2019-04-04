@@ -40,6 +40,12 @@
 
     <mat-card-actions>
 
+      <button mat-icon-button (click)="editFullscreen()"
+              matTooltip="Edit in Fullscreen Mode" matTooltipPosition="above"
+              type="button">
+        <mat-icon aria-label="Fullscreen">fullscreen</mat-icon>
+      </button>
+
       <button mat-icon-button (click)="toggleEditViewMode()"
               matTooltip={{labelModeText}} matTooltipPosition="above"
               type="button">

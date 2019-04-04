@@ -1,12 +1,14 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {Matrix, Vector3} from 'babylonjs';
 import {Annotation} from 'src/app/interfaces/annotation2/annotation2';
-import { AnnotationmarkerService } from 'src/app/services/annotationmarker/annotationmarker.service';
+import {AnnotationmarkerService} from 'src/app/services/annotationmarker/annotationmarker.service';
 
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
 import {DataService} from '../../services/data/data.service';
 import {SocketService} from '../../services/socket/socket.service';
+import {DialogAnnotationEditorComponent} from '../dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
+import {MatDialog} from '@angular/material';
 
 @Component({
   selector: 'app-annotation',
@@ -32,7 +34,8 @@ export class AnnotationComponent implements OnInit {
               private babylonService: BabylonService,
               private annotationmarkerService: AnnotationmarkerService,
               private socketService: SocketService,
-              ) {
+              public dialog: MatDialog,
+  ) {
   }
 
   ngOnInit() {
@@ -52,7 +55,7 @@ export class AnnotationComponent implements OnInit {
 
     setInterval(() => {
       this.setPosition(this.annotation);
-    },          15);
+    }, 15);
   }
 
   public setPosition(annotation: Annotation) {
@@ -133,12 +136,29 @@ export class AnnotationComponent implements OnInit {
     this.dataService.updateAnnotation(this.annotation);
     // 1.1.2
     if (this.annotationService.inSocket) {
-      this.socketService.socket.emit('editAnnotation', [this.annotationService.socketRoom, this.annotation]);
+      this.socketService.socket.emit('editAnnotation', [
+        this.annotationService.socketRoom,
+        this.annotation
+      ]);
     }
-
   }
 
-  public onSumbit(event) {
-    console.log(event);
+  public editFullscreen(): void {
+
+    const dialogRef = this.dialog.open(DialogAnnotationEditorComponent, {
+      width: '75%',
+      data: {
+        title: this.annotation.body.content.title,
+        content: this.annotation.body.content.description},
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+
+      if (result) {
+        this.annotation.body.content.title = result.title;
+        this.annotation.body.content.description = result.content;
+      }
+      console.log(result);
+    });
   }
 }
