@@ -2,6 +2,7 @@ import {AfterViewInit, ChangeDetectorRef, Component, HostBinding} from '@angular
 import {MatDialog, MatDialogConfig} from '@angular/material';
 
 import {Model} from '../../interfaces/model/model.interface';
+import {MediaTypePipe} from '../../pipes/media-type.pipe';
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {LoadModelService} from '../../services/load-model/load-model.service';
 import {MessageService} from '../../services/message/message.service';
@@ -13,12 +14,12 @@ import {PasswordComponent} from '../password/password.component';
   selector: 'app-collections-overview',
   templateUrl: './collections-overview.component.html',
   styleUrls: ['./collections-overview.component.scss'],
+  providers: [MediaTypePipe],
 })
 export class CollectionsOverviewComponent implements AfterViewInit {
 
   @HostBinding('class.is-open') private isOpen = false;
   public isSingleModel: boolean;
-  public isSingleCollection: boolean;
 
   public collectionSelected: boolean;
   public modelSelected: boolean;
@@ -33,6 +34,11 @@ export class CollectionsOverviewComponent implements AfterViewInit {
   private identifierModel;
 
   public isLoggedIn: boolean;
+  public isSingleObject: boolean;
+  public isSingleCollection: boolean;
+
+  public filterPersonal = false;
+  public filterPersonalCollections = false;
 
   constructor(private overlayService: OverlayService,
               public catalogueService: CatalogueService,
@@ -56,11 +62,23 @@ export class CollectionsOverviewComponent implements AfterViewInit {
       this.isSingleModel = singleModel;
     });
 
+    /*
     this.loadModelService.singleCollection.subscribe(singleCollection => {
       this.isSingleCollection = singleCollection;
       if (this.isSingleCollection) {
         this.overlayService.toggleCollectionsOverview();
       }
+    });*/
+
+    this.catalogueService.singleCollection.subscribe(singleCollection => {
+      this.isSingleCollection = singleCollection;
+      if (this.isSingleCollection) {
+        this.overlayService.toggleCollectionsOverview();
+      }
+    });
+
+    this.catalogueService.singleObject.subscribe(singleObject => {
+      this.isSingleObject = singleObject;
     });
 
     this.loadModelService.Observables.actualCollection.subscribe(actualCollection => {
@@ -103,9 +121,14 @@ export class CollectionsOverviewComponent implements AfterViewInit {
     this.catalogueService.selectModel(event.value, this.collectionSelected);
   }
 
-  async searchCollectionByID() {
-
-    this.catalogueService.selectCollectionByID(this.identifierCollection).then(result => {
+  async searchCollectionByID(event?) {
+    let id = '';
+    if (event) {
+      id = event.value._id;
+    } else {
+      id = this.identifierCollection;
+    }
+    this.catalogueService.selectCollectionByID(id).then(result => {
       switch (result) {
         case 'loaded':
           this.singleCollectionSelected = true;
@@ -124,18 +147,25 @@ export class CollectionsOverviewComponent implements AfterViewInit {
         default:
           this.message.error('Can not find Collection with ID ' + this.identifierCollection + '.');
       }
-    },                                                                         error => {
+    }, error => {
       this.message.error('Connection to object server refused.');
     });
   }
 
-  searchModelByID() {
-    const isloadable = this.catalogueService.selectModelbyID(this.identifierModel);
+  searchModelByID(event?) {
+    let id = '';
+    if (event) {
+      id = event.value._id;
+    } else {
+      id = this.identifierModel;
+    }
+
+    const isloadable = this.catalogueService.selectModelbyID(id);
     if (isloadable) {
       this.singleModelSelected = true;
       this.singleCollectionSelected = false;
     } else {
-      this.message.error('Can not find Model with ID ' + this.identifierModel + '.');
+      this.message.error('Can not find Model with ID ' + id + '.');
     }
   }
 

@@ -11,6 +11,7 @@ import {LoadModelService} from '../../services/load-model/load-model.service';
 import {OverlayService} from '../../services/overlay/overlay.service';
 import {AnnotationsEditorComponent} from '../annotations-editor/annotations-editor.component';
 import {DialogDeleteAnnotationsComponent} from '../dialogs/dialog-delete-annotations/dialog-delete-annotations.component';
+import {CatalogueService} from '../../services/catalogue/catalogue.service';
 
 @Component({
   selector: 'app-editor',
@@ -39,7 +40,8 @@ export class EditorComponent implements OnInit, AfterViewInit {
               public annotationService: AnnotationService,
               private annotationmarkerService: AnnotationmarkerService,
               private loadModelService: LoadModelService,
-              public dialog: MatDialog) {
+              public dialog: MatDialog,
+              private catalogueService: CatalogueService) {
   }
 
   ngOnInit() {
@@ -70,13 +72,11 @@ export class EditorComponent implements OnInit, AfterViewInit {
     });
 
     this.loadModelService.modelOwner.subscribe(isModelOwner => {
-      this.isModelOwner = isModelOwner;
-      console.log('Owner:', isModelOwner);
+        this.isModelOwner = isModelOwner;
     });
 
-    this.loadModelService.singleModel.subscribe(singleModel => {
-      this.isSingleModel = singleModel;
-      console.log('Single:', singleModel);
+    this.catalogueService.singleObject.subscribe(singleObject => {
+      this.isSingleModel = singleObject;
     });
   }
 
@@ -123,7 +123,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
   public exportAnnotations() {
     saveAs(new Blob([this.annotationService.exportAnnotations()],
-                    {type: 'text/plain;charset=utf-8'}), 'annotations.json');
+      {type: 'text/plain;charset=utf-8'}), 'annotations.json');
   }
 
   public importAnnotations(files: FileList): void {
@@ -131,7 +131,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
     const fileToUpload = files.item(0),
       fileReader: FileReader = new FileReader();
 
-    fileReader.onload =e => {
+    fileReader.onload = e => {
 
       if (typeof fileReader.result === 'string') {
 

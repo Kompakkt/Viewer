@@ -32,7 +32,7 @@
                   [(ngModel)]="annotation.body.content.description"></textarea>
       </mat-form-field>
 
-      <mat-checkbox class="validation" *ngIf="editMode" [checked]="annotation.validated"
+      <mat-checkbox class="validation" *ngIf="editMode && this.loadModelService.isCollectionOwner" [checked]="annotation.validated"
                     (change)="annotation.validated = !annotation.validated">Validated
       </mat-checkbox>
 
@@ -49,6 +49,12 @@
 
 
     <mat-card-actions>
+
+      <mat-slide-toggle
+        [checked]="showAnnotation"
+        (change)="toggleVisibility()">
+        {{labelVisibility}}
+      </mat-slide-toggle>
 
       <button mat-icon-button (click)="toggleEditViewMode()"
               matTooltip={{labelModeText}} matTooltipPosition="above"

@@ -7,6 +7,7 @@ import {BabylonService} from '../../services/babylon/babylon.service';
 import {CameraService} from '../../services/camera/camera.service';
 import {DataService} from '../../services/data/data.service';
 import {SocketService} from '../../services/socket/socket.service';
+import {LoadModelService} from '../../services/load-model/load-model.service';
 
 @Component({
   selector: 'app-annotations-editor',
@@ -22,6 +23,8 @@ export class AnnotationsEditorComponent implements OnInit {
   public labelMode = 'remove_red_eye';
   public labelModeText = 'view';
   public preview = '';
+  public showAnnotation = true;
+  public labelVisibility = 'Hide';
 
   public id = '';
 
@@ -31,7 +34,7 @@ export class AnnotationsEditorComponent implements OnInit {
               private cameraService: CameraService,
               private annotationmarkerService: AnnotationmarkerService,
               private socketService: SocketService,
-  ) {
+              public loadModelService: LoadModelService) {
   }
 
   ngOnInit() {
@@ -40,6 +43,17 @@ export class AnnotationsEditorComponent implements OnInit {
 
       this.id = this.annotation._id;
       this.preview = this.annotation.body.content.relatedPerspective.preview;
+    }
+
+    this.annotationmarkerService.popupIsOpen().subscribe(
+      popup_is_open => this.hiddenAnnotation(popup_is_open),
+    );
+  }
+
+  private hiddenAnnotation(ID) {
+    if (this.annotation._id === ID) {
+      this.showAnnotation = true;
+      this.labelVisibility = 'Hide';
     }
   }
 
@@ -52,6 +66,9 @@ export class AnnotationsEditorComponent implements OnInit {
 
   public changeOpenPopup() {
     this.annotationmarkerService.toggleCreatorPopup(this.id);
+    this.babylonService.hideMesh(this.id, true);
+    this.showAnnotation = true;
+    this.labelVisibility = 'Hide';
   }
 
   public getValidation(validated) {
@@ -117,6 +134,21 @@ export class AnnotationsEditorComponent implements OnInit {
       this.labelModeText = 'view';
     } else {
       return;
+    }
+  }
+
+  public toggleVisibility() {
+    if (this.showAnnotation) {
+      this.showAnnotation = false;
+      this.labelVisibility = 'Show';
+      this.annotationmarkerService.closeCreatorPopup(this.annotation._id);
+      this.babylonService.hideMesh(this.annotation._id, false);
+
+    } else {
+      this.showAnnotation = true;
+      this.labelVisibility = 'Hide';
+      this.annotationmarkerService.toggleCreatorPopup(this.annotation._id);
+      this.babylonService.hideMesh(this.annotation._id, true);
     }
   }
 }

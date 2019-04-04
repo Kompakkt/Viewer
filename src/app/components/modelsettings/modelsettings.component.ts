@@ -93,7 +93,7 @@ export class ModelsettingsComponent implements OnInit {
       this.isFinished = isFinished;
     });
 
-    this.loadModelService.singleModel.subscribe(singleModel => {
+    this.catalogueService.singleObject.subscribe(singleModel => {
       this.isSingleModel = singleModel;
     });
 
@@ -574,9 +574,9 @@ export class ModelsettingsComponent implements OnInit {
       this.ambientlightDownintensity = 1;
 
       // Only for DEV - uncomment the 3 following lines
-      // await this.modelSettingsService.createVisualSettings();
-      // this.initialSettingsMode = true;
-      // this.overlayService.activateSettingsTab();
+     // await this.modelSettingsService.createVisualSettings();
+     // this.initialSettingsMode = true;
+     // this.overlayService.activateSettingsTab();
       // End
 
       await this.modelSettingsService.loadSettings(this.activeModel.settings.scale,

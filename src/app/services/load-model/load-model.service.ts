@@ -32,19 +32,24 @@ export class LoadModelService {
 
   public personalCollections: any[] = [];
   public userOwnedModels: any[] = [];
+  public userOwnedFinishedModels: any[] = [];
   public currentUserData: any;
 
   private baseUrl = `${environment.express_server_url}:${environment.express_server_port}/`;
   public quality = 'low';
+  public high = '';
+  public low = '';
+  public medium = '';
 
   private defaultModel: Model;
 
-  public isSingleLoadModel = true;
-  public isSingleLoadCollection = true;
-  public isDefaultLoad = true;
-  public isModelOwner = false;
-  public isFinished = true;
-  public isLoaded = false;
+  public isSingleLoadModel: boolean;
+  public isSingleLoadCollection: boolean;
+  public isDefaultLoad: boolean;
+  public isModelOwner: boolean;
+  public isFinished: boolean;
+  public isLoaded: boolean;
+  public isCollectionOwner: boolean;
 
   @Output() singleCollection: EventEmitter<boolean> = new EventEmitter();
   @Output() singleModel: EventEmitter<boolean> = new EventEmitter();
@@ -52,6 +57,7 @@ export class LoadModelService {
   @Output() modelOwner: EventEmitter<boolean> = new EventEmitter();
   @Output() finished: EventEmitter<boolean> = new EventEmitter();
   @Output() loaded: EventEmitter<boolean> = new EventEmitter();
+  @Output() collectionOwner: EventEmitter<boolean> = new EventEmitter();
 
   constructor(public babylonService: BabylonService,
               private actionService: ActionService,
@@ -88,13 +94,15 @@ export class LoadModelService {
       this.loaded.emit(false);
       this.isSingleLoadModel = true;
       this.singleModel.emit(true);
+      this.isSingleLoadCollection = false;
+      this.singleCollection.emit(false);
       this.isDefaultLoad = false;
       this.defaultLoad.emit(false);
       this.quality = 'low';
       this.loadModel(resultModel).then(result => {
         this.isLoaded = true;
         this.loaded.emit(true);
-      },                               error => {
+      }, error => {
         this.message.error('Loading not possible');
       });
     });
@@ -113,10 +121,10 @@ export class LoadModelService {
       this.loadModel(compilation.models[0]).then(result => {
         this.isLoaded = true;
         this.loaded.emit(true);
-      },                                         error => {
+      }, error => {
         this.message.error('Loading not possible');
       });
-    },                                                       error => {
+    }, error => {
       this.message.error('Connection to object server refused.');
     });
   }
@@ -157,7 +165,7 @@ export class LoadModelService {
     this.loadModel(this.defaultModel, '').then(result => {
       this.isLoaded = true;
       this.loaded.emit(true);
-    },                                         error => {
+    }, error => {
       this.message.error('Loading not possible');
     });
     this.metadataService.addDefaultMetadata();
@@ -168,23 +176,18 @@ export class LoadModelService {
     this.loaded.emit(false);
     this.isDefaultLoad = false;
     this.defaultLoad.emit(false);
+    this.isSingleLoadModel = false;
+    this.singleModel.emit(false);
+    this.isSingleLoadCollection = false;
+    this.singleCollection.emit(false);
     if (!collection) {
       this.updateActiveCollection([]);
-      this.isSingleLoadModel = true;
-      this.singleModel.emit(true);
-      this.isSingleLoadCollection = false;
-      this.singleCollection.emit(false);
-    } else {
-      this.isSingleLoadModel = false;
-      this.singleModel.emit(false);
-      this.isSingleLoadCollection = true;
-      this.singleCollection.emit(true);
     }
     this.quality = 'low';
     this.loadModel(model).then(result => {
       this.isLoaded = true;
       this.loaded.emit(true);
-    },                         error => {
+    }, error => {
       this.message.error('Loading not possible');
     });
   }
@@ -199,7 +202,7 @@ export class LoadModelService {
         this.loadModel(_model).then(result => {
           this.isLoaded = true;
           this.loaded.emit(true);
-        },                          error => {
+        }, error => {
           this.message.error('Loading not possible');
         });
       } else {
@@ -228,10 +231,19 @@ export class LoadModelService {
           this.checkOwnerState(newModel._id);
         }
 
+
         if (!newModel.finished) {
           this.finished.emit(false);
           this.isFinished = false;
         } else {
+          this.checkAvailableQuality();
+          if (this.isSingleLoadCollection && !this.isDefaultLoad) {
+            this.checkOwnerStateCollection();
+          } else {
+            this.isCollectionOwner = false;
+            this.collectionOwner.emit(false);
+          }
+
           this.finished.emit(true);
           this.isFinished = true;
         }
@@ -251,12 +263,21 @@ export class LoadModelService {
           this.message.info('No valid userdata received');
         } else {
           this.currentUserData = userData;
-          this.userOwnedModels = userData.data.models;
-          if (userData.data && userData.data.compilations) {
-            this.personalCollections = userData.data.compilations;
+          this.userOwnedModels = userData.data.model;
+          if (userData.data && userData.data.model) {
+            userData.data.model.forEach(model => {
+              if (model !== null) {
+                this.userOwnedFinishedModels.push(model);
+              }
+            });
+
+            console.log('eigene Mdoell: ', this.userOwnedModels);
+          }
+          if (userData.data && userData.data.compilation) {
+            this.personalCollections = userData.data.compilation;
           }
         }
-      },                                                 error => {
+      }, error => {
         this.message.error('Connection to object server refused.');
         reject('Connection to object server refused.');
       });
@@ -270,6 +291,41 @@ export class LoadModelService {
     } else {
       this.isModelOwner = false;
       this.modelOwner.emit(false);
+    }
+  }
+
+  private checkOwnerStateCollection() {
+    if (this.getCurrentCompilation()) {
+      if (this.personalCollections.filter(obj => obj && obj._id === this.getCurrentCompilation()._id).length === 1) {
+        this.isCollectionOwner = true;
+        this.collectionOwner.emit(true);
+      } else {
+        this.isCollectionOwner = false;
+        this.collectionOwner.emit(false);
+      }
+    } else {
+      this.isCollectionOwner = false;
+      this.collectionOwner.emit(false);
+    }
+  }
+
+  private checkAvailableQuality() {
+    const _model = this.Observables.actualModel.source['_events'].slice(-1)[0];
+
+    if (_model.processed['low'] !== undefined) {
+      this.low = _model.processed['low'];
+    } else {
+      this.low = '';
+    }
+    if (_model.processed['high'] !== undefined && _model.processed['high'] !== _model.processed['low']) {
+      this.high = _model.processed['high'];
+    } else {
+      this.high = '';
+    }
+    if (_model.processed['medium'] !== undefined && _model.processed['medium'] !== _model.processed['low']) {
+      this.medium = _model.processed['medium'];
+    } else {
+      this.medium = '';
     }
   }
 

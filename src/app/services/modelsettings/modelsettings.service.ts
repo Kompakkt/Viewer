@@ -268,9 +268,9 @@ export class ModelsettingsService {
 
     const end = BABYLON.Quaternion.RotationYawPitchRoll(0, 0, 0);
     const anim = new BABYLON.Animation('anim', 'rotationQuaternion',
-                                       120, BABYLON.Animation.ANIMATIONTYPE_QUATERNION, BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE);
+      120, BABYLON.Animation.ANIMATIONTYPE_QUATERNION, BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE);
     const frame = [{frame: 0, value: start},
-                   {frame: 100, value: end}];
+      {frame: 100, value: end}];
     anim.setKeys(frame);
     this.center.animations = [];
     this.center.animations.push(anim);
@@ -384,7 +384,7 @@ export class ModelsettingsService {
 
     this.boundingBox = BABYLON.MeshBuilder.CreateBox('boundingBox', {
       width: this.initialSize.x, height: this.initialSize.y, depth: this.initialSize.z,
-    },                                               this.babylonService.getScene());
+    }, this.babylonService.getScene());
     BABYLON.Tags.AddTagsTo(this.boundingBox, 'boundingBox');
     this.boundingBox.parent = this.center;
 
@@ -422,7 +422,7 @@ export class ModelsettingsService {
   private createGround(size: number) {
     this.scalingFactorGround = 1;
     this.ground = BABYLON.MeshBuilder.CreateGround('ground', {height: size, width: size, subdivisions: 1},
-                                                   this.babylonService.getScene());
+      this.babylonService.getScene());
     BABYLON.Tags.AddTagsTo(this.ground, 'ground');
     this.showGround = true;
   }
@@ -477,7 +477,7 @@ export class ModelsettingsService {
     const vecThreeX = new BABYLON.Vector3(sizeWorldAxis, 0, 0);
     const vecFourX = new BABYLON.Vector3(sizeWorldAxis * 0.95, -0.05 * sizeWorldAxis, 0);
     const axisX = BABYLON.Mesh.CreateLines('axisX', [BABYLON.Vector3.Zero(), vecOneX, vecTwoX, vecThreeX, vecFourX],
-                                           this.babylonService.getScene());
+      this.babylonService.getScene());
     BABYLON.Tags.AddTagsTo(axisX, 'worldAxis');
     axisX.color = new BABYLON.Color3(1, 0, 0);
     const xChar = this.createTextPlane('X', 'red', sizeWorldAxis / 10, 'worldAxis', 'worldAxisX');
@@ -488,7 +488,7 @@ export class ModelsettingsService {
     const vecThreeY = new BABYLON.Vector3(0, sizeWorldAxis, 0);
     const vecFourY = new BABYLON.Vector3(0.05 * sizeWorldAxis, sizeWorldAxis * 0.95, 0);
     const axisY = BABYLON.Mesh.CreateLines('axisY', [BABYLON.Vector3.Zero(), vecOneY, vecTwoY, vecThreeY, vecFourY],
-                                           this.babylonService.getScene());
+      this.babylonService.getScene());
     BABYLON.Tags.AddTagsTo(axisY, 'worldAxis');
     axisY.color = new BABYLON.Color3(0, 1, 0);
     const yChar = this.createTextPlane('Y', 'green', sizeWorldAxis / 10, 'worldAxis', 'worldAxisY');
@@ -499,7 +499,7 @@ export class ModelsettingsService {
     const vecThreeZ = new BABYLON.Vector3(0, 0, sizeWorldAxis);
     const vecFourZ = new BABYLON.Vector3(0, 0.05 * sizeWorldAxis, sizeWorldAxis * 0.95);
     const axisZ = BABYLON.Mesh.CreateLines('axisZ', [BABYLON.Vector3.Zero(), vecOneZ, vecTwoZ, vecThreeZ, vecFourZ],
-                                           this.babylonService.getScene());
+      this.babylonService.getScene());
     BABYLON.Tags.AddTagsTo(axisZ, 'worldAxis');
     axisZ.color = new BABYLON.Color3(0, 0, 1);
     const zChar = this.createTextPlane('Z', 'blue', sizeWorldAxis / 10, 'worldAxis', 'worldAxisZ');
@@ -563,7 +563,7 @@ export class ModelsettingsService {
     const vecThreeX = new BABYLON.Vector3(sizeLocalAxis, 0, 0);
     const vecFourX = new BABYLON.Vector3(sizeLocalAxis * 0.95, -0.05 * sizeLocalAxis, 0);
     const local_axisX = BABYLON.Mesh.CreateLines('local_axisX', [BABYLON.Vector3.Zero(), vecOneX, vecTwoX, vecThreeX, vecFourX],
-                                                 this.babylonService.getScene());
+      this.babylonService.getScene());
     BABYLON.Tags.AddTagsTo(local_axisX, 'localAxis');
     local_axisX.color = new BABYLON.Color3(1, 0, 0);
     const xChar = this.createTextPlane('X', 'red', sizeLocalAxis / 10, 'localAxis', 'localAxisX');
@@ -574,7 +574,7 @@ export class ModelsettingsService {
     const vecThreeY = new BABYLON.Vector3(0, sizeLocalAxis, 0);
     const vecFourY = new BABYLON.Vector3(0.05 * sizeLocalAxis, sizeLocalAxis * 0.95, 0);
     const local_axisY = BABYLON.Mesh.CreateLines('local_axisY', [BABYLON.Vector3.Zero(), vecOneY, vecTwoY, vecThreeY, vecFourY],
-                                                 this.babylonService.getScene());
+      this.babylonService.getScene());
     BABYLON.Tags.AddTagsTo(local_axisY, 'localAxis');
     local_axisY.color = new BABYLON.Color3(0, 1, 0);
     const yChar = this.createTextPlane('Y', 'green', sizeLocalAxis / 10, 'localAxis', 'localAxisY');
@@ -585,7 +585,7 @@ export class ModelsettingsService {
     const vecThreeZ = new BABYLON.Vector3(0, 0, sizeLocalAxis);
     const vecFourZ = new BABYLON.Vector3(0, 0.05 * sizeLocalAxis, sizeLocalAxis * 0.95);
     const local_axisZ = BABYLON.Mesh.CreateLines('local_axisZ', [BABYLON.Vector3.Zero(), vecOneZ, vecTwoZ, vecThreeZ, vecFourZ],
-                                                 this.babylonService.getScene());
+      this.babylonService.getScene());
     BABYLON.Tags.AddTagsTo(local_axisZ, 'localAxis');
     local_axisZ.color = new BABYLON.Color3(0, 0, 1);
     const zChar = this.createTextPlane('Z', 'blue', sizeLocalAxis / 10, 'localAxis', 'localAxisZ');
@@ -629,19 +629,17 @@ export class ModelsettingsService {
     this.showLocalAxis = false;
   }
 
-  public setScalingFactor(event: any) {
+  public async setScalingFactor(event: any) {
+
     this.scalingFactor = event.value.toFixed(2);
-    this.center.scaling = new BABYLON.Vector3(event.value, event.value, event.value);
 
-    const bi = this.boundingBox.getBoundingInfo();
-    const minimum = bi.boundingBox.minimumWorld;
-    const maximum = bi.boundingBox.maximumWorld;
-    const size = maximum.subtract(minimum);
-    this.height = size.y.toFixed(2);
-    this.width = size.x.toFixed(2);
-    this.depth = size.z.toFixed(2);
-
+    this.height = parseFloat((this.initialSize.y * this.scalingFactor).toFixed(2));
+    this.width = parseFloat((this.initialSize.x * this.scalingFactor).toFixed(2));
+    this.depth = parseFloat((this.initialSize.z * this.scalingFactor).toFixed(2));
+    this.center.scaling = new BABYLON.Vector3(this.scalingFactor, this.scalingFactor, this.scalingFactor);
   }
+
+
 
   public handleChangeHeight() {
 
@@ -695,14 +693,13 @@ export class ModelsettingsService {
 
   }
 
-  private rotationFunc(axisName: string, degree: number) {
+  private async rotationFunc(axisName: string, degree: number) {
 
     // Math.PI / 2 -> 90 Grad
 
-    const axis = BABYLON.Axis[axisName.toUpperCase()];
-
     switch (axisName) {
       case 'x':
+        console.log('Ich werde jetzt rotieren:', this.lastRotationX, '+', degree);
         this.lastRotationX = this.lastRotationX + degree;
         break;
       case 'y':
@@ -716,22 +713,38 @@ export class ModelsettingsService {
       this.center.rotationQuaternion = BABYLON.Quaternion.RotationYawPitchRoll(0, 0, 0);
     }
 
+
     const start = this.center.rotationQuaternion;
 
-    const rotationQuaternion = BABYLON.Quaternion.RotationAxis(axis, Math.PI / 180 * degree);
-    const end = rotationQuaternion.multiply(this.center.rotationQuaternion);
+
+    const axisX = BABYLON.Axis['X'];
+    const axisY = BABYLON.Axis['Y'];
+    const axisZ = BABYLON.Axis['Z'];
+
+    const rotationQuaternion = BABYLON.Quaternion.RotationYawPitchRoll(0, 0, 0);
+
+    const rotationQuaternionX = BABYLON.Quaternion.RotationAxis(axisX, Math.PI / 180 * this.lastRotationX);
+    let end = rotationQuaternionX.multiply(rotationQuaternion);
+
+    const rotationQuaternionY = BABYLON.Quaternion.RotationAxis(axisY, Math.PI / 180 * this.lastRotationY);
+    end = rotationQuaternionY.multiply(end);
+
+    const rotationQuaternionZ = BABYLON.Quaternion.RotationAxis(axisZ, Math.PI / 180 * this.lastRotationZ);
+    end = rotationQuaternionZ.multiply(end);
+
     const anim = new BABYLON.Animation('anim', 'rotationQuaternion',
-                                       120, BABYLON.Animation.ANIMATIONTYPE_QUATERNION, BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE);
+      120, BABYLON.Animation.ANIMATIONTYPE_QUATERNION, BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE);
     const frame = [{frame: 0, value: start},
-                   {frame: 100, value: end}];
+      {frame: 100, value: end}];
     anim.setKeys(frame);
     this.center.animations = [];
     this.center.animations.push(anim);
-    this.babylonService.getScene().beginAnimation(this.center, 0, 100, false);
+    this.center.rotationQuaternion = end;
+    await this.babylonService.getScene().beginAnimation(this.center, 0, 100, false, undefined, undefined, undefined, false);
 
   }
 
-  public handleChangeRotationX(rotation: number) {
+  public async handleChangeRotationX(rotation: number) {
     if (rotation !== 0) {
       const check = this.rotationX + rotation;
       if (0 <= check && check <= 360) {
@@ -744,14 +757,14 @@ export class ModelsettingsService {
       const check = this.rotationX;
 
       if (0 <= check && check <= 360) {
-        this.rotationFunc('x', this.rotationX - this.lastRotationX);
+        await this.rotationFunc('x', this.rotationX - this.lastRotationX);
       } else {
         this.rotationX = this.lastRotationX;
       }
     }
   }
 
-  public handleChangeRotationY(rotation: number) {
+  public async handleChangeRotationY(rotation: number) {
     if (rotation !== 0) {
       const check = this.rotationY + rotation;
       if (0 <= check && check <= 360) {
@@ -763,14 +776,14 @@ export class ModelsettingsService {
     } else {
       const check = this.rotationY;
       if (0 <= check && check <= 360) {
-        this.rotationFunc('y', this.rotationY - this.lastRotationY);
+        await this.rotationFunc('y', this.rotationY - this.lastRotationY);
       } else {
         this.rotationY = this.lastRotationY;
       }
     }
   }
 
-  public handleChangeRotationZ(rotation: number) {
+  public async handleChangeRotationZ(rotation: number) {
     if (rotation !== 0) {
       const check = this.rotationZ + rotation;
       if (0 <= check && check <= 360) {
@@ -782,7 +795,7 @@ export class ModelsettingsService {
     } else {
       const check = this.rotationZ;
       if (0 <= check && check <= 360) {
-        this.rotationFunc('z', this.rotationZ - this.lastRotationZ);
+        await this.rotationFunc('z', this.rotationZ - this.lastRotationZ);
       } else {
         this.rotationZ = this.lastRotationZ;
       }

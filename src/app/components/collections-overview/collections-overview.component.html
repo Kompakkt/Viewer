@@ -3,19 +3,19 @@
   <mat-card class="titlecard">
     <mat-card-header>
       <mat-card-title>
-        Collections
+        Catalogue
       </mat-card-title>
     </mat-card-header>
   </mat-card>
 
-  <mat-card *ngIf="!isSingleModel && isLoggedIn && !isSingleCollection">
+  <mat-card *ngIf="!isSingleObject && !isSingleCollection && isLoggedIn">
 
     <mat-card-content>
 
       Please choose to
       <button class="inline-button" mat-raised-button (click)="loadCollection()">load Collection</button>
       or
-      <button class="inline-button" mat-raised-button (click)="loadModel()">load Model</button>
+      <button class="inline-button" mat-raised-button (click)="loadModel()">load Object</button>
       .
 
     </mat-card-content>
@@ -36,35 +36,31 @@
 
         <mat-card-content>
 
-          <mat-form-field>
-            <mat-select (selectionChange)="handleCollectionChoice($event)" placeholder="Choose Collection">
-              <mat-option *ngFor="let collection of this.catalogueService.Observables.collections.source['value'];"
-                          [value]="collection">
-                {{collection.name}}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
+          <mat-checkbox *ngIf="this.loadModelService.personalCollections.length" [checked]="filterPersonalCollections"
+                        (change)="filterPersonalCollections = !filterPersonalCollections">Show only my Collections
+          </mat-checkbox>
 
-        </mat-card-content>
+          <div *ngIf="!filterPersonalCollections">
+            <mat-form-field>
+              <mat-select (selectionChange)="handleCollectionChoice($event)" placeholder="Choose Collection">
+                <mat-option *ngFor="let collection of this.catalogueService.Observables.collections.source['value'];"
+                            [value]="collection">
+                  {{collection.name}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
 
-      </mat-card>
-
-      <mat-card *ngIf="this.loadModelService.personalCollections.length">
-
-        <mat-card-header>
-          Personal Collections
-        </mat-card-header>
-
-        <mat-card-content>
-
-          <mat-form-field>
-            <mat-select (selectionChange)="handleCollectionChoice($event)" placeholder="Choose Collection">
-              <mat-option *ngFor="let collection of this.loadModelService.personalCollections;"
-                          [value]="collection">
-                {{collection.name}}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
+          <div *ngIf="filterPersonalCollections">
+            <mat-form-field>
+              <mat-select (selectionChange)="searchCollectionByID($event)" placeholder="Choose Collection">
+                <mat-option *ngFor="let collection of this.loadModelService.personalCollections;"
+                            [value]="collection">
+                  {{collection.name}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
 
         </mat-card-content>
 
@@ -102,47 +98,44 @@
 
   <div *ngIf="modelSelected">
 
+    <mat-spinner *ngIf="!this.catalogueService.Observables.models;"></mat-spinner>
 
-    <mat-spinner *ngIf="!this.catalogueService.Observables.models.source['value'];"></mat-spinner>
+    <div *ngIf="this.catalogueService.Observables.models">
 
-    <div *ngIf="this.catalogueService.Observables.models.source['value'];">
       <mat-card>
 
         <mat-card-header>
-          Select by List of Models
+          Select by List of Objects
         </mat-card-header>
 
         <mat-card-content>
 
-          <mat-form-field>
-            <mat-select (selectionChange)="handleModelChoice($event)" placeholder="Choose Model">
-              <mat-option *ngFor="let model of this.catalogueService.Observables.models.source['value'];"
-                          [value]="model">
-                {{model.name}}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
+          <mat-checkbox *ngIf="this.loadModelService.userOwnedFinishedModels.length" [checked]="filterPersonal"
+                        (change)="filterPersonal = !filterPersonal">Show only my Objects
+          </mat-checkbox>
 
-        </mat-card-content>
+          <div *ngIf="!filterPersonal">
+            <mat-form-field>
+              <mat-select (selectionChange)="handleModelChoice($event)" placeholder="Choose Object">
 
-      </mat-card>
+                <mat-option *ngFor="let model of this.catalogueService.Observables.models.source['value'];"
+                            [value]="model">
+                  {{model.name}} ( {{model.processed['low'] | mediaType}} )
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
 
-      <mat-card *ngIf="this.loadModelService.userOwnedModels.length">
-
-        <mat-card-header>
-          Personal Models
-        </mat-card-header>
-
-        <mat-card-content>
-
-          <mat-form-field>
-            <mat-select (selectionChange)="handleModelChoice($event)" placeholder="Choose Model">
-              <mat-option *ngFor="let model of this.loadModelService.userOwnedModels;"
-                          [value]="model">
-                {{model.name}}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
+          <div *ngIf="filterPersonal">
+            <mat-form-field>
+              <mat-select (selectionChange)="searchModelByID($event)" placeholder="Choose Object">
+                <mat-option *ngFor="let model of this.loadModelService.userOwnedFinishedModels;"
+                            [value]="model">
+                  {{model.name}} ( {{model.processed['low'] | mediaType}} )
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
 
         </mat-card-content>
 
@@ -150,7 +143,7 @@
 
       <mat-card>
         <mat-card-header>
-          Select Model by ID
+          Select Object by ID
         </mat-card-header>
 
         <mat-card-content>
@@ -182,10 +175,6 @@
       <mat-spinner *ngIf="!actualCollection.models.length"></mat-spinner>
 
       <div *ngIf="actualCollection.models.length">
-
-        <app-model class="model-box" *ngFor="let model of actualCollection.models;"
-                   [model]=model></app-model>
-
         <div class="category" *ngIf="actualCollection.name">Selected Collection: {{actualCollection.name}}</div>
         <div class="category" *ngIf="actualModel.name">Selected Model: {{actualModel.name}}</div>
         <div *ngIf="actualCollection.models.length">

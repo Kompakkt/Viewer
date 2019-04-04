@@ -35,6 +35,7 @@ import { ModelComponent } from './components/model/model.component';
 import { ModelsettingsComponent } from './components/modelsettings/modelsettings.component';
 import { PasswordComponent } from './components/password/password.component';
 import { SceneComponent } from './components/scene/scene.component';
+import { MediaTypePipe } from './pipes/media-type.pipe';
 // tslint:enable:max-line-length
 
 @NgModule({
@@ -56,6 +57,7 @@ import { SceneComponent } from './components/scene/scene.component';
     PasswordComponent,
     DialogDeleteAnnotationsComponent,
     DialogMeshsettingsComponent,
+    MediaTypePipe,
   ],
   imports: [
     BrowserModule,
