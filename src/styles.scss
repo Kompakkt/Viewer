@@ -154,3 +154,11 @@ html, body {
 #collections .mat-raised-button:not([disabled]) .mat-icon {
   margin-right: 10px;
 }
+
+.cdk-overlay-dark-backdrop {
+  background-color: rgba(0, 0, 0, .5);
+}
+
+.mat-dialog-container {
+  background: #333;
+}
