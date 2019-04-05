@@ -71,13 +71,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
       }
     });
 
-    this.loadModelService.modelOwner.subscribe(isModelOwner => {
-        this.isModelOwner = isModelOwner;
-    });
 
-    this.catalogueService.singleObject.subscribe(singleObject => {
-      this.isSingleModel = singleObject;
-    });
   }
 
   ngAfterViewInit(): void {
@@ -91,6 +85,14 @@ export class EditorComponent implements OnInit, AfterViewInit {
     this.annotationmarkerService.popupIsOpen().subscribe(
       popup_is_open => this.setVisability(popup_is_open),
     );
+
+    this.loadModelService.modelOwner.subscribe(isModelOwner => {
+      this.isModelOwner = isModelOwner;
+    });
+
+    this.catalogueService.singleObject.subscribe(singleObject => {
+      this.isSingleModel = singleObject;
+    });
   }
 
   public setVisability(id: string) {

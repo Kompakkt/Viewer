@@ -1,5 +1,5 @@
 import {DOCUMENT} from '@angular/common';
-import {Component, Inject, OnInit} from '@angular/core';
+import {AfterViewInit, Component, Inject, OnInit} from '@angular/core';
 import {MatDialog, MatDialogConfig, MatIconRegistry} from '@angular/material';
 import {DomSanitizer} from '@angular/platform-browser';
 
@@ -26,7 +26,7 @@ import {LoginComponent} from '../dialogs/dialog-login/login.component';
   templateUrl: './menu.component.html',
   styleUrls: ['./menu.component.scss'],
 })
-export class MenuComponent implements OnInit {
+export class MenuComponent implements OnInit, AfterViewInit {
 
   // 1.1.5
   public toggleChecked = false;
@@ -84,9 +84,14 @@ export class MenuComponent implements OnInit {
       this.isLoggedIn = loggedIn;
     });
 
+  }
+
+  ngAfterViewInit(): void {
+
     this.catalogueService.showCatalogue.subscribe(showCatalogue => {
       this.isShowCatalogue = showCatalogue;
     });
+
   }
 
   /*
