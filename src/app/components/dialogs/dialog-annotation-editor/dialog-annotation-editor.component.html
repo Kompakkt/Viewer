@@ -27,7 +27,7 @@
     <button mat-button (click)="toggleEditViewMode()" attr.aria-label="{{labelModeText}}">
       <mat-icon>{{labelMode}}</mat-icon>
     </button>
-    <button mat-button [mat-dialog-close]="data" cdkFocusInitial>
+    <button mat-button [mat-dialog-close]="data">
       <mat-icon attr.aria-label="Save">save</mat-icon>
     </button>
     <button mat-button (click)="cancel()">
