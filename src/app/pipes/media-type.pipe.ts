@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
   name: 'mediaType',
@@ -6,7 +6,11 @@ import { Pipe, PipeTransform } from '@angular/core';
 export class MediaTypePipe implements PipeTransform {
 
   transform(value: string, args?: any): string {
-    return this.checkMediatype(value);
+    if (value) {
+      return this.checkMediatype(value);
+    } else {
+      return 'unknown';
+    }
   }
 
   public checkMediatype(path: string): string {
