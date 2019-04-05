@@ -270,8 +270,6 @@ export class LoadModelService {
                 this.userOwnedFinishedModels.push(model);
               }
             });
-
-            console.log('eigene Mdoell: ', this.userOwnedModels);
           }
           if (userData.data && userData.data.compilation) {
             this.personalCollections = userData.data.compilation;

@@ -15,6 +15,7 @@ export class MediaTypePipe implements PipeTransform {
       case 'babylon':
         return '3D Model';
       case 'jpg':
+      case 'png':
         return 'Image';
       default:
         return 'unknown';

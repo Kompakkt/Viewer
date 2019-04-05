@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {ActionManager} from 'babylonjs';
 import * as BABYLON from 'babylonjs';
-import { Socket } from 'ngx-socket-io';
+import {Socket} from 'ngx-socket-io';
 import {ReplaySubject} from 'rxjs';
 import {Annotation} from 'src/app/interfaces/annotation2/annotation2';
 
@@ -185,18 +185,39 @@ export class AnnotationService {
     const camera = this.babylonService.getActiveCamera() as BABYLON.ArcRotateCamera;
 
     // Fetch userData if not existing
-    if (!this.loadModelService.currentUserData) { await this.loadModelService.getUserData(); }
-    this.loadModelService.currentUserData = this.loadModelService.getUserData();
-    // Inform user if userData still doesn't exist
-    if (!this.loadModelService.currentUserData) {
-      this.message.error(`Login check failed. Try again`);
-      return;
+    if (!this.isDefaultLoad) {
+      if (!this.loadModelService.currentUserData) {
+        await this.loadModelService.getUserData();
+      }
+      this.loadModelService.currentUserData = this.loadModelService.getUserData();
+      // Inform user if userData still doesn't exist
+      if (!this.loadModelService.currentUserData) {
+        this.message.error(`Login check failed. Try again`);
+        return;
+      }
     }
 
     this.babylonService.createPreviewScreenshot(400).then(async detailScreenshot => {
       // TODO: Detect if user is offline
-      let generatedId: string = this.mongo.generateObjectId();
-      await this.mongo.getUnusedObjectId().then(id => generatedId = id).catch(e => console.error(e));
+      let generatedId: string;
+      if (!this.isDefaultLoad) {
+        generatedId = this.mongo.generateObjectId();
+        await this.mongo.getUnusedObjectId().then(id => generatedId = id).catch(e => console.error(e));
+      } else {
+        generatedId = Math.random().toString(36).substr(2, 9);
+      }
+
+      let personName: string;
+      let personID: string;
+      if (!this.loadModelService.currentUserData) {
+        personName = 'Guest';
+        personID = Math.random().toString(36).substr(2, 9);
+      } else {
+        personName = this.loadModelService.currentUserData.fullname;
+        personID = this.loadModelService.currentUserData._id;
+      }
+
+
       const newAnnotation: Annotation = {
         validated: false,
         _id: generatedId,
@@ -204,22 +225,22 @@ export class AnnotationService {
         ranking: this.annotations.length + 1,
         creator: {
           type: 'person',
-          name: this.loadModelService.currentUserData.fullname,
-          _id: this.loadModelService.currentUserData._id,
+          name: personName,
+          _id: personID,
         },
         created: new Date().toISOString(),
         generator: {
           type: 'software',
           name: environment.version,
-          _id: this.loadModelService.currentUserData._id,
+          _id: personID,
           homepage: 'https://github.com/DH-Cologne/Kompakkt',
         },
         motivation: 'defaultMotivation',
         // TODO: Overwrite when updating annotation
         lastModifiedBy: {
           type: 'person',
-          name: this.loadModelService.currentUserData.fullname,
-          _id: this.loadModelService.currentUserData._id,
+          name: personName,
+          _id: personID,
         },
         body: {
           type: 'annotation',
@@ -260,17 +281,21 @@ export class AnnotationService {
 
       // 3 Fälle werden beim speichern unterschieden
       // 1) Model nicht über Collection geladen
-      if (this.isSingleModel) {
-        // Darf Default Annotationen hinzufügen
-        if (this.isModelOwner) {
-          newAnnotation.validated = true;
-          this.addDefault(newAnnotation);
-        } else {
-          this.addLocal(newAnnotation);
-        }
-        // Model über collection geladen
+      if (this.isDefaultLoad) {
+        this.addLocal(newAnnotation);
       } else {
-        this.add(newAnnotation);
+        if (this.isSingleModel) {
+          // Darf Default Annotationen hinzufügen
+          if (this.isModelOwner) {
+            newAnnotation.validated = true;
+            this.addDefault(newAnnotation);
+          } else {
+            this.addLocal(newAnnotation);
+          }
+          // Model über collection geladen
+        } else {
+          this.add(newAnnotation);
+        }
       }
       this.annotationmarkerService.createAnnotationMarker(newAnnotation);
       // set created annotation as is_open in annotationmarker.service ((on double click) created annotation)
@@ -359,7 +384,7 @@ export class AnnotationService {
           annotationList.push(row.doc);
         }
         resolve(annotationList);
-      },                            error => {
+      }, error => {
         reject(error);
       });
     });

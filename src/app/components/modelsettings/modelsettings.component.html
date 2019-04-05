@@ -244,10 +244,10 @@
         <div *ngIf="showLights">
           <h4>Brightness</h4>
           <p>Ambient environment lights</p>
-          <h5>Fabulous (up towards the sky)</h5>
+          <h5>Fabulous (down towards the ground)</h5>
           <mat-slider min="0" max="1" step="0.1" value={{ambientlightUpintensity}} #matslider
                       (input)="setAmbientlightIntensityUp($event)"></mat-slider>
-          <h5>Sunny (down towards the ground)</h5>
+          <h5>Sunny (up towards the sky)</h5>
           <mat-slider min="0" max="1" step="0.1" value={{ambientlightDownintensity}} #matslider
                       (input)="setAmbientlightIntensityDown($event)"></mat-slider>
           <br>
