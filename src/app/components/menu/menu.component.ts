@@ -40,7 +40,7 @@ export class MenuComponent implements OnInit, AfterViewInit {
   private editActive = false;
   private collectionsActive = false;
 
-  public isShowCatalogue: boolean;
+  public isShowCatalogue = false;
 
   constructor(
     private message: MessageService,
@@ -68,7 +68,7 @@ export class MenuComponent implements OnInit, AfterViewInit {
     });
   }
 
-  public fullscreen: Boolean = false;
+  public fullscreen: boolean = false;
 
   ngOnInit() {
 
@@ -84,14 +84,19 @@ export class MenuComponent implements OnInit, AfterViewInit {
       this.isLoggedIn = loggedIn;
     });
 
-  }
-
-  ngAfterViewInit(): void {
-
     this.catalogueService.showCatalogue.subscribe(showCatalogue => {
       this.isShowCatalogue = showCatalogue;
     });
 
+  }
+
+  ngAfterViewInit(): void {
+/*
+    this.catalogueService.showCatalogue.subscribe(showCatalogue => {
+      this.isShowCatalogue = showCatalogue;
+      console.log('ich setze:', showCatalogue);
+    });
+*/
   }
 
   /*
