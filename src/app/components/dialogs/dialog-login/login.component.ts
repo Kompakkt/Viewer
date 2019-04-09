@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 
 import {CatalogueService} from '../../../services/catalogue/catalogue.service';
 import {MessageService} from '../../../services/message/message.service';
@@ -24,12 +24,14 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit() {
+
     this.overlayService.collectionsOverview.subscribe(collectionsOverviewIsOpen => {
       this.isOpen = collectionsOverviewIsOpen;
     });
   }
 
   public login() {
+
     this.mongohandlerService.login(this.username, this.password).subscribe(result => {
       if (result.status === 'ok') {
         this.success = true;
