@@ -34,7 +34,13 @@
                 [data]="annotation.body.content.description"></markdown>
 
       <mat-form-field *ngIf="editMode">
-        <textarea matInput name="description" #description="ngModel" type="text" placeholder="Description"
+        <textarea matInput
+                  cdkTextareaAutosize
+                  #autosize="cdkTextareaAutosize"
+                  cdkAutosizeMinRows="1"
+                  name="description"
+                  type="text"
+                  placeholder="Description"
                   [(ngModel)]="annotation.body.content.description"></textarea>
       </mat-form-field>
 
