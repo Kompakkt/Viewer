@@ -1,37 +1,42 @@
-<form>
-  <h1 mat-dialog-title>
-    <span *ngIf="!editMode" [innerHTML]="data.title"></span>
-    <mat-form-field *ngIf="editMode">
-      <input matInput
-             name="title"
-             type="text"
-             placeholder="Title"
-             [(ngModel)]="data.title">
-    </mat-form-field>
-  </h1>
+<h1 mat-dialog-title>
+  <span *ngIf="!editMode" [innerHTML]="data.title"></span>
+  <mat-form-field *ngIf="editMode">
+    <input matInput
+           name="title"
+           type="text"
+           placeholder="Title"
+           [(ngModel)]="data.title">
+  </mat-form-field>
+</h1>
 
-  <div mat-dialog-content>
+<div mat-dialog-content>
 
-    <div *ngIf="!editMode" [innerHTML]="data.content"></div>
 
-    <mat-form-field *ngIf="editMode">
-      <textarea id="annotation-content" matInput name="description"
-                type="text" placeholder="Description"
-                matTextareaAutosize
+  <markdown *ngIf="!editMode"
+            [data]="data.content"></markdown>
+
+  <mat-form-field *ngIf="editMode">
+      <textarea id="annotation-content"
+                matInput
+                cdkTextareaAutosize
+                #autosize="cdkTextareaAutosize"
+                cdkAutosizeMinRows="3"
+                name="description"
+                type="text"
+                placeholder="Description"
                 [(ngModel)]="data.content">
       </textarea>
-    </mat-form-field>
-  </div>
+  </mat-form-field>
+</div>
 
-  <div mat-dialog-actions>
-    <button mat-button (click)="toggleEditViewMode()" attr.aria-label="{{labelModeText}}">
-      <mat-icon>{{labelMode}}</mat-icon>
-    </button>
-    <button mat-button [mat-dialog-close]="data">
-      <mat-icon attr.aria-label="Save">save</mat-icon>
-    </button>
-    <button mat-button (click)="cancel()">
-      <mat-icon attr.aria-label="Cancel">cancel</mat-icon>
-    </button>
-  </div>
-</form>
+<div mat-dialog-actions>
+  <button mat-button (click)="toggleEditViewMode()" attr.aria-label="{{labelModeText}}">
+    <mat-icon>{{labelMode}}</mat-icon>
+  </button>
+  <button mat-button [mat-dialog-close]="data">
+    <mat-icon attr.aria-label="Save">save</mat-icon>
+  </button>
+  <button mat-button (click)="cancel()">
+    <mat-icon attr.aria-label="Cancel">cancel</mat-icon>
+  </button>
+</div>

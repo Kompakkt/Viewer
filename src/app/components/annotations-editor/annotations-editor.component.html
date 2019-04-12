@@ -25,7 +25,9 @@
 
     <mat-card-content *ngIf="!collapsed">
 
-      <p *ngIf="!editMode"> {{annotation.body.content.description}}</p>
+      <p *ngIf="!editMode">
+        <markdown [data]="annotation.body.content.description"></markdown>
+      </p>
 
       <mat-form-field *ngIf="editMode" class="description">
         <textarea matInput name="description" #description="ngModel" type="text" placeholder="Description"

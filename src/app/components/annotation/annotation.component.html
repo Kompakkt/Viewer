@@ -29,9 +29,9 @@
 
     <mat-card-content>
 
-      <div id="annotation-content"
-           *ngIf="!editMode"
-           [innerHTML]="annotation.body.content.description"></div>
+      <markdown id="annotation-content"
+                *ngIf="!editMode"
+                [data]="annotation.body.content.description"></markdown>
 
       <mat-form-field *ngIf="editMode">
         <textarea matInput name="description" #description="ngModel" type="text" placeholder="Description"

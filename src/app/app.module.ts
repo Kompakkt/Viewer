@@ -37,6 +37,7 @@ import { PasswordComponent } from './components/password/password.component';
 import { SceneComponent } from './components/scene/scene.component';
 import {DialogAnnotationEditorComponent} from './components/dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
 import {MediaTypePipe} from './pipes/media-type.pipe';
+import {MarkdownModule} from 'ngx-markdown';
 // tslint:enable:max-line-length
 
 @NgModule({
@@ -92,6 +93,7 @@ import {MediaTypePipe} from './pipes/media-type.pipe';
     SocketIoModule.forRoot({
       url: `${environment.express_server_url}:${environment.express_server_port}`,
     }),
+    MarkdownModule.forRoot(),
   ],
   entryComponents: [
     LoginComponent,
