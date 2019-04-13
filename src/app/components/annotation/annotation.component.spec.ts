@@ -70,7 +70,8 @@ describe('AnnotationComponent', () => {
         content: {
           type: 'text',
           title: 'Welcome to Kompakkt',
-          description: 'Hi! I am an annotation of this cool logo. Please feel free to add a friend for me by clicking on the edit button in the corner on the right bottom and double click this 3D logo!',
+          description: '![alt Kompakkt Logo](https://raw.githubusercontent.com/DH-Cologne/Kompakkt/master/src/assets/img/kompakkt-logo.png)' +
+            'Hi! I am an annotation of this cool logo. Please feel free to add a friend for me by clicking on the edit button in the corner on the right bottom and double click this 3D logo!',
           relatedPerspective: {
             camera: 'ArcRoatateCamera',
             vector: {

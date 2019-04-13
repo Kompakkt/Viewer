@@ -1,4 +1,4 @@
-import {Component, Inject, OnInit} from '@angular/core';
+import {Component, Inject, ViewChild} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 
 export interface IDialogData {
@@ -9,9 +9,11 @@ export interface IDialogData {
 @Component({
   selector: 'app-dialog-annotation-editor',
   templateUrl: './dialog-annotation-editor.component.html',
-  styleUrls: ['./dialog-annotation-editor.component.scss']
+  styleUrls: ['./dialog-annotation-editor.component.scss'],
 })
 export class DialogAnnotationEditorComponent {
+
+  @ViewChild('annotationContent') private annotationContent;
 
   public editMode = false;
   public labelMode = 'edit';
@@ -19,6 +21,19 @@ export class DialogAnnotationEditorComponent {
 
   constructor(public dialogRef: MatDialogRef<DialogAnnotationEditorComponent>,
               @Inject(MAT_DIALOG_DATA) public data: IDialogData) {
+  }
+
+  public addImage() {
+
+    const mdImage = '![alt DESCRIPTION](URL)';
+
+    this.annotationContent.nativeElement.focus();
+
+    const startPos = this.annotationContent.nativeElement.selectionStart;
+    const value = this.annotationContent.nativeElement.value;
+
+    this.annotationContent.nativeElement.value =
+      `${value.substring(0, startPos)}${mdImage}${value.substring(startPos, value.length)}`;
   }
 
   public toggleEditViewMode() {

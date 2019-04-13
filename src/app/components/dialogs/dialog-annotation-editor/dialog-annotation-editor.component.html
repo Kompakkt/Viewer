@@ -11,20 +11,26 @@
 
 <div mat-dialog-content>
 
-
   <markdown *ngIf="!editMode"
             [data]="data.content"></markdown>
 
   <mat-form-field *ngIf="editMode">
-      <textarea id="annotation-content"
-                matInput
-                cdkTextareaAutosize
-                #autosize="cdkTextareaAutosize"
-                cdkAutosizeMinRows="1"
-                name="description"
-                type="text"
-                placeholder="Description"
-                [(ngModel)]="data.content">
+
+    <mat-icon
+      id="add-image"
+      (click)="addImage(annotationContent)">add_photo_alternate
+    </mat-icon>
+
+    <textarea id="annotation-content"
+              #annotationContent
+              matInput
+              cdkTextareaAutosize
+              #autosize="cdkTextareaAutosize"
+              cdkAutosizeMinRows="1"
+              name="description"
+              type="text"
+              placeholder="Description"
+              [(ngModel)]="data.content">
       </textarea>
   </mat-form-field>
 </div>

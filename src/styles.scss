@@ -162,3 +162,9 @@ html, body {
 .mat-dialog-container {
   background: #333;
 }
+
+#annotation-content img,
+.mat-dialog-content img,
+.mat-card-content img {
+  max-width: 100%;
+}
