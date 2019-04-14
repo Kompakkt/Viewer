@@ -16,10 +16,7 @@
 
   <mat-form-field *ngIf="editMode">
 
-    <mat-icon
-      id="add-image"
-      (click)="addImage(annotationContent)">add_photo_alternate
-    </mat-icon>
+    <mat-icon id="add-image" (click)="addImage()">add_photo_alternate</mat-icon>
 
     <textarea id="annotation-content"
               #annotationContent
