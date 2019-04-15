@@ -2,7 +2,6 @@ import {Injectable} from '@angular/core';
 import {ActionManager} from 'babylonjs';
 import * as BABYLON from 'babylonjs';
 import {Socket} from 'ngx-socket-io';
-import {ReplaySubject} from 'rxjs';
 import {Annotation} from 'src/app/interfaces/annotation2/annotation2';
 
 import {environment} from '../../../environments/environment';
