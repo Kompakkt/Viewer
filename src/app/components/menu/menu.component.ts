@@ -40,7 +40,7 @@ export class MenuComponent implements OnInit, AfterViewInit {
   private editActive = false;
   private collectionsActive = false;
 
-  public isShowCatalogue = true;
+  public isShowCatalogue = false;
 
   constructor(
     private message: MessageService,
