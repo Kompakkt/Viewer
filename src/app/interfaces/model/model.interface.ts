@@ -1,6 +1,7 @@
 export interface Model {
   _id?: string;
   relatedDigitalObject?: { _id: string };
+  mediaType?: string;
   name: string;
   cameraPosition?: Array<{ dimension: string; value: number }>;
   referencePoint?: Array<{ dimension: string; value: number }>;

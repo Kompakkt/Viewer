@@ -2,20 +2,20 @@ import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material';
 import { ActionManager } from 'babylonjs';
 import * as BABYLON from 'babylonjs';
-import { Socket } from 'ngx-socket-io';
-import { ReplaySubject } from 'rxjs';
-import { Annotation } from 'src/app/interfaces/annotation2/annotation2';
+import {Socket} from 'ngx-socket-io';
+import {ReplaySubject} from 'rxjs';
+import {Annotation} from 'src/app/interfaces/annotation2/annotation2';
 
 import { LoginComponent } from '../../components/dialogs/dialog-login/login.component';
-import { environment } from '../../../environments/environment';
-import { ActionService } from '../action/action.service';
-import { AnnotationmarkerService } from '../annotationmarker/annotationmarker.service';
-import { BabylonService } from '../babylon/babylon.service';
-import { DataService } from '../data/data.service';
-import { LoadModelService } from '../load-model/load-model.service';
-import { MessageService } from '../message/message.service';
-import { MongohandlerService } from '../mongohandler/mongohandler.service';
-import { CatalogueService } from '../catalogue/catalogue.service';
+import {environment} from '../../../environments/environment';
+import {ActionService} from '../action/action.service';
+import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
+import {BabylonService} from '../babylon/babylon.service';
+import {DataService} from '../data/data.service';
+import {LoadModelService} from '../load-model/load-model.service';
+import {MessageService} from '../message/message.service';
+import {MongohandlerService} from '../mongohandler/mongohandler.service';
+import {CatalogueService} from '../catalogue/catalogue.service';
 
 @Injectable({
   providedIn: 'root',

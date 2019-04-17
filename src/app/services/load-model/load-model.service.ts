@@ -11,6 +11,7 @@ import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreen
 import {MessageService} from '../message/message.service';
 import {MetadataService} from '../metadata/metadata.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
+import {SizedEvent} from '../../interfaces/sizedEvent/sizedEvent';
 
 @Injectable({
   providedIn: 'root',
@@ -63,6 +64,8 @@ export class LoadModelService {
   @Output() finished: EventEmitter<boolean> = new EventEmitter();
   @Output() loaded: EventEmitter<boolean> = new EventEmitter();
   @Output() collectionOwner: EventEmitter<boolean> = new EventEmitter();
+  @Output() imagesource: EventEmitter<string> = new EventEmitter();
+
 
   constructor(public babylonService: BabylonService,
               private actionService: ActionService,
@@ -218,6 +221,11 @@ export class LoadModelService {
     }
   }
 
+
+  private isSizedEvent(e: any): e is SizedEvent {
+    return (e && e.width !== undefined && e.height !== undefined);
+  }
+
   public async loadModel(newModel: Model, overrideUrl?: string) {
     const URL = (overrideUrl !== undefined) ? overrideUrl : this.baseUrl;
 
@@ -225,8 +233,67 @@ export class LoadModelService {
       await this.getUserData();
     }
 
+
     if (!this.loadingScreenHandler.isLoading && newModel.processed) {
-      await this.babylonService.loadModel(URL, newModel.processed[this.quality]).then(async model => {
+
+      // cases: model, image, audio, video, text
+      let mediaType: string;
+      if (newModel.mediaType) {
+        mediaType = newModel.mediaType;
+      } else {
+        mediaType = '';
+      }
+
+      if (mediaType && mediaType !== '') {
+        switch (mediaType) {
+          case 'model':
+            break;
+
+          case 'image':
+
+            this.imagesource.emit(newModel.processed[this.quality]);
+
+            console.log('ein Bild!', newModel.processed[this.quality]);
+            const image = new Image();
+            image.src = newModel.processed[this.quality];
+            console.log('Bild', image);
+
+
+            image.onload = (event) => {
+              if (this.isSizedEvent(event)) {
+                // event.width is now available
+                console.log(image.height, 'Höhe');
+                console.log('event', event);
+                console.log('ein Bild mit der Größe:', event.width, event.height);
+              }
+            };
+
+            /*
+            const reader = new FileReader();
+            reader.readAsDataURL(newModel.processed[this.quality]);
+            reader.onload =_event => {
+              console.log('OHOHOH', event);
+            };*/
+
+
+            break;
+
+          case 'audio':
+            break;
+
+          case 'video':
+            break;
+
+          case 'text':
+            break;
+
+          default:
+
+        }
+      }
+
+
+      await this.babylonService.loadModel(URL, newModel.processed[this.quality], mediaType).then(async model => {
         // Warte auf Antwort von loadModel, da loadModel ein Promise<object> von ImportMeshAync übergibt
         // model ist hier das neu geladene Model
         this.updateActiveModel(newModel);

@@ -40,7 +40,7 @@ export class MenuComponent implements OnInit, AfterViewInit {
   private editActive = false;
   private collectionsActive = false;
 
-  public isShowCatalogue = false;
+  public isShowCatalogue = true;
 
   constructor(
     private message: MessageService,
@@ -84,19 +84,20 @@ export class MenuComponent implements OnInit, AfterViewInit {
       this.isLoggedIn = loggedIn;
     });
 
+    /*
     this.catalogueService.showCatalogue.subscribe(showCatalogue => {
       this.isShowCatalogue = showCatalogue;
-    });
+    });*/
 
   }
 
-  ngAfterViewInit(): void {
-/*
+  ngAfterViewInit() {
+
     this.catalogueService.showCatalogue.subscribe(showCatalogue => {
       this.isShowCatalogue = showCatalogue;
       console.log('ich setze:', showCatalogue);
     });
-*/
+
   }
 
   /*

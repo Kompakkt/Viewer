@@ -38,6 +38,7 @@ import { SceneComponent } from './components/scene/scene.component';
 import {DialogAnnotationEditorComponent} from './components/dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
 import {MediaTypePipe} from './pipes/media-type.pipe';
 import {MarkdownModule} from 'ngx-markdown';
+import { MediaComponent } from './components/media/media.component';
 // tslint:enable:max-line-length
 
 @NgModule({
@@ -61,6 +62,7 @@ import {MarkdownModule} from 'ngx-markdown';
     DialogMeshsettingsComponent,
     DialogAnnotationEditorComponent,
     MediaTypePipe,
+    MediaComponent,
   ],
   imports: [
     BrowserModule,
