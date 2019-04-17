@@ -1,19 +1,19 @@
-import {Injectable} from '@angular/core';
-import {ActionManager} from 'babylonjs';
+import { Injectable } from '@angular/core';
+import { ActionManager } from 'babylonjs';
 import * as BABYLON from 'babylonjs';
-import {Socket} from 'ngx-socket-io';
-import {ReplaySubject} from 'rxjs';
-import {Annotation} from 'src/app/interfaces/annotation2/annotation2';
+import { Socket } from 'ngx-socket-io';
+import { ReplaySubject } from 'rxjs';
+import { Annotation } from 'src/app/interfaces/annotation2/annotation2';
 
-import {environment} from '../../../environments/environment';
-import {ActionService} from '../action/action.service';
-import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
-import {BabylonService} from '../babylon/babylon.service';
-import {DataService} from '../data/data.service';
-import {LoadModelService} from '../load-model/load-model.service';
-import {MessageService} from '../message/message.service';
-import {MongohandlerService} from '../mongohandler/mongohandler.service';
-import {CatalogueService} from '../catalogue/catalogue.service';
+import { environment } from '../../../environments/environment';
+import { ActionService } from '../action/action.service';
+import { AnnotationmarkerService } from '../annotationmarker/annotationmarker.service';
+import { BabylonService } from '../babylon/babylon.service';
+import { DataService } from '../data/data.service';
+import { LoadModelService } from '../load-model/load-model.service';
+import { MessageService } from '../message/message.service';
+import { MongohandlerService } from '../mongohandler/mongohandler.service';
+import { CatalogueService } from '../catalogue/catalogue.service';
 
 @Injectable({
   providedIn: 'root',
@@ -37,14 +37,14 @@ export class AnnotationService {
   private isModelOwner: boolean;
 
   constructor(private babylonService: BabylonService,
-              private dataService: DataService,
-              private actionService: ActionService,
-              private annotationmarkerService: AnnotationmarkerService,
-              private loadModelService: LoadModelService,
-              private mongo: MongohandlerService,
-              private message: MessageService,
-              public socket: Socket,
-              private catalogueService: CatalogueService) {
+    private dataService: DataService,
+    private actionService: ActionService,
+    private annotationmarkerService: AnnotationmarkerService,
+    private loadModelService: LoadModelService,
+    private mongo: MongohandlerService,
+    private message: MessageService,
+    public socket: Socket,
+    private catalogueService: CatalogueService) {
 
     this.annotations = [];
 
@@ -167,10 +167,6 @@ export class AnnotationService {
       this.actionService.createActionManager(mesh, ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
     });
     this.annotationMode(false);
-
-    if (this.inSocket) {
-      this.socket.emit('myNewRoom', [this.socketRoom, this.annotations]);
-    }
   }
 
   // Das aktuelle Modell wird anklickbar und damit annotierbar
@@ -375,7 +371,7 @@ export class AnnotationService {
       // 1.1.4
       // - Löschen der Annotation
       if (this.inSocket) {
-        this.socket.emit('deleteAnnotation', [this.socketRoom, annotation]);
+        this.socket.emit('deleteAnnotation', { annotation });
       }
     }
 
@@ -416,7 +412,7 @@ export class AnnotationService {
       }
       // Send ID's & new Ranking of changed annotations
       if (this.inSocket) {
-        this.socket.emit('changeRanking', [this.socketRoom, IdArray, RankingArray]);
+        this.socket.emit('changeRanking', { oldRanking: IdArray, newRanking: RankingArray });
       }
     }
 
