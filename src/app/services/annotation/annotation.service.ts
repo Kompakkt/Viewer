@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
+import { MatDialog, MatDialogConfig } from '@angular/material';
 import { ActionManager } from 'babylonjs';
 import * as BABYLON from 'babylonjs';
 import { Socket } from 'ngx-socket-io';
 import { ReplaySubject } from 'rxjs';
 import { Annotation } from 'src/app/interfaces/annotation2/annotation2';
 
+import { LoginComponent } from '../../components/dialogs/dialog-login/login.component';
 import { environment } from '../../../environments/environment';
 import { ActionService } from '../action/action.service';
 import { AnnotationmarkerService } from '../annotationmarker/annotationmarker.service';
@@ -44,7 +46,8 @@ export class AnnotationService {
     private mongo: MongohandlerService,
     private message: MessageService,
     public socket: Socket,
-    private catalogueService: CatalogueService) {
+    private catalogueService: CatalogueService,
+    private dialog: MatDialog) {
 
     this.annotations = [];
 
@@ -300,6 +303,25 @@ export class AnnotationService {
       });
   }
 
+  public updateAnnotation(annotation) {
+    if (this.isDefaultLoad) return;
+    this.mongo.updateAnnotation(annotation)
+      .toPromise()
+      .then((resultAnnotation: Annotation) => {
+        // MongoDB hat funktioniert
+        // MongoDB-Eintrag in PouchDB
+        this.dataService.updateAnnotation(resultAnnotation);
+        this.annotations.splice(this.annotations.indexOf(annotation), 1, resultAnnotation);
+        this.allAnnotations.splice(this.allAnnotations.indexOf(annotation), 1, resultAnnotation);
+      })
+      .catch((errorMessage: any) => {
+        // PouchDB
+        // TODO: Später synchronisieren
+        console.log(errorMessage);
+        this.dataService.updateAnnotation(annotation);
+      });
+  }
+
   public exportAnnotations() {
     return JSON.stringify(this.annotations);
   }
@@ -359,15 +381,24 @@ export class AnnotationService {
   }
 
   public deleteAnnotation(annotation: Annotation) {
+    // TODO: Check if cached user data is available for DB deletion
+    /*if (!this.loadModelService.cachedUser.username || !this.loadModelService.cachedUser.password) {
+      const dialogConfig = new MatDialogConfig();
+
+      dialogConfig.disableClose = true;
+      dialogConfig.autoFocus = true;
+
+      this.dialog.open(LoginComponent, dialogConfig);
+    }*/
 
     // 3 Fälle werden beim löschen unterschieden
     // 1) Model nicht über Collection geladen
     if (this.isSingleModel && this.isModelOwner) {
       // Darf Default Annotationen löschen
-      // TODO delete in MongoDB
+      // TODO: delete in MongoDB
       // Model über collection geladen
     } else {
-      // TODO delete in MongoDB -> Soll nur der Annotation Owner die Annotation löschen dürfen?
+      // TODO: delete in MongoDB -> Soll nur der Annotation Owner die Annotation löschen dürfen?
       // 1.1.4
       // - Löschen der Annotation
       if (this.inSocket) {

@@ -38,6 +38,7 @@ export class LoadModelService {
     username: 'guest',
     _id: 'guest',
   };
+  public cachedUser: any = {};
 
   private baseUrl = `${environment.express_server_url}:${environment.express_server_port}/`;
   public quality = 'low';

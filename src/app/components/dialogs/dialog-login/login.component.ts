@@ -32,14 +32,17 @@ export class LoginComponent implements OnInit {
 
   public login() {
 
-    this.mongohandlerService.login(this.username, this.password).subscribe(result => {
-      if (result.status === 'ok') {
-        this.success = true;
-        this.catalogueService.bootstrap();
-      }
-    },                                                                     error => {
-      this.message.error('Connection to object server refused.');
-    });
+    this.mongohandlerService.login(this.username, this.password)
+      .subscribe(result => {
+        if (result.status === 'ok') {
+          this.success = true;
+          this.catalogueService.bootstrap();
+          this.loadModelService.cachedUser =
+            { username: this.username, password: this.password };
+        }
+      }, error => {
+        this.message.error('Connection to object server refused.');
+      });
 
   }
 
