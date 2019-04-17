@@ -197,139 +197,111 @@ export class AnnotationService {
       }
     }
 
-    this.babylonService.createPreviewScreenshot(400).then(async detailScreenshot => {
-      // TODO: Detect if user is offline
-      let generatedId: string;
-      if (!this.isDefaultLoad) {
-        generatedId = this.mongo.generateObjectId();
-        await this.mongo.getUnusedObjectId().then(id => generatedId = id).catch(e => console.error(e));
-      } else {
-        generatedId = Math.random().toString(36).substr(2, 9);
-      }
+    this.babylonService.createPreviewScreenshot(400)
+      .then(async detailScreenshot => {
+        // TODO: Detect if user is offline
+        let generatedId = this.mongo.generateObjectId();
+        await this.mongo.getUnusedObjectId()
+          .then(id => generatedId = id)
+          .catch(e => console.error(e));
 
-      let personName: string;
-      let personID: string;
-      if (!this.loadModelService.currentUserData) {
-        personName = 'Guest';
-        personID = Math.random().toString(36).substr(2, 9);
-      } else {
-        personName = this.loadModelService.currentUserData.fullname;
-        personID = this.loadModelService.currentUserData._id;
-      }
+        const personName = this.loadModelService.currentUserData.fullname;
+        const personID = this.loadModelService.currentUserData._id;
 
-
-      const newAnnotation: Annotation = {
-        validated: false,
-        _id: generatedId,
-        identifier: generatedId,
-        ranking: this.annotations.length + 1,
-        creator: {
-          type: 'person',
-          name: personName,
-          _id: personID,
-        },
-        created: new Date().toISOString(),
-        generator: {
-          type: 'software',
-          name: environment.version,
-          _id: personID,
-          homepage: 'https://github.com/DH-Cologne/Kompakkt',
-        },
-        motivation: 'defaultMotivation',
-        // TODO: Overwrite when updating annotation
-        lastModifiedBy: {
-          type: 'person',
-          name: personName,
-          _id: personID,
-        },
-        body: {
-          type: 'annotation',
-          content: {
-            type: 'text',
-            title: '',
-            description: '',
-            relatedPerspective: {
-              camera: camera.id,
-              vector: {
-                x: camera.alpha,
-                y: camera.beta,
-                z: camera.radius,
+        const newAnnotation: Annotation = {
+          validated: false,
+          _id: generatedId,
+          identifier: generatedId,
+          ranking: this.annotations.length + 1,
+          creator: {
+            type: 'person',
+            name: personName,
+            _id: personID,
+          },
+          created: new Date().toISOString(),
+          generator: {
+            type: 'software',
+            name: environment.version,
+            _id: personID,
+            homepage: 'https://github.com/DH-Cologne/Kompakkt',
+          },
+          motivation: 'defaultMotivation',
+          lastModificationDate: new Date().toISOString(),
+          lastModifiedBy: {
+            type: 'person',
+            name: personName,
+            _id: personID,
+          },
+          body: {
+            type: 'annotation',
+            content: {
+              type: 'text',
+              title: '',
+              description: '',
+              relatedPerspective: {
+                camera: camera.id,
+                vector: {
+                  x: camera.alpha,
+                  y: camera.beta,
+                  z: camera.radius,
+                },
+                preview: detailScreenshot,
               },
-              preview: detailScreenshot,
             },
           },
-        },
-        target: {
-          source: {
-            relatedModel: this.currentModel._id,
-            relatedCompilation: (this.currentCompilation) ? this.currentCompilation._id : '',
-          },
-          selector: {
-            referencePoint: {
-              x: result.pickedPoint.x,
-              y: result.pickedPoint.y,
-              z: result.pickedPoint.z,
+          target: {
+            source: {
+              relatedModel: this.currentModel._id,
+              relatedCompilation: (this.currentCompilation) ? this.currentCompilation._id : '',
             },
-            referenceNormal: {
-              x: result.getNormal(true, true).x,
-              y: result.getNormal(true, true).y,
-              z: result.getNormal(true, true).z,
+            selector: {
+              referencePoint: {
+                x: result.pickedPoint.x,
+                y: result.pickedPoint.y,
+                z: result.pickedPoint.z,
+              },
+              referenceNormal: {
+                x: result.getNormal(true, true).x,
+                y: result.getNormal(true, true).y,
+                z: result.getNormal(true, true).z,
+              },
             },
           },
-        },
-      };
+        };
 
-      // 3 Fälle werden beim speichern unterschieden
-      // 1) Model nicht über Collection geladen
-      if (this.isDefaultLoad) {
-        this.addLocal(newAnnotation);
-      } else {
-        if (this.isSingleModel) {
-          // Darf Default Annotationen hinzufügen
-          if (this.isModelOwner) {
-            newAnnotation.validated = true;
-            this.addDefault(newAnnotation);
-          } else {
-            this.addLocal(newAnnotation);
-          }
-          // Model über collection geladen
-        } else {
-          this.add(newAnnotation);
-        }
-      }
-      this.annotationmarkerService.createAnnotationMarker(newAnnotation);
-      // set created annotation as is_open in annotationmarker.service ((on double click) created annotation)
-      this.annotationmarkerService.toggleCreatorPopup(newAnnotation._id);
+        // 3 Fälle werden beim speichern in MongoDB unterschieden
+        this.add(newAnnotation);
+        this.annotationmarkerService.createAnnotationMarker(newAnnotation);
+        // set created annotation as is_open in annotationmarker.service ((on double click) created annotation)
+        this.annotationmarkerService.toggleCreatorPopup(newAnnotation._id);
 
-    });
-  }
-
-  private addDefault(annotation): void {
-    // TODO add to MongoDB
-    this.dataService.putAnnotation(annotation);
-    this.annotations.push(annotation);
-    this.allAnnotations.push(annotation);
-  }
-
-  private addLocal(annotation): void {
-    this.dataService.putAnnotation(annotation);
-    this.annotations.push(annotation);
-    this.allAnnotations.push(annotation);
+      });
   }
 
   private add(annotation): void {
-    this.dataService.putAnnotation(annotation);
     this.annotations.push(annotation);
     this.allAnnotations.push(annotation);
 
-    // 1.1.1
-    // - Annotation erstellen
     if (this.inSocket) {
-      this.socket.emit('createAnnotation', [this.socketRoom, annotation]);
+      this.socket.emit('createAnnotation', { annotation });
     }
+    if (this.isDefaultLoad) return;
 
-    // TODO add to MongoDB
-
+    this.mongo.updateAnnotation(annotation)
+      .toPromise()
+      .then((resultAnnotation: Annotation) => {
+        // MongoDB hat funktioniert
+        // MongoDB-Eintrag in PouchDB
+        this.dataService.putAnnotation(resultAnnotation);
+        this.annotations.splice(this.annotations.indexOf(annotation), 1, resultAnnotation);
+        this.allAnnotations.splice(this.allAnnotations.indexOf(annotation), 1, resultAnnotation);
+      })
+      .catch((errorMessage: any) => {
+        // PouchDB
+        // TODO: Später synchronisieren
+        console.log(errorMessage);
+        this.dataService.putAnnotation(annotation);
+      });
   }
 
   public exportAnnotations() {
