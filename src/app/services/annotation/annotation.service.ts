@@ -225,7 +225,6 @@ export class AnnotationService {
             homepage: 'https://github.com/DH-Cologne/Kompakkt',
           },
           motivation: 'defaultMotivation',
-          lastModificationDate: new Date().toISOString(),
           lastModifiedBy: {
             type: 'person',
             name: personName,
@@ -277,7 +276,7 @@ export class AnnotationService {
       });
   }
 
-  private add(annotation): void {
+  private add(annotation: Annotation): void {
     this.annotations.push(annotation);
     this.allAnnotations.push(annotation);
 
@@ -298,12 +297,13 @@ export class AnnotationService {
       .catch((errorMessage: any) => {
         // PouchDB
         // TODO: Später synchronisieren
+        annotation.lastModificationDate = new Date().toISOString();
         console.log(errorMessage);
         this.dataService.putAnnotation(annotation);
       });
   }
 
-  public updateAnnotation(annotation) {
+  public updateAnnotation(annotation: Annotation) {
     if (this.isDefaultLoad) return;
     this.mongo.updateAnnotation(annotation)
       .toPromise()
@@ -311,13 +311,12 @@ export class AnnotationService {
         // MongoDB hat funktioniert
         // MongoDB-Eintrag in PouchDB
         this.dataService.updateAnnotation(resultAnnotation);
-        this.annotations.splice(this.annotations.indexOf(annotation), 1, resultAnnotation);
-        this.allAnnotations.splice(this.allAnnotations.indexOf(annotation), 1, resultAnnotation);
       })
       .catch((errorMessage: any) => {
         // PouchDB
         // TODO: Später synchronisieren
         console.log(errorMessage);
+        annotation.lastModificationDate = new Date().toISOString();
         this.dataService.updateAnnotation(annotation);
       });
   }
