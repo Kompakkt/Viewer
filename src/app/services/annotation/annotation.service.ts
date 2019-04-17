@@ -185,12 +185,11 @@ export class AnnotationService {
 
     // Fetch userData if not existing
     if (!this.isDefaultLoad) {
-      if (!this.loadModelService.currentUserData) {
-        await this.loadModelService.getUserData();
+      if (!this.loadModelService.currentUserData._id) {
+        this.loadModelService.currentUserData = await this.loadModelService.getUserData();
       }
-      this.loadModelService.currentUserData = this.loadModelService.getUserData();
       // Inform user if userData still doesn't exist
-      if (!this.loadModelService.currentUserData) {
+      if (!this.loadModelService.currentUserData._id) {
         this.message.error(`Login check failed. Try again`);
         return;
       }
