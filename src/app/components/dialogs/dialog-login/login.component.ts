@@ -4,6 +4,7 @@ import {CatalogueService} from '../../../services/catalogue/catalogue.service';
 import {MessageService} from '../../../services/message/message.service';
 import {MongohandlerService} from '../../../services/mongohandler/mongohandler.service';
 import {OverlayService} from '../../../services/overlay/overlay.service';
+import {LoadModelService} from '../../../services/load-model/load-model.service';
 
 @Component({
   selector: 'app-login',
@@ -20,7 +21,8 @@ export class LoginComponent implements OnInit {
   constructor(private mongohandlerService: MongohandlerService,
               private catalogueService: CatalogueService,
               private message: MessageService,
-              private overlayService: OverlayService) {
+              private overlayService: OverlayService,
+              private loadModelService: LoadModelService) {
   }
 
   ngOnInit() {
