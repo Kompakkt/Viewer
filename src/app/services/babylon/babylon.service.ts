@@ -1,13 +1,13 @@
-import { DOCUMENT } from '@angular/common';
-import { EventEmitter, Inject, Injectable, Output } from '@angular/core';
+import {DOCUMENT} from '@angular/common';
+import {EventEmitter, Inject, Injectable, Output} from '@angular/core';
 import * as BABYLON from 'babylonjs';
 import 'babylonjs-loaders';
-import { ReplaySubject } from 'rxjs';
+import {ReplaySubject} from 'rxjs';
 
-import { LoadingscreenhandlerService } from '../loadingscreenhandler/loadingscreenhandler.service';
-import { MessageService } from '../message/message.service';
+import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreenhandler.service';
+import {MessageService} from '../message/message.service';
 
-import { LoadingScreen } from './loadingscreen';
+import {LoadingScreen} from './loadingscreen';
 import ActionEvent = BABYLON.ActionEvent;
 
 /**
@@ -65,7 +65,7 @@ export class BabylonService {
 
       if (newCanvas) {
 
-        this.engine = new BABYLON.Engine(newCanvas, true, { preserveDrawingBuffer: true, stencil: true });
+        this.engine = new BABYLON.Engine(newCanvas, true, {preserveDrawingBuffer: true, stencil: true});
         this.scene = new BABYLON.Scene(this.engine);
         this.engine.loadingScreen = new LoadingScreen(newCanvas, '',
                                                       '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
@@ -215,7 +215,7 @@ export class BabylonService {
     return this.VRHelper;
   }
 
-  public loadModel(rootUrl: string, filename: string): Promise<any> {
+  public loadModel(rootUrl: string, filename: string, type?: string): Promise<any> {
 
     const message = this.message;
     const engine = this.engine;
@@ -242,6 +242,45 @@ export class BabylonService {
         reject(error);
       });
     });
+
+  }
+
+  public loadImage(rootUrl: string, width: number, height: number) {
+
+    const message = this.message;
+    const engine = this.engine;
+
+    engine.displayLoadingUI();
+
+    this.scene.meshes.forEach(mesh => mesh.dispose());
+    this.scene.meshes = [];
+
+      /*
+          BABYLON.Tools.LoadImage(rootUrl, function () {
+            console.log('loaded');
+          }, function (item, err) {
+            console.log('error:', err, item, 'not loaded');
+          });
+
+          const assetsManager = new BABYLON.AssetsManager(this.scene);
+          const imageTask = assetsManager.addImageTask('image task', rootUrl);
+          imageTask.onSuccess = function (task) {
+            console.log(task.image.width, 'assetManager');
+          };
+      */
+
+
+
+    const mypicture = new BABYLON.Texture(rootUrl, this.scene);
+
+    const ground = BABYLON.Mesh.CreateGround('gnd', width / 100, height / 100, 1, this.scene);
+
+    const gndmat = new BABYLON.StandardMaterial('gmat', this.scene);
+    ground.material = gndmat;
+    gndmat.diffuseTexture = mypicture;
+
+    engine.hideLoadingUI();
+
   }
 
   public saveScene(): void {
@@ -255,10 +294,10 @@ export class BabylonService {
     const result = await new Promise<string>((resolve, reject) => {
       const _activeCamera = this.getScene().activeCamera;
       if (_activeCamera instanceof BABYLON.Camera) {
-        BABYLON.Tools.CreateScreenshot(this.getEngine(), _activeCamera, { precision: 2 },screenshot => {
-            fetch(screenshot).then(res => res.blob()).then(blob => BABYLON.Tools.Download(blob, `Kompakkt-${Date.now().toString()}`));
-            resolve(screenshot);
-          });
+        BABYLON.Tools.CreateScreenshot(this.getEngine(), _activeCamera, {precision: 2}, screenshot => {
+          fetch(screenshot).then(res => res.blob()).then(blob => BABYLON.Tools.Download(blob, `Kompakkt-${Date.now().toString()}`));
+          resolve(screenshot);
+        });
       }
     });
     this.hideMesh('plane', true);
@@ -274,7 +313,7 @@ export class BabylonService {
       const _activeCamera = this.getScene().activeCamera;
       if (_activeCamera instanceof BABYLON.Camera) {
         BABYLON.Tools.CreateScreenshot(this.getEngine(), _activeCamera,
-                                       (width === undefined) ? { width: 400, height: 225 } : { width, height: Math.round((width / 16) * 9) },screenshot => {
+                                       (width === undefined) ? {width: 400, height: 225} : {width, height: Math.round((width / 16) * 9)}, screenshot => {
             resolve(screenshot);
           });
       }
@@ -365,7 +404,7 @@ export class BabylonService {
           this.pointlightPosZ = pos;
       }
 
-      this.createPointLight('pointlight', { x: this.pointlightPosX, y: this.pointlightPosY, z: this.pointlightPosZ });
+      this.createPointLight('pointlight', {x: this.pointlightPosX, y: this.pointlightPosY, z: this.pointlightPosZ});
     }
   }
 

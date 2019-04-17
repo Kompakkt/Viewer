@@ -1,10 +1,12 @@
-import {Injectable} from '@angular/core';
-import {ActionManager} from 'babylonjs';
+import { Injectable } from '@angular/core';
+import { MatDialog, MatDialogConfig } from '@angular/material';
+import { ActionManager } from 'babylonjs';
 import * as BABYLON from 'babylonjs';
 import {Socket} from 'ngx-socket-io';
 import {ReplaySubject} from 'rxjs';
 import {Annotation} from 'src/app/interfaces/annotation2/annotation2';
 
+import { LoginComponent } from '../../components/dialogs/dialog-login/login.component';
 import {environment} from '../../../environments/environment';
 import {ActionService} from '../action/action.service';
 import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
@@ -37,14 +39,15 @@ export class AnnotationService {
   private isModelOwner: boolean;
 
   constructor(private babylonService: BabylonService,
-              private dataService: DataService,
-              private actionService: ActionService,
-              private annotationmarkerService: AnnotationmarkerService,
-              private loadModelService: LoadModelService,
-              private mongo: MongohandlerService,
-              private message: MessageService,
-              public socket: Socket,
-              private catalogueService: CatalogueService) {
+    private dataService: DataService,
+    private actionService: ActionService,
+    private annotationmarkerService: AnnotationmarkerService,
+    private loadModelService: LoadModelService,
+    private mongo: MongohandlerService,
+    private message: MessageService,
+    public socket: Socket,
+    private catalogueService: CatalogueService,
+    private dialog: MatDialog) {
 
     this.annotations = [];
 
@@ -167,10 +170,6 @@ export class AnnotationService {
       this.actionService.createActionManager(mesh, ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
     });
     this.annotationMode(false);
-
-    if (this.inSocket) {
-      this.socket.emit('myNewRoom', [this.socketRoom, this.annotations]);
-    }
   }
 
   // Das aktuelle Modell wird anklickbar und damit annotierbar
@@ -186,150 +185,139 @@ export class AnnotationService {
 
     // Fetch userData if not existing
     if (!this.isDefaultLoad) {
-      if (!this.loadModelService.currentUserData) {
-        await this.loadModelService.getUserData();
+      if (!this.loadModelService.currentUserData._id) {
+        this.loadModelService.currentUserData = await this.loadModelService.getUserData();
       }
-      this.loadModelService.currentUserData = this.loadModelService.getUserData();
       // Inform user if userData still doesn't exist
-      if (!this.loadModelService.currentUserData) {
+      if (!this.loadModelService.currentUserData._id) {
         this.message.error(`Login check failed. Try again`);
         return;
       }
     }
 
-    this.babylonService.createPreviewScreenshot(400).then(async detailScreenshot => {
-      // TODO: Detect if user is offline
-      let generatedId: string;
-      if (!this.isDefaultLoad) {
-        generatedId = this.mongo.generateObjectId();
-        await this.mongo.getUnusedObjectId().then(id => generatedId = id).catch(e => console.error(e));
-      } else {
-        generatedId = Math.random().toString(36).substr(2, 9);
-      }
+    this.babylonService.createPreviewScreenshot(400)
+      .then(async detailScreenshot => {
+        // TODO: Detect if user is offline
+        let generatedId = this.mongo.generateObjectId();
+        await this.mongo.getUnusedObjectId()
+          .then(id => generatedId = id)
+          .catch(e => console.error(e));
 
-      let personName: string;
-      let personID: string;
-      if (!this.loadModelService.currentUserData) {
-        personName = 'Guest';
-        personID = Math.random().toString(36).substr(2, 9);
-      } else {
-        personName = this.loadModelService.currentUserData.fullname;
-        personID = this.loadModelService.currentUserData._id;
-      }
+        const personName = this.loadModelService.currentUserData.fullname;
+        const personID = this.loadModelService.currentUserData._id;
 
-
-      const newAnnotation: Annotation = {
-        validated: false,
-        _id: generatedId,
-        identifier: generatedId,
-        ranking: this.annotations.length + 1,
-        creator: {
-          type: 'person',
-          name: personName,
-          _id: personID,
-        },
-        created: new Date().toISOString(),
-        generator: {
-          type: 'software',
-          name: environment.version,
-          _id: personID,
-          homepage: 'https://github.com/DH-Cologne/Kompakkt',
-        },
-        motivation: 'defaultMotivation',
-        // TODO: Overwrite when updating annotation
-        lastModifiedBy: {
-          type: 'person',
-          name: personName,
-          _id: personID,
-        },
-        body: {
-          type: 'annotation',
-          content: {
-            type: 'text',
-            title: '',
-            description: '',
-            relatedPerspective: {
-              camera: camera.id,
-              vector: {
-                x: camera.alpha,
-                y: camera.beta,
-                z: camera.radius,
+        const newAnnotation: Annotation = {
+          validated: false,
+          _id: generatedId,
+          identifier: generatedId,
+          ranking: this.annotations.length + 1,
+          creator: {
+            type: 'person',
+            name: personName,
+            _id: personID,
+          },
+          created: new Date().toISOString(),
+          generator: {
+            type: 'software',
+            name: environment.version,
+            _id: personID,
+            homepage: 'https://github.com/DH-Cologne/Kompakkt',
+          },
+          motivation: 'defaultMotivation',
+          lastModifiedBy: {
+            type: 'person',
+            name: personName,
+            _id: personID,
+          },
+          body: {
+            type: 'annotation',
+            content: {
+              type: 'text',
+              title: '',
+              description: '',
+              relatedPerspective: {
+                camera: camera.id,
+                vector: {
+                  x: camera.alpha,
+                  y: camera.beta,
+                  z: camera.radius,
+                },
+                preview: detailScreenshot,
               },
-              preview: detailScreenshot,
             },
           },
-        },
-        target: {
-          source: {
-            relatedModel: this.currentModel._id,
-            relatedCompilation: (this.currentCompilation) ? this.currentCompilation._id : '',
-          },
-          selector: {
-            referencePoint: {
-              x: result.pickedPoint.x,
-              y: result.pickedPoint.y,
-              z: result.pickedPoint.z,
+          target: {
+            source: {
+              relatedModel: this.currentModel._id,
+              relatedCompilation: (this.currentCompilation) ? this.currentCompilation._id : '',
             },
-            referenceNormal: {
-              x: result.getNormal(true, true).x,
-              y: result.getNormal(true, true).y,
-              z: result.getNormal(true, true).z,
+            selector: {
+              referencePoint: {
+                x: result.pickedPoint.x,
+                y: result.pickedPoint.y,
+                z: result.pickedPoint.z,
+              },
+              referenceNormal: {
+                x: result.getNormal(true, true).x,
+                y: result.getNormal(true, true).y,
+                z: result.getNormal(true, true).z,
+              },
             },
           },
-        },
-      };
+        };
 
-      // 3 Fälle werden beim speichern unterschieden
-      // 1) Model nicht über Collection geladen
-      if (this.isDefaultLoad) {
-        this.addLocal(newAnnotation);
-      } else {
-        if (this.isSingleModel) {
-          // Darf Default Annotationen hinzufügen
-          if (this.isModelOwner) {
-            newAnnotation.validated = true;
-            this.addDefault(newAnnotation);
-          } else {
-            this.addLocal(newAnnotation);
-          }
-          // Model über collection geladen
-        } else {
-          this.add(newAnnotation);
-        }
-      }
-      this.annotationmarkerService.createAnnotationMarker(newAnnotation);
-      // set created annotation as is_open in annotationmarker.service ((on double click) created annotation)
-      this.annotationmarkerService.toggleCreatorPopup(newAnnotation._id);
+        // 3 Fälle werden beim speichern in MongoDB unterschieden
+        this.add(newAnnotation);
+        this.annotationmarkerService.createAnnotationMarker(newAnnotation);
+        // set created annotation as is_open in annotationmarker.service ((on double click) created annotation)
+        this.annotationmarkerService.toggleCreatorPopup(newAnnotation._id);
 
-    });
+      });
   }
 
-  private addDefault(annotation): void {
-    // TODO add to MongoDB
-    this.dataService.putAnnotation(annotation);
-    this.annotations.push(annotation);
-    this.allAnnotations.push(annotation);
-  }
-
-  private addLocal(annotation): void {
-    this.dataService.putAnnotation(annotation);
-    this.annotations.push(annotation);
-    this.allAnnotations.push(annotation);
-  }
-
-  private add(annotation): void {
-    this.dataService.putAnnotation(annotation);
+  private add(annotation: Annotation): void {
     this.annotations.push(annotation);
     this.allAnnotations.push(annotation);
 
-    // 1.1.1
-    // - Annotation erstellen
     if (this.inSocket) {
-      this.socket.emit('createAnnotation', [this.socketRoom, annotation]);
+      this.socket.emit('createAnnotation', { annotation });
     }
+    if (this.isDefaultLoad) return;
 
-    // TODO add to MongoDB
+    this.mongo.updateAnnotation(annotation)
+      .toPromise()
+      .then((resultAnnotation: Annotation) => {
+        // MongoDB hat funktioniert
+        // MongoDB-Eintrag in PouchDB
+        this.dataService.putAnnotation(resultAnnotation);
+        this.annotations.splice(this.annotations.indexOf(annotation), 1, resultAnnotation);
+        this.allAnnotations.splice(this.allAnnotations.indexOf(annotation), 1, resultAnnotation);
+      })
+      .catch((errorMessage: any) => {
+        // PouchDB
+        // TODO: Später synchronisieren
+        annotation.lastModificationDate = new Date().toISOString();
+        console.log(errorMessage);
+        this.dataService.putAnnotation(annotation);
+      });
+  }
 
+  public updateAnnotation(annotation: Annotation) {
+    if (this.isDefaultLoad) return;
+    this.mongo.updateAnnotation(annotation)
+      .toPromise()
+      .then((resultAnnotation: Annotation) => {
+        // MongoDB hat funktioniert
+        // MongoDB-Eintrag in PouchDB
+        this.dataService.updateAnnotation(resultAnnotation);
+      })
+      .catch((errorMessage: any) => {
+        // PouchDB
+        // TODO: Später synchronisieren
+        console.log(errorMessage);
+        annotation.lastModificationDate = new Date().toISOString();
+        this.dataService.updateAnnotation(annotation);
+      });
   }
 
   public exportAnnotations() {
@@ -391,19 +379,28 @@ export class AnnotationService {
   }
 
   public deleteAnnotation(annotation: Annotation) {
+    // TODO: Check if cached user data is available for DB deletion
+    /*if (!this.loadModelService.cachedUser.username || !this.loadModelService.cachedUser.password) {
+      const dialogConfig = new MatDialogConfig();
+
+      dialogConfig.disableClose = true;
+      dialogConfig.autoFocus = true;
+
+      this.dialog.open(LoginComponent, dialogConfig);
+    }*/
 
     // 3 Fälle werden beim löschen unterschieden
     // 1) Model nicht über Collection geladen
     if (this.isSingleModel && this.isModelOwner) {
       // Darf Default Annotationen löschen
-      // TODO delete in MongoDB
+      // TODO: delete in MongoDB
       // Model über collection geladen
     } else {
-      // TODO delete in MongoDB -> Soll nur der Annotation Owner die Annotation löschen dürfen?
+      // TODO: delete in MongoDB -> Soll nur der Annotation Owner die Annotation löschen dürfen?
       // 1.1.4
       // - Löschen der Annotation
       if (this.inSocket) {
-        this.socket.emit('deleteAnnotation', [this.socketRoom, annotation]);
+        this.socket.emit('deleteAnnotation', { annotation });
       }
     }
 
@@ -444,7 +441,7 @@ export class AnnotationService {
       }
       // Send ID's & new Ranking of changed annotations
       if (this.inSocket) {
-        this.socket.emit('changeRanking', [this.socketRoom, IdArray, RankingArray]);
+        this.socket.emit('changeRanking', { oldRanking: IdArray, newRanking: RankingArray });
       }
     }
 

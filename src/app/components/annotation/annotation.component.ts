@@ -133,13 +133,9 @@ export class AnnotationComponent implements OnInit {
   }
 
   private save(): void {
-    this.dataService.updateAnnotation(this.annotation);
-    // 1.1.2
+    this.annotationService.updateAnnotation(this.annotation);
     if (this.annotationService.inSocket) {
-      this.socketService.socket.emit('editAnnotation', [
-        this.annotationService.socketRoom,
-        this.annotation
-      ]);
+      this.socketService.socket.emit('editAnnotation', { annotation: this.annotation });
     }
   }
 
