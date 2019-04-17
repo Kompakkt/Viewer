@@ -35,7 +35,8 @@ export class LoadModelService {
   public userOwnedFinishedModels: any[] = [];
   public currentUserData: any = {
     fullname: 'Guest',
-    _id: 'guest'
+    username: 'guest',
+    _id: 'guest',
   };
 
   private baseUrl = `${environment.express_server_url}:${environment.express_server_port}/`;

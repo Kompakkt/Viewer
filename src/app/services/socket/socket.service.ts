@@ -16,9 +16,10 @@ interface IMessage {
 }
 
 interface IUser {
+  _id: string;
   socketId: string;
-  personId: string;
-  name: string;
+  username: string;
+  fullname: string;
   room: string;
 }
 
@@ -184,7 +185,7 @@ export class SocketService {
 
     // 1.2.0
     this.socket.on('message', (result: IMessage) => {
-      console.log(`${result.user.name}: ${result.message}`);
+      console.log(`${result.user.username}: ${result.message}`);
     });
 
     // 1.2.1
@@ -195,7 +196,7 @@ export class SocketService {
 
     // 1.2.2
     this.socket.on('createAnnotation', (result: IAnnotation) => {
-      console.log(`COLLABORATOR '${result.user.name}' CREATED AN ANNOTATION - SOCKET.IO`);
+      console.log(`COLLABORATOR '${result.user.username}' CREATED AN ANNOTATION - SOCKET.IO`);
 
       this.collaboratorsAnnotations.push(result.annotation);
 
@@ -204,7 +205,7 @@ export class SocketService {
 
     // 1.2.3
     this.socket.on('editAnnotation', (result: IAnnotation) => {
-      console.log(`COLLABORATOR '${result.user.name}' EDITED AN ANNOTATION - SOCKET.IO`);
+      console.log(`COLLABORATOR '${result.user.username}' EDITED AN ANNOTATION - SOCKET.IO`);
 
       const findIndexById = this.collaboratorsAnnotations
         .findIndex(_socketAnnotation => _socketAnnotation.annotation._id === result.annotation._id);
@@ -217,7 +218,7 @@ export class SocketService {
 
     // 1.2.4
     this.socket.on('deleteAnnotation', (result: IAnnotation) => { // [socket.id, annotation]
-      console.log(`COLLABORATOR '${result.user.name}' DELETED AN ANNOTATION- SOCKET.IO`);
+      console.log(`COLLABORATOR '${result.user.username}' DELETED AN ANNOTATION- SOCKET.IO`);
 
       const findIndexById = this.collaboratorsAnnotations
         .findIndex(_socketAnnotation => _socketAnnotation.annotation._id === result.annotation._id);
@@ -230,7 +231,7 @@ export class SocketService {
 
     // 1.2.5
     this.socket.on('changeRanking', (result: IChangeRanking) => {
-      console.log(`COLLABORATOR '${result.user.name}' CHANGED ANNOTATION-RANKING - SOCKET.IO`);
+      console.log(`COLLABORATOR '${result.user.username}' CHANGED ANNOTATION-RANKING - SOCKET.IO`);
 
       let i = 0;
       for (const socketAnnotation of this.collaboratorsAnnotations) {
@@ -247,7 +248,7 @@ export class SocketService {
 
     // 1.2.6
     this.socket.on('lostConnection', (result: IUserInfo) => { // [user, annotations]);
-      console.log(`COLLABORATOR '${result.user.name}' LOGGED OUT - SOCKET.IO`);
+      console.log(`COLLABORATOR '${result.user.username}' LOGGED OUT - SOCKET.IO`);
 
       // delete user from collaborators
       let userCounter = 0;
@@ -396,10 +397,11 @@ export class SocketService {
   private getOwnSocketData(): IUserInfo {
     return {
       user: {
-        name: this.loadModelService.currentUserData.fullname || 'Guest',
+        _id: this.loadModelService.currentUserData._id,
+        fullname: this.loadModelService.currentUserData.fullname,
+        username: this.loadModelService.currentUserData.username,
         room: this.annotationService.socketRoom,
         socketId: 'self',
-        personId: this.loadModelService.currentUserData._id || 'Guest',
       },
       annotations: this.annotationService.annotations,
     };
