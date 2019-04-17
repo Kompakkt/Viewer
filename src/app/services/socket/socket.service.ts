@@ -166,16 +166,10 @@ export class SocketService {
 
     // SET -- 'this.annotationService.socketRoom'
     this.loadModelService.Observables.actualModel.subscribe(actualModel => {
-      console.log(this.annotationService.currentCompilation, actualModel)
-      if (this.annotationService.currentCompilation !== undefined) {
-        if (this.annotationService.currentCompilation.name != undefined) {
-          this.annotationService.socketRoom = this.annotationService.currentCompilation.name + '_' + this.annotationService.modelName;
-        } else {
-          this.annotationService.socketRoom = this.annotationService.modelName;
-        }
-      } else {
-        this.annotationService.socketRoom = this.annotationService.modelName;
-      }
+      const currentCompilation = this.loadModelService.getCurrentCompilation();
+      const currentModel = this.loadModelService.getCurrentModel();
+      this.annotationService.socketRoom = (currentCompilation)
+        ? `${currentCompilation._id}_${currentModel._id}` : `${currentModel._id}`;
 
       // 'changeRoom'
       if (this.annotationService.inSocket) {
