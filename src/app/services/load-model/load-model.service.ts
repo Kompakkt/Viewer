@@ -33,7 +33,10 @@ export class LoadModelService {
   public personalCollections: any[] = [];
   public userOwnedModels: any[] = [];
   public userOwnedFinishedModels: any[] = [];
-  public currentUserData: any;
+  public currentUserData: any = {
+    fullname: 'Guest',
+    _id: 'guest'
+  };
 
   private baseUrl = `${environment.express_server_url}:${environment.express_server_port}/`;
   public quality = 'low';
