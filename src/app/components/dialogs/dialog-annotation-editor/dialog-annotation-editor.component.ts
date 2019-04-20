@@ -19,21 +19,24 @@ export class DialogAnnotationEditorComponent {
   public labelMode = 'edit';
   public labelModeText = 'Edit';
 
+  public showMediaBrowser = false;
+
   constructor(public dialogRef: MatDialogRef<DialogAnnotationEditorComponent>,
               @Inject(MAT_DIALOG_DATA) public data: IDialogData) {
   }
 
-  public addImage() {
+  // TODO Resolve code duplication in dialog-annotation-editor, annotation and annotations-editor.
+  public addMedium(medium) {
 
-    const mdImage = '![alt DESCRIPTION](URL)';
+    const mdImage = `![alt ${medium.description}](${medium.url})`;
 
     this.annotationContent.nativeElement.focus();
 
-    const startPos = this.annotationContent.nativeElement.selectionStart;
+    const start = this.annotationContent.nativeElement.selectionStart;
     const value = this.annotationContent.nativeElement.value;
 
-    this.annotationContent.nativeElement.value =
-      `${value.substring(0, startPos)}${mdImage}${value.substring(startPos, value.length)}`;
+    this.data.content =
+      `${value.substring(0, start)}${mdImage}${value.substring(start, value.length)}`;
   }
 
   public toggleEditViewMode() {

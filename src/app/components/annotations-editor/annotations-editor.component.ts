@@ -1,5 +1,5 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {Annotation} from 'src/app/interfaces/annotation2/annotation2';
+import {Component, Input, OnInit, ViewChild} from '@angular/core';
+import {Annotation} from '../../interfaces/annotation2/annotation2';
 
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
@@ -26,7 +26,11 @@ export class AnnotationsEditorComponent implements OnInit {
   public showAnnotation = true;
   public labelVisibility = 'Hide';
 
+  public showMediaBrowser = false;
+
   public id = '';
+
+  @ViewChild('annotationContent') private annotationContent;
 
   constructor(private dataService: DataService,
               private annotationService: AnnotationService,
@@ -48,6 +52,19 @@ export class AnnotationsEditorComponent implements OnInit {
     this.annotationmarkerService.popupIsOpen().subscribe(
       popup_is_open => this.hiddenAnnotation(popup_is_open),
     );
+  }
+
+  public addMedium(medium) {
+
+    const mdImage = `![alt ${medium.description}](${medium.url})`;
+
+    this.annotationContent.nativeElement.focus();
+
+    const start = this.annotationContent.nativeElement.selectionStart;
+    const value = this.annotationContent.nativeElement.value;
+
+    this.annotation.body.content.description =
+      `${value.substring(0, start)}${mdImage}${value.substring(start, value.length)}`;
   }
 
   private hiddenAnnotation(ID) {
@@ -112,7 +129,7 @@ export class AnnotationsEditorComponent implements OnInit {
   private save(): void {
     this.annotationService.updateAnnotation(this.annotation);
     if (this.annotationService.inSocket) {
-      this.socketService.socket.emit('editAnnotation', { annotation: this.annotation });
+      this.socketService.socket.emit('editAnnotation', {annotation: this.annotation});
     }
   }
 
