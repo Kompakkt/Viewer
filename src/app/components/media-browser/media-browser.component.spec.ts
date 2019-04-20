@@ -1,6 +1,10 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { MediaBrowserComponent } from './media-browser.component';
+import {MediaBrowserComponent} from './media-browser.component';
+import {FormsModule} from '@angular/forms';
+import {MatFormFieldModule, MatIconModule, MatInputModule, MatSnackBarModule} from '@angular/material';
+import {HttpClientModule} from '@angular/common/http';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 describe('MediaBrowserComponent', () => {
   let component: MediaBrowserComponent;
@@ -8,9 +12,18 @@ describe('MediaBrowserComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ MediaBrowserComponent ]
+      declarations: [MediaBrowserComponent],
+      imports: [
+        FormsModule,
+        MatFormFieldModule,
+        MatIconModule,
+        MatSnackBarModule,
+        HttpClientModule,
+        MatInputModule,
+        BrowserAnimationsModule,
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

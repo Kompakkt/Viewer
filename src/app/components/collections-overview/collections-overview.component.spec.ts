@@ -2,7 +2,7 @@ import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {CollectionsOverviewComponent} from './collections-overview.component';
 import {
-  MatCardModule,
+  MatCardModule, MatCheckboxModule,
   MatDialogModule,
   MatIconModule,
   MatOptionModule, MatProgressSpinnerModule,
@@ -13,6 +13,7 @@ import {
 import {FormsModule} from '@angular/forms';
 import {ModelComponent} from '../model/model.component';
 import {HttpClientModule} from '@angular/common/http';
+import {MediaTypePipe} from '../../pipes/media-type.pipe';
 
 describe('CollectionsOverviewComponent', () => {
   let component: CollectionsOverviewComponent;
@@ -20,7 +21,11 @@ describe('CollectionsOverviewComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CollectionsOverviewComponent, ModelComponent],
+      declarations: [
+        CollectionsOverviewComponent,
+        ModelComponent,
+        MediaTypePipe,
+      ],
       imports: [
         MatDialogModule,
         MatRadioModule,
@@ -31,7 +36,8 @@ describe('CollectionsOverviewComponent', () => {
         MatCardModule,
         HttpClientModule,
         MatSnackBarModule,
-        MatProgressSpinnerModule
+        MatProgressSpinnerModule,
+        MatCheckboxModule,
       ]
     })
       .compileComponents();

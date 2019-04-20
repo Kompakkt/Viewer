@@ -14,6 +14,9 @@ import {HttpClientModule} from '@angular/common/http';
 import {SocketIoModule} from 'ngx-socket-io';
 import {environment} from '../../../environments/environment';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {MediaBrowserComponent} from '../media-browser/media-browser.component';
+import {MarkdownComponent} from 'ngx-markdown';
+import {MatSlideToggleModule} from '@angular/material/typings/esm5/slide-toggle';
 
 describe('AnnotationsEditorComponent', () => {
   let component: AnnotationsEditorComponent;
@@ -21,7 +24,11 @@ describe('AnnotationsEditorComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [AnnotationsEditorComponent],
+      declarations: [
+        AnnotationsEditorComponent,
+        MediaBrowserComponent,
+        MarkdownComponent,
+      ],
       imports: [
         MatCardModule,
         FormsModule,

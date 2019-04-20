@@ -17,6 +17,9 @@ import {FormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 import {SocketIoModule} from 'ngx-socket-io';
 import {environment} from '../../../environments/environment';
+import {MediaComponent} from '../media/media.component';
+import {MediaBrowserComponent} from '../media-browser/media-browser.component';
+import {MarkdownComponent} from 'ngx-markdown';
 
 describe('SceneComponent', () => {
   let component: SceneComponent;
@@ -30,7 +33,10 @@ describe('SceneComponent', () => {
         AnnotationwalkthroughComponent,
         AnnotationcardsComponent,
         MatDialogContent,
-        MatDialogActions
+        MatDialogActions,
+        MediaComponent,
+        MediaBrowserComponent,
+        MarkdownComponent,
       ],
       imports: [
         MatCardModule,

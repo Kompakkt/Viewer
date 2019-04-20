@@ -1,6 +1,8 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { DialogAnnotationEditorComponent } from './dialog-annotation-editor.component';
+import {DialogAnnotationEditorComponent} from './dialog-annotation-editor.component';
+import {MatFormFieldModule, MatIconModule} from '@angular/material';
+import {MarkdownComponent} from 'ngx-markdown';
 
 describe('DialogAnnotationEditorComponent', () => {
   let component: DialogAnnotationEditorComponent;
@@ -8,9 +10,16 @@ describe('DialogAnnotationEditorComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DialogAnnotationEditorComponent ]
+      declarations: [
+        DialogAnnotationEditorComponent,
+        MarkdownComponent
+      ],
+      imports: [
+        MatFormFieldModule,
+        MatIconModule,
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

@@ -11,6 +11,8 @@ import {FormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 import {SocketIoModule} from 'ngx-socket-io';
 import {environment} from '../../../environments/environment';
+import {MediaBrowserComponent} from '../media-browser/media-browser.component';
+import {MarkdownComponent} from 'ngx-markdown';
 
 describe('AnnotationComponent', () => {
   let component: AnnotationComponent;
@@ -19,7 +21,11 @@ describe('AnnotationComponent', () => {
   beforeEach(async(() => {
 
     TestBed.configureTestingModule({
-      declarations: [AnnotationComponent],
+      declarations: [
+        AnnotationComponent,
+        MediaBrowserComponent,
+        MarkdownComponent,
+      ],
       imports: [
         MatFormFieldModule,
         MatCardModule,

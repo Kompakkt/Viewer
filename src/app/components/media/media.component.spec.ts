@@ -1,6 +1,8 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { MediaComponent } from './media.component';
+import {MediaComponent} from './media.component';
+import {MatSnackBarModule} from '@angular/material';
+import {HttpClientModule} from '@angular/common/http';
 
 describe('MediaComponent', () => {
   let component: MediaComponent;
@@ -8,9 +10,13 @@ describe('MediaComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ MediaComponent ]
+      declarations: [MediaComponent],
+      imports: [
+        MatSnackBarModule,
+        HttpClientModule,
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
