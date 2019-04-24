@@ -261,10 +261,10 @@ export class CatalogueService {
     this.loadModelService.fetchAndLoad(undefined, collectionId, undefined);
   }
 
-  public selectModel(modelId: string, collection: boolean) {
+  public selectModel(modelId: string, collection?: boolean) {
     this.isDefaultLoad = false;
     this.defaultLoad.emit(false);
-    this.loadModelService.fetchAndLoad(modelId, undefined, collection);
+    this.loadModelService.fetchAndLoad(modelId, undefined, collection ? collection : undefined);
   }
 
   /**
