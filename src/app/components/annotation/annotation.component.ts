@@ -89,10 +89,9 @@ export class AnnotationComponent implements OnInit {
           this.labelMode = 'edit';
           this.labelModeText = 'edit';
           this.save();
-        } else {
-          this.editMode = false;
-          this.labelMode = 'edit';
-          this.labelModeText = 'edit';
+        }
+        if (selectedAnno !== this.annotation._id && !this.editMode) {
+          return;
         }
       });
 

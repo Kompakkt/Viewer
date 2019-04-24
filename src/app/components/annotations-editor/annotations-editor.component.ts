@@ -21,9 +21,9 @@ export class AnnotationsEditorComponent implements OnInit {
   @Input() annotation: Annotation;
 
   public collapsed = false;
-  public editMode = true;
-  public labelMode = 'remove_red_eye';
-  public labelModeText = 'view';
+  public editMode = false;
+  public labelMode = 'edit';
+  public labelModeText = 'edit';
   public preview = '';
   public showAnnotation = true;
   public isDefault: boolean;
@@ -100,10 +100,9 @@ export class AnnotationsEditorComponent implements OnInit {
         this.labelMode = 'edit';
         this.labelModeText = 'edit';
         this.save();
-      } else {
-        this.editMode = false;
-        this.labelMode = 'edit';
-        this.labelModeText = 'edit';
+      }
+      if (selectedAnno !== this.annotation._id && !this.editMode) {
+        return;
       }
     });
   }
@@ -119,12 +118,6 @@ export class AnnotationsEditorComponent implements OnInit {
 
     this.annotation.body.content.description =
       `${value.substring(0, start)}${mdImage}${value.substring(start, value.length)}`;
-  }
-
-  private hiddenAnnotation(ID) {
-    if (this.annotation._id === ID) {
-      this.showAnnotation = true;
-    }
   }
 
   public changeOpenPopup() {
