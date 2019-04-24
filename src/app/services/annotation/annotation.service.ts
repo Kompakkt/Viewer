@@ -6,6 +6,7 @@ import {Socket} from 'ngx-socket-io';
 import {BehaviorSubject} from 'rxjs/internal/BehaviorSubject';
 
 import {environment} from '../../../environments/environment';
+import {DialogGetUserDataComponent} from '../../components/dialogs/dialog-get-user-data/dialog-get-user-data.component';
 import {Annotation} from '../../interfaces/annotation2/annotation2';
 import {ActionService} from '../action/action.service';
 import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
@@ -17,7 +18,6 @@ import {LoadModelService} from '../load-model/load-model.service';
 import {MessageService} from '../message/message.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
 import {UserdataService} from '../userdata/userdata.service';
-import {DialogGetUserDataComponent} from '../../components/dialogs/dialog-get-user-data/dialog-get-user-data.component';
 
 @Injectable({
   providedIn: 'root',
@@ -667,7 +667,7 @@ export class AnnotationService {
             }
           });
           resolve(annotationList);
-        }, error => {
+        },    error => {
           reject(error);
         });
     });

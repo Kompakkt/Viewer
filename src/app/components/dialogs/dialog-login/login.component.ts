@@ -1,11 +1,11 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 
 import {CatalogueService} from '../../../services/catalogue/catalogue.service';
+import {LoadModelService} from '../../../services/load-model/load-model.service';
 import {MessageService} from '../../../services/message/message.service';
 import {MongohandlerService} from '../../../services/mongohandler/mongohandler.service';
 import {OverlayService} from '../../../services/overlay/overlay.service';
 import {UserdataService} from '../../../services/userdata/userdata.service';
-import {LoadModelService} from '../../../services/load-model/load-model.service';
 
 @Component({
   selector: 'app-login',
@@ -43,7 +43,7 @@ export class LoginComponent implements OnInit {
         this.success = true;
         this.catalogueService.bootstrap();
       }
-    }, error => {
+    },           error => {
       this.message.error('Connection to object server refused.');
       this.userDataService.setcachedLoginData('', '');
     });

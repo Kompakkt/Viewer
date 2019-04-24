@@ -10,7 +10,6 @@ import {SocketService} from '../../services/socket/socket.service';
 })
 export class ActiveUsersComponent implements OnInit {
 
-
   constructor(public socketService: SocketService,
               public annotationService: AnnotationService) {
   }

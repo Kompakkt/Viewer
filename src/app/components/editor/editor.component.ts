@@ -3,17 +3,17 @@ import {Component, EventEmitter, HostBinding, Input, OnInit, Output, ViewChild} 
 import {AfterViewInit, QueryList, ViewChildren} from '@angular/core';
 import {MatDialog, MatRadioButton, MatRadioChange} from '@angular/material';
 import {saveAs} from 'file-saver';
-import {SocketService} from '../../services/socket/socket.service';
 
 import {environment} from '../../../environments/environment.prod';
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
+import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {LoadModelService} from '../../services/load-model/load-model.service';
 import {OverlayService} from '../../services/overlay/overlay.service';
+import {SocketService} from '../../services/socket/socket.service';
+import {UserdataService} from '../../services/userdata/userdata.service';
 import {AnnotationsEditorComponent} from '../annotations-editor/annotations-editor.component';
 import {DialogDeleteAnnotationsComponent} from '../dialogs/dialog-delete-annotations/dialog-delete-annotations.component';
-import {CatalogueService} from '../../services/catalogue/catalogue.service';
-import {UserdataService} from '../../services/userdata/userdata.service';
 
 @Component({
   selector: 'app-editor',
@@ -47,7 +47,6 @@ export class EditorComponent implements OnInit, AfterViewInit {
   public dragDisabled = true;
 
   private isCollectionOwner: boolean;
-
 
   public popup_is_open = '';
   @ViewChildren(AnnotationsEditorComponent)
@@ -172,7 +171,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
   public exportAnnotations() {
     saveAs(new Blob([this.annotationService.exportAnnotations()],
-      {type: 'text/plain;charset=utf-8'}), 'annotations.json');
+                    {type: 'text/plain;charset=utf-8'}), 'annotations.json');
   }
 
   public importAnnotations(files: FileList): void {

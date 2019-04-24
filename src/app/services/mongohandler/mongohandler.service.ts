@@ -10,11 +10,12 @@ import { environment } from '../../../environments/environment';
 export class MongohandlerService {
 
   // Needed for ObjectId gen
+  /* tslint:disable:no-magic-numbers */
   private genIndex = parseInt((Math.random() * 0xFFFFFF).toString(), 10);
   private MACHINE_ID = Math.floor(Math.random() * 0xFFFFFF);
   private pid = (typeof process === 'undefined' || typeof process.pid !== 'number'
-      ? Math.floor(Math.random() * 100000) : process.pid) % 0xFFFF;
-
+    ? Math.floor(Math.random() * 100000) : process.pid) % 0xFFFF;
+  /* tslint:enable:no-magic-numbers */
   //
   private endpoint = `${environment.express_server_url}:${environment.express_server_port}`;
   private httpOptions = {
@@ -28,8 +29,8 @@ export class MongohandlerService {
   }
 
   // Helper
-  private updatePreviewURL(promise: Promise<any>) {
-    const update =obj => {
+  private async updatePreviewURL(promise: Promise<any>) {
+    const update = obj => {
       // Only update if it's a relative path and not a URL
       if (obj && obj.settings && obj.settings.preview
         && obj.settings.preview.indexOf('base64') === -1
@@ -40,28 +41,31 @@ export class MongohandlerService {
     };
 
     return new Promise<any>((resolve, reject) => {
-      promise.then(result => {
-        if (Array.isArray(result) && result[0] && !result[0].models) {
-          result = result.map(update);
-        } else if (Array.isArray(result) && result[0] && result[0].models) {
-          for (const compilation of result) {
-            for (let model of compilation.models) {
-              model = update(model);
+      promise
+        .then(result => {
+          if (Array.isArray(result) && result[0] && !result[0].models) {
+            result = result.map(update);
+          } else if (Array.isArray(result) && result[0] && result[0].models) {
+            for (const compilation of result) {
+              for (let model of compilation.models) {
+                model = update(model);
+              }
             }
+          } else if (result.models) {
+            result.models = result.models.map(update);
+          } else {
+            result = update(result);
           }
-        } else if (result.models) {
-          result.models = result.models.map(update);
-        } else {
-          result = update(result);
-        }
-        resolve(result);
-      }).catch(reject);
+          resolve(result);
+        })
+        .catch(reject);
     });
   }
 
   // Override GET and POST to use HttpOptions which is needed for auth
-  private get(path: string): Promise<any> {
-    return this.updatePreviewURL(this.http.get(`${this.endpoint}/${path}`, this.httpOptions).toPromise());
+  private async get(path: string): Promise<any> {
+    const getResult = this.http.get(`${this.endpoint}/${path}`, this.httpOptions);
+    return this.updatePreviewURL(getResult.toPromise());
   }
 
   private post(path: string, obj: any): Observable<any> {
@@ -69,28 +73,28 @@ export class MongohandlerService {
   }
 
   // GETs
-  public getAllCompilations(): Promise<any> {
+  public async getAllCompilations(): Promise<any> {
     return this.get(`api/v1/get/findall/compilation`);
   }
 
-  public getAllModels(): Promise<any> {
+  public async getAllModels(): Promise<any> {
     return this.get(`api/v1/get/findall/model`);
   }
 
-  public getModel(identifier: string): Promise<any> {
+  public async getModel(identifier: string): Promise<any> {
     return this.get(`api/v1/get/find/model/${identifier}`);
   }
 
-  public getCompilation(identifier: string, password?: string): Promise<any> {
+  public async getCompilation(identifier: string, password?: string): Promise<any> {
     return (password) ? this.get(`api/v1/get/find/compilation/${identifier}/${password}`)
       : this.get(`api/v1/get/find/compilation/${identifier}`);
   }
 
-  public getModelMetadata(identifier: string): Promise<any> {
+  public async getModelMetadata(identifier: string): Promise<any> {
     return this.get(`api/v1/get/find/digitalobject/${identifier}`);
   }
 
-  public getCurrentUserData(): Promise<any> {
+  public async getCurrentUserData(): Promise<any> {
     return this.get(`api/v1/get/ldata`);
   }
 
@@ -112,23 +116,24 @@ export class MongohandlerService {
     return this.post(`login`, { username, password });
   }
 
-  public logout(): Promise<any> {
+  public async logout(): Promise<any> {
     return this.get(`logout`);
   }
 
-  public isAuthorized() {
+  public async isAuthorized(): Promise<any> {
     return this.get(`auth`);
   }
 
   // annotation
-  public deleteRequest(identifier: string, type: string,
-                       username: string, password: string): Observable<any> {
-    return this.post(`api/v1/post/remove/${type}/${identifier}`, {username, password});
+  public deleteRequest(
+    identifier: string, type: string,
+    username: string, password: string): Observable<any> {
+    return this.post(`api/v1/post/remove/${type}/${identifier}`, { username, password });
   }
 
   // annotation
   public async shareAnnotation(identifierColl: string, annotationArray: string[]): Promise<any> {
-    return this.post(`utility/moveannotations/${identifierColl}`, {annotationArray});
+    return this.post(`utility/moveannotations/${identifierColl}`, { annotationArray });
   }
 
   /**
@@ -136,6 +141,7 @@ export class MongohandlerService {
    * This is used as fallback when we cannot get an ObjectId from Server
    */
   public generateObjectId(): string {
+    /* tslint:disable:no-magic-numbers */
     const next = () => {
       return this.genIndex = (this.genIndex + 1) % 0xFFFFFF;
     };
@@ -148,5 +154,6 @@ export class MongohandlerService {
     const time = parseInt((Date.now() / 1000).toString(), 10) % 0xFFFFFFFF;
 
     return hex(8, time) + hex(6, this.MACHINE_ID) + hex(4, this.pid) + hex(6, next());
+    /* tslint:enable:no-magic-numbers */
   }
 }

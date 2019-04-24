@@ -69,7 +69,7 @@ export class AnnotationmarkerService {
 
   private createPlane(name: string, height: number, width: number, tag: string, position: BABYLON.Vector3, normal: BABYLON.Vector3) {
     const plane = BABYLON.MeshBuilder.CreatePlane(name,
-      {height, width}, this.babylonService.getScene());
+                                                  {height, width}, this.babylonService.getScene());
     BABYLON.Tags.AddTagsTo(plane, tag + ' plane');
     plane.position = position;
     plane.translate(normal, 0.5, BABYLON.Space.WORLD);
@@ -130,7 +130,7 @@ export class AnnotationmarkerService {
 
   public deleteMarker(annotationID: string) {
     const marker = this.babylonService.getScene().getMeshesByTags(annotationID);
-    marker.forEach(function (value) {
+    marker.forEach(function(value) {
       value.dispose();
     });
   }
@@ -139,7 +139,6 @@ export class AnnotationmarkerService {
     await this.babylonService.getScene().getMeshesByTags('label').map(mesh => mesh.dispose());
     await this.babylonService.getScene().getMeshesByTags('plane').map(mesh => mesh.dispose());
   }
-
 
   public async hideAllMarker(visibility: boolean) {
     this.babylonService.hideMesh('label', visibility);

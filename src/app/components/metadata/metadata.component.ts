@@ -22,7 +22,6 @@ export class MetadataComponent implements OnInit {
   public baseURL = 'https://blacklodge.hki.uni-koeln.de/builds/ObjectsRepository/live/#/model-overview?model=';
   public downloadJsonHref: any;
 
-
   constructor(private overlayService: OverlayService,
               private metadataService: MetadataService,
               public loadModelService: LoadModelService,

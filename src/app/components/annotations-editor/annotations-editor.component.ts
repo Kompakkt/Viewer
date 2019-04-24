@@ -1,6 +1,6 @@
 import {Component, Input, OnInit, ViewChild} from '@angular/core';
-import {Annotation} from '../../interfaces/annotation2/annotation2';
 
+import {Annotation} from '../../interfaces/annotation2/annotation2';
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
@@ -185,7 +185,7 @@ export class AnnotationsEditorComponent implements OnInit {
     // 1.1.2
     if (this.annotationService.inSocket) {
       this.socketService.socket.emit('editAnnotation',
-        [this.annotationService.socketRoom, this.annotation]);
+                                     [this.annotationService.socketRoom, this.annotation]);
     }
   }
 

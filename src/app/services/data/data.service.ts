@@ -28,10 +28,10 @@ export class DataService {
         fields: ['target.source.relatedCompilation', 'target.source.relatedModel'],
       },
     })
-      .then(function (result) {
+      .then(function(result) {
         // yo, a result
       })
-      .catch(function (err) {
+      .catch(function(err) {
         console.log('Error create Index Pouch:', err);
         // ouch, an error
       });

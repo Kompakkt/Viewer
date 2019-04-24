@@ -419,7 +419,7 @@ export class SocketService {
       if (index !== 0) {
         this.collaborators.splice(0, 0, this.collaborators.splice(index, 1)[0]);
 
-      if (addAsLast) {
+        if (addAsLast) {
         const newUserIndex = this.collaborators.findIndex(x => x.socketId === addAsLast.socketId);
         if (newUserIndex !== 0) {
           if (this.collaborators.length < this.annotationService.maxColoredUsersMinusOne) {

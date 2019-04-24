@@ -9,7 +9,7 @@ import {UserdataService} from '../../../services/userdata/userdata.service';
 @Component({
   selector: 'app-dialog-get-user-data',
   templateUrl: './dialog-get-user-data.component.html',
-  styleUrls: ['./dialog-get-user-data.component.scss']
+  styleUrls: ['./dialog-get-user-data.component.scss'],
 })
 
 export class DialogGetUserDataComponent implements OnInit {

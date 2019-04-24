@@ -16,7 +16,6 @@ export class MediaComponent implements OnInit {
   public existingImage: boolean;
   private base64Image: any;
 
-
   constructor(
     private loadModelService: LoadModelService,
     private babylonService: BabylonService,
@@ -78,10 +77,6 @@ export class MediaComponent implements OnInit {
         console.log('Hier: ', base64data);
         this.base64Image = 'data:image/jpg;base64,' + base64data;
       });
-
-
-
-
 
     console.log(evt, 'Event');
     console.log(evt.path[0].height, 'Höhe');

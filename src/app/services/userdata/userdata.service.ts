@@ -119,7 +119,7 @@ export class UserdataService {
             }
           }
           console.log('Meine Modelle', this.userOwnedFinishedModels, 'compis', this.personalCollections, 'meine Annos', this.userOwnedAnnotations);
-        }, error => {
+        },    error => {
           this.message.error('Connection to object server refused.');
           reject('Connection to object server refused.');
         });

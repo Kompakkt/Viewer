@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+
 import {LoadModelService} from '../../../services/load-model/load-model.service';
 import {MessageService} from '../../../services/message/message.service';
 import {UserdataService} from '../../../services/userdata/userdata.service';
@@ -6,7 +7,7 @@ import {UserdataService} from '../../../services/userdata/userdata.service';
 @Component({
   selector: 'app-dialog-delete-single-annotation',
   templateUrl: './dialog-delete-single-annotation.component.html',
-  styleUrls: ['./dialog-delete-single-annotation.component.scss']
+  styleUrls: ['./dialog-delete-single-annotation.component.scss'],
 })
 export class DialogDeleteSingleAnnotationComponent implements OnInit {
 

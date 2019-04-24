@@ -140,7 +140,7 @@ export class CollectionsOverviewComponent implements AfterViewInit {
         default:
           this.message.error('Can not find Collection with ID ' + this.identifierCollection + '.');
       }
-    }, error => {
+    },                                                  error => {
       this.message.error('Connection to object server refused.');
     });
   }
