@@ -81,7 +81,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
       if (editorIsOpen && this.meshSettingsMode) {
         this.annotationService.annotationMode(false);
       }
-      if (editorIsOpen && !this.isCollectionSource) {
+      if (editorIsOpen && !this.isCollectionSource && !this.isDefaultLoad) {
         this.annotationService.annotationMode(false);
         this.dragDisabled = true;
       }
