@@ -13,13 +13,7 @@ import {MessageService} from '../../services/message/message.service';
 import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
 import {OverlayService} from '../../services/overlay/overlay.service';
 import {SkyboxService} from '../../services/skybox/skybox.service';
-import {SocketService} from '../../services/socket/socket.service';
 import {LoginComponent} from '../dialogs/dialog-login/login.component';
-
-/**
- * @author Zoe Schubert
- * @author Jan G. Wieners
- */
 
 @Component({
   selector: 'app-menu',
@@ -28,19 +22,17 @@ import {LoginComponent} from '../dialogs/dialog-login/login.component';
 })
 export class MenuComponent implements OnInit, AfterViewInit {
 
-  // 1.1.5
-  public toggleChecked = false;
-
-  public menuIsEnabled = true;
-  private isSingleModel: boolean;
-  private isSingleCollection: boolean;
+  public fullscreen = false;
 
   public isLoggedIn: boolean;
 
-  private editActive = false;
-  private collectionsActive = false;
-
   public isShowCatalogue = true;
+
+  public loaded = false;
+
+  public high = '';
+  public medium = '';
+  public low = '';
 
   constructor(
     private message: MessageService,
@@ -48,54 +40,44 @@ export class MenuComponent implements OnInit, AfterViewInit {
     private sanitizer: DomSanitizer,
     private skyboxService: SkyboxService,
     private cameraService: CameraService,
-    private overlayService: OverlayService,
-    private babylonService: BabylonService,
+    public overlayService: OverlayService,
+    public babylonService: BabylonService,
     private annotationService: AnnotationService,
     private mongohandlerService: MongohandlerService,
-    private catalogueService: CatalogueService,
+    public catalogueService: CatalogueService,
     private annotationVRService: AnnotationvrService,
-    private loadModelService: LoadModelService,
+    public loadModelService: LoadModelService,
     public dialog: MatDialog,
-    private socketService: SocketService,
     @Inject(DOCUMENT) private document: any) {
 
     iconRegistry.addSvgIcon(
       'cardboard',
       sanitizer.bypassSecurityTrustResourceUrl('assets/img/google-cardboard.svg'));
-
-    this.babylonService.vrModeIsActive.subscribe(vrModeIsActive => {
-      this.menuIsEnabled = !vrModeIsActive;
-    });
   }
-
-  public fullscreen: boolean = false;
 
   ngOnInit() {
 
-    this.catalogueService.singleObject.subscribe(singleModel => {
-      this.isSingleModel = singleModel;
-    });
-
-    this.loadModelService.singleCollection.subscribe(singleCollection => {
-      this.isSingleCollection = singleCollection;
+    this.catalogueService.showCatalogue.subscribe(showCatalogue => {
+      if (showCatalogue) {
+        this.isShowCatalogue = showCatalogue;
+      }
     });
 
     this.catalogueService.loggedIn.subscribe(loggedIn => {
       this.isLoggedIn = loggedIn;
     });
 
-    /*
-    this.catalogueService.showCatalogue.subscribe(showCatalogue => {
-      this.isShowCatalogue = showCatalogue;
-    });*/
-
   }
 
   ngAfterViewInit() {
 
-    this.catalogueService.showCatalogue.subscribe(showCatalogue => {
-      this.isShowCatalogue = showCatalogue;
-      console.log('ich setze:', showCatalogue);
+    this.loadModelService.loaded.subscribe(loaded => {
+      this.loaded = loaded;
+      if (this.loadModelService.getCurrentModel().processed) {
+        this.high = this.loadModelService.getCurrentModel().processed.high;
+        this.medium = this.loadModelService.getCurrentModel().processed.medium;
+        this.low = this.loadModelService.getCurrentModel().processed.low;
+      }
     });
 
   }
@@ -114,19 +96,16 @@ export class MenuComponent implements OnInit, AfterViewInit {
   }
 
   public setModelQuality(quality: string) {
-    if (this.loadModelService.quality !== quality) {
-      this.loadModelService.updateModelQuality(quality);
-    }
+    this.loadModelService.updateModelQuality(quality);
   }
 
   public quitFullscreen() {
-    this.babylonService.getEngine().switchFullscreen(false);
+    this.babylonService.getEngine()
+      .switchFullscreen(false);
     this.fullscreen = false;
   }
 
-  // VR BUTTON
   public pressVrButton() {
-
     this.cameraService.createVrHelperInCamera();
   }
 
@@ -157,28 +136,6 @@ export class MenuComponent implements OnInit, AfterViewInit {
     this.skyboxService.setSkyboxMaterial(skyboxID);
   }*/
 
-  public saveScene() {
-    console.log(this.babylonService.saveScene());
-  }
-
-  public editScene(): void {
-
-    if (this.collectionsActive) {
-      this.overlayService.toggleCollectionsOverview();
-      this.collectionsActive = false;
-    }
-    this.editActive = this.overlayService.toggleEditor();
-  }
-
-  public toggleCollectionsOverview(): void {
-
-    if (this.editActive) {
-      this.overlayService.toggleEditor();
-      this.editActive = false;
-    }
-    this.collectionsActive = this.overlayService.toggleCollectionsOverview();
-  }
-
   public takeScreenshot() {
     this.babylonService.createScreenshot();
   }
@@ -193,18 +150,10 @@ export class MenuComponent implements OnInit, AfterViewInit {
   }
 
   public logout() {
-    this.mongohandlerService.logout().then(() => {
-      this.catalogueService.bootstrap();
-    });
-  }
-
-  // 1.1.5
-  private onSocketToggleChange() {
-    if (this.toggleChecked) {
-      this.socketService.loginToSocket();
-    } else {
-      this.socketService.disconnectSocket();
-    }
+    this.mongohandlerService.logout()
+      .then(() => {
+        this.catalogueService.bootstrap();
+      });
   }
 
 }

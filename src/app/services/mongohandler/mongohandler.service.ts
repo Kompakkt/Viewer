@@ -120,6 +120,17 @@ export class MongohandlerService {
     return this.get(`auth`);
   }
 
+  // annotation
+  public deleteRequest(identifier: string, type: string,
+                       username: string, password: string): Observable<any> {
+    return this.post(`api/v1/post/remove/${type}/${identifier}`, {username, password});
+  }
+
+  // annotation
+  public async shareAnnotation(identifierColl: string, annotationArray: string[]): Promise<any> {
+    return this.post(`utility/moveannotations/${identifierColl}`, {annotationArray});
+  }
+
   /**
    * Generates an ObjectId
    * This is used as fallback when we cannot get an ObjectId from Server

@@ -20,26 +20,55 @@
 
       <div *ngIf="!meshSettingsMode">
 
-        <mat-card *ngIf="isSingleModel && !isModelOwner">
-          Annotations are not saved on server. Load model from a collection to save your annotations to make them
-          visible for others.
-        </mat-card>
+        <div *ngIf="!isDefaultLoad">
 
-        <mat-card *ngIf="isModelOwner && isSingleModel">
-          All annotations here are default annotations and visible for everyone who can access the model. If you don't
-          want that, load model from a collection.
-        </mat-card>
+          <mat-radio-group [disabled]="!isCollection" aria-label="Select Annotation Category"
+                           (change)="changeCategory($event)">
+            <mat-radio-button value="d" [checked]=!isCollectionSource>Default</mat-radio-button>
+            <mat-radio-button value="c">Collection</mat-radio-button>
+          </mat-radio-group>
+
+          <div *ngIf="isModelOwner && !isCollection">
+            <mat-card>
+              All annotations here are default annotations and visible for everyone who can access the model. If you
+              don't
+              want that, load model from a collection.
+            </mat-card>
+            <mat-card *ngIf="this.annotationService.annotations.length < 1">
+              To add annotations, simply double-click on the model.
+            </mat-card>
+          </div>
+
+          <mat-card *ngIf="!isCollection && !isModelOwner">
+            Default Annotations are not editable for foreign models. Load model from a collection to save your
+            annotations to make them
+            visible for others.
+          </mat-card>
+
+
+          <mat-card *ngIf="this.annotationService.annotations.length < 1 && isCollection && isShowCollection">
+            To add annotations, simply double-click on the model.
+          </mat-card>
+        </div>
+
+        <div *ngIf="isShowCollection || isDefaultLoad">
+          Collaborative Annotationmode
+          <mat-slide-toggle id="socket"
+                            mat-icon-button [(ngModel)]="toggleChecked" (change)="onSocketToggleChange()"
+                            matTooltip="Login to Socket.Io" matTooltipPosition="above"
+                            color="warn"
+                            aria-label="Login to Socket.Io">
+          </mat-slide-toggle>
+        </div>
 
         <div cdkDropList class="annotations-list" (cdkDropListDropped)="drop($event)"
              *ngIf="this.annotationService.annotations.length">
           <app-annotations-editor class="annotation-box" *ngFor="let annotation of this.annotationService.annotations;"
                                   [annotation]="annotation"
+                                  [cdkDragDisabled] = "dragDisabled"
                                   cdkDrag cdkDragLockAxis="y"></app-annotations-editor>
         </div>
 
-        <mat-card *ngIf="this.annotationService.annotations.length < 1">
-          To add annotations, simply double-click on the model.
-        </mat-card>
 
         <div id="annotations-eximport">
           <button *ngIf="this.annotationService.annotations.length > 0"
@@ -50,25 +79,26 @@
             <mat-icon aria-label="Export Annotations to File">save</mat-icon>
           </button>
 
-          <input type="file"
+          <!--input type="file"
                  style="display: none;"
                  #importInput
-                 (change)="importAnnotations($event.target.files)">
+                 (change)="importAnnotations($event.target.files)"-->
 
-          <button mat-icon-button
+          <!--button mat-icon-button
                   matTooltip="Import Annotations"
                   matTooltipPosition="below"
                   (click)="importInput.click()">
             <mat-icon aria-label="Import Annotations">save_alt</mat-icon>
-          </button>
+          </button-->
 
-          <button *ngIf="this.annotationService.annotations.length > 0"
+          <!--button *ngIf="this.annotationService.annotations.length > 0 && isCollection || isModelOwner"
                   mat-icon-button
                   matTooltip="Delete Annotations"
                   matTooltipPosition="below"
                   (click)="deleteAnnotations()">
             <mat-icon aria-label="Delete Annotations">delete</mat-icon>
-          </button>
+          </button-->
+
         </div>
       </div>
     </mat-tab>

@@ -37,6 +37,7 @@ export class CameraService {
       if (newCanvas) {
 
         this.scene = this.babylonService.getScene();
+        this.scene.collisionsEnabled = true;
         this.canvas = newCanvas;
 
         // Arc Rotate Camera
@@ -50,6 +51,8 @@ export class CameraService {
         this.arcRotateCamera.keysRight.push(68);
 
         this.arcRotateCamera.attachControl(newCanvas, false);
+        this.arcRotateCamera.checkCollisions = true;
+        this.arcRotateCamera.collisionRadius = new BABYLON.Vector3(4, 4, 4);
 
         /*
   this.universalCamera = new BABYLON.UniversalCamera('universalCamera',
@@ -366,16 +369,22 @@ export class CameraService {
   }
 
   public getActualCameraPosAnnotation() {
-    // 11/02/19
-    const cameraPosition = {
-      x: this.arcRotateCamera.alpha,
-      y: this.arcRotateCamera.beta,
-      z: this.arcRotateCamera.radius,
+    return {
+      cameraType: 'arcRotateCam',
+      position: {
+        x: this.arcRotateCamera.alpha,
+        y: this.arcRotateCamera.beta,
+        z: this.arcRotateCamera.radius,
+      },
+      target: {
+        x: this.arcRotateCamera.target.x,
+        y: this.arcRotateCamera.target.y,
+        z: this.arcRotateCamera.target.z,
+      },
     };
     // const cameraPosition = [{dimension: 'x', value: this.arcRotateCamera.alpha},
     //   {dimension: 'y', value: this.arcRotateCamera.beta},
     //   {dimension: 'z', value: this.arcRotateCamera.radius}];
-    return cameraPosition;
   }
 
   public getActualCameraPosInitialView() {

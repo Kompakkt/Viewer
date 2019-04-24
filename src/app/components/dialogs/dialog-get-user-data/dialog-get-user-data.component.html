@@ -1,0 +1,33 @@
+<h2 mat-dialog-title>Authentification required</h2>
+<div *ngIf="!success">
+  <mat-dialog-content class="mat-typography">
+    <h3>Please enter your correct user data to continue.</h3>
+    <p>With your university account you can login to delete items.</p>
+    <h3>Username and password</h3>
+    <mat-form-field>
+      <input matInput
+             name="username"
+             type="text"
+             placeholder="username"
+             [(ngModel)]="username"
+             cdkFocusInitial>
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput
+             name="password"
+             type="password"
+             placeholder="password"
+             [(ngModel)]="password">
+    </mat-form-field>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="send()">Send</button>
+    <button mat-button mat-dialog-close (click)="withoutlogin()">Cancel</button>
+  </mat-dialog-actions>
+</div>
+<div *ngIf="success">
+  <p>That was successful!</p>
+  <mat-dialog-actions align="end">
+    <button mat-button [mat-dialog-close]="true">Close</button>
+  </mat-dialog-actions>
+</div>

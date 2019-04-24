@@ -22,6 +22,12 @@ export class OverlayService {
 
     this.editorIsOpen = !this.editorIsOpen;
     this.editor.emit(this.editorIsOpen);
+
+    if (this.editorIsOpen) {
+      this.collectionsOverviewIsOpen = !this.editorIsOpen;
+      this.collectionsOverview.emit(this.collectionsOverviewIsOpen);
+    }
+
     return this.editorIsOpen;
   }
 
@@ -29,6 +35,12 @@ export class OverlayService {
 
     this.collectionsOverviewIsOpen = !this.collectionsOverviewIsOpen;
     this.collectionsOverview.emit(this.collectionsOverviewIsOpen);
+
+    if (this.collectionsOverviewIsOpen) {
+      this.editorIsOpen = !this.collectionsOverviewIsOpen;
+      this.editor.emit(this.editorIsOpen);
+    }
+
     return this.collectionsOverviewIsOpen;
   }
 

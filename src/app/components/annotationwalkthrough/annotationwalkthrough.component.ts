@@ -1,10 +1,10 @@
 import {Component, OnInit} from '@angular/core';
 import {Vector3} from 'babylonjs';
+import * as BABYLON from 'babylonjs';
 
 import {AnnotationService} from '../../services/annotation/annotation.service';
-import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
-import {CameraService} from '../../services/camera/camera.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
+import {CameraService} from '../../services/camera/camera.service';
 
 @Component({
   selector: 'app-annotationwalkthrough',
@@ -19,7 +19,6 @@ export class AnnotationwalkthroughComponent implements OnInit {
 
   constructor(private cameraService: CameraService,
               public annotationService: AnnotationService,
-              private annotationmarkerService: AnnotationmarkerService,
               private babylonService: BabylonService) {
 
     this.positionVector = Vector3.Zero();
@@ -34,7 +33,7 @@ export class AnnotationwalkthroughComponent implements OnInit {
     if (annotations.length) {
 
       if (this.actualRanking === 0) {
-        this.actualRanking = annotations.length;
+        this.actualRanking = annotations.length  - 1;
       } else {
         this.actualRanking = this.actualRanking - 1;
       }
@@ -77,6 +76,7 @@ export class AnnotationwalkthroughComponent implements OnInit {
   }
 
   private getAction(index: number) {
+    console.log('der index ist: ', index);
 
     const annotations = this.annotationService.annotations;
 
@@ -88,12 +88,19 @@ export class AnnotationwalkthroughComponent implements OnInit {
     if (annotations.length) {
 
             this.title = annotations[index].body.content.title;
-            const cameraVector = new Vector3(
-              annotations[index].body.content.relatedPerspective.vector.x,
-              annotations[index].body.content.relatedPerspective.vector.y,
-              annotations[index].body.content.relatedPerspective.vector.z);
-            this.cameraService.moveCameraToTarget(cameraVector);
-            this.annotationmarkerService.toggleCreatorPopup(annotations[index]._id);
+
+            let camera;
+            camera = annotations[index].body.content.relatedPerspective;
+
+            if (camera !== undefined) {
+              const positionVector = new BABYLON.Vector3(camera.position.x, camera.position.y, camera.position.z);
+              const targetVector = new BABYLON.Vector3(camera.target.x, camera.target.y, camera.target.z);
+
+              this.cameraService.moveCameraToTarget(positionVector);
+              this.cameraService.arcRotateCamera.setTarget(targetVector);
+            }
+
+            this.annotationService.setSelectedAnnotation(annotations[index]._id);
             this.babylonService.hideMesh(annotations[index]._id, true);
     } else {
       this.actualRanking = 0;

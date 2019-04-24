@@ -1,0 +1,20 @@
+<mat-chip-list>
+    <mat-chip *ngFor="let collaborator of this.socketService.collaborators | slice:0:this.annotationService.maxColoredUsersMinusOne; let i=index" [style.color]="this.annotationService.color[i]">
+    {{collaborator.username.substring(0,2)}}</mat-chip>
+
+  <button
+    *ngIf="this.socketService.collaborators.length > 2"
+    mat-icon-button (click)="select.open()"
+    matTooltip="See all" matTooltipPosition="above"
+    type="button">
+    <mat-icon aria-label="Delete">group_add</mat-icon>
+  </button>
+  <mat-form-field [style.visibility]="'hidden'">
+    <mat-select #select [style.visibility]="'hidden'" (selectionChange)="selectedUser($event.value)">
+      <mat-option *ngFor="let collaborator of this.socketService.collaborators | slice:this.annotationService.maxColoredUsersMinusOne:this.socketService.collaborators.length; let i=index" [value]="collaborator">
+        {{collaborator.fullname}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+</mat-chip-list>

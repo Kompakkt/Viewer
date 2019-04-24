@@ -1,9 +1,7 @@
 <mat-card class="annotation-card">
   <form class="annotation-form" (ngSubmit)="onSubmit($event)">
 
-
-
-    <mat-card-header (click)="!editMode ? collapsed = !collapsed : false" (click)="changeOpenPopup()">
+    <mat-card-header (click)="changeOpenPopup()">
 
       <div mat-card-avatar class="annotation-header-image"><span>{{annotation.ranking}}</span></div>
 
@@ -15,11 +13,9 @@
 
       </mat-card-title>
 
-      <mat-card-subtitle>{{getValidation(annotation.validated)}}</mat-card-subtitle>
+      <mat-card-subtitle>{{(annotation.validated) ? 'validated' : 'unvalidated'}}</mat-card-subtitle>
 
     </mat-card-header>
-
-
 
     <img mat-card-image src={{preview}} *ngIf="!collapsed">
 
@@ -32,7 +28,7 @@
                   [(ngModel)]="annotation.body.content.description"></textarea>
       </mat-form-field>
 
-      <mat-checkbox class="validation" *ngIf="editMode && this.loadModelService.isCollectionOwner" [checked]="annotation.validated"
+      <mat-checkbox class="validation" *ngIf="editMode && isCollectionOwner" [checked]="annotation.validated"
                     (change)="annotation.validated = !annotation.validated">Validated
       </mat-checkbox>
 
@@ -53,21 +49,23 @@
       <mat-slide-toggle
         [checked]="showAnnotation"
         (change)="toggleVisibility()">
-        {{labelVisibility}}
+        {{this.showAnnotation ? 'Hide' : 'Show'}}
       </mat-slide-toggle>
 
-      <button mat-icon-button (click)="toggleEditViewMode()"
+      <div *ngIf="isDefaultLoad || !isDefault || isDefault && isOwner && !isCollection">
+      <button mat-icon-button (click)="editMode ? annotationService.setEditModeAnnotation('') :
+                                                  annotationService.setEditModeAnnotation(annotation._id)"
               matTooltip={{labelModeText}} matTooltipPosition="above"
               type="button">
         <mat-icon attr.aria-label={{labelModeText}}>{{labelMode}}</mat-icon>
       </button>
 
-      <button mat-icon-button (click)="deleteAnnotation()"
+      <button *ngIf="isOwner" mat-icon-button (click)="deleteAnnotation()"
               matTooltip="Delete" matTooltipPosition="above"
               type="button">
         <mat-icon aria-label="Delete">delete</mat-icon>
       </button>
-
+      </div>
     </mat-card-actions>
 
 

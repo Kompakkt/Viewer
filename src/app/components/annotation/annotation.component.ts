@@ -9,6 +9,9 @@ import {DataService} from '../../services/data/data.service';
 import {SocketService} from '../../services/socket/socket.service';
 import {DialogAnnotationEditorComponent} from '../dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
 import {MatDialog} from '@angular/material';
+import {LoadModelService} from '../../services/load-model/load-model.service';
+import {UserdataService} from '../../services/userdata/userdata.service';
+import {CatalogueService} from '../../services/catalogue/catalogue.service';
 
 @Component({
   selector: 'app-annotation',
@@ -28,6 +31,12 @@ export class AnnotationComponent implements OnInit {
   public visibility = false;
   public id = '';
   public opacity = '0';
+  public isDefault: boolean;
+  public isOwner: boolean;
+  public isDefaultLoad: boolean;
+  public isCollection: boolean;
+  private selectedAnnotation: string;
+  private editModeAnnotation: string;
 
   constructor(private dataService: DataService,
               private annotationService: AnnotationService,
@@ -35,20 +44,58 @@ export class AnnotationComponent implements OnInit {
               private annotationmarkerService: AnnotationmarkerService,
               private socketService: SocketService,
               public dialog: MatDialog,
-  ) {
+              private userdataService: UserdataService,
+              private catalogueService: CatalogueService,
+              private loadModelService: LoadModelService) {
   }
 
   ngOnInit() {
 
     if (this.annotation) {
+
       this.id = this.annotation._id;
 
-      if (this.annotationmarkerService.open_popup === this.annotation._id) {
-        this.editMode = true;
-        this.visibility = true;
-        this.labelMode = 'remove_red_eye';
-        this.labelModeText = 'view';
-      }
+      this.isDefault = (!this.annotation.target.source.relatedCompilation ||
+        this.annotation.target.source.relatedCompilation === '');
+
+      this.isOwner = this.userdataService.isAnnotationOwner(this.annotation);
+
+      this.catalogueService.defaultLoad.subscribe(defaultLoad => {
+        this.isDefaultLoad = defaultLoad;
+      });
+
+      this.loadModelService.Observables.actualCollection.subscribe(actualCompilation => {
+        actualCompilation._id ? this.isCollection = true : this.isCollection = false;
+      });
+
+      this.annotationService.isSelectedAnnotation.subscribe(selectedAnno => {
+        selectedAnno === this.annotation._id ? this.visibility = true : this.visibility = false;
+        this.selectedAnnotation = selectedAnno;
+      });
+
+      this.annotationService.isEditModeAnnotation.subscribe(selectedAnno => {
+        this.editModeAnnotation = selectedAnno;
+        if (selectedAnno === this.annotation._id && !this.editMode) {
+          this.editMode = true;
+          this.annotationService.setSelectedAnnotation(this.annotation._id);
+          this.labelMode = 'remove_red_eye';
+          this.labelModeText = 'view';
+        }
+        if (selectedAnno === this.annotation._id && this.editMode) {
+          return;
+        }
+        if (selectedAnno !== this.annotation._id && this.editMode) {
+          this.editMode = false;
+          this.labelMode = 'edit';
+          this.labelModeText = 'edit';
+          this.save();
+        } else {
+          this.editMode = false;
+          this.labelMode = 'edit';
+          this.labelModeText = 'edit';
+        }
+      });
+
     }
 
     this.opacity = '1';
@@ -96,26 +143,10 @@ export class AnnotationComponent implements OnInit {
   }
 
   private closeAnnotation(): void {
-
     this.opacity = '0';
-    this.visibility = false;
+    this.annotationService.setSelectedAnnotation('');
   }
 
-  public toggleEditViewMode() {
-
-    if (this.editMode) {
-
-      this.editMode = false;
-      this.labelMode = 'edit';
-      this.labelModeText = 'edit';
-      this.save();
-    } else {
-
-      this.editMode = true;
-      this.labelMode = 'remove_red_eye';
-      this.labelModeText = 'view';
-    }
-  }
 
   public setEditMode(mode: boolean) {
     if (!mode && this.editMode) {
@@ -133,12 +164,13 @@ export class AnnotationComponent implements OnInit {
   }
 
   private save(): void {
-    this.dataService.updateAnnotation(this.annotation);
+    this.annotationService.updateAnnotation(this.annotation);
+    // this.dataService.updateAnnotation(this.annotation);
     // 1.1.2
     if (this.annotationService.inSocket) {
       this.socketService.socket.emit('editAnnotation', [
         this.annotationService.socketRoom,
-        this.annotation
+        this.annotation,
       ]);
     }
   }
@@ -149,16 +181,33 @@ export class AnnotationComponent implements OnInit {
       width: '75%',
       data: {
         title: this.annotation.body.content.title,
-        content: this.annotation.body.content.description},
+        content: this.annotation.body.content.description
+      },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed()
+      .subscribe(result => {
 
-      if (result) {
-        this.annotation.body.content.title = result.title;
-        this.annotation.body.content.description = result.content;
+        if (result) {
+          this.annotation.body.content.title = result.title;
+          this.annotation.body.content.description = result.content;
+        }
+        console.log(result);
+      });
+  }
+
+  public getColor(): any {
+    if (this.annotationService.coloredUsers.length) {
+      for (let _i = 0; _i < this.annotationService.maxColoredUsersMinusOne; _i++) {
+        if (this.annotationService.coloredUsers[_i]) {
+          if (this.annotation.creator._id === this.annotationService.coloredUsers[_i]._id) {
+            return this.annotationService.color[_i];
+          }
+        }
       }
-      console.log(result);
-    });
+
+      return '$cardbgr';
+
+    }
   }
 }

@@ -13,6 +13,7 @@ import {ModelsettingsService} from '../../services/modelsettings/modelsettings.s
 import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
 import {OverlayService} from '../../services/overlay/overlay.service';
 import {DialogMeshsettingsComponent} from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
+import {UserdataService} from '../../services/userdata/userdata.service';
 
 @Component({
   selector: 'app-modelsettings',
@@ -68,6 +69,7 @@ export class ModelsettingsComponent implements OnInit {
               private loadModelService: LoadModelService,
               public modelSettingsService: ModelsettingsService,
               public dialog: MatDialog,
+              private userdataService: UserdataService
   ) {
   }
 
@@ -77,26 +79,28 @@ export class ModelsettingsComponent implements OnInit {
       this.isLoaded = isLoaded;
       if (isLoaded) {
         this.activeModel = this.loadModelService.getCurrentModel();
+        this.isFinished = this.activeModel.finished;
         this.setSettings();
       }
     });
 
-    this.loadModelService.defaultLoad.subscribe(isDefaultLoad => {
+    this.catalogueService.defaultLoad.subscribe(isDefaultLoad => {
       this.isDefault = isDefaultLoad;
     });
 
-    this.loadModelService.modelOwner.subscribe(isModelOwner => {
+    this.userdataService.modelOwner.subscribe(isModelOwner => {
       this.isModelOwner = isModelOwner;
-    });
-
-    this.loadModelService.finished.subscribe(isFinished => {
-      this.isFinished = isFinished;
     });
 
     this.catalogueService.singleObject.subscribe(singleModel => {
       this.isSingleModel = singleModel;
     });
-
+    // camera should not move through mesh
+    this.loadModelService.Observables.actualModelMeshes.subscribe(actualModelMeshes => {
+      actualModelMeshes.forEach(mesh => {
+        mesh.checkCollisions = true;
+      });
+    });
   }
 
   public showNextAlertFirstStep() {
@@ -239,13 +243,13 @@ export class ModelsettingsComponent implements OnInit {
   public async setInitialView() {
     this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
     this.cameraService.setDefaultPosition(this.cameraService.arcRotateCamera.alpha,
-                                          this.cameraService.arcRotateCamera.beta, this.cameraService.arcRotateCamera.radius,
-                                          this.cameraService.arcRotateCamera.target.x, this.cameraService.arcRotateCamera.target.y,
-                                          this.cameraService.arcRotateCamera.target.z);
+      this.cameraService.arcRotateCamera.beta, this.cameraService.arcRotateCamera.radius,
+      this.cameraService.arcRotateCamera.target.x, this.cameraService.arcRotateCamera.target.y,
+      this.cameraService.arcRotateCamera.target.z);
     return new Promise<string>((resolve, reject) => this.babylonService.createPreviewScreenshot(400).then(screenshot => {
       this.preview = screenshot;
       resolve(screenshot);
-    },                                                                                                    error => {
+    }, error => {
       this.message.error(error);
       reject(error);
     }));
@@ -335,7 +339,7 @@ export class ModelsettingsComponent implements OnInit {
           this.overlayService.deactivateMeshSettings();
 
           this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
-                                                 this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
+            this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
         }
       });
     }
@@ -346,7 +350,7 @@ export class ModelsettingsComponent implements OnInit {
       this.preview = screenshot;
       this.activeModel.settings.preview = screenshot;
       resolve(screenshot);
-    },                                                                                                   error => {
+    }, error => {
       this.message.error(error);
       reject(error);
     }));
@@ -420,7 +424,7 @@ export class ModelsettingsComponent implements OnInit {
     } else {
       // settings exist
       await this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
-                                                   this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
+        this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
     }
   }
 
@@ -445,11 +449,11 @@ export class ModelsettingsComponent implements OnInit {
         if (camera.target) {
           targetVector = new BABYLON.Vector3(camera.target.x, camera.target.y, camera.target.z);
           this.cameraService.setDefaultPosition(camera.position.x, camera.position.y, camera.position.z,
-                                                camera.target.x, camera.target.y, camera.target.z);
+            camera.target.x, camera.target.y, camera.target.z);
         } else {
           targetVector = BABYLON.Vector3.Zero();
           this.cameraService.setDefaultPosition(camera.position.x, camera.position.y, camera.position.z,
-                                                0, 0, 0);
+            0, 0, 0);
         }
         this.cameraService.moveCameraToTarget(positionVector);
         this.cameraService.arcRotateCamera.setTarget(targetVector);
@@ -574,13 +578,13 @@ export class ModelsettingsComponent implements OnInit {
       this.ambientlightDownintensity = 1;
 
       // Only for DEV - uncomment the 3 following lines
-     // await this.modelSettingsService.createVisualSettings();
-     // this.initialSettingsMode = true;
-     // this.overlayService.activateSettingsTab();
+      // await this.modelSettingsService.createVisualSettings();
+      // this.initialSettingsMode = true;
+      // this.overlayService.activateSettingsTab();
       // End
 
       await this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
-                                                   this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
+        this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
 
       this.cameraService.setUpperRadiusLimit(500);
       this.cameraService.setDefaultPosition(2.7065021761026817, 1.3419080619941322, 90.44884111420268, 0, 0, 0);

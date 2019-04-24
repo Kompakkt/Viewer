@@ -1,5 +1,10 @@
 import {Injectable} from '@angular/core';
 import PouchDB from 'pouchdb';
+import PouchFind from 'pouchdb-find';
+import PouchUpsert from 'pouchdb-upsert';
+
+PouchDB.plugin(PouchFind);
+PouchDB.plugin(PouchUpsert);
 
 import {Annotation} from '../../interfaces/annotation2/annotation2';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
@@ -13,14 +18,36 @@ export class DataService {
 
   public constructor(private mongo: MongohandlerService) {
 
-    PouchDB.plugin(require('pouchdb-upsert'));
-
     this.pouchdb = new PouchDB('annotationdb');
+    this.createIndex();
+  }
 
+  public createIndex() {
+    this.pouchdb.createIndex({
+      index: {
+        fields: ['target.source.relatedCompilation', 'target.source.relatedModel'],
+      },
+    })
+      .then(function (result) {
+        // yo, a result
+      })
+      .catch(function (err) {
+        console.log('Error create Index Pouch:', err);
+        // ouch, an error
+      });
   }
 
   public fetch() {
     return this.pouchdb.allDocs({include_docs: true});
+  }
+
+  public find(model: string, compilation?: string) {
+    return this.pouchdb.find({
+      selector: {
+        'target.source.relatedCompilation': compilation,
+        'target.source.relatedModel': model,
+      },
+    });
   }
 
   public putAnnotation(annotation: any) {
@@ -46,13 +73,23 @@ export class DataService {
     );
   }
 
-  public updateAnnotation(annotation: Annotation): void {
+  /*public updateAnnotation(annotation: Annotation): void {
     if (annotation._id === 'DefaultAnnotation') { return; }
 
     this.pouchdb.upsert(annotation._id, function(result) {
       result = annotation;
       return result;
     });
+  }*/
+
+  public updateAnnotation(annotation: Annotation): void {
+    if (annotation._id === 'DefaultAnnotation') { return; }
+
+    this.pouchdb.get(annotation._id)
+      .then(() => annotation)
+      .catch(() => {
+        this.pouchdb.put(annotation);
+      });
   }
 
   public updateAnnotationRanking(id: string, ranking: number) {

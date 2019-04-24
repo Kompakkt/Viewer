@@ -1,23 +1,14 @@
-<div *ngIf="menuIsEnabled">
-
-  <!-- // 1.1.5 -->
-  <!-- Socket.io Toggle-Button -->
-  <mat-slide-toggle id="socket"
-          mat-icon-button [(ngModel)]="toggleChecked" (change)="onSocketToggleChange()"
-          matTooltip="Login to Socket.Io" matTooltipPosition="above"
-          color ="warn"
-          aria-label="Login to Socket.Io">
-  </mat-slide-toggle>
+<div [style.visibility]="babylonService.vrModeIsActive ? 'visible' : 'hidden'">
 
   <button *ngIf="isShowCatalogue"
-          mat-icon-button (click)="toggleCollectionsOverview()"
-          [class.active]="this.collectionsActive"
+          mat-icon-button (click)="overlayService.toggleCollectionsOverview()"
+          [class.active]="overlayService.collectionsOverview | async"
           matTooltip="Catalogue" matTooltipPosition="above">
     <mat-icon aria-label="Toggle Collections Overview">collections</mat-icon>
   </button>
 
-  <button mat-icon-button (click)="editScene()"
-          [class.active]="this.editActive"
+  <button mat-icon-button (click)="overlayService.toggleEditor()"
+          [class.active]="overlayService.editor | async"
           matTooltip="Edit scene and annotations" matTooltipPosition="above">
     <mat-icon aria-label="Edit scene and annotations">edit</mat-icon>
   </button>
@@ -39,10 +30,10 @@
 
     <button mat-menu-item [matMenuTriggerFor]="cameras">
       <mat-icon>videocam</mat-icon>
-      <span>Cameras</span>
+      <span>Camera</span>
     </button>
 
-    <button mat-menu-item [matMenuTriggerFor]="quality">
+    <button mat-menu-item [matMenuTriggerFor]="quality"  *ngIf="loaded">
       <mat-icon>high_quality</mat-icon>
       <span>Quality</span>
     </button>
@@ -52,35 +43,40 @@
       <span>Screenshot</span>
     </button>
 
-    <button *ngIf="!isLoggedIn" mat-menu-item (click)="loginDialog()">
+    <button *ngIf="!catalogueService.loggedIn | async" mat-menu-item (click)="loginDialog()">
       <mat-icon>account_circle</mat-icon>
       <span>Login</span>
     </button>
 
-    <button *ngIf="isLoggedIn" mat-menu-item (click)="logout()">
+    <button *ngIf="catalogueService.loggedIn | async" mat-menu-item (click)="logout()">
       <mat-icon>account_circle</mat-icon>
       <span>Logout</span>
     </button>
+
     <!--
     <button mat-menu-item [matMenuTriggerFor]="skyboxes">Skyboxes</button>
     -->
+
   </mat-menu>
 
   <!-- Cameras Submenu -->
   <mat-menu #cameras="matMenu">
+
     <!-- button mat-menu-item (click)="setCamArcRotate()">Orbit Camera</button-->
     <!--
     <button mat-menu-item (click)="setCamUniversal()">Universal Camera</button>
     -->
+
     <button mat-menu-item (click)="setBackToDefault()">Reset Camera</button>
+
   </mat-menu>
   <!-- / Cameras Submenu -->
 
   <!-- Quality Submenu -->
   <mat-menu #quality="matMenu">
-    <button mat-menu-item *ngIf="this.loadModelService.high !== ''" (click)="setModelQuality('high')">High</button>
-    <button mat-menu-item *ngIf="this.loadModelService.medium !== ''" (click)="setModelQuality('medium')">Medium</button>
-    <button mat-menu-item *ngIf="this.loadModelService.low !== ''" (click)="setModelQuality('low')">Low</button>
+    <button mat-menu-item *ngIf="high !== ''" (click)="setModelQuality('high')">High</button>
+    <button mat-menu-item *ngIf="medium !== ''" (click)="setModelQuality('medium')">Medium</button>
+    <button mat-menu-item *ngIf="low !== ''" (click)="setModelQuality('low')">Low</button>
   </mat-menu>
   <!-- / Quality Submenu -->
 

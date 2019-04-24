@@ -46,8 +46,17 @@ export interface Content {
 
 export interface CameraPerspective {
 
-  camera: string;
-  vector: Vector;
+  cameraType: string;
+  position: {
+    x: number;
+    y: number;
+    z: number;
+  };
+  target: {
+    x: number;
+    y: number;
+    z: number;
+  };
   preview: string;
 }
 

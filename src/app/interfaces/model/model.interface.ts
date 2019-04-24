@@ -9,6 +9,10 @@ export interface Model {
   files: string[];
   finished: boolean;
   online: boolean;
+  dataSource?: {
+    isExternal: boolean;
+    service?: string;
+  };
   processed?: {
     time: {
       start: string;

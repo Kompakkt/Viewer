@@ -1,8 +1,9 @@
 import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
-import {Component, HostBinding, Input, OnInit, ViewChild} from '@angular/core';
+import {Component, EventEmitter, HostBinding, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {AfterViewInit, QueryList, ViewChildren} from '@angular/core';
-import {MatDialog} from '@angular/material';
+import {MatDialog, MatRadioButton, MatRadioChange} from '@angular/material';
 import {saveAs} from 'file-saver';
+import {SocketService} from '../../services/socket/socket.service';
 
 import {environment} from '../../../environments/environment.prod';
 import {AnnotationService} from '../../services/annotation/annotation.service';
@@ -12,6 +13,7 @@ import {OverlayService} from '../../services/overlay/overlay.service';
 import {AnnotationsEditorComponent} from '../annotations-editor/annotations-editor.component';
 import {DialogDeleteAnnotationsComponent} from '../dialogs/dialog-delete-annotations/dialog-delete-annotations.component';
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
+import {UserdataService} from '../../services/userdata/userdata.service';
 
 @Component({
   selector: 'app-editor',
@@ -31,6 +33,21 @@ export class EditorComponent implements OnInit, AfterViewInit {
   public defaultAnnotationsMode;
   public isModelOwner: boolean;
   public isSingleModel: boolean;
+  public isDefaultLoad = true;
+  public isCollectionSource: boolean;
+  // 1.1.5
+  public toggleChecked = false;
+
+  public isShowCollection = false;
+
+  public isannotationSourceCollection: boolean;
+
+  public isCollection: boolean;
+
+  public dragDisabled = true;
+
+  private isCollectionOwner: boolean;
+
 
   public popup_is_open = '';
   @ViewChildren(AnnotationsEditorComponent)
@@ -41,14 +58,58 @@ export class EditorComponent implements OnInit, AfterViewInit {
               private annotationmarkerService: AnnotationmarkerService,
               private loadModelService: LoadModelService,
               public dialog: MatDialog,
-              private catalogueService: CatalogueService) {
+              private catalogueService: CatalogueService,
+              private socketService: SocketService,
+              private userdataService: UserdataService) {
   }
 
   ngOnInit() {
 
+    this.userdataService.collectionOwner.subscribe(owner => {
+      this.isCollectionOwner = owner;
+    });
+
+    this.catalogueService.defaultLoad.subscribe(defaultLoad => {
+      this.isDefaultLoad = defaultLoad;
+      this.dragDisabled = false;
+    });
+
     this.overlayService.editor.subscribe(editorIsOpen => {
       this.isOpen = editorIsOpen;
-      this.annotationService.annotationMode(this.isOpen);
+      if (!editorIsOpen) {
+        this.annotationService.annotationMode(false);
+      }
+      if (editorIsOpen && this.meshSettingsMode) {
+        this.annotationService.annotationMode(false);
+      }
+      if (editorIsOpen && !this.isCollectionSource) {
+        this.annotationService.annotationMode(false);
+        this.dragDisabled = true;
+      }
+      if (editorIsOpen && !this.meshSettingsMode && !this.isCollection && !this.isModelOwner) {
+        this.annotationService.annotationMode(false);
+        this.dragDisabled = true;
+      }
+      if (editorIsOpen && this.isDefaultLoad) {
+        this.annotationService.annotationMode(true);
+        this.dragDisabled = false;
+      }
+      if (editorIsOpen && !this.meshSettingsMode && this.isCollection && this.isCollectionSource) {
+        this.annotationService.annotationMode(true);
+      }
+      if (editorIsOpen && !this.meshSettingsMode && this.isCollection &&
+        this.isCollectionSource && this.isCollectionOwner) {
+        this.annotationService.annotationMode(true);
+        this.dragDisabled = false;
+      }
+      if (editorIsOpen && !this.meshSettingsMode && !this.isCollection && this.isModelOwner) {
+        this.annotationService.annotationMode(true);
+        this.dragDisabled = false;
+      }
+    });
+
+    this.annotationService.annotationSourceCollection.subscribe(annotationSourceCollection => {
+      this.isCollectionSource = annotationSourceCollection;
     });
 
     this.overlayService.editorSetting.subscribe(meshSettingsMode => {
@@ -71,48 +132,34 @@ export class EditorComponent implements OnInit, AfterViewInit {
       }
     });
 
+    this.loadModelService.Observables.actualCollection.subscribe(actualCompilation => {
+      actualCompilation._id ? this.isCollection = true : this.isCollection = false;
+    });
 
   }
 
   ngAfterViewInit(): void {
 
-    // setVisabile for newly created annotation by double click on mesh
-    this.annotationsList.changes.subscribe(() => {
-      this.setVisability(this.annotationmarkerService.open_popup);
-    });
-
-    // setVisabile for freshly clicked annotation-List-elements
-    this.annotationmarkerService.popupIsOpen().subscribe(
-      popup_is_open => this.setVisability(popup_is_open),
-    );
-
-    this.loadModelService.modelOwner.subscribe(isModelOwner => {
+    this.userdataService.modelOwner.subscribe(isModelOwner => {
       this.isModelOwner = isModelOwner;
     });
 
     this.catalogueService.singleObject.subscribe(singleObject => {
       this.isSingleModel = singleObject;
     });
+
   }
 
-  public setVisability(id: string) {
-    const found = this.annotationsList.find(annotation => annotation.id === id);
-    if (found) {
-      const foundID = found.id;
-      this.annotationsList.forEach(function(value) {
-        if (value.id != foundID) {
-          value.toViewMode();
-        } else {
-          value.collapsed = false;
-        }
-      });
-    }
-  }
-
-  drop(event: CdkDragDrop<string[]>) {
+  public async drop(event: CdkDragDrop<string[]>) {
 
     moveItemInArray(this.annotationService.annotations, event.previousIndex, event.currentIndex);
-    this.annotationService.changedRankingPositions();
+    if (this.isCollectionSource && !this.isDefaultLoad) {
+      moveItemInArray(this.annotationService.collectionAnnotationsSorted, event.previousIndex, event.currentIndex);
+    } else {
+      moveItemInArray(this.annotationService.defaultAnnotationsSorted, event.previousIndex, event.currentIndex);
+    }
+    await this.annotationService.changedRankingPositions(this.annotationService.annotations);
+    await this.annotationService.redrawMarker();
   }
 
   private changeTab(tabIndex) {
@@ -158,6 +205,27 @@ export class EditorComponent implements OnInit, AfterViewInit {
         this.annotationService.deleteAllAnnotations();
       }
     });
+  }
+
+  public onSocketToggleChange() {
+    if (this.toggleChecked) {
+      this.socketService.loginToSocket();
+    } else {
+      this.socketService.disconnectSocket();
+    }
+  }
+
+  public changeCategory(mrChange: MatRadioChange) {
+    const mrButton: MatRadioButton = mrChange.source;
+
+    if (mrChange.value === 'c') {
+      this.annotationService.toggleAnnotationSource(true, false);
+      this.annotationService.annotationMode(true);
+    }
+    if (mrChange.value === 'd') {
+      this.annotationService.annotationMode(false);
+      this.annotationService.toggleAnnotationSource(false, true);
+    }
   }
 
 }

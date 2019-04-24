@@ -21,6 +21,7 @@ export class ModelComponent implements OnInit {
   }
 
   public async changeModel() {
-    this.loadModelService.loadSelectedModel(this.model, false);
+    // TODO
+    // this.loadModelService.loadSelectedModel(this.model, false);
   }
 }

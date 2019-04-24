@@ -36,7 +36,7 @@
 
         <mat-card-content>
 
-          <mat-checkbox *ngIf="this.loadModelService.personalCollections.length" [checked]="filterPersonalCollections"
+          <mat-checkbox *ngIf="this.userdataService.personalCollections.length > 0" [checked]="filterPersonalCollections"
                         (change)="filterPersonalCollections = !filterPersonalCollections">Show only my Collections
           </mat-checkbox>
 
@@ -53,8 +53,8 @@
 
           <div *ngIf="filterPersonalCollections">
             <mat-form-field>
-              <mat-select (selectionChange)="searchCollectionByID($event)" placeholder="Choose Collection">
-                <mat-option *ngFor="let collection of this.loadModelService.personalCollections;"
+              <mat-select (selectionChange)="handleCollectionChoice($event)" placeholder="Choose Collection">
+                <mat-option *ngFor="let collection of this.userdataService.personalCollections;"
                             [value]="collection">
                   {{collection.name}}
                 </mat-option>
@@ -84,7 +84,7 @@
             <div *ngIf="singleModelSelected">
               <div class="category" *ngIf="actualModel.name">Selected Model: {{actualModel.name}}</div>
             </div>
-            <div *ngIf="actualCollection.models.length">
+            <div *ngIf="actualCollection.models">
               <app-model class="model-box" *ngFor="let model of actualCollection.models;" [model]=model></app-model>
             </div>
           </div>
@@ -110,28 +110,53 @@
 
         <mat-card-content>
 
-          <mat-checkbox *ngIf="this.loadModelService.userOwnedFinishedModels.length" [checked]="filterPersonal"
+          <mat-checkbox *ngIf="this.userdataService.userOwnedFinishedModels.length" [checked]="filterPersonal"
                         (change)="filterPersonal = !filterPersonal">Show only my Objects
+          </mat-checkbox>
+
+          <br>
+
+          <mat-checkbox [checked]="showModels"
+                        (change)="showModels = !showModels">Models
+          </mat-checkbox>
+
+          <mat-checkbox [checked]="showImages"
+                        (change)="showImages = !showImages">Image
+          </mat-checkbox>
+
+          <mat-checkbox [checked]="showAudio"
+                        (change)="showAudio = !showAudio">Audio
+          </mat-checkbox>
+
+          <mat-checkbox [checked]="showVideo"
+                        (change)="showVideo = !showVideo">Video
+          </mat-checkbox>
+
+          <mat-checkbox [checked]="showText"
+                        (change)="showText = !showText">Text
           </mat-checkbox>
 
           <div *ngIf="!filterPersonal">
             <mat-form-field>
               <mat-select (selectionChange)="handleModelChoice($event)" placeholder="Choose Object">
 
-                <mat-option *ngFor="let model of this.catalogueService.Observables.models.source['value'];"
+                <mat-option *ngFor="let model of this.catalogueService.Observables.models.source['value']
+                | mediaType: showModels:showImages:showAudio:showVideo:showText"
                             [value]="model">
-                  {{model.name}} ( {{model.processed['low'] | mediaType}} )
+                  {{model.name}} ({{model.mediaType}})
                 </mat-option>
+
               </mat-select>
             </mat-form-field>
           </div>
 
           <div *ngIf="filterPersonal">
             <mat-form-field>
-              <mat-select (selectionChange)="searchModelByID($event)" placeholder="Choose Object">
-                <mat-option *ngFor="let model of this.loadModelService.userOwnedFinishedModels;"
+              <mat-select (selectionChange)="handleModelChoice($event)" placeholder="Choose Object">
+                <mat-option *ngFor="let model of this.userdataService.userOwnedFinishedModels
+                                | mediaType: showModels:showImages:showAudio:showVideo:showText"
                             [value]="model">
-                  {{model.name}} ( {{model.processed['low'] | mediaType}} )
+                  {{model.name}} ({{model.mediaType}})
                 </mat-option>
               </mat-select>
             </mat-form-field>

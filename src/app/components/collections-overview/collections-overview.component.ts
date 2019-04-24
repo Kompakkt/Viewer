@@ -7,6 +7,7 @@ import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {LoadModelService} from '../../services/load-model/load-model.service';
 import {MessageService} from '../../services/message/message.service';
 import {OverlayService} from '../../services/overlay/overlay.service';
+import {UserdataService} from '../../services/userdata/userdata.service';
 import {LoginComponent} from '../dialogs/dialog-login/login.component';
 import {PasswordComponent} from '../password/password.component';
 
@@ -40,13 +41,19 @@ export class CollectionsOverviewComponent implements AfterViewInit {
   public filterPersonal = false;
   public filterPersonalCollections = false;
 
+  public showModels = true;
+  public showImages = true;
+  public showAudio = true;
+  public showVideo = true;
+  public showText = true;
+
   constructor(private overlayService: OverlayService,
               public catalogueService: CatalogueService,
               public loadModelService: LoadModelService,
               private message: MessageService,
               public dialog: MatDialog,
               private _changeDetectionRef: ChangeDetectorRef,
-  ) {
+              public userdataService: UserdataService) {
   }
 
   ngAfterViewInit() {
@@ -58,27 +65,15 @@ export class CollectionsOverviewComponent implements AfterViewInit {
       this.isOpen = collectionsOverviewIsOpen;
     });
 
-    this.loadModelService.singleModel.subscribe(singleModel => {
-      this.isSingleModel = singleModel;
+    this.catalogueService.singleObject.subscribe(singleModel => {
+      this.isSingleObject = singleModel;
     });
-
-    /*
-    this.loadModelService.singleCollection.subscribe(singleCollection => {
-      this.isSingleCollection = singleCollection;
-      if (this.isSingleCollection) {
-        this.overlayService.toggleCollectionsOverview();
-      }
-    });*/
 
     this.catalogueService.singleCollection.subscribe(singleCollection => {
       this.isSingleCollection = singleCollection;
       if (this.isSingleCollection) {
         this.overlayService.toggleCollectionsOverview();
       }
-    });
-
-    this.catalogueService.singleObject.subscribe(singleObject => {
-      this.isSingleObject = singleObject;
     });
 
     this.loadModelService.Observables.actualCollection.subscribe(actualCollection => {
@@ -96,13 +91,11 @@ export class CollectionsOverviewComponent implements AfterViewInit {
   }
 
   private loadCollection(): void {
-
     this.modelSelected = false;
     this.collectionSelected = true;
   }
 
   private loadModel(): void {
-
     this.collectionSelected = false;
     this.singleCollectionSelected = false;
     this.modelSelected = true;
@@ -112,13 +105,13 @@ export class CollectionsOverviewComponent implements AfterViewInit {
     console.log('Ausgewählt: ', event.value);
     this.singleCollectionSelected = true;
     this.singleModelSelected = true;
-    this.catalogueService.selectCollection(event.value);
+    this.catalogueService.selectCollection(event.value._id);
   }
 
   handleModelChoice(event) {
     this.singleModelSelected = true;
     this.singleCollectionSelected = false;
-    this.catalogueService.selectModel(event.value, this.collectionSelected);
+    this.catalogueService.selectModel(event.value._id, this.collectionSelected);
   }
 
   async searchCollectionByID(event?) {
@@ -160,7 +153,7 @@ export class CollectionsOverviewComponent implements AfterViewInit {
       id = this.identifierModel;
     }
 
-    const isloadable = this.catalogueService.selectModelbyID(id);
+    const isloadable = this.catalogueService.selectModelByID(id);
     if (isloadable) {
       this.singleModelSelected = true;
       this.singleCollectionSelected = false;

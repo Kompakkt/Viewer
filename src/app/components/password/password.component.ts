@@ -29,20 +29,17 @@ export class PasswordComponent implements OnInit {
 
   public check() {
 
-    if (this.identifierCollection !== undefined && this.password !== '') {
-      this.mongohandlerService.getCompilation(this.identifierCollection, this.password).then(compilation => {
+    if (this.identifierCollection && this.password !== '') {
+      this.mongohandlerService.getCompilation(this.identifierCollection, this.password)
+        .then(compilation => {
 
         if (compilation['_id']) {
-
-          console.log('Antwort ist:', compilation, 'und ', compilation['_id']);
           this.catalogueService.addAndLoadCollection(compilation);
           this.dialogRef.close(true);
-
         } else {
-          this.message.error('Password is wrong. ' + this.identifierCollection + '.');
+          this.message.error('Password is wrong.' + this.identifierCollection + '.');
         }
-
-      },                                                                                     error => {
+      },      error => {
         this.message.error('Connection to object server refused.');
         this.dialogRef.close();
       });

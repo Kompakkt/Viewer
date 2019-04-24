@@ -16,47 +16,15 @@ import {CameraService} from '../camera/camera.service';
 })
 export class AnnotationmarkerService {
 
-  public open_popup = '';
-  private isOpen: BehaviorSubject<string> = new BehaviorSubject('');
+  private selectedAnnotation: BehaviorSubject<string> = new BehaviorSubject('');
+  public isSelectedAnnotation = this.selectedAnnotation.asObservable();
 
-  public hide_popup = '';
-  private isHidden: BehaviorSubject<string> = new BehaviorSubject('');
-
-  public toggleCreatorPopup(id: string) {
-    this.open_popup = id;
-    this.isOpen.next(this.open_popup);
-    if (this.hide_popup === this.open_popup) {
-      this.hide_popup = '';
-      this.isHidden.next('');
-    }
+  constructor(private babylonService: BabylonService,
+              private cameraService: CameraService) {
 
   }
 
-  public closeCreatorPopup(id: string) {
-    if (this.open_popup === id) {
-      this.open_popup = '';
-      this.isOpen.next('');
-      this.hide_popup = id;
-      this.isHidden.next(id);
-    }
-  }
-
-  popupIsOpen(): Observable<any> {
-    return this.isOpen.asObservable();
-  }
-
-  popupIsHidden(): Observable<any> {
-    return this.isHidden.asObservable();
-  }
-
-  constructor(private babylonService: BabylonService, private cameraService: CameraService) {
-
-  }
-
-  // Ein und Ausblenden des Markers
-  // Zahl verändern/ aktualisieren
-
-  public createAnnotationMarker(annotation: Annotation) {
+  public createAnnotationMarker(annotation: Annotation, color: string) {
 
     // 11/02/19
     const positionVector = new BABYLON.Vector3(
@@ -67,10 +35,7 @@ export class AnnotationmarkerService {
       annotation.target.selector.referenceNormal.x,
       annotation.target.selector.referenceNormal.y,
       annotation.target.selector.referenceNormal.z);
-    const cameraVector = new BABYLON.Vector3(
-      annotation.body.content.relatedPerspective.vector.x,
-      annotation.body.content.relatedPerspective.vector.y,
-      annotation.body.content.relatedPerspective.vector.z);
+    const camera = annotation.body.content.relatedPerspective;
     // const positionVector = new BABYLON.Vector3(annotation.referencePoint[0].value,
     //   annotation.referencePoint[1].value, annotation.referencePoint[2].value);
     // const normalVector = new BABYLON.Vector3(annotation.referencePointNormal[0].value,
@@ -81,7 +46,7 @@ export class AnnotationmarkerService {
     // two Labels: one is for isOccluded true, one for false -> alpha 0.5 for transparancy
 
     const plane1 = this.createPlane(annotation._id + '_pick', 1, 1, annotation._id, positionVector, normalVector);
-    const label1 = this.createClickLabel(annotation._id, '100%', '100%', annotation._id, 'White', 'black', cameraVector);
+    const label1 = this.createClickLabel(annotation._id, '100%', '100%', annotation._id, 'White', color, camera);
 
     GUI.AdvancedDynamicTexture.CreateForMesh(plane1).addControl(label1);
     label1.addControl(this.createRankingNumber(annotation._id, annotation.ranking));
@@ -91,7 +56,7 @@ export class AnnotationmarkerService {
     plane1.renderingGroupId = 0;
 
     const plane2 = this.createPlane(annotation._id + '_pick', 1, 1, annotation._id, positionVector, normalVector);
-    const label2 = this.createClickLabel(annotation._id, '100%', '100%', annotation._id, 'White', 'black', cameraVector);
+    const label2 = this.createClickLabel(annotation._id, '100%', '100%', annotation._id, 'White', color, camera);
 
     GUI.AdvancedDynamicTexture.CreateForMesh(plane2).addControl(label2);
     label2.addControl(this.createRankingNumber(annotation._id, annotation.ranking));
@@ -107,13 +72,13 @@ export class AnnotationmarkerService {
       {height, width}, this.babylonService.getScene());
     BABYLON.Tags.AddTagsTo(plane, tag + ' plane');
     plane.position = position;
-    plane.translate(normal, 1, BABYLON.Space.WORLD);
+    plane.translate(normal, 0.5, BABYLON.Space.WORLD);
     plane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
     return plane;
   }
 
   private createClickLabel(name: string, height: string, width: string, tag: string, color: string,
-                           backgroundColor: string, cameraVector: BABYLON.Vector3) {
+                           backgroundColor: string, camera: any) {
 
     const label = new GUI.Ellipse(name);
     label.width = width;
@@ -121,19 +86,25 @@ export class AnnotationmarkerService {
     label.color = color;
     label.thickness = 1;
     label.background = backgroundColor;
+
     label.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
     BABYLON.Tags.AddTagsTo(label, tag + ' label');
 
     label.onPointerDownObservable.add(() => {
-      this.onMarkerClicked(name, cameraVector);
+      this.onMarkerClicked(name, camera);
     });
     return label;
 
   }
 
-  private onMarkerClicked(id, cameraVector: BABYLON.Vector3) {
-    this.toggleCreatorPopup(id);
-    this.cameraService.moveCameraToTarget(cameraVector);
+  private onMarkerClicked(id, camera: any) {
+    this.selectedAnnotation.next(id);
+
+    const positionVector = new BABYLON.Vector3(camera.position.x, camera.position.y, camera.position.z);
+    const targetVector = new BABYLON.Vector3(camera.target.x, camera.target.y, camera.target.z);
+    this.cameraService.moveCameraToTarget(positionVector);
+    this.cameraService.arcRotateCamera.setTarget(targetVector);
+
   }
 
   public createRankingNumber(annotationID: string, rankingNumber: number) {
@@ -169,17 +140,6 @@ export class AnnotationmarkerService {
     await this.babylonService.getScene().getMeshesByTags('plane').map(mesh => mesh.dispose());
   }
 
-  public redrawAllMarker(annotations: Annotation[]) {
-    this.deleteAllMarker();
-    annotations.forEach(function (value) {
-      this.createAnnotationMarker(value);
-    });
-  }
-
-  public redrawMarker(annotation: Annotation) {
-    this.deleteMarker(annotation._id);
-    this.createAnnotationMarker(annotation);
-  }
 
   public async hideAllMarker(visibility: boolean) {
     this.babylonService.hideMesh('label', visibility);
