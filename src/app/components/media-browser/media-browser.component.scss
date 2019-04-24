@@ -1,3 +1,19 @@
 :host {
   display: block;
 }
+
+.collection-object {
+  cursor: pointer;
+  width: 250px;
+  display: inline-block;
+}
+
+.btn-add-medium {
+  position: absolute;
+  margin-top: -35px;
+  cursor: pointer;
+}
+
+:host mat-form-field {
+  margin-right: 5px;
+}

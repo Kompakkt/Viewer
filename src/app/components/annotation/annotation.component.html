@@ -7,14 +7,18 @@
           [style.background-color]="getColor()"
           id={{annotation._id}}>
 
-  <form class="annotation-form" (ngSubmit)="onSubmit($event)">
+  <form class="annotation-form">
 
     <mat-card-header>
 
       <mat-card-title>
         <span *ngIf="!editMode">{{annotation.body.content.title}}</span>
         <mat-form-field *ngIf="editMode">
-          <input matInput name="title" #title="ngModel" type="text" placeholder="Title"
+          <input matInput
+                 name="title"
+                 #title="ngModel"
+                 type="text"
+                 placeholder="Title"
                  [(ngModel)]="annotation.body.content.title">
         </mat-form-field>
       </mat-card-title>
@@ -30,19 +34,15 @@
 
     <mat-card-content>
 
-      <mat-icon id="add-medium"
-                *ngIf="editMode"
-                (click)="showMediaBrowser = !showMediaBrowser">add_photo_alternate
-      </mat-icon>
-
-      <app-media-browser *ngIf="editMode && showMediaBrowser"
-                         (addMedia)="addMedium($event)"></app-media-browser>
-
       <markdown id="annotation-content"
                 *ngIf="!editMode"
                 [data]="annotation.body.content.description"></markdown>
 
-      <mat-form-field *ngIf="editMode">
+      <div *ngIf="editMode">
+
+        <app-media-browser (addMedia)="addMedium($event)"></app-media-browser>
+
+        <mat-form-field>
         <textarea #annotationContent
                   matInput
                   cdkTextareaAutosize
@@ -52,7 +52,9 @@
                   type="text"
                   placeholder="Description"
                   [(ngModel)]="annotation.body.content.description"></textarea>
-      </mat-form-field>
+        </mat-form-field>
+
+      </div>
 
     </mat-card-content>
 
@@ -68,24 +70,24 @@
 
       <div *ngIf="isDefaultLoad || !isDefault || isDefault && isOwner && !isCollection">
 
-      <button mat-icon-button (click)="editFullscreen()"
-              matTooltip="Edit in Fullscreen Mode" matTooltipPosition="above"
-              type="button">
-        <mat-icon aria-label="Fullscreen">fullscreen</mat-icon>
-      </button>
+        <button mat-icon-button (click)="editFullscreen()"
+                matTooltip="Edit in Fullscreen Mode" matTooltipPosition="above"
+                type="button">
+          <mat-icon aria-label="Fullscreen">fullscreen</mat-icon>
+        </button>
 
-      <button mat-icon-button (click)="editMode ? annotationService.setEditModeAnnotation('') :
+        <button mat-icon-button (click)="editMode ? annotationService.setEditModeAnnotation('') :
                                                   annotationService.setEditModeAnnotation(annotation._id)"
-              matTooltip={{labelModeText}} matTooltipPosition="above"
-              type="button">
-        <mat-icon attr.aria-label={{labelModeText}}>{{labelMode}}</mat-icon>
-      </button>
+                matTooltip={{labelModeText}} matTooltipPosition="above"
+                type="button">
+          <mat-icon attr.aria-label={{labelModeText}}>{{labelMode}}</mat-icon>
+        </button>
 
-      <button *ngIf="isOwner" mat-icon-button (click)="deleteAnnotation()"
-              matTooltip="Delete" matTooltipPosition="above"
-              type="button">
-        <mat-icon aria-label="Delete">delete</mat-icon>
-      </button>
+        <button *ngIf="isOwner" mat-icon-button (click)="deleteAnnotation()"
+                matTooltip="Delete" matTooltipPosition="above"
+                type="button">
+          <mat-icon aria-label="Delete">delete</mat-icon>
+        </button>
       </div>
     </mat-card-actions>
 

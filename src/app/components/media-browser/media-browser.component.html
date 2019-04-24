@@ -1,9 +1,17 @@
-Embed an external image at cursor position:
+<button mat-icon-button
+        class="btn-add-medium"
+        (click)="showMediaBrowser = !showMediaBrowser">
+  <mat-icon aria-label="Add Image">add_photo_alternate</mat-icon>
+</button>
 
-<div id="external-image">
+<div id="external-image"
+     *ngIf="showMediaBrowser">
+
+  <h3>Embed an external image at cursor position:</h3>
+
   <mat-form-field>
     <input matInput
-           [(ngModel)]="url"
+           #url
            placeholder="URL"
            name="URL"
            type="text">
@@ -11,17 +19,37 @@ Embed an external image at cursor position:
 
   <mat-form-field>
     <input matInput
-           [(ngModel)]="description"
-           placeholder="Description"
-           name="Description"
+           #description
+           placeholder="Image Description"
+           name="Image Description"
            type="text">
   </mat-form-field>
 
-  <button mat-icon-button (click)="add()"
+  <button mat-icon-button (click)="addObject(url.value, description.value)"
           matTooltip="Add Image at Cursor Position"
           matTooltipPosition="right"
           type="button">
     <mat-icon aria-label="Add Image">add</mat-icon>
     Add Image
   </button>
+
+  <!--
+  <div id="collection-objects">
+    OR embed an object of your collection:
+    <br>
+
+    <ng-container *ngFor="let object of objects.models">
+
+      <mat-card *ngIf="object.mediaType === 'image' || object.mediaType === 'text'"
+                (click)="addObject(object.settings.preview, object.name)"
+                class="collection-object">
+        <img mat-card-image src="{{object.settings.preview}}" alt="{{object.name}}">
+        <mat-card-footer>{{object.name}}</mat-card-footer>
+      </mat-card>
+
+    </ng-container>
+
+  </div>
+  -->
+
 </div>

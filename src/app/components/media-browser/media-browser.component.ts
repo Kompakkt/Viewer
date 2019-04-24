@@ -12,18 +12,26 @@ export class MediaBrowserComponent implements OnInit {
   @Output() addMedia = new EventEmitter();
 
   public url = '';
+  public objects: any;
   public description = '';
+
+  public showMediaBrowser = false;
 
   constructor(public loadModelService: LoadModelService) {
   }
 
   ngOnInit() {
+    this.loadModelService.Observables.actualCollection.subscribe(actualCollection => {
+      this.objects = actualCollection;
+      console.log(this.objects);
+    });
   }
 
-  add() {
+  addObject(adress, text) {
+
     this.addMedia.emit({
-      url: this.url,
-      description: this.description,
+      url: adress,
+      description: text,
     });
   }
 
