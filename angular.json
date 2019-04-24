@@ -28,7 +28,9 @@
               },
               "src/styles.scss"
             ],
-            "scripts": ["node_modules/pepjs/dist/pep.min.js"]
+            "scripts": [
+              "node_modules/pepjs/dist/pep.min.js",
+              "node_modules/marked/lib/marked.js"]
           },
           "configurations": {
             "production": {
@@ -84,7 +86,10 @@
               },
               "src/styles.scss"
             ],
-            "scripts": [],
+            "scripts": [
+              "node_modules/pepjs/dist/pep.min.js",
+              "node_modules/marked/lib/marked.js"
+            ],
             "assets": [
               "src/favicon.ico",
               "src/assets"

@@ -27,6 +27,7 @@ import {ColorChromeModule} from 'ngx-color/chrome';
 import {HttpClientModule} from '@angular/common/http';
 import {SocketIoModule} from 'ngx-socket-io';
 import {environment} from '../environments/environment';
+import {MediaComponent} from './components/media/media.component';
 
 describe('AppComponent', () => {
   beforeEach(async(() => {
@@ -46,6 +47,7 @@ describe('AppComponent', () => {
         ModelsettingsComponent,
         ModelComponent,
         AnnotationComponent,
+        MediaComponent,
       ],
       imports: [
         FormsModule,

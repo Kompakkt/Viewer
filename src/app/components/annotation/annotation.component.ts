@@ -1,7 +1,7 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnInit, ViewChild} from '@angular/core';
 import {Matrix, Vector3} from 'babylonjs';
-import {Annotation} from 'src/app/interfaces/annotation2/annotation2';
-import {AnnotationmarkerService} from 'src/app/services/annotationmarker/annotationmarker.service';
+import {Annotation} from '../../interfaces/annotation2/annotation2';
+import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
 
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
@@ -23,6 +23,8 @@ export class AnnotationComponent implements OnInit {
 
   @Input() annotation: Annotation;
 
+  @ViewChild('annotationContent') private annotationContent;
+
   public editMode = false;
   public labelMode = 'edit';
   public labelModeText = 'edit';
@@ -31,12 +33,7 @@ export class AnnotationComponent implements OnInit {
   public visibility = false;
   public id = '';
   public opacity = '0';
-  public isDefault: boolean;
-  public isOwner: boolean;
-  public isDefaultLoad: boolean;
-  public isCollection: boolean;
-  private selectedAnnotation: string;
-  private editModeAnnotation: string;
+
 
   constructor(private dataService: DataService,
               private annotationService: AnnotationService,
@@ -103,6 +100,19 @@ export class AnnotationComponent implements OnInit {
     setInterval(() => {
       this.setPosition(this.annotation);
     }, 15);
+  }
+
+  public addMedium(medium) {
+
+    const mdImage = `![alt ${medium.description}](${medium.url})`;
+
+    this.annotationContent.nativeElement.focus();
+
+    const start = this.annotationContent.nativeElement.selectionStart;
+    const value = this.annotationContent.nativeElement.value;
+
+    this.annotation.body.content.description =
+      `${value.substring(0, start)}${mdImage}${value.substring(start, value.length)}`;
   }
 
   public setPosition(annotation: Annotation) {

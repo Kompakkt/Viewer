@@ -11,6 +11,8 @@ import {FormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 import {SocketIoModule} from 'ngx-socket-io';
 import {environment} from '../../../environments/environment';
+import {MediaBrowserComponent} from '../media-browser/media-browser.component';
+import {MarkdownComponent} from 'ngx-markdown';
 
 describe('AnnotationComponent', () => {
   let component: AnnotationComponent;
@@ -19,7 +21,11 @@ describe('AnnotationComponent', () => {
   beforeEach(async(() => {
 
     TestBed.configureTestingModule({
-      declarations: [AnnotationComponent],
+      declarations: [
+        AnnotationComponent,
+        MediaBrowserComponent,
+        MarkdownComponent,
+      ],
       imports: [
         MatFormFieldModule,
         MatCardModule,
@@ -70,7 +76,8 @@ describe('AnnotationComponent', () => {
         content: {
           type: 'text',
           title: 'Welcome to Kompakkt',
-          description: 'Hi! I am an annotation of this cool logo. Please feel free to add a friend for me by clicking on the edit button in the corner on the right bottom and double click this 3D logo!',
+          description: '![alt Kompakkt Logo](https://raw.githubusercontent.com/DH-Cologne/Kompakkt/master/src/assets/img/kompakkt-logo.png)' +
+            'Hi! I am an annotation of this cool logo. Please feel free to add a friend for me by clicking on the edit button in the corner on the right bottom and double click this 3D logo!',
           relatedPerspective: {
             camera: 'ArcRoatateCamera',
             vector: {

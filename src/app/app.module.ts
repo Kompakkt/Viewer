@@ -38,6 +38,9 @@ import { ModelsettingsComponent } from './components/modelsettings/modelsettings
 import { PasswordComponent } from './components/password/password.component';
 import { SceneComponent } from './components/scene/scene.component';
 import {MediaTypePipe} from './pipes/media-type.pipe';
+import {MarkdownModule} from 'ngx-markdown';
+import { MediaComponent } from './components/media/media.component';
+import {MediaBrowserComponent} from './components/media-browser/media-browser.component';
 import { ActiveUsersComponent } from './components/active-users/active-users.component';
 import { DialogDeleteSingleAnnotationComponent } from './components/dialogs/dialog-delete-single-annotation/dialog-delete-single-annotation.component';
 import { DialogGetUserDataComponent } from './components/dialogs/dialog-get-user-data/dialog-get-user-data.component';
@@ -68,6 +71,7 @@ import { DialogGetUserDataComponent } from './components/dialogs/dialog-get-user
     ActiveUsersComponent,
     DialogDeleteSingleAnnotationComponent,
     DialogGetUserDataComponent,
+    MediaBrowserComponent,
   ],
   imports: [
     BrowserModule,
@@ -101,6 +105,7 @@ import { DialogGetUserDataComponent } from './components/dialogs/dialog-get-user
     SocketIoModule.forRoot({
       url: `${environment.express_server_url}:${environment.express_server_port}`,
     }),
+    MarkdownModule.forRoot(),
   ],
   entryComponents: [
     LoginComponent,

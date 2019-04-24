@@ -1,0 +1,27 @@
+Embed an external image at cursor position:
+
+<div id="external-image">
+  <mat-form-field>
+    <input matInput
+           [(ngModel)]="url"
+           placeholder="URL"
+           name="URL"
+           type="text">
+  </mat-form-field>
+
+  <mat-form-field>
+    <input matInput
+           [(ngModel)]="description"
+           placeholder="Description"
+           name="Description"
+           type="text">
+  </mat-form-field>
+
+  <button mat-icon-button (click)="add()"
+          matTooltip="Add Image at Cursor Position"
+          matTooltipPosition="right"
+          type="button">
+    <mat-icon aria-label="Add Image">add</mat-icon>
+    Add Image
+  </button>
+</div>

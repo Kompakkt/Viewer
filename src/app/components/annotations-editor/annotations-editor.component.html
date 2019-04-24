@@ -21,10 +21,28 @@
 
     <mat-card-content *ngIf="!collapsed">
 
-      <p *ngIf="!editMode"> {{annotation.body.content.description}}</p>
+      <mat-icon id="add-medium"
+                *ngIf="editMode"
+                (click)="showMediaBrowser = !showMediaBrowser">add_photo_alternate
+      </mat-icon>
+
+      <app-media-browser *ngIf="editMode && showMediaBrowser"
+                         (addMedia)="addMedium($event)"
+      ></app-media-browser>
+
+      <markdown id="annotation-content"
+                *ngIf="!editMode"
+                [data]="annotation.body.content.description"></markdown>
 
       <mat-form-field *ngIf="editMode" class="description">
-        <textarea matInput name="description" #description="ngModel" type="text" placeholder="Description"
+        <textarea matInput
+                  #annotationContent
+                  cdkTextareaAutosize
+                  #autosize="cdkTextareaAutosize"
+                  cdkAutosizeMinRows="1"
+                  name="description"
+                  type="text"
+                  placeholder="Description"
                   [(ngModel)]="annotation.body.content.description"></textarea>
       </mat-form-field>
 

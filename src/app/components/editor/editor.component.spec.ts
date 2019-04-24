@@ -23,6 +23,8 @@ import {HttpClientModule} from '@angular/common/http';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {SocketIoModule} from 'ngx-socket-io';
 import {environment} from '../../../environments/environment';
+import {MediaBrowserComponent} from '../media-browser/media-browser.component';
+import {MarkdownComponent} from 'ngx-markdown';
 
 describe('EditorComponent', () => {
   let component: EditorComponent;
@@ -30,7 +32,14 @@ describe('EditorComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [EditorComponent, AnnotationsEditorComponent, ModelsettingsComponent, MetadataComponent],
+      declarations: [
+        EditorComponent,
+        AnnotationsEditorComponent,
+        ModelsettingsComponent,
+        MetadataComponent,
+        MediaBrowserComponent,
+        MarkdownComponent,
+      ],
       imports: [
         MatIconModule,
         MatTabsModule,

@@ -1,5 +1,5 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {Annotation} from 'src/app/interfaces/annotation2/annotation2';
+import {Component, Input, OnInit, ViewChild} from '@angular/core';
+import {Annotation} from '../../interfaces/annotation2/annotation2';
 
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
@@ -34,7 +34,11 @@ export class AnnotationsEditorComponent implements OnInit {
   private selectedAnnotation: string;
   private editModeAnnotation: string;
 
+  public showMediaBrowser = false;
+
   public id = '';
+
+  @ViewChild('annotationContent') private annotationContent;
 
   constructor(private dataService: DataService,
               private annotationService: AnnotationService,
@@ -102,6 +106,26 @@ export class AnnotationsEditorComponent implements OnInit {
         this.labelModeText = 'edit';
       }
     });
+  }
+
+  public addMedium(medium) {
+
+    const mdImage = `![alt ${medium.description}](${medium.url})`;
+
+    this.annotationContent.nativeElement.focus();
+
+    const start = this.annotationContent.nativeElement.selectionStart;
+    const value = this.annotationContent.nativeElement.value;
+
+    this.annotation.body.content.description =
+      `${value.substring(0, start)}${mdImage}${value.substring(start, value.length)}`;
+  }
+
+  private hiddenAnnotation(ID) {
+    if (this.annotation._id === ID) {
+      this.showAnnotation = true;
+      this.labelVisibility = 'Hide';
+    }
   }
 
   public changeOpenPopup() {

@@ -4,7 +4,10 @@ import {ActionManager} from 'babylonjs';
 import * as BABYLON from 'babylonjs';
 import {Socket} from 'ngx-socket-io';
 import {BehaviorSubject} from 'rxjs/internal/BehaviorSubject';
+import {ReplaySubject} from 'rxjs';
+import {Annotation} from 'src/app/interfaces/annotation2/annotation2';
 
+import { LoginComponent } from '../../components/dialogs/dialog-login/login.component';
 import {environment} from '../../../environments/environment';
 import {Annotation} from '../../interfaces/annotation2/annotation2';
 import {ActionService} from '../action/action.service';
@@ -344,10 +347,6 @@ export class AnnotationService {
       this.actionService.createActionManager(mesh, ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
     });
     this.annotationMode(false);
-
-    if (this.inSocket) {
-      this.socket.emit('myNewRoom', [this.socketRoom, this.annotations]);
-    }
   }
 
   // Das aktuelle Modell wird anklickbar und damit annotierbar
@@ -456,6 +455,25 @@ export class AnnotationService {
       this.editModeAnnotation.next(annotation._id);
       return;
     }
+    if (this.isDefaultLoad) return;
+
+    this.mongo.updateAnnotation(annotation)
+      .toPromise()
+      .then((resultAnnotation: Annotation) => {
+        // MongoDB hat funktioniert
+        // MongoDB-Eintrag in PouchDB
+        this.dataService.putAnnotation(resultAnnotation);
+        this.annotations.splice(this.annotations.indexOf(annotation), 1, resultAnnotation);
+        this.allAnnotations.splice(this.allAnnotations.indexOf(annotation), 1, resultAnnotation);
+      })
+      .catch((errorMessage: any) => {
+        // PouchDB
+        // TODO: Später synchronisieren
+        annotation.lastModificationDate = new Date().toISOString();
+        console.log(errorMessage);
+        this.dataService.putAnnotation(annotation);
+      });
+  }
 
     this.mongo.updateAnnotation(annotation)
       .toPromise()
@@ -680,9 +698,6 @@ export class AnnotationService {
       this.annotationSourceCollection.emit(false);
     } else {
 
-      if (sourceCol === this.isannotationSourceCollection) {
-        return;
-      }
 
       if (!this.isCollection) {
         this.isannotationSourceCollection = false;

@@ -2,7 +2,7 @@ import {TestBed} from '@angular/core/testing';
 
 import {AnnotationvrService} from './annotationvr.service';
 import {AnnotationService} from '../annotation/annotation.service';
-import {MatSnackBarModule} from '@angular/material';
+import {MatDialogModule, MatSnackBarModule} from '@angular/material';
 import {HttpClientModule} from '@angular/common/http';
 import {SocketIoModule} from 'ngx-socket-io';
 import {environment} from '../../../environments/environment';
@@ -14,6 +14,7 @@ describe('AnnotationvrService', () => {
       imports: [
         MatSnackBarModule,
         HttpClientModule,
+        MatDialogModule,
         SocketIoModule.forRoot({
           url: `${environment.express_server_url}:${environment.express_server_port}`,
           options: {}

@@ -19,7 +19,6 @@
         </mat-form-field>
       </mat-card-title>
 
-
       <button id="closeButton"
               mat-icon-button
               (click)="closeAnnotation()"
@@ -31,12 +30,27 @@
 
     <mat-card-content>
 
-      <div id="annotation-content"
-           *ngIf="!editMode"
-           [innerHTML]="annotation.body.content.description"></div>
+      <mat-icon id="add-medium"
+                *ngIf="editMode"
+                (click)="showMediaBrowser = !showMediaBrowser">add_photo_alternate
+      </mat-icon>
+
+      <app-media-browser *ngIf="editMode && showMediaBrowser"
+                         (addMedia)="addMedium($event)"></app-media-browser>
+
+      <markdown id="annotation-content"
+                *ngIf="!editMode"
+                [data]="annotation.body.content.description"></markdown>
 
       <mat-form-field *ngIf="editMode">
-        <textarea matInput name="description" #description="ngModel" type="text" placeholder="Description"
+        <textarea #annotationContent
+                  matInput
+                  cdkTextareaAutosize
+                  #autosize="cdkTextareaAutosize"
+                  cdkAutosizeMinRows="1"
+                  name="description"
+                  type="text"
+                  placeholder="Description"
                   [(ngModel)]="annotation.body.content.description"></textarea>
       </mat-form-field>
 

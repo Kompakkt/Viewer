@@ -14,6 +14,9 @@ import {HttpClientModule} from '@angular/common/http';
 import {SocketIoModule} from 'ngx-socket-io';
 import {environment} from '../../../environments/environment';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {MediaBrowserComponent} from '../media-browser/media-browser.component';
+import {MarkdownComponent} from 'ngx-markdown';
+import {MatSlideToggleModule} from '@angular/material/typings/esm5/slide-toggle';
 
 describe('AnnotationsEditorComponent', () => {
   let component: AnnotationsEditorComponent;
@@ -21,7 +24,11 @@ describe('AnnotationsEditorComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [AnnotationsEditorComponent],
+      declarations: [
+        AnnotationsEditorComponent,
+        MediaBrowserComponent,
+        MarkdownComponent,
+      ],
       imports: [
         MatCardModule,
         FormsModule,
@@ -76,7 +83,8 @@ describe('AnnotationsEditorComponent', () => {
         content: {
           type: 'text',
           title: 'Welcome to Kompakkt',
-          description: 'Hi! I am an annotation of this cool logo. Please feel free to add a friend for me by clicking on the edit button in the corner on the right bottom and double click this 3D logo!',
+          description: '![alt Kompakkt Logo](https://raw.githubusercontent.com/DH-Cologne/Kompakkt/master/src/assets/img/kompakkt-logo.png)' +
+            'Hi! I am an annotation of this cool logo. Please feel free to add a friend for me by clicking on the edit button in the corner on the right bottom and double click this 3D logo!',
           relatedPerspective: {
             camera: 'ArcRoatateCamera',
             vector: {

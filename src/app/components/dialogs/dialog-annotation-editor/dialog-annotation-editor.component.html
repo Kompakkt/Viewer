@@ -1,37 +1,52 @@
-<form>
-  <h1 mat-dialog-title>
-    <span *ngIf="!editMode" [innerHTML]="data.title"></span>
-    <mat-form-field *ngIf="editMode">
-      <input matInput
-             name="title"
-             type="text"
-             placeholder="Title"
-             [(ngModel)]="data.title">
-    </mat-form-field>
-  </h1>
+<h1 mat-dialog-title>
+  <span *ngIf="!editMode" [innerHTML]="data.title"></span>
+  <mat-form-field *ngIf="editMode">
+    <input matInput
+           name="title"
+           type="text"
+           placeholder="Title"
+           [(ngModel)]="data.title">
+  </mat-form-field>
+</h1>
 
-  <div mat-dialog-content>
+<div mat-dialog-content>
 
-    <div *ngIf="!editMode" [innerHTML]="data.content"></div>
+  <h3>Description</h3>
 
-    <mat-form-field *ngIf="editMode">
-      <textarea id="annotation-content" matInput name="description"
-                type="text" placeholder="Description"
-                matTextareaAutosize
-                [(ngModel)]="data.content">
+  <markdown *ngIf="!editMode"
+            [data]="data.content"></markdown>
+
+  <mat-icon id="add-medium"
+            *ngIf="editMode"
+            (click)="showMediaBrowser = !showMediaBrowser">add_photo_alternate</mat-icon>
+
+  <app-media-browser *ngIf="editMode && showMediaBrowser"
+                     (addMedia)="addMedium($event)"></app-media-browser>
+
+  <mat-form-field *ngIf="editMode">
+
+    <textarea id="annotation-content"
+              #annotationContent
+              matInput
+              cdkTextareaAutosize
+              #autosize="cdkTextareaAutosize"
+              cdkAutosizeMinRows="1"
+              name="description"
+              type="text"
+              placeholder=""
+              [(ngModel)]="data.content">
       </textarea>
-    </mat-form-field>
-  </div>
+  </mat-form-field>
+</div>
 
-  <div mat-dialog-actions>
-    <button mat-button (click)="toggleEditViewMode()" attr.aria-label="{{labelModeText}}">
-      <mat-icon>{{labelMode}}</mat-icon>
-    </button>
-    <button mat-button [mat-dialog-close]="data">
-      <mat-icon attr.aria-label="Save">save</mat-icon>
-    </button>
-    <button mat-button (click)="cancel()">
-      <mat-icon attr.aria-label="Cancel">cancel</mat-icon>
-    </button>
-  </div>
-</form>
+<div mat-dialog-actions>
+  <button mat-button (click)="toggleEditViewMode()" attr.aria-label="{{labelModeText}}">
+    <mat-icon>{{labelMode}}</mat-icon>
+  </button>
+  <button mat-button [mat-dialog-close]="data">
+    <mat-icon attr.aria-label="Save">save</mat-icon>
+  </button>
+  <button mat-button (click)="cancel()">
+    <mat-icon attr.aria-label="Cancel">cancel</mat-icon>
+  </button>
+</div>
