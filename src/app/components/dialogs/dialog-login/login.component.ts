@@ -23,7 +23,7 @@ export class LoginComponent implements OnInit {
               private catalogueService: CatalogueService,
               private message: MessageService,
               private overlayService: OverlayService,
-              private userDataService: UserdataService
+              private userDataService: UserdataService,
               private loadModelService: LoadModelService) {
   }
 
@@ -43,7 +43,7 @@ export class LoginComponent implements OnInit {
         this.success = true;
         this.catalogueService.bootstrap();
       }
-    },                                                                     error => {
+    }, error => {
       this.message.error('Connection to object server refused.');
       this.userDataService.setcachedLoginData('', '');
     });

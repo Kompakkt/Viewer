@@ -124,7 +124,6 @@ export class AnnotationsEditorComponent implements OnInit {
   private hiddenAnnotation(ID) {
     if (this.annotation._id === ID) {
       this.showAnnotation = true;
-      this.labelVisibility = 'Hide';
     }
   }
 

@@ -39,7 +39,6 @@ import { PasswordComponent } from './components/password/password.component';
 import { SceneComponent } from './components/scene/scene.component';
 import {MediaTypePipe} from './pipes/media-type.pipe';
 import {MarkdownModule} from 'ngx-markdown';
-import { MediaComponent } from './components/media/media.component';
 import {MediaBrowserComponent} from './components/media-browser/media-browser.component';
 import { ActiveUsersComponent } from './components/active-users/active-users.component';
 import { DialogDeleteSingleAnnotationComponent } from './components/dialogs/dialog-delete-single-annotation/dialog-delete-single-annotation.component';
