@@ -208,4 +208,8 @@ export class AnnotationComponent implements OnInit {
 
     }
   }
+
+  public shareAnnotation() {
+    this.annotationService.shareAnnotation(this.annotation);
+  }
 }

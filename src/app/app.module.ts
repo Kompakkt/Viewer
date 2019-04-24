@@ -43,6 +43,7 @@ import { ModelsettingsComponent } from './components/modelsettings/modelsettings
 import { PasswordComponent } from './components/password/password.component';
 import { SceneComponent } from './components/scene/scene.component';
 import {MediaTypePipe} from './pipes/media-type.pipe';
+import { DialogShareAnnotationComponent } from './components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
 // tslint:enable:max-line-length
 
 @NgModule({
@@ -71,6 +72,7 @@ import {MediaTypePipe} from './pipes/media-type.pipe';
     DialogDeleteSingleAnnotationComponent,
     DialogGetUserDataComponent,
     MediaBrowserComponent,
+    DialogShareAnnotationComponent,
   ],
   imports: [
     BrowserModule,
@@ -113,6 +115,7 @@ import {MediaTypePipe} from './pipes/media-type.pipe';
     DialogMeshsettingsComponent,
     DialogAnnotationEditorComponent,
     DialogGetUserDataComponent,
+    DialogShareAnnotationComponent,
   ],
   providers: [],
   bootstrap: [AppComponent],

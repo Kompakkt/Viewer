@@ -57,7 +57,16 @@
     </mat-card-content>
 
 
-    <mat-card-actions *ngIf="isDefaultLoad || !isDefault || isDefault && isOwner && !isCollection">
+    <mat-card-actions>
+
+      <button *ngIf="id !== 'DefaultAnnotation'"
+              (click)="shareAnnotation()"
+              matTooltip="Copy to collection" matTooltipPosition="above"
+              type="button">
+        <mat-icon aria-label="Delete">send</mat-icon>
+      </button>
+
+      <div *ngIf="isDefaultLoad || !isDefault || isDefault && isOwner && !isCollection">
 
       <button mat-icon-button (click)="editFullscreen()"
               matTooltip="Edit in Fullscreen Mode" matTooltipPosition="above"
@@ -77,7 +86,7 @@
               type="button">
         <mat-icon aria-label="Delete">delete</mat-icon>
       </button>
-
+      </div>
     </mat-card-actions>
 
 

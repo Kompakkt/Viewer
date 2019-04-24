@@ -127,7 +127,7 @@ export class AnnotationsEditorComponent implements OnInit {
     this.collapsed && this.selectedAnnotation === this.annotation._id ?
       this.annotationService.setSelectedAnnotation('') :
       this.annotationService.setSelectedAnnotation(this.annotation._id);
-    this.babylonService.hideMesh(this.id, true);
+    this.babylonService.hideMesh(this.annotation._id, true);
     this.showAnnotation = true;
   }
 
@@ -184,6 +184,10 @@ export class AnnotationsEditorComponent implements OnInit {
 
   public onSubmit(event) {
     console.log(event);
+  }
+
+  public shareAnnotation() {
+  this.annotationService.shareAnnotation(this.annotation);
   }
 
 }

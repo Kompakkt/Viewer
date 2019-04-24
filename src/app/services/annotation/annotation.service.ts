@@ -7,6 +7,7 @@ import {BehaviorSubject} from 'rxjs/internal/BehaviorSubject';
 
 import {environment} from '../../../environments/environment';
 import {DialogGetUserDataComponent} from '../../components/dialogs/dialog-get-user-data/dialog-get-user-data.component';
+import {DialogShareAnnotationComponent} from '../../components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
 import {Annotation} from '../../interfaces/annotation2/annotation2';
 import {ActionService} from '../action/action.service';
 import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
@@ -550,10 +551,6 @@ export class AnnotationService {
           this.defaultAnnotationsSorted.splice(this.annotations.indexOf(annotation), 1);
           this.changedRankingPositions(this.annotations);
           this.redrawMarker();
-          // User pwd check for deliting on Server
-          const username = this.userdataService.cachedLoginData.username;
-          const password = this.userdataService.cachedLoginData.password;
-          console.log('USER & PWD', this.userdataService.cachedLoginData.username, this.userdataService.cachedLoginData.password);
         }
         return;
       }
@@ -667,7 +664,7 @@ export class AnnotationService {
             }
           });
           resolve(annotationList);
-        },    error => {
+        }, error => {
           reject(error);
         });
     });
@@ -739,6 +736,76 @@ export class AnnotationService {
 
   public setEditModeAnnotation(id: string) {
     this.editModeAnnotation.next(id);
+  }
+
+  public async shareAnnotation(annotation: Annotation) {
+
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.disableClose = true;
+    dialogConfig.autoFocus = true;
+
+    dialogConfig.data = {
+      modelId: this.currentModel._id,
+    };
+
+    const dialogRef = this.dialog.open(DialogShareAnnotationComponent, dialogConfig);
+    dialogRef.afterClosed()
+      .subscribe(data => {
+        if (data.status === true) {
+          console.log('Das bekomme ich vom Dialog: ', data);
+          console.log('Status1: ', data.status);
+          const copyAnnotation = this.createCopyOfAnnotation(annotation, data.collectionId, data.annotationListLength);
+
+          this.mongo.updateAnnotation(copyAnnotation)
+            .subscribe(result => {
+              console.log('Status1: ', result);
+              if (result.status === 'ok') {
+                this.message.error('Annotation is shared to Collection with id: ' + data.collectionId);
+              } else {
+                console.log('Status: ', result);
+              }
+            }, error => {
+              this.message.error('Annotation can not be shared.');
+            });
+        } else {
+          this.message.error('Annotation has not been shared.');
+        }
+      });
+  }
+
+  public createCopyOfAnnotation(annotation: Annotation, collectionId: string,
+                                annotationLength: number): any {
+    console.log('Erstelle die Kopie');
+
+    let generatedId = this.mongo.generateObjectId();
+    // TODO async
+    this.mongo.getUnusedObjectId()
+      .then(id => generatedId = id)
+      .catch(e => console.error(e));
+
+    return {
+      validated: false,
+      _id: generatedId,
+      identifier: generatedId,
+      ranking: String(annotationLength + 1),
+      creator: annotation.creator,
+      created: annotation.created,
+      generator: annotation.generator,
+      motivation: annotation.motivation,
+      lastModifiedBy: {
+        type: 'person',
+        name: this.userdataService.currentUserData.fullname,
+        _id: this.userdataService.currentUserData._id,
+      },
+      body: annotation.body,
+      target: {
+        source: {
+          relatedModel: this.currentModel._id,
+          relatedCompilation: collectionId,
+        },
+        selector: annotation.target.selector,
+      },
+    };
   }
 
   public createDefaultAnnotation(): Annotation {

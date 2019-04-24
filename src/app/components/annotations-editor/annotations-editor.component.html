@@ -70,6 +70,14 @@
         {{this.showAnnotation ? 'Hide' : 'Show'}}
       </mat-slide-toggle>
 
+      <button *ngIf="id !== 'DefaultAnnotation'"
+              mat-icon-button
+              (click)="shareAnnotation()"
+              matTooltip="Copy to collection" matTooltipPosition="above"
+              type="button">
+        <mat-icon aria-label="Delete">send</mat-icon>
+      </button>
+
       <div *ngIf="isDefaultLoad || !isDefault || isDefault && isOwner && !isCollection">
       <button mat-icon-button (click)="editMode ? annotationService.setEditModeAnnotation('') :
                                                   annotationService.setEditModeAnnotation(annotation._id)"
