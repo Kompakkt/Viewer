@@ -1,6 +1,5 @@
 import {Component, OnInit} from '@angular/core';
 
-import {AnnotationService} from '../../services/annotation/annotation.service';
 import {SocketService} from '../../services/socket/socket.service';
 
 @Component({
@@ -10,8 +9,7 @@ import {SocketService} from '../../services/socket/socket.service';
 })
 export class ActiveUsersComponent implements OnInit {
 
-  constructor(public socketService: SocketService,
-              public annotationService: AnnotationService) {
+  constructor(public socketService: SocketService) {
   }
 
   ngOnInit() {

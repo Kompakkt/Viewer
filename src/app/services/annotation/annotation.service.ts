@@ -19,6 +19,7 @@ import {LoadModelService} from '../load-model/load-model.service';
 import {MessageService} from '../message/message.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
 import {UserdataService} from '../userdata/userdata.service';
+import {SocketService} from '../socket/socket.service';
 
 @Injectable({
   providedIn: 'root',
@@ -26,11 +27,7 @@ import {UserdataService} from '../userdata/userdata.service';
 
 export class AnnotationService {
 
-  public inSocket: boolean;
-  public socketRoom: string;
-  public coloredUsers: any[];
-  public color = ['pink', 'red', 'blue', 'yellow', 'purple', 'gold'];
-  public maxColoredUsersMinusOne = 5;
+  public inSocket: false;
 
   public annotations: Annotation[];
   public defaultAnnotationsSorted: Annotation[];
@@ -69,9 +66,14 @@ export class AnnotationService {
               private catalogueService: CatalogueService,
               private cameraService: CameraService,
               private dialog: MatDialog,
-              private userdataService: UserdataService) {
+              private userdataService: UserdataService,
+              private socketService: SocketService) {
 
     this.annotations = [];
+
+    this.socketService.inSocket.subscribe(inSocket => {
+      this.inSocket = inSocket;
+    });
 
     this.loadModelService.Observables.actualModel.subscribe(actualModel => {
       this.currentModel = actualModel;
@@ -93,6 +95,10 @@ export class AnnotationService {
 
     this.userdataService.modelOwner.subscribe(isModelOwner => {
       this.isModelOwner = isModelOwner;
+    });
+
+    this.annotationmarkerService.isSelectedAnnotation.subscribe(selectedAnno => {
+      this.selectedAnnotation.next(selectedAnno);
     });
 
     this.annotationmarkerService.isSelectedAnnotation.subscribe(selectedAnno => {
@@ -157,9 +163,7 @@ export class AnnotationService {
     // Das neu geladene Modell wird annotierbar, ist aber noch nicht klickbar -> das soll erst passieren,
     // wenn der Edit-Mode aufgerufen wird
     this.initializeAnnotationMode();
-
     this.toggleAnnotationSource(false, true);
-
   }
 
   private async getAnnotationsfromServerDB() {
@@ -337,6 +341,9 @@ export class AnnotationService {
       return 0;
     });
     this.changedRankingPositions(this.defaultAnnotationsSorted);
+    // TODO add to load function
+    this.socketService.initialAnnotationsForSocket(this.collectionAnnotationsSorted);
+
   }
 
   // Die Annotationsfunktionalität wird zum aktuellen Modell hinzugefügt
@@ -345,10 +352,6 @@ export class AnnotationService {
       this.actionService.createActionManager(mesh, ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
     });
     this.annotationMode(false);
-
-    if (this.inSocket) {
-      this.socket.emit('myNewRoom', [this.socketRoom, this.annotations]);
-    }
   }
 
   // Das aktuelle Modell wird anklickbar und damit annotierbar
@@ -444,9 +447,7 @@ export class AnnotationService {
   }
 
   private add(annotation: Annotation): void {
-    if (this.inSocket) {
-      this.socket.emit('createAnnotation', {annotation});
-    }
+
     if (this.isDefaultLoad) {
       this.annotations.push(annotation);
       this.defaultAnnotationsSorted.push(annotation);
@@ -476,6 +477,12 @@ export class AnnotationService {
         // annotationmarker.service ((on double click) created annotation)
         this.selectedAnnotation.next(resultAnnotation._id);
         this.editModeAnnotation.next(resultAnnotation._id);
+        if (this.isannotationSourceCollection) {
+        const annoSocket = this.socketService.annotationAdd(resultAnnotation);
+        if (this.inSocket) {
+          this.socket.emit('createAnnotation', {annoSocket});
+        }
+        }
       })
       .catch((errorMessage: any) => {
         // PouchDB
@@ -493,7 +500,12 @@ export class AnnotationService {
         // annotationmarker.service ((on double click) created annotation)
         this.selectedAnnotation.next(annotation._id);
         this.editModeAnnotation.next(annotation._id);
-
+        if (this.isannotationSourceCollection) {
+        const annoSocket = this.socketService.annotationAdd(annotation);
+        if (this.inSocket) {
+          this.socket.emit('createAnnotation', {annoSocket});
+        }
+        }
       });
   }
 
@@ -518,6 +530,11 @@ export class AnnotationService {
             .splice(this.annotations.indexOf(resultAnnotation), 1, resultAnnotation) :
           this.collectionAnnotationsSorted
             .splice(this.annotations.indexOf(resultAnnotation), 1, resultAnnotation);
+        if (this.isannotationSourceCollection) {
+        const annoSocket = this.socketService.annotationChange(resultAnnotation);
+        if (this.inSocket) {
+          this.socket.emit('editAnnotation', {annoSocket});
+        }}
       })
       .catch((errorMessage: any) => {
         // PouchDB
@@ -533,16 +550,17 @@ export class AnnotationService {
             .splice(this.annotations.indexOf(annotation), 1, annotation) :
           this.collectionAnnotationsSorted
             .splice(this.annotations.indexOf(annotation), 1, annotation);
+        const annoSocket = this.socketService.annotationChange(annotation);
+        if (this.isannotationSourceCollection) {
+        if (this.inSocket) {
+          this.socket.emit('editAnnotation', {annoSocket});
+        }}
       });
   }
 
   public deleteAnnotation(annotation: Annotation) {
 
     if (this.userdataService.isAnnotationOwner(annotation)) {
-
-      if (this.inSocket) {
-        this.socket.emit('deleteAnnotation', {annotation});
-      }
 
       if (this.isDefaultLoad) {
         const index: number = this.annotations.indexOf(annotation);
@@ -581,6 +599,11 @@ export class AnnotationService {
           .then((result: any) => {
             if (result.status === 'ok') {
               this.message.info('Deleted from Server');
+              if (this.isannotationSourceCollection) {
+              const annoSocket = this.socketService.annotationDelete(annotation);
+              if (this.inSocket) {
+                this.socket.emit('deleteAnnotation', {annoSocket});
+              }}
             } else {
               this.message.info('Not deleted from Server');
               this.passwordDialog(annotation._id);
@@ -631,8 +654,10 @@ export class AnnotationService {
       }
     }
 
+    // Zoe sagt: ist wahrscheinlich überflüssig, wird durch Update erledigt.
     // 1.1.3
     // - Ranking der Annotation ändern
+    /*
     if (this.inSocket) {
       const IdArray = new Array();
       const RankingArray = new Array();
@@ -644,7 +669,7 @@ export class AnnotationService {
       if (this.inSocket) {
         this.socket.emit('changeRanking', {oldRanking: IdArray, newRanking: RankingArray});
       }
-    }
+    }*/
   }
 
   public exportAnnotations() {
@@ -697,37 +722,25 @@ export class AnnotationService {
 
   public async redrawMarker() {
 
+    if (!this.inSocket) {
     await this.annotationmarkerService.deleteAllMarker();
 
     for (const annotation of this.annotations) {
-      let color = 'black';
-      if (this.coloredUsers.length) {
-        for (let _i = 0; _i < 6; _i++) {
-          if (this.coloredUsers[_i]) {
-            if (annotation.creator._id === this.coloredUsers[_i]._id) {
-              color = this.color[_i];
-            }
-          }
-        }
-      }
+      const color = 'black';
       this.annotationmarkerService.createAnnotationMarker(annotation, color);
+    }
+    } else {
+      this.socketService.redrawMarker();
     }
   }
 
   public drawMarker(newAnnotation: Annotation) {
-
-    let color = 'black';
-    if (this.coloredUsers.length) {
-      for (let _i = 0; _i < 6; _i++) {
-        if (this.coloredUsers[_i]) {
-          if (newAnnotation.creator._id === this.coloredUsers[_i]._id) {
-            color = this.color[_i];
-          }
-        }
-      }
+    if(!this.inSocket) {
+      const color = 'black';
+      this.annotationmarkerService.createAnnotationMarker(newAnnotation, color);
+    } else {
+      this.socketService.drawMarker(newAnnotation);
     }
-
-    this.annotationmarkerService.createAnnotationMarker(newAnnotation, color);
   }
 
   public setSelectedAnnotation(id: string) {
@@ -752,8 +765,6 @@ export class AnnotationService {
     dialogRef.afterClosed()
       .subscribe(data => {
         if (data.status === true) {
-          console.log('Das bekomme ich vom Dialog: ', data);
-          console.log('Status1: ', data.status);
           const copyAnnotation = this.createCopyOfAnnotation(annotation, data.collectionId, data.annotationListLength);
 
           this.mongo.updateAnnotation(copyAnnotation)

@@ -28,6 +28,12 @@ export class UserdataService {
     _id: 'guest',
   };
 
+  public socketUserData: any = {
+    fullname: 'Guest',
+    username: 'guest',
+    _id: 'guest',
+  };
+
   public cachedLoginData: any = {
     password: '',
     username: '',
@@ -42,6 +48,7 @@ export class UserdataService {
 
     this.catalogueService.loggedIn.subscribe(loggedIn => {
       this.loggedIn = loggedIn;
+      this.createUserDataForSocket();
       if (loggedIn) {
         this.getUserData();
       }
@@ -151,6 +158,38 @@ export class UserdataService {
   public setcachedLoginData(pwd: string, user: string) {
     this.cachedLoginData.password = pwd;
     this.cachedLoginData.username = user;
+  }
+
+  public getUserDataForSocket(): any {
+    if (this.currentUserData.id !== 'guest') {
+      return this.currentUserData;
+    } else {
+      if (this.socketUserData.id !== 'guest') {
+        return this.socketUserData.id;
+      } else {
+        const generatedId = this.mongoService.generateObjectId();
+        const socketUserData = {
+          fullname: 'Kompakkt Cat',
+          username: 'komkcat',
+          _id: generatedId,
+        };
+        this.socketUserData = socketUserData;
+        return socketUserData;
+      }
+    }
+  }
+
+  public createUserDataForSocket() {
+    if (this.currentUserData.id !== 'guest') {
+      this.socketUserData = this.currentUserData;
+    } else {
+      const generatedId = this.mongoService.generateObjectId();
+      this.socketUserData = {
+        fullname: 'Kompakkt Cat',
+        username: 'komkcat',
+        _id: generatedId,
+      };
+    }
   }
 
 }

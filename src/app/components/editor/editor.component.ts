@@ -85,7 +85,8 @@ export class EditorComponent implements OnInit, AfterViewInit {
         this.annotationService.annotationMode(false);
         this.dragDisabled = true;
       }
-      if (editorIsOpen && !this.meshSettingsMode && !this.isCollection && !this.isModelOwner && !this.isDefaultLoad) {
+      if (editorIsOpen && !this.meshSettingsMode && !this.isCollection &&
+        !this.isModelOwner && !this.isDefaultLoad) {
         this.annotationService.annotationMode(false);
         this.dragDisabled = true;
       }
@@ -223,7 +224,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
     }
     if (mrChange.value === 'd') {
       this.annotationService.annotationMode(false);
-      this.annotationService.toggleAnnotationSource(false, true);
+      this.annotationService.toggleAnnotationSource(false, false);
     }
   }
 

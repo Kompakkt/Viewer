@@ -165,14 +165,6 @@ export class AnnotationComponent implements OnInit {
 
   private save(): void {
     this.annotationService.updateAnnotation(this.annotation);
-    // this.dataService.updateAnnotation(this.annotation);
-    // 1.1.2
-    if (this.annotationService.inSocket) {
-      this.socketService.socket.emit('editAnnotation', [
-        this.annotationService.socketRoom,
-        this.annotation,
-      ]);
-    }
   }
 
   public editFullscreen(): void {
@@ -197,11 +189,11 @@ export class AnnotationComponent implements OnInit {
   }
 
   public getColor(): any {
-    if (this.annotationService.coloredUsers.length) {
-      for (let _i = 0; _i < this.annotationService.maxColoredUsersMinusOne; _i++) {
-        if (this.annotationService.coloredUsers[_i]) {
-          if (this.annotation.creator._id === this.annotationService.coloredUsers[_i]._id) {
-            return this.annotationService.color[_i];
+    if (this.socketService.coloredUsers.length) {
+      for (let _i = 0; _i < this.socketService.maxColoredUsersMinusOne; _i++) {
+        if (this.socketService.coloredUsers[_i]) {
+          if (this.annotation.creator._id === this.socketService.coloredUsers[_i]._id) {
+            return this.socketService.color[_i];
           }
         }
       }
