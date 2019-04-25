@@ -13,6 +13,11 @@ import {SocketService} from '../../services/socket/socket.service';
 import {UserdataService} from '../../services/userdata/userdata.service';
 import {DialogAnnotationEditorComponent} from '../dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
 
+import {
+  PerfectScrollbarConfigInterface,
+  PerfectScrollbarComponent, PerfectScrollbarDirective
+} from 'ngx-perfect-scrollbar';
+
 @Component({
   selector: 'app-annotation',
   templateUrl: './annotation.component.html',
@@ -39,6 +44,8 @@ export class AnnotationComponent implements OnInit {
   public isCollection: boolean;
   private selectedAnnotation: string;
   private editModeAnnotation: string;
+
+  public config: PerfectScrollbarConfigInterface = {};
 
   constructor(private dataService: DataService,
               private annotationService: AnnotationService,
@@ -103,7 +110,7 @@ export class AnnotationComponent implements OnInit {
 
     setInterval(() => {
       this.setPosition(this.annotation);
-    },          15);
+    }, 15);
   }
 
   public setPosition(annotation: Annotation) {
