@@ -279,27 +279,23 @@ export class SocketService {
     };
   }
 
-  public sortUser(addAsLast?: IUser) {
-    if (this.collaborators.length) {
-      const index = this.collaborators.findIndex(x => x.socketId === this.socket.ioSocket.id);
-      if (index !== 0) {
-        this.collaborators.splice(0, 0, this.collaborators.splice(index, 1)[0]);
+  public sortUser(priorityUser?: IUser) {
+    const selfIndex = this.collaborators
+      .findIndex(user => user.socketId === this.socket.ioSocket.id);
 
-        if (addAsLast) {
-          const newUserIndex = this.collaborators.findIndex(x => x.socketId === addAsLast.socketId);
-          if (newUserIndex !== 0) {
-            const splicedUser = this.collaborators.splice(newUserIndex, 1)[0];
-            if (this.collaborators.length < this.maxColoredUsersMinusOne) {
-              this.collaborators.splice(this.collaborators.length, 0, splicedUser);
-            } else {
-              this.collaborators.splice(this.maxColoredUsersMinusOne, 0, splicedUser);
-            }
-          }
-        }
-      }
-      this.coloredUsers = this.collaborators;
+    const self = this.collaborators.splice(selfIndex, 1)[0];
 
+    if (priorityUser) {
+      const pUserIndex = this.collaborators.findIndex(x => x.socketId === priorityUser.socketId);
+      const pUser = (pUserIndex !== -1)
+        ? this.collaborators.splice(pUserIndex, 1)[0] : priorityUser;
+      this.collaborators.unshift(pUser);
     }
+
+    this.collaborators.unshift(self);
+
+    this.coloredUsers = this.collaborators;
+
     this.redrawMarker();
   }
 
