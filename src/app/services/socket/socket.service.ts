@@ -96,7 +96,7 @@ export class SocketService {
     this.socket.on('createAnnotation', (result: IAnnotation) => {
       console.log(`COLLABORATOR '${result.user.username}' CREATED AN ANNOTATION - SOCKET.IO`);
 
-     // this.collaboratorsAnnotations.push(result.annotation);
+      this.annotationsForSocket.push(result.annotation);
 
       this.printInfo();
     });
@@ -104,12 +104,12 @@ export class SocketService {
     this.socket.on('editAnnotation', (result: IAnnotation) => {
       console.log(`COLLABORATOR '${result.user.username}' EDITED AN ANNOTATION - SOCKET.IO`);
 
-      /*
-      const findIndexById = this.collaboratorsAnnotations
-        .findIndex(_socketAnnotation => _socketAnnotation.annotation._id === result.annotation._id);
+
+      const findIndexById = this.annotationsForSocket
+        .findIndex(_socketAnnotation => _socketAnnotation._id === result.annotation._id);
       if (findIndexById !== -1) {
-        this.collaboratorsAnnotations.splice(findIndexById, 1, result.annotation);
-      }*/
+        this.annotationsForSocket.splice(findIndexById, 1, result.annotation);
+      }
 
       this.printInfo();
     });
@@ -117,12 +117,12 @@ export class SocketService {
     this.socket.on('deleteAnnotation', (result: IAnnotation) => { // [socket.id, annotation]
       console.log(`COLLABORATOR '${result.user.username}' DELETED AN ANNOTATION- SOCKET.IO`);
 
-      /*
-      const findIndexById = this.collaboratorsAnnotations
-        .findIndex(_socketAnnotation => _socketAnnotation.annotation._id === result.annotation._id);
+
+      const findIndexById = this.annotationsForSocket
+        .findIndex(_socketAnnotation => _socketAnnotation._id === result.annotation._id);
       if (findIndexById !== -1) {
-        this.collaboratorsAnnotations.splice(findIndexById, 1);
-      }*/
+        this.annotationsForSocket.splice(findIndexById, 1);
+      }
 
       this.printInfo();
     });
@@ -253,22 +253,23 @@ export class SocketService {
     }
     data.annotations.forEach(annotation => {
       console.log('Bekomme in Socket von Collab: ', annotation);
-      /*
-      const foundInCollabAnnotations = this.collaboratorsAnnotations
-        .find(_socketAnnotation => annotation._id === _socketAnnotation.annotation._id);
-      const foundInLocalAnnotations = this.annotationsForSocket
-        .find(_annotation => annotation._id === _annotation._id);
 
-      if (!foundInCollabAnnotations && !foundInLocalAnnotations) {
-        this.collaboratorsAnnotations.push(annotation);
+      const foundInOwnSocketAnnotations = this.annotationsForSocket
+        .find(_socketAnnotation => annotation._id === _socketAnnotation._id);
+
+      if (foundInOwnSocketAnnotations && foundInOwnSocketAnnotations.lastModificationDate && annotation.lastModificationDate) {
+        if (foundInOwnSocketAnnotations.lastModificationDate < annotation.lastModificationDate) {
+          const annotationIndex = this.annotationsForSocket.indexOf(foundInOwnSocketAnnotations);
+          this.annotationsForSocket.splice(annotationIndex, 1, annotation);
+        }
+      } else {
+        this.annotationsForSocket.push(annotation);
       }
-
-      if (foundInCollabAnnotations) {
-        const annotationIndex = this.collaboratorsAnnotations.indexOf(foundInCollabAnnotations);
-        // Replace in place
-        this.collaboratorsAnnotations.splice(annotationIndex, 1, annotation);
-      }*/
     });
+
+    const sortMeArray = JSON.parse(JSON.stringify(this.annotationsForSocket));
+    this.sortAnnotations(sortMeArray);
+
     this.printInfo();
   }
 
@@ -391,5 +392,26 @@ export class SocketService {
     }
 
     this.annotationmarkerService.createAnnotationMarker(newAnnotation, color);
+  }
+
+  private async sortAnnotations(toBesorted: any[]) {
+    let sortMe = toBesorted;
+
+    this.annotationsForSocket = sortMe;
+    sortMe = this.annotationsForSocket.slice(0);
+    this.annotationsForSocket.splice(0, this.annotationsForSocket.length);
+    this.annotationsForSocket = sortMe.slice(0);
+
+    await this.annotationsForSocket.sort((leftSide, rightSide): number => {
+      if (+leftSide.ranking < +rightSide.ranking) {
+        return -1;
+      }
+      if (+leftSide.ranking > +rightSide.ranking) {
+        return 1;
+      }
+      return 0;
+    });
+
+    this.redrawMarker();
   }
 }
