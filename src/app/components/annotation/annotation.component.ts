@@ -84,23 +84,18 @@ export class AnnotationComponent implements OnInit {
 
       this.annotationService.isEditModeAnnotation.subscribe(selectedAnno => {
         this.editModeAnnotation = selectedAnno;
-        if (selectedAnno === this.annotation._id && !this.editMode) {
-          this.editMode = true;
-          this.annotationService.setSelectedAnnotation(this.annotation._id);
-          this.labelMode = 'remove_red_eye';
-          this.labelModeText = 'view';
-        }
-        if (selectedAnno === this.annotation._id && this.editMode) {
-          return;
-        }
-        if (selectedAnno !== this.annotation._id && this.editMode) {
+        const isSelectedAnno = selectedAnno === this.annotation._id;
+        if (!isSelectedAnno && this.editMode) {
           this.editMode = false;
           this.labelMode = 'edit';
           this.labelModeText = 'edit';
           this.save();
         }
-        if (selectedAnno !== this.annotation._id && !this.editMode) {
-          return;
+        if (isSelectedAnno && !this.editMode) {
+          this.editMode = true;
+          this.annotationService.setSelectedAnnotation(this.annotation._id);
+          this.labelMode = 'remove_red_eye';
+          this.labelModeText = 'view';
         }
       });
 
