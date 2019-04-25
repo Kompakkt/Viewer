@@ -732,6 +732,7 @@ export class AnnotationService {
       this.annotationSourceCollection.emit(false);
       this.annotations = JSON.parse(JSON.stringify(this.isannotationSourceCollection ?
         this.collectionAnnotationsSorted : this.defaultAnnotationsSorted));
+      await this.redrawMarker();
     } else {
       if (sourceCol === this.isannotationSourceCollection) {
         return;
