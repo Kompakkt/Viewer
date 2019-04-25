@@ -51,17 +51,17 @@ interface IRoomData {
 })
 export class SocketService {
 
-  public collaboratorsAnnotations: IAnnotation[];
-  public collaborators: IUser[];
+  public collaboratorsAnnotations: IAnnotation[] = [];
+  public collaborators: IUser[] = [];
   public socketRoom: string;
   private isInSocket = false;
   @Output() inSocket: EventEmitter<boolean> = new EventEmitter();
 
-  public coloredUsers: any[];
+  public coloredUsers: any[] = [];
   public color = ['pink', 'red', 'blue', 'yellow', 'purple', 'gold'];
   public maxColoredUsersMinusOne = this.color.length - 1;
 
-  public annotationsForSocket: Annotation[];
+  public annotationsForSocket: Annotation[] = [];
 
   constructor(public socket: Socket,
               private loadModelService: LoadModelService,
@@ -69,9 +69,6 @@ export class SocketService {
               private annotationmarkerService: AnnotationmarkerService) {
     this.isInSocket = false;
     this.inSocket.emit(false);
-    this.collaboratorsAnnotations = [];
-    this.collaborators = [];
-    this.coloredUsers = [];
 
     this.loadModelService.Observables.actualModel.subscribe(actualModel => {
       const currentCompilation = this.loadModelService.getCurrentCompilation();
@@ -284,6 +281,7 @@ export class SocketService {
       .findIndex(user => user.socketId === this.socket.ioSocket.id);
 
     const self = this.collaborators.splice(selfIndex, 1)[0];
+    if (!self) return;
 
     if (priorityUser) {
       const pUserIndex = this.collaborators.findIndex(x => x.socketId === priorityUser.socketId);
