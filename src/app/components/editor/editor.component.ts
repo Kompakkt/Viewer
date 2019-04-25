@@ -48,7 +48,8 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
   private isCollectionOwner: boolean;
 
-  public popup_is_open = '';
+  public inSocket = false;
+
   @ViewChildren(AnnotationsEditorComponent)
   annotationsList: QueryList<AnnotationsEditorComponent>;
 
@@ -63,6 +64,14 @@ export class EditorComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
+
+    this.socketService.inSocket.subscribe(inSocket => {
+      this.inSocket = inSocket;
+    });
+
+    this.annotationService.annotationSourceCollection.subscribe(annotationSourceCollection => {
+      this.isannotationSourceCollection = annotationSourceCollection;
+    });
 
     this.userdataService.collectionOwner.subscribe(owner => {
       this.isCollectionOwner = owner;

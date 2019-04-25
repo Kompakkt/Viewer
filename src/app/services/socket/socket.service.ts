@@ -51,11 +51,14 @@ interface IRoomData {
 })
 export class SocketService {
 
-  public collaboratorsAnnotations: IAnnotation[] = [];
+  // public collaboratorsAnnotations: IAnnotation[] = [];
   public collaborators: IUser[] = [];
   public socketRoom: string;
   private isInSocket = false;
   @Output() inSocket: EventEmitter<boolean> = new EventEmitter();
+
+  private isSocketAnnotationSource = false;
+  @Output() socketAnnotationSource: EventEmitter<boolean> = new EventEmitter();
 
   public coloredUsers: any[] = [];
   public color = ['pink', 'red', 'blue', 'yellow', 'purple', 'gold'];
@@ -93,7 +96,7 @@ export class SocketService {
     this.socket.on('createAnnotation', (result: IAnnotation) => {
       console.log(`COLLABORATOR '${result.user.username}' CREATED AN ANNOTATION - SOCKET.IO`);
 
-      this.collaboratorsAnnotations.push(result.annotation);
+     // this.collaboratorsAnnotations.push(result.annotation);
 
       this.printInfo();
     });
@@ -101,11 +104,12 @@ export class SocketService {
     this.socket.on('editAnnotation', (result: IAnnotation) => {
       console.log(`COLLABORATOR '${result.user.username}' EDITED AN ANNOTATION - SOCKET.IO`);
 
+      /*
       const findIndexById = this.collaboratorsAnnotations
         .findIndex(_socketAnnotation => _socketAnnotation.annotation._id === result.annotation._id);
       if (findIndexById !== -1) {
         this.collaboratorsAnnotations.splice(findIndexById, 1, result.annotation);
-      }
+      }*/
 
       this.printInfo();
     });
@@ -113,11 +117,12 @@ export class SocketService {
     this.socket.on('deleteAnnotation', (result: IAnnotation) => { // [socket.id, annotation]
       console.log(`COLLABORATOR '${result.user.username}' DELETED AN ANNOTATION- SOCKET.IO`);
 
+      /*
       const findIndexById = this.collaboratorsAnnotations
         .findIndex(_socketAnnotation => _socketAnnotation.annotation._id === result.annotation._id);
       if (findIndexById !== -1) {
         this.collaboratorsAnnotations.splice(findIndexById, 1);
-      }
+      }*/
 
       this.printInfo();
     });
@@ -125,12 +130,13 @@ export class SocketService {
     this.socket.on('changeRanking', (result: IChangeRanking) => {
       console.log(`COLLABORATOR '${result.user.username}' CHANGED ANNOTATION-RANKING - SOCKET.IO`);
 
+      /*
       for (const collabAnnotation of this.collaboratorsAnnotations) {
         for (let j = 0; j < result.oldRanking.length; j++) {
           if (result.oldRanking[j] !== collabAnnotation.annotation._id) continue;
           collabAnnotation.annotation.ranking = result.newRanking[j];
         }
-      }
+      }*/
 
       this.printInfo();
     });
@@ -140,11 +146,16 @@ export class SocketService {
       console.log(`COLLABORATOR '${result.user.username}' LOGGED OUT - SOCKET.IO`);
       this.removeKnowledgeAboutUser(result);
       this.printInfo();
+
+      this.isSocketAnnotationSource = false;
+      this.socketAnnotationSource.emit(false);
     });
 
     this.socket.on('logout', result => { // socket.id
       console.log(`logging out of Socket.io...`);
       console.log(`DISCONNECTED FROM SOCKET.IO`);
+      this.isSocketAnnotationSource = false;
+      this.socketAnnotationSource.emit(false);
     });
 
     // A user left the room, so we remove knowledge about this user
@@ -160,8 +171,10 @@ export class SocketService {
       this.inSocket.emit(false);
       this.collaborators = [];
       this.sortUser();
-      this.collaboratorsAnnotations = [];
+      // this.collaboratorsAnnotations = [];
       this.socket.disconnect();
+      this.isSocketAnnotationSource = false;
+      this.socketAnnotationSource.emit(false);
     });
 
     // Our data is requested
@@ -179,12 +192,13 @@ export class SocketService {
   private removeKnowledgeAboutUser(userInfo: IUserInfo) {
     this.collaborators = this.collaborators.filter(_user => _user._id !== userInfo.user._id);
 
+    /*
     for (const removableAnnotation of userInfo.annotations) {
       const annIndex = this.collaboratorsAnnotations
         .findIndex(ann => ann.annotation._id === removableAnnotation._id);
       if (annIndex === -1) continue;
       this.collaboratorsAnnotations.splice(annIndex, 1);
-    }
+    }*/
 
     this.sortUser();
   }
@@ -204,6 +218,8 @@ export class SocketService {
       recipient: this.socketRoom,
     };
     this.socket.emit('roomDataRequest', emitRequest);
+    this.isSocketAnnotationSource = false;
+    this.socketAnnotationSource.emit(false);
   }
 
   public disconnectSocket() {
@@ -211,9 +227,10 @@ export class SocketService {
     this.inSocket.emit(false);
     this.collaborators = [];
     this.sortUser();
-    this.collaboratorsAnnotations = [];
+    // this.collaboratorsAnnotations = [];
     // send info to other Room members,
     // then emit 'logout' from Socket.id for this User
+    // TODO So kann ein Event einfach emittet werden?
     this.socket.emit('logout', {annotations: this.annotationsForSocket});
     this.socket.disconnect();
   }
@@ -221,7 +238,7 @@ export class SocketService {
   public changeSocketRoom() {
     this.collaborators = [];
     this.sortUser();
-    this.collaboratorsAnnotations = [];
+    // this.collaboratorsAnnotations = [];
     const emitData: IChangeRoom = {
       newRoom: this.socketRoom,
       annotations: this.annotationsForSocket,
@@ -235,6 +252,8 @@ export class SocketService {
       this.sortUser();
     }
     data.annotations.forEach(annotation => {
+      console.log('Bekomme in Socket von Collab: ', annotation);
+      /*
       const foundInCollabAnnotations = this.collaboratorsAnnotations
         .find(_socketAnnotation => annotation._id === _socketAnnotation.annotation._id);
       const foundInLocalAnnotations = this.annotationsForSocket
@@ -248,7 +267,7 @@ export class SocketService {
         const annotationIndex = this.collaboratorsAnnotations.indexOf(foundInCollabAnnotations);
         // Replace in place
         this.collaboratorsAnnotations.splice(annotationIndex, 1, annotation);
-      }
+      }*/
     });
     this.printInfo();
   }
@@ -258,17 +277,17 @@ export class SocketService {
     console.log('this.collaborators:');
     console.log(JSON.parse(JSON.stringify(this.collaborators)));
     console.log('this.collaboratorsAnnotations');
-    console.log(JSON.parse(JSON.stringify(this.collaboratorsAnnotations)));
+    console.log(JSON.parse(JSON.stringify(this.annotationsForSocket)));
   }
 
   // TODO das wird den anderen Nutzern gesendet
   private getOwnSocketData(): IUserInfo {
-    const us = this.userdataService.getUserDataForSocket();
+    const userData = this.userdataService.getUserDataForSocket();
     return {
       user: {
-        _id: us._id,
-        fullname: us.fullname,
-        username: us.username,
+        _id: userData._id,
+        fullname: userData.fullname,
+        username: userData.username,
         room: this.socketRoom,
         socketId: 'self',
       },
@@ -301,35 +320,45 @@ export class SocketService {
     this.annotationsForSocket = JSON.parse(JSON.stringify(annotations));
   }
 
-  public annotationChange(annotation: Annotation): Annotation {
-    const newAnnotation = JSON.parse(JSON.stringify(annotation));
-    const inSocketAnnotation = this.annotationsForSocket
-      .find(anno => (anno._id === annotation._id));
-    const indexOfAnnotation = this.annotationsForSocket.indexOf(annotation);
+  public annotationforSocket(annotation: Annotation, action: string): Annotation {
 
-    if (!inSocketAnnotation) {
-      this.annotationsForSocket.splice(indexOfAnnotation, 1, annotation);
-      return annotation;
+    const annotationIndex = this.collaborators
+      .findIndex(user => user.socketId === this.socket.ioSocket.id);
+
+    switch (action) {
+      // Use case: single collection (3)
+      case 'delete':
+        if (annotationIndex !== -1) {
+          this.annotationsForSocket.splice(annotationIndex, 1);
+        }
+        break;
+
+      case 'edit':
+        if (annotationIndex !== -1) {
+          const _manipulatedAnno = JSON.parse(JSON.stringify(annotation));
+          const _keepCreator = this.annotationsForSocket[annotationIndex].creator;
+          _manipulatedAnno.creator = _keepCreator;
+          this.annotationsForSocket.splice(annotationIndex, 1, _manipulatedAnno);
+          return _manipulatedAnno;
+        }
+        break;
+
+      case 'add':
+        if (annotationIndex === -1) {
+          const _manipulatedAnno = JSON.parse(JSON.stringify(annotation));
+          const _manipulatedCreator = this.userdataService.getUserDataForSocket();
+          _manipulatedAnno.creator.name = _manipulatedCreator.fullname;
+          _manipulatedAnno.creator._id = _manipulatedCreator._id;
+          this.annotationsForSocket.push(_manipulatedAnno);
+          return _manipulatedAnno;
+        }
+        break;
+
+      default:
+        console.log('No valid action passed');
+
     }
-
-    const user = this.userdataService.getUserDataForSocket();
-    newAnnotation.creator.name = user.fullname;
-    newAnnotation.creator._id = user._id;
-    this.annotationsForSocket.splice(indexOfAnnotation, 1, newAnnotation);
-    return newAnnotation;
-  }
-
-  public annotationAdd(annotation: Annotation): Annotation {
-    const user = this.userdataService.getUserDataForSocket();
-    const newAnnotation = JSON.parse(JSON.stringify(annotation));
-    newAnnotation.creator.name = user.fullname;
-    newAnnotation.creator._id = user._id;
-    this.annotationsForSocket.push(newAnnotation);
-    return newAnnotation;
-  }
-
-  public annotationDelete(annotation: Annotation) {
-    this.annotationsForSocket.splice(this.annotationsForSocket.indexOf(annotation), 1);
+    return annotation;
   }
 
   public redrawMarker() {

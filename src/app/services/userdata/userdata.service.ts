@@ -46,9 +46,14 @@ export class UserdataService {
               private mongoService: MongohandlerService,
               private message: MessageService) {
 
+    this.catalogueService.firstLoad.subscribe(firstLoad => {
+      if (firstLoad) {
+        this.initUserDataForSocket();
+      }
+    });
+
     this.catalogueService.loggedIn.subscribe(loggedIn => {
       this.loggedIn = loggedIn;
-      this.createUserDataForSocket();
       if (loggedIn) {
         this.getUserData();
       }
@@ -126,7 +131,7 @@ export class UserdataService {
             }
           }
           console.log('Meine Modelle', this.userOwnedFinishedModels, 'compis', this.personalCollections, 'meine Annos', this.userOwnedAnnotations);
-        },    error => {
+        }, error => {
           this.message.error('Connection to object server refused.');
           reject('Connection to object server refused.');
         });
@@ -144,15 +149,8 @@ export class UserdataService {
   }
 
   public isAnnotationOwner(annotation: Annotation): boolean {
-    if (annotation._id && this.loggedIn && this.currentUserData._id) {
-      if (this.currentUserData._id !== 'guest') {
-        return this.currentUserData._id === annotation.creator._id;
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
+    return annotation._id && this.loggedIn && this.currentUserData._id !== 'guest' ?
+      this.currentUserData._id === annotation.creator._id : false;
   }
 
   public setcachedLoginData(pwd: string, user: string) {
@@ -161,35 +159,16 @@ export class UserdataService {
   }
 
   public getUserDataForSocket(): any {
-    if (this.currentUserData.id !== 'guest') {
-      return this.currentUserData;
-    } else {
-      if (this.socketUserData.id !== 'guest') {
-        return this.socketUserData.id;
-      } else {
-        const generatedId = this.mongoService.generateObjectId();
-        const socketUserData = {
-          fullname: 'Kompakkt Cat',
-          username: 'komkcat',
-          _id: generatedId,
-        };
-        this.socketUserData = socketUserData;
-        return socketUserData;
-      }
-    }
+    return this.currentUserData.id !== 'guest' ?
+      this.currentUserData : this.socketUserData.id;
   }
 
-  public createUserDataForSocket() {
-    if (this.currentUserData.id !== 'guest') {
-      this.socketUserData = this.currentUserData;
-    } else {
-      const generatedId = this.mongoService.generateObjectId();
+  public initUserDataForSocket() {
+    this.socketUserData = this.currentUserData.id !== 'guest' ? this.currentUserData :
       this.socketUserData = {
         fullname: 'Kompakkt Cat',
         username: 'komkcat',
-        _id: generatedId,
+        _id: this.mongoService.generateObjectId(),
       };
-    }
   }
-
 }

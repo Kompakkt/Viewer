@@ -22,7 +22,7 @@
 
         <div *ngIf="!isDefaultLoad">
 
-          <mat-radio-group [disabled]="!isCollection" aria-label="Select Annotation Category"
+          <mat-radio-group [disabled]="!isCollection && inSocket" aria-label="Select Annotation Category"
                            (change)="changeCategory($event)">
             <mat-radio-button value="d" [checked]=!isCollectionSource>Default</mat-radio-button>
             <mat-radio-button value="c">Collection</mat-radio-button>

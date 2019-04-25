@@ -34,6 +34,7 @@ export class CatalogueService {
   @Output() singleObject: EventEmitter<boolean> = new EventEmitter();
   @Output() singleCollection: EventEmitter<boolean> = new EventEmitter();
   @Output() defaultLoad: EventEmitter<boolean> = new EventEmitter();
+  @Output() firstLoad: EventEmitter<boolean> = new EventEmitter();
 
   constructor(private mongoHandlerService: MongohandlerService,
               private loadModelService: LoadModelService,
@@ -43,6 +44,7 @@ export class CatalogueService {
   public bootstrap(): void {
 
     if (this.isFirstLoad) {
+      this.firstLoad.emit(true);
 
       const url_split = location.href.split('?');
       this.isFirstLoad = false;
@@ -215,6 +217,7 @@ export class CatalogueService {
             });
         }
       }
+      this.firstLoad.emit(false);
     } else {
       console.log('Page has already been initially loaded.');
       this.mongoHandlerService.isAuthorized()
