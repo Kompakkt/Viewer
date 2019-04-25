@@ -41,181 +41,7 @@ export class CatalogueService {
   }
 
   public bootstrap(): void {
-
-    if (this.isFirstLoad) {
-
-      const url_split = location.href.split('?');
-      this.isFirstLoad = false;
-
-      // Use case 1: load viewer (all available objects and collections)
-      if (url_split.length <= 1) {
-
-        this.isSingleObject = false;
-        this.singleObject.emit(false);
-        this.isSingleCollection = false;
-        this.singleCollection.emit(false);
-
-        this.isShowCatalogue = true;
-        this.showCatalogue.emit(true);
-
-        this.loadModelService.loadDefaultModelData();
-        this.isDefaultLoad = true;
-        this.defaultLoad.emit(true);
-
-        this.mongoHandlerService.isAuthorized()
-          .then(result => {
-            if (result.status === 'ok') {
-              this.isLoggedIn = true;
-              this.loggedIn.emit(true);
-
-              this.fetchCollectionsData();
-              this.fetchModelsData();
-            } else {
-              this.isLoggedIn = false;
-              this.loggedIn.emit(false);
-            }
-          })
-          .catch(error => {
-            this.isLoggedIn = false;
-            this.loggedIn.emit(false);
-            this.message.error(
-              'Other Models and Collections are only available in the Cologne University ' +
-              'Network for logged in Users.');
-          });
-      }
-
-      // Use case: load viewer with single object (2) or single collection (3)
-      if (url_split.length > 1) {
-
-        const equal_split = url_split[1].split('=');
-
-        if (equal_split.length > 1) {
-
-          const query = equal_split[1];
-          const category = equal_split[0];
-
-          switch (category) {
-            // Use case: single collection (3)
-            case 'model':
-
-              this.isSingleObject = true;
-              this.singleObject.emit(true);
-              this.isSingleCollection = false;
-              this.singleCollection.emit(false);
-              this.isShowCatalogue = false;
-              this.showCatalogue.emit(false);
-
-              this.isDefaultLoad = false;
-              this.defaultLoad.emit(false);
-
-              this.mongoHandlerService.isAuthorized()
-                .then(result => {
-                  if (result.status === 'ok') {
-                    this.isLoggedIn = true;
-                    this.loggedIn.emit(true);
-                    this.selectModel(query, false);
-                  } else {
-                    this.isLoggedIn = false;
-                    this.loggedIn.emit(false);
-                  }
-                })
-                .catch(error => {
-                  this.isLoggedIn = false;
-                  this.loggedIn.emit(false);
-                  this.message.error('Can not see if you are logged in.');
-                });
-              break;
-
-            case 'compilation':
-
-              this.isSingleObject = false;
-              this.singleObject.emit(false);
-              this.isSingleCollection = true;
-              this.singleCollection.emit(true);
-              this.isShowCatalogue = true;
-              this.showCatalogue.emit(true);
-
-              this.isDefaultLoad = false;
-              this.defaultLoad.emit(false);
-
-              this.mongoHandlerService.isAuthorized()
-                .then(result => {
-                  if (result.status === 'ok') {
-                    this.isLoggedIn = true;
-                    this.loggedIn.emit(true);
-                    this.selectCollection(query);
-                  } else {
-                    this.isLoggedIn = false;
-                    this.loggedIn.emit(false);
-                  }
-                })
-                .catch(error => {
-                  this.isLoggedIn = false;
-                  this.loggedIn.emit(false);
-                  this.message.error('Can not see if you are logged in.');
-                });
-              break;
-
-            default:
-              this.isShowCatalogue = true;
-              this.showCatalogue.emit(true);
-              this.isSingleObject = false;
-              this.singleObject.emit(false);
-              this.isSingleCollection = false;
-              this.singleCollection.emit(false);
-              console.log('No valid query passed. Loading default model.');
-              this.loadModelService.loadDefaultModelData();
-              this.isDefaultLoad = true;
-              this.defaultLoad.emit(true);
-              this.mongoHandlerService.isAuthorized()
-                .then(result => {
-                  if (result.status === 'ok') {
-                    this.isLoggedIn = true;
-                    this.loggedIn.emit(true);
-                    this.fetchCollectionsData();
-                    this.fetchModelsData();
-                  } else {
-                    this.isLoggedIn = false;
-                    this.loggedIn.emit(false);
-                  }
-                })
-                .catch(error => {
-                  this.isLoggedIn = false;
-                  this.loggedIn.emit(false);
-                  this.message.error('Can not see if you are logged in.');
-                });
-          }
-        } else {
-          this.isShowCatalogue = true;
-          this.showCatalogue.emit(true);
-          this.isSingleObject = false;
-          this.singleObject.emit(false);
-          this.isSingleCollection = false;
-          this.singleCollection.emit(false);
-          console.log('No valid query passed. Loading default model.');
-          this.loadModelService.loadDefaultModelData();
-          this.isDefaultLoad = true;
-          this.defaultLoad.emit(true);
-          this.mongoHandlerService.isAuthorized()
-            .then(result => {
-              if (result.status === 'ok') {
-                this.fetchCollectionsData();
-                this.fetchModelsData();
-                this.isLoggedIn = true;
-                this.loggedIn.emit(true);
-              } else {
-                this.isLoggedIn = false;
-                this.loggedIn.emit(false);
-              }
-            })
-            .catch(error => {
-              this.isLoggedIn = false;
-              this.loggedIn.emit(false);
-              this.message.error('Can not see if you are logged in.');
-            });
-        }
-      }
-    } else {
+    if (!this.isFirstLoad) {
       console.log('Page has already been initially loaded.');
       this.mongoHandlerService.isAuthorized()
         .then(result => {
@@ -234,6 +60,182 @@ export class CatalogueService {
           this.loggedIn.emit(false);
           this.message.error('Can not see if you are logged in.');
         });
+      return;
+    }
+
+    const searchParams = location.search;
+    const queryParams = new URLSearchParams(searchParams);
+    const modelParam = queryParams.get('model');
+    const compParam = queryParams.get('compilation');
+    const url_split = location.href.split('?');
+    this.isFirstLoad = false;
+
+    // Use case 1: load viewer (all available objects and collections)
+    if (!modelParam && !compParam) {
+      this.isSingleObject = false;
+      this.singleObject.emit(false);
+      this.isSingleCollection = false;
+      this.singleCollection.emit(false);
+
+      this.isShowCatalogue = true;
+      this.showCatalogue.emit(true);
+
+      this.loadModelService.loadDefaultModelData();
+      this.isDefaultLoad = true;
+      this.defaultLoad.emit(true);
+
+      this.mongoHandlerService.isAuthorized()
+        .then(result => {
+          if (result.status === 'ok') {
+            this.isLoggedIn = true;
+            this.loggedIn.emit(true);
+
+            this.fetchCollectionsData();
+            this.fetchModelsData();
+          } else {
+            this.isLoggedIn = false;
+            this.loggedIn.emit(false);
+          }
+        })
+        .catch(error => {
+          this.isLoggedIn = false;
+          this.loggedIn.emit(false);
+          this.message.error(
+            'Other Models and Collections are only available in the Cologne University ' +
+            'Network for logged in Users.');
+        });
+    }
+
+    // Use case: load viewer with single object (2) or single collection (3)
+    if (url_split.length > 1) {
+
+      const equal_split = url_split[1].split('=');
+
+      if (equal_split.length > 1) {
+
+        const query = equal_split[1];
+        const category = equal_split[0];
+
+        switch (category) {
+          // Use case: single collection (3)
+          case 'model':
+
+            this.isSingleObject = true;
+            this.singleObject.emit(true);
+            this.isSingleCollection = false;
+            this.singleCollection.emit(false);
+            this.isShowCatalogue = false;
+            this.showCatalogue.emit(false);
+
+            this.isDefaultLoad = false;
+            this.defaultLoad.emit(false);
+
+            this.mongoHandlerService.isAuthorized()
+              .then(result => {
+                if (result.status === 'ok') {
+                  this.isLoggedIn = true;
+                  this.loggedIn.emit(true);
+                  this.selectModel(query, false);
+                } else {
+                  this.isLoggedIn = false;
+                  this.loggedIn.emit(false);
+                }
+              })
+              .catch(error => {
+                this.isLoggedIn = false;
+                this.loggedIn.emit(false);
+                this.message.error('Can not see if you are logged in.');
+              });
+            break;
+
+          case 'compilation':
+
+            this.isSingleObject = false;
+            this.singleObject.emit(false);
+            this.isSingleCollection = true;
+            this.singleCollection.emit(true);
+            this.isShowCatalogue = true;
+            this.showCatalogue.emit(true);
+
+            this.isDefaultLoad = false;
+            this.defaultLoad.emit(false);
+
+            this.mongoHandlerService.isAuthorized()
+              .then(result => {
+                if (result.status === 'ok') {
+                  this.isLoggedIn = true;
+                  this.loggedIn.emit(true);
+                  this.selectCollection(query);
+                } else {
+                  this.isLoggedIn = false;
+                  this.loggedIn.emit(false);
+                }
+              })
+              .catch(error => {
+                this.isLoggedIn = false;
+                this.loggedIn.emit(false);
+                this.message.error('Can not see if you are logged in.');
+              });
+            break;
+
+          default:
+            this.isShowCatalogue = true;
+            this.showCatalogue.emit(true);
+            this.isSingleObject = false;
+            this.singleObject.emit(false);
+            this.isSingleCollection = false;
+            this.singleCollection.emit(false);
+            console.log('No valid query passed. Loading default model.');
+            this.loadModelService.loadDefaultModelData();
+            this.isDefaultLoad = true;
+            this.defaultLoad.emit(true);
+            this.mongoHandlerService.isAuthorized()
+              .then(result => {
+                if (result.status === 'ok') {
+                  this.isLoggedIn = true;
+                  this.loggedIn.emit(true);
+                  this.fetchCollectionsData();
+                  this.fetchModelsData();
+                } else {
+                  this.isLoggedIn = false;
+                  this.loggedIn.emit(false);
+                }
+              })
+              .catch(error => {
+                this.isLoggedIn = false;
+                this.loggedIn.emit(false);
+                this.message.error('Can not see if you are logged in.');
+              });
+        }
+      } else {
+        this.isShowCatalogue = true;
+        this.showCatalogue.emit(true);
+        this.isSingleObject = false;
+        this.singleObject.emit(false);
+        this.isSingleCollection = false;
+        this.singleCollection.emit(false);
+        console.log('No valid query passed. Loading default model.');
+        this.loadModelService.loadDefaultModelData();
+        this.isDefaultLoad = true;
+        this.defaultLoad.emit(true);
+        this.mongoHandlerService.isAuthorized()
+          .then(result => {
+            if (result.status === 'ok') {
+              this.fetchCollectionsData();
+              this.fetchModelsData();
+              this.isLoggedIn = true;
+              this.loggedIn.emit(true);
+            } else {
+              this.isLoggedIn = false;
+              this.loggedIn.emit(false);
+            }
+          })
+          .catch(error => {
+            this.isLoggedIn = false;
+            this.loggedIn.emit(false);
+            this.message.error('Can not see if you are logged in.');
+          });
+      }
     }
   }
 
