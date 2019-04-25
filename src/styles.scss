@@ -1,4 +1,5 @@
 @import "~@angular/material/prebuilt-themes/pink-bluegrey.css";
+@import '~perfect-scrollbar/css/perfect-scrollbar.css';
 
 html, body {
   margin: 0;
@@ -167,4 +168,8 @@ html, body {
 .mat-dialog-content img,
 .mat-card-content img {
   max-width: 100%;
+}
+
+mat-card-content {
+  position: relative;
 }

@@ -15,6 +15,9 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ColorChromeModule } from 'ngx-color/chrome';
 import { DeviceDetectorModule } from 'ngx-device-detector';
 import {MarkdownModule} from 'ngx-markdown';
+import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
+import { PERFECT_SCROLLBAR_CONFIG } from 'ngx-perfect-scrollbar';
+import { PerfectScrollbarConfigInterface } from 'ngx-perfect-scrollbar';
 import { SocketIoConfig, SocketIoModule } from 'ngx-socket-io';
 
 import { environment } from '../environments/environment';
@@ -32,6 +35,7 @@ import { DialogDeleteSingleAnnotationComponent } from './components/dialogs/dial
 import { DialogGetUserDataComponent } from './components/dialogs/dialog-get-user-data/dialog-get-user-data.component';
 import { LoginComponent } from './components/dialogs/dialog-login/login.component';
 import { DialogMeshsettingsComponent } from './components/dialogs/dialog-meshsettings/dialog-meshsettings.component';
+import { DialogShareAnnotationComponent } from './components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
 import { EditorComponent } from './components/editor/editor.component';
 import { LoadingscreenComponent } from './components/loadingscreen/loadingscreen.component';
 import {MediaBrowserComponent} from './components/media-browser/media-browser.component';
@@ -43,8 +47,6 @@ import { ModelsettingsComponent } from './components/modelsettings/modelsettings
 import { PasswordComponent } from './components/password/password.component';
 import { SceneComponent } from './components/scene/scene.component';
 import {MediaTypePipe} from './pipes/media-type.pipe';
-import { DialogShareAnnotationComponent } from './components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
-// tslint:enable:max-line-length
 
 @NgModule({
   declarations: [
@@ -107,6 +109,7 @@ import { DialogShareAnnotationComponent } from './components/dialogs/dialog-shar
       url: `${environment.express_server_url}:${environment.express_server_port}`,
     }),
     MarkdownModule.forRoot(),
+    PerfectScrollbarModule,
   ],
   entryComponents: [
     LoginComponent,
