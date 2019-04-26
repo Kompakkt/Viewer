@@ -1,17 +1,17 @@
 import {Component, Input, OnInit, ViewChild} from '@angular/core';
 import {MatDialog} from '@angular/material';
 import {Matrix, Vector3} from 'babylonjs';
-import {IAnnotation} from '../../interfaces/interfaces';
-import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
+import {IAnnotation} from '../../../interfaces/interfaces';
+import {AnnotationmarkerService} from '../../../services/annotationmarker/annotationmarker.service';
 
-import {AnnotationService} from '../../services/annotation/annotation.service';
-import {BabylonService} from '../../services/babylon/babylon.service';
-import {CatalogueService} from '../../services/catalogue/catalogue.service';
-import {DataService} from '../../services/data/data.service';
-import {LoadModelService} from '../../services/load-model/load-model.service';
-import {SocketService} from '../../services/socket/socket.service';
-import {UserdataService} from '../../services/userdata/userdata.service';
-import {DialogAnnotationEditorComponent} from '../dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
+import {AnnotationService} from '../../../services/annotation/annotation.service';
+import {BabylonService} from '../../../services/babylon/babylon.service';
+import {CatalogueService} from '../../../services/catalogue/catalogue.service';
+import {DataService} from '../../../services/data/data.service';
+import {LoadModelService} from '../../../services/load-model/load-model.service';
+import {SocketService} from '../../../services/socket/socket.service';
+import {UserdataService} from '../../../services/userdata/userdata.service';
+import {DialogAnnotationEditorComponent} from '../../dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
 
 import {
   PerfectScrollbarConfigInterface,

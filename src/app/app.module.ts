@@ -24,10 +24,10 @@ import { environment } from '../environments/environment';
 
 import { AppComponent } from './app.component';
 import { ActiveUsersComponent } from './components/active-users/active-users.component';
-import { AnnotationComponent } from './components/annotation/annotation.component';
-import { AnnotationcardsComponent } from './components/annotationcards/annotationcards.component';
-import { AnnotationsEditorComponent } from './components/annotations-editor/annotations-editor.component';
-import { AnnotationwalkthroughComponent } from './components/annotationwalkthrough/annotationwalkthrough.component';
+import { AnnotationComponent } from './components/annotations/annotation/annotation.component';
+import { AnnotationcardsComponent } from './components/annotations/annotationcards/annotationcards.component';
+import { AnnotationsEditorComponent } from './components/annotations/annotations-editor/annotations-editor.component';
+import { AnnotationwalkthroughComponent } from './components/annotations/annotationwalkthrough/annotationwalkthrough.component';
 import { CollectionsOverviewComponent } from './components/collections-overview/collections-overview.component';
 import {DialogAnnotationEditorComponent} from './components/dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
 import { DialogDeleteAnnotationsComponent } from './components/dialogs/dialog-delete-annotations/dialog-delete-annotations.component';

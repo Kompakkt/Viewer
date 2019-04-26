@@ -14,7 +14,7 @@ import {
   MatTabsModule,
   MatTooltipModule
 } from '@angular/material';
-import {AnnotationsEditorComponent} from '../annotations-editor/annotations-editor.component';
+import {AnnotationsEditorComponent} from '../annotations/annotations-editor/annotations-editor.component';
 import {ModelsettingsComponent} from '../modelsettings/modelsettings.component';
 import {MetadataComponent} from '../metadata/metadata.component';
 import {FormsModule} from '@angular/forms';

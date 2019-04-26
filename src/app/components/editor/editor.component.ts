@@ -12,7 +12,7 @@ import {LoadModelService} from '../../services/load-model/load-model.service';
 import {OverlayService} from '../../services/overlay/overlay.service';
 import {SocketService} from '../../services/socket/socket.service';
 import {UserdataService} from '../../services/userdata/userdata.service';
-import {AnnotationsEditorComponent} from '../annotations-editor/annotations-editor.component';
+import {AnnotationsEditorComponent} from '../annotations/annotations-editor/annotations-editor.component';
 import {DialogDeleteAnnotationsComponent} from '../dialogs/dialog-delete-annotations/dialog-delete-annotations.component';
 
 @Component({

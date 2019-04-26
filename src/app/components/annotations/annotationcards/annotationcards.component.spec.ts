@@ -6,8 +6,8 @@ import {FormsModule} from '@angular/forms';
 import {MatCardModule, MatFormFieldModule, MatIconModule, MatSnackBarModule, MatTooltipModule} from '@angular/material';
 import {HttpClientModule} from '@angular/common/http';
 import {SocketIoModule} from 'ngx-socket-io';
-import {environment} from '../../../environments/environment';
-import {MediaBrowserComponent} from '../media-browser/media-browser.component';
+import {environment} from '../../../../environments/environment';
+import {MediaBrowserComponent} from '../../media-browser/media-browser.component';
 
 describe('AnnotationcardsComponent', () => {
   let component: AnnotationcardsComponent;

@@ -10,9 +10,9 @@ import {
   MatSnackBarModule,
   MatTooltipModule
 } from '@angular/material';
-import {AnnotationwalkthroughComponent} from '../annotationwalkthrough/annotationwalkthrough.component';
-import {AnnotationcardsComponent} from '../annotationcards/annotationcards.component';
-import {AnnotationComponent} from '../annotation/annotation.component';
+import {AnnotationwalkthroughComponent} from '../annotations/annotationwalkthrough/annotationwalkthrough.component';
+import {AnnotationcardsComponent} from '../annotations/annotationcards/annotationcards.component';
+import {AnnotationComponent} from '../annotations/annotation/annotation.component';
 import {FormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 import {SocketIoModule} from 'ngx-socket-io';

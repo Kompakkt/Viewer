@@ -4,7 +4,7 @@ import {AnnotationwalkthroughComponent} from './annotationwalkthrough.component'
 import {MatDialogModule, MatIconModule, MatSnackBarModule} from '@angular/material';
 import {HttpClientModule} from '@angular/common/http';
 import {SocketIoModule} from 'ngx-socket-io';
-import {environment} from '../../../environments/environment';
+import {environment} from '../../../../environments/environment';
 
 describe('AnnotationwalkthroughComponent', () => {
   let component: AnnotationwalkthroughComponent;

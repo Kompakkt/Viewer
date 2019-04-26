@@ -1,39 +1,46 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import {AnnotationComponent} from './annotation.component';
+import {AnnotationsEditorComponent} from './annotations-editor.component';
 import {
   MatCardModule,
+  MatCheckboxModule, MatDialogModule,
   MatFormFieldModule,
-  MatIconModule, MatSnackBarModule,
+  MatIconModule, MatInputModule,
+  MatSnackBarModule,
   MatTooltipModule
 } from '@angular/material';
 import {FormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 import {SocketIoModule} from 'ngx-socket-io';
-import {environment} from '../../../environments/environment';
-import {MediaBrowserComponent} from '../media-browser/media-browser.component';
+import {environment} from '../../../../environments/environment';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {MediaBrowserComponent} from '../../media-browser/media-browser.component';
 import {MarkdownComponent} from 'ngx-markdown';
+import {MatSlideToggleModule} from '@angular/material/typings/esm5/slide-toggle';
 
-describe('AnnotationComponent', () => {
-  let component: AnnotationComponent;
-  let fixture: ComponentFixture<AnnotationComponent>;
+describe('AnnotationsEditorComponent', () => {
+  let component: AnnotationsEditorComponent;
+  let fixture: ComponentFixture<AnnotationsEditorComponent>;
 
   beforeEach(async(() => {
-
     TestBed.configureTestingModule({
       declarations: [
-        AnnotationComponent,
+        AnnotationsEditorComponent,
         MediaBrowserComponent,
         MarkdownComponent,
       ],
       imports: [
-        MatFormFieldModule,
         MatCardModule,
-        MatIconModule,
-        MatSnackBarModule,
-        MatTooltipModule,
         FormsModule,
+        MatFormFieldModule,
+        MatCheckboxModule,
+        MatIconModule,
+        MatTooltipModule,
+        MatSnackBarModule,
         HttpClientModule,
+        MatDialogModule,
+        MatInputModule,
+        BrowserAnimationsModule,
         SocketIoModule.forRoot({
           url: `${environment.express_server_url}:${environment.express_server_port}`,
           options: {}
@@ -43,7 +50,7 @@ describe('AnnotationComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(AnnotationComponent);
+    fixture = TestBed.createComponent(AnnotationsEditorComponent);
     component = fixture.componentInstance;
 
     // Mock annotation for @Input
@@ -112,8 +119,6 @@ describe('AnnotationComponent', () => {
   });
 
   it('should create', () => {
-
-    fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 });

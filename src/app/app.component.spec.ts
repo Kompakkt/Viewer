@@ -5,8 +5,8 @@ import {SceneComponent} from './components/scene/scene.component';
 import {EditorComponent} from './components/editor/editor.component';
 import {CollectionsOverviewComponent} from './components/collections-overview/collections-overview.component';
 import {MenuComponent} from './components/menu/menu.component';
-import {AnnotationwalkthroughComponent} from './components/annotationwalkthrough/annotationwalkthrough.component';
-import {AnnotationcardsComponent} from './components/annotationcards/annotationcards.component';
+import {AnnotationwalkthroughComponent} from './components/annotations/annotationwalkthrough/annotationwalkthrough.component';
+import {AnnotationcardsComponent} from './components/annotations/annotationcards/annotationcards.component';
 import {
   MatCardModule, MatCheckboxModule, MatDialogModule,
   MatFormFieldModule,
@@ -18,11 +18,11 @@ import {
   MatTabsModule, MatTooltipModule, MatStepperModule, MatProgressSpinnerModule
 } from '@angular/material';
 import {FormsModule} from '@angular/forms';
-import {AnnotationsEditorComponent} from './components/annotations-editor/annotations-editor.component';
+import {AnnotationsEditorComponent} from './components/annotations/annotations-editor/annotations-editor.component';
 import {MetadataComponent} from './components/metadata/metadata.component';
 import {ModelsettingsComponent} from './components/modelsettings/modelsettings.component';
 import {ModelComponent} from './components/model/model.component';
-import {AnnotationComponent} from './components/annotation/annotation.component';
+import {AnnotationComponent} from './components/annotations/annotation/annotation.component';
 import {ColorChromeModule} from 'ngx-color/chrome';
 import {HttpClientModule} from '@angular/common/http';
 import {SocketIoModule} from 'ngx-socket-io';
