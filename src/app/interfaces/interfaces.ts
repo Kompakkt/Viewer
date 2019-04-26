@@ -1,6 +1,9 @@
-// TODO: Interface for DigitalObject, PhysicalObject, Person, Institution, etc...
-
 // Metadata related
+interface IMetaDataExternalLink {
+  externalLink_description: string;
+  externalLink_value: string;
+}
+
 interface IMetaDataAddress {
   address_building: string;
   address_number: string;
@@ -18,8 +21,14 @@ export interface IMetaDataPerson {
   person_role: string[];
   person_phonenumber: string;
   person_note: string;
-  person_institution: string;
-  person_institution_data: IMetaDataInstitution;
+  person_institution: string | any[];
+  person_institution_data: IMetaDataInstitution[];
+  roles: {
+    [key: string]: string[];
+  };
+
+  display?: string;
+  value?: string;
 }
 
 export interface IMetaDataInstitution {
@@ -29,33 +38,41 @@ export interface IMetaDataInstitution {
   institution_university: string;
   institution_role: string[];
   institution_note: string;
+  roles: {
+    [key: string]: string[];
+  };
+
+  display?: string;
+  value?: string;
 }
 
-// TODO: Check how tags work
 export interface IMetaDataTag {
   _id: string;
+  display: string;
+  value: string;
 }
 
 export interface IMetaDataPhysicalObject {
   _id: string;
   phyobj_title: string;
   phyobj_description: string;
-  phyobj_rightsownerSelector: number;
-  phyobj_rightsowner: Array<IMetaDataPerson | IMetaDataInstitution>;
-  phyobj_rightsowner_person: IMetaDataPerson[];
-  phyobj_rightsowner_institution: IMetaDataInstitution[];
   phyobj_externalIdentifier: any[];
-  phyobj_externalLink: any[];
+  phyobj_externalLink: IMetaDataExternalLink[];
   phyobj_externalFile: any;
   phyobj_place: IMetaDataAddress[];
-  phyobj_person_existing: IMetaDataPerson[];
   phyobj_person_existing_role: any[];
-  phyobj_person: IMetaDataPerson[];
-  phyobj_institution_existing: IMetaDataInstitution[];
   phyobj_institution_existing_role: any[];
-  phyobj_institution: IMetaDataInstitution[];
   phyobj_metadata_files: IFile[];
   phyobj_collection: string;
+
+  phyobj_rightsownerSelector: number;
+  phyobj_rightsowner: Array<IMetaDataPerson | IMetaDataInstitution>;
+  phyobj_rightsowner_person: Array<IMetaDataPerson | null>;
+  phyobj_rightsowner_institution: Array<IMetaDataInstitution | null>;
+  phyobj_person_existing: Array<IMetaDataPerson | null>;
+  phyobj_person: Array<IMetaDataPerson | null>;
+  phyobj_institution: Array<IMetaDataInstitution | null>;
+  phyobj_institution_existing: Array<IMetaDataInstitution | null>;
 }
 
 export interface IMetaDataDigitalObject {
@@ -64,26 +81,27 @@ export interface IMetaDataDigitalObject {
   digobj_title: string;
   digobj_description: string;
   digobj_licence: string;
-  digobj_rightsownerSelector: number;
-  digobj_rightsowner: Array<IMetaDataPerson | IMetaDataInstitution>;
-  digobj_rightsowner_person: IMetaDataPerson[];
-  digobj_rightsowner_institution: IMetaDataInstitution[];
-  contact_person_existing: IMetaDataPerson[];
-  contact_person: IMetaDataPerson[];
-  digobj_discipline: string;
-  dibobj_tags: IMetaDataTag[];
+  digobj_discipline: string[];
+  digobj_tags: IMetaDataTag[];
   digobj_objecttype: string;
   digobj_externalIdentifier: any[];
   digobj_dimensions: any[];
   digobj_creation: any[];
-  digobj_person_existing: IMetaDataPerson[];
-  digobj_person: IMetaDataPerson[];
-  digobj_person_existing_role: any[];
-  digobj_externalLink: any[];
+  digobj_externalLink: IMetaDataExternalLink[];
   digobj_metadata_files: any[];
   digobj_files: Array<IFile | null>;
   digobj_statement: string;
   phyObjs: Array<IMetaDataPhysicalObject | null>;
+
+  digobj_rightsownerSelector: number;
+  digobj_rightsowner: Array<IMetaDataPerson | IMetaDataInstitution | null>;
+  digobj_rightsowner_person: Array<IMetaDataPerson | null>;
+  digobj_rightsowner_institution: Array<IMetaDataInstitution | null>;
+  contact_person_existing: Array<IMetaDataPerson | null>;
+  contact_person: Array<IMetaDataPerson | null>;
+  digobj_person_existing: Array<IMetaDataPerson | null>;
+  digobj_person: Array<IMetaDataPerson | null>;
+  digobj_person_existing_role: any[];
 }
 
 // User related
