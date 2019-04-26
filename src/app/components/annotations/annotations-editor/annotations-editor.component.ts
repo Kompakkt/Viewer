@@ -1,15 +1,15 @@
 import {Component, Input, OnInit, ViewChild} from '@angular/core';
 
-import {IAnnotation} from '../../interfaces/interfaces';
-import {AnnotationService} from '../../services/annotation/annotation.service';
-import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
-import {BabylonService} from '../../services/babylon/babylon.service';
-import {CameraService} from '../../services/camera/camera.service';
-import {CatalogueService} from '../../services/catalogue/catalogue.service';
-import {DataService} from '../../services/data/data.service';
-import {LoadModelService} from '../../services/load-model/load-model.service';
-import {SocketService} from '../../services/socket/socket.service';
-import {UserdataService} from '../../services/userdata/userdata.service';
+import {IAnnotation} from '../../../interfaces/interfaces';
+import {AnnotationService} from '../../../services/annotation/annotation.service';
+import {AnnotationmarkerService} from '../../../services/annotationmarker/annotationmarker.service';
+import {BabylonService} from '../../../services/babylon/babylon.service';
+import {CameraService} from '../../../services/camera/camera.service';
+import {CatalogueService} from '../../../services/catalogue/catalogue.service';
+import {DataService} from '../../../services/data/data.service';
+import {LoadModelService} from '../../../services/load-model/load-model.service';
+import {SocketService} from '../../../services/socket/socket.service';
+import {UserdataService} from '../../../services/userdata/userdata.service';
 
 @Component({
   selector: 'app-annotations-editor',

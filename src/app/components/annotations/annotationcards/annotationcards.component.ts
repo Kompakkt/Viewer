@@ -1,9 +1,9 @@
 import {AfterViewInit, Component, Input, OnInit, QueryList, ViewChildren} from '@angular/core';
 import {int} from 'babylonjs';
 
-import {AnnotationService} from '../../services/annotation/annotation.service';
-import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
-import {AnnotationComponent} from '../annotations/annotation/annotation.component';
+import {AnnotationService} from '../../../services/annotation/annotation.service';
+import {AnnotationmarkerService} from '../../../services/annotationmarker/annotationmarker.service';
+import {AnnotationComponent} from '../../annotations/annotation/annotation.component';
 
 @Component({
   selector: 'app-annotationcards',
