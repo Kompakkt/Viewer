@@ -1,6 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
 
-import {Model} from '../../interfaces/model/model.interface';
+import {IModel} from '../../interfaces/interfaces';
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
 
 @Component({
@@ -10,7 +10,7 @@ import {CatalogueService} from '../../services/catalogue/catalogue.service';
 })
 export class ModelComponent implements OnInit {
 
-  @Input() model: Model;
+  @Input() model: IModel;
 
   constructor(private catalogueService: CatalogueService) {
   }

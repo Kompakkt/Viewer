@@ -1,7 +1,7 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 
-import {Model} from '../../interfaces/model/model.interface';
+import {IModel} from '../../interfaces/interfaces';
 import {LoadModelService} from '../load-model/load-model.service';
 import {MessageService} from '../message/message.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
@@ -12,8 +12,9 @@ import {MongohandlerService} from '../mongohandler/mongohandler.service';
 
 export class CatalogueService {
 
+  // TODO: ReplaySubjects
   private Subjects = {
-    models: new BehaviorSubject<Model[]>(Array<Model>()),
+    models: new BehaviorSubject<IModel[]>(Array<IModel>()),
     collections: new BehaviorSubject<any[]>(Array<any>()),
   };
 
@@ -146,8 +147,8 @@ export class CatalogueService {
 
   public fetchModelsData() {
     this.mongoHandlerService.getAllModels()
-      .then(model => {
-        this.Subjects.models.next(model);
+      .then(models => {
+        this.Subjects.models.next(models);
       },    error => {
         this.message.error('Connection to object server refused.');
       });
@@ -211,7 +212,7 @@ export class CatalogueService {
       this.mongoHandlerService.getModel(identifierModel)
         .then(actualModel => {
           if (actualModel['_id']) {
-            this.Subjects.models.next(actualModel);
+            this.Subjects.models.next([actualModel]);
             this.selectModel(actualModel._id, false);
             return true;
           } else {

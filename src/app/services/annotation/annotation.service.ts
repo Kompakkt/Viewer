@@ -8,7 +8,7 @@ import {BehaviorSubject} from 'rxjs/internal/BehaviorSubject';
 import {environment} from '../../../environments/environment';
 import {DialogGetUserDataComponent} from '../../components/dialogs/dialog-get-user-data/dialog-get-user-data.component';
 import {DialogShareAnnotationComponent} from '../../components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
-import {Annotation} from '../../interfaces/annotation2/annotation2';
+import {IAnnotation} from '../../interfaces/interfaces';
 import {ActionService} from '../action/action.service';
 import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
 import {BabylonService} from '../babylon/babylon.service';
@@ -29,15 +29,15 @@ export class AnnotationService {
 
   public inSocket: false;
 
-  public annotations: Annotation[];
-  public defaultAnnotationsSorted: Annotation[];
-  public collectionAnnotationsSorted: Annotation[];
+  public annotations: IAnnotation[];
+  public defaultAnnotationsSorted: IAnnotation[];
+  public collectionAnnotationsSorted: IAnnotation[];
 
-  private defaultAnnotations: Annotation[];
-  private collectionAnnotations: Annotation[];
-  private unsortedAnnotations: Annotation[];
-  private pouchDBAnnotations: Annotation[];
-  private serverAnnotations: Annotation[];
+  private defaultAnnotations: IAnnotation[];
+  private collectionAnnotations: IAnnotation[];
+  private unsortedAnnotations: IAnnotation[];
+  private pouchDBAnnotations: IAnnotation[];
+  private serverAnnotations: IAnnotation[];
   private currentModel: any;
   public currentCompilation: any;
   private actualModelMeshes: BABYLON.Mesh[];
@@ -393,7 +393,7 @@ export class AnnotationService {
         const personName = this.userdataService.currentUserData.fullname;
         const personID = this.userdataService.currentUserData._id;
 
-        const newAnnotation: Annotation = {
+        const newAnnotation: IAnnotation = {
           validated: (!this.isCollection),
           _id: generatedId,
           identifier: generatedId,
@@ -463,7 +463,7 @@ export class AnnotationService {
       });
   }
 
-  private add(annotation: Annotation): void {
+  private add(annotation: IAnnotation): void {
 
     if (this.isDefaultLoad) {
       this.annotations.push(annotation);
@@ -482,7 +482,7 @@ export class AnnotationService {
 
     this.mongo.updateAnnotation(annotation)
       .toPromise()
-      .then((resultAnnotation: Annotation) => {
+      .then((resultAnnotation: IAnnotation) => {
         console.log('Die result Anno:', resultAnnotation);
         // MongoDB hat funktioniert
         // MongoDB-Eintrag in PouchDB
@@ -530,7 +530,7 @@ export class AnnotationService {
       });
   }
 
-  public updateAnnotation(annotation: Annotation) {
+  public updateAnnotation(annotation: IAnnotation) {
     if (this.isDefaultLoad) {
       this.annotations.splice(this.annotations.indexOf(annotation), 1, annotation);
       this.defaultAnnotationsSorted.splice(this.annotations.indexOf(annotation), 1, annotation);
@@ -544,7 +544,7 @@ export class AnnotationService {
 
     this.mongo.updateAnnotation(annotation)
       .toPromise()
-      .then((resultAnnotation: Annotation) => {
+      .then((resultAnnotation: IAnnotation) => {
         // MongoDB hat funktioniert
         // MongoDB-Eintrag in PouchDB
         this.dataService.updateAnnotation(resultAnnotation);
@@ -586,7 +586,7 @@ export class AnnotationService {
       });
   }
 
-  public deleteAnnotation(annotation: Annotation) {
+  public deleteAnnotation(annotation: IAnnotation) {
 
     if (this.userdataService.isAnnotationOwner(annotation)) {
 
@@ -675,7 +675,7 @@ export class AnnotationService {
 
   }
 
-  public async changedRankingPositions(annotationArray: Annotation[]) {
+  public async changedRankingPositions(annotationArray: IAnnotation[]) {
 
     let i = 0;
     for (const annotation of annotationArray) {
@@ -765,7 +765,7 @@ export class AnnotationService {
     }
   }
 
-  public drawMarker(newAnnotation: Annotation) {
+  public drawMarker(newAnnotation: IAnnotation) {
     if (!this.inSocket) {
       const color = 'black';
       this.annotationmarkerService.createAnnotationMarker(newAnnotation, color);
@@ -782,7 +782,7 @@ export class AnnotationService {
     this.editModeAnnotation.next(id);
   }
 
-  public async shareAnnotation(annotation: Annotation) {
+  public async shareAnnotation(annotation: IAnnotation) {
 
     const dialogConfig = new MatDialogConfig();
     dialogConfig.disableClose = true;
@@ -815,7 +815,7 @@ export class AnnotationService {
       });
   }
 
-  public createCopyOfAnnotation(annotation: Annotation, collectionId: string,
+  public createCopyOfAnnotation(annotation: IAnnotation, collectionId: string,
                                 annotationLength: number): any {
     console.log('Erstelle die Kopie');
 
@@ -850,7 +850,7 @@ export class AnnotationService {
     };
   }
 
-  public createDefaultAnnotation(): Annotation {
+  public createDefaultAnnotation(): IAnnotation {
     return {
       validated: true,
       _id: 'DefaultAnnotation',

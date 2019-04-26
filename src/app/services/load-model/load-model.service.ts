@@ -3,8 +3,7 @@ import * as BABYLON from 'babylonjs';
 import {ReplaySubject} from 'rxjs';
 
 import {environment} from '../../../environments/environment';
-import {Model} from '../../interfaces/model/model.interface';
-import {SizedEvent} from '../../interfaces/sizedEvent/sizedEvent';
+import {IModel, ISizedEvent} from '../../interfaces/interfaces';
 import {ActionService} from '../action/action.service';
 import {BabylonService} from '../babylon/babylon.service';
 import {CameraService} from '../camera/camera.service';
@@ -20,7 +19,7 @@ import {MongohandlerService} from '../mongohandler/mongohandler.service';
 export class LoadModelService {
 
   private Subjects = {
-    actualModel: new ReplaySubject<Model>(),
+    actualModel: new ReplaySubject<IModel>(),
     actualModelMeshes: new ReplaySubject<BABYLON.Mesh[]>(),
     actualCollection: new ReplaySubject<any>(),
   };
@@ -40,16 +39,13 @@ export class LoadModelService {
   private baseUrl = `${environment.express_server_url}:${environment.express_server_port}/`;
   public quality = 'low';
 
-  private defaultModel = {
+  private defaultModel: IModel = {
     _id: 'Cube',
+    annotationList: [],
     relatedDigitalObject: { _id: 'default_model' },
     mediaType: 'model',
     name: 'Cube',
     dataSource: { isExternal: false },
-    cameraPosition: [
-      { dimension: 'x', value: 0 },
-      { dimension: 'y', value: 0 },
-      { dimension: 'z', value: 0 }],
     files: [{
       file_name: 'kompakkt.babylon',
       file_link: 'assets/models/kompakkt.babylon',
@@ -58,6 +54,13 @@ export class LoadModelService {
     }],
     finished: true,
     online: true,
+    settings: {
+      cameraPositionInitial: {
+        x: 0,
+        y: 0,
+        z: 0,
+      },
+    },
     processed: {
       time: {
         start: '',
@@ -88,7 +91,7 @@ export class LoadModelService {
     return this.Observables.actualCollection.source['_events'].slice(-1)[0];
   }
 
-  public updateActiveModel(model: Model) {
+  public updateActiveModel(model: IModel) {
     this.Subjects.actualModel.next(model);
   }
 
@@ -127,9 +130,10 @@ export class LoadModelService {
     if (collectionId) {
       this.mongohandlerService.getCompilation(collectionId)
         .then(compilation => {
-          compilation.models = compilation.models.filter(obj => obj);
-          this.updateActiveCollection(compilation);
-          this.fetchModelData(compilation.models[0]._id);
+          // TODO: check if possible without any
+          const filtered: any = compilation.models.filter(obj => obj);
+          this.updateActiveCollection(filtered);
+          this.fetchModelData(filtered[0]._id);
         },    error => {
           this.message.error('Connection to object server to load collection refused.');
         });
@@ -153,11 +157,11 @@ export class LoadModelService {
   }
 
   // TODO
-  private isSizedEvent(e: any): e is SizedEvent {
+  private isSizedEvent(e: any): e is ISizedEvent {
     return (e && e.width !== undefined && e.height !== undefined);
   }
 
-  public async loadModel(newModel: Model, overrideUrl?: string) {
+  public async loadModel(newModel: IModel, overrideUrl?: string) {
     const URL = (overrideUrl !== undefined) ? overrideUrl : this.baseUrl;
 
     if (!this.loadingScreenHandler.isLoading && newModel.processed && newModel.mediaType) {

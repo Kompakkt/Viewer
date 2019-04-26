@@ -1,6 +1,6 @@
 import {Component, Input, OnInit, ViewChild} from '@angular/core';
 
-import {Annotation} from '../../interfaces/annotation2/annotation2';
+import {IAnnotation} from '../../interfaces/interfaces';
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
@@ -18,7 +18,7 @@ import {UserdataService} from '../../services/userdata/userdata.service';
 })
 export class AnnotationsEditorComponent implements OnInit {
 
-  @Input() annotation: Annotation;
+  @Input() annotation: IAnnotation;
 
   public collapsed = false;
   public editMode = false;

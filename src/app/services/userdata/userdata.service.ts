@@ -1,21 +1,10 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
 
-import {Annotation} from '../../interfaces/annotation2/annotation2';
+import {IAnnotation, IUserData, ILoginData, IModel} from '../../interfaces/interfaces';
 import {CatalogueService} from '../catalogue/catalogue.service';
 import {LoadModelService} from '../load-model/load-model.service';
 import {MessageService} from '../message/message.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
-
-interface IUserData {
-  fullname: string;
-  username: string;
-  _id: string;
-}
-
-interface ILoginData {
-  username: string;
-  password: string;
-}
 
 @Injectable({
   providedIn: 'root',
@@ -116,7 +105,7 @@ export class UserdataService {
           } else {
             this.currentUserData = userData;
             if (userData.data && userData.data.model) {
-              userData.data.model.forEach(model => {
+              userData.data.model.forEach((model: IModel) => {
                 if (model !== null) {
                   this.userOwnedModels.push(model);
                   if (model.finished) {
@@ -158,7 +147,7 @@ export class UserdataService {
     }
   }
 
-  public isAnnotationOwner(annotation: Annotation): boolean {
+  public isAnnotationOwner(annotation: IAnnotation): boolean {
     return annotation._id && this.loggedIn && this.currentUserData._id !== 'guest' ?
       this.currentUserData._id === annotation.creator._id : false;
   }

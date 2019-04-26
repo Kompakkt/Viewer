@@ -4,7 +4,7 @@ import * as GUI from 'babylonjs-gui';
 import {BehaviorSubject} from 'rxjs/internal/BehaviorSubject';
 import {Observable} from 'rxjs/internal/Observable';
 // 11/02/19
-import {Annotation} from 'src/app/interfaces/annotation2/annotation2';
+import {IAnnotation} from 'src/app/interfaces/interfaces';
 
 import {BabylonService} from '../babylon/babylon.service';
 import {CameraService} from '../camera/camera.service';
@@ -24,7 +24,7 @@ export class AnnotationmarkerService {
 
   }
 
-  public createAnnotationMarker(annotation: Annotation, color: string) {
+  public createAnnotationMarker(annotation: IAnnotation, color: string) {
 
     // 11/02/19
     const positionVector = new BABYLON.Vector3(

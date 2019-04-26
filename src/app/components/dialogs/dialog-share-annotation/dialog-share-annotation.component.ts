@@ -47,7 +47,7 @@ export class DialogShareAnnotationComponent implements OnInit {
           if (compilation['_id']) {
             // loaded'
 
-            if (compilation.models.filter(model => (model._id === this.modelId)).length !== 0) {
+            if (compilation.models.filter(model => model && (model._id === this.modelId)).length !== 0) {
               this.response.status = true;
               this.response.collectionId = this.targetCollectionId;
               this.response.annotationListLength = compilation.annotationList ? compilation.annotationList.length : 0;

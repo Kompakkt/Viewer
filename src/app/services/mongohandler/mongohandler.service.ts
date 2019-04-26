@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
+import { IModel, ICompilation, IAnnotation, ILDAPData, IServerResponse } from '../../interfaces/interfaces';
 
 @Injectable({
   providedIn: 'root',
@@ -73,19 +74,19 @@ export class MongohandlerService {
   }
 
   // GETs
-  public async getAllCompilations(): Promise<any> {
+  public async getAllCompilations(): Promise<ICompilation[]> {
     return this.get(`api/v1/get/findall/compilation`);
   }
 
-  public async getAllModels(): Promise<any> {
+  public async getAllModels(): Promise<IModel[]> {
     return this.get(`api/v1/get/findall/model`);
   }
 
-  public async getModel(identifier: string): Promise<any> {
+  public async getModel(identifier: string): Promise<IModel & IServerResponse> {
     return this.get(`api/v1/get/find/model/${identifier}`);
   }
 
-  public async getCompilation(identifier: string, password?: string): Promise<any> {
+  public async getCompilation(identifier: string, password?: string): Promise<ICompilation & IServerResponse> {
     return (password) ? this.get(`api/v1/get/find/compilation/${identifier}/${password}`)
       : this.get(`api/v1/get/find/compilation/${identifier}`);
   }
@@ -94,7 +95,7 @@ export class MongohandlerService {
     return this.get(`api/v1/get/find/digitalobject/${identifier}`);
   }
 
-  public async getCurrentUserData(): Promise<any> {
+  public async getCurrentUserData(): Promise<ILDAPData & IServerResponse> {
     return this.get(`api/v1/get/ldata`);
   }
 
@@ -107,12 +108,12 @@ export class MongohandlerService {
     return this.post(`api/v1/post/settings/${identifier}`, settings);
   }
 
-  public updateAnnotation(annotation: any): Observable<any> {
+  public updateAnnotation(annotation: any): Observable<IAnnotation & IServerResponse> {
     return this.post(`api/v1/post/push/annotation`, annotation);
   }
 
   // Auth
-  public login(username: string, password: string): Observable<any> {
+  public login(username: string, password: string): Observable<ILDAPData & IServerResponse> {
     return this.post(`login`, { username, password });
   }
 

@@ -1,7 +1,7 @@
 import {AfterViewInit, ChangeDetectorRef, Component, HostBinding} from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material';
 
-import {Model} from '../../interfaces/model/model.interface';
+import {ICompilation, IModel} from '../../interfaces/interfaces';
 import {MediaTypePipe} from '../../pipes/media-type.pipe';
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {LoadModelService} from '../../services/load-model/load-model.service';
@@ -28,8 +28,8 @@ export class CollectionsOverviewComponent implements AfterViewInit {
   private singleCollectionSelected: boolean;
   private singleModelSelected: boolean;
 
-  private actualCollection: any;
-  private actualModel: Model;
+  private actualCollection: ICompilation;
+  private actualModel: IModel;
 
   private identifierCollection;
   private identifierModel;

@@ -6,7 +6,7 @@ import PouchUpsert from 'pouchdb-upsert';
 PouchDB.plugin(PouchFind);
 PouchDB.plugin(PouchUpsert);
 
-import {Annotation} from '../../interfaces/annotation2/annotation2';
+import {IAnnotation} from '../../interfaces/interfaces';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
 
 @Injectable({
@@ -66,7 +66,7 @@ export class DataService {
 
   public deleteAnnotation(id: string) {
     if (id === 'DefaultAnnotation') { return; }
-    this.pouchdb.get(id).then((result: Annotation) =>
+    this.pouchdb.get(id).then((result: IAnnotation) =>
       this.pouchdb.remove(result),
     ).catch((error: any) =>
       console.log('Failed removing annotation', error),
@@ -82,7 +82,7 @@ export class DataService {
     });
   }*/
 
-  public updateAnnotation(annotation: Annotation): void {
+  public updateAnnotation(annotation: IAnnotation): void {
     if (annotation._id === 'DefaultAnnotation') { return; }
 
     this.pouchdb.get(annotation._id)

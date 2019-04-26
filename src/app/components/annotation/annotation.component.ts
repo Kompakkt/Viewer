@@ -1,7 +1,7 @@
 import {Component, Input, OnInit, ViewChild} from '@angular/core';
 import {MatDialog} from '@angular/material';
 import {Matrix, Vector3} from 'babylonjs';
-import {Annotation} from '../../interfaces/annotation2/annotation2';
+import {IAnnotation} from '../../interfaces/interfaces';
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
 
 import {AnnotationService} from '../../services/annotation/annotation.service';
@@ -26,7 +26,7 @@ import {
 
 export class AnnotationComponent implements OnInit {
 
-  @Input() annotation: Annotation;
+  @Input() annotation: IAnnotation;
 
   @ViewChild('annotationContent') private annotationContent;
 
@@ -108,7 +108,7 @@ export class AnnotationComponent implements OnInit {
     }, 15);
   }
 
-  public setPosition(annotation: Annotation) {
+  public setPosition(annotation: IAnnotation) {
 
     const scene = this.babylonService.getScene();
 

@@ -1,50 +1,10 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
 import {Socket} from 'ngx-socket-io';
 
-import {Annotation} from '../../interfaces/annotation2/annotation2';
+import {IAnnotation, ISocketAnnotation, ISocketUser, ISocketMessage, ISocketChangeRanking, ISocketChangeRoom, ISocketUserInfo, ISocketRoomData} from '../../interfaces/interfaces';
 import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
 import {LoadModelService} from '../load-model/load-model.service';
 import {UserdataService} from '../userdata/userdata.service';
-
-interface IAnnotation {
-  annotation: any;
-  user: IUser;
-}
-
-interface IMessage {
-  message: string;
-  user: IUser;
-}
-
-interface IUser {
-  _id: string;
-  socketId: string;
-  username: string;
-  fullname: string;
-  room: string;
-}
-
-interface IUserInfo {
-  user: IUser;
-  annotations: any[];
-}
-
-interface IChangeRoom {
-  newRoom: string;
-  annotations: any[];
-}
-
-interface IChangeRanking {
-  user: IUser;
-  oldRanking: any[];
-  newRanking: any[];
-}
-
-interface IRoomData {
-  requester: IUserInfo;
-  recipient: string;
-  info: IUserInfo;
-}
 
 @Injectable({
   providedIn: 'root',
@@ -52,7 +12,7 @@ interface IRoomData {
 export class SocketService {
 
   // public collaboratorsAnnotations: IAnnotation[] = [];
-  public collaborators: IUser[] = [];
+  public collaborators: ISocketUser[] = [];
   public socketRoom: string;
   private isInSocket = false;
   @Output() inSocket: EventEmitter<boolean> = new EventEmitter();
@@ -64,7 +24,7 @@ export class SocketService {
   public color = ['pink', 'red', 'blue', 'yellow', 'purple', 'gold'];
   public maxColoredUsersMinusOne = this.color.length - 1;
 
-  public annotationsForSocket: Annotation[] = [];
+  public annotationsForSocket: IAnnotation[] = [];
 
   constructor(public socket: Socket,
               private loadModelService: LoadModelService,
@@ -84,16 +44,16 @@ export class SocketService {
       }
     });
 
-    this.socket.on('message', (result: IMessage) => {
+    this.socket.on('message', (result: ISocketMessage) => {
       console.log(`${result.user.username}: ${result.message}`);
     });
 
-    this.socket.on('newUser', (result: IUserInfo) => {
+    this.socket.on('newUser', (result: ISocketUserInfo) => {
       console.log(`GET ONLINE USERS OF YOUR ROOM - SOCKET.IO`);
       this.updateCollaboratorInfo(result);
     });
 
-    this.socket.on('createAnnotation', (result: IAnnotation) => {
+    this.socket.on('createAnnotation', (result: ISocketAnnotation) => {
       console.log(`COLLABORATOR '${result.user.username}' CREATED AN ANNOTATION - SOCKET.IO`);
 
       this.annotationsForSocket.push(result.annotation);
@@ -101,9 +61,8 @@ export class SocketService {
       this.printInfo();
     });
 
-    this.socket.on('editAnnotation', (result: IAnnotation) => {
+    this.socket.on('editAnnotation', (result: ISocketAnnotation) => {
       console.log(`COLLABORATOR '${result.user.username}' EDITED AN ANNOTATION - SOCKET.IO`);
-
 
       const findIndexById = this.annotationsForSocket
         .findIndex(_socketAnnotation => _socketAnnotation._id === result.annotation._id);
@@ -114,9 +73,8 @@ export class SocketService {
       this.printInfo();
     });
 
-    this.socket.on('deleteAnnotation', (result: IAnnotation) => { // [socket.id, annotation]
+    this.socket.on('deleteAnnotation', (result: ISocketAnnotation) => { // [socket.id, annotation]
       console.log(`COLLABORATOR '${result.user.username}' DELETED AN ANNOTATION- SOCKET.IO`);
-
 
       const findIndexById = this.annotationsForSocket
         .findIndex(_socketAnnotation => _socketAnnotation._id === result.annotation._id);
@@ -127,7 +85,7 @@ export class SocketService {
       this.printInfo();
     });
 
-    this.socket.on('changeRanking', (result: IChangeRanking) => {
+    this.socket.on('changeRanking', (result: ISocketChangeRanking) => {
       console.log(`COLLABORATOR '${result.user.username}' CHANGED ANNOTATION-RANKING - SOCKET.IO`);
 
       /*
@@ -142,7 +100,7 @@ export class SocketService {
     });
 
     // A user lost connection, so we remove knowledge about this user
-    this.socket.on('lostConnection', (result: IUserInfo) => { // [user, annotations]);
+    this.socket.on('lostConnection', (result: ISocketUserInfo) => { // [user, annotations]);
       console.log(`COLLABORATOR '${result.user.username}' LOGGED OUT - SOCKET.IO`);
       this.removeKnowledgeAboutUser(result);
       this.printInfo();
@@ -159,7 +117,7 @@ export class SocketService {
     });
 
     // A user left the room, so we remove knowledge about this user
-    this.socket.on('changeRoom', (result: IUserInfo) => {
+    this.socket.on('changeRoom', (result: ISocketUserInfo) => {
       console.log(`COLLABORATOR '${result.user.username}' CHANGED ROOM - SOCKET.IO`);
       this.removeKnowledgeAboutUser(result);
       this.printInfo();
@@ -178,18 +136,18 @@ export class SocketService {
     });
 
     // Our data is requested
-    this.socket.on('roomDataRequest', (result: IRoomData) => {
+    this.socket.on('roomDataRequest', (result: ISocketRoomData) => {
       result.info = this.getOwnSocketData();
       this.socket.emit('roomDataAnswer', result);
     });
 
     // We recieved data from someone
-    this.socket.on('roomDataAnswer', (result: IRoomData) => {
+    this.socket.on('roomDataAnswer', (result: ISocketRoomData) => {
       this.updateCollaboratorInfo(result.info);
     });
   }
 
-  private removeKnowledgeAboutUser(userInfo: IUserInfo) {
+  private removeKnowledgeAboutUser(userInfo: ISocketUserInfo) {
     this.collaborators = this.collaborators.filter(_user => _user._id !== userInfo.user._id);
 
     /*
@@ -209,10 +167,10 @@ export class SocketService {
     this.socket.connect();
     console.log(`LOGGING IN TO SOCKET.IO \n ROOM: '${this.socketRoom}'`);
     // emit "you" as newUser to other online members of your current room
-    const emitData: IUserInfo = this.getOwnSocketData();
+    const emitData: ISocketUserInfo = this.getOwnSocketData();
     this.socket.emit('newUser', emitData);
     // Request Roomdata from every person in the room
-    const emitRequest: IRoomData = {
+    const emitRequest: ISocketRoomData = {
       info: emitData,
       requester: emitData,
       recipient: this.socketRoom,
@@ -239,14 +197,14 @@ export class SocketService {
     this.collaborators = [];
     this.sortUser();
     // this.collaboratorsAnnotations = [];
-    const emitData: IChangeRoom = {
+    const emitData: ISocketChangeRoom = {
       newRoom: this.socketRoom,
       annotations: this.annotationsForSocket,
     };
     this.socket.emit('changeRoom', emitData);
   }
 
-  private updateCollaboratorInfo(data: IUserInfo) {
+  private updateCollaboratorInfo(data: ISocketUserInfo) {
     if (!this.collaborators.find(_user => data.user.socketId === _user.socketId)) {
       this.collaborators.push(data.user);
       this.sortUser();
@@ -282,7 +240,7 @@ export class SocketService {
   }
 
   // TODO das wird den anderen Nutzern gesendet
-  private getOwnSocketData(): IUserInfo {
+  private getOwnSocketData(): ISocketUserInfo {
     const userData = this.userdataService.getUserDataForSocket();
     return {
       user: {
@@ -296,7 +254,7 @@ export class SocketService {
     };
   }
 
-  public sortUser(priorityUser?: IUser) {
+  public sortUser(priorityUser?: ISocketUser) {
     const selfIndex = this.collaborators
       .findIndex(user => user.socketId === this.socket.ioSocket.id);
 
@@ -317,11 +275,11 @@ export class SocketService {
     this.redrawMarker();
   }
 
-  public initialAnnotationsForSocket(annotations: Annotation[]) {
+  public initialAnnotationsForSocket(annotations: IAnnotation[]) {
     this.annotationsForSocket = JSON.parse(JSON.stringify(annotations));
   }
 
-  public annotationforSocket(annotation: Annotation, action: string): Annotation {
+  public annotationforSocket(annotation: IAnnotation, action: string): IAnnotation {
 
     const annotationIndex = this.collaborators
       .findIndex(user => user.socketId === this.socket.ioSocket.id);
@@ -380,7 +338,7 @@ export class SocketService {
       .catch(e => console.error(e));
   }
 
-  public drawMarker(newAnnotation: Annotation) {
+  public drawMarker(newAnnotation: IAnnotation) {
 
     let color = 'black';
     if (this.coloredUsers.length) {
