@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {ActionManager, ExecuteCodeAction} from 'babylonjs';
+import {ActionManager, ExecuteCodeAction, Mesh as IMesh} from 'babylonjs';
 
 import {BabylonService} from '../babylon/babylon.service';
 
@@ -11,28 +11,22 @@ export class ActionService {
   constructor(private babylonService: BabylonService) {
   }
 
-  public createActionManager(mesh: BABYLON.Mesh, trigger: number, actionExecuted: (result: any) => void) {
+  public createActionManager(mesh: IMesh | null, trigger: number, actionExecuted: (result: any) => void) {
+    if (!mesh) return;
 
-   // const mesh = this.babylonService.getScene().getMeshesByTags(modelName)[0];
-
-    if (mesh !== null) {
-
-      const scene = this.babylonService.getScene();
-      mesh.actionManager = new ActionManager(scene);
-      mesh.actionManager.registerAction(new ExecuteCodeAction(
-        trigger, function(evt) {
-          const pickResult = scene.pick(scene.pointerX, scene.pointerY,
-                                        undefined, false, scene.activeCamera);
-          console.log(pickResult);
-          actionExecuted(pickResult);
-        }));
-    } else {
-    }
+    const scene = this.babylonService.getScene();
+    mesh.actionManager = new ActionManager(scene);
+    mesh.actionManager.registerAction(new ExecuteCodeAction(
+      trigger, evt => {
+        const pickResult = scene
+          .pick(scene.pointerX, scene.pointerY, undefined, false, scene.activeCamera);
+        console.log(pickResult);
+        actionExecuted(pickResult);
+      }));
   }
 
-  public pickableModel(mesh: BABYLON.Mesh, pickable: boolean) {
+  public pickableModel(mesh: IMesh, pickable: boolean) {
     mesh.isPickable = pickable;
-    // this.babylonService.getScene().getMeshesByTags(modelName).map(model => model.isPickable = pickable);
   }
 
 }
