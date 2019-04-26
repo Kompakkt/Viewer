@@ -1,16 +1,16 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 
-import {CatalogueService} from '../../services/catalogue/catalogue.service';
-import {MessageService} from '../../services/message/message.service';
-import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
+import {CatalogueService} from '../../../services/catalogue/catalogue.service';
+import {MessageService} from '../../../services/message/message.service';
+import {MongohandlerService} from '../../../services/mongohandler/mongohandler.service';
 
 @Component({
   selector: 'app-password',
-  templateUrl: './password.component.html',
-  styleUrls: ['./password.component.scss'],
+  templateUrl: './dialog-password.component.html',
+  styleUrls: ['./dialog-password.component.scss'],
 })
-export class PasswordComponent implements OnInit {
+export class DialogPasswordComponent implements OnInit {
 
   public password = '';
   public identifierCollection: string;
@@ -18,7 +18,7 @@ export class PasswordComponent implements OnInit {
   constructor(private mongohandlerService: MongohandlerService,
               private catalogueService: CatalogueService,
               private message: MessageService,
-              private dialogRef: MatDialogRef<PasswordComponent>,
+              private dialogRef: MatDialogRef<DialogPasswordComponent>,
               @Inject(MAT_DIALOG_DATA) data) {
 
     this.identifierCollection = data.id;

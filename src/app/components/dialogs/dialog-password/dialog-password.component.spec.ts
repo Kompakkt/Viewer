@@ -1,6 +1,6 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import {PasswordComponent} from './password.component';
+import {DialogPasswordComponent} from './password.component';
 import {
   MAT_DIALOG_DATA,
   MatDialogRef,
@@ -16,8 +16,8 @@ import {HttpClientModule} from '@angular/common/http';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 describe('PasswordComponent', () => {
-  let component: PasswordComponent;
-  let fixture: ComponentFixture<PasswordComponent>;
+  let component: DialogPasswordComponent;
+  let fixture: ComponentFixture<DialogPasswordComponent>;
 
   const mockDialogRef = {
     close: jasmine.createSpy('close')
@@ -25,7 +25,7 @@ describe('PasswordComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [PasswordComponent],
+      declarations: [DialogPasswordComponent],
       imports: [
         MatFormFieldModule,
         FormsModule,
@@ -45,7 +45,7 @@ describe('PasswordComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(PasswordComponent);
+    fixture = TestBed.createComponent(DialogPasswordComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

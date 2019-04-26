@@ -35,6 +35,7 @@ import { DialogDeleteSingleAnnotationComponent } from './components/dialogs/dial
 import { DialogGetUserDataComponent } from './components/dialogs/dialog-get-user-data/dialog-get-user-data.component';
 import { LoginComponent } from './components/dialogs/dialog-login/login.component';
 import { DialogMeshsettingsComponent } from './components/dialogs/dialog-meshsettings/dialog-meshsettings.component';
+import { DialogPasswordComponent } from './components/dialogs/dialog-password/dialog-password.component';
 import { DialogShareAnnotationComponent } from './components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
 import { EditorComponent } from './components/editor/editor.component';
 import { LoadingscreenComponent } from './components/loadingscreen/loadingscreen.component';
@@ -44,7 +45,6 @@ import { MenuComponent } from './components/menu/menu.component';
 import { MetadataComponent } from './components/metadata/metadata.component';
 import { ModelComponent } from './components/model/model.component';
 import { ModelsettingsComponent } from './components/modelsettings/modelsettings.component';
-import { PasswordComponent } from './components/password/password.component';
 import { SceneComponent } from './components/scene/scene.component';
 import {MediaTypePipe} from './pipes/media-type.pipe';
 
@@ -64,7 +64,7 @@ import {MediaTypePipe} from './pipes/media-type.pipe';
     MetadataComponent,
     ModelsettingsComponent,
     LoginComponent,
-    PasswordComponent,
+    DialogPasswordComponent,
     DialogDeleteAnnotationsComponent,
     DialogMeshsettingsComponent,
     DialogAnnotationEditorComponent,
@@ -113,7 +113,7 @@ import {MediaTypePipe} from './pipes/media-type.pipe';
   ],
   entryComponents: [
     LoginComponent,
-    PasswordComponent,
+    DialogPasswordComponent,
     DialogDeleteAnnotationsComponent,
     DialogMeshsettingsComponent,
     DialogAnnotationEditorComponent,

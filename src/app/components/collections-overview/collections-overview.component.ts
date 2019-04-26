@@ -9,7 +9,7 @@ import {MessageService} from '../../services/message/message.service';
 import {OverlayService} from '../../services/overlay/overlay.service';
 import {UserdataService} from '../../services/userdata/userdata.service';
 import {LoginComponent} from '../dialogs/dialog-login/login.component';
-import {PasswordComponent} from '../password/password.component';
+import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-password.component';
 
 @Component({
   selector: 'app-collections-overview',
@@ -182,7 +182,7 @@ export class CollectionsOverviewComponent implements AfterViewInit {
     };
     console.log('password');
 
-    const dialogRef = this.dialog.open(PasswordComponent, dialogConfig);
+    const dialogRef = this.dialog.open(DialogPasswordComponent, dialogConfig);
     dialogRef.afterClosed().subscribe(data => {
       if (data === true) {
         this.singleCollectionSelected = true;
