@@ -1,29 +1,33 @@
 <h2 mat-dialog-title>Kompakkt Login</h2>
 <div *ngIf="!success">
-  <mat-dialog-content class="mat-typography">
-    <h3>Login to view models from the repository</h3>
-    <p>With your university account you can login to see models available in the repository.</p>
-    <h3>Username and password</h3>
-    <mat-form-field>
-      <input matInput
-             name="username"
-             type="text"
-             placeholder="username"
-             [(ngModel)]="username"
-             cdkFocusInitial>
-    </mat-form-field>
-    <mat-form-field>
-      <input matInput
-             name="password"
-             type="password"
-             placeholder="password"
-             [(ngModel)]="password">
-    </mat-form-field>
-  </mat-dialog-content>
-  <mat-dialog-actions align="end">
-    <button mat-button (click)="login()">Login</button>
-    <button mat-button mat-dialog-close (click)="withoutlogin()">Cancel</button>
-  </mat-dialog-actions>
+
+  <form novalidate (ngSubmit)="login()">
+    <mat-dialog-content class="mat-typography">
+      <h3>Login to view models from the repository</h3>
+      <p>With your university account you can login to see models available in the repository.</p>
+      <h3>Username and password</h3>
+      <mat-form-field>
+        <input matInput
+               name="username"
+               type="text"
+               placeholder="username"
+               [(ngModel)]="username"
+               cdkFocusInitial>
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput
+               name="password"
+               type="password"
+               placeholder="password"
+               [(ngModel)]="password">
+      </mat-form-field>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button (click)="login()" type="submit">Login</button>
+      <button mat-button mat-dialog-close (click)="withoutlogin()">Cancel</button>
+    </mat-dialog-actions>
+  </form>
+
 </div>
 <div *ngIf="success">
   <p>Login was successful! You are logged in now.</p>
