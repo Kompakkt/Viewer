@@ -42,17 +42,20 @@ export class LoadModelService {
 
   private defaultModel = {
     _id: 'Cube',
-    relatedDigitalObject: {_id: 'default_model'},
+    relatedDigitalObject: { _id: 'default_model' },
     mediaType: 'model',
     name: 'Cube',
-    dataSource: {isExternal: false},
-    cameraPosition: [{dimension: 'x', value: 0},
-                     {dimension: 'y', value: 0},
-                     {dimension: 'z', value: 0}],
-    files: ['{file_name: \'kompakkt.babylon\',' +
-    '          file_link: \'assets/models/kompakkt.babylon\',' +
-    '          file_size: 0,' +
-    '          file_format: \'.babylon\'}'],
+    dataSource: { isExternal: false },
+    cameraPosition: [
+      { dimension: 'x', value: 0 },
+      { dimension: 'y', value: 0 },
+      { dimension: 'z', value: 0 }],
+    files: [{
+      file_name: 'kompakkt.babylon',
+      file_link: 'assets/models/kompakkt.babylon',
+      file_size: 0,
+      file_format: '.babylon',
+    }],
     finished: true,
     online: true,
     processed: {

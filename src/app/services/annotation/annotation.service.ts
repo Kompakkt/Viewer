@@ -226,11 +226,17 @@ export class AnnotationService {
   private async updateAnnotationList() {
     // Durch alle Annotationen der lokalen DB
     this.pouchDBAnnotations.forEach(annotation => {
+      const isLastModifiedByMe = annotation.lastModifiedBy._id
+        === this.userdataService.currentUserData._id;
+      const isCreatedByMe = annotation.creator._id
+        === this.userdataService.currentUserData._id;
+
       // Finde die Annotaion in den Server Annotationen
       if (annotation && this.serverAnnotations) {
         const serverAnnotation = this.serverAnnotations
           .find(_serverAnnotation => _serverAnnotation._id === annotation._id);
         // Wenn sie gefunden wurde aktuellere speichern lokal bzw. server
+
         if (serverAnnotation) {
           if (annotation.lastModificationDate && serverAnnotation.lastModificationDate) {
             // vergleichen welche aktueller ist
@@ -264,8 +270,7 @@ export class AnnotationService {
         } else {
           // Nicht in Server Annos gefunden
           // Checke, ob local last editor === creator === ich
-          if (annotation.creator._id === annotation.lastModifiedBy._id
-            === this.userdataService.currentUserData._id) {
+          if (isLastModifiedByMe && isCreatedByMe) {
             // Annotation auf Server speichern
             // Update Server
             this.mongo.updateAnnotation(annotation);
@@ -282,8 +287,7 @@ export class AnnotationService {
       } else {
         // Nicht in Server Annos gefunden
         // Checke, ob local last editor === creator === ich
-        if (annotation.creator._id === annotation.lastModifiedBy._id
-          === this.userdataService.currentUserData._id) {
+        if (isLastModifiedByMe && isCreatedByMe) {
           // Annotation auf Server speichern
           // Update Server
           this.mongo.updateAnnotation(annotation);

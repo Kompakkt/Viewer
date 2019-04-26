@@ -1,3 +1,10 @@
+interface IFile {
+  file_name: string;
+  file_link: string;
+  file_size: number;
+  file_format: string;
+}
+
 export interface Model {
   _id?: string;
   relatedDigitalObject?: { _id: string };
@@ -6,7 +13,7 @@ export interface Model {
   cameraPosition?: Array<{ dimension: string; value: number }>;
   referencePoint?: Array<{ dimension: string; value: number }>;
   ranking?: number;
-  files: string[];
+  files: IFile[];
   finished: boolean;
   online: boolean;
   dataSource?: {

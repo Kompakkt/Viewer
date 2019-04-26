@@ -6,6 +6,17 @@ import {LoadModelService} from '../load-model/load-model.service';
 import {MessageService} from '../message/message.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
 
+interface IUserData {
+  fullname: string;
+  username: string;
+  _id: string;
+}
+
+interface ILoginData {
+  username: string;
+  password: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -22,19 +33,19 @@ export class UserdataService {
   public userOwnedFinishedModels: any[] = [];
   public userOwnedAnnotations: any[] = [];
 
-  public currentUserData: any = {
+  public currentUserData: IUserData = {
     fullname: 'Guest',
     username: 'guest',
     _id: 'guest',
   };
 
-  public socketUserData: any = {
+  public socketUserData: IUserData = {
     fullname: 'Guest',
     username: 'guest',
     _id: 'guest',
   };
 
-  public cachedLoginData: any = {
+  public cachedLoginData: ILoginData = {
     password: '',
     username: '',
   };
@@ -45,6 +56,9 @@ export class UserdataService {
               private loadModelService: LoadModelService,
               private mongoService: MongohandlerService,
               private message: MessageService) {
+    this.getUserData()
+      .then(() => console.log('Logged in user with sessionID cookie', this.currentUserData))
+      .catch(() => console.log('No session cookie. User not logged in'));
 
     this.catalogueService.firstLoad.subscribe(firstLoad => {
       if (firstLoad) {
@@ -74,23 +88,19 @@ export class UserdataService {
           if (this.currentUserData._id !== 'guest') {
             if (actualCollection.relatedOwner._id === this.currentUserData._id) {
               this.isCollectionOwner = true;
-              this.collectionOwner.emit(true);
             } else {
               this.isCollectionOwner = false;
-              this.collectionOwner.emit(false);
             }
           } else {
             this.isCollectionOwner = false;
-            this.collectionOwner.emit(false);
           }
         } else {
           this.isCollectionOwner = false;
-          this.collectionOwner.emit(false);
         }
       } else {
         this.isCollectionOwner = false;
-        this.collectionOwner.emit(false);
       }
+      this.collectionOwner.emit(this.isCollectionOwner);
     });
   }
 
@@ -159,12 +169,12 @@ export class UserdataService {
   }
 
   public getUserDataForSocket(): any {
-    return this.currentUserData.id !== 'guest' ?
-      this.currentUserData : this.socketUserData.id;
+    return this.currentUserData._id !== 'guest' ?
+      this.currentUserData : this.socketUserData._id;
   }
 
   public initUserDataForSocket() {
-    this.socketUserData = this.currentUserData.id !== 'guest' ? this.currentUserData :
+    this.socketUserData = this.currentUserData._id !== 'guest' ? this.currentUserData :
       this.socketUserData = {
         fullname: 'Kompakkt Cat',
         username: 'komkcat',
