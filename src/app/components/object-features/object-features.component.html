@@ -1,4 +1,11 @@
 <div id="editor">
+  <button class="closeSidenav"
+          mat-icon-button
+          (click)="closeEditor()"
+          type="button">
+    <mat-icon aria-label="Close">cancel</mat-icon>
+  </button>
+
   <mat-tab-group #tabGroup mat-align-tabs="left" animationDuration="0ms" [(selectedIndex)]="selectedTab">
 
     <mat-tab>
@@ -118,7 +125,7 @@
         <mat-icon class="tab-icon">settings</mat-icon>
       </ng-template>
       <div>
-        <app-modelsettings></app-modelsettings>
+        <app-object-feature-settings></app-object-feature-settings>
       </div>
     </mat-tab>
 
@@ -127,7 +134,7 @@
         <mat-icon class="tab-icon">description</mat-icon>
       </ng-template>
       <div>
-        <app-metadata></app-metadata>
+        <app-object-feature-metadata></app-object-feature-metadata>
       </div>
     </mat-tab>
 

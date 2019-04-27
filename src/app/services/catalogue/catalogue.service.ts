@@ -5,6 +5,7 @@ import {IModel} from '../../interfaces/interfaces';
 import {LoadModelService} from '../load-model/load-model.service';
 import {MessageService} from '../message/message.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
+import {OverlayService} from '../overlay/overlay.service';
 
 @Injectable({
   providedIn: 'root',
@@ -39,7 +40,8 @@ export class CatalogueService {
 
   constructor(private mongoHandlerService: MongohandlerService,
               private loadModelService: LoadModelService,
-              private message: MessageService) {
+              private message: MessageService,
+              private overlayService: OverlayService) {
   }
 
   public bootstrap(): void {
@@ -122,6 +124,7 @@ export class CatalogueService {
           this.selectModel(modelParam, false);
         } else if (this.isSingleCollection && compParam) {
           this.selectCollection(compParam);
+          this.overlayService.toggleCollectionsOverview();
         } else {
           this.fetchCollectionsData();
           this.fetchModelsData();

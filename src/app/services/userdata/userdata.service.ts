@@ -1,6 +1,6 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
 
-import {IAnnotation, IUserData, ILoginData, IModel} from '../../interfaces/interfaces';
+import {IAnnotation, ICompilation, IUserData, ILoginData, IModel} from '../../interfaces/interfaces';
 import {CatalogueService} from '../catalogue/catalogue.service';
 import {LoadModelService} from '../load-model/load-model.service';
 import {MessageService} from '../message/message.service';
@@ -104,9 +104,10 @@ export class UserdataService {
             this.message.info('No valid userdata received');
           } else {
             this.currentUserData = userData;
-            if (userData.data && userData.data.model) {
-              userData.data.model.forEach((model: IModel) => {
-                if (model !== null) {
+            if (!userData.data) return;
+            if (userData.data.model) {
+              userData.data.model.forEach((model: IModel | null) => {
+                if (model !== null && !this.userOwnedModels.find(_m => _m._id === model._id)) {
                   this.userOwnedModels.push(model);
                   if (model.finished) {
                     this.userOwnedFinishedModels.push(model);
@@ -114,16 +115,16 @@ export class UserdataService {
                 }
               });
             }
-            if (userData.data && userData.data.compilation) {
-              userData.data.compilation.forEach(compilation => {
-                if (compilation !== null) {
+            if (userData.data.compilation) {
+              userData.data.compilation.forEach((compilation: ICompilation | null) => {
+                if (compilation !== null && !this.personalCollections.find(_c => _c._id === compilation._id)) {
                   this.personalCollections.push(compilation);
                 }
               });
             }
-            if (userData.data && userData.data.annotation) {
-              userData.data.annotation.forEach(annotation => {
-                if (annotation !== null && annotation !== '') {
+            if (userData.data.annotation) {
+              userData.data.annotation.forEach((annotation: IAnnotation | null) => {
+                if (annotation !== null && !this.userOwnedAnnotations.find(_a => _a._id === annotation._id)) {
                   this.userOwnedAnnotations.push(annotation);
                 }
               });
@@ -138,7 +139,7 @@ export class UserdataService {
   }
 
   private checkOwnerState(identifier: string) {
-    if (this.userOwnedModels.filter(obj => obj && obj._id === identifier).length === 1) {
+    if (this.userOwnedModels.find(obj => obj && obj._id === identifier)) {
       this.isModelOwner = true;
       this.modelOwner.emit(true);
     } else {

@@ -23,12 +23,9 @@ import { SocketIoConfig, SocketIoModule } from 'ngx-socket-io';
 import { environment } from '../environments/environment';
 
 import { AppComponent } from './app.component';
-import { ActiveUsersComponent } from './components/active-users/active-users.component';
-import { AnnotationComponent } from './components/annotations/annotation/annotation.component';
-import { AnnotationcardsComponent } from './components/annotations/annotationcards/annotationcards.component';
-import { AnnotationsEditorComponent } from './components/annotations/annotations-editor/annotations-editor.component';
-import { AnnotationwalkthroughComponent } from './components/annotations/annotationwalkthrough/annotationwalkthrough.component';
-import { CollectionsOverviewComponent } from './components/collections-overview/collections-overview.component';
+import { BroadcastComponent } from './components/broadcast/broadcast.component';
+import { ContentBrowserComponent } from './components/content-browser/content-browser.component';
+import { ContentComponent } from './components/content/content.component';
 import {DialogAnnotationEditorComponent} from './components/dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
 import { DialogDeleteAnnotationsComponent } from './components/dialogs/dialog-delete-annotations/dialog-delete-annotations.component';
 import { DialogDeleteSingleAnnotationComponent } from './components/dialogs/dialog-delete-single-annotation/dialog-delete-single-annotation.component';
@@ -37,14 +34,16 @@ import { LoginComponent } from './components/dialogs/dialog-login/login.componen
 import { DialogMeshsettingsComponent } from './components/dialogs/dialog-meshsettings/dialog-meshsettings.component';
 import { DialogPasswordComponent } from './components/dialogs/dialog-password/dialog-password.component';
 import { DialogShareAnnotationComponent } from './components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
-import { EditorComponent } from './components/editor/editor.component';
 import { LoadingscreenComponent } from './components/loadingscreen/loadingscreen.component';
 import {MediaBrowserComponent} from './components/media-browser/media-browser.component';
-import { MediaComponent } from './components/media/media.component';
 import { MenuComponent } from './components/menu/menu.component';
-import { MetadataComponent } from './components/metadata/metadata.component';
-import { ModelComponent } from './components/model/model.component';
-import { ModelsettingsComponent } from './components/modelsettings/modelsettings.component';
+import { AnnotationComponent } from './components/object-feature-annotations/annotation/annotation.component';
+import { AnnotationcardsComponent } from './components/object-feature-annotations/annotationcards/annotationcards.component';
+import { AnnotationsEditorComponent } from './components/object-feature-annotations/annotations-editor/annotations-editor.component';
+import { AnnotationwalkthroughComponent } from './components/object-feature-annotations/annotationwalkthrough/annotationwalkthrough.component';
+import { ObjectFeatureMetadataComponent } from './components/object-feature-metadata/object-feature-metadata.component';
+import { ObjectFeatureSettingsComponent } from './components/object-feature-settings/object-feature-settings.component';
+import { ObjectFeaturesComponent } from './components/object-features/object-features.component';
 import { SceneComponent } from './components/scene/scene.component';
 import {MediaTypePipe} from './pipes/media-type.pipe';
 
@@ -53,24 +52,23 @@ import {MediaTypePipe} from './pipes/media-type.pipe';
     AppComponent,
     SceneComponent,
     MenuComponent,
-    EditorComponent,
+    ObjectFeaturesComponent,
     AnnotationsEditorComponent,
     AnnotationComponent,
     AnnotationcardsComponent,
     AnnotationwalkthroughComponent,
-    ModelComponent,
-    CollectionsOverviewComponent,
+    ContentComponent,
+    ContentBrowserComponent,
     LoadingscreenComponent,
-    MetadataComponent,
-    ModelsettingsComponent,
+    ObjectFeatureMetadataComponent,
+    ObjectFeatureSettingsComponent,
     LoginComponent,
     DialogPasswordComponent,
     DialogDeleteAnnotationsComponent,
     DialogMeshsettingsComponent,
     DialogAnnotationEditorComponent,
     MediaTypePipe,
-    MediaComponent,
-    ActiveUsersComponent,
+    BroadcastComponent,
     DialogDeleteSingleAnnotationComponent,
     DialogGetUserDataComponent,
     MediaBrowserComponent,

@@ -134,7 +134,8 @@ html, body {
 }
 
 .titlecard .mat-card-header-text {
-  margin: 0 !important;
+  margin: 0 !important;	  margin: 0 !important;
+  padding: 12px 0 10px 0;
 }
 
 .titlecard .mat-card-header .mat-card-title {
@@ -172,4 +173,11 @@ html, body {
 
 mat-card-content {
   position: relative;
+}
+
+.closeSidenav {
+  position: absolute !important;
+  top: 3px;
+  right: 7px;
+  z-index: 15;
 }

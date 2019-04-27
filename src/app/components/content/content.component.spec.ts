@@ -1,6 +1,6 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import {CollectionsOverviewComponent} from './collections-overview.component';
+import {ContentComponent} from './content.component';
 import {
   MatCardModule, MatCheckboxModule,
   MatDialogModule,
@@ -16,13 +16,13 @@ import {HttpClientModule} from '@angular/common/http';
 import {MediaTypePipe} from '../../pipes/media-type.pipe';
 
 describe('CollectionsOverviewComponent', () => {
-  let component: CollectionsOverviewComponent;
-  let fixture: ComponentFixture<CollectionsOverviewComponent>;
+  let component: ContentComponent;
+  let fixture: ComponentFixture<ContentComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
-        CollectionsOverviewComponent,
+        ContentComponent,
         ModelComponent,
         MediaTypePipe,
       ],
@@ -44,7 +44,7 @@ describe('CollectionsOverviewComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CollectionsOverviewComponent);
+    fixture = TestBed.createComponent(ContentComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

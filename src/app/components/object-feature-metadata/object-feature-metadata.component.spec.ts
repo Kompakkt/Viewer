@@ -1,18 +1,18 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import {MetadataComponent} from './metadata.component';
+import {ObjectFeatureMetadataComponent} from './object-feature-metadata.component';
 import {HttpClientModule} from '@angular/common/http';
 import {MatCardModule, MatIconModule, MatSnackBarModule, MatStepperModule} from '@angular/material';
 import {SocketIoModule} from 'ngx-socket-io';
 import {environment} from '../../../environments/environment';
 
 describe('MetadataComponent', () => {
-  let component: MetadataComponent;
-  let fixture: ComponentFixture<MetadataComponent>;
+  let component: ObjectFeatureMetadataComponent;
+  let fixture: ComponentFixture<ObjectFeatureMetadataComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [MetadataComponent],
+      declarations: [ObjectFeatureMetadataComponent],
       imports: [
         HttpClientModule,
         MatSnackBarModule,
@@ -28,7 +28,7 @@ describe('MetadataComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(MetadataComponent);
+    fixture = TestBed.createComponent(ObjectFeatureMetadataComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
