@@ -1,6 +1,6 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import {EditorComponent} from './editor.component';
+import {ObjectFeaturesComponent} from './object-features.component';
 import {
   MatCardModule,
   MatCheckboxModule,
@@ -14,9 +14,9 @@ import {
   MatTabsModule,
   MatTooltipModule
 } from '@angular/material';
-import {AnnotationsEditorComponent} from '../annotations/annotations-editor/annotations-editor.component';
-import {ModelsettingsComponent} from '../modelsettings/modelsettings.component';
-import {MetadataComponent} from '../metadata/metadata.component';
+import {AnnotationsEditorComponent} from '../object-feature-annotations/annotations-editor/annotations-editor.component';
+import {ObjectFeatureSettingsComponent} from '../object-feature-settings/object-settings.component';
+import {ObjectMetadataComponent} from '../object-feature-metadata/metadata.component';
 import {FormsModule} from '@angular/forms';
 import {ColorChromeModule} from 'ngx-color/chrome';
 import {HttpClientModule} from '@angular/common/http';
@@ -27,16 +27,16 @@ import {MediaBrowserComponent} from '../media-browser/media-browser.component';
 import {MarkdownComponent} from 'ngx-markdown';
 
 describe('EditorComponent', () => {
-  let component: EditorComponent;
-  let fixture: ComponentFixture<EditorComponent>;
+  let component: ObjectFeaturesComponent;
+  let fixture: ComponentFixture<ObjectFeaturesComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
-        EditorComponent,
+        ObjectFeaturesComponent,
         AnnotationsEditorComponent,
-        ModelsettingsComponent,
-        MetadataComponent,
+        ObjectFeatureSettingsComponent,
+        ObjectMetadataComponent,
         MediaBrowserComponent,
         MarkdownComponent,
       ],
@@ -66,7 +66,7 @@ describe('EditorComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(EditorComponent);
+    fixture = TestBed.createComponent(ObjectFeaturesComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

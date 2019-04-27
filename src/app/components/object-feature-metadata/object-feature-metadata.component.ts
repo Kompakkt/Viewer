@@ -6,11 +6,11 @@ import {MetadataService} from '../../services/metadata/metadata.service';
 import {OverlayService} from '../../services/overlay/overlay.service';
 
 @Component({
-  selector: 'app-metadata',
-  templateUrl: './metadata.component.html',
-  styleUrls: ['./metadata.component.scss'],
+  selector: 'app-object-feature-metadata',
+  templateUrl: './object-feature-metadata.component.html',
+  styleUrls: ['./object-feature-metadata.component.scss'],
 })
-export class MetadataComponent implements OnInit {
+export class ObjectFeatureMetadataComponent implements OnInit {
 
   @HostBinding('class.is-open') private isOpen = false;
 

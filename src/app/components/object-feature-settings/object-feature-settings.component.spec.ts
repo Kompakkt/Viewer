@@ -1,6 +1,6 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import {ModelsettingsComponent} from './modelsettings.component';
+import {ObjectFeatureSettingsComponent} from './object-feature-settings.component';
 import {
   MatCardModule,
   MatCheckboxModule,
@@ -14,12 +14,12 @@ import {HttpClientModule} from '@angular/common/http';
 import {FormsModule} from '@angular/forms';
 
 describe('ModelsettingsComponent', () => {
-  let component: ModelsettingsComponent;
-  let fixture: ComponentFixture<ModelsettingsComponent>;
+  let component: ObjectFeatureSettingsComponent;
+  let fixture: ComponentFixture<ObjectFeatureSettingsComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ModelsettingsComponent],
+      declarations: [ObjectFeatureSettingsComponent],
       imports: [
         MatCardModule,
         ColorChromeModule,
@@ -38,7 +38,7 @@ describe('ModelsettingsComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ModelsettingsComponent);
+    fixture = TestBed.createComponent(ObjectFeatureSettingsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -16,12 +16,12 @@ import {UserdataService} from '../../services/userdata/userdata.service';
 import {DialogMeshsettingsComponent} from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
 
 @Component({
-  selector: 'app-modelsettings',
-  templateUrl: './modelsettings.component.html',
-  styleUrls: ['./modelsettings.component.scss'],
+  selector: 'app-object-feature-settings',
+  templateUrl: './object-feature-settings.component.html',
+  styleUrls: ['./object-feature-settings.component.scss'],
 })
 
-export class ModelsettingsComponent implements OnInit {
+export class ObjectFeatureSettingsComponent implements OnInit {
 
   @ViewChild('stepper') stepper;
 

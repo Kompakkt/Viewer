@@ -1,0 +1,73 @@
+<div id="collections">
+
+  <button class="closeSidenav"
+          mat-icon-button
+          (click)="closeEditor()"
+          type="button">
+    <mat-icon aria-label="Close">cancel</mat-icon>
+  </button>
+
+  <mat-card class="titlecard">
+    <mat-card-header>
+      <mat-card-title>
+        Overview
+      </mat-card-title>
+    </mat-card-header>
+  </mat-card>
+
+  <app-content-browser *ngIf="showContentBrowser"></app-content-browser>
+
+  <mat-card>
+    <mat-card-content>
+
+      <!-- TODO wird nicht angezeigt!-->
+      <div class="category"
+           *ngIf="loadModelService.Observables.actualCollection | async; let collection">
+        <div *ngIf="collection.name">
+          Selected Collection: {{collection.name}}
+        </div>
+      </div>
+      <!-- -->
+
+      <div id="model-overview"
+           *ngIf="loadModelService.Observables.actualModel | async; let object">
+        <mat-card class="model-card">
+          <mat-card-header>
+            <mat-card-title>
+              Selected Object: {{object.name}}
+            </mat-card-title>
+          </mat-card-header>
+          <img
+            *ngIf="object.settings && object.settings.preview"
+            mat-card-image src={{object.settings.preview}}>
+        </mat-card>
+      </div>
+
+      <!-- TODO wird nicht angezeigt! -->
+      <div *ngIf="loadModelService.Observables.actualCollection | async; let collection">
+        <div *ngIf="collection._id">
+          <div class="category">
+            Objects in {{collection.name}}
+          </div>
+
+          <mat-card class="model-card"
+                    *ngFor="let object of collection.models | async">
+
+            <mat-card-header>
+              <mat-card-title>
+                {{object.name}}
+              </mat-card-title>
+            </mat-card-header>
+            <img
+              *ngIf="object.settings && object.settings.preview"
+              mat-card-image src={{object.settings.preview}}
+              (click)="selectObject(object._id)">
+          </mat-card>
+        </div>
+      </div>
+      <!-- -->
+
+    </mat-card-content>
+  </mat-card>
+
+</div>

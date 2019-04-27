@@ -12,15 +12,15 @@ import {LoadModelService} from '../../services/load-model/load-model.service';
 import {OverlayService} from '../../services/overlay/overlay.service';
 import {SocketService} from '../../services/socket/socket.service';
 import {UserdataService} from '../../services/userdata/userdata.service';
-import {AnnotationsEditorComponent} from '../annotations/annotations-editor/annotations-editor.component';
+import {AnnotationsEditorComponent} from '../object-feature-annotations/annotations-editor/annotations-editor.component';
 import {DialogDeleteAnnotationsComponent} from '../dialogs/dialog-delete-annotations/dialog-delete-annotations.component';
 
 @Component({
-  selector: 'app-editor',
-  templateUrl: './editor.component.html',
-  styleUrls: ['./editor.component.scss'],
+  selector: 'app-object-features',
+  templateUrl: './object-features.component.html',
+  styleUrls: ['./object-features.component.scss'],
 })
-export class EditorComponent implements OnInit, AfterViewInit {
+export class ObjectFeaturesComponent implements OnInit, AfterViewInit {
 
   @HostBinding('class.is-open') private isOpen = false;
   @Input() modelFileName: string;
@@ -235,6 +235,10 @@ export class EditorComponent implements OnInit, AfterViewInit {
       this.annotationService.annotationMode(false);
       this.annotationService.toggleAnnotationSource(false, false);
     }
+  }
+
+  public closeEditor() {
+    this.overlayService.toggleEditor();
   }
 
 }
