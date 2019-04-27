@@ -39,8 +39,4 @@ export class ContentComponent implements OnInit {
   public selectObject(_id: string) {
       this.catalogueService.selectModel(_id, undefined);
   }
-
-  public closeEditor() {
-    this.overlayService.toggleCollectionsOverview();
-  }
 }

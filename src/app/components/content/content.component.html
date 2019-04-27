@@ -1,20 +1,5 @@
 <div id="collections">
 
-  <button class="closeSidenav"
-          mat-icon-button
-          (click)="closeEditor()"
-          type="button">
-    <mat-icon aria-label="Close">cancel</mat-icon>
-  </button>
-
-  <mat-card class="titlecard">
-    <mat-card-header>
-      <mat-card-title>
-        Overview
-      </mat-card-title>
-    </mat-card-header>
-  </mat-card>
-
   <app-content-browser *ngIf="showContentBrowser"></app-content-browser>
 
   <mat-card>
