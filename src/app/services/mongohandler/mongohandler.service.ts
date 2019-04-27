@@ -29,44 +29,11 @@ export class MongohandlerService {
   constructor(private http: HttpClient) {
   }
 
-  // Helper
-  private async updatePreviewURL(promise: Promise<any>) {
-    const update = obj => {
-      // Only update if it's a relative path and not a URL
-      if (obj && obj.settings && obj.settings.preview
-        && obj.settings.preview.indexOf('base64') === -1
-        && obj.settings.preview.indexOf('http') === -1) {
-        obj.settings.preview = `${this.endpoint}${obj.settings.preview}`;
-      }
-      return obj;
-    };
-
-    return new Promise<any>((resolve, reject) => {
-      promise
-        .then(result => {
-          if (Array.isArray(result) && result[0] && !result[0].models) {
-            result = result.map(update);
-          } else if (Array.isArray(result) && result[0] && result[0].models) {
-            for (const compilation of result) {
-              for (let model of compilation.models) {
-                model = update(model);
-              }
-            }
-          } else if (result.models) {
-            result.models = result.models.map(update);
-          } else {
-            result = update(result);
-          }
-          resolve(result);
-        })
-        .catch(reject);
-    });
-  }
-
   // Override GET and POST to use HttpOptions which is needed for auth
   private async get(path: string): Promise<any> {
-    const getResult = this.http.get(`${this.endpoint}/${path}`, this.httpOptions);
-    return this.updatePreviewURL(getResult.toPromise());
+    return this.http
+      .get(`${this.endpoint}/${path}`, this.httpOptions)
+      .toPromise();
   }
 
   private post(path: string, obj: any): Observable<any> {
