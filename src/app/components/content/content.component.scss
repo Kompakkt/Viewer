@@ -19,11 +19,6 @@
   margin: 0;
 }
 
-#model-overview {
-  padding: 25px;
-  height: 100%;
-}
-
 .mat-tab-group {
   width: 300px;
   height: 100%;
@@ -51,6 +46,6 @@
 
 .model-card img {
   cursor: pointer;
-  height: 150px;
-  object-fit: cover;
+  max-height: 150px;
+  width: 100%;
 }
