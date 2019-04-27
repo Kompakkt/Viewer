@@ -10,7 +10,7 @@ import {MongohandlerService} from '../mongohandler/mongohandler.service';
 export class MetadataService {
 
   private actualModelMetadata: IMetaDataDigitalObject | undefined;
-  private modelsMetadata: any[] = [];
+  private modelsMetadata: IMetaDataDigitalObject[] = [];
 
   constructor(private mongohandlerService: MongohandlerService,
               private message: MessageService) {
@@ -20,7 +20,7 @@ export class MetadataService {
     this.modelsMetadata.push(metadata);
   }
 
-  public async fetchMetadata(metadata_id: string): Promise<any> {
+  public async fetchMetadata(metadata_id: string): Promise<IMetaDataDigitalObject> {
     this.actualModelMetadata = this.modelsMetadata.find(e => e['_id'] === metadata_id);
 
     if (this.actualModelMetadata) {

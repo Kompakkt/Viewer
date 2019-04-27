@@ -86,32 +86,33 @@ export class ObjectFeaturesComponent implements OnInit, AfterViewInit {
       this.isOpen = editorIsOpen;
       if (!editorIsOpen) {
         this.annotationService.annotationMode(false);
+        return;
       }
-      if (editorIsOpen && this.meshSettingsMode) {
+      if (this.meshSettingsMode) {
         this.annotationService.annotationMode(false);
       }
-      if (editorIsOpen && !this.isCollectionSource && !this.isDefaultLoad) {
+      if (!this.isCollectionSource && !this.isDefaultLoad) {
         this.annotationService.annotationMode(false);
         this.dragDisabled = true;
       }
-      if (editorIsOpen && !this.meshSettingsMode && !this.isCollection &&
+      if (!this.meshSettingsMode && !this.isCollection &&
         !this.isModelOwner && !this.isDefaultLoad) {
         this.annotationService.annotationMode(false);
         this.dragDisabled = true;
       }
-      if (editorIsOpen && this.isDefaultLoad) {
+      if (this.isDefaultLoad) {
         this.annotationService.annotationMode(true);
         this.dragDisabled = false;
       }
-      if (editorIsOpen && !this.meshSettingsMode && this.isCollection && this.isCollectionSource) {
+      if (!this.meshSettingsMode && this.isCollection && this.isCollectionSource) {
         this.annotationService.annotationMode(true);
       }
-      if (editorIsOpen && !this.meshSettingsMode && this.isCollection &&
+      if (!this.meshSettingsMode && this.isCollection &&
         this.isCollectionSource && this.isCollectionOwner) {
         this.annotationService.annotationMode(true);
         this.dragDisabled = false;
       }
-      if (editorIsOpen && !this.meshSettingsMode && !this.isCollection && this.isModelOwner) {
+      if (!this.meshSettingsMode && !this.isCollection && this.isModelOwner) {
         this.annotationService.annotationMode(true);
         this.dragDisabled = false;
       }
@@ -142,7 +143,8 @@ export class ObjectFeaturesComponent implements OnInit, AfterViewInit {
     });
 
     this.loadModelService.Observables.actualCollection.subscribe(actualCompilation => {
-      actualCompilation._id ? this.isCollection = true : this.isCollection = false;
+      (actualCompilation && actualCompilation._id)
+        ? this.isCollection = true : this.isCollection = false;
     });
 
   }

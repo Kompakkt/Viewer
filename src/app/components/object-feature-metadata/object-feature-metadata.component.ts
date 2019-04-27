@@ -33,7 +33,6 @@ export class ObjectFeatureMetadataComponent implements OnInit {
         this.isOpen = editorIsOpen;
         const currentModel = this.loadModelService.getCurrentModel();
         if (this.isOpen && currentModel) {
-
           if (this.actualMetadata_id !== currentModel.relatedDigitalObject._id) {
             this.actualMetadata_id = currentModel.relatedDigitalObject._id;
             if (this.actualMetadata_id && this.actualMetadata_id !== '') {

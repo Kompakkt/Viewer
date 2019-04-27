@@ -21,7 +21,7 @@ export class LoadModelService {
   private Subjects = {
     actualModel: new ReplaySubject<IModel>(),
     actualModelMeshes: new ReplaySubject<BABYLON.Mesh[]>(),
-    actualCollection: new ReplaySubject<ICompilation>(),
+    actualCollection: new ReplaySubject<ICompilation | undefined>(),
   };
 
   public Observables = {
@@ -95,7 +95,7 @@ export class LoadModelService {
     this.Subjects.actualModel.next(model);
   }
 
-  public updateActiveCollection(collection: any) {
+  public updateActiveCollection(collection: ICompilation | undefined) {
     this.Subjects.actualCollection.next(collection);
   }
 
@@ -124,16 +124,21 @@ export class LoadModelService {
     if (modelId) {
       this.fetchModelData(modelId);
       if (!isfromCollection) {
-        this.updateActiveCollection({});
+        this.updateActiveCollection(undefined);
       }
     }
     if (collectionId) {
       this.mongohandlerService.getCompilation(collectionId)
         .then(compilation => {
-          // TODO: check if possible without any
-          const filtered: any = compilation.models.filter(obj => obj);
-          this.updateActiveCollection(filtered);
-          this.fetchModelData(filtered[0]._id);
+          // TODO: Put Typeguards in its own service?
+          const isModel = (obj: any): obj is IModel => {
+            const _model = obj as IModel;
+            return _model && _model.name !== undefined && _model.mediaType !== undefined
+              && _model.online !== undefined && _model.finished !== undefined;
+          };
+          this.updateActiveCollection(compilation);
+          const model = compilation.models[0];
+          if (isModel(model)) this.fetchModelData(model._id);
         },    error => {
           this.message.error('Connection to object server to load collection refused.');
         });

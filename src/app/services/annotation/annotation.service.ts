@@ -8,7 +8,7 @@ import {BehaviorSubject} from 'rxjs/internal/BehaviorSubject';
 import {environment} from '../../../environments/environment';
 import {DialogGetUserDataComponent} from '../../components/dialogs/dialog-get-user-data/dialog-get-user-data.component';
 import {DialogShareAnnotationComponent} from '../../components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
-import {IAnnotation} from '../../interfaces/interfaces';
+import {IAnnotation, ICompilation, IModel} from '../../interfaces/interfaces';
 import {ActionService} from '../action/action.service';
 import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
 import {BabylonService} from '../babylon/babylon.service';
@@ -38,9 +38,9 @@ export class AnnotationService {
   private unsortedAnnotations: IAnnotation[];
   private pouchDBAnnotations: IAnnotation[];
   private serverAnnotations: IAnnotation[];
-  private currentModel: any;
-  public currentCompilation: any;
-  private actualModelMeshes: BABYLON.Mesh[];
+  private currentModel: IModel;
+  public currentCompilation: ICompilation;
+  private actualModelMeshes: BABYLON.Mesh[] = [];
 
   private isDefaultLoad: boolean;
   private isModelOwner: boolean;
@@ -92,6 +92,7 @@ export class AnnotationService {
     });
 
     this.loadModelService.Observables.actualCollection.subscribe(actualCompilation => {
+      if (!actualCompilation) return;
       actualCompilation._id ? this.isCollection = true : this.isCollection = false;
       this.currentCompilation = actualCompilation;
     });
@@ -151,7 +152,6 @@ export class AnnotationService {
 
     // Alle Marker, die eventuell vom vorherigen Modell noch da sind, sollen gelöscht werden
     await this.annotationmarkerService.deleteAllMarker();
-
     // Beim Laden eines Modells, werden alle in der PuchDB vorhandenen Annotationen,
     // auf dem Server vorhandenen Anntoatationen geladen
     if (!this.isDefaultLoad) {

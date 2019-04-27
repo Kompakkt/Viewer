@@ -1,7 +1,7 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 
-import {IModel} from '../../interfaces/interfaces';
+import {IModel, ICompilation} from '../../interfaces/interfaces';
 import {LoadModelService} from '../load-model/load-model.service';
 import {MessageService} from '../message/message.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
@@ -16,7 +16,7 @@ export class CatalogueService {
   // TODO: ReplaySubjects
   private Subjects = {
     models: new BehaviorSubject<IModel[]>(Array<IModel>()),
-    collections: new BehaviorSubject<any[]>(Array<any>()),
+    collections: new BehaviorSubject<ICompilation[]>(Array<ICompilation>()),
   };
 
   public Observables = {
@@ -175,7 +175,7 @@ export class CatalogueService {
    * param {string} identifierCollection,
    * returns {boolean} collection has been found
    */
-  public async selectCollectionByID(identifierCollection: string): Promise<any> {
+  public async selectCollectionByID(identifierCollection: string): Promise<string> {
     // Check if collection has been initially loaded and is available in collections
     const collection = this.Observables.collections.source['value']
       .find(i => i._id === identifierCollection);
@@ -230,7 +230,7 @@ export class CatalogueService {
     return true;
   }
 
-  public addAndLoadCollection(compilation: any) {
+  public addAndLoadCollection(compilation: ICompilation) {
     // this.Subjects.collections.next(compilation);
     // TODO
     this.selectCollection(compilation._id);

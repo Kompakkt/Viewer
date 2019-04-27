@@ -74,7 +74,8 @@ export class AnnotationComponent implements OnInit {
       });
 
       this.loadModelService.Observables.actualCollection.subscribe(actualCompilation => {
-        actualCompilation._id ? this.isCollection = true : this.isCollection = false;
+        (actualCompilation && actualCompilation._id)
+          ? this.isCollection = true : this.isCollection = false;
       });
 
       this.annotationService.isSelectedAnnotation.subscribe(selectedAnno => {

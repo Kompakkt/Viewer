@@ -20,7 +20,7 @@ export class SocketService {
   private isSocketAnnotationSource = false;
   @Output() socketAnnotationSource: EventEmitter<boolean> = new EventEmitter();
 
-  public coloredUsers: any[] = [];
+  public coloredUsers: ISocketUser[] = [];
   public color = ['pink', 'red', 'blue', 'yellow', 'purple', 'gold'];
   public maxColoredUsersMinusOne = this.color.length - 1;
 

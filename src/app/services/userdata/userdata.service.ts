@@ -17,10 +17,10 @@ export class UserdataService {
   @Output() modelOwner: EventEmitter<boolean> = new EventEmitter();
   @Output() collectionOwner: EventEmitter<boolean> = new EventEmitter();
 
-  public personalCollections: any[] = [];
-  public userOwnedModels: any[] = [];
-  public userOwnedFinishedModels: any[] = [];
-  public userOwnedAnnotations: any[] = [];
+  public personalCollections: ICompilation[] = [];
+  public userOwnedModels: IModel[] = [];
+  public userOwnedFinishedModels: IModel[] = [];
+  public userOwnedAnnotations: IAnnotation[] = [];
 
   public currentUserData: IUserData = {
     fullname: 'Guest',
@@ -72,6 +72,7 @@ export class UserdataService {
     });
 
     this.loadModelService.Observables.actualCollection.subscribe(actualCollection => {
+      if (!actualCollection) return;
       if (actualCollection._id && actualCollection.relatedOwner) {
         if (actualCollection.relatedOwner._id && this.loggedIn && this.currentUserData._id) {
           if (this.currentUserData._id !== 'guest') {
