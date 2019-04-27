@@ -1,89 +1,62 @@
 import {Injectable} from '@angular/core';
 import PouchDB from 'pouchdb';
-import PouchFind from 'pouchdb-find';
-import PouchUpsert from 'pouchdb-upsert';
 
-PouchDB.plugin(PouchFind);
-PouchDB.plugin(PouchUpsert);
-
-import {IAnnotation} from '../../interfaces/interfaces';
-import {MongohandlerService} from '../mongohandler/mongohandler.service';
+import {IAnnotation, ICompilation, IModel} from '../../interfaces/interfaces';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DataService {
 
-  public pouchdb: any;
-
-  public constructor(private mongo: MongohandlerService) {
-
-    this.pouchdb = new PouchDB('annotationdb');
-    this.createIndex();
-  }
-
-  public createIndex() {
-    this.pouchdb.createIndex({
-      index: {
-        fields: ['target.source.relatedCompilation', 'target.source.relatedModel'],
-      },
-    })
-      .then(function(result) {
-        // yo, a result
-      })
-      .catch(function(err) {
-        console.log('Error create Index Pouch:', err);
-        // ouch, an error
-      });
-  }
+  public pouchdb: PouchDB.Database = new PouchDB('annotationdb');
 
   public fetch() {
     return this.pouchdb.allDocs({include_docs: true});
   }
 
-  public find(model: string, compilation?: string) {
-    return this.pouchdb.find({
-      selector: {
-        'target.source.relatedCompilation': compilation,
-        'target.source.relatedModel': model,
-      },
+  public async findAnnotations(model: string, compilation?: string): Promise<IAnnotation[]> {
+    const allDocs = await this.fetch();
+    const annotationList: IAnnotation[] = [];
+    allDocs.rows.forEach(annotation => {
+      const isAnnotation = (obj: any): obj is IAnnotation => {
+        const _annotation = obj as IAnnotation;
+        return _annotation && _annotation.body !== undefined && _annotation.target !== undefined;
+      };
+
+      if (!isAnnotation(annotation)) return;
+
+      const correctCompilation = (compilation)
+        ? annotation.target.source.relatedCompilation === compilation : true;
+      const correctModel = annotation.target.source.relatedModel === model;
+
+      if (!correctModel || !correctModel) return;
+
+      annotationList.push(annotation);
     });
+    console.log(allDocs.rows, annotationList, model, compilation);
+    return annotationList;
   }
 
-  public putAnnotation(annotation: any) {
-    if (annotation._id === 'DefaultAnnotation') { return; }
+  public putAnnotation(annotation: IAnnotation) {
+    if (annotation._id === 'DefaultAnnotation') return;
     this.pouchdb.put(annotation);
-    /*this.mongo.updateAnnotation(annotation).toPromise()
-      .then(result => console.log(result))
-      .catch(error => console.error(error));*/
   }
 
   public cleanAndRenewDatabase() {
-    this.pouchdb.destroy().then(() => {
-      this.pouchdb = new PouchDB('annotationdb');
-    });
+    this.pouchdb
+      .destroy()
+      .then(() => this.pouchdb = new PouchDB('annotationdb'));
   }
 
   public deleteAnnotation(id: string) {
-    if (id === 'DefaultAnnotation') { return; }
-    this.pouchdb.get(id).then((result: IAnnotation) =>
-      this.pouchdb.remove(result),
-    ).catch((error: any) =>
-      console.log('Failed removing annotation', error),
-    );
+    if (id === 'DefaultAnnotation') return;
+    this.pouchdb.get(id)
+      .then(result => this.pouchdb.remove(result))
+      .catch((error: any) => console.log('Failed removing annotation', error));
   }
 
-  /*public updateAnnotation(annotation: Annotation): void {
-    if (annotation._id === 'DefaultAnnotation') { return; }
-
-    this.pouchdb.upsert(annotation._id, function(result) {
-      result = annotation;
-      return result;
-    });
-  }*/
-
   public updateAnnotation(annotation: IAnnotation): void {
-    if (annotation._id === 'DefaultAnnotation') { return; }
+    if (annotation._id === 'DefaultAnnotation') return;
 
     this.pouchdb.get(annotation._id)
       .then(() => annotation)
@@ -93,11 +66,12 @@ export class DataService {
   }
 
   public updateAnnotationRanking(id: string, ranking: number) {
-    if (id === 'DefaultAnnotation') { return; }
-    this.pouchdb.upsert(id, function(result) {
-      console.log('Updating ranking in PouchDB:');
-      result.ranking = ranking;
-      return result;
-    });
+    if (id === 'DefaultAnnotation') return;
+    this.pouchdb.get(id)
+      .then((result: PouchDB.Core.IdMeta & IAnnotation & PouchDB.Core.GetMeta) => {
+        result.ranking = ranking;
+        this.pouchdb.put(result);
+      })
+      .catch(e => console.log('Failed updating annotation ranking', e));
   }
 }

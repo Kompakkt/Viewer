@@ -710,22 +710,11 @@ export class AnnotationService {
     return JSON.stringify(this.annotations);
   }
 
-  private async fetchAnnotations(model: string, compilation?: string): Promise<any[]> {
-
-    return new Promise<any>((resolve, reject) => {
-
-      const annotationList: any[] = [];
-      this.dataService.find(model, (compilation) ? compilation : '')
-        .then(result => {
-          result.docs.forEach(annotation => {
-            if (annotation._id) {
-              annotationList.push(annotation);
-            }
-          });
-          resolve(annotationList);
-        }, error => {
-          reject(error);
-        });
+  private async fetchAnnotations(model: string, compilation?: string): Promise<IAnnotation[]> {
+    return new Promise<IAnnotation[]>(async (resolve, reject) => {
+      const annotationList: IAnnotation[] = await this.dataService
+        .findAnnotations(model, (compilation) ? compilation : '');
+      resolve(annotationList);
     });
   }
 
