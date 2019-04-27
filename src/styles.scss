@@ -90,11 +90,21 @@ a {
 
 #editor .mat-card,
 #collections .mat-card {
-  background-color: rgba(0, 176, 255, 0.2);
+  background-color: rgba(0, 0, 0, 0);
+}
+
+#editor .mat-card:not(:last-child),
+#collections .mat-card:not(:last-child) {
+  border-bottom: 1px solid #333;
 }
 
 #editor .mat-tab-group .mat-tab-label-active {
-  background-color: rgba(0, 176, 255, 0.3);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+#editor .mat-raised-button:not([disabled]),
+#collections .mat-raised-button:not([disabled]) {
+  background-color: #333;
 }
 
 #editor .mat-card-avatar {
@@ -130,27 +140,6 @@ a {
 #editor-about .mat-card-content,
 #collections .mat-card-content {
   line-height: 23px;
-}
-
-.mat-card.titlecard {
-  padding: 7px 7px 7px 10px !important;
-  background-color: rgba(0, 176, 255, 0.1) !important;
-}
-
-.titlecard .mat-card-header-text {
-  margin: 0 !important;
-  padding: 12px 0 10px 0;
-}
-
-.titlecard .mat-card-header .mat-card-title {
-  font-size: 11px !important;
-  font-weight: lighter;
-  margin-bottom: 0 !important;
-}
-
-#editor .mat-raised-button:not([disabled]),
-#collections .mat-raised-button:not([disabled]) {
-  background-color: rgba(0, 176, 255, 0.3);
 }
 
 .fullwidth-button {
