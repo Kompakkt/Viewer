@@ -72,3 +72,34 @@
 #annotations-eximport {
   background-color: rgba(0, 176, 255, 0.3);
 }
+
+#switch-collaborative {
+  text-align: center;
+  font-size: 0.9rem;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  padding: 7px 0;
+  z-index: 1;
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+::ng-deep .mat-slide-toggle-bar {
+  height: 8px !important;
+  width: 28px !important;
+}
+
+::ng-deep .mat-slide-toggle-thumb {
+  height: 11px !important;
+  width: 10px !important;
+}
+
+::ng-deep .mat-slide-toggle.mat-checked .mat-slide-toggle-thumb-container {
+  transform: translate3d(18px,0,0) !important;
+}
+
+::ng-deep .mat-slide-toggle-thumb-container {
+  width: 12px !important;
+  height: 12px !important;
+  top: -2px !important;
+}
