@@ -9,6 +9,11 @@ html, body {
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
+a {
+  color: #fff;
+  text-decoration: none;
+}
+
 .mat-card {
   border-radius: 1px !important;
 }
@@ -133,7 +138,7 @@ html, body {
 }
 
 .titlecard .mat-card-header-text {
-  margin: 0 !important;	  margin: 0 !important;
+  margin: 0 !important;
   padding: 12px 0 10px 0;
 }
 
