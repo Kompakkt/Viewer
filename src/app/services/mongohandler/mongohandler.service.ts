@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { IModel, ICompilation, IAnnotation, ILDAPData, IServerResponse } from '../../interfaces/interfaces';
+import { IModel, ICompilation, IAnnotation, ILDAPData, IServerResponse, IMetaDataDigitalObject } from '../../interfaces/interfaces';
 
 @Injectable({
   providedIn: 'root',
@@ -29,44 +29,11 @@ export class MongohandlerService {
   constructor(private http: HttpClient) {
   }
 
-  // Helper
-  private async updatePreviewURL(promise: Promise<any>) {
-    const update = obj => {
-      // Only update if it's a relative path and not a URL
-      if (obj && obj.settings && obj.settings.preview
-        && obj.settings.preview.indexOf('base64') === -1
-        && obj.settings.preview.indexOf('http') === -1) {
-        obj.settings.preview = `${this.endpoint}${obj.settings.preview}`;
-      }
-      return obj;
-    };
-
-    return new Promise<any>((resolve, reject) => {
-      promise
-        .then(result => {
-          if (Array.isArray(result) && result[0] && !result[0].models) {
-            result = result.map(update);
-          } else if (Array.isArray(result) && result[0] && result[0].models) {
-            for (const compilation of result) {
-              for (let model of compilation.models) {
-                model = update(model);
-              }
-            }
-          } else if (result.models) {
-            result.models = result.models.map(update);
-          } else {
-            result = update(result);
-          }
-          resolve(result);
-        })
-        .catch(reject);
-    });
-  }
-
   // Override GET and POST to use HttpOptions which is needed for auth
   private async get(path: string): Promise<any> {
-    const getResult = this.http.get(`${this.endpoint}/${path}`, this.httpOptions);
-    return this.updatePreviewURL(getResult.toPromise());
+    return this.http
+      .get(`${this.endpoint}/${path}`, this.httpOptions)
+      .toPromise();
   }
 
   private post(path: string, obj: any): Observable<any> {
@@ -91,7 +58,7 @@ export class MongohandlerService {
       : this.get(`api/v1/get/find/compilation/${identifier}`);
   }
 
-  public async getModelMetadata(identifier: string): Promise<any> {
+  public async getModelMetadata(identifier: string): Promise<IMetaDataDigitalObject & IServerResponse> {
     return this.get(`api/v1/get/find/digitalobject/${identifier}`);
   }
 
@@ -117,22 +84,21 @@ export class MongohandlerService {
     return this.post(`login`, { username, password });
   }
 
-  public async logout(): Promise<any> {
+  public async logout(): Promise<IServerResponse> {
     return this.get(`logout`);
   }
 
-  public async isAuthorized(): Promise<any> {
+  public async isAuthorized(): Promise<IServerResponse> {
     return this.get(`auth`);
   }
 
-  // annotation
+  // TODO: check return type
   public deleteRequest(
     identifier: string, type: string,
     username: string, password: string): Observable<any> {
     return this.post(`api/v1/post/remove/${type}/${identifier}`, { username, password });
   }
 
-  // annotation
   public async shareAnnotation(identifierColl: string, annotationArray: string[]): Promise<any> {
     return this.post(`utility/moveannotations/${identifierColl}`, { annotationArray });
   }
