@@ -1,4 +1,8 @@
 // Metadata related
+export interface IUnresolvedObject {
+  _id: string;
+}
+
 interface IMetaDataExternalLink {
   externalLink_description: string;
   externalLink_value: string;
@@ -210,13 +214,14 @@ export interface IFile {
 }
 
 export interface IModel {
-  _id?: string;
+  _id: string;
   annotationList: Array<IAnnotation | null>;
   name: string;
   files: IFile[] | null;
   finished: boolean;
   ranking?: number;
   relatedDigitalObject?: any;
+  relatedModelOwners?: IRelatedOwner[];
   online: boolean;
   isExternal?: boolean;
   externalService?: string;
@@ -246,13 +251,19 @@ export interface IModel {
   };
 }
 
+interface IRelatedOwner {
+  _id: string;
+  username: string;
+  fullname: string;
+}
+
 export interface ICompilation {
-  _id?: string;
-  name?: string;
-  description?: string;
-  relatedOwner?: string;
-  passcode?: string;
-  models: Array<IModel | null>;
+  _id: string;
+  name: string;
+  description: string;
+  relatedOwner?: IRelatedOwner;
+  password?: string;
+  models: Array<IModel | null | IUnresolvedObject>;
   annotationList: Array<IAnnotation | null>;
 }
 
@@ -296,7 +307,6 @@ export interface ISocketRoomData {
   recipient: string;
   info: ISocketUserInfo;
 }
-
 
 // Misc
 export interface ISizedEvent {
