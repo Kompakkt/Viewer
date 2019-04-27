@@ -72,7 +72,7 @@ export class UserdataService {
     });
 
     this.loadModelService.Observables.actualCollection.subscribe(actualCollection => {
-      if (actualCollection._id) {
+      if (actualCollection._id && actualCollection.relatedOwner) {
         if (actualCollection.relatedOwner._id && this.loggedIn && this.currentUserData._id) {
           if (this.currentUserData._id !== 'guest') {
             if (actualCollection.relatedOwner._id === this.currentUserData._id) {

@@ -3,7 +3,7 @@ import * as BABYLON from 'babylonjs';
 import {ReplaySubject} from 'rxjs';
 
 import {environment} from '../../../environments/environment';
-import {IModel, ISizedEvent} from '../../interfaces/interfaces';
+import {ICompilation, IModel, ISizedEvent} from '../../interfaces/interfaces';
 import {ActionService} from '../action/action.service';
 import {BabylonService} from '../babylon/babylon.service';
 import {CameraService} from '../camera/camera.service';
@@ -21,7 +21,7 @@ export class LoadModelService {
   private Subjects = {
     actualModel: new ReplaySubject<IModel>(),
     actualModelMeshes: new ReplaySubject<BABYLON.Mesh[]>(),
-    actualCollection: new ReplaySubject<any>(),
+    actualCollection: new ReplaySubject<ICompilation>(),
   };
 
   public Observables = {
@@ -83,11 +83,11 @@ export class LoadModelService {
               private metadataService: MetadataService) {
   }
 
-  public getCurrentModel() {
+  public getCurrentModel(): IModel | null {
     return this.Observables.actualModel.source['_events'].slice(-1)[0];
   }
 
-  public getCurrentCompilation() {
+  public getCurrentCompilation(): ICompilation | null {
     return this.Observables.actualCollection.source['_events'].slice(-1)[0];
   }
 
@@ -228,9 +228,10 @@ export class LoadModelService {
       this.quality = quality;
       this.isLoaded = false;
       this.loaded.emit(false);
-      const _model = this.getCurrentModel();
-      if (_model.processed[this.quality] !== undefined) {
-        this.loadModel(_model._id === 'Cube' ? _model : this.defaultModel, '')
+      const model = this.getCurrentModel();
+      if (!model || !model.processed) return;
+      if (model.processed[this.quality] !== undefined) {
+        this.loadModel(model._id === 'Cube' ? model : this.defaultModel, '')
           .then(result => {
             this.isLoaded = true;
             this.loaded.emit(true);

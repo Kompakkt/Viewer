@@ -36,6 +36,10 @@ export class SocketService {
     this.loadModelService.Observables.actualModel.subscribe(actualModel => {
       const currentCompilation = this.loadModelService.getCurrentCompilation();
       const currentModel = this.loadModelService.getCurrentModel();
+
+      // We always need a model loaded
+      if (!currentModel) return;
+
       this.socketRoom = (currentCompilation)
         ? `${currentCompilation._id}_${currentModel._id}` : `${currentModel._id}`;
 

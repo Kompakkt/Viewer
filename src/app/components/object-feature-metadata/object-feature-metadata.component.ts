@@ -31,16 +31,17 @@ export class ObjectFeatureMetadataComponent implements OnInit {
   ngOnInit() {
     this.overlayService.editor.subscribe(async editorIsOpen => {
         this.isOpen = editorIsOpen;
-        if (this.isOpen) {
+        const currentModel = this.loadModelService.getCurrentModel();
+        if (this.isOpen && currentModel) {
 
-          if (this.actualMetadata_id !== this.loadModelService.getCurrentModel().relatedDigitalObject._id) {
-            this.actualMetadata_id = this.loadModelService.getCurrentModel().relatedDigitalObject._id;
+          if (this.actualMetadata_id !== currentModel.relatedDigitalObject._id) {
+            this.actualMetadata_id = currentModel.relatedDigitalObject._id;
             if (this.actualMetadata_id && this.actualMetadata_id !== '') {
               this.metadata = await this.metadataService.fetchMetadata(this.actualMetadata_id);
               this.showMetadata = (this.metadata && this.metadata !== '');
-              this.isExternal = this.loadModelService.getCurrentModel().dataSource.isExternal;
-              if (this.isExternal && this.loadModelService.getCurrentModel().dataSource.service) {
-                this.service = this.loadModelService.getCurrentModel().dataSource.service;
+              this.isExternal = currentModel.dataSource.isExternal;
+              if (this.isExternal && currentModel.dataSource.service) {
+                this.service = currentModel.dataSource.service;
               } else {
                 this.service = 'Objects Repository';
               }

@@ -75,9 +75,9 @@ export class MenuComponent implements OnInit, AfterViewInit {
       this.loaded = loaded;
       const currentModel = this.loadModelService.getCurrentModel();
       if (currentModel && currentModel.processed) {
-        this.high = this.loadModelService.getCurrentModel().processed.high;
-        this.medium = this.loadModelService.getCurrentModel().processed.medium;
-        this.low = this.loadModelService.getCurrentModel().processed.low;
+        this.high = (currentModel.processed.high) ? currentModel.processed.high : '';
+        this.medium = (currentModel.processed.medium) ? currentModel.processed.medium : '';
+        this.low = (currentModel.processed.low) ? currentModel.processed.low : '';
       }
     });
 
