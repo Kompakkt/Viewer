@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { IModel, ICompilation, IAnnotation, ILDAPData, IServerResponse } from '../../interfaces/interfaces';
+import { IModel, ICompilation, IAnnotation, ILDAPData, IServerResponse, IMetaDataDigitalObject } from '../../interfaces/interfaces';
 
 @Injectable({
   providedIn: 'root',
@@ -91,7 +91,7 @@ export class MongohandlerService {
       : this.get(`api/v1/get/find/compilation/${identifier}`);
   }
 
-  public async getModelMetadata(identifier: string): Promise<any> {
+  public async getModelMetadata(identifier: string): Promise<IMetaDataDigitalObject & IServerResponse> {
     return this.get(`api/v1/get/find/digitalobject/${identifier}`);
   }
 
@@ -117,22 +117,21 @@ export class MongohandlerService {
     return this.post(`login`, { username, password });
   }
 
-  public async logout(): Promise<any> {
+  public async logout(): Promise<IServerResponse> {
     return this.get(`logout`);
   }
 
-  public async isAuthorized(): Promise<any> {
+  public async isAuthorized(): Promise<IServerResponse> {
     return this.get(`auth`);
   }
 
-  // annotation
+  // TODO: check return type
   public deleteRequest(
     identifier: string, type: string,
     username: string, password: string): Observable<any> {
     return this.post(`api/v1/post/remove/${type}/${identifier}`, { username, password });
   }
 
-  // annotation
   public async shareAnnotation(identifierColl: string, annotationArray: string[]): Promise<any> {
     return this.post(`utility/moveannotations/${identifierColl}`, { annotationArray });
   }

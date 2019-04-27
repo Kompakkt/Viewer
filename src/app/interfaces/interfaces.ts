@@ -1,3 +1,109 @@
+// Metadata related
+interface IMetaDataExternalLink {
+  externalLink_description: string;
+  externalLink_value: string;
+}
+
+interface IMetaDataAddress {
+  address_building: string;
+  address_number: string;
+  address_street: string;
+  address_postcode: string;
+  address_city: string;
+  address_country: string;
+}
+
+export interface IMetaDataPerson {
+  _id: string;
+  person_surname: string;
+  person_prename: string;
+  person_email: string;
+  person_role: string[];
+  person_phonenumber: string;
+  person_note: string;
+  person_institution: string | any[];
+  person_institution_data: IMetaDataInstitution[];
+  roles: {
+    [key: string]: string[];
+  };
+
+  display?: string;
+  value?: string;
+}
+
+export interface IMetaDataInstitution {
+  _id: string;
+  institution_name: string;
+  institution_address: IMetaDataAddress;
+  institution_university: string;
+  institution_role: string[];
+  institution_note: string;
+  roles: {
+    [key: string]: string[];
+  };
+
+  display?: string;
+  value?: string;
+}
+
+export interface IMetaDataTag {
+  _id: string;
+  display: string;
+  value: string;
+}
+
+export interface IMetaDataPhysicalObject {
+  _id: string;
+  phyobj_title: string;
+  phyobj_description: string;
+  phyobj_externalIdentifier: any[];
+  phyobj_externalLink: IMetaDataExternalLink[];
+  phyobj_externalFile: any;
+  phyobj_place: IMetaDataAddress[];
+  phyobj_person_existing_role: any[];
+  phyobj_institution_existing_role: any[];
+  phyobj_metadata_files: IFile[];
+  phyobj_collection: string;
+
+  phyobj_rightsownerSelector: number;
+  phyobj_rightsowner: Array<IMetaDataPerson | IMetaDataInstitution>;
+  phyobj_rightsowner_person: Array<IMetaDataPerson | null>;
+  phyobj_rightsowner_institution: Array<IMetaDataInstitution | null>;
+  phyobj_person_existing: Array<IMetaDataPerson | null>;
+  phyobj_person: Array<IMetaDataPerson | null>;
+  phyobj_institution: Array<IMetaDataInstitution | null>;
+  phyobj_institution_existing: Array<IMetaDataInstitution | null>;
+}
+
+export interface IMetaDataDigitalObject {
+  _id: string;
+  digobj_type: string;
+  digobj_title: string;
+  digobj_description: string;
+  digobj_licence: string;
+  digobj_discipline: string[];
+  digobj_tags: IMetaDataTag[];
+  digobj_objecttype: string;
+  digobj_externalIdentifier: any[];
+  digobj_dimensions: any[];
+  digobj_creation: any[];
+  digobj_externalLink: IMetaDataExternalLink[];
+  digobj_metadata_files: any[];
+  digobj_files: Array<IFile | null>;
+  digobj_statement: string;
+  phyObjs: Array<IMetaDataPhysicalObject | null>;
+
+  digobj_rightsownerSelector: number;
+  digobj_rightsowner: Array<IMetaDataPerson | IMetaDataInstitution | null>;
+  digobj_rightsowner_person: Array<IMetaDataPerson | null>;
+  digobj_rightsowner_institution: Array<IMetaDataInstitution | null>;
+  contact_person_existing: Array<IMetaDataPerson | null>;
+  contact_person: Array<IMetaDataPerson | null>;
+  digobj_person_existing: Array<IMetaDataPerson | null>;
+  digobj_person: Array<IMetaDataPerson | null>;
+  digobj_person_existing_role: any[];
+}
+
 // User related
 export interface IUserData {
   fullname: string;
