@@ -346,14 +346,24 @@ export class SocketService {
 
     let color = 'black';
     if (this.coloredUsers.length) {
-      for (let i = 0; i < this.maxColoredUsersMinusOne; i++) {
-        if (!this.coloredUsers[i]) continue;
-        if (newAnnotation.creator._id !== this.coloredUsers[i]._id) continue;
-        color = this.color[i];
+      const cUserIndex = this.coloredUsers.findIndex(x => x._id === newAnnotation.creator._id);
+      if (cUserIndex !== -1 && cUserIndex < this.maxColoredUsersMinusOne) {
+        color = this.color[cUserIndex];
       }
     }
 
     this.annotationmarkerService.createAnnotationMarker(newAnnotation, color);
+  }
+
+  public getColor(annotationCreatorId: string): string {
+    if (this.coloredUsers.length) {
+      const cUserIndex = this.coloredUsers.findIndex(x => x._id === annotationCreatorId);
+      if (cUserIndex !== -1 && cUserIndex < this.maxColoredUsersMinusOne) {
+        return this.color[cUserIndex];
+      } else { return '$cardbgr';
+      }
+    } else {
+    return '$cardbgr'; }
   }
 
   private async sortAnnotations(toBesorted: any[]) {

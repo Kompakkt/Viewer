@@ -133,20 +133,6 @@ export class AnnotationComponent implements OnInit {
     }
   }
 
-  // TODO set color in socket Service
-  public getColor(): any {
-    if (this.socketService.coloredUsers.length) {
-      for (let _i = 0; _i < this.socketService.maxColoredUsersMinusOne; _i++) {
-        if (this.socketService.coloredUsers[_i]) {
-          if (this.annotation.creator._id === this.socketService.coloredUsers[_i]._id) {
-            return this.socketService.color[_i];
-          }
-        }
-      }
-      return '$cardbgr';
-    }
-  }
-
   // --- JAN ----
   public editFullscreen(): void {
 

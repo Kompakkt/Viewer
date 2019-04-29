@@ -34,7 +34,6 @@ export class CatalogueService {
   @Output() showCatalogue: EventEmitter<boolean> = new EventEmitter();
   @Output() loggedIn: EventEmitter<boolean> = new EventEmitter();
   @Output() singleObject: EventEmitter<boolean> = new EventEmitter();
-  @Output() singleCollection: EventEmitter<boolean> = new EventEmitter();
   @Output() defaultLoad: EventEmitter<boolean> = new EventEmitter();
   @Output() firstLoad: EventEmitter<boolean> = new EventEmitter();
 
@@ -103,7 +102,6 @@ export class CatalogueService {
     this.defaultLoad.emit(this.isDefaultLoad);
     this.singleObject.emit(this.isSingleObject);
     this.showCatalogue.emit(this.isShowCatalogue);
-    this.singleCollection.emit(this.isSingleCollection);
 
     if (this.isDefaultLoad) {
       this.loadModelService.loadDefaultModelData();

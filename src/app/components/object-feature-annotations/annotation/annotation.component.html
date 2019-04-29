@@ -3,7 +3,7 @@
           [style.top.px]="positionTop"
           [style.left.px]="positionLeft"
           *ngIf="visibility"
-          [style.background-color]="getColor()"
+          [style.background-color]="socketService.getColor(annotation.creator._id)"
           id={{annotation._id}}>
 
   <form class="annotation-form">
