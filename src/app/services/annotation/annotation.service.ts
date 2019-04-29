@@ -930,14 +930,14 @@ export class AnnotationService {
     });
   }
 
-  public async toggleAnnotationSource(sourceCol: boolean, initial?: boolean) {
+  public toggleAnnotationSource(sourceCol: boolean, initial?: boolean) {
 
     if (initial) {
       this.isannotationSourceCollection = false;
       this.annotationSourceCollection.emit(false);
       this.annotations = JSON.parse(JSON.stringify(this.isannotationSourceCollection ?
         this.collectionAnnotationsSorted : this.defaultAnnotationsSorted));
-      await this.redrawMarker();
+      this.redrawMarker();
     } else {
       if (sourceCol === this.isannotationSourceCollection) {
         return;
@@ -947,7 +947,7 @@ export class AnnotationService {
         this.annotations = JSON.parse(JSON.stringify(this.isannotationSourceCollection ?
           this.collectionAnnotationsSorted : this.defaultAnnotationsSorted));
 
-        await this.redrawMarker();
+        this.redrawMarker();
       }
     }
   }
