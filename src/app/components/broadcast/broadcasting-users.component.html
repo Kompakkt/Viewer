@@ -1,4 +1,4 @@
-<div *ngIf="this.socketService.collaborators">
+<div *ngIf="this.socketService.collaborators" id="collaborators">
   <mat-chip-list>
     <mat-chip *ngFor="let collaborator of this.socketService.collaborators |
     slice:0:
