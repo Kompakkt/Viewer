@@ -5,7 +5,7 @@
     this.socketService.maxColoredUsersMinusOne < this.socketService.collaborators.length ?
     this.socketService.maxColoredUsersMinusOne : this.socketService.collaborators.length;
     let i=index"
-              [style.color]="this.socketService.color[i]"
+              [style.background-color]="this.socketService.color[i]"
               matTooltip="{{collaborator.fullname}}">
       {{collaborator.username.substring(0,2)}}
     </mat-chip>
