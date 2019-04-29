@@ -83,10 +83,10 @@ export class AnnotationService {
       if (socketSource) {
         this.annotations = [];
         this.annotations = this.socketService.annotationsForSocket;
+        this.redrawMarker();
       } else {
         this.annotations = JSON.parse(JSON.stringify(this.isannotationSourceCollection ?
           this.collectionAnnotationsSorted : this.defaultAnnotationsSorted));
-
         this.redrawMarker();
       }
     });

@@ -49,6 +49,7 @@ export class AnnotationComponent implements OnInit {
   public isAnnotatingAllowed: boolean;
   public isAnnotationOwner: boolean;
   public isCollectionOwner: boolean;
+  public isInSocket: boolean;
 
   constructor(private dataService: DataService,
               public annotationService: AnnotationService,
@@ -71,6 +72,10 @@ export class AnnotationComponent implements OnInit {
     this.annotationService.isSelectedAnnotation.subscribe(selectedAnno => {
       selectedAnno === this.annotation._id ? this.visibility = true : this.visibility = false;
       this.selectedAnnotation = selectedAnno;
+    });
+
+    this.socketService.inSocket.subscribe(inSocket => {
+      this.isInSocket = inSocket;
     });
 
     this.annotationService.isEditModeAnnotation.subscribe(selectedAnno => {

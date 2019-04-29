@@ -121,6 +121,8 @@ export class SocketService {
       console.log(`DISCONNECTED FROM SOCKET.IO`);
       this.isSocketAnnotationSource = false;
       this.socketAnnotationSource.emit(false);
+      this.coloredUsers = [];
+      this.collaborators = [];
     });
 
     // A user left the room, so we remove knowledge about this user
@@ -183,14 +185,15 @@ export class SocketService {
       recipient: this.socketRoom,
     };
     this.socket.emit('roomDataRequest', emitRequest);
-    this.isSocketAnnotationSource = false;
-    this.socketAnnotationSource.emit(false);
+    this.isSocketAnnotationSource = true;
+    this.socketAnnotationSource.emit(true);
   }
 
   public disconnectSocket() {
     this.isInSocket = false;
     this.inSocket.emit(false);
     this.collaborators = [];
+    this.coloredUsers = [];
     this.sortUser();
     // this.collaboratorsAnnotations = [];
     // send info to other Room members,
@@ -359,14 +362,20 @@ export class SocketService {
   }
 
   public getColor(annotationCreatorId: string): string {
-    if (this.coloredUsers.length) {
-      const cUserIndex = this.coloredUsers.findIndex(x => x._id === annotationCreatorId);
-      if (cUserIndex !== -1 && cUserIndex < this.maxColoredUsersMinusOne) {
-        return this.color[cUserIndex];
-      } else { return '$cardbgr';
+    if (this.inSocket) {
+      if (this.coloredUsers.length) {
+        const cUserIndex = this.coloredUsers.findIndex(x => x._id === annotationCreatorId);
+        if (cUserIndex !== -1 && cUserIndex < this.maxColoredUsersMinusOne) {
+          return this.color[cUserIndex];
+        } else {
+          return '$cardbgr';
+        }
+      } else {
+        return '$cardbgr';
       }
     } else {
-    return '$cardbgr'; }
+      return '$cardbgr';
+    }
   }
 
   private async sortAnnotations(toBesorted: any[]) {
