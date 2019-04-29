@@ -37,8 +37,8 @@ import { DialogShareAnnotationComponent } from './components/dialogs/dialog-shar
 import { LoadingscreenComponent } from './components/loadingscreen/loadingscreen.component';
 import {MediaBrowserComponent} from './components/media-browser/media-browser.component';
 import { MenuComponent } from './components/menu/menu.component';
+import { AnnotationComponentForEditorComponent } from './components/object-feature-annotations/annotation/annotation-for-editor.component';
 import { AnnotationComponent } from './components/object-feature-annotations/annotation/annotation.component';
-import { AnnotationcardsComponent } from './components/object-feature-annotations/annotationcards/annotationcards.component';
 import { AnnotationsEditorComponent } from './components/object-feature-annotations/annotations-editor/annotations-editor.component';
 import { AnnotationwalkthroughComponent } from './components/object-feature-annotations/annotationwalkthrough/annotationwalkthrough.component';
 import { ObjectFeatureMetadataComponent } from './components/object-feature-metadata/object-feature-metadata.component';
@@ -55,7 +55,7 @@ import {MediaTypePipe} from './pipes/media-type.pipe';
     ObjectFeaturesComponent,
     AnnotationsEditorComponent,
     AnnotationComponent,
-    AnnotationcardsComponent,
+    AnnotationComponentForEditorComponent,
     AnnotationwalkthroughComponent,
     ContentComponent,
     ContentBrowserComponent,

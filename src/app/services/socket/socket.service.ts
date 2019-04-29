@@ -14,7 +14,7 @@ export class SocketService {
   // public collaboratorsAnnotations: IAnnotation[] = [];
   public collaborators: ISocketUser[] = [];
   public socketRoom: string;
-  private isInSocket = false;
+  public isInSocket = false;
   @Output() inSocket: EventEmitter<boolean> = new EventEmitter();
 
   private isSocketAnnotationSource = false;

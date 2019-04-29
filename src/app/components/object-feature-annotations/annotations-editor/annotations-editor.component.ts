@@ -1,14 +1,12 @@
-import {Component, Input, OnInit, ViewChild} from '@angular/core';
+import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
+import {Component, OnInit, QueryList, ViewChildren} from '@angular/core';
+import {MatRadioChange} from '@angular/material';
+import {saveAs} from 'file-saver';
 
-import {IAnnotation} from '../../../interfaces/interfaces';
 import {AnnotationService} from '../../../services/annotation/annotation.service';
-import {AnnotationmarkerService} from '../../../services/annotationmarker/annotationmarker.service';
-import {BabylonService} from '../../../services/babylon/babylon.service';
-import {CameraService} from '../../../services/camera/camera.service';
-import {CatalogueService} from '../../../services/catalogue/catalogue.service';
-import {DataService} from '../../../services/data/data.service';
 import {LoadModelService} from '../../../services/load-model/load-model.service';
 import {SocketService} from '../../../services/socket/socket.service';
+import {AnnotationComponent} from '../annotation/annotation.component';
 import {UserdataService} from '../../../services/userdata/userdata.service';
 
 @Component({
@@ -18,172 +16,69 @@ import {UserdataService} from '../../../services/userdata/userdata.service';
 })
 export class AnnotationsEditorComponent implements OnInit {
 
-  @Input() annotation: IAnnotation;
+  @ViewChildren(AnnotationComponent)
+  annotationsList: QueryList<AnnotationComponent>;
 
-  public collapsed = false;
-  public editMode = false;
-  public labelMode = 'edit';
-  public labelModeText = 'edit';
-  public preview = '';
-  public showAnnotation = true;
-  public isDefault: boolean;
-  public isOwner: boolean;
-  public isDefaultLoad: boolean;
-  public isCollection: boolean;
-  public isCollectionOwner: boolean;
-  private selectedAnnotation: string;
-  private editModeAnnotation: string;
+  // external
+  public isCollectionLoaded: boolean;
+  public isDefaultModelLoaded: boolean;
+  public isAnnotatingAllowed: boolean;
+  public isBroadcasting: boolean;
 
-  public showMediaBrowser = false;
+  // internal
+  private isDefaultAnnotationsSource: boolean;
 
-  public id = '';
-
-  @ViewChild('annotationContent') private annotationContent;
-
-  constructor(private dataService: DataService,
-              private annotationService: AnnotationService,
-              private babylonService: BabylonService,
-              private cameraService: CameraService,
-              private annotationmarkerService: AnnotationmarkerService,
+  constructor(private annotationService: AnnotationService,
               private socketService: SocketService,
               public loadModelService: LoadModelService,
-              private userdataService: UserdataService,
-              private catalogueService: CatalogueService) {
+              private  userDataService: UserdataService) {
   }
 
   ngOnInit() {
 
-    if (this.annotation) {
+    this.isDefaultAnnotationsSource = true;
 
-      this.isDefault = (!this.annotation.target.source.relatedCompilation ||
-        this.annotation.target.source.relatedCompilation === '');
+    this.loadModelService.collectionLoaded.subscribe(isLoaded => {
+      this.isCollectionLoaded = isLoaded;
+    });
 
-      this.isOwner = this.userdataService.isAnnotationOwner(this.annotation);
+    this.loadModelService.defaultModelLoaded.subscribe(isLoaded => {
+      this.isDefaultModelLoaded = isLoaded;
+    });
 
-      this.catalogueService.defaultLoad.subscribe(defaultLoad => {
-        this.isDefaultLoad = defaultLoad;
-      });
+    this.annotationService.annnotatingAllowed.subscribe(allowed => {
+      this.isAnnotatingAllowed = allowed;
+    });
 
-      this.loadModelService.Observables.actualCollection.subscribe(actualCompilation => {
-        (actualCompilation && actualCompilation._id)
-          ? this.isCollection = true : this.isCollection = false;
-      });
+    this.socketService.inSocket.subscribe(broadcast => {
+      this.isBroadcasting = broadcast;
+    });
 
-      this.id = this.annotation._id;
-      this.preview = this.annotation.body.content.relatedPerspective.preview;
+  }
+
+  drop(event: CdkDragDrop<string[]>) {
+    moveItemInArray(this.annotationService.annotations, event.previousIndex, event.currentIndex);
+    this.annotationService.changedRankingPositions(this.annotationService.annotations);
+    this.annotationService.redrawMarker();
+  }
+
+  exportAnnotations() {
+    saveAs(new Blob([JSON.stringify(this.annotationService.annotations)],
+                    {type: 'text/plain;charset=utf-8'}),
+           'annotations.json');
+  }
+
+  changeCategory(mrChange: MatRadioChange) {
+    // for other values check:
+    // const mrButton: MatRadioButton = mrChange.source;
+    if (mrChange.value === 'col') {
+      this.isDefaultAnnotationsSource = false;
+      this.annotationService.setCollectionInput(false);
     }
-
-    this.userdataService.collectionOwner.subscribe(owner => {
-      this.isCollectionOwner = owner;
-    });
-
-    this.annotationService.isSelectedAnnotation.subscribe(selectedAnno => {
-      this.selectedAnnotation = selectedAnno;
-      if (this.selectedAnnotation === this.annotation._id && !this.showAnnotation) {
-        this.showAnnotation = true;
-        this.babylonService.hideMesh(this.annotation._id, true);
-      }
-    });
-
-    this.annotationService.isEditModeAnnotation.subscribe(selectedAnno => {
-      this.editModeAnnotation = selectedAnno;
-      if (selectedAnno === this.annotation._id && !this.editMode) {
-        this.editMode = true;
-        this.annotationService.setSelectedAnnotation(this.annotation._id);
-        this.labelMode = 'remove_red_eye';
-        this.labelModeText = 'view';
-      }
-      if (selectedAnno === this.annotation._id && this.editMode) {
-        return;
-      }
-      if (selectedAnno !== this.annotation._id && this.editMode) {
-        this.editMode = false;
-        this.labelMode = 'edit';
-        this.labelModeText = 'edit';
-        this.save();
-      }
-      if (selectedAnno !== this.annotation._id && !this.editMode) {
-        return;
-      }
-    });
-  }
-
-  public addMedium(medium) {
-
-    const mdImage = `![alt ${medium.description}](${medium.url})`;
-
-    this.annotationContent.nativeElement.focus();
-
-    const start = this.annotationContent.nativeElement.selectionStart;
-    const value = this.annotationContent.nativeElement.value;
-
-    this.annotation.body.content.description =
-      `${value.substring(0, start)}${mdImage}${value.substring(start, value.length)}`;
-  }
-
-  public changeOpenPopup() {
-    if (!this.editMode) {
-      this.collapsed = !this.collapsed;
+    if (mrChange.value === 'def') {
+      this.isDefaultAnnotationsSource = true;
+      this.annotationService.setCollectionInput(true);
     }
-    this.collapsed && this.selectedAnnotation === this.annotation._id ?
-      this.annotationService.setSelectedAnnotation('') :
-      this.annotationService.setSelectedAnnotation(this.annotation._id);
-    this.babylonService.hideMesh(this.annotation._id, true);
-    this.showAnnotation = true;
-  }
-
-  public toggleVisibility() {
-    if (this.showAnnotation) {
-      this.showAnnotation = false;
-      if (this.selectedAnnotation === this.annotation._id) {
-        this.annotationService.setSelectedAnnotation('');
-      }
-      this.babylonService.hideMesh(this.annotation._id, false);
-    } else {
-      this.showAnnotation = true;
-      this.annotationService.setSelectedAnnotation(this.annotation._id);
-      this.babylonService.hideMesh(this.annotation._id, true);
-    }
-  }
-
-  public async selectPerspective() {
-
-    await this.babylonService.createPreviewScreenshot(400).then(detailScreenshot => {
-
-      const camera = this.cameraService.getActualCameraPosAnnotation();
-      this.annotation.body.content.relatedPerspective = {
-        cameraType: camera.cameraType,
-        position: {
-          x: camera.position.x,
-          y: camera.position.y,
-          z: camera.position.z,
-        },
-        target: {
-          x: camera.target.x,
-          y: camera.target.y,
-          z: camera.target.z,
-        },
-        preview: detailScreenshot,
-      };
-
-      this.preview = detailScreenshot;
-    });
-  }
-
-  public deleteAnnotation(): void {
-    this.annotationService.deleteAnnotation(this.annotation);
-  }
-
-  private save(): void {
-    this.annotationService.updateAnnotation(this.annotation);
-  }
-
-  public onSubmit(event) {
-    console.log(event);
-  }
-
-  public shareAnnotation() {
-  this.annotationService.shareAnnotation(this.annotation);
   }
 
 }

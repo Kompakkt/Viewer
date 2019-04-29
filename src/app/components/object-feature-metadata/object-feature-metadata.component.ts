@@ -19,8 +19,10 @@ export class ObjectFeatureMetadataComponent implements OnInit {
   private actualMetadata_id: string;
   public isExternal: boolean;
   public service: string;
-  public baseURL = 'https://blacklodge.hki.uni-koeln.de/builds/ObjectsRepository/live/#/model-overview?model=';
   public downloadJsonHref: any;
+  public isDefaultModelLoaded: boolean;
+  // TODO better to set somewhere global
+  public baseURL = 'https://blacklodge.hki.uni-koeln.de/builds/ObjectsRepository/live/#/model-overview?model=';
 
   constructor(private overlayService: OverlayService,
               private metadataService: MetadataService,
@@ -39,11 +41,9 @@ export class ObjectFeatureMetadataComponent implements OnInit {
               this.metadata = await this.metadataService.fetchMetadata(this.actualMetadata_id);
               this.showMetadata = (this.metadata && this.metadata !== '');
               this.isExternal = currentModel.dataSource.isExternal;
-              if (this.isExternal && currentModel.dataSource.service) {
-                this.service = currentModel.dataSource.service;
-              } else {
+              this.isExternal && currentModel.dataSource.service ?
+                this.service = currentModel.dataSource.service :
                 this.service = 'Objects Repository';
-              }
             } else {
               this.showMetadata = false;
             }

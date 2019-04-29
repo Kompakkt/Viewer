@@ -1,3 +1,4 @@
+<!--
 <mat-chip-list *ngIf="this.socketService.collaborators">
     <mat-chip
       *ngFor="let collaborator of this.socketService.collaborators |
@@ -20,8 +21,19 @@
     this.socketService.maxColoredUsersMinusOne: this.socketService.collaborators.length;
     : this.socketService.collaborators.length; let i=index" [value]="collaborator">
         {{collaborator.fullname}}
-      </mat-option-->
+      </mat-option>
     </mat-select>
   </mat-form-field>
 
 </mat-chip-list>
+
+<div *ngIf="isCollectionSource || loadModelService.Observables.actualModel._id === 'Cube'" id="switch-collaborative">
+  Collaborative Annotation Mode
+  <mat-slide-toggle id="socket"
+                    mat-icon-button [(ngModel)]="toggleChecked" (change)="onSocketToggleChange()"
+                    matTooltip="Login to Socket.Io" matTooltipPosition="above"
+                    color="warn"
+                    aria-label="Login to Socket.Io">
+  </mat-slide-toggle>
+</div>
+-->

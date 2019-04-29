@@ -1,15 +1,15 @@
-<div [style.visibility]="babylonService.vrModeIsActive ? 'visible' : 'hidden'">
+<div [style.visibility]="!isVRModeActive ? 'visible' : 'hidden'">
 
-  <button *ngIf="isShowCatalogue"
-          mat-icon-button (click)="overlayService.toggleCollectionsOverview()"
+  <button mat-icon-button (click)="overlayService.toggleCollectionsOverview()"
           [class.active]="overlayService.collectionsOverview | async"
-          matTooltip="Catalogue" matTooltipPosition="above">
+          matTooltip="Catalogue"
+          matTooltipPosition="above">
     <mat-icon aria-label="Toggle Collections Overview">collections</mat-icon>
   </button>
 
   <button mat-icon-button (click)="overlayService.toggleEditor()"
           [class.active]="overlayService.editor | async"
-          matTooltip="Edit scene and annotations" matTooltipPosition="above">
+          matTooltip="Object Features" matTooltipPosition="above">
     <mat-icon aria-label="Edit scene and annotations">edit</mat-icon>
   </button>
 
@@ -17,13 +17,6 @@
           matTooltip="Settings" matTooltipPosition="above">
     <mat-icon aria-label="Settings">settings</mat-icon>
   </button>
-
-  <!--
-  <button mat-icon-button (click)="saveScene()"
-          matTooltip="Save Scene" matTooltipPosition="above">
-    <mat-icon aria-label="Save Scene">save</mat-icon>
-  </button>
-  -->
 
   <!-- Settings Menu -->
   <mat-menu #settingsMenu="matMenu" yPosition="above" [overlapTrigger]="false">
@@ -33,86 +26,50 @@
       <span>Camera</span>
     </button>
 
-    <button mat-menu-item [matMenuTriggerFor]="quality"  *ngIf="loaded">
+    <button mat-menu-item [matMenuTriggerFor]="quality">
       <mat-icon>high_quality</mat-icon>
       <span>Quality</span>
     </button>
 
-    <button mat-menu-item (click)="takeScreenshot()">
+    <button mat-menu-item (click)="babylonService.createScreenshot();">
       <mat-icon>camera</mat-icon>
       <span>Screenshot</span>
     </button>
 
-    <button *ngIf="!catalogueService.loggedIn | async" mat-menu-item (click)="loginDialog()">
+    <button mat-menu-item (click)="isLoggedIn ? logout() : loginDialog()">
       <mat-icon>account_circle</mat-icon>
-      <span>Login</span>
+      <span>{{isLoggedIn ? 'Logout' : 'Login'}}</span>
     </button>
-
-    <button *ngIf="catalogueService.loggedIn | async" mat-menu-item (click)="logout()">
-      <mat-icon>account_circle</mat-icon>
-      <span>Logout</span>
-    </button>
-
-    <!--
-    <button mat-menu-item [matMenuTriggerFor]="skyboxes">Skyboxes</button>
-    -->
 
   </mat-menu>
 
   <!-- Cameras Submenu -->
   <mat-menu #cameras="matMenu">
 
-    <!-- button mat-menu-item (click)="setCamArcRotate()">Orbit Camera</button-->
-    <!--
-    <button mat-menu-item (click)="setCamUniversal()">Universal Camera</button>
-    -->
-
-    <button mat-menu-item (click)="setBackToDefault()">Reset Camera</button>
+    <button mat-menu-item (click)="cameraService.backToDefault();">Reset Camera</button>
 
   </mat-menu>
   <!-- / Cameras Submenu -->
 
   <!-- Quality Submenu -->
   <mat-menu #quality="matMenu">
-    <button mat-menu-item *ngIf="high !== ''" (click)="setModelQuality('high')">High</button>
-    <button mat-menu-item *ngIf="medium !== ''" (click)="setModelQuality('medium')">Medium</button>
-    <button mat-menu-item *ngIf="low !== ''" (click)="setModelQuality('low')">Low</button>
+    <button mat-menu-item *ngIf="high !== ''" (click)="loadModelService.updateModelQuality('high')">High</button>
+    <button mat-menu-item *ngIf="medium !== ''" (click)="loadModelService.updateModelQuality('medium')">Medium</button>
+    <button mat-menu-item *ngIf="low !== ''" (click)="loadModelService.updateModelQuality('low')">Low</button>
   </mat-menu>
   <!-- / Quality Submenu -->
 
-  <!-- Skyboxes Submenu -->
-  <!--
-  <mat-menu #skyboxes="matMenu">
-    <button mat-menu-item (click)="changeSkybox(0)">Grey</button>
-    <button mat-menu-item (click)="changeSkybox(1)">White</button>
-    <button mat-menu-item (click)="changeSkybox(2)">Light Grey</button>
-    <button mat-menu-item (click)="changeSkybox(3)">Blue</button>
-    <button mat-menu-item (click)="changeSkybox(4)">Marine Blue</button>
-  </mat-menu>
-  -->
-  <!-- /Skyboxes Submenu -->
-
-  <!-- / Settings Menu -->
-
   <!-- VR Button -->
-  <!-- Click event gets handled by Babylon's VRExperienceHelper -->
   <button id="vrbutton"
-          mat-icon-button (click)="pressVrButton()"
+          mat-icon-button (click)="cameraService.createVrHelperInCamera()"
           matTooltip="VR Camera" matTooltipPosition="above">
     <mat-icon aria-label="VR Camera" svgIcon="cardboard"></mat-icon>
   </button>
 
   <!-- Fullscreen Buttons -->
-  <button *ngIf="!fullscreen"
-          mat-icon-button (click)="enterFullscreen()"
-          matTooltip="Fullscreen" matTooltipPosition="above">
-    <mat-icon aria-label="Switch to fullscreen mode">fullscreen</mat-icon>
-  </button>
-
-  <button *ngIf="fullscreen"
-          mat-icon-button (click)="quitFullscreen()"
-          matTooltip="Exit Fullscreen" matTooltipPosition="above">
-    <mat-icon aria-label="Exit fullscreen mode">fullscreen_exit</mat-icon>
+  <button mat-icon-button (click)="fullscreen ? quitFullscreen() : enterFullscreen()"
+          matTooltip="{{fullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}}" matTooltipPosition="above">
+    <mat-icon aria-label="Exit fullscreen mode">{{fullscreen ? 'fullscreen_exit' : 'fullscreen'}}</mat-icon>
   </button>
   <!-- / Fullscreen Buttons -->
 </div>

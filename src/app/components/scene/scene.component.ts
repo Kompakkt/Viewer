@@ -1,5 +1,6 @@
 import {AfterViewInit, Component, ElementRef, HostListener, ViewChild} from '@angular/core';
 
+import {AnnotationService} from '../../services/annotation/annotation.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
 
@@ -19,7 +20,8 @@ export class SceneComponent implements AfterViewInit {
   }
 
   constructor(private babylonService: BabylonService,
-              private catalogueService: CatalogueService) {
+              private catalogueService: CatalogueService,
+              public annotationService: AnnotationService) {
   }
 
   ngAfterViewInit() {

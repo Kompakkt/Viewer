@@ -1,5 +1,5 @@
-import {AfterViewInit, ChangeDetectorRef, Component, HostBinding, OnInit} from '@angular/core';
-import {MatDialog, MatDialogConfig, MatRadioButton, MatRadioChange} from '@angular/material';
+import {Component, OnInit} from '@angular/core';
+import {MatDialog, MatDialogConfig, MatRadioChange} from '@angular/material';
 
 import {MediaTypePipe} from '../../pipes/media-type.pipe';
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
@@ -19,8 +19,13 @@ import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-passwor
 
   export class ContentBrowserComponent implements OnInit {
 
+  // external
   public isLoggedIn: boolean;
-  public isObjectCategory = true;
+  public isObjectCategory: boolean;
+  public isCollectionLoaded: boolean;
+
+  // internal
+  public isCollectionInputSelected: boolean;
   public filterPersonalCollections = false;
   public filterPersonalObjects = false;
 
@@ -46,35 +51,35 @@ import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-passwor
     this.catalogueService.loggedIn.subscribe(loggedIn => {
       this.isLoggedIn = loggedIn;
     });
+
+    this.isObjectCategory = true;
+
+    this.loadModelService.collectionLoaded.subscribe(loadedCol => {
+      this.isCollectionLoaded = loadedCol;
+    });
   }
 
   public loginDialog() {
     const dialogConfig = new MatDialogConfig();
-
     dialogConfig.disableClose = true;
     dialogConfig.autoFocus = true;
-
     this.dialog.open(LoginComponent, dialogConfig);
   }
 
-  public changeCategory(mrChange: MatRadioChange) {
-    const mrButton: MatRadioButton = mrChange.source;
-
-    if (mrChange.value === 'objects') {
-      this.isObjectCategory = true;
-    }
-    if (mrChange.value === 'collections') {
+  changeCategory(mrChange: MatRadioChange) {
+    // for other values check:
+    // const mrButton: MatRadioButton = mrChange.source;
+    if (mrChange.value === 'col') {
       this.isObjectCategory = false;
+    }
+    if (mrChange.value === 'obj') {
+      this.isObjectCategory = true;
     }
   }
 
-  async searchCollectionByID(event?) {
+  searchCollectionByID(event?) {
     let id = '';
-    if (event) {
-      id = event.value._id;
-    } else {
-      id = this.identifierCollection;
-    }
+    event ? id = event.value._id : id = this.identifierCollection;
     this.catalogueService.selectCollectionByID(id).then(result => {
       switch (result) {
         case 'loaded':
@@ -109,36 +114,22 @@ import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-passwor
     console.log('password');
 
     const dialogRef = this.dialog.open(DialogPasswordComponent, dialogConfig);
-    dialogRef.afterClosed().subscribe(data => {
+    dialogRef.afterClosed()
+      .subscribe(data => {
       if (data === true) {
         this.identifierCollection = '';
       }
     });
-
   }
 
   searchObjectByID(event?) {
     let id = '';
-    if (event) {
-      id = event.value._id;
-    } else {
-      id = this.identifierObject;
-    }
-
+    event ? id = event.value._id : id = this.identifierObject;
     const isloadable = this.catalogueService.selectModelByID(id);
     if (isloadable) {
     } else {
       this.message.error('Can not find Model with ID ' + id + '.');
     }
-  }
-
-  handleCollectionChoice(event) {
-    console.log('Ausgewählt: ', event.value);
-    this.catalogueService.selectCollection(event.value._id);
-  }
-
-  handleModelChoice(event) {
-    this.catalogueService.selectModel(event.value._id, !this.isObjectCategory);
   }
 
 }

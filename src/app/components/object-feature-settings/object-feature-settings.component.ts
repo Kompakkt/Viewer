@@ -1,3 +1,7 @@
+/*
+TODO: Not yet refactored by ZOE
+
+ */
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {MatDialog} from '@angular/material';
 import * as BABYLON from 'babylonjs';
@@ -33,7 +37,7 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   public isSingleModel: boolean;
   private isFinished: boolean;
   private initialSettingsMode = false;
-  private isLoaded = false;
+  private isLoaded: boolean;
   public showHelpers = false;
   public showHelperBackground = false;
   public showScaling = false;

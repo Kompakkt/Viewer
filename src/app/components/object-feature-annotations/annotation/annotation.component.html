@@ -1,8 +1,7 @@
-<mat-card class="single-annotation-card resizable" style="position: absolute;"
+<mat-card class="single-annotation-card resizable"
+          [class.editmode]="isEditMode"
           [style.top.px]="positionTop"
           [style.left.px]="positionLeft"
-          [style.opacity]="opacity"
-          [class.editmode]="editMode"
           *ngIf="visibility"
           [style.background-color]="getColor()"
           id={{annotation._id}}>
@@ -12,8 +11,8 @@
     <mat-card-header>
 
       <mat-card-title>
-        <span *ngIf="!editMode">{{annotation.body.content.title}}</span>
-        <mat-form-field *ngIf="editMode">
+        <span *ngIf="!isEditMode">{{annotation.body.content.title}}</span>
+        <mat-form-field *ngIf="isEditMode">
           <input matInput
                  name="title"
                  #title="ngModel"
@@ -35,10 +34,10 @@
     <mat-card-content [perfectScrollbar]="config">
 
       <markdown id="annotation-content"
-                *ngIf="!editMode"
+                *ngIf="!isEditMode"
                 [data]="annotation.body.content.description"></markdown>
 
-      <div *ngIf="editMode">
+      <div *ngIf="isEditMode">
 
         <app-media-browser (addMedia)="addMedium($event)"></app-media-browser>
 
@@ -58,37 +57,39 @@
     </mat-card-content>
 
     <mat-card-actions>
-
-      <button *ngIf="id !== 'DefaultAnnotation'"
+      <button *ngIf="annotation._id !== 'DefaultAnnotation'"
               (click)="shareAnnotation()"
-              matTooltip="Copy to collection" matTooltipPosition="above"
+              matTooltip="Copy to collection"
+              matTooltipPosition="above"
               type="button">
-        <mat-icon aria-label="Delete">send</mat-icon>
+        <mat-icon aria-label="Copy to collection">share</mat-icon>
       </button>
 
-      <div *ngIf="isDefaultLoad || !isDefault || isDefault && isOwner && !isCollection">
+      <button mat-icon-button
+              (click)="editFullscreen()"
+              matTooltip="Edit in Fullscreen Mode"
+              matTooltipPosition="above"
+              type="button"
+              *ngIf="isAnnotatingAllowed">
+        <mat-icon aria-label="Fullscreen">fullscreen</mat-icon>
+      </button>
 
-        <button mat-icon-button (click)="editFullscreen()"
-                matTooltip="Edit in Fullscreen Mode" matTooltipPosition="above"
-                type="button">
-          <mat-icon aria-label="Fullscreen">fullscreen</mat-icon>
-        </button>
-
-        <button mat-icon-button (click)="editMode ? annotationService.setEditModeAnnotation('') :
+      <button mat-icon-button (click)="isEditMode ? annotationService.setEditModeAnnotation('') :
                                                   annotationService.setEditModeAnnotation(annotation._id)"
-                matTooltip={{labelModeText}} matTooltipPosition="above"
-                type="button">
-          <mat-icon attr.aria-label={{labelModeText}}>{{labelMode}}</mat-icon>
-        </button>
+              matTooltip={{labelModeText}}
+              *ngIf="isAnnotatingAllowed"
+              matTooltipPosition="above"
+              type="button">
+        <mat-icon attr.aria-label={{labelModeText}}>{{labelMode}}</mat-icon>
+      </button>
 
-        <button *ngIf="isOwner" mat-icon-button (click)="deleteAnnotation()"
-                matTooltip="Delete" matTooltipPosition="above"
-                type="button">
-          <mat-icon aria-label="Delete">delete</mat-icon>
-        </button>
-      </div>
+      <button *ngIf="isAnnotatingAllowed && isAnnotationOwner"
+              mat-icon-button (click)="deleteAnnotation()"
+              matTooltip="Delete" matTooltipPosition="above"
+              type="button">
+        <mat-icon aria-label="Delete">delete</mat-icon>
+      </button>
     </mat-card-actions>
-
 
   </form>
 </mat-card>

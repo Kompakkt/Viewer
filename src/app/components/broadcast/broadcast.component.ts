@@ -9,6 +9,9 @@ import {SocketService} from '../../services/socket/socket.service';
 })
 export class BroadcastComponent implements OnInit {
 
+  public toggleChecked = false;
+  public isCollectionSource: boolean;
+
   constructor(public socketService: SocketService) {
   }
 
@@ -19,4 +22,12 @@ export class BroadcastComponent implements OnInit {
     console.log('AUSGEWÄHLT', selected);
     this.socketService.sortUser(selected);
   }
+
+/*
+public onSocketToggleChange() {
+  if (this.toggleChecked) {
+    this.socketService.loginToSocket();
+  } else {
+    this.socketService.disconnectSocket();
+  }*/
 }

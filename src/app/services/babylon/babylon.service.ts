@@ -21,6 +21,7 @@ import ActionEvent = BABYLON.ActionEvent;
 export class BabylonService {
 
   @Output() vrModeIsActive: EventEmitter<boolean> = new EventEmitter();
+  private isVRModeActive = false;
 
   private scene: BABYLON.Scene;
   private engine: BABYLON.Engine;
@@ -203,9 +204,11 @@ export class BabylonService {
 
     this.VRHelper.onEnteringVRObservable.add(() => {
       this.vrModeIsActive.emit(true);
+      this.isVRModeActive = true;
     });
     this.VRHelper.onExitingVRObservable.add(() => {
       this.vrModeIsActive.emit(false);
+      this.isVRModeActive = false;
     });
 
     return this.VRHelper;

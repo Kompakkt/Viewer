@@ -1,0 +1,51 @@
+:host {
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.annotation-card {
+  width: 100%;
+}
+
+.annotation-card .mat-card-actions {
+  padding: 0;
+  margin: 0;
+  float: right;
+}
+
+.annotation-card .material-icons {
+  font-size: 20px;
+}
+
+.annotation-card .description,
+.annotation-card .validation,
+.annotation-card .perspective {
+  display: block;
+}
+
+.annotation-card .perspective {
+  cursor: pointer;
+  margin-left: -4px;
+}
+
+img {
+  margin-bottom: 0;
+}
+
+.annotation-header-image {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:16px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+span {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+#number {
+  position: absolute;
+  z-index: -1;
+}

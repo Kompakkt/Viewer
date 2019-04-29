@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, HostBinding, OnInit} from '@angular/core';
+import {Component, HostBinding, OnInit} from '@angular/core';
 
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {LoadModelService} from '../../services/load-model/load-model.service';
@@ -13,7 +13,10 @@ export class ContentComponent implements OnInit {
 
   @HostBinding('class.is-open') private isOpen = false;
 
-  public showContentBrowser = true;
+  // external
+  public isCollectionLoaded: boolean;
+  public isDefaultModelLoaded: boolean;
+  public showContentBrowser: boolean;
 
   constructor(public catalogueService: CatalogueService,
               private overlayService: OverlayService,
@@ -22,21 +25,23 @@ export class ContentComponent implements OnInit {
 
   ngOnInit() {
 
+    this.loadModelService.collectionLoaded.subscribe(isCollectionLoaded => {
+      this.isCollectionLoaded = isCollectionLoaded;
+    });
+
+    this.loadModelService.defaultModelLoaded.subscribe(isDefaultModelLoaded => {
+      this.isDefaultModelLoaded = isDefaultModelLoaded;
+    });
+
     this.overlayService.collectionsOverview.subscribe(collectionsOverviewIsOpen => {
       this.isOpen = collectionsOverviewIsOpen;
     });
 
-    // Default Modell wurde geladen,
-    this.loadModelService.Observables.actualModel.subscribe(actualModel => {
-      if (actualModel._id === 'Cube') {
-        this.showContentBrowser = true;
-      }
+    // TODO subscription undefined
+    this.catalogueService.showCatalogue.subscribe(showCatalogue => {
+      this.showContentBrowser = showCatalogue;
     });
 
-    console.log('Show Browser', this.showContentBrowser);
   }
 
-  public selectObject(_id: string) {
-      this.catalogueService.selectModel(_id, undefined);
-  }
 }

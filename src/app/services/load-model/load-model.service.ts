@@ -30,9 +30,14 @@ export class LoadModelService {
     actualCollection: this.Subjects.actualCollection.asObservable(),
   };
 
-  public isLoaded = false;
+  private isLoaded = false;
+  public isCollectionLoaded = false;
+  public isDefaultModelLoaded = false;
 
   @Output() loaded: EventEmitter<boolean> = new EventEmitter();
+  @Output() collectionLoaded: EventEmitter<boolean> = new EventEmitter();
+  @Output() defaultModelLoaded: EventEmitter<boolean> = new EventEmitter();
+
   // TODO
   @Output() imagesource: EventEmitter<string> = new EventEmitter();
 
@@ -40,7 +45,7 @@ export class LoadModelService {
   public quality = 'low';
 
   private defaultModel: IModel = {
-    _id: 'Cube',
+    _id: 'default',
     annotationList: [],
     relatedDigitalObject: { _id: 'default_model' },
     mediaType: 'model',
@@ -93,10 +98,24 @@ export class LoadModelService {
 
   public updateActiveModel(model: IModel) {
     this.Subjects.actualModel.next(model);
+    if (model && model._id === 'default') {
+      this.isDefaultModelLoaded = true;
+      this.defaultModelLoaded.emit(true);
+    } else {
+      this.isDefaultModelLoaded = false;
+      this.defaultModelLoaded.emit(false);
+    }
   }
 
   public updateActiveCollection(collection: ICompilation | undefined) {
     this.Subjects.actualCollection.next(collection);
+    if (collection && collection._id) {
+      this.isCollectionLoaded = true;
+      this.collectionLoaded.emit(true);
+    } else {
+      this.isCollectionLoaded = false;
+      this.collectionLoaded.emit(false);
+    }
   }
 
   public updateActiveModelMeshes(meshes: BABYLON.Mesh[]) {

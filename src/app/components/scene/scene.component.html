@@ -2,8 +2,13 @@
   <canvas #canvas
           id="renderCanvas" touch-action="none">
   </canvas>
+  <div *ngIf="annotationService.annotations.length">
+    <div *ngFor="let annotation of annotationService.annotations">
+      <app-annotation [annotation]="annotation"></app-annotation>
+    </div>
+  </div>
   <app-annotationwalkthrough></app-annotationwalkthrough>
-  <app-annotationcards></app-annotationcards>
+  <app-object-features></app-object-features>
   <app-broadcast></app-broadcast>
-
+  <app-content></app-content>
 </div>

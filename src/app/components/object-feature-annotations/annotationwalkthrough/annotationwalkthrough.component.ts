@@ -20,94 +20,47 @@ export class AnnotationwalkthroughComponent implements OnInit {
   constructor(private cameraService: CameraService,
               public annotationService: AnnotationService,
               private babylonService: BabylonService) {
+  }
 
+  ngOnInit() {
     this.positionVector = Vector3.Zero();
     this.actualRanking = 0;
     this.title = 'Annotation Walkthrough';
   }
 
   public previousAnnotation() {
-
-    const annotations = this.annotationService.annotations;
-
-    if (annotations.length) {
-
-      if (this.actualRanking === 0) {
-        this.actualRanking = annotations.length  - 1;
-      } else {
-        this.actualRanking = this.actualRanking - 1;
-      }
-    }
-
-    if (this.actualRanking < 0) {
-      this.actualRanking = 0;
-    }
-
-    if (this.actualRanking > annotations.length) {
-      this.actualRanking = annotations.length;
-    }
+    this.actualRanking === 0 ?
+      this.actualRanking = this.annotationService.annotations.length - 1 :
+      this.actualRanking = this.actualRanking - 1;
     this.getAction(this.actualRanking);
   }
 
   public nextAnnotation() {
-
-    const annotations = this.annotationService.annotations;
-
-    if (annotations.length) {
-
-      if (this.actualRanking > annotations.length - 1) {
-        this.actualRanking = annotations.length - 1;
-      } else {
-        this.actualRanking = this.actualRanking + 1;
-      }
-      if (this.actualRanking === annotations.length) {
-        this.actualRanking = 0;
-      }
-    } else {
-      this.actualRanking = 0;
-    }
-    if (this.actualRanking < 1) {
-      this.actualRanking = 0;
-    }
-    if (this.actualRanking > annotations.length) {
-      this.actualRanking = 0;
-    }
+    this.actualRanking === (this.annotationService.annotations.length) - 1 ?
+      this.actualRanking = 0 : this.actualRanking = this.actualRanking + 1;
     this.getAction(this.actualRanking);
   }
 
   private getAction(index: number) {
-    console.log('der index ist: ', index);
 
-    const annotations = this.annotationService.annotations;
+    this.title = this.annotationService.annotations[index].body.content.title;
 
-    const test = annotations[index];
-    const test2 = annotations.length;
+    let camera;
+    camera = this.annotationService.annotations[index].body.content.relatedPerspective;
 
-    console.log('annotation an der Stelle ' + index + ' ist ' + test + 'Array länge ' + test2);
+    if (camera !== undefined) {
+      const positionVector =
+        new BABYLON.Vector3(camera.position.x, camera.position.y, camera.position.z);
+      const targetVector =
+        new BABYLON.Vector3(camera.target.x, camera.target.y, camera.target.z);
 
-    if (annotations.length) {
-
-            this.title = annotations[index].body.content.title;
-
-            let camera;
-            camera = annotations[index].body.content.relatedPerspective;
-
-            if (camera !== undefined) {
-              const positionVector = new BABYLON.Vector3(camera.position.x, camera.position.y, camera.position.z);
-              const targetVector = new BABYLON.Vector3(camera.target.x, camera.target.y, camera.target.z);
-
-              this.cameraService.moveCameraToTarget(positionVector);
-              this.cameraService.arcRotateCamera.setTarget(targetVector);
-            }
-
-            this.annotationService.setSelectedAnnotation(annotations[index]._id);
-            this.babylonService.hideMesh(annotations[index]._id, true);
-    } else {
-      this.actualRanking = 0;
+      this.cameraService.moveCameraToTarget(positionVector);
+      this.cameraService.arcRotateCamera.setTarget(targetVector);
     }
-  }
 
-  ngOnInit() {
+    this.annotationService.setSelectedAnnotation(
+      this.annotationService.annotations[index]._id);
+    this.babylonService.hideMesh(this.annotationService.annotations[index]._id, true);
   }
 
 }

@@ -8,9 +8,9 @@ export class OverlayService {
   constructor() {
   }
 
-  private editorIsOpen = false;
+  public editorIsOpen = false;
   private collectionsOverviewIsOpen = false;
-  private editorSettingIsOpen = false;
+  public editorSettingIsOpen = false;
   private defaultAnnotationsIsOpen = false;
 
   @Output() editor: EventEmitter<boolean> = new EventEmitter();

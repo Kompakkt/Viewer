@@ -20,12 +20,20 @@ import {MessageService} from '../message/message.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
 import {UserdataService} from '../userdata/userdata.service';
 import {SocketService} from '../socket/socket.service';
+import {OverlayService} from '../overlay/overlay.service';
 
 @Injectable({
   providedIn: 'root',
 })
 
 export class AnnotationService {
+
+  public isAnnotatingAllowed = false;
+  @Output() annnotatingAllowed: EventEmitter<boolean> = new EventEmitter();
+
+  public isCollectionInputSelected: boolean;
+  // TODO
+  private isOpen = false;
 
   public inSocket: false;
 
@@ -67,7 +75,8 @@ export class AnnotationService {
               private cameraService: CameraService,
               private dialog: MatDialog,
               private userdataService: UserdataService,
-              private socketService: SocketService) {
+              private socketService: SocketService,
+              private overlayService: OverlayService) {
 
     this.annotations = [];
 
@@ -85,6 +94,11 @@ export class AnnotationService {
 
     this.socketService.inSocket.subscribe(inSocket => {
       this.inSocket = inSocket;
+    });
+
+    this.overlayService.editor.subscribe(open => {
+      this.isOpen = open;
+      this.setAnnotatingAllowance();
     });
 
     this.loadModelService.Observables.actualModel.subscribe(actualModel => {
@@ -371,13 +385,6 @@ export class AnnotationService {
     this.annotationMode(false);
   }
 
-  // Das aktuelle Modell wird anklickbar und damit annotierbar
-  public annotationMode(value: boolean) {
-    this.actualModelMeshes.forEach(mesh => {
-      this.actionService.pickableModel(mesh, value);
-    });
-  }
-
   public async createNewAnnotation(result: any) {
 
     const camera = this.cameraService.getActualCameraPosAnnotation();
@@ -386,9 +393,10 @@ export class AnnotationService {
       .then(async detailScreenshot => {
         // TODO: Detect if user is offline
         let generatedId = this.mongo.generateObjectId();
+        /* TODO check id from server is needed
         await this.mongo.getUnusedObjectId()
           .then(id => generatedId = id)
-          .catch(e => console.error(e));
+          .catch(e => console.error(e));*/
 
         const personName = this.userdataService.currentUserData.fullname;
         const personID = this.userdataService.currentUserData._id;
@@ -706,9 +714,7 @@ export class AnnotationService {
     }*/
   }
 
-  public exportAnnotations() {
-    return JSON.stringify(this.annotations);
-  }
+
 
   private async fetchAnnotations(model: string, compilation?: string): Promise<IAnnotation[]> {
     return new Promise<IAnnotation[]>(async (resolve, reject) => {
@@ -915,6 +921,38 @@ export class AnnotationService {
   // TODO -> not used anymore, because of complex usecase and the feature to share Annotations
   // TODO suggestion Zoe: kill this functionality
   public async importAnnotations(annotationsFile) {
+  }
+
+  public setAnnotatingAllowance() {
+
+    if (this.isOpen) {
+      if (this.isCollectionInputSelected) {
+        this.annotationMode(true);
+        this.isAnnotatingAllowed = true;
+        this.annnotatingAllowed.emit(true);
+      } else {
+        this.isAnnotatingAllowed = this.userdataService.isModelOwner ||
+          this.loadModelService.isDefaultModelLoaded;
+        this.annotationMode(this.isAnnotatingAllowed);
+        this.annnotatingAllowed.emit(this.isAnnotatingAllowed);
+      }
+    } else {
+      this.isAnnotatingAllowed = false;
+      this.annotationMode(false);
+      this.annnotatingAllowed.emit(false);
+    }
+  }
+
+  public setCollectionInput(selected: boolean) {
+    this.isCollectionInputSelected = selected;
+    this.setAnnotatingAllowance();
+  }
+
+  // Das aktuelle Modell wird anklickbar und damit annotierbar
+  public annotationMode(value: boolean) {
+    this.actualModelMeshes.forEach(mesh => {
+      this.actionService.pickableModel(mesh, value);
+    });
   }
 
 }

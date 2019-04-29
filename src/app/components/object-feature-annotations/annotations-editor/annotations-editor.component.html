@@ -1,99 +1,42 @@
-<mat-card class="annotation-card">
-  <form class="annotation-form" (ngSubmit)="onSubmit($event)">
+<mat-radio-group [disabled]="!isCollectionLoaded || isBroadcasting ||isDefaultModelLoaded"
+                 aria-label="Select Annotation Category"
+                 (change)="changeCategory($event)">
+  <mat-radio-button value="def"
+                    [checked]="!isCollectionLoaded || isDefaultModelLoaded || isDefaultAnnotationsSource"> Default
+  </mat-radio-button>
+  <mat-radio-button value="col">Collection</mat-radio-button>
+</mat-radio-group>
 
-    <mat-card-header (click)="changeOpenPopup()">
+<app-broadcast *ngIf="isAnnotatingAllowed"></app-broadcast>
 
-      <div mat-card-avatar class="annotation-header-image"><span>{{annotation.ranking}}</span></div>
-
-      <mat-card-title>
-        <span *ngIf="!editMode">{{annotation.body.content.title | uppercase}}</span>
-        <mat-form-field *ngIf="editMode">
-          <input matInput name="title" #title="ngModel" type="text" placeholder="Title" [(ngModel)]="annotation.body.content.title">
-        </mat-form-field>
-
-      </mat-card-title>
-
-      <mat-card-subtitle>{{(annotation.validated) ? 'validated' : 'unvalidated'}}</mat-card-subtitle>
-
-    </mat-card-header>
-
-    <img mat-card-image src={{preview}} *ngIf="!collapsed">
-
-    <mat-card-content *ngIf="!collapsed">
-
-      <mat-icon id="add-medium"
-                *ngIf="editMode"
-                (click)="showMediaBrowser = !showMediaBrowser">add_photo_alternate
-      </mat-icon>
-
-      <app-media-browser *ngIf="editMode && showMediaBrowser"
-                         (addMedia)="addMedium($event)"
-      ></app-media-browser>
-
-      <markdown id="annotation-content"
-                *ngIf="!editMode"
-                [data]="annotation.body.content.description"></markdown>
-
-      <mat-form-field *ngIf="editMode" class="description">
-        <textarea matInput
-                  #annotationContent
-                  cdkTextareaAutosize
-                  #autosize="cdkTextareaAutosize"
-                  cdkAutosizeMinRows="1"
-                  name="description"
-                  type="text"
-                  placeholder="Description"
-                  [(ngModel)]="annotation.body.content.description"></textarea>
-      </mat-form-field>
-
-      <mat-checkbox class="validation" *ngIf="editMode && isCollectionOwner" [checked]="annotation.validated"
-                    (change)="annotation.validated = !annotation.validated">Validated
-      </mat-checkbox>
-
-      <button mat-icon-button (click)="selectPerspective()"
-              matTooltip="Select Perspective"
-              matTooltipPosition="right"
-              *ngIf="editMode"
-              type="button"
-              class="perspective">
-        <mat-icon aria-label="Select Perspective">camera</mat-icon> Select Perspective
-      </button>
-
-    </mat-card-content>
-
-
-    <mat-card-actions>
-
-      <mat-slide-toggle
-        [checked]="showAnnotation"
-        (change)="toggleVisibility()">
-        {{this.showAnnotation ? 'Hide' : 'Show'}}
-      </mat-slide-toggle>
-
-      <button *ngIf="id !== 'DefaultAnnotation'"
-              mat-icon-button
-              (click)="shareAnnotation()"
-              matTooltip="Copy to collection" matTooltipPosition="above"
-              type="button">
-        <mat-icon aria-label="Delete">send</mat-icon>
-      </button>
-
-      <div *ngIf="isDefaultLoad || !isDefault || isDefault && isOwner && !isCollection">
-      <button mat-icon-button (click)="editMode ? annotationService.setEditModeAnnotation('') :
-                                                  annotationService.setEditModeAnnotation(annotation._id)"
-              matTooltip={{labelModeText}} matTooltipPosition="above"
-              type="button">
-        <mat-icon attr.aria-label={{labelModeText}}>{{labelMode}}</mat-icon>
-      </button>
-
-      <button *ngIf="isOwner" mat-icon-button (click)="deleteAnnotation()"
-              matTooltip="Delete" matTooltipPosition="above"
-              type="button">
-        <mat-icon aria-label="Delete">delete</mat-icon>
-      </button>
-      </div>
-    </mat-card-actions>
-
-
-  </form>
+<mat-card *ngIf="isAnnotatingAllowed && !isCollectionInputSelected && !this.annotationService.annotations.length">
+  All annotations here are default annotations and visible for everyone who can access the model. If you
+  don't want that, load this model from a collection.
 </mat-card>
+
+<mat-card *ngIf="!isAnnotatingAllowed && !isCollectionInputSelected && !isDefaultModelLoaded">
+  Default Annotations are not editable for foreign models. Load model from a collection to save your
+  annotations to make them visible for others.
+</mat-card>
+
+<mat-card *ngIf="isAnnotatingAllowed && !this.annotationService.annotations.length">
+  To add annotations, simply double-click on the model.
+</mat-card>
+
+<div cdkDropList class="annotations-list"
+     (cdkDropListDropped)="drop($event)">
+  <app-annotation-for-editor class="annotation-box" *ngFor="let annotation of this.annotationService.annotations;"
+                             [annotation]="annotation"
+                             [cdkDragDisabled]="!isAnnotatingAllowed"
+                             cdkDrag cdkDragLockAxis="y"></app-annotation-for-editor>
+</div>
+
+<div id="annotations-eximport">
+  <button *ngIf="this.annotationService.annotations.length"
+          mat-icon-button
+          matTooltip="Export Annotations to File"
+          matTooltipPosition="below"
+          (click)="exportAnnotations()">
+    <mat-icon aria-label="Export Annotations to File">save</mat-icon>
+  </button>
+</div>

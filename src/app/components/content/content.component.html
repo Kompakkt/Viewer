@@ -2,14 +2,11 @@
 
   <app-content-browser *ngIf="showContentBrowser"></app-content-browser>
 
-  <!-- TODO wird nicht angezeigt!-->
-  <div class="category"
-       *ngIf="loadModelService.Observables.actualCollection | async; let collection">
-    <div *ngIf="collection.name">
-      Selected Collection: {{collection.name}}
+  <div *ngIf="isCollectionLoaded">
+    <div class="category">
+        Selected Collection: {{loadModelService.getCurrentCompilation().name}}
     </div>
   </div>
-  <!-- -->
 
   <div id="model-overview"
        *ngIf="loadModelService.Observables.actualModel | async; let object">
@@ -25,28 +22,23 @@
     </mat-card>
   </div>
 
-  <!-- TODO wird nicht angezeigt! -->
-  <div *ngIf="loadModelService.Observables.actualCollection | async; let collection">
-    <div *ngIf="collection._id">
-      <div class="category">
-        Objects in {{collection.name}}
-      </div>
+  <div *ngIf="isCollectionLoaded">
+        <div class="category">
+          Objects in {{loadModelService.getCurrentCompilation().name}}
+        </div>
 
-      <mat-card class="model-card"
-                *ngFor="let object of collection.models">
-
-        <mat-card-header>
-          <mat-card-title>
-            {{object.name}}
-          </mat-card-title>
-        </mat-card-header>
-        <img
-          *ngIf="object.settings && object.settings.preview"
-          src={{object.settings.preview}}
-          (click)="selectObject(object._id)">
-      </mat-card>
+        <mat-card class="model-card"
+                  *ngFor="let object of loadModelService.getCurrentCompilation().models">
+          <mat-card-header>
+            <mat-card-title>
+              {{object.name}}
+            </mat-card-title>
+          </mat-card-header>
+          <img
+            *ngIf="object.settings && object.settings.preview"
+            src={{object.settings.preview}}
+            (click)="this.catalogueService.selectModel(object._id, undefined)">
+        </mat-card>
     </div>
-  </div>
-  <!-- -->
 
 </div>

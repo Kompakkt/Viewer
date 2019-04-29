@@ -13,30 +13,17 @@
 <mat-card *ngIf="isLoggedIn">
 
   <mat-card-content>
-    <mat-radio-group aria-label="Select Browsing Category"
-                     (change)="changeCategory($event)"
+    <mat-radio-group aria-label="Select Browsing Category" (change)="changeCategory($event)"
                      [disabled]="!catalogueService.Observables.collections | async">
-
-      <mat-radio-button
-        value="objects"
-        [checked]=isObjectCategory>
-        Object
-      </mat-radio-button>
-
-      <mat-radio-button
-        value="collections"
-        *ngIf="catalogueService.Observables.collections | async">
-        Collection
-      </mat-radio-button>
-    </mat-radio-group>
+                                <!--TODO is this the correct way to check if collections exist? -->
+      <mat-radio-button value="obj" [checked]=isObjectCategory>Object</mat-radio-button>
+      <mat-radio-button value="col">Collection</mat-radio-button></mat-radio-group>
   </mat-card-content>
 
 
   <mat-card *ngIf="!isObjectCategory">
 
-    <mat-card-header>
-      Public Collections
-    </mat-card-header>
+    <mat-card-header>Public Collections</mat-card-header>
 
     <mat-card-content>
 
@@ -46,7 +33,8 @@
       <br>
 
       <mat-form-field>
-        <mat-select (selectionChange)="handleCollectionChoice($event)" placeholder="Choose Collection">
+        <mat-select (selectionChange)="catalogueService.selectCollection($event.value._id)"
+                    placeholder="Choose Collection">
           <mat-option *ngFor="let collection of filterPersonalCollections ?
               userdataService.personalCollections :
               catalogueService.Observables.collections | async"
@@ -119,7 +107,8 @@
           <br>
 
           <mat-form-field>
-            <mat-select (selectionChange)="handleModelChoice($event)" placeholder="Choose Object">
+            <mat-select (selectionChange)="catalogueService.selectModel($event.value._id, !isObjectCategory)"
+                        placeholder="Choose Object">
 
               <mat-option *ngFor="let object of filterPersonalObjects ? this.userdataService.userOwnedFinishedModels
                 : catalogueService.Observables.models | async

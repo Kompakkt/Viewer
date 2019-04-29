@@ -25,14 +25,14 @@ export class CatalogueService {
   };
 
   private isFirstLoad = true;
-  private isLoggedIn: boolean;
+  public isLoggedIn: boolean;
   public isShowCatalogue: boolean;
   private isSingleObject: boolean;
   private isSingleCollection: boolean;
   private isDefaultLoad: boolean;
 
-  @Output() loggedIn: EventEmitter<boolean> = new EventEmitter();
   @Output() showCatalogue: EventEmitter<boolean> = new EventEmitter();
+  @Output() loggedIn: EventEmitter<boolean> = new EventEmitter();
   @Output() singleObject: EventEmitter<boolean> = new EventEmitter();
   @Output() singleCollection: EventEmitter<boolean> = new EventEmitter();
   @Output() defaultLoad: EventEmitter<boolean> = new EventEmitter();
