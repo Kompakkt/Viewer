@@ -730,28 +730,6 @@ export class AnnotationService {
     });
   }
 
-  public async toggleAnnotationSource(sourceCol: boolean, initial?: boolean) {
-
-    if (initial) {
-      this.isannotationSourceCollection = false;
-      this.annotationSourceCollection.emit(false);
-      this.annotations = JSON.parse(JSON.stringify(this.isannotationSourceCollection ?
-        this.collectionAnnotationsSorted : this.defaultAnnotationsSorted));
-      await this.redrawMarker();
-    } else {
-      if (sourceCol === this.isannotationSourceCollection) {
-        return;
-      } else {
-        this.isannotationSourceCollection = sourceCol;
-        this.annotationSourceCollection.emit(this.isannotationSourceCollection);
-        this.annotations = JSON.parse(JSON.stringify(this.isannotationSourceCollection ?
-          this.collectionAnnotationsSorted : this.defaultAnnotationsSorted));
-
-        await this.redrawMarker();
-      }
-    }
-  }
-
   public async redrawMarker() {
 
     if (!this.inSocket) {
@@ -919,16 +897,6 @@ export class AnnotationService {
     };
   }
 
-  // TODO -> not used anymore, because of complex usecase and the feature to share Annotations
-  // TODO suggestion Zoe: kill this functionality
-  public deleteAllAnnotations() {
-  }
-
-  // TODO -> not used anymore, because of complex usecase and the feature to share Annotations
-  // TODO suggestion Zoe: kill this functionality
-  public async importAnnotations(annotationsFile) {
-  }
-
   public setAnnotatingAllowance() {
 
     if (this.isOpen && !this.isMeshSettingsMode) {
@@ -951,6 +919,7 @@ export class AnnotationService {
 
   public setCollectionInput(selected: boolean) {
     this.isCollectionInputSelected = selected;
+    this.toggleAnnotationSource(selected, false);
     this.setAnnotatingAllowance();
   }
 
@@ -959,6 +928,28 @@ export class AnnotationService {
     this.actualModelMeshes.forEach(mesh => {
       this.actionService.pickableModel(mesh, value);
     });
+  }
+
+  public async toggleAnnotationSource(sourceCol: boolean, initial?: boolean) {
+
+    if (initial) {
+      this.isannotationSourceCollection = false;
+      this.annotationSourceCollection.emit(false);
+      this.annotations = JSON.parse(JSON.stringify(this.isannotationSourceCollection ?
+        this.collectionAnnotationsSorted : this.defaultAnnotationsSorted));
+      await this.redrawMarker();
+    } else {
+      if (sourceCol === this.isannotationSourceCollection) {
+        return;
+      } else {
+        this.isannotationSourceCollection = sourceCol;
+        this.annotationSourceCollection.emit(this.isannotationSourceCollection);
+        this.annotations = JSON.parse(JSON.stringify(this.isannotationSourceCollection ?
+          this.collectionAnnotationsSorted : this.defaultAnnotationsSorted));
+
+        await this.redrawMarker();
+      }
+    }
   }
 
 }
