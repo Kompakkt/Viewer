@@ -1,6 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 
 import {SocketService} from '../../services/socket/socket.service';
+import {MatDialog} from '@angular/material';
+import {DialogMeshsettingsComponent} from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
+import {DialogInviteBroadcastingComponent} from '../dialogs/dialog-invite-broadcasting/dialog-invite-broadcasting.component';
 
 @Component({
   selector: 'app-broadcast',
@@ -11,7 +14,8 @@ export class BroadcastComponent implements OnInit {
 
   public toggleChecked = false;
 
-  constructor(public socketService: SocketService) {
+  constructor(public socketService: SocketService,
+              public dialog: MatDialog) {
   }
 
   ngOnInit() {
@@ -27,5 +31,9 @@ export class BroadcastComponent implements OnInit {
     } else {
       this.socketService.disconnectSocket();
     }
+  }
+
+  public inviteCollaborators() {
+    this.dialog.open(DialogInviteBroadcastingComponent);
   }
 }

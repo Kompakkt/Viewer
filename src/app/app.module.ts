@@ -31,6 +31,7 @@ import {DialogAnnotationEditorComponent} from './components/dialogs/dialog-annot
 import { DialogDeleteAnnotationsComponent } from './components/dialogs/dialog-delete-annotations/dialog-delete-annotations.component';
 import { DialogDeleteSingleAnnotationComponent } from './components/dialogs/dialog-delete-single-annotation/dialog-delete-single-annotation.component';
 import { DialogGetUserDataComponent } from './components/dialogs/dialog-get-user-data/dialog-get-user-data.component';
+import { DialogInviteBroadcastingComponent } from './components/dialogs/dialog-invite-broadcasting/dialog-invite-broadcasting.component';
 import { LoginComponent } from './components/dialogs/dialog-login/login.component';
 import { DialogMeshsettingsComponent } from './components/dialogs/dialog-meshsettings/dialog-meshsettings.component';
 import { DialogPasswordComponent } from './components/dialogs/dialog-password/dialog-password.component';
@@ -75,6 +76,7 @@ import {MediaTypePipe} from './pipes/media-type.pipe';
     DialogGetUserDataComponent,
     MediaBrowserComponent,
     DialogShareAnnotationComponent,
+    DialogInviteBroadcastingComponent,
   ],
   imports: [
     BrowserModule,
@@ -119,6 +121,7 @@ import {MediaTypePipe} from './pipes/media-type.pipe';
     DialogAnnotationEditorComponent,
     DialogGetUserDataComponent,
     DialogShareAnnotationComponent,
+    DialogInviteBroadcastingComponent,
   ],
   providers: [],
   bootstrap: [AppComponent],

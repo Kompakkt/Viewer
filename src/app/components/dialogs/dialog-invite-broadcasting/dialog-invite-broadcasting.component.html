@@ -1,0 +1,11 @@
+<mat-form-field>
+  <h3>Invitation for Collaborators</h3>
+  <textarea matInput placeholder="You can edit this Text"
+            [value]="text + ((loadModelService.isDefaultModelLoaded) ? (defaultURL) : (baseURL +
+            loadModelService.getCurrentCompilation()._id))"
+            #userinput cdkTextareaAutosize cdkAutosizeMinRows="4"></textarea>
+</mat-form-field>
+<button mat-icon-button (click)="copyInputMessage(userinput)"
+        matTooltip="click to copy" matTooltipPosition="above">
+  <mat-icon aria-label="Copy from Textbox">file_copy</mat-icon>
+</button>
