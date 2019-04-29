@@ -35,6 +35,7 @@ export class AnnotationService {
   private isOpen = false;
   private isMeshSettingsMode: boolean;
   public inSocket: false;
+  private isDefaultModelLoaded: boolean;
 
   public annotations: IAnnotation[];
   public defaultAnnotationsSorted: IAnnotation[];
@@ -50,7 +51,6 @@ export class AnnotationService {
   private actualModelMeshes: BABYLON.Mesh[] = [];
 
   private isDefaultLoad: boolean;
-  private isModelOwner: boolean;
   private isCollection: boolean;
 
   private isannotationSourceCollection: boolean;
@@ -79,20 +79,16 @@ export class AnnotationService {
 
     this.annotations = [];
 
-    this.socketService.socketAnnotationSource.subscribe(socketSource => {
-      if (socketSource) {
-        this.annotations = [];
-        this.annotations = this.socketService.annotationsForSocket;
+    this.socketService.inSocket.subscribe(inSocket => {
+      this.inSocket = inSocket;
+      if (inSocket) {
+        this.annotations = JSON.parse(JSON.stringify(this.socketService.annotationsForSocket));
         this.redrawMarker();
       } else {
         this.annotations = JSON.parse(JSON.stringify(this.isannotationSourceCollection ?
           this.collectionAnnotationsSorted : this.defaultAnnotationsSorted));
         this.redrawMarker();
       }
-    });
-
-    this.socketService.inSocket.subscribe(inSocket => {
-      this.inSocket = inSocket;
     });
 
     this.overlayService.editorSetting.subscribe(meshSettingsMode => {
@@ -121,7 +117,7 @@ export class AnnotationService {
     });
 
     this.loadModelService.defaultModelLoaded.subscribe(defaultLoad => {
-      this.isDefaultLoad = defaultLoad;
+      this.isDefaultModelLoaded = defaultLoad;
     });
 
     this.annotationmarkerService.isSelectedAnnotation.subscribe(selectedAnno => {
@@ -165,7 +161,7 @@ export class AnnotationService {
     await this.annotationmarkerService.deleteAllMarker();
     // Beim Laden eines Modells, werden alle in der PuchDB vorhandenen Annotationen,
     // auf dem Server vorhandenen Anntoatationen geladen
-    if (!this.isDefaultLoad) {
+    if (!this.isDefaultModelLoaded) {
       await this.getAnnotationsfromServerDB();
       await this.getAnnotationsfromLocalDB();
       await this.updateLocalDB();
@@ -368,10 +364,10 @@ export class AnnotationService {
       }
       return 0;
     });
+    await this.changedRankingPositions(this.collectionAnnotationsSorted);
     // TODO move to load function
     this.socketService.initialAnnotationsForSocket(this.collectionAnnotationsSorted);
 
-    this.changedRankingPositions(this.collectionAnnotationsSorted);
   }
 
   // Die Annotationsfunktionalität wird zum aktuellen Modell hinzugefügt
@@ -470,18 +466,24 @@ export class AnnotationService {
 
   private add(annotation: IAnnotation): void {
 
-    if (this.isDefaultLoad) {
-      this.annotations.push(annotation);
-      this.defaultAnnotationsSorted.push(annotation);
-      this.drawMarker(annotation);
-      // set created annotation as is_open in
-      // annotationmarker.service ((on double click) created annotation)
-      this.selectedAnnotation.next(annotation._id);
-      this.editModeAnnotation.next(annotation._id);
+    if (this.isDefaultModelLoaded) {
       const annoSocket = this.socketService.annotationforSocket(annotation, 'add');
       if (this.inSocket) {
         this.socket.emit('createAnnotation', {annoSocket});
+        this.annotations.push(annoSocket);
+        this.drawMarker(annoSocket);
+        this.selectedAnnotation.next(annoSocket._id);
+        console.log('Zeichnen', annoSocket._id);
+        this.editModeAnnotation.next(annoSocket._id);
+      } else {
+        this.annotations.push(annotation);
+        this.drawMarker(annotation);
+        this.selectedAnnotation.next(annotation._id);
+        this.editModeAnnotation.next(annotation._id);
       }
+      this.defaultAnnotationsSorted.push(annotation);
+      // set created annotation as is_open in
+      // annotationmarker.service ((on double click) created annotation)
       return;
     }
 
@@ -497,18 +499,23 @@ export class AnnotationService {
           resultAnnotation.target.source.relatedCompilation === '') ?
           this.defaultAnnotationsSorted.push(resultAnnotation) :
           this.collectionAnnotationsSorted.push(resultAnnotation);
-        this.drawMarker(resultAnnotation);
-        this.annotations.push(resultAnnotation);
-        // set created annotation as is_open in
-        // annotationmarker.service ((on double click) created annotation)
-        this.selectedAnnotation.next(resultAnnotation._id);
-        this.editModeAnnotation.next(resultAnnotation._id);
         if (this.isannotationSourceCollection) {
           const annoSocket = this.socketService.annotationforSocket(resultAnnotation, 'add');
           if (this.inSocket) {
             this.socket.emit('createAnnotation', {annoSocket});
+            this.annotations.push(annoSocket);
+            this.drawMarker(annoSocket);
+            this.selectedAnnotation.next(annoSocket._id);
+            this.editModeAnnotation.next(annoSocket._id);
+          } else {
+            this.annotations.push(resultAnnotation);
+            this.drawMarker(resultAnnotation);
+            this.selectedAnnotation.next(resultAnnotation._id);
+            this.editModeAnnotation.next(resultAnnotation._id);
           }
         }
+
+
       })
       .catch((errorMessage: any) => {
         // PouchDB
@@ -520,29 +527,37 @@ export class AnnotationService {
           annotation.target.source.relatedCompilation === '') ?
           this.defaultAnnotationsSorted.push(annotation) :
           this.collectionAnnotationsSorted.push(annotation);
-        this.drawMarker(annotation);
-        this.annotations.push(annotation);
-        // set created annotation as is_open in
-        // annotationmarker.service ((on double click) created annotation)
-        this.selectedAnnotation.next(annotation._id);
-        this.editModeAnnotation.next(annotation._id);
         if (this.isannotationSourceCollection) {
           const annoSocket = this.socketService.annotationforSocket(annotation, 'add');
           if (this.inSocket) {
             this.socket.emit('createAnnotation', {annoSocket});
+            this.annotations.push(annoSocket);
+            this.drawMarker(annoSocket);
+            this.selectedAnnotation.next(annoSocket._id);
+            this.editModeAnnotation.next(annoSocket._id);
+          } else {
+            this.annotations.push(annotation);
+            this.drawMarker(annotation);
+            this.selectedAnnotation.next(annotation._id);
+            this.editModeAnnotation.next(annotation._id);
           }
         }
+        // set created annotation as is_open in
+        // annotationmarker.service ((on double click) created annotation)
+
       });
   }
 
   public updateAnnotation(annotation: IAnnotation) {
-    if (this.isDefaultLoad) {
-      this.annotations.splice(this.annotations.indexOf(annotation), 1, annotation);
+    if (this.isDefaultModelLoaded) {
       this.defaultAnnotationsSorted.splice(this.annotations.indexOf(annotation), 1, annotation);
 
       const annoSocket = this.socketService.annotationforSocket(annotation, 'edit');
       if (this.inSocket) {
         this.socket.emit('editAnnotation', {annoSocket});
+        this.annotations.splice(this.annotations.indexOf(annoSocket), 1, annoSocket);
+      } else {
+        this.annotations.splice(this.annotations.indexOf(annotation), 1, annotation);
       }
       return;
     }
@@ -553,8 +568,7 @@ export class AnnotationService {
         // MongoDB hat funktioniert
         // MongoDB-Eintrag in PouchDB
         this.dataService.updateAnnotation(resultAnnotation);
-        this.annotations
-          .splice(this.annotations.indexOf(resultAnnotation), 1, resultAnnotation);
+
         (!resultAnnotation.target.source.relatedCompilation ||
           resultAnnotation.target.source.relatedCompilation === '') ?
           this.defaultAnnotationsSorted
@@ -565,6 +579,9 @@ export class AnnotationService {
           const annoSocket = this.socketService.annotationforSocket(resultAnnotation, 'edit');
           if (this.inSocket) {
             this.socket.emit('editAnnotation', {annoSocket});
+            this.annotations.splice(this.annotations.indexOf(annoSocket), 1, annoSocket);
+          } else {
+            this.annotations.splice(this.annotations.indexOf(resultAnnotation), 1, resultAnnotation);
           }
         }
       })
@@ -574,8 +591,6 @@ export class AnnotationService {
         console.log(errorMessage);
         annotation.lastModificationDate = new Date().toISOString();
         this.dataService.updateAnnotation(annotation);
-        this.annotations
-          .splice(this.annotations.indexOf(annotation), 1, annotation);
         (!annotation.target.source.relatedCompilation ||
           annotation.target.source.relatedCompilation === '') ?
           this.defaultAnnotationsSorted
@@ -586,6 +601,9 @@ export class AnnotationService {
           const annoSocket = this.socketService.annotationforSocket(annotation, 'edit');
           if (this.inSocket) {
             this.socket.emit('editAnnotation', {annoSocket});
+            this.annotations.splice(this.annotations.indexOf(annoSocket), 1, annoSocket);
+          } else {
+            this.annotations.splice(this.annotations.indexOf(annotation), 1, annotation);
           }
         }
       });
@@ -595,14 +613,14 @@ export class AnnotationService {
 
     if (this.userdataService.isAnnotationOwner(annotation)) {
 
-      if (this.isDefaultLoad) {
+      if (this.isDefaultModelLoaded) {
         const index: number = this.annotations.indexOf(annotation);
         if (index !== -1) {
           this.annotations.splice(index, 1);
           this.defaultAnnotationsSorted.splice(this.annotations.indexOf(annotation), 1);
-          const annoSocket = this.socketService.annotationforSocket(annotation, 'edit');
+          const annoSocket = this.socketService.annotationforSocket(annotation, 'delete');
           if (this.inSocket) {
-            this.socket.emit('editAnnotation', {annoSocket});
+            this.socket.emit('deleteAnnotation', {annoSocket});
           }
           this.changedRankingPositions(this.annotations);
           this.redrawMarker();
@@ -613,7 +631,7 @@ export class AnnotationService {
       if (this.isannotationSourceCollection) {
         const annoSocket = this.socketService.annotationforSocket(annotation, 'delete');
         if (this.inSocket) {
-          this.socket.emit('editAnnotation', {annoSocket});
+          this.socket.emit('deleteAnnotation', {annoSocket});
         }
       }
 
@@ -710,8 +728,6 @@ export class AnnotationService {
       }
     }*/
   }
-
-
 
   private async fetchAnnotations(model: string, compilation?: string): Promise<IAnnotation[]> {
     return new Promise<IAnnotation[]>(async (resolve, reject) => {
@@ -897,9 +913,10 @@ export class AnnotationService {
         this.annnotatingAllowed.emit(true);
         this.socketService.setBroadcastingAllowance(true);
       } else {
-        this.loadModelService.isDefaultModelLoaded ?
+        this.isDefaultModelLoaded ?
           this.socketService.setBroadcastingAllowance(true) :
           this.socketService.setBroadcastingAllowance(false);
+
         this.isAnnotatingAllowed = this.userdataService.isModelOwner ||
           this.loadModelService.isDefaultModelLoaded;
         this.annotationMode(this.isAnnotatingAllowed);

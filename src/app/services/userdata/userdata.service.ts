@@ -31,7 +31,7 @@ export class UserdataService {
   public socketUserData: IUserData = {
     fullname: 'Guest',
     username: 'guest',
-    _id: 'guest',
+    _id: this.mongoService.generateObjectId(),
   };
 
   public cachedLoginData: ILoginData = {
@@ -160,8 +160,7 @@ export class UserdataService {
   }
 
   public getUserDataForSocket(): any {
-    return this.currentUserData._id !== 'guest' ?
-      this.currentUserData : this.socketUserData._id;
+    return this.socketUserData;
   }
 
   public initUserDataForSocket() {

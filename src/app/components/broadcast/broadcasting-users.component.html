@@ -19,7 +19,7 @@
       <mat-form-field [style.visibility]="'hidden'">
         <mat-select #select [style.visibility]="'hidden'" (selectionChange)="selectedUser($event.value)">
           <mat-option *ngFor="let collaborator of this.socketService.collaborators |
-      slice:this.socketService.maxColoredUsersMinusOne : this.socketService.collaborators.length;
+      slice:this.socketService.maxColoredUsersMinusOne;
      let i=index" [value]="collaborator">
             {{collaborator.fullname}}
           </mat-option>

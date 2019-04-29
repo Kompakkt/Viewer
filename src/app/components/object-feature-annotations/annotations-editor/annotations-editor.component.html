@@ -7,7 +7,7 @@
   <mat-radio-button value="col">Collection</mat-radio-button>
 </mat-radio-group>
 
-<app-broadcast [style.visibility]="isBroadcastingAllowed"></app-broadcast>
+<app-broadcast [style.visibility]="isBroadcastingAllowed ? 'visible' : 'hidden'"></app-broadcast>
 
 <mat-card *ngIf="isAnnotatingAllowed && !isCollectionInputSelected && !this.annotationService.annotations.length">
   All annotations here are default annotations and visible for everyone who can access the model. If you
