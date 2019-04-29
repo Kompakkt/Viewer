@@ -30,12 +30,10 @@ export class AnnotationService {
 
   public isAnnotatingAllowed = false;
   @Output() annnotatingAllowed: EventEmitter<boolean> = new EventEmitter();
-
   public isCollectionInputSelected: boolean;
   // TODO
   private isOpen = false;
   private isMeshSettingsMode: boolean;
-
   public inSocket: false;
 
   public annotations: IAnnotation[];
@@ -122,21 +120,14 @@ export class AnnotationService {
       this.loadAnnotations();
     });
 
-    this.catalogueService.defaultLoad.subscribe(defaultLoad => {
+    this.loadModelService.defaultModelLoaded.subscribe(defaultLoad => {
       this.isDefaultLoad = defaultLoad;
     });
 
-    this.userdataService.modelOwner.subscribe(isModelOwner => {
-      this.isModelOwner = isModelOwner;
-    });
-
     this.annotationmarkerService.isSelectedAnnotation.subscribe(selectedAnno => {
       this.selectedAnnotation.next(selectedAnno);
     });
 
-    this.annotationmarkerService.isSelectedAnnotation.subscribe(selectedAnno => {
-      this.selectedAnnotation.next(selectedAnno);
-    });
   }
 
   public async loadAnnotations() {
@@ -933,8 +924,6 @@ export class AnnotationService {
   public toggleAnnotationSource(sourceCol: boolean, initial?: boolean) {
 
     if (initial) {
-      this.isannotationSourceCollection = false;
-      this.annotationSourceCollection.emit(false);
       this.annotations = JSON.parse(JSON.stringify(this.isannotationSourceCollection ?
         this.collectionAnnotationsSorted : this.defaultAnnotationsSorted));
       this.redrawMarker();
@@ -943,10 +932,8 @@ export class AnnotationService {
         return;
       } else {
         this.isannotationSourceCollection = sourceCol;
-        this.annotationSourceCollection.emit(this.isannotationSourceCollection);
         this.annotations = JSON.parse(JSON.stringify(this.isannotationSourceCollection ?
           this.collectionAnnotationsSorted : this.defaultAnnotationsSorted));
-
         this.redrawMarker();
       }
     }
