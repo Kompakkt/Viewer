@@ -1,4 +1,4 @@
-import {Component, HostBinding, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, HostBinding, OnInit} from '@angular/core';
 
 import {CatalogueService} from '../../services/catalogue/catalogue.service';
 import {LoadModelService} from '../../services/load-model/load-model.service';
@@ -20,7 +20,8 @@ export class ContentComponent implements OnInit {
 
   constructor(public catalogueService: CatalogueService,
               private overlayService: OverlayService,
-              private loadModelService: LoadModelService) {
+              private loadModelService: LoadModelService,
+              private cdRef: ChangeDetectorRef) {
   }
 
   ngOnInit() {
@@ -40,8 +41,8 @@ export class ContentComponent implements OnInit {
     // TODO subscription undefined
     this.catalogueService.showCatalogue.subscribe(showCatalogue => {
       this.showContentBrowser = showCatalogue;
+      this.cdRef.detectChanges();
     });
-
   }
 
 }
