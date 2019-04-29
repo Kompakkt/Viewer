@@ -34,6 +34,7 @@ export class AnnotationService {
   public isCollectionInputSelected: boolean;
   // TODO
   private isOpen = false;
+  private isMeshSettingsMode: boolean;
 
   public inSocket: false;
 
@@ -94,6 +95,11 @@ export class AnnotationService {
 
     this.socketService.inSocket.subscribe(inSocket => {
       this.inSocket = inSocket;
+    });
+
+    this.overlayService.editorSetting.subscribe(meshSettingsMode => {
+      this.isMeshSettingsMode = meshSettingsMode;
+      this.setAnnotatingAllowance();
     });
 
     this.overlayService.editor.subscribe(open => {
@@ -925,7 +931,7 @@ export class AnnotationService {
 
   public setAnnotatingAllowance() {
 
-    if (this.isOpen) {
+    if (this.isOpen && !this.isMeshSettingsMode) {
       if (this.isCollectionInputSelected) {
         this.annotationMode(true);
         this.isAnnotatingAllowed = true;

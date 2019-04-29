@@ -28,26 +28,15 @@ export class ObjectFeaturesComponent implements OnInit {
 
   ngOnInit() {
 
-    // TODO
     this.overlayService.defaultAnnotations.subscribe(annotationsMode => {
-      this.defaultAnnotationsMode = annotationsMode;
       if (this.isOpen && annotationsMode) {
-        this.annotationService.annotationMode(true);
         this.changeTab(0);
       }
     });
 
-    // TODO
     this.overlayService.editorSetting.subscribe(meshSettingsMode => {
-      this.isMeshSettingsMode = meshSettingsMode;
-      if (this.isOpen) {
-        if (meshSettingsMode) {
-          // TODO
-          this.annotationService.annotationMode(false);
+      if (this.isOpen && meshSettingsMode) {
           this.changeTab(1);
-        } else {
-          this.annotationService.annotationMode(true);
-        }
       }
     });
 
