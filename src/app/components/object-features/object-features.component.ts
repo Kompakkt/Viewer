@@ -14,10 +14,7 @@ export class ObjectFeaturesComponent implements OnInit {
   @ViewChild('tabGroup') tabGroup;
 
   // external
-  //TODO
   public isMeshSettingsMode: boolean;
-  // Toggled during upload after meshsettings have been set
-  public defaultAnnotationsMode: boolean;
 
   // internal
   public selectedTab;
@@ -35,6 +32,7 @@ export class ObjectFeaturesComponent implements OnInit {
     });
 
     this.overlayService.editorSetting.subscribe(meshSettingsMode => {
+      this.isMeshSettingsMode = meshSettingsMode;
       if (this.isOpen && meshSettingsMode) {
           this.changeTab(1);
       }
