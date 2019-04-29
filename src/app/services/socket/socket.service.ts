@@ -17,6 +17,9 @@ export class SocketService {
   public isInSocket = false;
   @Output() inSocket: EventEmitter<boolean> = new EventEmitter();
 
+  public isBroadcastingAllowed = false;
+  @Output() broadcastingAllowed: EventEmitter<boolean> = new EventEmitter();
+
   private isSocketAnnotationSource = false;
   @Output() socketAnnotationSource: EventEmitter<boolean> = new EventEmitter();
 
@@ -385,5 +388,11 @@ export class SocketService {
     });
 
     this.redrawMarker();
+  }
+
+  public setBroadcastingAllowance(allowance: boolean) {
+    console.log('set', allowance);
+    this.isBroadcastingAllowed = allowance;
+    this.broadcastingAllowed.emit(allowance);
   }
 }

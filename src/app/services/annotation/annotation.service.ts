@@ -895,13 +895,18 @@ export class AnnotationService {
         this.annotationMode(true);
         this.isAnnotatingAllowed = true;
         this.annnotatingAllowed.emit(true);
+        this.socketService.setBroadcastingAllowance(true);
       } else {
+        this.loadModelService.isDefaultModelLoaded ?
+          this.socketService.setBroadcastingAllowance(true) :
+          this.socketService.setBroadcastingAllowance(false);
         this.isAnnotatingAllowed = this.userdataService.isModelOwner ||
           this.loadModelService.isDefaultModelLoaded;
         this.annotationMode(this.isAnnotatingAllowed);
         this.annnotatingAllowed.emit(this.isAnnotatingAllowed);
       }
     } else {
+      this.socketService.setBroadcastingAllowance(false);
       this.isAnnotatingAllowed = false;
       this.annotationMode(false);
       this.annnotatingAllowed.emit(false);

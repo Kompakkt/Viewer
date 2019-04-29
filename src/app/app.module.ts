@@ -24,6 +24,7 @@ import { environment } from '../environments/environment';
 
 import { AppComponent } from './app.component';
 import { BroadcastComponent } from './components/broadcast/broadcast.component';
+import { BroadcastingUsersComponent } from './components/broadcast/broadcasting-users.component';
 import { ContentBrowserComponent } from './components/content-browser/content-browser.component';
 import { ContentComponent } from './components/content/content.component';
 import {DialogAnnotationEditorComponent} from './components/dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
@@ -69,6 +70,7 @@ import {MediaTypePipe} from './pipes/media-type.pipe';
     DialogAnnotationEditorComponent,
     MediaTypePipe,
     BroadcastComponent,
+    BroadcastingUsersComponent,
     DialogDeleteSingleAnnotationComponent,
     DialogGetUserDataComponent,
     MediaBrowserComponent,

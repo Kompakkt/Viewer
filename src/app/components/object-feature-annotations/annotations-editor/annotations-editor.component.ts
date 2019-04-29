@@ -23,6 +23,7 @@ export class AnnotationsEditorComponent implements OnInit {
   public isCollectionLoaded: boolean;
   public isDefaultModelLoaded: boolean;
   public isAnnotatingAllowed: boolean;
+  public isBroadcastingAllowed: boolean;
   public isBroadcasting: boolean;
 
   // internal
@@ -54,6 +55,10 @@ export class AnnotationsEditorComponent implements OnInit {
       this.isBroadcasting = broadcast;
     });
 
+    this.socketService.broadcastingAllowed.subscribe(broadcast => {
+      this.isBroadcastingAllowed = broadcast;
+    });
+
   }
 
   drop(event: CdkDragDrop<string[]>) {
@@ -73,11 +78,11 @@ export class AnnotationsEditorComponent implements OnInit {
     // const mrButton: MatRadioButton = mrChange.source;
     if (mrChange.value === 'col') {
       this.isDefaultAnnotationsSource = false;
-      this.annotationService.setCollectionInput(false);
+      this.annotationService.setCollectionInput(true);
     }
     if (mrChange.value === 'def') {
       this.isDefaultAnnotationsSource = true;
-      this.annotationService.setCollectionInput(true);
+      this.annotationService.setCollectionInput(false);
     }
   }
 

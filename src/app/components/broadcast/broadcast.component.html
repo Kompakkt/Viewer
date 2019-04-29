@@ -1,39 +1,11 @@
-<!--
-<mat-chip-list *ngIf="this.socketService.collaborators">
-    <mat-chip
-      *ngFor="let collaborator of this.socketService.collaborators |
-    slice:0:this.socketService.maxColoredUsersMinusOne > this.socketService.collaborators.length ?
-    this.socketService.maxColoredUsersMinusOne: this.socketService.collaborators.length;
-    let i=index" [style.color]="this.socketService.color[i]">
-    {{collaborator.username.substring(0,2)}}</mat-chip>
-
-  <button
-    *ngIf="this.socketService.collaborators.length > 2"
-    mat-icon-button (click)="select.open()"
-    matTooltip="See all" matTooltipPosition="above"
-    type="button">
-    <mat-icon aria-label="Delete">group_add</mat-icon>
-  </button>
-  <mat-form-field [style.visibility]="'hidden'">
-    <mat-select #select [style.visibility]="'hidden'" (selectionChange)="selectedUser($event.value)">
-      <!--mat-option *ngFor="let collaborator of this.socketService.collaborators |
-      slice:this.socketService.maxColoredUsersMinusOne < this.socketService.collaborators.length ?
-    this.socketService.maxColoredUsersMinusOne: this.socketService.collaborators.length;
-    : this.socketService.collaborators.length; let i=index" [value]="collaborator">
-        {{collaborator.fullname}}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-
-</mat-chip-list>
-
-<div *ngIf="isCollectionSource || loadModelService.Observables.actualModel._id === 'Cube'" id="switch-collaborative">
+<div id="switch-collaborative">
   Collaborative Annotation Mode
   <mat-slide-toggle id="socket"
-                    mat-icon-button [(ngModel)]="toggleChecked" (change)="onSocketToggleChange()"
-                    matTooltip="Login to Socket.Io" matTooltipPosition="above"
+                    mat-icon-button
+                    [(ngModel)]="toggleChecked" (change)="onSocketToggleChange()"
+                    matTooltip="Login to Socket.Io"
+                    matTooltipPosition="above"
                     color="warn"
                     aria-label="Login to Socket.Io">
   </mat-slide-toggle>
-</div>
--->
+  </div>
