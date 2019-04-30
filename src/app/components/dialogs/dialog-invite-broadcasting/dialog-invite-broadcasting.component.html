@@ -3,7 +3,7 @@
     <h3>Invitation for Collaborators</h3>
     <textarea matInput placeholder="You can edit this Text"
               [value]="text + ((processingService.isDefaultModelLoaded) ? (defaultURL) : (baseURL +
-            processingService.getCurrentCompilation()._id))"
+            processingService.getCurrentCompilation()!._id))"
               #userinput cdkTextareaAutosize cdkAutosizeMinRows="4"></textarea>
   </mat-form-field>
 </mat-dialog-content>

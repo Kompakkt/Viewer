@@ -27,9 +27,9 @@ export class AnnotationsEditorComponent implements OnInit {
   public isBroadcasting: boolean;
 
   // internal
-  private isDefaultAnnotationsSource: boolean;
+  public isDefaultAnnotationsSource: boolean;
 
-  constructor(private annotationService: AnnotationService,
+  constructor(public annotationService: AnnotationService,
               private socketService: SocketService,
               public processingService: ProcessingService,
               private  userDataService: UserdataService) {

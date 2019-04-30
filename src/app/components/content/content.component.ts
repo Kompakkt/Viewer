@@ -18,7 +18,7 @@ export class ContentComponent implements OnInit {
   public showContentBrowser: boolean;
 
   constructor(private overlayService: OverlayService,
-              private processingService: ProcessingService,
+              public processingService: ProcessingService,
               private cdRef: ChangeDetectorRef) {
   }
 

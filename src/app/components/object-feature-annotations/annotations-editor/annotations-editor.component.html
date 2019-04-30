@@ -9,30 +9,30 @@
 
 <app-broadcast [style.visibility]="isBroadcastingAllowed ? 'visible' : 'hidden'"></app-broadcast>
 
-<mat-card *ngIf="isAnnotatingAllowed && !isCollectionInputSelected && !this.annotationService.annotations.length">
+<mat-card *ngIf="isAnnotatingAllowed && !annotationService.isCollectionInputSelected && !annotationService.annotations.length">
   All annotations here are default annotations and visible for everyone who can access the model. If you
   don't want that, load this model from a collection.
 </mat-card>
 
-<mat-card *ngIf="!isAnnotatingAllowed && !isCollectionInputSelected && !isDefaultModelLoaded">
+<mat-card *ngIf="!isAnnotatingAllowed && !annotationService.isCollectionInputSelected && !isDefaultModelLoaded">
   Default Annotations are not editable for foreign models. Load model from a collection to save your
   annotations to make them visible for others.
 </mat-card>
 
-<mat-card *ngIf="isAnnotatingAllowed && !this.annotationService.annotations.length">
+<mat-card *ngIf="isAnnotatingAllowed && !annotationService.annotations.length">
   To add annotations, simply double-click on the model.
 </mat-card>
 
 <div cdkDropList class="annotations-list"
      (cdkDropListDropped)="drop($event)">
-  <app-annotation-for-editor class="annotation-box" *ngFor="let annotation of this.annotationService.annotations;"
+  <app-annotation-for-editor class="annotation-box" *ngFor="let annotation of annotationService.annotations;"
                              [annotation]="annotation"
                              [cdkDragDisabled]="!isAnnotatingAllowed"
                              cdkDrag cdkDragLockAxis="y"></app-annotation-for-editor>
 </div>
 
 <div id="annotations-eximport">
-  <button *ngIf="this.annotationService.annotations.length"
+  <button *ngIf="annotationService.annotations.length"
           mat-icon-button
           matTooltip="Export Annotations to File"
           matTooltipPosition="below"

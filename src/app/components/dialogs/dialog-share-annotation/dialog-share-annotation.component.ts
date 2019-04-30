@@ -15,7 +15,7 @@ import {UserdataService} from '../../../services/userdata/userdata.service';
 export class DialogShareAnnotationComponent implements OnInit {
 
   public targetCollectionId = '';
-  private checkPwdMode = false;
+  public checkPwdMode = false;
   private passwordCollection = '';
   private modelId = '';
   private response: any = {
