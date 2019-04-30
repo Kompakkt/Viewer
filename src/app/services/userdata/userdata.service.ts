@@ -158,7 +158,11 @@ export class UserdataService {
   }
 
   public getUserDataForSocket(): any {
-    return this.socketUserData;
+    if (this.currentUserData.fullname !== 'Guest') {
+      return this.currentUserData;
+    } else {
+      return this.socketUserData;
+    }
   }
 
   public initUserDataForSocket() {
