@@ -107,7 +107,7 @@
           <br>
 
           <mat-form-field>
-            <mat-select (selectionChange)="processingService.this.fetchAndLoad($event.value._id, undefined, !isObjectCategory)"
+            <mat-select (selectionChange)="processingService.fetchAndLoad($event.value._id, undefined, !isObjectCategory)"
                         placeholder="Choose Object">
 
               <mat-option *ngFor="let object of filterPersonalObjects ? this.userdataService.userOwnedFinishedModels
