@@ -43,6 +43,7 @@ export class ProcessingService {
   private isLoaded = false;
   public isCollectionLoaded = false;
   public isDefaultModelLoaded = false;
+  public isFallbackModelLoaded = false;
 
   @Output() showCatalogue: EventEmitter<boolean> = new EventEmitter();
   @Output() loggedIn: EventEmitter<boolean> = new EventEmitter();
@@ -50,6 +51,7 @@ export class ProcessingService {
   @Output() loaded: EventEmitter<boolean> = new EventEmitter();
   @Output() collectionLoaded: EventEmitter<boolean> = new EventEmitter();
   @Output() defaultModelLoaded: EventEmitter<boolean> = new EventEmitter();
+  @Output() fallbackModelLoaded: EventEmitter<boolean> = new EventEmitter();
 
   private baseUrl = `${environment.express_server_url}:${environment.express_server_port}/`;
   public quality = 'low';
@@ -209,7 +211,7 @@ export class ProcessingService {
     this.mongoHandlerService.getAllCompilations()
       .then(compilation => {
         this.Subjects.collections.next(compilation);
-      },    error => {
+      }, error => {
         this.message.error('Connection to object server refused.');
       });
   }
@@ -218,7 +220,7 @@ export class ProcessingService {
     this.mongoHandlerService.getAllModels()
       .then(models => {
         this.Subjects.models.next(models);
-      },    error => {
+      }, error => {
         this.message.error('Connection to object server refused.');
       });
   }
@@ -232,7 +234,7 @@ export class ProcessingService {
         this.isLoaded = true;
         this.loaded.emit(true);
         this.metadataService.addDefaultMetadata();
-      },    error => {
+      }, error => {
         this.message.error('Loading of default model not possible');
       });
   }
@@ -259,7 +261,7 @@ export class ProcessingService {
           this.updateActiveCollection(compilation);
           const model = compilation.models[0];
           if (isModel(model)) this.fetchModelData(model._id);
-        },    error => {
+        }, error => {
           this.message.error('Connection to object server to load collection refused.');
         });
     }
@@ -273,65 +275,99 @@ export class ProcessingService {
             this.isLoaded = true;
             this.loaded.emit(true);
             console.log('Load:', result);
-          },    error => {
+          }, error => {
             this.message.error('Loading of this Model is not possible');
           });
-      },    error => {
+      }, error => {
         this.message.error('Connection to object server to load model refused.');
       });
   }
 
   public async loadModel(newModel: IModel, overrideUrl?: string) {
     const URL = (overrideUrl !== undefined) ? overrideUrl : this.baseUrl;
+    const fallBackURL = '';
+    this.isFallbackModelLoaded = false;
+    this.fallbackModelLoaded.emit(false);
 
-    if (!this.loadingScreenHandler.isLoading && newModel.processed && newModel.mediaType) {
+    if (!this.loadingScreenHandler.isLoading && newModel.processed
+      && newModel.mediaType) {
 
-      // cases: model, image, audio, video, text
-      switch (newModel.mediaType) {
-        case 'model':
-          await this.babylonService.loadModel(URL, newModel.processed[this.quality])
-            .then(async model => {
-              // Warte auf Antwort von loadModel,
-              // da loadModel ein Promise<object> von ImportMeshAync übergibt
-              // model ist hier das neu geladene Model
-              this.updateActiveModel(newModel);
-              this.updateActiveModelMeshes(model.meshes);
-            });
-          break;
+      if (!newModel.dataSource.isExternal) {
+        // cases: model, image, audio, video, text
+        switch (newModel.mediaType) {
+          case 'model':
+            await this.babylonService.loadModel(URL, newModel.processed[this.quality])
+              .then(async model => {
+                // Warte auf Antwort von loadModel,
+                // da loadModel ein Promise<object> von ImportMeshAync übergibt
+                // model ist hier das neu geladene Model
+                this.updateActiveModel(newModel);
+                this.updateActiveModelMeshes(model.meshes);
+              });
+            break;
 
-        case 'image':
+          case 'image':
 
-          // TODO
-          this.updateActiveModel(newModel);
+            this.Subjects.actualModel.next(newModel);
+            await this.loadFallbackModel();
+            /*
+            // TODO
+            this.updateActiveModel(newModel);
 
-          //  this.imagesource.emit(newModel.processed[this.quality]);
+            //  this.imagesource.emit(newModel.processed[this.quality]);
 
-          console.log('ein Bild!', newModel.processed[this.quality]);
-          const image = new Image();
-          //  image.src = newModel.processed[this.quality];
-          console.log('Bild', image);
+            console.log('ein Bild!', newModel.processed[this.quality]);
+            const image = new Image();
+            //  image.src = newModel.processed[this.quality];
+            console.log('Bild', image);
 
-          /*
-          const reader = new FileReader();
-          reader.readAsDataURL(newModel.processed[this.quality]);
-          reader.onload =_event => {
-            console.log('OHOHOH', event);
-          };*/
+            /*
+            const reader = new FileReader();
+            reader.readAsDataURL(newModel.processed[this.quality]);
+            reader.onload =_event => {
+              console.log('OHOHOH', event);
+            };*/
 
-          break;
+            break;
 
-        case 'audio':
-          break;
+          case 'audio':
+            this.Subjects.actualModel.next(newModel);
+            await this.loadFallbackModel();
+            break;
 
-        case 'video':
-          break;
+          case 'video':
+            this.Subjects.actualModel.next(newModel);
+            await this.loadFallbackModel();
+            break;
 
-        case 'text':
-          break;
+          case 'text':
+            this.Subjects.actualModel.next(newModel);
+            await this.loadFallbackModel();
+            break;
 
-        default:
+          default:
+        }
+      }
+      if (newModel.dataSource.isExternal) {
+        this.Subjects.actualModel.next(newModel);
+        await this.loadFallbackModel();
+        return;
       }
     }
+  }
+
+  public async loadFallbackModel() {
+    await this.babylonService.loadModel('assets/models/sketch_cat/', 'scene.gltf')
+      .then(async model => {
+        // Warte auf Antwort von loadModel,
+        // da loadModel ein Promise<object> von ImportMeshAync übergibt
+        // model ist hier das neu geladene Model
+        this.updateActiveModelMeshes(model.meshes);
+        this.isFallbackModelLoaded = true;
+        this.fallbackModelLoaded.emit(true);
+        this.isDefaultModelLoaded = true;
+        this.defaultModelLoaded.emit(true);
+      });
   }
 
   public updateModelQuality(quality: string) {
