@@ -37,7 +37,7 @@
           <img
             *ngIf="object.settings && object.settings.preview"
             src={{object.settings.preview}}
-            (click)="this.processingService.selectModel(object._id, undefined)">
+            (click)="processingService.fetchAndLoad(object._id, undefined, true)">
         </mat-card>
     </div>
 

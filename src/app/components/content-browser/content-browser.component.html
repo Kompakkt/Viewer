@@ -33,7 +33,7 @@
       <br>
 
       <mat-form-field>
-        <mat-select (selectionChange)="processingService.selectCollection($event.value._id)"
+        <mat-select (selectionChange)="processingService.fetchAndLoad(undefined, $event.value._id, undefined)"
                     placeholder="Choose Collection">
           <mat-option *ngFor="let collection of filterPersonalCollections ?
               userdataService.personalCollections :
@@ -107,7 +107,7 @@
           <br>
 
           <mat-form-field>
-            <mat-select (selectionChange)="processingService.selectModel($event.value._id, !isObjectCategory)"
+            <mat-select (selectionChange)="processingService.this.fetchAndLoad($event.value._id, undefined, !isObjectCategory)"
                         placeholder="Choose Object">
 
               <mat-option *ngFor="let object of filterPersonalObjects ? this.userdataService.userOwnedFinishedModels

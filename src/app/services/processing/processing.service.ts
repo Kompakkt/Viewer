@@ -185,7 +185,7 @@ export class ProcessingService {
         this.loggedIn.emit(true);
 
         if (modelParam && !compParam) {
-          this.fetchAndLoad(modelParam, undefined);
+          this.fetchAndLoad(modelParam, undefined, false);
           this.showCatalogue.emit(false);
         } else if (!modelParam && compParam) {
           this.fetchAndLoad(undefined, compParam, undefined);
@@ -209,7 +209,7 @@ export class ProcessingService {
     this.mongoHandlerService.getAllCompilations()
       .then(compilation => {
         this.Subjects.collections.next(compilation);
-      }, error => {
+      },    error => {
         this.message.error('Connection to object server refused.');
       });
   }
@@ -218,7 +218,7 @@ export class ProcessingService {
     this.mongoHandlerService.getAllModels()
       .then(models => {
         this.Subjects.models.next(models);
-      }, error => {
+      },    error => {
         this.message.error('Connection to object server refused.');
       });
   }
@@ -245,14 +245,14 @@ export class ProcessingService {
               // collection ist nicht erreichbar
               resolve('missing');
             }
-          }, error => {
+          },    error => {
             this.message.error('Connection to object server refused.');
             reject('missing');
           });
       });
       // collection is available in collections and will be loaded
     } else {
-      this.fetchAndLoad(undefined, collection._id);
+      this.fetchAndLoad(undefined, collection._id, undefined);
       return 'loaded';
     }
   }
@@ -264,17 +264,17 @@ export class ProcessingService {
         .then(actualModel => {
           if (actualModel['_id']) {
             this.Subjects.models.next([actualModel]);
-            this.fetchAndLoad(actualModel._id, undefined);
+            this.fetchAndLoad(actualModel._id, undefined, false);
             return true;
           } else {
             return false;
           }
-        }, error => {
+        },    error => {
           this.message.error('Connection to object server refused.');
           return false;
         });
     }
-    this.fetchAndLoad(model._id, undefined);
+    this.fetchAndLoad(model._id, undefined, false);
 
     return true;
   }
@@ -283,15 +283,6 @@ export class ProcessingService {
     // this.Subjects.collections.next(compilation);
     // TODO
     this.fetchAndLoad(undefined, compilation._id, undefined);
-  }
-
-
-  public selectCollection(collectionId: string) {
-    this.fetchAndLoad(undefined, collectionId, undefined);
-  }
-
-  public selectModel(modelId: string, collection?: boolean) {
-    this.fetchAndLoad(modelId, undefined, collection ? collection : undefined);
   }
 
   public loadDefaultModelData() {
@@ -303,7 +294,7 @@ export class ProcessingService {
         this.isLoaded = true;
         this.loaded.emit(true);
         this.metadataService.addDefaultMetadata();
-      }, error => {
+      },    error => {
         this.message.error('Loading of default model not possible');
       });
   }
@@ -330,7 +321,7 @@ export class ProcessingService {
           this.updateActiveCollection(compilation);
           const model = compilation.models[0];
           if (isModel(model)) this.fetchModelData(model._id);
-        }, error => {
+        },    error => {
           this.message.error('Connection to object server to load collection refused.');
         });
     }
@@ -344,10 +335,10 @@ export class ProcessingService {
             this.isLoaded = true;
             this.loaded.emit(true);
             console.log('Load:', result);
-          }, error => {
+          },    error => {
             this.message.error('Loading of this Model is not possible');
           });
-      }, error => {
+      },    error => {
         this.message.error('Connection to object server to load model refused.');
       });
   }
@@ -417,7 +408,7 @@ export class ProcessingService {
           .then(result => {
             this.isLoaded = true;
             this.loaded.emit(true);
-          }, error => {
+          },    error => {
             this.message.error('Loading not possible');
           });
       } else {
