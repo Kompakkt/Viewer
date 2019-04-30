@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { IModel, ICompilation, IAnnotation, ILDAPData, IServerResponse, IMetaDataDigitalObject } from '../../interfaces/interfaces';
+import { IAnnotation, ICompilation, ILDAPData, IMetaDataDigitalObject, IModel, IServerResponse } from '../../interfaces/interfaces';
 
 @Injectable({
   providedIn: 'root',

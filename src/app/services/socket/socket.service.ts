@@ -1,10 +1,22 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
 import {Socket} from 'ngx-socket-io';
 
-import {IAnnotation, ISocketAnnotation, ISocketChangeRanking, ISocketChangeRoom, ISocketMessage, ISocketRoomData, ISocketUser, ISocketUserInfo} from '../../interfaces/interfaces';
+import {
+  IAnnotation, ICompilation, IModel,
+  ISocketAnnotation,
+  ISocketChangeRanking,
+  ISocketChangeRoom,
+  ISocketMessage,
+  ISocketRoomData,
+  ISocketUser,
+  ISocketUserInfo
+} from '../../interfaces/interfaces';
 import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
-import {LoadModelService} from '../load-model/load-model.service';
+import {ProcessingService} from '../processing/processing.service';
 import {UserdataService} from '../userdata/userdata.service';
+import {BehaviorSubject} from 'rxjs/internal/BehaviorSubject';
+import {ReplaySubject} from 'rxjs/internal/ReplaySubject';
+import * as BABYLON from 'babylonjs';
 
 @Injectable({
   providedIn: 'root',
@@ -25,17 +37,20 @@ export class SocketService {
 
   public annotationsForSocket: IAnnotation[] = [];
 
+  private  isNewAnnotation = new ReplaySubject<IAnnotation>();
+  public newAnnotation = this.isNewAnnotation.asObservable();
+
   constructor(public socket: Socket,
-              private loadModelService: LoadModelService,
+              private processingService: ProcessingService,
               private userdataService: UserdataService,
               private annotationmarkerService: AnnotationmarkerService) {
 
     this.isInSocket = false;
     this.inSocket.emit(false);
 
-    this.loadModelService.Observables.actualModel.subscribe(actualModel => {
-      const currentCompilation = this.loadModelService.getCurrentCompilation();
-      const currentModel = this.loadModelService.getCurrentModel();
+    this.processingService.Observables.actualModel.subscribe(actualModel => {
+      const currentCompilation = this.processingService.getCurrentCompilation();
+      const currentModel = this.processingService.getCurrentModel();
 
       // We always need a model loaded
       if (!currentModel) return;
@@ -59,19 +74,25 @@ export class SocketService {
 
     this.socket.on('createAnnotation', (result: ISocketAnnotation) => {
       console.log(`COLLABORATOR '${result.user.username}' CREATED AN ANNOTATION - SOCKET.IO`);
-      this.addReceivedAnnotation(result.annotation);
+      if (result.user._id !== this.getOwnSocketData().user._id) {
+        this.addReceivedAnnotation(result.annotation);
+      }
       this.printInfo();
     });
 
     this.socket.on('editAnnotation', (result: ISocketAnnotation) => {
       console.log(`COLLABORATOR '${result.user.username}' EDITED AN ANNOTATION - SOCKET.IO`);
-      this.addReceivedAnnotation(result.annotation);
+      if (result.user._id !== this.getOwnSocketData().user._id) {
+        this.addReceivedAnnotation(result.annotation);
+      }
       this.printInfo();
     });
 
     this.socket.on('deleteAnnotation', (result: ISocketAnnotation) => { // [socket.id, annotation]
       console.log(`COLLABORATOR '${result.user.username}' DELETED AN ANNOTATION- SOCKET.IO`);
-      this.annotationforSocket(result.annotation, 'delete');
+      if (result.user._id !== this.getOwnSocketData().user._id) {
+        this.annotationForSocket(result.annotation, 'delete');
+      }
       this.printInfo();
     });
 
@@ -116,6 +137,14 @@ export class SocketService {
     });
   }
 
+  public updateNewAnnotation(annotation: IAnnotation) {
+    this.isNewAnnotation.next(annotation);
+  }
+
+  public getCurrentAnnotation(): IAnnotation | null {
+    return this.isNewAnnotation.source['_events'].slice(-1)[0];
+  }
+
   private removeKnowledgeAboutUser(userInfo: ISocketUserInfo) {
     this.collaborators = this.collaborators.filter(_user => _user._id !== userInfo.user._id);
 
@@ -155,7 +184,6 @@ export class SocketService {
     // this.collaboratorsAnnotations = [];
     // send info to other Room members,
     // then emit 'logout' from Socket.id for this User
-    // TODO So kann ein Event einfach emittet werden?
     this.socket.emit('logout', {annotations: this.annotationsForSocket});
     this.socket.disconnect();
   }
@@ -198,6 +226,7 @@ export class SocketService {
       }
     } else {
       this.annotationsForSocket.push(receivedAnno);
+      this.updateNewAnnotation(receivedAnno);
     }
   }
 
@@ -249,45 +278,63 @@ export class SocketService {
     this.annotationsForSocket = JSON.parse(JSON.stringify(annotations));
   }
 
-  public annotationforSocket(annotation: IAnnotation, action: string): IAnnotation {
+  public annotationForSocket(anno: IAnnotation, action: string) {
 
     const annotationIndex = this.annotationsForSocket
-      .findIndex(anno => anno._id === annotation._id);
+      .findIndex(a => a._id === anno._id);
 
+    console.log(anno, action);
     switch (action) {
-      // Use case: single collection (3)
       case 'delete':
         if (annotationIndex !== -1) {
           this.annotationsForSocket.splice(annotationIndex, 1);
         }
-        break;
+        if (this.inSocket) {
+          this.socket.emit('deleteAnnotation', {annotation: anno});
+          return;
+        } else {
+          return;
+        }
 
-      case 'edit':
+      case 'update':
+        console.log('update', annotationIndex);
         if (annotationIndex !== -1) {
-          const _manipulatedAnno = JSON.parse(JSON.stringify(annotation));
-          const _keepCreator = this.annotationsForSocket[annotationIndex].creator;
-          _manipulatedAnno.creator = _keepCreator;
-          this.annotationsForSocket.splice(annotationIndex, 1, _manipulatedAnno);
-          return _manipulatedAnno;
-        }
-        break;
-
-      case 'add':
-        if (annotationIndex === -1) {
-          const _manipulatedAnno = JSON.parse(JSON.stringify(annotation));
-          const _manipulatedCreator = this.userdataService.getUserDataForSocket();
-          _manipulatedAnno.creator.name = _manipulatedCreator.fullname;
-          _manipulatedAnno.creator._id = _manipulatedCreator._id;
-          this.annotationsForSocket.push(_manipulatedAnno);
-          return _manipulatedAnno;
-        }
-        break;
-
+          this.annotationsForSocket.splice(annotationIndex, 1,
+                                           this.modifyAnnotationforSocket(anno));
+          if (this.inSocket) {
+            this.socket.emit('editAnnotation',
+                             {annotation: this.modifyAnnotationforSocket(anno)});
+            return;
+        }} else {
+          this.annotationsForSocket.push(this.modifyAnnotationforSocket(anno));
+          if (this.inSocket) {
+            this.socket.emit('createAnnotation',
+                             {annotation: this.modifyAnnotationforSocket(anno)});
+            this.drawMarker(this.modifyAnnotationforSocket(anno));
+            return;
+        }}
       default:
         console.log('No valid action passed');
-
     }
-    return annotation;
+    throw new Error('Should not be reachable');
+  }
+
+  public modifyAnnotationforSocket(anno: IAnnotation): IAnnotation {
+    const annotationIndex = this.annotationsForSocket
+      .findIndex(annot => annot._id === anno._id);
+    if (annotationIndex === -1) {
+      const _manipulatedAnno = JSON.parse(JSON.stringify(anno));
+      const _manipulatedCreator = this.userdataService.getUserDataForSocket();
+      _manipulatedAnno.creator.name = _manipulatedCreator.fullname;
+      _manipulatedAnno.creator._id = _manipulatedCreator._id;
+      this.annotationsForSocket.push(_manipulatedAnno);
+      return _manipulatedAnno;
+    } else {
+      const _manipulatedAnno = JSON.parse(JSON.stringify(anno));
+      const _keepCreator = this.annotationsForSocket[annotationIndex].creator;
+      _manipulatedAnno.creator = _keepCreator;
+      return _manipulatedAnno;
+    }
   }
 
   public redrawMarker() {

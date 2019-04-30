@@ -1,10 +1,9 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
 
-import {IAnnotation, ICompilation, IUserData, ILoginData, IModel} from '../../interfaces/interfaces';
-import {CatalogueService} from '../catalogue/catalogue.service';
-import {LoadModelService} from '../load-model/load-model.service';
+import {IAnnotation, ICompilation, ILoginData, IModel, IUserData} from '../../interfaces/interfaces';
 import {MessageService} from '../message/message.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
+import {ProcessingService} from '../processing/processing.service';
 
 @Injectable({
   providedIn: 'root',
@@ -41,28 +40,27 @@ export class UserdataService {
 
   private loggedIn = false;
 
-  constructor(private catalogueService: CatalogueService,
-              private loadModelService: LoadModelService,
+  constructor(private processingService: ProcessingService,
               private mongoService: MongohandlerService,
               private message: MessageService) {
     this.getUserData()
       .then(() => console.log('Logged in user with sessionID cookie', this.currentUserData))
       .catch(() => console.log('No session cookie. User not logged in'));
 
-    this.catalogueService.firstLoad.subscribe(firstLoad => {
+    this.processingService.firstLoad.subscribe(firstLoad => {
       if (firstLoad) {
         this.initUserDataForSocket();
       }
     });
 
-    this.catalogueService.loggedIn.subscribe(loggedIn => {
+    this.processingService.loggedIn.subscribe(loggedIn => {
       this.loggedIn = loggedIn;
       if (loggedIn) {
         this.getUserData();
       }
     });
 
-    this.loadModelService.Observables.actualModel.subscribe(actualModel => {
+    this.processingService.Observables.actualModel.subscribe(actualModel => {
       if (actualModel._id && this.userOwnedModels.length && this.loggedIn) {
         this.checkOwnerState(actualModel._id);
       } else {
@@ -71,7 +69,7 @@ export class UserdataService {
       }
     });
 
-    this.loadModelService.Observables.actualCollection.subscribe(actualCollection => {
+    this.processingService.Observables.actualCollection.subscribe(actualCollection => {
       if (!actualCollection) return;
       if (actualCollection._id && actualCollection.relatedOwner) {
         if (actualCollection.relatedOwner._id && this.loggedIn && this.currentUserData._id) {

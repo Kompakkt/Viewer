@@ -14,7 +14,7 @@
 
   <mat-card-content>
     <mat-radio-group aria-label="Select Browsing Category" (change)="changeCategory($event)"
-                     [disabled]="!catalogueService.Observables.collections | async">
+                     [disabled]="!processingService.Observables.collections | async">
                                 <!--TODO is this the correct way to check if collections exist? -->
       <mat-radio-button value="obj" [checked]=isObjectCategory>Object</mat-radio-button>
       <mat-radio-button value="col">Collection</mat-radio-button></mat-radio-group>
@@ -33,11 +33,11 @@
       <br>
 
       <mat-form-field>
-        <mat-select (selectionChange)="catalogueService.selectCollection($event.value._id)"
+        <mat-select (selectionChange)="processingService.selectCollection($event.value._id)"
                     placeholder="Choose Collection">
           <mat-option *ngFor="let collection of filterPersonalCollections ?
               userdataService.personalCollections :
-              catalogueService.Observables.collections | async"
+              processingService.Observables.collections | async"
                       [value]="collection">
             {{collection.name}}
           </mat-option>
@@ -68,7 +68,7 @@
 
   <div *ngIf="isObjectCategory">
 
-    <div *ngIf="catalogueService.Observables.models | async">
+    <div *ngIf="processingService.Observables.models | async">
 
       <mat-card>
 
@@ -107,11 +107,11 @@
           <br>
 
           <mat-form-field>
-            <mat-select (selectionChange)="catalogueService.selectModel($event.value._id, !isObjectCategory)"
+            <mat-select (selectionChange)="processingService.selectModel($event.value._id, !isObjectCategory)"
                         placeholder="Choose Object">
 
               <mat-option *ngFor="let object of filterPersonalObjects ? this.userdataService.userOwnedFinishedModels
-                : catalogueService.Observables.models | async
+                : processingService.Observables.models | async
                 | mediaType: showModels:showImages:showAudio:showVideo:showText"
                           [value]="object">
                 {{object.name}} ({{object.mediaType}})

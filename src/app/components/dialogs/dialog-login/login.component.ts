@@ -1,10 +1,9 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 
-import {CatalogueService} from '../../../services/catalogue/catalogue.service';
-import {LoadModelService} from '../../../services/load-model/load-model.service';
 import {MessageService} from '../../../services/message/message.service';
 import {MongohandlerService} from '../../../services/mongohandler/mongohandler.service';
 import {OverlayService} from '../../../services/overlay/overlay.service';
+import {ProcessingService} from '../../../services/processing/processing.service';
 import {UserdataService} from '../../../services/userdata/userdata.service';
 
 @Component({
@@ -20,11 +19,10 @@ export class LoginComponent implements OnInit {
   private isOpen: boolean;
 
   constructor(private mongohandlerService: MongohandlerService,
-              private catalogueService: CatalogueService,
               private message: MessageService,
               private overlayService: OverlayService,
               private userDataService: UserdataService,
-              private loadModelService: LoadModelService) {
+              private processingService: ProcessingService) {
   }
 
   ngOnInit() {
@@ -41,7 +39,7 @@ export class LoginComponent implements OnInit {
       if (result.status === 'ok') {
         this.userDataService.setcachedLoginData(this.password, this.username);
         this.success = true;
-        this.catalogueService.bootstrap();
+        this.processingService.bootstrap();
       }
     },           error => {
       this.message.error('Connection to object server refused.');

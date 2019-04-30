@@ -1,9 +1,9 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 
-import {CatalogueService} from '../../../services/catalogue/catalogue.service';
 import {MessageService} from '../../../services/message/message.service';
 import {MongohandlerService} from '../../../services/mongohandler/mongohandler.service';
+import {ProcessingService} from '../../../services/processing/processing.service';
 
 @Component({
   selector: 'app-password',
@@ -16,7 +16,7 @@ export class DialogPasswordComponent implements OnInit {
   public identifierCollection: string;
 
   constructor(private mongohandlerService: MongohandlerService,
-              private catalogueService: CatalogueService,
+              private processingService: ProcessingService,
               private message: MessageService,
               private dialogRef: MatDialogRef<DialogPasswordComponent>,
               @Inject(MAT_DIALOG_DATA) data) {
@@ -34,7 +34,7 @@ export class DialogPasswordComponent implements OnInit {
         .then(compilation => {
 
         if (compilation['_id']) {
-          this.catalogueService.addAndLoadCollection(compilation);
+          this.processingService.addAndLoadCollection(compilation);
           this.dialogRef.close(true);
         } else {
           this.message.error('Password is wrong.' + this.identifierCollection + '.');

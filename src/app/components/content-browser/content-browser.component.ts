@@ -2,13 +2,12 @@ import {Component, OnInit} from '@angular/core';
 import {MatDialog, MatDialogConfig, MatRadioChange} from '@angular/material';
 
 import {MediaTypePipe} from '../../pipes/media-type.pipe';
-import {CatalogueService} from '../../services/catalogue/catalogue.service';
-import {LoadModelService} from '../../services/load-model/load-model.service';
 import {MessageService} from '../../services/message/message.service';
 import {OverlayService} from '../../services/overlay/overlay.service';
 import {UserdataService} from '../../services/userdata/userdata.service';
 import {LoginComponent} from '../dialogs/dialog-login/login.component';
 import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-password.component';
+import {ProcessingService} from '../../services/processing/processing.service';
 
 @Component({
   selector: 'app-content-browser',
@@ -39,8 +38,7 @@ import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-passwor
   private identifierObject;
 
   constructor(private overlayService: OverlayService,
-              public catalogueService: CatalogueService,
-              public loadModelService: LoadModelService,
+              public processingService: ProcessingService,
               private message: MessageService,
               public dialog: MatDialog,
               public userdataService: UserdataService) {
@@ -48,13 +46,13 @@ import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-passwor
 
   ngOnInit() {
 
-    this.catalogueService.loggedIn.subscribe(loggedIn => {
+    this.processingService.loggedIn.subscribe(loggedIn => {
       this.isLoggedIn = loggedIn;
     });
 
     this.isObjectCategory = true;
 
-    this.loadModelService.collectionLoaded.subscribe(loadedCol => {
+    this.processingService.collectionLoaded.subscribe(loadedCol => {
       this.isCollectionLoaded = loadedCol;
     });
   }
@@ -80,7 +78,7 @@ import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-passwor
   searchCollectionByID(event?) {
     let id = '';
     event ? id = event.value._id : id = this.identifierCollection;
-    this.catalogueService.selectCollectionByID(id).then(result => {
+    this.processingService.selectCollectionByID(id).then(result => {
       switch (result) {
         case 'loaded':
           break;
@@ -125,7 +123,7 @@ import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-passwor
   searchObjectByID(event?) {
     let id = '';
     event ? id = event.value._id : id = this.identifierObject;
-    const isloadable = this.catalogueService.selectModelByID(id);
+    const isloadable = this.processingService.selectModelByID(id);
     if (isloadable) {
     } else {
       this.message.error('Can not find Model with ID ' + id + '.');

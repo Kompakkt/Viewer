@@ -53,9 +53,9 @@
 
   <!-- Quality Submenu -->
   <mat-menu #quality="matMenu">
-    <button mat-menu-item *ngIf="high !== ''" (click)="loadModelService.updateModelQuality('high')">High</button>
-    <button mat-menu-item *ngIf="medium !== ''" (click)="loadModelService.updateModelQuality('medium')">Medium</button>
-    <button mat-menu-item *ngIf="low !== ''" (click)="loadModelService.updateModelQuality('low')">Low</button>
+    <button mat-menu-item *ngIf="high !== ''" (click)="processingService.updateModelQuality('high')">High</button>
+    <button mat-menu-item *ngIf="medium !== ''" (click)="processingService.updateModelQuality('medium')">Medium</button>
+    <button mat-menu-item *ngIf="low !== ''" (click)="processingService.updateModelQuality('low')">Low</button>
   </mat-menu>
   <!-- / Quality Submenu -->
 

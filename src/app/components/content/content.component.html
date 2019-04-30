@@ -4,12 +4,12 @@
 
   <div *ngIf="isCollectionLoaded">
     <div class="category">
-        Selected Collection: {{loadModelService.getCurrentCompilation().name}}
+      Selected Collection: {{processingService.getCurrentCompilation().name}}
     </div>
   </div>
 
   <div id="model-overview"
-       *ngIf="loadModelService.Observables.actualModel | async; let object">
+       *ngIf="processingService.Observables.actualModel | async; let object">
     <mat-card class="model-card">
       <mat-card-header>
         <mat-card-title>
@@ -24,11 +24,11 @@
 
   <div *ngIf="isCollectionLoaded">
         <div class="category">
-          Objects in {{loadModelService.getCurrentCompilation().name}}
+          Objects in {{processingService.getCurrentCompilation().name}}
         </div>
 
         <mat-card class="model-card"
-                  *ngFor="let object of loadModelService.getCurrentCompilation().models">
+                  *ngFor="let object of processingService.getCurrentCompilation().models">
           <mat-card-header>
             <mat-card-title>
               {{object.name}}
@@ -37,7 +37,7 @@
           <img
             *ngIf="object.settings && object.settings.preview"
             src={{object.settings.preview}}
-            (click)="this.catalogueService.selectModel(object._id, undefined)">
+            (click)="this.processingService.selectModel(object._id, undefined)">
         </mat-card>
     </div>
 

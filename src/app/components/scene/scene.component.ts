@@ -2,7 +2,7 @@ import {AfterViewInit, Component, ElementRef, HostListener, ViewChild} from '@an
 
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
-import {CatalogueService} from '../../services/catalogue/catalogue.service';
+import {ProcessingService} from '../../services/processing/processing.service';
 
 @Component({
   selector: 'app-scene',
@@ -20,13 +20,13 @@ export class SceneComponent implements AfterViewInit {
   }
 
   constructor(private babylonService: BabylonService,
-              private catalogueService: CatalogueService,
+              private processingService: ProcessingService,
               public annotationService: AnnotationService) {
   }
 
   ngAfterViewInit() {
 
     this.babylonService.updateCanvas(this.canvasRef.nativeElement);
-    this.catalogueService.bootstrap();
+    this.processingService.bootstrap();
   }
 }

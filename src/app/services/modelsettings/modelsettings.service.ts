@@ -4,7 +4,7 @@ import {ColorEvent} from 'ngx-color';
 
 import {BabylonService} from '../babylon/babylon.service';
 import {CameraService} from '../camera/camera.service';
-import {LoadModelService} from '../load-model/load-model.service';
+import {ProcessingService} from '../processing/processing.service';
 
 @Injectable({
   providedIn: 'root',
@@ -49,9 +49,9 @@ export class ModelsettingsService {
 
   constructor(private babylonService: BabylonService,
               private cameraService: CameraService,
-              private loadModelService: LoadModelService) {
+              private processingService: ProcessingService) {
 
-    this.loadModelService.Observables.actualModelMeshes.subscribe(actualModelMeshes => {
+    this.processingService.Observables.actualModelMeshes.subscribe(actualModelMeshes => {
       this.actualModelMeshes = actualModelMeshes;
     });
   }

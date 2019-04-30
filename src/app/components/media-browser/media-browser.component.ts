@@ -1,6 +1,6 @@
 import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 
-import {LoadModelService} from '../../services/load-model/load-model.service';
+import {ProcessingService} from '../../services/processing/processing.service';
 
 @Component({
   selector: 'app-media-browser',
@@ -17,11 +17,11 @@ export class MediaBrowserComponent implements OnInit {
 
   public showMediaBrowser = false;
 
-  constructor(public loadModelService: LoadModelService) {
+  constructor(public processingService: ProcessingService) {
   }
 
   ngOnInit() {
-    this.loadModelService.Observables.actualCollection.subscribe(actualCollection => {
+    this.processingService.Observables.actualCollection.subscribe(actualCollection => {
       this.objects = actualCollection;
       console.log(this.objects);
     });

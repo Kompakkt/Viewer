@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 
-import {LoadModelService} from '../../../services/load-model/load-model.service';
+import {ProcessingService} from '../../../services/processing/processing.service';
 
 @Component({
   selector: 'app-dialog-invite-broadcasting',
@@ -16,7 +16,7 @@ export class DialogInviteBroadcastingComponent implements OnInit {
   public defaultURL = 'https://blacklodge.hki.uni-koeln.de/builds/Kompakkt/live/';
   public collectionId: string;
 
-  constructor(public loadModelService: LoadModelService) {
+  constructor(public processingService: ProcessingService) {
   }
 
   ngOnInit() {

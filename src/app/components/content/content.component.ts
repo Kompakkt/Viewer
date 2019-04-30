@@ -1,8 +1,7 @@
 import {ChangeDetectorRef, Component, HostBinding, OnInit} from '@angular/core';
 
-import {CatalogueService} from '../../services/catalogue/catalogue.service';
-import {LoadModelService} from '../../services/load-model/load-model.service';
 import {OverlayService} from '../../services/overlay/overlay.service';
+import {ProcessingService} from '../../services/processing/processing.service';
 
 @Component({
   selector: 'app-content',
@@ -18,19 +17,18 @@ export class ContentComponent implements OnInit {
   public isDefaultModelLoaded: boolean;
   public showContentBrowser: boolean;
 
-  constructor(public catalogueService: CatalogueService,
-              private overlayService: OverlayService,
-              private loadModelService: LoadModelService,
+  constructor(private overlayService: OverlayService,
+              private processingService: ProcessingService,
               private cdRef: ChangeDetectorRef) {
   }
 
   ngOnInit() {
 
-    this.loadModelService.collectionLoaded.subscribe(isCollectionLoaded => {
+    this.processingService.collectionLoaded.subscribe(isCollectionLoaded => {
       this.isCollectionLoaded = isCollectionLoaded;
     });
 
-    this.loadModelService.defaultModelLoaded.subscribe(isDefaultModelLoaded => {
+    this.processingService.defaultModelLoaded.subscribe(isDefaultModelLoaded => {
       this.isDefaultModelLoaded = isDefaultModelLoaded;
     });
 
@@ -39,7 +37,7 @@ export class ContentComponent implements OnInit {
     });
 
     // TODO subscription undefined
-    this.catalogueService.showCatalogue.subscribe(showCatalogue => {
+    this.processingService.showCatalogue.subscribe(showCatalogue => {
       this.showContentBrowser = showCatalogue;
       this.cdRef.detectChanges();
     });

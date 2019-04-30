@@ -5,10 +5,9 @@ import {DomSanitizer} from '@angular/platform-browser';
 
 import {BabylonService} from '../../services/babylon/babylon.service';
 import {CameraService} from '../../services/camera/camera.service';
-import {CatalogueService} from '../../services/catalogue/catalogue.service';
-import {LoadModelService} from '../../services/load-model/load-model.service';
 import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
 import {OverlayService} from '../../services/overlay/overlay.service';
+import {ProcessingService} from '../../services/processing/processing.service';
 import {LoginComponent} from '../dialogs/dialog-login/login.component';
 
 @Component({
@@ -34,9 +33,8 @@ export class MenuComponent implements OnInit {
     private sanitizer: DomSanitizer,
     public cameraService: CameraService,
     public overlayService: OverlayService,
-    public catalogueService: CatalogueService,
+    public processingService: ProcessingService,
     public babylonService: BabylonService,
-    public loadModelService: LoadModelService,
     private mongohandlerService: MongohandlerService,
     public dialog: MatDialog,
     @Inject(DOCUMENT) private document: any) {
@@ -54,11 +52,11 @@ export class MenuComponent implements OnInit {
       this.isVRModeActive = isActive;
     });
 
-    this.catalogueService.loggedIn.subscribe(isLoggedIn => {
+    this.processingService.loggedIn.subscribe(isLoggedIn => {
       this.isLoggedIn = isLoggedIn;
     });
 
-    this.loadModelService.Observables.actualModel.subscribe(model => {
+    this.processingService.Observables.actualModel.subscribe(model => {
       if (model.processed) {
         this.high = (model.processed.high) ? model.processed.high : '';
         this.medium = (model.processed.medium) ? model.processed.medium : '';
@@ -109,7 +107,7 @@ export class MenuComponent implements OnInit {
   logout() {
     this.mongohandlerService.logout()
       .then(() => {
-        this.catalogueService.bootstrap();
+        this.processingService.bootstrap();
       });
   }
 

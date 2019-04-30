@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
-import {LoadModelService} from '../../../services/load-model/load-model.service';
 import {MessageService} from '../../../services/message/message.service';
+import {ProcessingService} from '../../../services/processing/processing.service';
 import {UserdataService} from '../../../services/userdata/userdata.service';
 
 @Component({
@@ -15,7 +15,7 @@ export class DialogDeleteSingleAnnotationComponent implements OnInit {
   public password = '';
   public success = false;
 
-  constructor(private loadModelService: LoadModelService,
+  constructor(private processingService: ProcessingService,
               private message: MessageService,
               private userdataService: UserdataService) { }
 

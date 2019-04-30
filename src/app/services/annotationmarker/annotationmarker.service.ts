@@ -4,12 +4,10 @@ import * as GUI from 'babylonjs-gui';
 import {BehaviorSubject} from 'rxjs/internal/BehaviorSubject';
 import {Observable} from 'rxjs/internal/Observable';
 // 11/02/19
-import {IAnnotation} from 'src/app/interfaces/interfaces';
 
+import {IAnnotation} from '../../interfaces/interfaces';
 import {BabylonService} from '../babylon/babylon.service';
 import {CameraService} from '../camera/camera.service';
-
-// import {Annotation} from '../../interfaces/annotation/annotation';
 
 @Injectable({
   providedIn: 'root',

@@ -4,10 +4,10 @@ import {MatRadioChange} from '@angular/material';
 import {saveAs} from 'file-saver';
 
 import {AnnotationService} from '../../../services/annotation/annotation.service';
-import {LoadModelService} from '../../../services/load-model/load-model.service';
+import {ProcessingService} from '../../../services/processing/processing.service';
 import {SocketService} from '../../../services/socket/socket.service';
-import {AnnotationComponent} from '../annotation/annotation.component';
 import {UserdataService} from '../../../services/userdata/userdata.service';
+import {AnnotationComponent} from '../annotation/annotation.component';
 
 @Component({
   selector: 'app-annotations-editor',
@@ -31,7 +31,7 @@ export class AnnotationsEditorComponent implements OnInit {
 
   constructor(private annotationService: AnnotationService,
               private socketService: SocketService,
-              public loadModelService: LoadModelService,
+              public processingService: ProcessingService,
               private  userDataService: UserdataService) {
   }
 
@@ -39,11 +39,11 @@ export class AnnotationsEditorComponent implements OnInit {
 
     this.isDefaultAnnotationsSource = true;
 
-    this.loadModelService.collectionLoaded.subscribe(isLoaded => {
+    this.processingService.collectionLoaded.subscribe(isLoaded => {
       this.isCollectionLoaded = isLoaded;
     });
 
-    this.loadModelService.defaultModelLoaded.subscribe(isLoaded => {
+    this.processingService.defaultModelLoaded.subscribe(isLoaded => {
       this.isDefaultModelLoaded = isLoaded;
     });
 

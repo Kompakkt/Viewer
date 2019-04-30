@@ -13,14 +13,13 @@ import {ActionService} from '../action/action.service';
 import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
 import {BabylonService} from '../babylon/babylon.service';
 import {CameraService} from '../camera/camera.service';
-import {CatalogueService} from '../catalogue/catalogue.service';
 import {DataService} from '../data/data.service';
-import {LoadModelService} from '../load-model/load-model.service';
 import {MessageService} from '../message/message.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
-import {UserdataService} from '../userdata/userdata.service';
-import {SocketService} from '../socket/socket.service';
 import {OverlayService} from '../overlay/overlay.service';
+import {ProcessingService} from '../processing/processing.service';
+import {SocketService} from '../socket/socket.service';
+import {UserdataService} from '../userdata/userdata.service';
 
 @Injectable({
   providedIn: 'root',
@@ -34,7 +33,7 @@ export class AnnotationService {
   // TODO
   private isOpen = false;
   private isMeshSettingsMode: boolean;
-  public inSocket: false;
+  public inSocket: boolean;
   private isDefaultModelLoaded: boolean;
 
   public annotations: IAnnotation[];
@@ -50,7 +49,6 @@ export class AnnotationService {
   public currentCompilation: ICompilation;
   private actualModelMeshes: BABYLON.Mesh[] = [];
 
-  private isDefaultLoad: boolean;
   private isCollection: boolean;
 
   private isannotationSourceCollection: boolean;
@@ -66,11 +64,10 @@ export class AnnotationService {
               private dataService: DataService,
               private actionService: ActionService,
               private annotationmarkerService: AnnotationmarkerService,
-              private loadModelService: LoadModelService,
               private mongo: MongohandlerService,
               private message: MessageService,
               public socket: Socket,
-              private catalogueService: CatalogueService,
+              private processingService: ProcessingService,
               private cameraService: CameraService,
               private dialog: MatDialog,
               private userdataService: UserdataService,
@@ -82,8 +79,11 @@ export class AnnotationService {
     this.socketService.inSocket.subscribe(inSocket => {
       this.inSocket = inSocket;
       if (inSocket) {
-        this.annotations = JSON.parse(JSON.stringify(this.socketService.annotationsForSocket));
+        this.annotations = this.socketService.annotationsForSocket;
         this.redrawMarker();
+        this.socketService.newAnnotation.subscribe(newAnnotation => {
+          this.annotations.push(newAnnotation);
+        });
       } else {
         this.annotations = JSON.parse(JSON.stringify(this.isannotationSourceCollection ?
           this.collectionAnnotationsSorted : this.defaultAnnotationsSorted));
@@ -101,22 +101,22 @@ export class AnnotationService {
       this.setAnnotatingAllowance();
     });
 
-    this.loadModelService.Observables.actualModel.subscribe(actualModel => {
+    this.processingService.Observables.actualModel.subscribe(actualModel => {
       this.currentModel = actualModel;
     });
 
-    this.loadModelService.Observables.actualCollection.subscribe(actualCompilation => {
+    this.processingService.Observables.actualCollection.subscribe(actualCompilation => {
       if (!actualCompilation) return;
       actualCompilation._id ? this.isCollection = true : this.isCollection = false;
       this.currentCompilation = actualCompilation;
     });
 
-    this.loadModelService.Observables.actualModelMeshes.subscribe(actualModelMeshes => {
+    this.processingService.Observables.actualModelMeshes.subscribe(actualModelMeshes => {
       this.actualModelMeshes = actualModelMeshes;
       this.loadAnnotations();
     });
 
-    this.loadModelService.defaultModelLoaded.subscribe(defaultLoad => {
+    this.processingService.defaultModelLoaded.subscribe(defaultLoad => {
       this.isDefaultModelLoaded = defaultLoad;
     });
 
@@ -385,7 +385,7 @@ export class AnnotationService {
     this.babylonService.createPreviewScreenshot(400)
       .then(async detailScreenshot => {
         // TODO: Detect if user is offline
-        let generatedId = this.mongo.generateObjectId();
+        const generatedId = this.mongo.generateObjectId();
         /* TODO check id from server is needed
         await this.mongo.getUnusedObjectId()
           .then(id => generatedId = id)
@@ -467,23 +467,17 @@ export class AnnotationService {
   private add(annotation: IAnnotation): void {
 
     if (this.isDefaultModelLoaded) {
-      const annoSocket = this.socketService.annotationforSocket(annotation, 'add');
+      annotation.lastModificationDate = new Date().toISOString();
+      this.socketService.annotationForSocket(annotation, 'update');
       if (this.inSocket) {
-        this.socket.emit('createAnnotation', {annoSocket});
-        this.annotations.push(annoSocket);
-        this.drawMarker(annoSocket);
-        this.selectedAnnotation.next(annoSocket._id);
-        console.log('Zeichnen', annoSocket._id);
-        this.editModeAnnotation.next(annoSocket._id);
+        this.annotations.push(this.socketService.modifyAnnotationforSocket(annotation));
       } else {
         this.annotations.push(annotation);
         this.drawMarker(annotation);
-        this.selectedAnnotation.next(annotation._id);
-        this.editModeAnnotation.next(annotation._id);
       }
+      this.selectedAnnotation.next(this.annotations[this.annotations.length - 1]._id);
+      this.editModeAnnotation.next(this.annotations[this.annotations.length - 1]._id);
       this.defaultAnnotationsSorted.push(annotation);
-      // set created annotation as is_open in
-      // annotationmarker.service ((on double click) created annotation)
       return;
     }
 
@@ -495,70 +489,56 @@ export class AnnotationService {
         // MongoDB-Eintrag in PouchDB
         this.dataService.updateAnnotation(resultAnnotation);
 
-        (!resultAnnotation.target.source.relatedCompilation ||
-          resultAnnotation.target.source.relatedCompilation === '') ?
-          this.defaultAnnotationsSorted.push(resultAnnotation) :
-          this.collectionAnnotationsSorted.push(resultAnnotation);
         if (this.isannotationSourceCollection) {
-          const annoSocket = this.socketService.annotationforSocket(resultAnnotation, 'add');
-          if (this.inSocket) {
-            this.socket.emit('createAnnotation', {annoSocket});
-            this.annotations.push(annoSocket);
-            this.drawMarker(annoSocket);
-            this.selectedAnnotation.next(annoSocket._id);
-            this.editModeAnnotation.next(annoSocket._id);
-          } else {
-            this.annotations.push(resultAnnotation);
-            this.drawMarker(resultAnnotation);
-            this.selectedAnnotation.next(resultAnnotation._id);
-            this.editModeAnnotation.next(resultAnnotation._id);
-          }
+          this.socketService.annotationForSocket(resultAnnotation, 'update');
+          this.collectionAnnotationsSorted.push(resultAnnotation);
+        } else {
+          this.defaultAnnotationsSorted.push(resultAnnotation);
         }
 
-
+        if (this.inSocket) {
+          this.annotations.push(this.socketService.modifyAnnotationforSocket(resultAnnotation));
+        } else {
+          this.annotations.push(annotation);
+          this.drawMarker(annotation);
+        }
+        this.selectedAnnotation.next(this.annotations[this.annotations.length - 1]._id);
+        this.editModeAnnotation.next(this.annotations[this.annotations.length - 1]._id);
       })
       .catch((errorMessage: any) => {
         // PouchDB
-        // TODO: Später synchronisieren
         annotation.lastModificationDate = new Date().toISOString();
         console.log(errorMessage);
+
         this.dataService.updateAnnotation(annotation);
-        (!annotation.target.source.relatedCompilation ||
-          annotation.target.source.relatedCompilation === '') ?
-          this.defaultAnnotationsSorted.push(annotation) :
-          this.collectionAnnotationsSorted.push(annotation);
+
         if (this.isannotationSourceCollection) {
-          const annoSocket = this.socketService.annotationforSocket(annotation, 'add');
-          if (this.inSocket) {
-            this.socket.emit('createAnnotation', {annoSocket});
-            this.annotations.push(annoSocket);
-            this.drawMarker(annoSocket);
-            this.selectedAnnotation.next(annoSocket._id);
-            this.editModeAnnotation.next(annoSocket._id);
-          } else {
-            this.annotations.push(annotation);
-            this.drawMarker(annotation);
-            this.selectedAnnotation.next(annotation._id);
-            this.editModeAnnotation.next(annotation._id);
-          }
+          this.socketService.annotationForSocket(annotation, 'update');
+          this.collectionAnnotationsSorted.push(annotation);
+        } else {
+          this.defaultAnnotationsSorted.push(annotation);
         }
-        // set created annotation as is_open in
-        // annotationmarker.service ((on double click) created annotation)
+
+        if (this.inSocket) {
+          this.annotations.push(this.socketService.modifyAnnotationforSocket(annotation));
+        } else {
+          this.annotations.push(annotation);
+          this.drawMarker(annotation);
+        }
+        this.selectedAnnotation.next(this.annotations[this.annotations.length - 1]._id);
+        this.editModeAnnotation.next(this.annotations[this.annotations.length - 1]._id);
 
       });
   }
 
   public updateAnnotation(annotation: IAnnotation) {
     if (this.isDefaultModelLoaded) {
-      this.defaultAnnotationsSorted.splice(this.annotations.indexOf(annotation), 1, annotation);
-
-      const annoSocket = this.socketService.annotationforSocket(annotation, 'edit');
-      if (this.inSocket) {
-        this.socket.emit('editAnnotation', {annoSocket});
-        this.annotations.splice(this.annotations.indexOf(annoSocket), 1, annoSocket);
-      } else {
+      annotation.lastModificationDate = new Date().toISOString();
+      this.socketService.annotationForSocket(annotation, 'update');
+      if (!this.inSocket) {
         this.annotations.splice(this.annotations.indexOf(annotation), 1, annotation);
       }
+      this.defaultAnnotationsSorted.splice(this.annotations.indexOf(annotation), 1, annotation);
       return;
     }
 
@@ -569,20 +549,15 @@ export class AnnotationService {
         // MongoDB-Eintrag in PouchDB
         this.dataService.updateAnnotation(resultAnnotation);
 
-        (!resultAnnotation.target.source.relatedCompilation ||
-          resultAnnotation.target.source.relatedCompilation === '') ?
-          this.defaultAnnotationsSorted
-            .splice(this.annotations.indexOf(resultAnnotation), 1, resultAnnotation) :
-          this.collectionAnnotationsSorted
-            .splice(this.annotations.indexOf(resultAnnotation), 1, resultAnnotation);
         if (this.isannotationSourceCollection) {
-          const annoSocket = this.socketService.annotationforSocket(resultAnnotation, 'edit');
-          if (this.inSocket) {
-            this.socket.emit('editAnnotation', {annoSocket});
-            this.annotations.splice(this.annotations.indexOf(annoSocket), 1, annoSocket);
-          } else {
-            this.annotations.splice(this.annotations.indexOf(resultAnnotation), 1, resultAnnotation);
-          }
+          this.socketService.annotationForSocket(resultAnnotation, 'update');
+          this.collectionAnnotationsSorted.splice(this.annotations.indexOf(resultAnnotation), 1, resultAnnotation);
+        } else {
+          this.defaultAnnotationsSorted.splice(this.annotations.indexOf(resultAnnotation), 1, resultAnnotation);
+        }
+
+        if (!this.inSocket) {
+          this.annotations.splice(this.annotations.indexOf(resultAnnotation), 1, resultAnnotation);
         }
       })
       .catch((errorMessage: any) => {
@@ -591,23 +566,20 @@ export class AnnotationService {
         console.log(errorMessage);
         annotation.lastModificationDate = new Date().toISOString();
         this.dataService.updateAnnotation(annotation);
-        (!annotation.target.source.relatedCompilation ||
-          annotation.target.source.relatedCompilation === '') ?
-          this.defaultAnnotationsSorted
-            .splice(this.annotations.indexOf(annotation), 1, annotation) :
-          this.collectionAnnotationsSorted
-            .splice(this.annotations.indexOf(annotation), 1, annotation);
+
         if (this.isannotationSourceCollection) {
-          const annoSocket = this.socketService.annotationforSocket(annotation, 'edit');
-          if (this.inSocket) {
-            this.socket.emit('editAnnotation', {annoSocket});
-            this.annotations.splice(this.annotations.indexOf(annoSocket), 1, annoSocket);
-          } else {
-            this.annotations.splice(this.annotations.indexOf(annotation), 1, annotation);
-          }
+          this.socketService.annotationForSocket(annotation, 'update');
+          this.collectionAnnotationsSorted.splice(this.annotations.indexOf(annotation), 1, annotation);
+        } else {
+          this.defaultAnnotationsSorted.splice(this.annotations.indexOf(annotation), 1, annotation);
+        }
+
+        if (!this.inSocket) {
+          this.annotations.splice(this.annotations.indexOf(annotation), 1, annotation);
         }
       });
   }
+
 
   public deleteAnnotation(annotation: IAnnotation) {
 
@@ -616,12 +588,11 @@ export class AnnotationService {
       if (this.isDefaultModelLoaded) {
         const index: number = this.annotations.indexOf(annotation);
         if (index !== -1) {
-          this.annotations.splice(index, 1);
-          this.defaultAnnotationsSorted.splice(this.annotations.indexOf(annotation), 1);
-          const annoSocket = this.socketService.annotationforSocket(annotation, 'delete');
-          if (this.inSocket) {
-            this.socket.emit('deleteAnnotation', {annoSocket});
+          if (!this.inSocket) {
+            this.annotations.splice(index, 1);
           }
+          this.defaultAnnotationsSorted.splice(this.annotations.indexOf(annotation), 1);
+          this.socketService.annotationForSocket(annotation, 'delete');
           this.changedRankingPositions(this.annotations);
           this.redrawMarker();
         }
@@ -629,50 +600,52 @@ export class AnnotationService {
       }
 
       if (this.isannotationSourceCollection) {
-        const annoSocket = this.socketService.annotationforSocket(annotation, 'delete');
-        if (this.inSocket) {
-          this.socket.emit('deleteAnnotation', {annoSocket});
-        }
+        this.socketService.annotationForSocket(annotation, 'delete');
+        this.collectionAnnotationsSorted
+          .splice(this.annotations.indexOf(annotation), 1);
+      } else {
+        this.defaultAnnotationsSorted
+          .splice(this.annotations.indexOf(annotation), 1);
       }
 
       this.dataService.deleteAnnotation(annotation._id);
-      this.annotations
-        .splice(this.annotations.indexOf(annotation), 1);
+      if (!this.inSocket) {
+        this.annotations
+          .splice(this.annotations.indexOf(annotation), 1);
+      }
       this.changedRankingPositions(this.annotations);
       this.redrawMarker();
 
-      (!annotation.target.source.relatedCompilation ||
-        annotation.target.source.relatedCompilation === '') ?
-        this.defaultAnnotationsSorted
-          .splice(this.annotations.indexOf(annotation), 1) :
-        this.collectionAnnotationsSorted
-          .splice(this.annotations.indexOf(annotation), 1);
+      this.deleteAnnotationFromServer(annotation._id);
 
-      // User pwd check for deliting on Server
-      const username = this.userdataService.cachedLoginData.username;
-      const password = this.userdataService.cachedLoginData.password;
-
-      if (username === '' || password === '') {
-        this.passwordDialog(annotation._id);
-      } else {
-
-        this.mongo.deleteRequest(annotation._id, 'annotation', username, password)
-          .toPromise()
-          .then((result: any) => {
-            if (result.status === 'ok') {
-              this.message.info('Deleted from Server');
-            } else {
-              this.message.info('Not deleted from Server');
-              this.passwordDialog(annotation._id);
-            }
-          })
-          .catch((errorMessage: any) => {
-            console.log(errorMessage);
-            this.message.error('Can not see if you are logged in.');
-          });
-      }
     } else {
       this.message.error('You are not the Owner of this Annotation.');
+    }
+  }
+
+  public deleteAnnotationFromServer(annotationId: string) {
+    // User pwd check for deliting on Server
+    const username = this.userdataService.cachedLoginData.username;
+    const password = this.userdataService.cachedLoginData.password;
+
+    if (username === '' || password === '') {
+      this.passwordDialog(annotationId);
+    } else {
+
+      this.mongo.deleteRequest(annotationId, 'annotation', username, password)
+        .toPromise()
+        .then((result: any) => {
+          if (result.status === 'ok') {
+            this.message.info('Deleted from Server');
+          } else {
+            this.message.info('Not deleted from Server');
+            this.passwordDialog(annotationId);
+          }
+        })
+        .catch((errorMessage: any) => {
+          console.log(errorMessage);
+          this.message.error('Can not see if you are logged in.');
+        });
     }
   }
 
@@ -918,7 +891,7 @@ export class AnnotationService {
           this.socketService.setBroadcastingAllowance(false);
 
         this.isAnnotatingAllowed = this.userdataService.isModelOwner ||
-          this.loadModelService.isDefaultModelLoaded;
+          this.processingService.isDefaultModelLoaded;
         this.annotationMode(this.isAnnotatingAllowed);
         this.annnotatingAllowed.emit(this.isAnnotatingAllowed);
       }

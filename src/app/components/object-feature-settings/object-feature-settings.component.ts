@@ -10,12 +10,11 @@ import {ColorEvent} from 'ngx-color';
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
 import {CameraService} from '../../services/camera/camera.service';
-import {CatalogueService} from '../../services/catalogue/catalogue.service';
-import {LoadModelService} from '../../services/load-model/load-model.service';
 import {MessageService} from '../../services/message/message.service';
 import {ModelsettingsService} from '../../services/modelsettings/modelsettings.service';
 import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
 import {OverlayService} from '../../services/overlay/overlay.service';
+import {ProcessingService} from '../../services/processing/processing.service';
 import {UserdataService} from '../../services/userdata/userdata.service';
 import {DialogMeshsettingsComponent} from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
 
@@ -67,10 +66,9 @@ export class ObjectFeatureSettingsComponent implements OnInit {
               private cameraService: CameraService,
               private babylonService: BabylonService,
               private mongohandlerService: MongohandlerService,
-              private catalogueService: CatalogueService,
               private message: MessageService,
               private annotationmarkerService: AnnotationmarkerService,
-              private loadModelService: LoadModelService,
+              private processingService: ProcessingService,
               public modelSettingsService: ModelsettingsService,
               public dialog: MatDialog,
               private userdataService: UserdataService,
@@ -79,16 +77,16 @@ export class ObjectFeatureSettingsComponent implements OnInit {
 
   ngOnInit() {
 
-    this.loadModelService.loaded.subscribe(isLoaded => {
+    this.processingService.loaded.subscribe(isLoaded => {
       this.isLoaded = isLoaded;
       if (isLoaded) {
-        this.activeModel = this.loadModelService.getCurrentModel();
+        this.activeModel = this.processingService.getCurrentModel();
         this.isFinished = this.activeModel.finished;
         this.setSettings();
       }
     });
 
-    this.catalogueService.defaultLoad.subscribe(isDefaultLoad => {
+    this.processingService.defaultModelLoaded.subscribe(isDefaultLoad => {
       this.isDefault = isDefaultLoad;
     });
 
@@ -96,11 +94,11 @@ export class ObjectFeatureSettingsComponent implements OnInit {
       this.isModelOwner = isModelOwner;
     });
 
-    this.catalogueService.singleObject.subscribe(singleModel => {
-      this.isSingleModel = singleModel;
+    this.processingService.collectionLoaded.subscribe(collection => {
+      this.isSingleModel = !collection;
     });
     // camera should not move through mesh
-    this.loadModelService.Observables.actualModelMeshes.subscribe(actualModelMeshes => {
+    this.processingService.Observables.actualModelMeshes.subscribe(actualModelMeshes => {
       actualModelMeshes.forEach(mesh => {
         mesh.checkCollisions = true;
       });

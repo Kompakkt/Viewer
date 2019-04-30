@@ -1,9 +1,9 @@
 import {Component, HostBinding, OnInit} from '@angular/core';
 import {DomSanitizer} from '@angular/platform-browser';
 
-import {LoadModelService} from '../../services/load-model/load-model.service';
 import {MetadataService} from '../../services/metadata/metadata.service';
 import {OverlayService} from '../../services/overlay/overlay.service';
+import {ProcessingService} from '../../services/processing/processing.service';
 
 @Component({
   selector: 'app-object-feature-metadata',
@@ -26,14 +26,14 @@ export class ObjectFeatureMetadataComponent implements OnInit {
 
   constructor(private overlayService: OverlayService,
               private metadataService: MetadataService,
-              public loadModelService: LoadModelService,
+              public processingService: ProcessingService,
               private sanitizer: DomSanitizer) {
   }
 
   ngOnInit() {
     this.overlayService.editor.subscribe(async editorIsOpen => {
         this.isOpen = editorIsOpen;
-        const currentModel = this.loadModelService.getCurrentModel();
+        const currentModel = this.processingService.getCurrentModel();
         if (this.isOpen && currentModel) {
           if (this.actualMetadata_id !== currentModel.relatedDigitalObject._id) {
             this.actualMetadata_id = currentModel.relatedDigitalObject._id;
