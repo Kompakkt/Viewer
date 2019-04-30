@@ -223,68 +223,6 @@ export class ProcessingService {
       });
   }
 
-  public async selectCollectionByID(identifierCollection: string): Promise<string> {
-    // Check if collection has been initially loaded and is available in collections
-    const collection = this.Observables.collections.source['value']
-      .find(i => i._id === identifierCollection);
-    // If collection has not been loaded during initial load
-    if (collection === undefined) {
-      // try to find it on the server
-      return new Promise((resolve, reject) => {
-        this.mongoHandlerService.getCompilation(identifierCollection)
-          .then(compilation => {
-            console.log('die compi ist', compilation);
-            // collection is available on server
-            if (compilation['_id']) {
-              this.addAndLoadCollection(compilation);
-              resolve('loaded');
-            } else if (compilation['status'] === 'ok'
-              && compilation['message'] === 'Password protected compilation') {
-              resolve('password');
-            } else {
-              // collection ist nicht erreichbar
-              resolve('missing');
-            }
-          },    error => {
-            this.message.error('Connection to object server refused.');
-            reject('missing');
-          });
-      });
-      // collection is available in collections and will be loaded
-    } else {
-      this.fetchAndLoad(undefined, collection._id, undefined);
-      return 'loaded';
-    }
-  }
-
-  public selectModelByID(identifierModel: string): boolean {
-    const model = this.Observables.models.source['value'].find(i => i._id === identifierModel);
-    if (model === undefined) {
-      this.mongoHandlerService.getModel(identifierModel)
-        .then(actualModel => {
-          if (actualModel['_id']) {
-            this.Subjects.models.next([actualModel]);
-            this.fetchAndLoad(actualModel._id, undefined, false);
-            return true;
-          } else {
-            return false;
-          }
-        },    error => {
-          this.message.error('Connection to object server refused.');
-          return false;
-        });
-    }
-    this.fetchAndLoad(model._id, undefined, false);
-
-    return true;
-  }
-
-  public addAndLoadCollection(compilation: ICompilation) {
-    // this.Subjects.collections.next(compilation);
-    // TODO
-    this.fetchAndLoad(undefined, compilation._id, undefined);
-  }
-
   public loadDefaultModelData() {
     this.isLoaded = false;
     this.loaded.emit(false);
@@ -417,6 +355,63 @@ export class ProcessingService {
     } else {
       return;
     }
+  }
+
+  public async selectCollectionByID(identifierCollection: string): Promise<string> {
+    // Check if collection has been initially loaded and is available in collections
+    const collection = this.Observables.collections.source['value']
+      .find(i => i._id === identifierCollection);
+    // If collection has not been loaded during initial load
+    if (collection === undefined) {
+      // try to find it on the server
+      return new Promise((resolve, reject) => {
+        this.mongoHandlerService.getCompilation(identifierCollection)
+          .then(compilation => {
+            console.log('die compi ist', compilation);
+            // collection is available on server
+            if (compilation['_id']) {
+              // TODO: add to Subjects?
+              this.fetchAndLoad(undefined, compilation._id, undefined);
+              resolve('loaded');
+            } else if (compilation['status'] === 'ok'
+              && compilation['message'] === 'Password protected compilation') {
+              resolve('password');
+            } else {
+              // collection ist nicht erreichbar
+              resolve('missing');
+            }
+          },    error => {
+            this.message.error('Connection to object server refused.');
+            reject('missing');
+          });
+      });
+      // collection is available in collections and will be loaded
+    } else {
+      this.fetchAndLoad(undefined, collection._id, undefined);
+      return 'loaded';
+    }
+  }
+
+  public selectModelByID(identifierModel: string): boolean {
+    const model = this.Observables.models.source['value'].find(i => i._id === identifierModel);
+    if (model === undefined) {
+      this.mongoHandlerService.getModel(identifierModel)
+        .then(actualModel => {
+          if (actualModel['_id']) {
+            this.Subjects.models.next([actualModel]);
+            this.fetchAndLoad(actualModel._id, undefined, false);
+            return true;
+          } else {
+            return false;
+          }
+        },    error => {
+          this.message.error('Connection to object server refused.');
+          return false;
+        });
+    }
+    this.fetchAndLoad(model._id, undefined, false);
+
+    return true;
   }
 
 }

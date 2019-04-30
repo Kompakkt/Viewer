@@ -34,7 +34,8 @@ export class DialogPasswordComponent implements OnInit {
         .then(compilation => {
 
         if (compilation['_id']) {
-          this.processingService.addAndLoadCollection(compilation);
+          this.processingService.fetchAndLoad(undefined, compilation._id, undefined);
+
           this.dialogRef.close(true);
         } else {
           this.message.error('Password is wrong.' + this.identifierCollection + '.');
