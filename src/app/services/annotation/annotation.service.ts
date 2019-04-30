@@ -845,7 +845,7 @@ export class AnnotationService {
           content: {
             type: 'text',
             title: 'Hi there!',
-            description: 'maybe this is not what you were looking for. Unfortunately we cannot display the requested object but we are working on it. But we have something better as you can see...',
+            description: 'maybe this is not what you were looking for. Unfortunately we cannot display the requested object but we are working on it. But we have something better as you can see... This model is from https://sketchfab.com/mark2580',
             relatedPerspective: {
               cameraType: 'arcRotateCam',
               position: {
