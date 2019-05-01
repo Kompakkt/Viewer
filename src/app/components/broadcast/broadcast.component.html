@@ -1,19 +1,16 @@
-<div id="switch-collaborative">
-  Collaborative Annotation Mode
-  <mat-slide-toggle id="socket"
-                    mat-icon-button
-                    [(ngModel)]="toggleChecked" (change)="onSocketToggleChange()"
-                    matTooltip="Login to Socket.Io"
-                    matTooltipPosition="above"
-                    color="warn"
-                    aria-label="Login to Socket.Io">
-  </mat-slide-toggle>
-  <button
-    mat-icon-button
-    (click)="inviteCollaborators();"
-    matTooltip="Invite Collaborator"
-    matTooltipPosition="above"
-    type="button">
-    <mat-icon aria-label="Invite Collaborator">share</mat-icon>
-  </button>
-</div>
+<mat-slide-toggle id="socket"
+                  mat-icon-button
+                  [(ngModel)]="toggleChecked" (change)="onSocketToggleChange()"
+                  matTooltip="Collaborative Editing"
+                  matTooltipPosition="above"
+                  color="warn"
+                  aria-label="Collaborative Editing">
+</mat-slide-toggle>
+<button
+  mat-icon-button
+  (click)="inviteCollaborators();"
+  matTooltip="Invite Collaborator"
+  matTooltipPosition="above"
+  type="button">
+  <mat-icon aria-label="Invite Collaborator">share</mat-icon>
+</button>

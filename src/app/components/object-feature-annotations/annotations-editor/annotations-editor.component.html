@@ -1,15 +1,5 @@
-<mat-radio-group [disabled]="!isCollectionLoaded || isBroadcasting ||isDefaultModelLoaded"
-                 aria-label="Select Annotation Category"
-                 (change)="changeCategory($event)">
-  <mat-radio-button value="def"
-                    [checked]="!isCollectionLoaded || isDefaultModelLoaded || isDefaultAnnotationsSource"> Default
-  </mat-radio-button>
-  <mat-radio-button value="col">Collection</mat-radio-button>
-</mat-radio-group>
-
-<app-broadcast [style.visibility]="isBroadcastingAllowed ? 'visible' : 'hidden'"></app-broadcast>
-
-<mat-card *ngIf="isAnnotatingAllowed && !annotationService.isCollectionInputSelected && !annotationService.annotations.length">
+<mat-card
+  *ngIf="isAnnotatingAllowed && !annotationService.isCollectionInputSelected && !annotationService.annotations.length">
   All annotations here are default annotations and visible for everyone who can access the model. If you
   don't want that, load this model from a collection.
 </mat-card>
@@ -31,12 +21,29 @@
                              cdkDrag cdkDragLockAxis="y"></app-annotation-for-editor>
 </div>
 
-<div id="annotations-eximport">
+<div id="editor-footermenu">
+
   <button *ngIf="annotationService.annotations.length"
           mat-icon-button
-          matTooltip="Export Annotations to File"
+          matTooltip="Export Annotations to JSON"
           matTooltipPosition="below"
           (click)="exportAnnotations()">
-    <mat-icon aria-label="Export Annotations to File">save</mat-icon>
+    <mat-icon aria-label="Export Annotations to JSON">save</mat-icon>
   </button>
+
+  <app-broadcast [style.visibility]="isBroadcastingAllowed ? 'visible' : 'hidden'"></app-broadcast>
+
+  <div>
+
+    Mode:
+    <mat-radio-group [disabled]="!isCollectionLoaded || isBroadcasting || isDefaultModelLoaded"
+                     aria-label="Select Annotation Category"
+                     (change)="changeCategory($event)">
+      <mat-radio-button value="def"
+                        [checked]="!isCollectionLoaded || isDefaultModelLoaded || isDefaultAnnotationsSource"> Default
+      </mat-radio-button>
+      <mat-radio-button value="col"> Collection</mat-radio-button>
+    </mat-radio-group>
+
+  </div>
 </div>
