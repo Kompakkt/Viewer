@@ -84,14 +84,14 @@ export class AnnotationComponent implements OnInit {
       if (!isSelectedAnno && this.isEditMode) {
         this.isEditMode = false;
         this.labelMode = 'edit';
-        this.labelModeText = 'edit';
+        this.labelModeText = 'Edit Annotation';
         this.annotationService.updateAnnotation(this.annotation);
       }
       if (isSelectedAnno && !this.isEditMode) {
         this.isEditMode = true;
         this.annotationService.setSelectedAnnotation(this.annotation._id);
         this.labelMode = 'remove_red_eye';
-        this.labelModeText = 'view';
+        this.labelModeText = 'View Annotation';
       }
     });
 

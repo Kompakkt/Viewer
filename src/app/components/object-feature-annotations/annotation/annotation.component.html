@@ -57,13 +57,6 @@
     </mat-card-content>
 
     <mat-card-actions>
-      <button *ngIf="annotation._id !== 'DefaultAnnotation'"
-              (click)="shareAnnotation()"
-              matTooltip="Copy to collection"
-              matTooltipPosition="above"
-              type="button">
-        <mat-icon aria-label="Copy to collection">share</mat-icon>
-      </button>
 
       <button mat-icon-button
               (click)="editFullscreen()"
@@ -71,7 +64,7 @@
               matTooltipPosition="above"
               type="button"
               *ngIf="isAnnotatingAllowed">
-        <mat-icon aria-label="Fullscreen">fullscreen</mat-icon>
+        <mat-icon aria-label="Fullscreen">select_all</mat-icon>
       </button>
 
       <button mat-icon-button (click)="isEditMode ? annotationService.setEditModeAnnotation('') :
@@ -81,6 +74,15 @@
               matTooltipPosition="above"
               type="button">
         <mat-icon attr.aria-label={{labelModeText}}>{{labelMode}}</mat-icon>
+      </button>
+
+      <button mat-icon-button
+              *ngIf="annotation._id !== 'DefaultAnnotation'"
+              (click)="shareAnnotation()"
+              matTooltip="Copy to collection"
+              matTooltipPosition="above"
+              type="button">
+        <mat-icon aria-label="Copy to collection">file_copy</mat-icon>
       </button>
 
       <button *ngIf="isAnnotatingAllowed && isAnnotationOwner"
