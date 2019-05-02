@@ -21,7 +21,7 @@ import ActionEvent = BABYLON.ActionEvent;
 export class BabylonService {
 
   @Output() vrModeIsActive: EventEmitter<boolean> = new EventEmitter();
-  private isVRModeActive = false;
+  public isVRModeActive = false;
 
   private scene: BABYLON.Scene;
   private engine: BABYLON.Engine;
