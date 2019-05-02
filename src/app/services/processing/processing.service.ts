@@ -380,7 +380,7 @@ export class ProcessingService {
       const model = this.getCurrentModel();
       if (!model || !model.processed) return;
       if (model.processed[this.quality] !== undefined) {
-        this.loadModel(model._id === 'Cube' ? model : this.defaultModel, '')
+        this.loadModel(model._id === 'Cube' ? this.defaultModel : model, '')
           .then(result => {
             this.isLoaded = true;
             this.loaded.emit(true);
