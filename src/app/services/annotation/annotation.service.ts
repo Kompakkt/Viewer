@@ -474,13 +474,13 @@ export class AnnotationService {
 
     if (this.isDefaultModelLoaded) {
       annotation.lastModificationDate = new Date().toISOString();
-      this.socketService.annotationForSocket(annotation, 'update');
-      if (this.inSocket) {
+      //this.socketService.annotationForSocket(annotation, 'update');
+      /*if (this.inSocket) {
         this.annotations.push(this.socketService.modifyAnnotationforSocket(annotation));
-      } else {
+      } else {*/
         this.annotations.push(annotation);
         this.drawMarker(annotation);
-      }
+     // }
       this.selectedAnnotation.next(annotation._id);
       this.editModeAnnotation.next(annotation._id);
       this.defaultAnnotationsSorted.push(annotation);
@@ -496,18 +496,18 @@ export class AnnotationService {
         this.dataService.updateAnnotation(resultAnnotation);
 
         if (this.isannotationSourceCollection) {
-          this.socketService.annotationForSocket(resultAnnotation, 'update');
+          //this.socketService.annotationForSocket(resultAnnotation, 'update');
           this.collectionAnnotationsSorted.push(resultAnnotation);
         } else {
           this.defaultAnnotationsSorted.push(resultAnnotation);
         }
 
-        if (this.inSocket) {
+        /*if (this.inSocket) {
           this.annotations.push(this.socketService.modifyAnnotationforSocket(resultAnnotation));
-        } else {
+        } else {*/
           this.annotations.push(annotation);
           this.drawMarker(annotation);
-        }
+       // }
         this.selectedAnnotation.next(annotation._id);
         this.editModeAnnotation.next(annotation._id);
       })
@@ -519,18 +519,18 @@ export class AnnotationService {
         this.dataService.updateAnnotation(annotation);
 
         if (this.isannotationSourceCollection) {
-          this.socketService.annotationForSocket(annotation, 'update');
+         // this.socketService.annotationForSocket(annotation, 'update');
           this.collectionAnnotationsSorted.push(annotation);
         } else {
           this.defaultAnnotationsSorted.push(annotation);
         }
 
-        if (this.inSocket) {
+        /*if (this.inSocket) {
           this.annotations.push(this.socketService.modifyAnnotationforSocket(annotation));
-        } else {
+        } else {*/
           this.annotations.push(annotation);
           this.drawMarker(annotation);
-        }
+     //   }
         this.selectedAnnotation.next(annotation._id);
         this.editModeAnnotation.next(annotation._id);
 
@@ -540,10 +540,10 @@ export class AnnotationService {
   public updateAnnotation(annotation: IAnnotation) {
     if (this.isDefaultModelLoaded) {
       annotation.lastModificationDate = new Date().toISOString();
-      this.socketService.annotationForSocket(annotation, 'update');
-      if (!this.inSocket) {
+     // this.socketService.annotationForSocket(annotation, 'update');
+     // if (!this.inSocket) {
         this.annotations.splice(this.annotations.indexOf(annotation), 1, annotation);
-      }
+     // }
       this.defaultAnnotationsSorted.splice(this.annotations.indexOf(annotation), 1, annotation);
       return;
     }
@@ -556,15 +556,16 @@ export class AnnotationService {
         this.dataService.updateAnnotation(resultAnnotation);
 
         if (this.isannotationSourceCollection) {
-          this.socketService.annotationForSocket(resultAnnotation, 'update');
+      //    this.socketService.annotationForSocket(resultAnnotation, 'update');
           this.collectionAnnotationsSorted.splice(this.annotations.indexOf(resultAnnotation), 1, resultAnnotation);
         } else {
           this.defaultAnnotationsSorted.splice(this.annotations.indexOf(resultAnnotation), 1, resultAnnotation);
         }
+        this.annotations.splice(this.annotations.indexOf(resultAnnotation), 1, resultAnnotation);
 
-        if (!this.inSocket) {
+      /*  if (!this.inSocket) {
           this.annotations.splice(this.annotations.indexOf(resultAnnotation), 1, resultAnnotation);
-        }
+        }*/
       })
       .catch((errorMessage: any) => {
         // PouchDB
@@ -574,15 +575,15 @@ export class AnnotationService {
         this.dataService.updateAnnotation(annotation);
 
         if (this.isannotationSourceCollection) {
-          this.socketService.annotationForSocket(annotation, 'update');
+        //  this.socketService.annotationForSocket(annotation, 'update');
           this.collectionAnnotationsSorted.splice(this.annotations.indexOf(annotation), 1, annotation);
         } else {
           this.defaultAnnotationsSorted.splice(this.annotations.indexOf(annotation), 1, annotation);
         }
 
-        if (!this.inSocket) {
+       // if (!this.inSocket) {
           this.annotations.splice(this.annotations.indexOf(annotation), 1, annotation);
-        }
+      //  }
       });
   }
 
@@ -593,11 +594,11 @@ export class AnnotationService {
       if (this.isDefaultModelLoaded) {
         const index: number = this.annotations.indexOf(annotation);
         if (index !== -1) {
-          if (!this.inSocket) {
+        //  if (!this.inSocket) {
             this.annotations.splice(index, 1);
-          }
+       //   }
           this.defaultAnnotationsSorted.splice(this.annotations.indexOf(annotation), 1);
-          this.socketService.annotationForSocket(annotation, 'delete');
+      //    this.socketService.annotationForSocket(annotation, 'delete');
           this.changedRankingPositions(this.annotations);
           this.redrawMarker();
         }
@@ -605,7 +606,7 @@ export class AnnotationService {
       }
 
       if (this.isannotationSourceCollection) {
-        this.socketService.annotationForSocket(annotation, 'delete');
+       // this.socketService.annotationForSocket(annotation, 'delete');
         this.collectionAnnotationsSorted
           .splice(this.annotations.indexOf(annotation), 1);
       } else {
@@ -614,10 +615,10 @@ export class AnnotationService {
       }
 
       this.dataService.deleteAnnotation(annotation._id);
-      if (!this.inSocket) {
+      //if (!this.inSocket) {
         this.annotations
           .splice(this.annotations.indexOf(annotation), 1);
-      }
+    //  }
       this.changedRankingPositions(this.annotations);
       this.redrawMarker();
 
@@ -959,10 +960,14 @@ export class AnnotationService {
           this.socketService.setBroadcastingAllowance(true) :
           this.socketService.setBroadcastingAllowance(false);
 
-        this.isAnnotatingAllowed = this.userdataService.isModelOwner ||
-          this.processingService.isDefaultModelLoaded;
-        this.annotationMode(this.isAnnotatingAllowed);
-        this.annnotatingAllowed.emit(this.isAnnotatingAllowed);
+        if (this.userdataService.isModelOwner && !this.processingService.isCollectionLoaded ||
+          this.processingService.isDefaultModelLoaded) {
+          this.annotationMode(true);
+          this.annnotatingAllowed.emit(true);
+        } else {
+          this.annotationMode(false);
+          this.annnotatingAllowed.emit(false);
+        }
       }
     } else {
       this.socketService.setBroadcastingAllowance(false);
