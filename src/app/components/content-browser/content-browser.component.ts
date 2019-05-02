@@ -46,11 +46,13 @@ import {ProcessingService} from '../../services/processing/processing.service';
 
   ngOnInit() {
 
+    this.isLoggedIn = this.processingService.isLoggedIn;
+    this.isCollectionLoaded = this.processingService.isCollectionLoaded;
+    this.isObjectCategory = true;
+
     this.processingService.loggedIn.subscribe(loggedIn => {
       this.isLoggedIn = loggedIn;
     });
-
-    this.isObjectCategory = true;
 
     this.processingService.collectionLoaded.subscribe(loadedCol => {
       this.isCollectionLoaded = loadedCol;

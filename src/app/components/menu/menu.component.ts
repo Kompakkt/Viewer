@@ -47,6 +47,7 @@ export class MenuComponent implements OnInit {
   ngOnInit() {
 
     this.fullscreen = false;
+    this.isVRModeActive = this.babylonService.isVRModeActive;
 
     this.babylonService.vrModeIsActive.subscribe(isActive => {
       this.isVRModeActive = isActive;

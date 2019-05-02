@@ -18,11 +18,15 @@ export class ContentComponent implements OnInit {
   public showContentBrowser: boolean;
 
   constructor(private overlayService: OverlayService,
-              public processingService: ProcessingService,
-              private cdRef: ChangeDetectorRef) {
+              public processingService: ProcessingService) {
   }
 
   ngOnInit() {
+
+    this.isCollectionLoaded = this.processingService.isCollectionLoaded;
+    this.isDefaultModelLoaded = this.processingService.isDefaultModelLoaded;
+    this.isOpen = this.overlayService.collectionsOverviewIsOpen;
+    this.showContentBrowser = this.processingService.isShowCatalogue;
 
     this.processingService.collectionLoaded.subscribe(isCollectionLoaded => {
       this.isCollectionLoaded = isCollectionLoaded;
@@ -36,10 +40,8 @@ export class ContentComponent implements OnInit {
       this.isOpen = collectionsOverviewIsOpen;
     });
 
-    // TODO subscription undefined
     this.processingService.showCatalogue.subscribe(showCatalogue => {
       this.showContentBrowser = showCatalogue;
-      this.cdRef.detectChanges();
     });
   }
 
