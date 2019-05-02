@@ -557,11 +557,11 @@ export class AnnotationService {
 
         if (this.isannotationSourceCollection) {
       //    this.socketService.annotationForSocket(resultAnnotation, 'update');
-          this.collectionAnnotationsSorted.splice(this.annotations.indexOf(resultAnnotation), 1, resultAnnotation);
+          this.collectionAnnotationsSorted.splice(this.annotations.indexOf(annotation), 1, resultAnnotation);
         } else {
-          this.defaultAnnotationsSorted.splice(this.annotations.indexOf(resultAnnotation), 1, resultAnnotation);
+          this.defaultAnnotationsSorted.splice(this.annotations.indexOf(annotation), 1, resultAnnotation);
         }
-        this.annotations.splice(this.annotations.indexOf(resultAnnotation), 1, resultAnnotation);
+        this.annotations.splice(this.annotations.indexOf(annotation), 1, resultAnnotation);
 
       /*  if (!this.inSocket) {
           this.annotations.splice(this.annotations.indexOf(resultAnnotation), 1, resultAnnotation);
