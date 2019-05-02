@@ -32,8 +32,6 @@ export class AnnotationComponent implements OnInit {
   // internal
   public isEditMode: boolean;
   public showAnnotation: boolean;
-  public labelMode: string;
-  public labelModeText: string;
   public positionTop: number;
   public positionLeft: number;
   public collapsed: boolean;
@@ -83,15 +81,11 @@ export class AnnotationComponent implements OnInit {
       const isSelectedAnno = selectedAnno === this.annotation._id;
       if (!isSelectedAnno && this.isEditMode) {
         this.isEditMode = false;
-        this.labelMode = 'edit';
-        this.labelModeText = 'Edit Annotation';
         this.annotationService.updateAnnotation(this.annotation);
       }
       if (isSelectedAnno && !this.isEditMode) {
         this.isEditMode = true;
         this.annotationService.setSelectedAnnotation(this.annotation._id);
-        this.labelMode = 'remove_red_eye';
-        this.labelModeText = 'View Annotation';
       }
     });
 

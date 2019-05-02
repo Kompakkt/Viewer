@@ -75,11 +75,11 @@
       <button mat-icon-button
               (click)="isEditMode ? annotationService.setEditModeAnnotation('') :
                                                   annotationService.setEditModeAnnotation(annotation._id)"
-              matTooltip={{labelModeText}}
+              [matTooltip]="isEditMode ? 'View Annotation' : 'Edit Annotation'"
               *ngIf="isAnnotatingAllowed"
               matTooltipPosition="above"
               type="button">
-        <mat-icon attr.aria-label={{labelModeText}}>{{labelMode}}</mat-icon>
+        <mat-icon [attr.aria-label]= "isEditMode ? 'View Annotation' : 'Edit Annotation'">{{isEditMode ? 'remove_red_eye' : 'edit'}}</mat-icon>
       </button>
 
       <button mat-icon-button
