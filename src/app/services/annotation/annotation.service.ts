@@ -961,7 +961,7 @@ export class AnnotationService {
           this.socketService.setBroadcastingAllowance(false);
 
         if (this.userdataService.isModelOwner && !this.processingService.isCollectionLoaded ||
-          this.processingService.isDefaultModelLoaded) {
+          this.isDefaultModelLoaded) {
           this.annotationMode(true);
           this.annnotatingAllowed.emit(true);
         } else {

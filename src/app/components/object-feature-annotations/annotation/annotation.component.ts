@@ -15,6 +15,7 @@ import {DataService} from '../../../services/data/data.service';
 import {SocketService} from '../../../services/socket/socket.service';
 import {UserdataService} from '../../../services/userdata/userdata.service';
 import {DialogAnnotationEditorComponent} from '../../dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
+import {ProcessingService} from '../../../services/processing/processing.service';
 
 @Component({
   selector: 'app-annotation',
@@ -56,7 +57,8 @@ export class AnnotationComponent implements OnInit {
               public socketService: SocketService,
               public dialog: MatDialog,
               private userdataService: UserdataService,
-              public cameraService: CameraService) {
+              public cameraService: CameraService,
+              private processingService: ProcessingService) {
   }
 
   ngOnInit() {
@@ -64,28 +66,44 @@ export class AnnotationComponent implements OnInit {
     this.showAnnotation = true;
     this.collapsed = false;
     this.isAnnotatingAllowed = this.annotationService.isAnnotatingAllowed;
-    this.isCollectionOwner = this.userdataService.isCollectionOwner;
-    this.isAnnotationOwner = this.userdataService.isAnnotationOwner(this.annotation);
+
+    this.processingService.loggedIn.subscribe(colOwner => {
+      this.isAnnotationOwner = this.userdataService.isAnnotationOwner(this.annotation);
+    });
+
+    this.userdataService.collectionOwner.subscribe(colOwner => {
+      this.isCollectionOwner = colOwner;
+    });
 
     this.annotationService.isSelectedAnnotation.subscribe(selectedAnno => {
       selectedAnno === this.annotation._id ? this.visibility = true : this.visibility = false;
       this.selectedAnnotation = selectedAnno;
     });
 
+    this.annotationService.annnotatingAllowed.subscribe(allowed => {
+      this.isAnnotatingAllowed = allowed;
+      console.log('Allowed', this.isAnnotatingAllowed);
+    });
+
     this.socketService.inSocket.subscribe(inSocket => {
       this.isInSocket = inSocket;
     });
 
-    this.annotationService.isEditModeAnnotation.subscribe(selectedAnno => {
-      this.editModeAnnotation = selectedAnno;
-      const isSelectedAnno = selectedAnno === this.annotation._id;
-      if (!isSelectedAnno && this.isEditMode) {
+    this.annotationService.isEditModeAnnotation.subscribe(selectedEditAnno => {
+      this.editModeAnnotation = selectedEditAnno;
+      const isEditAnno = selectedEditAnno === this.annotation._id;
+      console.log(selectedEditAnno, this.annotation._id, isEditAnno);
+      if (!isEditAnno && this.isEditMode) {
         this.isEditMode = false;
         this.annotationService.updateAnnotation(this.annotation);
+        console.log(this.isEditMode);
       }
-      if (isSelectedAnno && !this.isEditMode) {
+      if (isEditAnno && !this.isEditMode) {
         this.isEditMode = true;
-        this.annotationService.setSelectedAnnotation(this.annotation._id);
+        console.log(this.isEditMode);
+        console.log(this.isAnnotatingAllowed);
+
+        // this.annotationService.setSelectedAnnotation(this.annotation._id);
       }
     });
 
