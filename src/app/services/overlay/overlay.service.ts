@@ -9,7 +9,7 @@ export class OverlayService {
   }
 
   public editorIsOpen = false;
-  private collectionsOverviewIsOpen = false;
+  public collectionsOverviewIsOpen = false;
   public editorSettingIsOpen = false;
   private defaultAnnotationsIsOpen = false;
 
