@@ -296,7 +296,9 @@ export class ProcessingService {
         // cases: model, image, audio, video, text
         switch (newModel.mediaType) {
           case 'model':
-            await this.babylonService.loadModel(URL, newModel.processed[this.quality])
+            await this.babylonService.loadModel(URL +
+              newModel.processed[this.quality].substring(0, newModel.processed[this.quality].lastIndexOf('/')) + '/',
+              newModel.processed[this.quality].replace(/^.*[\\\/]/, ''))
               .then(async model => {
                 // Warte auf Antwort von loadModel,
                 // da loadModel ein Promise<object> von ImportMeshAync übergibt
