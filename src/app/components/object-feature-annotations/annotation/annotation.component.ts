@@ -66,6 +66,8 @@ export class AnnotationComponent implements OnInit {
     this.showAnnotation = true;
     this.collapsed = false;
     this.isAnnotatingAllowed = this.annotationService.isAnnotatingAllowed;
+    this.isAnnotationOwner = this.userdataService.isAnnotationOwner(this.annotation);
+    this.isCollectionOwner = this.userdataService.isCollectionOwner;
 
     this.processingService.loggedIn.subscribe(colOwner => {
       this.isAnnotationOwner = this.userdataService.isAnnotationOwner(this.annotation);
