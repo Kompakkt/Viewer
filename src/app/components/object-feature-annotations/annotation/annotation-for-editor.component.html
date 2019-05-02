@@ -68,8 +68,7 @@
       </mat-slide-toggle>
 
       <button mat-icon-button
-              (click)="isEditMode ? annotationService.setEditModeAnnotation('') :
-                                                  annotationService.setEditModeAnnotation(annotation._id)"
+              (click)= toggleEditViewMode();
               [matTooltip]="isEditMode ? 'View Annotation' : 'Edit Annotation'"
               *ngIf="isAnnotatingAllowed"
               matTooltipPosition="above"

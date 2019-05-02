@@ -118,6 +118,11 @@ export class AnnotationComponent implements OnInit {
     this.annotationService.setSelectedAnnotation('');
   }
 
+  public toggleEditViewMode(): void {
+    this.isEditMode ? this.annotationService.setEditModeAnnotation('') :
+      this.annotationService.setEditModeAnnotation(this.annotation._id);
+  }
+
   public shareAnnotation() {
     this.annotationService.shareAnnotation(this.annotation);
   }
