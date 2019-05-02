@@ -6,7 +6,8 @@
 
 <mat-card *ngIf="!isAnnotatingAllowed && !annotationService.isCollectionInputSelected && !isDefaultModelLoaded">
   Default Annotations are not editable for foreign models. Load model from a collection to save your
-  annotations to make them visible for others.
+  annotations to make them visible for others. If you are the owner of this model do not load it
+  from a collection to edit the default Annotations.
 </mat-card>
 
 <mat-card *ngIf="isAnnotatingAllowed && !annotationService.annotations.length">
