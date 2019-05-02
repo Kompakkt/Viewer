@@ -963,9 +963,11 @@ export class AnnotationService {
         if (this.userdataService.isModelOwner && !this.processingService.isCollectionLoaded ||
           this.isDefaultModelLoaded) {
           this.annotationMode(true);
+          this.isAnnotatingAllowed = true;
           this.annnotatingAllowed.emit(true);
         } else {
           this.annotationMode(false);
+          this.isAnnotatingAllowed = false;
           this.annnotatingAllowed.emit(false);
         }
       }
