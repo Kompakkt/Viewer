@@ -38,6 +38,9 @@ export class AnnotationsEditorComponent implements OnInit {
   ngOnInit() {
 
     this.isDefaultAnnotationsSource = true;
+    this.isCollectionLoaded = this.processingService.isCollectionLoaded;
+    this.isDefaultModelLoaded = this.processingService.isDefaultModelLoaded;
+    this.isAnnotatingAllowed = this.annotationService.isAnnotatingAllowed;
 
     this.processingService.collectionLoaded.subscribe(isLoaded => {
       this.isCollectionLoaded = isLoaded;
