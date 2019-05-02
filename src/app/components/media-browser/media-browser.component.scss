@@ -1,5 +1,9 @@
-:host {
+#media-browser {
   display: block;
+}
+
+#media-browser mat-form-field {
+  margin-right: 5px;
 }
 
 .collection-object {
@@ -11,9 +15,12 @@
 .btn-add-medium {
   position: absolute;
   margin-top: -35px;
+  margin-left: -10px;
   cursor: pointer;
 }
 
-:host mat-form-field {
-  margin-right: 5px;
+#external-image h3,
+#collection-objects h3 {
+  font-size: 1rem;
+  font-weight: lighter;
 }

@@ -11,16 +11,10 @@
 
 <div mat-dialog-content>
 
-  <h3>Description</h3>
-
   <markdown *ngIf="!editMode"
             [data]="data.content"></markdown>
 
-  <mat-icon id="add-medium"
-            *ngIf="editMode"
-            (click)="showMediaBrowser = !showMediaBrowser">add_photo_alternate</mat-icon>
-
-  <app-media-browser *ngIf="editMode && showMediaBrowser"
+  <app-media-browser *ngIf="editMode"
                      (addMedia)="addMedium($event)"></app-media-browser>
 
   <mat-form-field *ngIf="editMode">
@@ -33,7 +27,7 @@
               cdkAutosizeMinRows="1"
               name="description"
               type="text"
-              placeholder=""
+              placeholder="Description"
               [(ngModel)]="data.content">
       </textarea>
   </mat-form-field>
