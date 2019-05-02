@@ -481,8 +481,8 @@ export class AnnotationService {
         this.annotations.push(annotation);
         this.drawMarker(annotation);
       }
-      this.selectedAnnotation.next(this.annotations[this.annotations.length - 1]._id);
-      this.editModeAnnotation.next(this.annotations[this.annotations.length - 1]._id);
+      this.selectedAnnotation.next(annotation._id);
+      this.editModeAnnotation.next(annotation._id);
       this.defaultAnnotationsSorted.push(annotation);
       return;
     }
