@@ -46,7 +46,9 @@ export class AnnotationComponentForEditorComponent extends AnnotationComponent {
         preview: detailScreenshot,
       };
 
-    });
+      this.annotationService.updateAnnotation(this.annotation);
+
+      });
   }
 
   public changeOpenPopup() {
