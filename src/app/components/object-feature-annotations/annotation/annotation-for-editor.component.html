@@ -26,11 +26,6 @@
                 (click)="showMediaBrowser = !showMediaBrowser">add_photo_alternate
       </mat-icon>
 
-      <app-media-browser *ngIf="isEditMode && showMediaBrowser"
-                         (addMedia)="addMedium($event)">
-
-      </app-media-browser>
-
       <markdown id="annotation-content"
                 *ngIf="!isEditMode"
                 [data]="annotation.body.content.description"></markdown>

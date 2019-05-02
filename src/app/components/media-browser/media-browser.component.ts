@@ -23,11 +23,12 @@ export class MediaBrowserComponent implements OnInit {
   ngOnInit() {
     this.processingService.Observables.actualCollection.subscribe(actualCollection => {
       this.objects = actualCollection;
-      console.log(this.objects);
     });
   }
 
   addObject(adress, text) {
+
+    this.showMediaBrowser = false;
 
     this.addMedia.emit({
       url: adress,

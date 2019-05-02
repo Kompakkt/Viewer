@@ -19,8 +19,6 @@ export class DialogAnnotationEditorComponent {
   public labelMode = 'edit';
   public labelModeText = 'Edit';
 
-  public showMediaBrowser = false;
-
   constructor(public dialogRef: MatDialogRef<DialogAnnotationEditorComponent>,
               @Inject(MAT_DIALOG_DATA) public data: IDialogData) {
   }
