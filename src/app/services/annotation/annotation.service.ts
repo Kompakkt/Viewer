@@ -323,10 +323,14 @@ export class AnnotationService {
       if (annotation._id) {
         if (!annotation.target.source.relatedCompilation ||
           annotation.target.source.relatedCompilation === '') {
+          if (annotation.target.source.relatedModel === this.currentModel._id) {
           this.defaultAnnotations.push(annotation);
+          }
         } else {
           if (this.currentCompilation._id) {
-            this.collectionAnnotations.push(annotation);
+            if (annotation.target.source.relatedModel === this.currentModel._id) {
+              this.collectionAnnotations.push(annotation);
+            }
           }
         }
       }
