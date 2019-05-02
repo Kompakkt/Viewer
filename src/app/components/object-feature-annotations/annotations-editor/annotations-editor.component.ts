@@ -25,6 +25,7 @@ export class AnnotationsEditorComponent implements OnInit {
   public isAnnotatingAllowed: boolean;
   public isBroadcastingAllowed: boolean;
   public isBroadcasting: boolean;
+  public isCollectionOwner: boolean;
 
   // internal
   public isDefaultAnnotationsSource: boolean;
@@ -41,6 +42,11 @@ export class AnnotationsEditorComponent implements OnInit {
     this.isCollectionLoaded = this.processingService.isCollectionLoaded;
     this.isDefaultModelLoaded = this.processingService.isDefaultModelLoaded;
     this.isAnnotatingAllowed = this.annotationService.isAnnotatingAllowed;
+    this.isCollectionOwner = this.userDataService.isCollectionOwner;
+
+    this.userDataService.collectionOwner.subscribe(isOwner => {
+      this.isCollectionOwner = isOwner;
+    });
 
     this.processingService.collectionLoaded.subscribe(isLoaded => {
       this.isCollectionLoaded = isLoaded;
