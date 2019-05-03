@@ -41,7 +41,6 @@ export class AnnotationService {
   public defaultAnnotationsSorted: IAnnotation[];
   public collectionAnnotationsSorted: IAnnotation[];
 
-  private unsortedAnnotations: IAnnotation[];
   private pouchDBAnnotations: IAnnotation[];
   private serverAnnotations: IAnnotation[];
   private currentModel: IModel;
@@ -138,11 +137,6 @@ export class AnnotationService {
     // Model relevant sind, zu Beginn also erstmal keine
     this.annotations = [];
 
-    // Hier werden die Annotationen unsortiert rein geworfen,
-    // wenn sie aus den verschiedenen Quellen geladen und aktualisiert wurden
-    // Dieses Array erzeugt keine visuellen Elemente
-    this.unsortedAnnotations = [];
-
     // Annnotationen aus PouchDB
     this.pouchDBAnnotations = [];
 
@@ -167,7 +161,6 @@ export class AnnotationService {
       await this.getAnnotationsfromLocalDB();
       await this.updateLocalDB();
       await this.updateAnnotationList();
-      await this.splitDefaultCollection();
       await this.sortAnnotationsDefault();
       await this.sortAnnotationsCollection();
     } else {
@@ -232,6 +225,7 @@ export class AnnotationService {
   }
 
   private async updateAnnotationList() {
+    const unsorted: IAnnotation[] = []
     // Durch alle Annotationen der lokalen DB
     this.pouchDBAnnotations.forEach(annotation => {
       const isLastModifiedByMe = annotation.lastModifiedBy._id
@@ -255,7 +249,7 @@ export class AnnotationService {
                 this.dataService.updateAnnotation(serverAnnotation);
                 this.pouchDBAnnotations
                   .splice(this.pouchDBAnnotations.findIndex(ann => ann._id === annotation._id), 1, serverAnnotation);
-                this.unsortedAnnotations.push(serverAnnotation);
+                unsorted.push(serverAnnotation);
               }
 
               if (serverAnnotation.lastModificationDate < annotation.lastModificationDate) {
@@ -263,11 +257,11 @@ export class AnnotationService {
                 this.mongo.updateAnnotation(annotation);
                 this.serverAnnotations.splice(this.pouchDBAnnotations
                   .findIndex(ann => ann._id === serverAnnotation._id), 1, annotation);
-                this.unsortedAnnotations.push(annotation);
+                unsorted.push(annotation);
               }
             } else {
               // Server und LocalDB identisch
-              this.unsortedAnnotations.push(annotation);
+              unsorted.push(annotation);
             }
 
             // Wenn sie nicht gefunden wurde: Annotation existiert nicht auf dem Server,
@@ -283,7 +277,7 @@ export class AnnotationService {
             // Update Server
             this.mongo.updateAnnotation(annotation);
             this.serverAnnotations.push(annotation);
-            this.unsortedAnnotations.push(annotation);
+            unsorted.push(annotation);
           } else {
             // Nicht local last editor === creator === ich
             // Annotation local löschen
@@ -300,7 +294,7 @@ export class AnnotationService {
           // Update Server
           this.mongo.updateAnnotation(annotation);
           this.serverAnnotations.push(annotation);
-          this.unsortedAnnotations.push(annotation);
+          unsorted.push(annotation);
         } else {
           // Nicht local last editor === creator === ich
           // Annotation local löschen
@@ -310,16 +304,18 @@ export class AnnotationService {
       }
     });
 
-    console.log('UpdatedAnnotations', this.unsortedAnnotations);
+    console.log('UpdatedAnnotations', unsorted);
+    await this.splitDefaultCollection(unsorted);
   }
 
-  private async splitDefaultCollection() {
-    this.unsortedAnnotations.forEach(annotation => {
-      if (annotation._id) {
+  private async splitDefaultCollection(annotations: IAnnotation[]) {
+    annotations
+      .filter(annotation => annotation._id)
+      .forEach(annotation => {
         if (!annotation.target.source.relatedCompilation ||
           annotation.target.source.relatedCompilation === '') {
           if (annotation.target.source.relatedModel === this.currentModel._id) {
-          this.defaultAnnotationsSorted.push(annotation);
+            this.defaultAnnotationsSorted.push(annotation);
           }
         } else {
           if (this.currentCompilation._id) {
@@ -328,8 +324,7 @@ export class AnnotationService {
             }
           }
         }
-      }
-    });
+      });
     console.log('splitDefaultCollection', this.defaultAnnotationsSorted, this.collectionAnnotationsSorted);
   }
 
