@@ -487,7 +487,6 @@ export class AnnotationService {
     }
 
     this.mongo.updateAnnotation(annotation)
-      .toPromise()
       .then((resultAnnotation: IAnnotation) => {
         console.log('Die result Anno:', resultAnnotation);
         // MongoDB hat funktioniert
@@ -552,7 +551,6 @@ export class AnnotationService {
     }
 
     this.mongo.updateAnnotation(annotation)
-      .toPromise()
       .then((resultAnnotation: IAnnotation) => {
         // MongoDB hat funktioniert
         // MongoDB-Eintrag in PouchDB
@@ -654,7 +652,6 @@ export class AnnotationService {
     } else {
 
       this.mongo.deleteRequest(annotationId, 'annotation', username, password)
-        .toPromise()
         .then((result: any) => {
           if (result.status === 'ok') {
             this.message.info('Deleted from Server');
@@ -774,24 +771,23 @@ export class AnnotationService {
 
     const dialogRef = this.dialog.open(DialogShareAnnotationComponent, dialogConfig);
     dialogRef.afterClosed()
-      .subscribe(data => {
-        if (data.status === true) {
-          const copyAnnotation = this.createCopyOfAnnotation(annotation, data.collectionId, data.annotationListLength);
-
-          this.mongo.updateAnnotation(copyAnnotation)
-            .subscribe(result => {
-              console.log('Status1: ', result);
-              if (result.status === 'ok') {
-                this.message.error('Annotation is shared to Collection with id: ' + data.collectionId);
-              } else {
-                console.log('Status: ', result);
-              }
-            },         error => {
-              this.message.error('Annotation can not be shared.');
-            });
-        } else {
-          this.message.error('Annotation has not been shared.');
+      .toPromise()
+      .then(data => {
+        if (data.status !== true) {
+          return this.message.error('Annotation has not been shared.');
         }
+        const copyAnnotation =
+          this.createCopyOfAnnotation(annotation, data.collectionId, data.annotationListLength);
+
+        this.mongo.updateAnnotation(copyAnnotation)
+          .then(result => {
+            if (result.status === 'ok') {
+              this.message.info(`Annotation is shared to Collection with id: ${data.collectionId}`);
+            } else {
+              console.log('Status:', result);
+            }
+          })
+          .catch(() => this.message.error('Annotation can not be shared.'));
       });
   }
 

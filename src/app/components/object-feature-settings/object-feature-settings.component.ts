@@ -113,8 +113,8 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   public showNextAlertFirstStep() {
     const dialogRef = this.dialog.open(DialogMeshsettingsComponent);
 
-    dialogRef.afterClosed().subscribe(finish => {
-
+    dialogRef.afterClosed()
+      .subscribe(finish => {
       if (finish) {
         this.resetHelpers();
         this.stepper.selected.completed = true;
@@ -337,32 +337,40 @@ export class ObjectFeatureSettingsComponent implements OnInit {
     this.activeModel.settings = settings;
 
     if (!this.isDefault) {
-      this.mongohandlerService.updateSettings(this.activeModel._id, settings).subscribe(result => {
-        console.log(result);
+      this.mongohandlerService
+        .updateSettings(this.activeModel._id, settings)
+        .then(result => {
+          console.log(result);
 
-        if (this.initialSettingsMode) {
+          if (this.initialSettingsMode) {
 
-          this.initialSettingsMode = false;
-          this.modelSettingsService.decomposeAfterSetting();
-          // allow Annotations
-          this.overlayService.deactivateMeshSettings();
+            this.initialSettingsMode = false;
+            this.modelSettingsService.decomposeAfterSetting();
+            // allow Annotations
+            this.overlayService.deactivateMeshSettings();
 
-          this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
-            this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
-        }
-      });
+            this.modelSettingsService.loadSettings(
+              this.activeModel.settings.scale,
+              this.activeModel.settings.rotation.x,
+              this.activeModel.settings.rotation.y,
+              this.activeModel.settings.rotation.z);
+          }
+        });
     }
   }
 
   private async createMissingInitialDefaultScreenshot() {
-    await new Promise<string>((resolve, reject) => this.babylonService.createPreviewScreenshot(400).then(screenshot => {
-      this.preview = screenshot;
-      this.activeModel.settings.preview = screenshot;
-      resolve(screenshot);
-    }, error => {
-      this.message.error(error);
-      reject(error);
-    }));
+    await new Promise<string>((resolve, reject) =>
+      this.babylonService.createPreviewScreenshot(400)
+        .then(screenshot => {
+          this.preview = screenshot;
+          this.activeModel.settings.preview = screenshot;
+          resolve(screenshot);
+        })
+        .catch(error => {
+          this.message.error(error);
+          reject(error);
+        }));
   }
 
   async backToDefault() {
