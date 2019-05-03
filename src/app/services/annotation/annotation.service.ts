@@ -282,18 +282,13 @@ export class AnnotationService {
   private async splitDefaultCollection(annotations: IAnnotation[]) {
     annotations
       .filter(annotation => annotation._id)
+      .filter(annotation => annotation.target.source.relatedModel === this.currentModel._id)
       .forEach(annotation => {
         if (!annotation.target.source.relatedCompilation ||
           annotation.target.source.relatedCompilation === '') {
-          if (annotation.target.source.relatedModel === this.currentModel._id) {
-            this.defaultAnnotationsSorted.push(annotation);
-          }
-        } else {
-          if (this.currentCompilation._id) {
-            if (annotation.target.source.relatedModel === this.currentModel._id) {
-              this.collectionAnnotationsSorted.push(annotation);
-            }
-          }
+          this.defaultAnnotationsSorted.push(annotation);
+        } else if (this.currentCompilation._id) {
+          this.collectionAnnotationsSorted.push(annotation);
         }
       });
     console.log('splitDefaultCollection', this.defaultAnnotationsSorted, this.collectionAnnotationsSorted);
