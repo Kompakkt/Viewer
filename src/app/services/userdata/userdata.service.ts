@@ -1,6 +1,6 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
 
-import {IAnnotation, ICompilation, ILoginData, IModel, IUserData} from '../../interfaces/interfaces';
+import {IAnnotation, ICompilation, ILoginData, IModel, IUserData, ILDAPData} from '../../interfaces/interfaces';
 import {MessageService} from '../message/message.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
 import {ProcessingService} from '../processing/processing.service';
@@ -21,7 +21,7 @@ export class UserdataService {
   public userOwnedFinishedModels: IModel[] = [];
   public userOwnedAnnotations: IAnnotation[] = [];
 
-  public currentUserData: IUserData = {
+  public currentUserData: IUserData | ILDAPData = {
     fullname: 'Guest',
     username: 'guest',
     _id: 'guest',
@@ -43,6 +43,11 @@ export class UserdataService {
   constructor(private processingService: ProcessingService,
               private mongoService: MongohandlerService,
               private message: MessageService) {
+    // this.currentUserData can either be IUserData or ILDAPData, so check if it's ILDAPData
+    const isLDAPUser = (obj: any): obj is ILDAPData => {
+      return obj.data !== undefined;
+    };
+
     this.getUserData()
       .then(() => console.log('Logged in user with sessionID cookie', this.currentUserData))
       .catch(() => console.log('No session cookie. User not logged in'));
@@ -72,19 +77,11 @@ export class UserdataService {
     this.processingService.Observables.actualCollection.subscribe(actualCollection => {
       if (!actualCollection) return;
       if (actualCollection._id && actualCollection.relatedOwner) {
-        if (actualCollection.relatedOwner._id && this.loggedIn && this.currentUserData._id) {
-          if (this.currentUserData._id !== 'guest') {
-            if (actualCollection.relatedOwner._id === this.currentUserData._id) {
-              this.isCollectionOwner = true;
-            } else {
-              this.isCollectionOwner = false;
-            }
-          } else {
-            this.isCollectionOwner = false;
-          }
-        } else {
-          this.isCollectionOwner = false;
-        }
+        this.isCollectionOwner =
+          (isLDAPUser(this.currentUserData) && this.currentUserData.data.compilation)
+            ? this.currentUserData.data.compilation
+              .find((comp: ICompilation) => comp._id === actualCollection._id) !== undefined
+            : false;
       } else {
         this.isCollectionOwner = false;
       }
