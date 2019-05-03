@@ -149,8 +149,12 @@ export class AnnotationService {
     // Beim Laden eines Modells, werden alle in der PuchDB vorhandenen Annotationen,
     // auf dem Server vorhandenen Anntoatationen geladen
     if (!this.isDefaultModelLoaded) {
-      const serverAnnotations = this.getAnnotationsfromServerDB();
-      const pouchAnnotations = await this.getAnnotationsfromLocalDB();
+      // Filter null/undefined annotations
+      const serverAnnotations = this.getAnnotationsfromServerDB()
+        .filter(annotation => annotation && annotation._id && annotation.lastModificationDate);
+      const pouchAnnotations = (await this.getAnnotationsfromLocalDB())
+        .filter(annotation => annotation && annotation._id && annotation.lastModificationDate);
+      // Update and sort local
       await this.updateLocalDB(pouchAnnotations, serverAnnotations);
       const unsorted = await this.updateAnnotationList(pouchAnnotations, serverAnnotations);
       await this.splitDefaultCollection(unsorted);
@@ -225,58 +229,34 @@ export class AnnotationService {
         === this.userdataService.currentUserData._id;
 
       // Finde die Annotaion in den Server Annotationen
-      if (annotation && serverAnnotations) {
-        const serverAnnotation = serverAnnotations
-          .find(_serverAnnotation => _serverAnnotation._id === annotation._id);
-        // Wenn sie gefunden wurde aktuellere speichern lokal bzw. server
+      const serverAnnotation = serverAnnotations
+        .find(_serverAnnotation => _serverAnnotation._id === annotation._id);
+      // Wenn sie gefunden wurde aktuellere speichern lokal bzw. server
 
-        if (serverAnnotation) {
-          if (annotation.lastModificationDate && serverAnnotation.lastModificationDate) {
-            // vergleichen welche aktueller ist
-            if (annotation.lastModificationDate !== serverAnnotation.lastModificationDate) {
-
-              if (annotation.lastModificationDate < serverAnnotation.lastModificationDate) {
-                // Update local DB
-                await this.dataService.updateAnnotation(serverAnnotation);
-                localAnnotations
-                  .splice(localAnnotations.findIndex(ann => ann._id === annotation._id), 1, serverAnnotation);
-                unsorted.push(serverAnnotation);
-              }
-
-              if (serverAnnotation.lastModificationDate < annotation.lastModificationDate) {
-                // Update Server
-                this.mongo.updateAnnotation(annotation);
-                serverAnnotations.splice(localAnnotations
-                  .findIndex(ann => ann._id === serverAnnotation._id), 1, annotation);
-                unsorted.push(annotation);
-              }
-            } else {
-              // Server und LocalDB identisch
-              unsorted.push(annotation);
-            }
-
-            // Wenn sie nicht gefunden wurde: Annotation existiert nicht auf dem Server,
-            // aber in der Local DB
-            // -> wurde gelöscht oder
-            // noch nicht gespeichert
-          }
-        } else {
-          // Nicht in Server Annos gefunden
-          // Checke, ob local last editor === creator === ich
-          if (isLastModifiedByMe && isCreatedByMe) {
-            // Annotation auf Server speichern
+      if (serverAnnotation) {
+        if (!annotation.lastModificationDate || !serverAnnotation.lastModificationDate) continue;
+        // vergleichen welche aktueller ist
+        const isSame = annotation.lastModificationDate === serverAnnotation.lastModificationDate;
+        const isLocalNewer = annotation.lastModificationDate > serverAnnotation.lastModificationDate;
+        if (isLocalNewer || isSame) {
+          if (!isSame) {
             // Update Server
             this.mongo.updateAnnotation(annotation);
-            serverAnnotations.push(annotation);
-            unsorted.push(annotation);
-          } else {
-            // Nicht local last editor === creator === ich
-            // Annotation local löschen
-            await this.dataService.deleteAnnotation(annotation._id);
-            localAnnotations.splice(localAnnotations.findIndex(ann => ann._id === annotation._id));
+            serverAnnotations.splice(localAnnotations
+              .findIndex(ann => ann._id === serverAnnotation._id), 1, annotation);
           }
-
+          unsorted.push(annotation);
+        } else {
+          // Update local DB
+          await this.dataService.updateAnnotation(serverAnnotation);
+          localAnnotations
+            .splice(localAnnotations.findIndex(ann => ann._id === annotation._id), 1, serverAnnotation);
+          unsorted.push(serverAnnotation);
         }
+        // Wenn sie nicht gefunden wurde: Annotation existiert nicht auf dem Server,
+        // aber in der Local DB
+        // -> wurde gelöscht oder
+        // noch nicht gespeichert
       } else {
         // Nicht in Server Annos gefunden
         // Checke, ob local last editor === creator === ich
