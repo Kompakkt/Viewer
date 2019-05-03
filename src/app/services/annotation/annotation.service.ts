@@ -618,34 +618,11 @@ export class AnnotationService {
   }
 
   public async changedRankingPositions(annotationArray: IAnnotation[]) {
-
-    let i = 0;
-    for (const annotation of annotationArray) {
-      if (annotation._id) {
-        if (annotation.ranking !== i + 1) {
-          annotation.ranking = i + 1;
-          this.updateAnnotation(annotation);
-        }
-        i++;
-      }
+    for (let i = 0; i < annotationArray.length; i++) {
+      const annotation = annotationArray[i];
+      if (!annotation._id || annotation.ranking === i + 1) continue;
+      await this.updateAnnotation({ ...annotation, ranking: i + 1 });
     }
-
-    // Zoe sagt: ist wahrscheinlich überflüssig, wird durch Update erledigt.
-    // 1.1.3
-    // - Ranking der Annotation ändern
-    /*
-    if (this.inSocket) {
-      const IdArray = new Array();
-      const RankingArray = new Array();
-      for (const annotation of this.annotations) {
-        IdArray.push(annotation._id);
-        RankingArray.push(annotation.ranking);
-      }
-      // Send ID's & new Ranking of changed annotations
-      if (this.inSocket) {
-        this.socket.emit('changeRanking', {oldRanking: IdArray, newRanking: RankingArray});
-      }
-    }*/
   }
 
   private async fetchAnnotations(model: string, compilation?: string): Promise<IAnnotation[]> {
