@@ -375,12 +375,13 @@ export class ProcessingService {
   public updateModelQuality(quality: string) {
     if (this.quality !== quality) {
       this.quality = quality;
+      const model = this.getCurrentModel();
+
       if (!model || !model.processed) return;
-      if (model.processed[this.quality] !== undefined) {
+      if (model && model.processed[this.quality] !== undefined) {
         this.isLoaded = false;
         this.loaded.emit(false);
-        const model = this.getCurrentModel();
-        this.loadModel(model._id === 'Cube' ? this.defaultModel : model ? model : undefined, model._id === 'Cube' ? '' : undefined)
+        this.loadModel(model._id === 'Cube' ? this.defaultModel : model, model._id === 'Cube' ? '' : undefined)
           .then(result => {
             this.isLoaded = true;
             this.loaded.emit(true);
