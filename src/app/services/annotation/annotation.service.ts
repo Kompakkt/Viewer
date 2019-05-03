@@ -41,8 +41,6 @@ export class AnnotationService {
   public defaultAnnotationsSorted: IAnnotation[];
   public collectionAnnotationsSorted: IAnnotation[];
 
-  private pouchDBAnnotations: IAnnotation[];
-  private serverAnnotations: IAnnotation[];
   private currentModel: IModel;
   public currentCompilation: ICompilation;
   private actualModelMeshes: BABYLON.Mesh[] = [];
@@ -137,12 +135,6 @@ export class AnnotationService {
     // Model relevant sind, zu Beginn also erstmal keine
     this.annotations = [];
 
-    // Annnotationen aus PouchDB
-    this.pouchDBAnnotations = [];
-
-    // Annotationen, die auf dem Server gespeichert sind
-    this.serverAnnotations = [];
-
     // Annotationen, die nicht zu einer Collection gehören
     this.defaultAnnotationsSorted = [];
 
@@ -157,12 +149,12 @@ export class AnnotationService {
     // Beim Laden eines Modells, werden alle in der PuchDB vorhandenen Annotationen,
     // auf dem Server vorhandenen Anntoatationen geladen
     if (!this.isDefaultModelLoaded) {
-      await this.getAnnotationsfromServerDB();
-      await this.getAnnotationsfromLocalDB();
-      await this.updateLocalDB();
-      await this.updateAnnotationList();
-      await this.sortAnnotationsDefault();
-      await this.sortAnnotationsCollection();
+      const serverAnnotations = this.getAnnotationsfromServerDB();
+      const pouchAnnotations = await this.getAnnotationsfromLocalDB();
+      await this.updateLocalDB(pouchAnnotations, serverAnnotations);
+      const unsorted = await this.updateAnnotationList(pouchAnnotations, serverAnnotations);
+      await this.splitDefaultCollection(unsorted);
+      await this.sortAnnotations();
     } else {
       this.defaultAnnotationsSorted.push(this.createDefaultAnnotation());
       this.selectedAnnotation.next(this.defaultAnnotationsSorted[this.defaultAnnotationsSorted.length - 1]._id);
@@ -180,62 +172,61 @@ export class AnnotationService {
     this.toggleAnnotationSource(false, true);
   }
 
-  private async getAnnotationsfromServerDB() {
+  private getAnnotationsfromServerDB() {
+    const serverAnnotations: IAnnotation[] = [];
     // Annotationen vom Server des aktuellen Modells...
     if (this.currentModel.annotationList) {
-      this.currentModel.annotationList.forEach(annotation => {
-        if (annotation && annotation._id) {
-          this.serverAnnotations.push(annotation);
-        }
-      });
+      this.currentModel.annotationList
+        .filter(annotation => annotation && annotation._id)
+        .forEach((annotation: IAnnotation) => serverAnnotations.push(annotation));
     }
     // ...und der aktuellen Compilation (if existing)
     if (this.isCollection && this.currentCompilation.annotationList) {
-      this.currentCompilation.annotationList.forEach(annotation => {
-        if (annotation && annotation._id) {
-          this.serverAnnotations.push(annotation);
-        }
-      });
+      this.currentCompilation.annotationList
+        .filter(annotation => annotation && annotation._id)
+        .forEach((annotation: IAnnotation) => serverAnnotations.push(annotation));
     }
-    console.log('getAnnotationsfromServerDB', this.serverAnnotations);
+    console.log('getAnnotationsfromServerDB', serverAnnotations);
+    return serverAnnotations;
   }
 
   private async getAnnotationsfromLocalDB() {
+    let pouchAnnotations: IAnnotation[] = await this.fetchAnnotations(this.currentModel._id);
     // Annotationen aus PouchDB des aktuellen Modells und der aktuellen Compilation (if existing)
-    this.pouchDBAnnotations = await this.fetchAnnotations(this.currentModel._id);
 
     if (this.isCollection) {
       const _compilationAnnotations = await this.fetchAnnotations(this.currentModel._id
         && this.currentCompilation._id);
-      this.pouchDBAnnotations = this.pouchDBAnnotations.concat(_compilationAnnotations);
+      pouchAnnotations = pouchAnnotations.concat(_compilationAnnotations);
     }
-    console.log('getAnnotationsfromLocalDB', this.pouchDBAnnotations);
+    console.log('getAnnotationsfromLocalDB', pouchAnnotations);
+    return pouchAnnotations;
   }
 
-  private async updateLocalDB() {
-    this.serverAnnotations.forEach(annotation => {
-      const localAnnotation = this.pouchDBAnnotations
+  private async updateLocalDB(localAnnotations: IAnnotation[], serverAnnotations: IAnnotation[]) {
+    for (const annotation of serverAnnotations) {
+      const localAnnotation = localAnnotations
         .find(_localAnnotation => _localAnnotation._id === annotation._id);
       if (!localAnnotation) {
-        this.dataService.updateAnnotation(annotation);
-        this.pouchDBAnnotations.push(annotation);
+        await this.dataService.updateAnnotation(annotation);
+        localAnnotations.push(annotation);
       }
-    });
-    console.log('updateLocalDB', this.pouchDBAnnotations);
+    }
+    console.log('updateLocalDB', localAnnotations);
   }
 
-  private async updateAnnotationList() {
-    const unsorted: IAnnotation[] = []
+  private async updateAnnotationList(localAnnotations: IAnnotation[], serverAnnotations: IAnnotation[]) {
+    const unsorted: IAnnotation[] = [];
     // Durch alle Annotationen der lokalen DB
-    this.pouchDBAnnotations.forEach(annotation => {
+    for (const annotation of localAnnotations) {
       const isLastModifiedByMe = annotation.lastModifiedBy._id
         === this.userdataService.currentUserData._id;
       const isCreatedByMe = annotation.creator._id
         === this.userdataService.currentUserData._id;
 
       // Finde die Annotaion in den Server Annotationen
-      if (annotation && this.serverAnnotations) {
-        const serverAnnotation = this.serverAnnotations
+      if (annotation && serverAnnotations) {
+        const serverAnnotation = serverAnnotations
           .find(_serverAnnotation => _serverAnnotation._id === annotation._id);
         // Wenn sie gefunden wurde aktuellere speichern lokal bzw. server
 
@@ -246,16 +237,16 @@ export class AnnotationService {
 
               if (annotation.lastModificationDate < serverAnnotation.lastModificationDate) {
                 // Update local DB
-                this.dataService.updateAnnotation(serverAnnotation);
-                this.pouchDBAnnotations
-                  .splice(this.pouchDBAnnotations.findIndex(ann => ann._id === annotation._id), 1, serverAnnotation);
+                await this.dataService.updateAnnotation(serverAnnotation);
+                localAnnotations
+                  .splice(localAnnotations.findIndex(ann => ann._id === annotation._id), 1, serverAnnotation);
                 unsorted.push(serverAnnotation);
               }
 
               if (serverAnnotation.lastModificationDate < annotation.lastModificationDate) {
                 // Update Server
                 this.mongo.updateAnnotation(annotation);
-                this.serverAnnotations.splice(this.pouchDBAnnotations
+                serverAnnotations.splice(localAnnotations
                   .findIndex(ann => ann._id === serverAnnotation._id), 1, annotation);
                 unsorted.push(annotation);
               }
@@ -276,13 +267,13 @@ export class AnnotationService {
             // Annotation auf Server speichern
             // Update Server
             this.mongo.updateAnnotation(annotation);
-            this.serverAnnotations.push(annotation);
+            serverAnnotations.push(annotation);
             unsorted.push(annotation);
           } else {
             // Nicht local last editor === creator === ich
             // Annotation local löschen
-            this.dataService.deleteAnnotation(annotation._id);
-            this.pouchDBAnnotations.splice(this.pouchDBAnnotations.findIndex(ann => ann._id === annotation._id));
+            await this.dataService.deleteAnnotation(annotation._id);
+            localAnnotations.splice(localAnnotations.findIndex(ann => ann._id === annotation._id));
           }
 
         }
@@ -293,19 +284,19 @@ export class AnnotationService {
           // Annotation auf Server speichern
           // Update Server
           this.mongo.updateAnnotation(annotation);
-          this.serverAnnotations.push(annotation);
+          serverAnnotations.push(annotation);
           unsorted.push(annotation);
         } else {
           // Nicht local last editor === creator === ich
           // Annotation local löschen
-          this.dataService.deleteAnnotation(annotation._id);
-          this.pouchDBAnnotations.splice(this.pouchDBAnnotations.findIndex(ann => ann._id === annotation._id));
+          await this.dataService.deleteAnnotation(annotation._id);
+          localAnnotations.splice(localAnnotations.findIndex(ann => ann._id === annotation._id));
         }
       }
-    });
+    }
 
     console.log('UpdatedAnnotations', unsorted);
-    await this.splitDefaultCollection(unsorted);
+    return unsorted;
   }
 
   private async splitDefaultCollection(annotations: IAnnotation[]) {
@@ -328,22 +319,19 @@ export class AnnotationService {
     console.log('splitDefaultCollection', this.defaultAnnotationsSorted, this.collectionAnnotationsSorted);
   }
 
-  private async sortAnnotationsDefault() {
+  private async sortAnnotations() {
     await this.defaultAnnotationsSorted.sort((leftSide, rightSide): number =>
         (+leftSide.ranking === +rightSide.ranking) ? 0
           : (+leftSide.ranking < +rightSide.ranking) ? -1 : 1);
+    await this.changedRankingPositions(this.defaultAnnotationsSorted);
 
-    this.changedRankingPositions(this.defaultAnnotationsSorted);
-  }
-
-  private async sortAnnotationsCollection() {
     await this.collectionAnnotationsSorted.sort((leftSide, rightSide): number =>
         (+leftSide.ranking === +rightSide.ranking) ? 0
           : (+leftSide.ranking < +rightSide.ranking) ? -1 : 1);
     await this.changedRankingPositions(this.collectionAnnotationsSorted);
+
     // TODO move to load function
     this.socketService.initialAnnotationsForSocket(this.collectionAnnotationsSorted);
-
   }
 
   // Die Annotationsfunktionalität wird zum aktuellen Modell hinzugefügt
