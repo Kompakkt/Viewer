@@ -66,10 +66,6 @@ export class MongohandlerService {
     return this.get(`api/v1/get/ldata`);
   }
 
-  public async getUnusedObjectId(): Promise<string> {
-    return this.get(`api/v1/get/id`);
-  }
-
   // POSTs
   public updateSettings(identifier: string, settings: any): Observable<any> {
     return this.post(`api/v1/post/settings/${identifier}`, settings);

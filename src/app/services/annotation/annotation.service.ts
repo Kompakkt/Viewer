@@ -393,13 +393,8 @@ export class AnnotationService {
     const camera = this.cameraService.getActualCameraPosAnnotation();
 
     this.babylonService.createPreviewScreenshot(400)
-      .then(async detailScreenshot => {
-        // TODO: Detect if user is offline
+      .then(detailScreenshot => {
         const generatedId = this.mongo.generateObjectId();
-        /* TODO check id from server is needed
-        await this.mongo.getUnusedObjectId()
-          .then(id => generatedId = id)
-          .catch(e => console.error(e));*/
 
         const personName = this.userdataService.currentUserData.fullname;
         const personID = this.userdataService.currentUserData._id;
@@ -804,11 +799,7 @@ export class AnnotationService {
                                 annotationLength: number): any {
     console.log('Erstelle die Kopie');
 
-    let generatedId = this.mongo.generateObjectId();
-    // TODO async
-    this.mongo.getUnusedObjectId()
-      .then(id => generatedId = id)
-      .catch(e => console.error(e));
+    const generatedId = this.mongo.generateObjectId();
 
     return {
       validated: false,
