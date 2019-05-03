@@ -41,8 +41,6 @@ export class AnnotationService {
   public defaultAnnotationsSorted: IAnnotation[];
   public collectionAnnotationsSorted: IAnnotation[];
 
-  private defaultAnnotations: IAnnotation[];
-  private collectionAnnotations: IAnnotation[];
   private unsortedAnnotations: IAnnotation[];
   private pouchDBAnnotations: IAnnotation[];
   private serverAnnotations: IAnnotation[];
@@ -152,11 +150,9 @@ export class AnnotationService {
     this.serverAnnotations = [];
 
     // Annotationen, die nicht zu einer Collection gehören
-    this.defaultAnnotations = [];
     this.defaultAnnotationsSorted = [];
 
     // Annotationen, die zu einer Collection gehören
-    this.collectionAnnotations = [];
     this.collectionAnnotationsSorted = [];
 
     this.selectedAnnotation.next('');
@@ -175,7 +171,6 @@ export class AnnotationService {
       await this.sortAnnotationsDefault();
       await this.sortAnnotationsCollection();
     } else {
-      this.defaultAnnotations = [];
       this.defaultAnnotationsSorted.push(this.createDefaultAnnotation());
       this.selectedAnnotation.next(this.defaultAnnotationsSorted[this.defaultAnnotationsSorted.length - 1]._id);
       this.socketService.initialAnnotationsForSocket(this.defaultAnnotationsSorted);
@@ -324,56 +319,32 @@ export class AnnotationService {
         if (!annotation.target.source.relatedCompilation ||
           annotation.target.source.relatedCompilation === '') {
           if (annotation.target.source.relatedModel === this.currentModel._id) {
-          this.defaultAnnotations.push(annotation);
+          this.defaultAnnotationsSorted.push(annotation);
           }
         } else {
           if (this.currentCompilation._id) {
             if (annotation.target.source.relatedModel === this.currentModel._id) {
-              this.collectionAnnotations.push(annotation);
+              this.collectionAnnotationsSorted.push(annotation);
             }
           }
         }
       }
     });
-    console.log('splitDefaultCollection', this.defaultAnnotations, this.collectionAnnotations);
+    console.log('splitDefaultCollection', this.defaultAnnotationsSorted, this.collectionAnnotationsSorted);
   }
 
   private async sortAnnotationsDefault() {
-
-    this.defaultAnnotationsSorted = this.defaultAnnotations;
-    this.defaultAnnotations = this.defaultAnnotationsSorted.slice(0);
-    this.defaultAnnotationsSorted.splice(0, this.defaultAnnotationsSorted.length);
-    this.defaultAnnotationsSorted = this.defaultAnnotations.slice(0);
-
-    await this.defaultAnnotationsSorted.sort((leftSide, rightSide): number => {
-      if (+leftSide.ranking < +rightSide.ranking) {
-        return -1;
-      }
-      if (+leftSide.ranking > +rightSide.ranking) {
-        return 1;
-      }
-      return 0;
-    });
+    await this.defaultAnnotationsSorted.sort((leftSide, rightSide): number =>
+        (+leftSide.ranking === +rightSide.ranking) ? 0
+          : (+leftSide.ranking < +rightSide.ranking) ? -1 : 1);
 
     this.changedRankingPositions(this.defaultAnnotationsSorted);
   }
 
   private async sortAnnotationsCollection() {
-
-    this.collectionAnnotationsSorted = this.collectionAnnotations;
-    this.collectionAnnotations = this.collectionAnnotationsSorted.slice(0);
-    this.collectionAnnotationsSorted.splice(0, this.collectionAnnotationsSorted.length);
-    this.collectionAnnotationsSorted = this.collectionAnnotations.slice(0);
-
-    await this.collectionAnnotationsSorted.sort((leftSide, rightSide): number => {
-      if (+leftSide.ranking < +rightSide.ranking) {
-        return -1;
-      }
-      if (+leftSide.ranking > +rightSide.ranking) {
-        return 1;
-      }
-      return 0;
-    });
+    await this.collectionAnnotationsSorted.sort((leftSide, rightSide): number =>
+        (+leftSide.ranking === +rightSide.ranking) ? 0
+          : (+leftSide.ranking < +rightSide.ranking) ? -1 : 1);
     await this.changedRankingPositions(this.collectionAnnotationsSorted);
     // TODO move to load function
     this.socketService.initialAnnotationsForSocket(this.collectionAnnotationsSorted);
@@ -551,11 +522,10 @@ export class AnnotationService {
     }
 
     this.mongo.updateAnnotation(annotation)
-      .then((resultAnnotation: IAnnotation) => {
+      .then(resultAnnotation => {
         // MongoDB hat funktioniert
         // MongoDB-Eintrag in PouchDB
         this.dataService.updateAnnotation(resultAnnotation);
-
         if (this.isannotationSourceCollection) {
           //    this.socketService.annotationForSocket(resultAnnotation, 'update');
           this.collectionAnnotationsSorted
