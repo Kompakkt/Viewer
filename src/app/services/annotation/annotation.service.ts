@@ -955,35 +955,16 @@ export class AnnotationService {
   }
 
   public setAnnotatingAllowance() {
-
-    if (this.isOpen && !this.isMeshSettingsMode) {
-      if (this.isCollectionInputSelected) {
-        this.annotationMode(true);
-        this.isAnnotatingAllowed = true;
-        this.annnotatingAllowed.emit(true);
-        this.socketService.setBroadcastingAllowance(true);
-      } else {
-        this.isDefaultModelLoaded ?
-          this.socketService.setBroadcastingAllowance(true) :
-          this.socketService.setBroadcastingAllowance(false);
-
-        if (this.userdataService.isModelOwner && !this.processingService.isCollectionLoaded ||
-          this.isDefaultModelLoaded) {
-          this.annotationMode(true);
-          this.isAnnotatingAllowed = true;
-          this.annnotatingAllowed.emit(true);
-        } else {
-          this.annotationMode(false);
-          this.isAnnotatingAllowed = false;
-          this.annnotatingAllowed.emit(false);
-        }
-      }
-    } else {
-      this.socketService.setBroadcastingAllowance(false);
-      this.isAnnotatingAllowed = false;
-      this.annotationMode(false);
-      this.annnotatingAllowed.emit(false);
+    let emitBool = false;
+    emitBool = (this.isOpen && !this.isMeshSettingsMode);
+    if (emitBool && !this.isCollectionInputSelected) {
+      emitBool = (this.userdataService.isModelOwner && !this.processingService.isCollectionLoaded ||
+        this.isDefaultModelLoaded);
     }
+    this.socketService.setBroadcastingAllowance(emitBool && this.isDefaultModelLoaded);
+    this.isAnnotatingAllowed = emitBool;
+    this.annotationMode(emitBool);
+    this.annnotatingAllowed.emit(emitBool);
   }
 
   public setCollectionInput(selected: boolean) {
