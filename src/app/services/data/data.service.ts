@@ -37,37 +37,37 @@ export class DataService {
     return annotationList;
   }
 
-  public putAnnotation(annotation: IAnnotation) {
+  public async putAnnotation(annotation: IAnnotation) {
     if (annotation._id === 'DefaultAnnotation') return;
-    this.pouchdb.put(annotation);
+    return this.pouchdb.put(annotation);
   }
 
-  public cleanAndRenewDatabase() {
-    this.pouchdb
+  public async cleanAndRenewDatabase() {
+    return this.pouchdb
       .destroy()
       .then(() => this.pouchdb = new PouchDB('annotationdb'));
   }
 
-  public deleteAnnotation(id: string) {
+  public async deleteAnnotation(id: string) {
     if (id === 'DefaultAnnotation') return;
-    this.pouchdb.get(id)
+    return this.pouchdb.get(id)
       .then(result => this.pouchdb.remove(result))
       .catch((error: any) => console.log('Failed removing annotation', error));
   }
 
-  public updateAnnotation(annotation: IAnnotation): void {
+  public async updateAnnotation(annotation: IAnnotation) {
     if (annotation._id === 'DefaultAnnotation') return;
 
-    this.pouchdb.get(annotation._id)
+    return this.pouchdb.get(annotation._id)
       .then(() => annotation)
       .catch(() => {
         this.pouchdb.put(annotation);
       });
   }
 
-  public updateAnnotationRanking(id: string, ranking: number) {
+  public async updateAnnotationRanking(id: string, ranking: number) {
     if (id === 'DefaultAnnotation') return;
-    this.pouchdb.get(id)
+    return this.pouchdb.get(id)
       .then((result: PouchDB.Core.IdMeta & IAnnotation & PouchDB.Core.GetMeta) => {
         result.ranking = ranking;
         this.pouchdb.put(result);
