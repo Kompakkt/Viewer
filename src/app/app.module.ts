@@ -48,7 +48,6 @@ import { ObjectFeatureMetadataComponent } from './components/object-feature-meta
 import { ObjectFeatureSettingsComponent } from './components/object-feature-settings/object-feature-settings.component';
 import { ObjectFeaturesComponent } from './components/object-features/object-features.component';
 import { SceneComponent } from './components/scene/scene.component';
-import { FilterAnnotationsPipe } from './pipes/filter-annotations.pipe';
 import {MediaTypePipe} from './pipes/media-type.pipe';
 
 @NgModule({
@@ -80,7 +79,6 @@ import {MediaTypePipe} from './pipes/media-type.pipe';
     DialogShareAnnotationComponent,
     DialogInviteBroadcastingComponent,
     MediaComponent,
-    FilterAnnotationsPipe,
   ],
   imports: [
     BrowserModule,

@@ -54,6 +54,9 @@ export class AnnotationService {
   private editModeAnnotation: BehaviorSubject<string> = new BehaviorSubject('');
   public isEditModeAnnotation = this.editModeAnnotation.asObservable();
 
+  private currentAnnotationSubject: BehaviorSubject<IAnnotation[]> = new BehaviorSubject([]);
+  public currentAnnotations = this.currentAnnotationSubject.asObservable();
+
   constructor(private babylonService: BabylonService,
               private dataService: DataService,
               private actionService: ActionService,
@@ -133,7 +136,18 @@ export class AnnotationService {
       && annotation.target.source.relatedCompilation.length > 0);
   }
 
+  private updateCurrentAnnotationsSubject() {
+    this.currentAnnotationSubject
+      .next((this.isannotationSourceCollection)
+        ? this.getCompilationAnnotations()
+        : this.getDefaultAnnotations());
+  }
+
   public getCurrentAnnotations() {
+    // This function should not be used in DOM
+    // If you need current annotations in DOM, subscribe to the
+    // currentAnnotations Observable using the async pipe
+    // e.g. (annotationService.currentAnnotations | async)
     return (this.isannotationSourceCollection)
       ? this.getCompilationAnnotations()
       : this.getDefaultAnnotations();
@@ -398,6 +412,8 @@ export class AnnotationService {
     this.annotations.push(newAnnotation);
     this.selectedAnnotation.next(newAnnotation._id);
     this.editModeAnnotation.next(newAnnotation._id);
+
+    this.updateCurrentAnnotationsSubject();
   }
 
   public updateAnnotation(annotation: IAnnotation) {
@@ -416,6 +432,8 @@ export class AnnotationService {
     this.annotations
       .splice(this.annotations
         .findIndex(ann => ann._id === annotation._id), 1, newAnnotation);
+
+    this.updateCurrentAnnotationsSubject();
   }
 
   public deleteAnnotation(annotation: IAnnotation) {
@@ -435,6 +453,8 @@ export class AnnotationService {
     } else {
       this.message.error('You are not the Owner of this Annotation.');
     }
+
+    this.updateCurrentAnnotationsSubject();
   }
 
   public deleteAnnotationFromServer(annotationId: string) {
@@ -491,6 +511,8 @@ export class AnnotationService {
       if (!annotation._id) continue;
       await this.updateAnnotation({...annotation, ranking: i - offset + 1});
     }
+
+    this.updateCurrentAnnotationsSubject();
   }
 
   private async fetchAnnotations(model: string, compilation?: string): Promise<IAnnotation[]> {

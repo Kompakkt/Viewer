@@ -1,5 +1,5 @@
 <mat-card
-  *ngIf="isAnnotatingAllowed && !annotationService.isCollectionInputSelected && !annotationService.getCurrentAnnotations().length">
+  *ngIf="isAnnotatingAllowed && !annotationService.isCollectionInputSelected && !(annotationService.currentAnnotations | async).length">
   All annotations here are default annotations and visible for everyone who can access the model. If you
   don't want that, load this model from a collection.
 </mat-card>
@@ -10,7 +10,7 @@
   from a collection to edit the default Annotations.
 </mat-card>
 
-<mat-card *ngIf="isAnnotatingAllowed && !annotationService.getCurrentAnnotations().length">
+<mat-card *ngIf="isAnnotatingAllowed && !(annotationService.currentAnnotations | async).length">
   To add annotations, simply double-click on the model.
 </mat-card>
 
@@ -19,7 +19,7 @@
      class="annotations-list"
      (cdkDropListDropped)="drop($event)">
   <app-annotation-for-editor class="annotation-box"
-                             *ngFor="let annotation of annotationService.annotations | filterAnnotations:annotationService.isCollectionInputSelected;"
+                             *ngFor="let annotation of (annotationService.currentAnnotations | async);"
                              [annotation]="annotation"
                              [cdkDragDisabled]="isCollectionLoaded ? !isCollectionOwner: !isAnnotatingAllowed"
                              cdkDrag cdkDragLockAxis="y"></app-annotation-for-editor>
@@ -27,7 +27,7 @@
 
 <div id="editor-footermenu">
 
-  <button *ngIf="annotationService.getCurrentAnnotations().length"
+  <button *ngIf="(annotationService.currentAnnotations | async).length"
           mat-icon-button
           matTooltip="Export Annotations to JSON"
           matTooltipPosition="below"
