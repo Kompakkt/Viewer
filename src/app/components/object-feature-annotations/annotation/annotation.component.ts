@@ -84,7 +84,6 @@ export class AnnotationComponent implements OnInit {
 
     this.annotationService.annnotatingAllowed.subscribe(allowed => {
       this.isAnnotatingAllowed = allowed;
-      console.log('Allowed', this.isAnnotatingAllowed);
     });
 
     this.socketService.inSocket.subscribe(inSocket => {
@@ -94,7 +93,6 @@ export class AnnotationComponent implements OnInit {
     this.annotationService.isEditModeAnnotation.subscribe(selectedEditAnno => {
       this.editModeAnnotation = selectedEditAnno;
       const isEditAnno = selectedEditAnno === this.annotation._id;
-      console.log(selectedEditAnno, this.annotation._id, isEditAnno);
       if (!isEditAnno && this.isEditMode) {
         this.isEditMode = false;
         this.annotationService.updateAnnotation(this.annotation);

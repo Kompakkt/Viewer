@@ -4,7 +4,7 @@ import {BehaviorSubject} from 'rxjs';
 import {ReplaySubject} from 'rxjs/internal/ReplaySubject';
 
 import {environment} from '../../../environments/environment';
-import {ICompilation, IModel} from '../../interfaces/interfaces';
+import {IAnnotation, ICompilation, IModel} from '../../interfaces/interfaces';
 import {ActionService} from '../action/action.service';
 import {BabylonService} from '../babylon/babylon.service';
 import {CameraService} from '../camera/camera.service';
@@ -27,6 +27,9 @@ export class ProcessingService {
     actualModel: new ReplaySubject<IModel>(),
     actualModelMeshes: new ReplaySubject<BABYLON.Mesh[]>(),
     actualCollection: new ReplaySubject<ICompilation | undefined>(),
+    // TODO
+    actualVideoSrc: new ReplaySubject<string>(),
+    actualMediaType: new ReplaySubject<string>(),
   };
 
   public Observables = {
@@ -35,6 +38,8 @@ export class ProcessingService {
     actualModel: this.Subjects.actualModel.asObservable(),
     actualModelMeshes: this.Subjects.actualModelMeshes.asObservable(),
     actualCollection: this.Subjects.actualCollection.asObservable(),
+    actualVideoSrc: this.Subjects.actualVideoSrc.asObservable(),
+    actualMediaType: this.Subjects.actualMediaType.asObservable(),
   };
 
   private isFirstLoad = true;
@@ -43,7 +48,9 @@ export class ProcessingService {
   private isLoaded = false;
   public isCollectionLoaded = false;
   public isDefaultModelLoaded = false;
+  //TODO
   public isFallbackModelLoaded = false;
+  public isVideo = false;
 
   @Output() showCatalogue: EventEmitter<boolean> = new EventEmitter();
   @Output() loggedIn: EventEmitter<boolean> = new EventEmitter();
@@ -52,6 +59,7 @@ export class ProcessingService {
   @Output() collectionLoaded: EventEmitter<boolean> = new EventEmitter();
   @Output() defaultModelLoaded: EventEmitter<boolean> = new EventEmitter();
   @Output() fallbackModelLoaded: EventEmitter<boolean> = new EventEmitter();
+  @Output() video: EventEmitter<boolean> = new EventEmitter();
 
   private baseUrl = `${environment.express_server_url}:${environment.express_server_port}/`;
   public quality = 'low';
@@ -288,6 +296,8 @@ export class ProcessingService {
     const fallBackURL = '';
     this.isFallbackModelLoaded = false;
     this.fallbackModelLoaded.emit(false);
+    this.isVideo = false;
+    this.video.emit(false);
 
     if (!this.loadingScreenHandler.isLoading && newModel.processed
       && newModel.mediaType) {
@@ -297,54 +307,67 @@ export class ProcessingService {
         switch (newModel.mediaType) {
           case 'model':
             await this.babylonService.loadModel(URL +
-              newModel.processed[this.quality].substring(0, newModel.processed[this.quality].lastIndexOf('/')) + '/',
-              newModel.processed[this.quality].replace(/^.*[\\\/]/, ''))
+              newModel.processed[this.quality].substring(0, newModel.processed[this.quality]
+                .lastIndexOf('/')) + '/',
+                                                newModel.processed[this.quality]
+              .replace(/^.*[\\\/]/, ''))
               .then(async model => {
                 // Warte auf Antwort von loadModel,
                 // da loadModel ein Promise<object> von ImportMeshAync übergibt
                 // model ist hier das neu geladene Model
                 this.updateActiveModel(newModel);
                 this.updateActiveModelMeshes(model.meshes);
+                console.log(model);
+                console.log(model.meshes);
+                this.Subjects.actualMediaType.next('model');
+
               });
             break;
 
           case 'image':
 
-            this.Subjects.actualModel.next(newModel);
-            await this.loadFallbackModel();
-            /*
-            // TODO
-            this.updateActiveModel(newModel);
-
-            //  this.imagesource.emit(newModel.processed[this.quality]);
-
-            console.log('ein Bild!', newModel.processed[this.quality]);
-            const image = new Image();
-            //  image.src = newModel.processed[this.quality];
-            console.log('Bild', image);
-
-            /*
-            const reader = new FileReader();
-            reader.readAsDataURL(newModel.processed[this.quality]);
-            reader.onload =_event => {
-              console.log('OHOHOH', event);
-            };*/
+            await this.babylonService.loadImage(this.baseUrl + newModel.processed[this.quality])
+              .then(async model => {
+                console.log(model);
+                this.updateActiveModel(newModel);
+                const mesh: BABYLON.Mesh[] = [];
+                mesh.push(model);
+                this.updateActiveModelMeshes(mesh);
+                this.Subjects.actualMediaType.next('image');
+              });
 
             break;
 
           case 'audio':
+
             this.Subjects.actualModel.next(newModel);
             await this.loadFallbackModel();
+            this.Subjects.actualMediaType.next('audio');
+
             break;
 
           case 'video':
+
             this.Subjects.actualModel.next(newModel);
             await this.loadFallbackModel();
+            this.Subjects.actualMediaType.next('video');
+            /*
+            await this.babylonService.loadVideo()
+              .then(async model => {
+                this.updateActiveModel(newModel);
+                this.Subjects.actualMediaType.next('video');
+                this.Subjects.actualVideoSrc.next(URL + newModel.processed[this.quality]);
+                this.isVideo = true;
+                this.video.emit(true);
+                this.Subjects.actualMediaType.next('video');
+              });*/
             break;
 
           case 'text':
             this.Subjects.actualModel.next(newModel);
             await this.loadFallbackModel();
+            this.Subjects.actualMediaType.next('text');
+
             break;
 
           default:
@@ -369,6 +392,7 @@ export class ProcessingService {
         this.fallbackModelLoaded.emit(true);
         this.isDefaultModelLoaded = true;
         this.defaultModelLoaded.emit(true);
+        this.Subjects.actualMediaType.next('model');
       });
   }
 

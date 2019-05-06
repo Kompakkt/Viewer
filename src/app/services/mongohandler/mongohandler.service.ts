@@ -1,6 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { IAnnotation, ICompilation, ILDAPData, IMetaDataDigitalObject, IModel, IServerResponse } from '../../interfaces/interfaces';
@@ -36,8 +35,10 @@ export class MongohandlerService {
       .toPromise();
   }
 
-  private post(path: string, obj: any): Observable<any> {
-    return this.http.post(`${this.endpoint}/${path}`, obj, this.httpOptions);
+  private post(path: string, obj: any): Promise<any> {
+    return this.http
+      .post(`${this.endpoint}/${path}`, obj, this.httpOptions)
+      .toPromise();
   }
 
   // GETs
@@ -67,16 +68,16 @@ export class MongohandlerService {
   }
 
   // POSTs
-  public updateSettings(identifier: string, settings: any): Observable<any> {
+  public updateSettings(identifier: string, settings: any): Promise<any> {
     return this.post(`api/v1/post/settings/${identifier}`, settings);
   }
 
-  public updateAnnotation(annotation: any): Observable<IAnnotation & IServerResponse> {
+  public updateAnnotation(annotation: any): Promise<IAnnotation & IServerResponse> {
     return this.post(`api/v1/post/push/annotation`, annotation);
   }
 
   // Auth
-  public login(username: string, password: string): Observable<ILDAPData & IServerResponse> {
+  public login(username: string, password: string): Promise<ILDAPData & IServerResponse> {
     return this.post(`login`, { username, password });
   }
 
@@ -91,7 +92,7 @@ export class MongohandlerService {
   // TODO: check return type
   public deleteRequest(
     identifier: string, type: string,
-    username: string, password: string): Observable<any> {
+    username: string, password: string): Promise<any> {
     return this.post(`api/v1/post/remove/${type}/${identifier}`, { username, password });
   }
 

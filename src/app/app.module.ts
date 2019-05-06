@@ -38,6 +38,7 @@ import { DialogPasswordComponent } from './components/dialogs/dialog-password/di
 import { DialogShareAnnotationComponent } from './components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
 import { LoadingscreenComponent } from './components/loadingscreen/loadingscreen.component';
 import {MediaBrowserComponent} from './components/media-browser/media-browser.component';
+import { MediaComponent } from './components/media/media.component';
 import { MenuComponent } from './components/menu/menu.component';
 import { AnnotationComponentForEditorComponent } from './components/object-feature-annotations/annotation/annotation-for-editor.component';
 import { AnnotationComponent } from './components/object-feature-annotations/annotation/annotation.component';
@@ -47,6 +48,7 @@ import { ObjectFeatureMetadataComponent } from './components/object-feature-meta
 import { ObjectFeatureSettingsComponent } from './components/object-feature-settings/object-feature-settings.component';
 import { ObjectFeaturesComponent } from './components/object-features/object-features.component';
 import { SceneComponent } from './components/scene/scene.component';
+import { FilterAnnotationsPipe } from './pipes/filter-annotations.pipe';
 import {MediaTypePipe} from './pipes/media-type.pipe';
 
 @NgModule({
@@ -77,6 +79,8 @@ import {MediaTypePipe} from './pipes/media-type.pipe';
     MediaBrowserComponent,
     DialogShareAnnotationComponent,
     DialogInviteBroadcastingComponent,
+    MediaComponent,
+    FilterAnnotationsPipe,
   ],
   imports: [
     BrowserModule,

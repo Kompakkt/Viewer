@@ -30,23 +30,23 @@ export class AnnotationwalkthroughComponent implements OnInit {
 
   public previousAnnotation() {
     this.actualRanking === 0 ?
-      this.actualRanking = this.annotationService.annotations.length - 1 :
+      this.actualRanking = this.annotationService.getCurrentAnnotations().length - 1 :
       this.actualRanking = this.actualRanking - 1;
     this.getAction(this.actualRanking);
   }
 
   public nextAnnotation() {
-    this.actualRanking === (this.annotationService.annotations.length) - 1 ?
+    this.actualRanking === (this.annotationService.getCurrentAnnotations().length) - 1 ?
       this.actualRanking = 0 : this.actualRanking = this.actualRanking + 1;
     this.getAction(this.actualRanking);
   }
 
   private getAction(index: number) {
 
-    this.title = this.annotationService.annotations[index].body.content.title;
+    this.title = this.annotationService.getCurrentAnnotations()[index].body.content.title;
 
     let camera;
-    camera = this.annotationService.annotations[index].body.content.relatedPerspective;
+    camera = this.annotationService.getCurrentAnnotations()[index].body.content.relatedPerspective;
 
     if (camera !== undefined) {
       const positionVector =
@@ -59,8 +59,8 @@ export class AnnotationwalkthroughComponent implements OnInit {
     }
 
     this.annotationService.setSelectedAnnotation(
-      this.annotationService.annotations[index]._id);
-    this.babylonService.hideMesh(this.annotationService.annotations[index]._id, true);
+      this.annotationService.getCurrentAnnotations()[index]._id);
+    this.babylonService.hideMesh(this.annotationService.getCurrentAnnotations()[index]._id, true);
   }
 
 }

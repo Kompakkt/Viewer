@@ -45,6 +45,7 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   public showBackground = false;
   public showLights = false;
   public isFallbackModelLoaded = false;
+  public mediaType: string;
 
   private cameraPositionInitial: {
     cameraType: string;
@@ -108,13 +109,17 @@ export class ObjectFeatureSettingsComponent implements OnInit {
     this.processingService.fallbackModelLoaded.subscribe(fallback => {
       this.isFallbackModelLoaded = fallback;
     });
+
+    this.processingService.Observables.actualMediaType.subscribe(mediaType => {
+      this.mediaType = mediaType;
+    });
   }
 
   public showNextAlertFirstStep() {
     const dialogRef = this.dialog.open(DialogMeshsettingsComponent);
 
-    dialogRef.afterClosed().subscribe(finish => {
-
+    dialogRef.afterClosed()
+      .subscribe(finish => {
       if (finish) {
         this.resetHelpers();
         this.stepper.selected.completed = true;
@@ -337,32 +342,40 @@ export class ObjectFeatureSettingsComponent implements OnInit {
     this.activeModel.settings = settings;
 
     if (!this.isDefault) {
-      this.mongohandlerService.updateSettings(this.activeModel._id, settings).subscribe(result => {
-        console.log(result);
+      this.mongohandlerService
+        .updateSettings(this.activeModel._id, settings)
+        .then(result => {
+          console.log(result);
 
-        if (this.initialSettingsMode) {
+          if (this.initialSettingsMode) {
 
-          this.initialSettingsMode = false;
-          this.modelSettingsService.decomposeAfterSetting();
-          // allow Annotations
-          this.overlayService.deactivateMeshSettings();
+            this.initialSettingsMode = false;
+            this.modelSettingsService.decomposeAfterSetting();
+            // allow Annotations
+            this.overlayService.deactivateMeshSettings();
 
-          this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
-            this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
-        }
-      });
+            this.modelSettingsService.loadSettings(
+              this.activeModel.settings.scale,
+              this.activeModel.settings.rotation.x,
+              this.activeModel.settings.rotation.y,
+              this.activeModel.settings.rotation.z);
+          }
+        });
     }
   }
 
   private async createMissingInitialDefaultScreenshot() {
-    await new Promise<string>((resolve, reject) => this.babylonService.createPreviewScreenshot(400).then(screenshot => {
-      this.preview = screenshot;
-      this.activeModel.settings.preview = screenshot;
-      resolve(screenshot);
-    }, error => {
-      this.message.error(error);
-      reject(error);
-    }));
+    await new Promise<string>((resolve, reject) =>
+      this.babylonService.createPreviewScreenshot(400)
+        .then(screenshot => {
+          this.preview = screenshot;
+          this.activeModel.settings.preview = screenshot;
+          resolve(screenshot);
+        })
+        .catch(error => {
+          this.message.error(error);
+          reject(error);
+        }));
   }
 
   async backToDefault() {
@@ -438,6 +451,11 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   }
 
   private async setCamera() {
+
+    if(this.mediaType !== 'image' && this.mediaType !== 'video') {
+
+     // this.cameraService.resetCameraMode();
+
     if (this.activeModel.settings.cameraPositionInitial === undefined) {
       this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
       // TODO: Camera Setting Interface
@@ -471,6 +489,9 @@ export class ObjectFeatureSettingsComponent implements OnInit {
         this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
         this.activeModel.settings.cameraPositionInitial.push(this.cameraService.getActualCameraPosInitialView());
       }
+    }
+    } else {
+   //   this.cameraService.setCamerato2DMode();
     }
   }
 
@@ -572,6 +593,10 @@ export class ObjectFeatureSettingsComponent implements OnInit {
 
   private async setSettings() {
 
+    this.cameraService.resetCameraMode();
+    if (this.mediaType === 'image') {
+      this.cameraService.setCamerato2DMode();
+    }
     // Default Model
     if (this.isDefault) {
       console.log(this.isFallbackModelLoaded);

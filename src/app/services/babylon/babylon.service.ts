@@ -249,101 +249,52 @@ export class BabylonService {
   }
 
   public loadImage(rootUrl: string) {
-    /*
-    const rootUrlTest = '/assets/img/BYSA.png';
 
     const message = this.message;
     const engine = this.engine;
+    const scene = this.scene;
 
     engine.displayLoadingUI();
 
     this.scene.meshes.forEach(mesh => mesh.dispose());
     this.scene.meshes = [];
 
-    const diffuseXHR = new XMLHttpRequest();
+    return new Promise<any>((resolve, reject) => {
 
-    const img = new Image();
-    img.src = rootUrlTest;
-    img.onload = function(e) {
-      alert(this.width + 'x' + this.height);
-      const ground = BABYLON.Mesh.CreateGround('gnd',
-        this.width / 100,
-        this.height / 100, 1, this.scene);
+      const img = new Image();
+      img.onload = () => {
+      const width = img.width;
+      const height = img.height;
 
-      diffuseXHR.open('GET', rootUrlTest);
-      diffuseXHR.responseType = 'arraybuffer';
-      diffuseXHR.onprogress = function(e) {
-      if (e.lengthComputable) {
-        console.log('diffuse progress: ', e.loaded);
-        engine.loadingUIText = (e.loaded * 100 / e.total).toFixed() + '%';
+      const mypicture = new BABYLON.Texture(rootUrl, scene);  // rem about CORS rules for cross-domain
+      const ground = BABYLON.Mesh.CreateGround('gnd', width / 10, height / 10, 1, scene);
+      const gndmat = new BABYLON.StandardMaterial('gmat', scene);
+      ground.material = gndmat;
+      gndmat.diffuseTexture = mypicture;
 
-      }
-    };
-      diffuseXHR.onload = function(e) {
-      if (this.status === 200) {
-          const mypicture = BABYLON.Texture.LoadFromDataString('diffuse',
-            this.response, this.scene);
-          const gndmat = new BABYLON.StandardMaterial('gmat', this.scene);
-          ground.material = gndmat;
-          gndmat.diffuseTexture = mypicture;
-          engine.hideLoadingUI();
+      engine.hideLoadingUI();
+      resolve(ground);
+      };
+      img.src = rootUrl;
+  });
+  }
 
-      }
-    };
-      diffuseXHR.send();
-    };*/
+  public loadVideo() {
 
-    /*
-        const mypicture = new BABYLON.Texture('https://crossorigin.me/' + rootUrl, this.scene);
+    const message = this.message;
+    const engine = this.engine;
+    const scene = this.scene;
 
-        const ground = BABYLON.Mesh.CreateGround('gnd', width / 100, height / 100, 1, this.scene);
+    engine.displayLoadingUI();
 
-        const gndmat = new BABYLON.StandardMaterial('gmat', this.scene);
-        ground.material = gndmat;
-        gndmat.diffuseTexture = mypicture;
+    this.scene.meshes.forEach(mesh => mesh.dispose());
+    this.scene.meshes = [];
 
-        engine.hideLoadingUI();
-
-        const ground = BABYLON.Mesh.CreateGround('gnd', width / 100, height / 100, 1, this.scene);
-
-        const material = new BABYLON.StandardMaterial('texture1', this.scene);
-        material.emissiveColor = new BABYLON.Color3(0.2, 0.2, 0.2);
-        //var texture = new BABYLON.Texture("https://upload.wikimedia.org/wikipedia/commons/b/ba/Dent_de_Vaulion_-_360_degree_panorama.jpg", scene);
-        const texture = new BABYLON.Texture('https://crossorigin.me/' + rootUrl, this.scene);
-        console.log('Texture from' + 'https://crossorigin.me/', rootUrl, texture);
-        material.diffuseTexture = texture;
-        material.diffuseTexture.coordinatesMode = BABYLON.Texture.SPHERICAL_MODE;
-        material.backFaceCulling = false;
-        ground.material = material;
-        engine.hideLoadingUI();*/
-
-    // sphere1.infiniteDistance = true;
-
-    /*
-        BABYLON.Tools.LoadImage(rootUrl, function () {
-          console.log('loaded');
-        }, function (item, err) {
-          console.log('error:', err, item, 'not loaded');
-        });
-
-        const assetsManager = new BABYLON.AssetsManager(this.scene);
-        const imageTask = assetsManager.addImageTask('image task', rootUrl);
-        imageTask.onSuccess = function (task) {
-          console.log(task.image.width, 'assetManager');
-        };
-    */
-
-    /*
-        const mypicture = new BABYLON.Texture(rootUrl, this.scene);
-
-        const ground = BABYLON.Mesh.CreateGround('gnd', width / 100, height / 100, 1, this.scene);
-
-        const gndmat = new BABYLON.StandardMaterial('gmat', this.scene);
-        ground.material = gndmat;
-        gndmat.diffuseTexture = mypicture;
-
-        engine.hideLoadingUI();*/
-
+    return new Promise<any>((resolve, reject) => {
+      const dummy = new BABYLON.Mesh('dummy', scene);
+      engine.hideLoadingUI();
+      resolve(dummy);
+      });
   }
 
   public saveScene(): void {

@@ -37,7 +37,6 @@ export class DialogGetUserDataComponent implements OnInit {
     if (this.id && this.password !== '') {
 
       this.mongohandlerService.deleteRequest(this.id, 'annotation', this.username, this.password)
-        .toPromise()
         .then((result: any) => {
           if (result.status === 'ok') {
             this.userdataService.setcachedLoginData(this.password, this.username);
