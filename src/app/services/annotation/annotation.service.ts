@@ -420,25 +420,17 @@ export class AnnotationService {
 
   public deleteAnnotation(annotation: IAnnotation) {
     if (this.userdataService.isAnnotationOwner(annotation)) {
+      this.setSelectedAnnotation('');
+      this.setEditModeAnnotation('');
       const index: number = this.annotations.findIndex(ann => ann._id === annotation._id);
       if (index !== -1) {
-        if (this.isSelectedAnnotation.source['_events']) {
-          if (this.isSelectedAnnotation.source['_events'].slice(-1)[0]._id === annotation._id) {
-            this.setSelectedAnnotation('');
-          }
-        }
-        if (this.isEditModeAnnotation.source['_events']) {
-          if (this.isEditModeAnnotation.source['_events'].slice(-1)[0]._id === annotation._id) {
-            this.setEditModeAnnotation('');
-          }
-        }
         this.annotations.splice(this.annotations.findIndex(ann => ann._id === annotation._id), 1);
         this.changedRankingPositions();
         this.redrawMarker();
-      }
-      if (!this.isDemoMode) {
-        this.dataService.deleteAnnotation(annotation._id);
-        this.deleteAnnotationFromServer(annotation._id);
+        if (!this.isDemoMode) {
+          this.dataService.deleteAnnotation(annotation._id);
+          this.deleteAnnotationFromServer(annotation._id);
+        }
       }
     } else {
       this.message.error('You are not the Owner of this Annotation.');
