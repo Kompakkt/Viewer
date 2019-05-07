@@ -227,7 +227,16 @@ export class ProcessingService {
   public fetchModelsData() {
     this.mongoHandlerService.getAllModels()
       .then(models => {
-        this.Subjects.models.next(models);
+        const modelsforBrowser: IModel[] = [];
+
+        models
+          .filter(model => model)
+          .forEach((model: IModel) => {
+          if (model.finished) {
+            modelsforBrowser.push(model);
+          }
+        });
+        this.Subjects.models.next(modelsforBrowser);
       },    error => {
         this.message.error('Connection to object server refused.');
       });
