@@ -38,7 +38,6 @@ import { DialogPasswordComponent } from './components/dialogs/dialog-password/di
 import { DialogShareAnnotationComponent } from './components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
 import { LoadingscreenComponent } from './components/loadingscreen/loadingscreen.component';
 import {MediaBrowserComponent} from './components/media-browser/media-browser.component';
-import { MediaComponent } from './components/media/media.component';
 import { MenuComponent } from './components/menu/menu.component';
 import { AnnotationComponentForEditorComponent } from './components/object-feature-annotations/annotation/annotation-for-editor.component';
 import { AnnotationComponent } from './components/object-feature-annotations/annotation/annotation.component';
@@ -78,7 +77,6 @@ import {MediaTypePipe} from './pipes/media-type.pipe';
     MediaBrowserComponent,
     DialogShareAnnotationComponent,
     DialogInviteBroadcastingComponent,
-    MediaComponent,
   ],
   imports: [
     BrowserModule,

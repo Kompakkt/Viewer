@@ -1,6 +1,7 @@
 import {DOCUMENT} from '@angular/common';
 import {EventEmitter, Inject, Injectable, Output} from '@angular/core';
 import * as BABYLON from 'babylonjs';
+import * as GUI from 'babylonjs-gui';
 import 'babylonjs-loaders';
 import {ReplaySubject} from 'rxjs';
 
@@ -8,12 +9,6 @@ import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreen
 import {MessageService} from '../message/message.service';
 
 import {LoadingScreen} from './loadingscreen';
-import ActionEvent = BABYLON.ActionEvent;
-
-/**
- * @author Zoe Schubert
- * @author Jan G. Wieners
- */
 
 @Injectable({
   providedIn: 'root',
@@ -25,6 +20,9 @@ export class BabylonService {
 
   private scene: BABYLON.Scene;
   private engine: BABYLON.Engine;
+
+  private analyser: BABYLON.Analyser;
+
   private VRHelper: BABYLON.VRExperienceHelper;
 
   private CanvasSubject = new ReplaySubject<HTMLCanvasElement>();
@@ -58,6 +56,12 @@ export class BabylonService {
   // FOR VR-HUD
   public vrJump: boolean;
 
+  public audio: BABYLON.Sound;
+  private mediaType = '';
+  private slider: GUI.Slider;
+  private currentTime: number;
+  public video: HTMLVideoElement;
+
   constructor(private message: MessageService,
               private loadingScreenHandler: LoadingscreenhandlerService,
               @Inject(DOCUMENT) private document: any) {
@@ -66,12 +70,36 @@ export class BabylonService {
 
       if (newCanvas) {
 
-        this.engine = new BABYLON.Engine(newCanvas, true, {preserveDrawingBuffer: true, stencil: true});
+        this.engine = new BABYLON.Engine(newCanvas, true, {audioEngine: true, preserveDrawingBuffer: true, stencil: true});
         this.scene = new BABYLON.Scene(this.engine);
         this.engine.loadingScreen = new LoadingScreen(newCanvas, '',
                                                       '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
 
+        this.analyser = new BABYLON.Analyser(this.scene);
+        // this.engine.audioEngine.connectToAnalyser(this.analyser);
+        // BABYLON.Engine.audioEngine.audioContext.currentTime
+        BABYLON.Engine.audioEngine['connectToAnalyser'](this.analyser);
+        this.analyser.FFT_SIZE = 32;
+        this.analyser.SMOOTHING = 0.9;
+
         this.scene.registerBeforeRender(() => {
+
+          if (this.mediaType === 'audio' && this.audio) {
+            if (this.audio.isPlaying) {
+              const fft = this.analyser.getByteFrequencyData();
+              const audioMeshes = this.scene.getMeshesByTags('audioCenter');
+              audioMeshes.forEach(mesh => {
+                mesh.scaling = new BABYLON.Vector3((fft[15] / 32), (fft[15] / 32), (fft[15] / 32));
+              });
+              if (BABYLON.Engine.audioEngine.audioContext) {
+                this.currentTime = BABYLON.Engine.audioEngine.audioContext['currentTime'];
+                if (this.slider) {
+                  this.slider.value = (this.slider.value + this.currentTime) / 60;
+                }
+              }
+            }
+
+          }
 
           // VR-Annotation-Text-Walk
           if (this.actualControl && this.selectingControl && !this.selectedControl) {
@@ -131,6 +159,10 @@ export class BabylonService {
         });
       }
     });
+  }
+
+  public setMediaType(type: string) {
+    this.mediaType = type;
   }
 
   public getActiveCamera() {
@@ -220,6 +252,8 @@ export class BabylonService {
 
   public loadModel(rootUrl: string, filename: string): Promise<any> {
 
+    this.mediaType = 'model';
+
     const message = this.message;
     const engine = this.engine;
 
@@ -248,13 +282,108 @@ export class BabylonService {
 
   }
 
-  public loadImage(rootUrl: string) {
+  private str_pad_left(string,pad,length) {
+    return (new Array(length+1).join(pad)+string).slice(-length);
+  }
+
+  private getCurrentTime(time: number): string {
+    const minutes = Math.floor(time / 60);
+    const seconds = time - minutes * 60;
+
+    return (this.str_pad_left(minutes,'0',2)+':'+ this.str_pad_left(seconds,'0',2));
+  }
+
+  public loadAudio(rootUrl: string): Promise<any> {
+
+    const message = this.message;
+    const engine = this.engine;
+    const scene = this.scene;
+
+    this.mediaType = 'audio';
+
+
+    engine.displayLoadingUI();
+
+    this.scene.meshes.forEach(mesh => mesh.dispose());
+    this.scene.meshes = [];
+
+    this.audio = new BABYLON.Sound('Music', rootUrl,
+                                   scene, () => {
+        // Sound has been downloaded & decoded
+
+    // GUI
+    const advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('UI');
+
+    const panel = new GUI.StackPanel();
+    panel.width = '5000px';
+    panel.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+    panel.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+    advancedTexture.addControl(panel);
+
+    const buffer = this.audio ? this.audio.getAudioBuffer() : undefined;
+
+    this.currentTime = 0;
+
+    const header = new GUI.TextBlock();
+    if (buffer) {
+      header.text = 'Length: ' + buffer.duration / 60 + ' sec';
+    } else {
+      header.text = 'Can not calculate length.';
+    }
+    header.height = '30px';
+    header.color = 'white';
+    panel.addControl(header);
+
+    this.slider = new GUI.Slider();
+    this.slider.minimum = 0;
+    buffer ? this.slider.maximum = buffer.duration / 60 : this.slider.maximum = 400;
+    this.slider.value = 0;
+    this.slider.height = '20px';
+    this.slider.width = '450px';
+    this.slider.onValueChangedObservable.add(() => {
+      header.text = 'Current time: ' + this.getCurrentTime(this.slider.value) + ' min.';
+    });
+    panel.addControl(this.slider);
+
+      },
+      null);
+
+    BABYLON.SceneLoader.ImportMeshAsync(null, 'assets/models/', 'kompakkt.babylon', this.scene, function(progress) {
+
+        if (progress.lengthComputable) {
+          engine.loadingUIText = (progress.loaded * 100 / progress.total).toFixed() + '%';
+        }
+      })
+        .then(function(result) {
+          // Streaming sound using HTML5 Audio element
+          engine.hideLoadingUI();
+          return new Promise<any>((resolve, reject) => {
+            const dummy = new BABYLON.Mesh('dummy', scene);
+            engine.hideLoadingUI();
+            resolve(dummy);
+            reject(dummy);
+          });
+        },    function(error) {
+
+          engine.hideLoadingUI();
+          message.error(error);
+          return new Promise<any>((resolve, reject) => {
+            const dummy = new BABYLON.Mesh('dummy', scene);
+            engine.hideLoadingUI();
+            resolve(dummy);
+            reject(dummy);
+          });
+        });
+  }
+
+  public loadImage(rootUrl: string): Promise<any> {
 
     const message = this.message;
     const engine = this.engine;
     const scene = this.scene;
 
     engine.displayLoadingUI();
+    this.mediaType = 'image';
 
     this.scene.meshes.forEach(mesh => mesh.dispose());
     this.scene.meshes = [];
@@ -263,38 +392,94 @@ export class BabylonService {
 
       const img = new Image();
       img.onload = () => {
-      const width = img.width;
-      const height = img.height;
+        const width = img.width;
+        const height = img.height;
 
-      const mypicture = new BABYLON.Texture(rootUrl, scene);  // rem about CORS rules for cross-domain
-      const ground = BABYLON.Mesh.CreateGround('gnd', width / 10, height / 10, 1, scene);
-      const gndmat = new BABYLON.StandardMaterial('gmat', scene);
-      ground.material = gndmat;
-      gndmat.diffuseTexture = mypicture;
+        const mypicture = new BABYLON.Texture(rootUrl, scene);  // rem about CORS rules for cross-domain
+        const ground = BABYLON.Mesh.CreateGround('gnd', width / 10, height / 10, 1, scene);
+        const gndmat = new BABYLON.StandardMaterial('gmat', scene);
+        ground.material = gndmat;
+        gndmat.diffuseTexture = mypicture;
 
-      engine.hideLoadingUI();
-      resolve(ground);
+        engine.hideLoadingUI();
+        resolve(ground);
+        reject(ground);
       };
       img.src = rootUrl;
-  });
+    });
   }
 
-  public loadVideo() {
+  public loadVideo(rootUrl: string): Promise<any>  {
 
     const message = this.message;
     const engine = this.engine;
     const scene = this.scene;
+
+    this.mediaType = 'video';
 
     engine.displayLoadingUI();
 
     this.scene.meshes.forEach(mesh => mesh.dispose());
     this.scene.meshes = [];
 
-    return new Promise<any>((resolve, reject) => {
-      const dummy = new BABYLON.Mesh('dummy', scene);
-      engine.hideLoadingUI();
-      resolve(dummy);
+    // Video material
+    const videoMat = new BABYLON.StandardMaterial('textVid', scene);
+    const videoTexture = new BABYLON.VideoTexture('video', rootUrl, scene, false);
+    videoMat.diffuseTexture = videoTexture;
+    videoMat.backFaceCulling = false;
+
+    videoTexture.onLoadObservable.add(tex => {
+      this.video = videoTexture.video;
+      const width = tex.getSize().width;
+      const height = tex.getSize().height;
+      const ground = BABYLON.Mesh.CreateGround('gnd', width / 10, height / 10, 1, scene);
+      ground.material = videoMat;
+      // GUI
+      const advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('UI');
+
+      const panel = new GUI.StackPanel();
+      panel.width = '5000px';
+      panel.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+      panel.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+      advancedTexture.addControl(panel);
+
+      this.currentTime = 0;
+
+      const header = new GUI.TextBlock();
+      header.text = 'Length: ' + videoTexture.video ? String((videoTexture.video.duration)) : '300' + ' sec';
+      header.height = '30px';
+      header.color = 'white';
+      panel.addControl(header);
+
+      this.slider = new GUI.Slider();
+      this.slider.minimum = 0;
+      videoTexture.video ? this.slider.maximum = videoTexture.video.duration / 60 : this.slider.maximum = 400;
+      this.slider.value = 0;
+      this.slider.height = '20px';
+      this.slider.width = '450px';
+      this.slider.onValueChangedObservable.add(() => {
+        header.text = 'Current time: ' + this.getCurrentTime(this.video.currentTime) + ' min.';
       });
+      panel.addControl(this.slider);
+
+
+      let playing = false;
+
+      scene.onPointerUp = function () {
+        if (videoTexture.video.paused) {
+          videoTexture.video.play();
+        } else {
+          videoTexture.video.pause();
+        }
+      };
+
+      return new Promise<any>((resolve, reject) => {
+        const dummy = new BABYLON.Mesh('dummy', scene);
+        engine.hideLoadingUI();
+        resolve(dummy);
+        reject(dummy);
+      });
+    });
   }
 
   public saveScene(): void {

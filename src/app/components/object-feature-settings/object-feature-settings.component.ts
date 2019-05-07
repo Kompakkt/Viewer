@@ -79,6 +79,8 @@ export class ObjectFeatureSettingsComponent implements OnInit {
 
   ngOnInit() {
 
+    this.mediaType = this.processingService.getCurrentMediaType();
+
     this.processingService.loaded.subscribe(isLoaded => {
       this.isLoaded = isLoaded;
       if (isLoaded) {
@@ -593,13 +595,34 @@ export class ObjectFeatureSettingsComponent implements OnInit {
 
   private async setSettings() {
 
-    this.cameraService.resetCameraMode();
-    if (this.mediaType === 'image') {
+    if (this.mediaType === 'image' || this.mediaType === 'video') {
+      console.log('2DMode');
       this.cameraService.setCamerato2DMode();
+    } else {
+      this.cameraService.resetCameraMode();
     }
     // Default Model
-    if (this.isDefault) {
-      console.log(this.isFallbackModelLoaded);
+    if (this.isDefault || this.isFallbackModelLoaded || this.mediaType === 'audio' || this.mediaType === 'video') {
+
+      // during upload process
+      if (this.isModelOwner && !this.isFinished) {
+
+        if (this.mediaType === 'audio') {
+          this.activeModel['settings'] = this.getDefaultLoadSettings();
+          this.mongohandlerService
+            .updateSettings(this.activeModel._id, this.getDefaultLoadSettings())
+            .then(result => {
+              console.log(result);
+            });
+        } else {
+            this.activeModel['settings'] = this.getDefaultLoadSettings(true);
+            this.mongohandlerService
+              .updateSettings(this.activeModel._id, this.getDefaultLoadSettings(true))
+              .then(result => {
+                console.log(result);
+              });
+        }
+      }
 
       this.isFallbackModelLoaded ?
         this.activeModel['settings'] = this.getDefaultLoadSettings(true) :
