@@ -153,7 +153,8 @@ export class AnnotationService {
       : this.getDefaultAnnotations();
     this.currentAnnotationSubject
       .next(next);
-    this.redrawMarker();
+    // After the observable updates we want to redraw markers
+    setTimeout(() => this.redrawMarker(), 0);
   }
 
   public getCurrentAnnotations() {
@@ -318,9 +319,7 @@ export class AnnotationService {
         (+leftSide.ranking === +rightSide.ranking) ? 0
           : (+leftSide.ranking < +rightSide.ranking) ? -1 : 1);
 
-    while (this.annotations.length > 0) {
-      this.annotations.pop();
-    }
+    this.annotations.splice(0, this.annotations.length);
     this.annotations.push(...sortedDefault, ...sortedCompilation);
 
     await this.changedRankingPositions();
