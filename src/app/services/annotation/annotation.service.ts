@@ -327,11 +327,21 @@ export class AnnotationService {
 
   // For Broadcasting
   public handleReceivedAnnotation(newAnnotation: IAnnotation) {
-    // TODO
+    const foundIndex = this.annotations
+      .findIndex(annotation => newAnnotation._id === annotation._id);
+    if (foundIndex === -1) {
+      this.annotations.push(newAnnotation);
+    } else {
+      this.annotations.splice(foundIndex, 1, newAnnotation);
+    }
   }
 
   public deleteRequestAnnotation(newAnnotation: IAnnotation) {
-    // TODO
+    const foundIndex = this.annotations
+      .findIndex(annotation => newAnnotation._id === annotation._id);
+    if (foundIndex !== -1) {
+      this.annotations.splice(foundIndex, 1);
+    }
   }
 
   // Die Annotationsfunktionalität wird zum aktuellen Modell hinzugefügt
