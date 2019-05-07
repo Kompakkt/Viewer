@@ -602,7 +602,8 @@ export class ObjectFeatureSettingsComponent implements OnInit {
       this.cameraService.resetCameraMode();
     }
     // Default Model
-    if (this.isDefault || this.isFallbackModelLoaded || this.mediaType === 'audio' || this.mediaType === 'video') {
+    if (this.isDefault || this.isFallbackModelLoaded || this.mediaType === 'audio'
+      || this.mediaType === 'video' || this.mediaType === 'audio') {
 
       // during upload process
       if (this.isModelOwner && !this.isFinished) {
