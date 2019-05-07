@@ -651,6 +651,7 @@ export class AnnotationService {
     this.isAnnotatingAllowed = emitBool;
     this.annotationMode(emitBool);
     this.annnotatingAllowed.emit(emitBool);
+    this.annotationMode(emitBool);
   }
 
   public setCollectionInput(selected: boolean) {
