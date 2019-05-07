@@ -21,7 +21,7 @@
   <app-annotation-for-editor class="annotation-box"
                              *ngFor="let annotation of (annotationService.currentAnnotations | async);"
                              [annotation]="annotation"
-                             [cdkDragDisabled]="isCollectionLoaded ? !isCollectionOwner: !isAnnotatingAllowed"
+                             [cdkDragDisabled]="!(isCollectionLoaded ? (isCollectionOwner && isAnnotatingAllowed) : isAnnotatingAllowed)"
                              cdkDrag cdkDragLockAxis="y"></app-annotation-for-editor>
 </div>
 
