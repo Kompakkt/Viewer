@@ -40,13 +40,26 @@ export class AnnotationService {
   private isCollectionLoaded: boolean;
   private isObjectFeaturesOpen = false;
 
-  public annotations: IAnnotation[] = [];
+  private _annotations: IAnnotation[] = [];
+  public readonly annotations = new Proxy(this._annotations, {
+      get: (obj, prop) => {
+        // After splicing or pushing to this.annotations we want to
+        // update the currentAnnotations Subject.
+        // Use setTimeout with time 0 to append it to the end of the
+        // JavaScript execution queue
+        try { return obj[prop]; } finally {
+          if (['splice', 'push'].includes(prop.toString())) {
+            setTimeout(() => this.updateCurrentAnnotationsSubject(), 0);
+          }
+        }
+      },
+    });
 
   private actualModel: IModel;
   public actualCompilation: ICompilation;
   private actualModelMeshes: BABYLON.Mesh[] = [];
 
-  private isannotationSourceCollection: boolean;
+  private isannotationSourceCollection = false;
   @Output() annotationSourceCollection: EventEmitter<boolean> = new EventEmitter();
 
   private selectedAnnotation: BehaviorSubject<string> = new BehaviorSubject('');
@@ -77,7 +90,6 @@ export class AnnotationService {
       || this.processingService.isFallbackModelLoaded;
 
     this.isCollectionInputSelected = false;
-    this.isannotationSourceCollection = false;
     this.isDefaultModelLoaded = this.processingService.isDefaultModelLoaded;
 
     this.processingService.Observables.actualModel.subscribe(actualModel => {
@@ -136,10 +148,12 @@ export class AnnotationService {
   }
 
   private updateCurrentAnnotationsSubject() {
+    const next = (this.isannotationSourceCollection)
+      ? this.getCompilationAnnotations()
+      : this.getDefaultAnnotations();
     this.currentAnnotationSubject
-      .next((this.isannotationSourceCollection)
-        ? this.getCompilationAnnotations()
-        : this.getDefaultAnnotations());
+      .next(next);
+    this.redrawMarker();
   }
 
   public getCurrentAnnotations() {
@@ -166,7 +180,7 @@ export class AnnotationService {
   public async loadAnnotations() {
 
     BABYLON.Tags.AddTagsTo(this.actualModelMeshes, this.actualModel._id);
-    this.annotations = [];
+    // this.annotations = [];
     this.selectedAnnotation.next('');
     this.editModeAnnotation.next('');
     await this.annotationmarkerService.deleteAllMarker();
@@ -179,12 +193,13 @@ export class AnnotationService {
         .filter(annotation => annotation && annotation._id && annotation.lastModificationDate);
       // Update and sort local
       await this.updateLocalDB(pouchAnnotations, serverAnnotations);
-      this.annotations = await this.updateAnnotationList(pouchAnnotations, serverAnnotations);
+      const updated = await this.updateAnnotationList(pouchAnnotations, serverAnnotations);
+      this.annotations.push(...updated);
       await this.sortAnnotations();
     } else {
       this.annotations.push(this.createDefaultAnnotation());
       this.selectedAnnotation.next(this.annotations[this.annotations.length - 1]._id);
-      this.updateCurrentAnnotationsSubject();
+
     }
     this.initializeAnnotationMode();
     this.toggleAnnotationSource(false);
@@ -302,7 +317,11 @@ export class AnnotationService {
       .sort((leftSide, rightSide): number =>
         (+leftSide.ranking === +rightSide.ranking) ? 0
           : (+leftSide.ranking < +rightSide.ranking) ? -1 : 1);
-    this.annotations = [...sortedDefault, ...sortedCompilation];
+
+    while (this.annotations.length > 0) {
+      this.annotations.pop();
+    }
+    this.annotations.push(...sortedDefault, ...sortedCompilation);
 
     await this.changedRankingPositions();
   }
@@ -422,7 +441,7 @@ export class AnnotationService {
     this.selectedAnnotation.next(newAnnotation._id);
     this.editModeAnnotation.next(newAnnotation._id);
 
-    this.updateCurrentAnnotationsSubject();
+
   }
 
   public updateAnnotation(annotation: IAnnotation) {
@@ -442,7 +461,7 @@ export class AnnotationService {
       .splice(this.annotations
         .findIndex(ann => ann._id === annotation._id), 1, newAnnotation);
 
-    this.updateCurrentAnnotationsSubject();
+
   }
 
   public deleteAnnotation(annotation: IAnnotation) {
@@ -463,7 +482,7 @@ export class AnnotationService {
       this.message.error('You are not the Owner of this Annotation.');
     }
 
-    this.updateCurrentAnnotationsSubject();
+
   }
 
   public deleteAnnotationFromServer(annotationId: string) {
@@ -520,8 +539,6 @@ export class AnnotationService {
       if (!annotation._id) continue;
       await this.updateAnnotation({...annotation, ranking: i - offset + 1});
     }
-
-    this.updateCurrentAnnotationsSubject();
   }
 
   private async fetchAnnotations(model: string, compilation?: string): Promise<IAnnotation[]> {
@@ -652,8 +669,8 @@ export class AnnotationService {
   public toggleAnnotationSource(sourceCol: boolean) {
     if (sourceCol !== this.isannotationSourceCollection) {
       this.isannotationSourceCollection = sourceCol;
+      this.updateCurrentAnnotationsSubject();
     }
-    this.redrawMarker();
   }
 
   public createDefaultAnnotation(): IAnnotation {
