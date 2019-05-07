@@ -97,24 +97,24 @@ export class SocketService {
         // nach unbekannter Annotation
         const newAnnotation = newList
           .find(annotation => !this.knownAnnotations.includes(annotation));
-        if (newAnnotation) {
-          this.knownAnnotations.push(newAnnotation);
-          if (this.inSocket) {
-            socket.emit('createAnnotation', {
-              annotation: newAnnotation, user: this.getOwnSocketData().user,
-            });
-            this.drawMarker(newAnnotation);
-          }
+        if (!newAnnotation) return;
+        this.knownAnnotations.push(newAnnotation);
+        if (this.inSocket && newAnnotation.creator._id === this.getOwnSocketData().user._id) {
+          socket.emit('createAnnotation', {
+            annotation: newAnnotation, user: this.getOwnSocketData().user,
+          });
+          this.drawMarker(newAnnotation);
         }
       } else if (prevLength > newLength) {
         // Annotation entfernt, also suche in bekannten Annotationen
         // nach fehlender Annotation
         const indexOfRemovedAnnotation = this.knownAnnotations
           .findIndex(annotation => !newList.includes(annotation));
+        const removedAnnotation = this.knownAnnotations
+          .find(annotation => !newList.includes(annotation));
+        if (!removedAnnotation) return;
         this.knownAnnotations.splice(indexOfRemovedAnnotation, 1);
-        if (this.inSocket) {
-          const removedAnnotation = this.knownAnnotations
-            .find(annotation => !newList.includes(annotation));
+        if (this.inSocket && removedAnnotation.creator._id === this.getOwnSocketData().user._id) {
           socket.emit('deleteAnnotation', {
             annotation: removedAnnotation, user: this.getOwnSocketData().user,
           });
@@ -125,19 +125,14 @@ export class SocketService {
         // nach unbekannter Annotation und ersetze diese in Bekannten
         const changedAnnotation = newList
           .find(annotation => !this.knownAnnotations.includes(annotation));
-        if (changedAnnotation) {
-          if (changedAnnotation._id) {
-            const indexOfChanged = this.knownAnnotations
-              .findIndex(annotation => annotation._id === changedAnnotation._id);
-            if (changedAnnotation) {
-              this.knownAnnotations.splice(indexOfChanged, 1, changedAnnotation);
-            }
-            if (this.inSocket) {
-              socket.emit('editAnnotation', {
-                annotation: changedAnnotation, user: this.getOwnSocketData().user,
-              });
-            }
-          }
+        if (!changedAnnotation || !changedAnnotation._id) return;
+        const indexOfChanged = this.knownAnnotations
+          .findIndex(annotation => annotation._id === changedAnnotation._id);
+        this.knownAnnotations.splice(indexOfChanged, 1, changedAnnotation);
+        if (this.inSocket && changedAnnotation.lastModifiedBy._id === this.getOwnSocketData().user._id) {
+          socket.emit('editAnnotation', {
+            annotation: changedAnnotation, user: this.getOwnSocketData().user,
+          });
         }
       }
     });
