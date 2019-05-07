@@ -335,14 +335,8 @@ export class ProcessingService {
             break;
 
           case 'audio':
-            console.log(this.baseUrl + newModel.processed[this.quality]);
-            console.log(newModel);
             await this.babylonService.loadAudio(this.baseUrl + newModel.processed[this.quality])
               .then(async model => {
-                this.updateActiveModel(newModel);
-                const mesh: BABYLON.Mesh[] = [];
-                mesh.push(model);
-                this.updateActiveModelMeshes(mesh);
 
                 const center = BABYLON.MeshBuilder.CreateBox('audioCenter', {size: 1}, this.babylonService.getScene());
                 BABYLON.Tags.AddTagsTo(center, 'audioCenter');
@@ -355,7 +349,7 @@ export class ProcessingService {
                   mesh.actionManager = new ActionManager(this.babylonService.getScene());
                   mesh.actionManager.registerAction(new ExecuteCodeAction(
                     ActionManager.OnPickTrigger, (() => {
-                      // console.log('click', this.babylonService.audio._startTime);
+                      console.log('click');
                       const buffer = this.babylonService.audio.getAudioBuffer();
                       //console.log('dauer', buffer.duration / 60);
                       this.babylonService.audio.isPlaying ?
@@ -363,6 +357,11 @@ export class ProcessingService {
 
                     })));
                 });
+
+                this.updateActiveModel(newModel);
+                const mesh: BABYLON.Mesh[] = [];
+                mesh.push(center);
+                this.updateActiveModelMeshes(mesh);
                 this.Subjects.actualMediaType.next('audio');
 
               });

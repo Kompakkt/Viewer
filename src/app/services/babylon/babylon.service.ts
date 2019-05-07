@@ -282,15 +282,15 @@ export class BabylonService {
 
   }
 
-  private str_pad_left(string,pad,length) {
-    return (new Array(length+1).join(pad)+string).slice(-length);
+  private str_pad_left(string, pad, length) {
+    return (new Array(length + 1).join(pad) + string).slice(-length);
   }
 
   private getCurrentTime(time: number): string {
     const minutes = Math.floor(time / 60);
     const seconds = time - minutes * 60;
 
-    return (this.str_pad_left(minutes,'0',2)+':'+ this.str_pad_left(seconds,'0',2));
+    return (this.str_pad_left(minutes, '0', 2) + ':' + this.str_pad_left(seconds, '0', 2));
   }
 
   public loadAudio(rootUrl: string): Promise<any> {
@@ -300,7 +300,6 @@ export class BabylonService {
     const scene = this.scene;
 
     this.mediaType = 'audio';
-
 
     engine.displayLoadingUI();
 
@@ -348,30 +347,26 @@ export class BabylonService {
       },
       null);
 
-    return BABYLON.SceneLoader.ImportMeshAsync(null, 'assets/models/', 'kompakkt.babylon', this.scene, progress => {
-      if (progress.lengthComputable) {
-        engine.loadingUIText = (progress.loaded * 100 / progress.total).toFixed() + '%';
-      }
-    })
-    .then(result => {
-      // Streaming sound using HTML5 Audio element
-      engine.hideLoadingUI();
-      return new Promise<any>((resolve, reject) => {
-        const dummy = new BABYLON.Mesh('dummy', scene);
-        engine.hideLoadingUI();
-        resolve(dummy);
-        reject(dummy);
-      });
-    })
-    .catch(error => {
-      engine.hideLoadingUI();
-      message.error(error);
-      return new Promise<any>((resolve, reject) => {
-        const dummy = new BABYLON.Mesh('dummy', scene);
-        engine.hideLoadingUI();
-        resolve(dummy);
-        reject(dummy);
-      });
+
+    return new Promise<any>((resolve, reject) => {
+
+       BABYLON.SceneLoader.ImportMeshAsync(null, 'assets/models/', 'kompakkt.babylon', this.scene, function(progress) {
+
+        if (progress.lengthComputable) {
+          engine.loadingUIText = (progress.loaded * 100 / progress.total).toFixed() + '%';
+        }
+      })
+        .then(function(result) {
+          // Streaming sound using HTML5 Audio element
+
+          engine.hideLoadingUI();
+          resolve(result);
+        },    function(error) {
+
+          engine.hideLoadingUI();
+          message.error(error);
+          reject(error);
+        });
     });
   }
 
@@ -402,7 +397,6 @@ export class BabylonService {
 
         engine.hideLoadingUI();
         resolve(ground);
-        reject(ground);
       };
       img.src = rootUrl;
     });
@@ -462,8 +456,7 @@ export class BabylonService {
         });
         panel.addControl(this.slider);
 
-
-        let playing = false;
+        const playing = false;
 
         scene.onPointerUp = () => {
           if (videoTexture.video.paused) {
@@ -477,10 +470,9 @@ export class BabylonService {
           const dummy = new BABYLON.Mesh('dummy', scene);
           engine.hideLoadingUI();
           resolve(dummy);
-          reject(dummy);
         })
-          .then(result => resolve(result))
-          .catch(error => reject(error));
+          .then(resolve)
+          .catch(reject);
       });
     });
   }
