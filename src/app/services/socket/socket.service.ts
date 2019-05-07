@@ -100,7 +100,9 @@ export class SocketService {
         if (newAnnotation) {
           this.knownAnnotations.push(newAnnotation);
           if (this.inSocket) {
-            socket.emit('createAnnotation', [this.socketRoom, newAnnotation]);
+            socket.emit('createAnnotation', {
+              annotation: newAnnotation, user: this.getOwnSocketData().user,
+            });
             this.drawMarker(newAnnotation);
           }
         }
@@ -113,7 +115,9 @@ export class SocketService {
         if (this.inSocket) {
           const removedAnnotation = this.knownAnnotations
             .find(annotation => !newList.includes(annotation));
-          socket.emit('deleteAnnotation', [this.socketRoom, removedAnnotation]);
+          socket.emit('deleteAnnotation', {
+            annotation: removedAnnotation, user: this.getOwnSocketData().user,
+          });
           this.redrawMarker();
         }
       } else {
@@ -129,7 +133,9 @@ export class SocketService {
               this.knownAnnotations.splice(indexOfChanged, 1, changedAnnotation);
             }
             if (this.inSocket) {
-              socket.emit('editAnnotation', [this.socketRoom, changedAnnotation]);
+              socket.emit('editAnnotation', {
+                annotation: changedAnnotation, user: this.getOwnSocketData().user,
+              });
             }
           }
         }
