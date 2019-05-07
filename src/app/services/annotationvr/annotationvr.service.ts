@@ -155,9 +155,9 @@ export class AnnotationvrService {
 
   private previousAnnotation() {
 
-    if (this.annotationService.annotations.length) {
+    if (this.annotationService.getCurrentAnnotations().length) {
       if (this.actualRanking === 0) {
-        this.actualRanking = this.annotationService.annotations.length;
+        this.actualRanking = this.annotationService.getCurrentAnnotations().length;
       }
       if (this.actualRanking !== 0) {
         this.actualRanking = this.actualRanking - 1;
@@ -166,21 +166,21 @@ export class AnnotationvrService {
     if (this.actualRanking < 0) {
       this.actualRanking = 0;
     }
-    if (this.actualRanking > this.annotationService.annotations.length) {
-      this.actualRanking = this.annotationService.annotations.length;
+    if (this.actualRanking > this.annotationService.getCurrentAnnotations().length) {
+      this.actualRanking = this.annotationService.getCurrentAnnotations().length;
     }
     this.getAction(this.actualRanking);
   }
 
   private nextAnnotation() {
 
-    if (this.annotationService.annotations.length) {
-      if (this.actualRanking > this.annotationService.annotations.length - 1) {
-        this.actualRanking = this.annotationService.annotations.length - 1;
+    if (this.annotationService.getCurrentAnnotations().length) {
+      if (this.actualRanking > this.annotationService.getCurrentAnnotations().length - 1) {
+        this.actualRanking = this.annotationService.getCurrentAnnotations().length - 1;
       } else {
         this.actualRanking = this.actualRanking + 1;
       }
-      if (this.actualRanking === this.annotationService.annotations.length) {
+      if (this.actualRanking === this.annotationService.getCurrentAnnotations().length) {
         this.actualRanking = 0;
       }
     } else {
@@ -189,7 +189,7 @@ export class AnnotationvrService {
     if (this.actualRanking < 1) {
       this.actualRanking = 0;
     }
-    if (this.actualRanking > this.annotationService.annotations.length) {
+    if (this.actualRanking > this.annotationService.getCurrentAnnotations().length) {
       this.actualRanking = 0;
     }
     this.getAction(this.actualRanking);
@@ -197,10 +197,10 @@ export class AnnotationvrService {
 
   private getAction(index: number) {
 
-    if (this.annotationService.annotations.length) {
+    if (this.annotationService.getCurrentAnnotations().length) {
       // FOR VR-HUD
 
-      this.text1.text = this.annotationService.annotations[index].body.content.title;
+      this.text1.text = this.annotationService.getCurrentAnnotations()[index].body.content.title;
 
       let cameraVector;
       let i = 1;
@@ -211,7 +211,7 @@ export class AnnotationvrService {
         } else {
           i++;
 
-          const annoID = this.annotationService.annotations[index]['_id'] + '_pick';
+          const annoID = this.annotationService.getCurrentAnnotations()[index]['_id'] + '_pick';
 
           if (annoID === mesh.name) {
             // console.log("Active-Camera - Before Animation");

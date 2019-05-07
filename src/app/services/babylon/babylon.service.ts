@@ -1,6 +1,7 @@
 import {DOCUMENT} from '@angular/common';
 import {EventEmitter, Inject, Injectable, Output} from '@angular/core';
 import * as BABYLON from 'babylonjs';
+import * as GUI from 'babylonjs-gui';
 import 'babylonjs-loaders';
 import {ReplaySubject} from 'rxjs';
 
@@ -8,12 +9,6 @@ import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreen
 import {MessageService} from '../message/message.service';
 
 import {LoadingScreen} from './loadingscreen';
-import ActionEvent = BABYLON.ActionEvent;
-
-/**
- * @author Zoe Schubert
- * @author Jan G. Wieners
- */
 
 @Injectable({
   providedIn: 'root',
@@ -25,6 +20,9 @@ export class BabylonService {
 
   private scene: BABYLON.Scene;
   private engine: BABYLON.Engine;
+
+  private analyser: BABYLON.Analyser;
+
   private VRHelper: BABYLON.VRExperienceHelper;
 
   private CanvasSubject = new ReplaySubject<HTMLCanvasElement>();
@@ -58,6 +56,12 @@ export class BabylonService {
   // FOR VR-HUD
   public vrJump: boolean;
 
+  public audio: BABYLON.Sound;
+  private mediaType = '';
+  private slider: GUI.Slider;
+  private currentTime: number;
+  public video: HTMLVideoElement;
+
   constructor(private message: MessageService,
               private loadingScreenHandler: LoadingscreenhandlerService,
               @Inject(DOCUMENT) private document: any) {
@@ -66,12 +70,36 @@ export class BabylonService {
 
       if (newCanvas) {
 
-        this.engine = new BABYLON.Engine(newCanvas, true, {preserveDrawingBuffer: true, stencil: true});
+        this.engine = new BABYLON.Engine(newCanvas, true, {audioEngine: true, preserveDrawingBuffer: true, stencil: true});
         this.scene = new BABYLON.Scene(this.engine);
         this.engine.loadingScreen = new LoadingScreen(newCanvas, '',
                                                       '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
 
+        this.analyser = new BABYLON.Analyser(this.scene);
+        // this.engine.audioEngine.connectToAnalyser(this.analyser);
+        // BABYLON.Engine.audioEngine.audioContext.currentTime
+        BABYLON.Engine.audioEngine['connectToAnalyser'](this.analyser);
+        this.analyser.FFT_SIZE = 32;
+        this.analyser.SMOOTHING = 0.9;
+
         this.scene.registerBeforeRender(() => {
+
+          if (this.mediaType === 'audio' && this.audio) {
+            if (this.audio.isPlaying) {
+              const fft = this.analyser.getByteFrequencyData();
+              const audioMeshes = this.scene.getMeshesByTags('audioCenter');
+              audioMeshes.forEach(mesh => {
+                mesh.scaling = new BABYLON.Vector3((fft[15] / 32), (fft[15] / 32), (fft[15] / 32));
+              });
+              if (BABYLON.Engine.audioEngine.audioContext) {
+                this.currentTime = BABYLON.Engine.audioEngine.audioContext['currentTime'];
+                if (this.slider) {
+                  this.slider.value = (this.slider.value + this.currentTime) / 60;
+                }
+              }
+            }
+
+          }
 
           // VR-Annotation-Text-Walk
           if (this.actualControl && this.selectingControl && !this.selectedControl) {
@@ -131,6 +159,10 @@ export class BabylonService {
         });
       }
     });
+  }
+
+  public setMediaType(type: string) {
+    this.mediaType = type;
   }
 
   public getActiveCamera() {
@@ -220,6 +252,8 @@ export class BabylonService {
 
   public loadModel(rootUrl: string, filename: string): Promise<any> {
 
+    this.mediaType = 'model';
+
     const message = this.message;
     const engine = this.engine;
 
@@ -248,102 +282,199 @@ export class BabylonService {
 
   }
 
-  public loadImage(rootUrl: string) {
-    /*
-    const rootUrlTest = '/assets/img/BYSA.png';
+  private str_pad_left(string, pad, length) {
+    return (new Array(length + 1).join(pad) + string).slice(-length);
+  }
+
+  private getCurrentTime(time: number): string {
+    const minutes = Math.floor(time / 60);
+    const seconds = time - minutes * 60;
+
+    return (this.str_pad_left(minutes, '0', 2) + ':' + this.str_pad_left(seconds, '0', 2));
+  }
+
+  public loadAudio(rootUrl: string): Promise<any> {
 
     const message = this.message;
     const engine = this.engine;
+    const scene = this.scene;
+
+    this.mediaType = 'audio';
 
     engine.displayLoadingUI();
 
     this.scene.meshes.forEach(mesh => mesh.dispose());
     this.scene.meshes = [];
 
-    const diffuseXHR = new XMLHttpRequest();
+    this.audio = new BABYLON.Sound('Music', rootUrl,
+                                   scene, () => {
+        // Sound has been downloaded & decoded
 
-    const img = new Image();
-    img.src = rootUrlTest;
-    img.onload = function(e) {
-      alert(this.width + 'x' + this.height);
-      const ground = BABYLON.Mesh.CreateGround('gnd',
-        this.width / 100,
-        this.height / 100, 1, this.scene);
+    // GUI
+    const advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('UI');
 
-      diffuseXHR.open('GET', rootUrlTest);
-      diffuseXHR.responseType = 'arraybuffer';
-      diffuseXHR.onprogress = function(e) {
-      if (e.lengthComputable) {
-        console.log('diffuse progress: ', e.loaded);
-        engine.loadingUIText = (e.loaded * 100 / e.total).toFixed() + '%';
+    const panel = new GUI.StackPanel();
+    panel.width = '5000px';
+    panel.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+    panel.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+    advancedTexture.addControl(panel);
 
-      }
-    };
-      diffuseXHR.onload = function(e) {
-      if (this.status === 200) {
-          const mypicture = BABYLON.Texture.LoadFromDataString('diffuse',
-            this.response, this.scene);
-          const gndmat = new BABYLON.StandardMaterial('gmat', this.scene);
-          ground.material = gndmat;
-          gndmat.diffuseTexture = mypicture;
+    const buffer = this.audio ? this.audio.getAudioBuffer() : undefined;
+
+    this.currentTime = 0;
+
+    const header = new GUI.TextBlock();
+    if (buffer) {
+      header.text = 'Length: ' + buffer.duration / 60 + ' sec';
+    } else {
+      header.text = 'Can not calculate length.';
+    }
+    header.height = '30px';
+    header.color = 'white';
+    panel.addControl(header);
+
+    this.slider = new GUI.Slider();
+    this.slider.minimum = 0;
+    buffer ? this.slider.maximum = buffer.duration / 60 : this.slider.maximum = 400;
+    this.slider.value = 0;
+    this.slider.height = '20px';
+    this.slider.width = '450px';
+    this.slider.onValueChangedObservable.add(() => {
+      header.text = 'Current time: ' + this.getCurrentTime(this.slider.value) + ' min.';
+    });
+    panel.addControl(this.slider);
+
+      },
+      null);
+
+
+    return new Promise<any>((resolve, reject) => {
+
+       BABYLON.SceneLoader.ImportMeshAsync(null, 'assets/models/', 'kompakkt.babylon', this.scene, function(progress) {
+
+        if (progress.lengthComputable) {
+          engine.loadingUIText = (progress.loaded * 100 / progress.total).toFixed() + '%';
+        }
+      })
+        .then(function(result) {
+          // Streaming sound using HTML5 Audio element
+
           engine.hideLoadingUI();
+          resolve(result);
+        },    function(error) {
 
-      }
-    };
-      diffuseXHR.send();
-    };*/
+          engine.hideLoadingUI();
+          message.error(error);
+          reject(error);
+        });
+    });
+  }
 
-    /*
-        const mypicture = new BABYLON.Texture('https://crossorigin.me/' + rootUrl, this.scene);
+  public loadImage(rootUrl: string): Promise<any> {
 
-        const ground = BABYLON.Mesh.CreateGround('gnd', width / 100, height / 100, 1, this.scene);
+    const message = this.message;
+    const engine = this.engine;
+    const scene = this.scene;
 
-        const gndmat = new BABYLON.StandardMaterial('gmat', this.scene);
+    engine.displayLoadingUI();
+    this.mediaType = 'image';
+
+    this.scene.meshes.forEach(mesh => mesh.dispose());
+    this.scene.meshes = [];
+
+    return new Promise<any>((resolve, reject) => {
+
+      const img = new Image();
+      img.onload = () => {
+        const width = img.width;
+        const height = img.height;
+
+        const mypicture = new BABYLON.Texture(rootUrl, scene);  // rem about CORS rules for cross-domain
+        const ground = BABYLON.Mesh.CreateGround('gnd', width / 10, height / 10, 1, scene);
+        const gndmat = new BABYLON.StandardMaterial('gmat', scene);
         ground.material = gndmat;
         gndmat.diffuseTexture = mypicture;
 
         engine.hideLoadingUI();
+        resolve(ground);
+      };
+      img.src = rootUrl;
+    });
+  }
 
-        const ground = BABYLON.Mesh.CreateGround('gnd', width / 100, height / 100, 1, this.scene);
+  public loadVideo(rootUrl: string): Promise<any>  {
 
-        const material = new BABYLON.StandardMaterial('texture1', this.scene);
-        material.emissiveColor = new BABYLON.Color3(0.2, 0.2, 0.2);
-        //var texture = new BABYLON.Texture("https://upload.wikimedia.org/wikipedia/commons/b/ba/Dent_de_Vaulion_-_360_degree_panorama.jpg", scene);
-        const texture = new BABYLON.Texture('https://crossorigin.me/' + rootUrl, this.scene);
-        console.log('Texture from' + 'https://crossorigin.me/', rootUrl, texture);
-        material.diffuseTexture = texture;
-        material.diffuseTexture.coordinatesMode = BABYLON.Texture.SPHERICAL_MODE;
-        material.backFaceCulling = false;
-        ground.material = material;
-        engine.hideLoadingUI();*/
+    const message = this.message;
+    const engine = this.engine;
+    const scene = this.scene;
 
-    // sphere1.infiniteDistance = true;
+    this.mediaType = 'video';
 
-    /*
-        BABYLON.Tools.LoadImage(rootUrl, function () {
-          console.log('loaded');
-        }, function (item, err) {
-          console.log('error:', err, item, 'not loaded');
+    engine.displayLoadingUI();
+
+    this.scene.meshes.forEach(mesh => mesh.dispose());
+    this.scene.meshes = [];
+
+    // Video material
+    const videoMat = new BABYLON.StandardMaterial('textVid', scene);
+    const videoTexture = new BABYLON.VideoTexture('video', rootUrl, scene, false);
+    videoMat.diffuseTexture = videoTexture;
+    videoMat.backFaceCulling = false;
+
+    return new Promise<any>((resolve, reject) => {
+      videoTexture.onLoadObservable.add(tex => {
+        this.video = videoTexture.video;
+        const width = tex.getSize().width;
+        const height = tex.getSize().height;
+        const ground = BABYLON.Mesh.CreateGround('gnd', width / 10, height / 10, 1, scene);
+        ground.material = videoMat;
+        // GUI
+        const advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('UI');
+
+        const panel = new GUI.StackPanel();
+        panel.width = '5000px';
+        panel.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+        panel.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+        advancedTexture.addControl(panel);
+
+        this.currentTime = 0;
+
+        const header = new GUI.TextBlock();
+        header.text = 'Length: ' + videoTexture.video ? String((videoTexture.video.duration)) : '300' + ' sec';
+        header.height = '30px';
+        header.color = 'white';
+        panel.addControl(header);
+
+        this.slider = new GUI.Slider();
+        this.slider.minimum = 0;
+        videoTexture.video ? this.slider.maximum = videoTexture.video.duration / 60 : this.slider.maximum = 400;
+        this.slider.value = 0;
+        this.slider.height = '20px';
+        this.slider.width = '450px';
+        this.slider.onValueChangedObservable.add(() => {
+          header.text = 'Current time: ' + this.getCurrentTime(this.video.currentTime) + ' min.';
         });
+        panel.addControl(this.slider);
 
-        const assetsManager = new BABYLON.AssetsManager(this.scene);
-        const imageTask = assetsManager.addImageTask('image task', rootUrl);
-        imageTask.onSuccess = function (task) {
-          console.log(task.image.width, 'assetManager');
+        const playing = false;
+
+        scene.onPointerUp = () => {
+          if (videoTexture.video.paused) {
+            videoTexture.video.play();
+          } else {
+            videoTexture.video.pause();
+          }
         };
-    */
 
-    /*
-        const mypicture = new BABYLON.Texture(rootUrl, this.scene);
-
-        const ground = BABYLON.Mesh.CreateGround('gnd', width / 100, height / 100, 1, this.scene);
-
-        const gndmat = new BABYLON.StandardMaterial('gmat', this.scene);
-        ground.material = gndmat;
-        gndmat.diffuseTexture = mypicture;
-
-        engine.hideLoadingUI();*/
-
+        new Promise<any>((resolve, reject) => {
+          const dummy = new BABYLON.Mesh('dummy', scene);
+          engine.hideLoadingUI();
+          resolve(dummy);
+        })
+          .then(resolve)
+          .catch(reject);
+      });
+    });
   }
 
   public saveScene(): void {

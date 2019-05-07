@@ -1,4 +1,4 @@
-import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
+import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import {Component, OnInit, QueryList, ViewChildren} from '@angular/core';
 import {MatRadioChange} from '@angular/material';
 import {saveAs} from 'file-saver';
@@ -71,13 +71,12 @@ export class AnnotationsEditorComponent implements OnInit {
   }
 
   drop(event: CdkDragDrop<string[]>) {
-    moveItemInArray(this.annotationService.annotations, event.previousIndex, event.currentIndex);
-    this.annotationService.changedRankingPositions(this.annotationService.annotations);
-    this.annotationService.redrawMarker();
+    this.annotationService
+      .moveAnnotationByIndex(event.previousIndex, event.currentIndex);
   }
 
   exportAnnotations() {
-    saveAs(new Blob([JSON.stringify(this.annotationService.annotations)],
+    saveAs(new Blob([JSON.stringify(this.annotationService.getCurrentAnnotations())],
                     {type: 'text/plain;charset=utf-8'}),
            'annotations.json');
   }

@@ -115,6 +115,34 @@ export class CameraService {
     }
   }
 
+  public setCamerato2DMode() {
+  // This positions the camera
+    this.arcRotateCamera.setPosition(new BABYLON.Vector3(0, 0, -50));
+    this.arcRotateCamera.alpha = 0;
+    this.arcRotateCamera.beta = 0;
+
+    this.arcRotateCamera.lowerAlphaLimit = 0;
+    this.arcRotateCamera.upperAlphaLimit = 0;
+    this.arcRotateCamera.lowerBetaLimit = 0;
+    this.arcRotateCamera.upperBetaLimit = 0;
+  }
+
+  public resetCameraMode() {
+
+    this.arcRotateCamera.dispose();
+    this.arcRotateCamera = this.babylonService.createArcRotateCam(0, 10, 100);
+    this.arcRotateCamera.allowUpsideDown = false;
+    this.arcRotateCamera.panningSensibility = 25;
+    this.arcRotateCamera.keysUp.push(87);
+    this.arcRotateCamera.keysDown.push(83);
+    this.arcRotateCamera.keysLeft.push(65);
+    this.arcRotateCamera.keysRight.push(68);
+
+    this.arcRotateCamera.attachControl(this.canvas, false);
+    this.arcRotateCamera.checkCollisions = true;
+    this.arcRotateCamera.collisionRadius = new BABYLON.Vector3(4, 4, 4);
+
+  }
   /*
    private setCameraDefaults(camera: any): void {
 

@@ -45,6 +45,7 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   public showBackground = false;
   public showLights = false;
   public isFallbackModelLoaded = false;
+  public mediaType: string;
 
   private cameraPositionInitial: {
     cameraType: string;
@@ -78,6 +79,8 @@ export class ObjectFeatureSettingsComponent implements OnInit {
 
   ngOnInit() {
 
+    this.mediaType = this.processingService.getCurrentMediaType();
+
     this.processingService.loaded.subscribe(isLoaded => {
       this.isLoaded = isLoaded;
       if (isLoaded) {
@@ -107,6 +110,10 @@ export class ObjectFeatureSettingsComponent implements OnInit {
 
     this.processingService.fallbackModelLoaded.subscribe(fallback => {
       this.isFallbackModelLoaded = fallback;
+    });
+
+    this.processingService.Observables.actualMediaType.subscribe(mediaType => {
+      this.mediaType = mediaType;
     });
   }
 
@@ -446,6 +453,11 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   }
 
   private async setCamera() {
+
+    if(this.mediaType !== 'image' && this.mediaType !== 'video') {
+
+     // this.cameraService.resetCameraMode();
+
     if (this.activeModel.settings.cameraPositionInitial === undefined) {
       this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
       // TODO: Camera Setting Interface
@@ -479,6 +491,9 @@ export class ObjectFeatureSettingsComponent implements OnInit {
         this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
         this.activeModel.settings.cameraPositionInitial.push(this.cameraService.getActualCameraPosInitialView());
       }
+    }
+    } else {
+   //   this.cameraService.setCamerato2DMode();
     }
   }
 
@@ -580,9 +595,35 @@ export class ObjectFeatureSettingsComponent implements OnInit {
 
   private async setSettings() {
 
+    if (this.mediaType === 'image' || this.mediaType === 'video') {
+      console.log('2DMode');
+      this.cameraService.setCamerato2DMode();
+    } else {
+      this.cameraService.resetCameraMode();
+    }
     // Default Model
-    if (this.isDefault) {
-      console.log(this.isFallbackModelLoaded);
+    if (this.isDefault || this.isFallbackModelLoaded || this.mediaType === 'audio'
+      || this.mediaType === 'video' || this.mediaType === 'audio') {
+
+      // during upload process
+      if (this.isModelOwner && !this.isFinished) {
+
+        if (this.mediaType === 'audio') {
+          this.activeModel['settings'] = this.getDefaultLoadSettings();
+          this.mongohandlerService
+            .updateSettings(this.activeModel._id, this.getDefaultLoadSettings())
+            .then(result => {
+              console.log(result);
+            });
+        } else {
+            this.activeModel['settings'] = this.getDefaultLoadSettings(true);
+            this.mongohandlerService
+              .updateSettings(this.activeModel._id, this.getDefaultLoadSettings(true))
+              .then(result => {
+                console.log(result);
+              });
+        }
+      }
 
       this.isFallbackModelLoaded ?
         this.activeModel['settings'] = this.getDefaultLoadSettings(true) :

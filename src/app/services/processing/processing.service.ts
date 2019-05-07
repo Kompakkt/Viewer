@@ -1,10 +1,11 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
 import * as BABYLON from 'babylonjs';
+import {ActionManager, ExecuteCodeAction, Mesh as IMesh} from 'babylonjs';
 import {BehaviorSubject} from 'rxjs';
 import {ReplaySubject} from 'rxjs/internal/ReplaySubject';
 
 import {environment} from '../../../environments/environment';
-import {ICompilation, IModel} from '../../interfaces/interfaces';
+import {IAnnotation, ICompilation, IModel} from '../../interfaces/interfaces';
 import {ActionService} from '../action/action.service';
 import {BabylonService} from '../babylon/babylon.service';
 import {CameraService} from '../camera/camera.service';
@@ -27,6 +28,7 @@ export class ProcessingService {
     actualModel: new ReplaySubject<IModel>(),
     actualModelMeshes: new ReplaySubject<BABYLON.Mesh[]>(),
     actualCollection: new ReplaySubject<ICompilation | undefined>(),
+    actualMediaType: new ReplaySubject<string>(),
   };
 
   public Observables = {
@@ -35,6 +37,7 @@ export class ProcessingService {
     actualModel: this.Subjects.actualModel.asObservable(),
     actualModelMeshes: this.Subjects.actualModelMeshes.asObservable(),
     actualCollection: this.Subjects.actualCollection.asObservable(),
+    actualMediaType: this.Subjects.actualMediaType.asObservable(),
   };
 
   private isFirstLoad = true;
@@ -107,6 +110,11 @@ export class ProcessingService {
 
   public getCurrentCompilation(): ICompilation | null {
     return this.Observables.actualCollection.source['_events'].slice(-1)[0];
+  }
+
+  public getCurrentMediaType(): string {
+    return this.Observables.actualMediaType.source['_events'].slice(-1)[0] ?
+      this.Observables.actualMediaType.source['_events'].slice(-1)[0] : '';
   }
 
   public updateActiveModel(model: IModel) {
@@ -211,7 +219,7 @@ export class ProcessingService {
     this.mongoHandlerService.getAllCompilations()
       .then(compilation => {
         this.Subjects.collections.next(compilation);
-      }, error => {
+      },    error => {
         this.message.error('Connection to object server refused.');
       });
   }
@@ -220,7 +228,7 @@ export class ProcessingService {
     this.mongoHandlerService.getAllModels()
       .then(models => {
         this.Subjects.models.next(models);
-      }, error => {
+      },    error => {
         this.message.error('Connection to object server refused.');
       });
   }
@@ -234,7 +242,7 @@ export class ProcessingService {
         this.isLoaded = true;
         this.loaded.emit(true);
         this.metadataService.addDefaultMetadata();
-      }, error => {
+      },    error => {
         this.message.error('Loading of default model not possible');
       });
   }
@@ -261,7 +269,7 @@ export class ProcessingService {
           this.updateActiveCollection(compilation);
           const model = compilation.models[0];
           if (isModel(model)) this.fetchModelData(model._id);
-        }, error => {
+        },    error => {
           this.message.error('Connection to object server to load collection refused.');
         });
     }
@@ -275,10 +283,10 @@ export class ProcessingService {
             this.isLoaded = true;
             this.loaded.emit(true);
             console.log('Load:', result);
-          }, error => {
+          },    error => {
             this.message.error('Loading of this Model is not possible');
           });
-      }, error => {
+      },    error => {
         this.message.error('Connection to object server to load model refused.');
       });
   }
@@ -297,54 +305,88 @@ export class ProcessingService {
         switch (newModel.mediaType) {
           case 'model':
             await this.babylonService.loadModel(URL +
-              newModel.processed[this.quality].substring(0, newModel.processed[this.quality].lastIndexOf('/')) + '/',
-              newModel.processed[this.quality].replace(/^.*[\\\/]/, ''))
+              newModel.processed[this.quality].substring(0, newModel.processed[this.quality]
+                .lastIndexOf('/')) + '/',
+                                                newModel.processed[this.quality]
+              .replace(/^.*[\\\/]/, ''))
               .then(async model => {
                 // Warte auf Antwort von loadModel,
                 // da loadModel ein Promise<object> von ImportMeshAync übergibt
                 // model ist hier das neu geladene Model
+
                 this.updateActiveModel(newModel);
                 this.updateActiveModelMeshes(model.meshes);
+                this.Subjects.actualMediaType.next('model');
+
               });
             break;
 
           case 'image':
 
-            this.Subjects.actualModel.next(newModel);
-            await this.loadFallbackModel();
-            /*
-            // TODO
-            this.updateActiveModel(newModel);
-
-            //  this.imagesource.emit(newModel.processed[this.quality]);
-
-            console.log('ein Bild!', newModel.processed[this.quality]);
-            const image = new Image();
-            //  image.src = newModel.processed[this.quality];
-            console.log('Bild', image);
-
-            /*
-            const reader = new FileReader();
-            reader.readAsDataURL(newModel.processed[this.quality]);
-            reader.onload =_event => {
-              console.log('OHOHOH', event);
-            };*/
+            await this.babylonService.loadImage(this.baseUrl + newModel.processed[this.quality])
+              .then(async model => {
+                this.updateActiveModel(newModel);
+                const mesh: BABYLON.Mesh[] = [];
+                mesh.push(model);
+                this.updateActiveModelMeshes(mesh);
+                this.Subjects.actualMediaType.next('image');
+              });
 
             break;
 
           case 'audio':
-            this.Subjects.actualModel.next(newModel);
-            await this.loadFallbackModel();
+            await this.babylonService.loadAudio(this.baseUrl + newModel.processed[this.quality])
+              .then(async model => {
+
+                const center = BABYLON.MeshBuilder.CreateBox('audioCenter', {size: 1}, this.babylonService.getScene());
+                BABYLON.Tags.AddTagsTo(center, 'audioCenter');
+                center.isVisible = false;
+                model.meshes.forEach(mesh => {
+                  BABYLON.Tags.AddTagsTo(mesh, 'audio');
+                  mesh.parent = center;
+                  mesh.isPickable = true;
+
+                  mesh.actionManager = new ActionManager(this.babylonService.getScene());
+                  mesh.actionManager.registerAction(new ExecuteCodeAction(
+                    ActionManager.OnPickTrigger, (() => {
+                      console.log('click');
+                      const buffer = this.babylonService.audio.getAudioBuffer();
+                      //console.log('dauer', buffer.duration / 60);
+                      this.babylonService.audio.isPlaying ?
+                        this.babylonService.audio.pause() : this.babylonService.audio.play();
+
+                    })));
+                });
+
+                this.updateActiveModel(newModel);
+                const mesh: BABYLON.Mesh[] = [];
+                mesh.push(center);
+                this.updateActiveModelMeshes(mesh);
+                this.Subjects.actualMediaType.next('audio');
+
+              });
+
             break;
 
           case 'video':
-            this.Subjects.actualModel.next(newModel);
-            await this.loadFallbackModel();
+
+            await this.babylonService.loadVideo(URL + newModel.processed[this.quality])
+              .then(async model => {
+
+                this.updateActiveModel(newModel);
+                const mesh: BABYLON.Mesh[] = [];
+                mesh.push(model);
+                this.updateActiveModelMeshes(mesh);
+                this.Subjects.actualMediaType.next('video');
+
+              });
             break;
 
           case 'text':
             this.Subjects.actualModel.next(newModel);
             await this.loadFallbackModel();
+            this.Subjects.actualMediaType.next('text');
+
             break;
 
           default:
@@ -367,8 +409,7 @@ export class ProcessingService {
         this.updateActiveModelMeshes(model.meshes);
         this.isFallbackModelLoaded = true;
         this.fallbackModelLoaded.emit(true);
-        this.isDefaultModelLoaded = true;
-        this.defaultModelLoaded.emit(true);
+        this.Subjects.actualMediaType.next('model');
       });
   }
 

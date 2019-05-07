@@ -18,7 +18,8 @@ export class ContentComponent implements OnInit {
   public showContentBrowser: boolean;
 
   constructor(private overlayService: OverlayService,
-              public processingService: ProcessingService) {
+              public processingService: ProcessingService,
+              private cdRef: ChangeDetectorRef) {
   }
 
   ngOnInit() {
@@ -42,6 +43,7 @@ export class ContentComponent implements OnInit {
 
     this.processingService.showCatalogue.subscribe(showCatalogue => {
       this.showContentBrowser = showCatalogue;
+      this.cdRef.detectChanges();
     });
   }
 
