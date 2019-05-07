@@ -184,6 +184,7 @@ export class AnnotationService {
     } else {
       this.annotations.push(this.createDefaultAnnotation());
       this.selectedAnnotation.next(this.annotations[this.annotations.length - 1]._id);
+      this.updateCurrentAnnotationsSubject();
     }
     this.initializeAnnotationMode();
     this.toggleAnnotationSource(false);

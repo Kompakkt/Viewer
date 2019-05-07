@@ -242,6 +242,7 @@ export class SocketService {
       recipient: this.socketRoom,
     };
     this.socket.emit('roomDataRequest', emitRequest);
+    this.redrawMarker();
   }
 
   public disconnectSocket() {
