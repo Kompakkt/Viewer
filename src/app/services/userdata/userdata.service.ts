@@ -24,12 +24,6 @@ export class UserdataService {
   public currentUserData: IUserData | ILDAPData = {
     fullname: 'Guest',
     username: 'guest',
-    _id: 'guest',
-  };
-
-  public socketUserData: IUserData = {
-    fullname: 'Guest',
-    username: 'guest',
     _id: this.mongoService.generateObjectId(),
   };
 
@@ -51,12 +45,6 @@ export class UserdataService {
     this.getUserData()
       .then(() => console.log('Logged in user with sessionID cookie', this.currentUserData))
       .catch(() => console.log('No session cookie. User not logged in'));
-
-    this.processingService.firstLoad.subscribe(firstLoad => {
-      if (firstLoad) {
-        this.initUserDataForSocket();
-      }
-    });
 
     this.processingService.loggedIn.subscribe(loggedIn => {
       this.loggedIn = loggedIn;
@@ -158,16 +146,12 @@ export class UserdataService {
     if (this.currentUserData.fullname !== 'Guest') {
       return this.currentUserData;
     } else {
-      return this.socketUserData;
-    }
-  }
-
-  public initUserDataForSocket() {
-    this.socketUserData = this.currentUserData._id !== 'guest' ? this.currentUserData :
-      this.socketUserData = {
-        fullname: 'Kompakkt Cat',
-        username: 'komkcat',
-        _id: this.mongoService.generateObjectId(),
+      // TODO better names for guests
+      return {
+        fullname: 'Guest',
+        username: 'guest',
+        _id: this.currentUserData._id,
       };
+    }
   }
 }

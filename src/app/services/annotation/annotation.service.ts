@@ -19,7 +19,6 @@ import {MessageService} from '../message/message.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
 import {OverlayService} from '../overlay/overlay.service';
 import {ProcessingService} from '../processing/processing.service';
-import {SocketService} from '../socket/socket.service';
 import {UserdataService} from '../userdata/userdata.service';
 
 @Injectable({
@@ -29,7 +28,9 @@ import {UserdataService} from '../userdata/userdata.service';
 export class AnnotationService {
 
   private isDemoMode: boolean;
-  private isBroadcasting: boolean;
+  private isDefaultModelLoaded: boolean;
+
+  public isBroadcasting: boolean;
 
   private isMeshSettingsMode: boolean;
   public isAnnotatingAllowed = false;
@@ -68,15 +69,16 @@ export class AnnotationService {
               private cameraService: CameraService,
               private dialog: MatDialog,
               private userdataService: UserdataService,
-              private socketService: SocketService,
               private overlayService: OverlayService) {
 
     this.isCollectionLoaded = this.processingService.isCollectionLoaded;
     this.isMeshSettingsMode = this.overlayService.editorIsOpen;
     this.isDemoMode = this.processingService.isDefaultModelLoaded
       || this.processingService.isFallbackModelLoaded;
+
     this.isCollectionInputSelected = false;
     this.isannotationSourceCollection = false;
+    this.isDefaultModelLoaded = this.processingService.isDefaultModelLoaded;
 
     this.processingService.Observables.actualModel.subscribe(actualModel => {
       this.actualModel = actualModel;
@@ -108,6 +110,7 @@ export class AnnotationService {
 
     this.processingService.defaultModelLoaded.subscribe(defaultLoad => {
       this.isDemoMode = defaultLoad;
+      this.isDefaultModelLoaded = defaultLoad;
     });
 
     this.processingService.fallbackModelLoaded.subscribe(fallback => {
@@ -116,10 +119,6 @@ export class AnnotationService {
 
     this.annotationmarkerService.isSelectedAnnotation.subscribe(selectedAnno => {
       this.selectedAnnotation.next(selectedAnno);
-    });
-
-    this.socketService.inSocket.subscribe(broadcasting => {
-      this.isBroadcasting = broadcasting;
     });
 
   }
@@ -305,6 +304,15 @@ export class AnnotationService {
     this.annotations = [...sortedDefault, ...sortedCompilation];
 
     await this.changedRankingPositions();
+  }
+
+  // For Broadcasting
+  public handleReceivedAnnotation(newAnnotation: IAnnotation) {
+    // TODO
+  }
+
+  public deleteRequestAnnotation(newAnnotation: IAnnotation) {
+    // TODO
   }
 
   // Die Annotationsfunktionalität wird zum aktuellen Modell hinzugefügt
@@ -531,7 +539,7 @@ export class AnnotationService {
         this.annotationmarkerService.createAnnotationMarker(annotation, color);
       }
     } else {
-      this.socketService.redrawMarker();
+      return;
     }
   }
 
@@ -540,7 +548,7 @@ export class AnnotationService {
       const color = 'black';
       this.annotationmarkerService.createAnnotationMarker(newAnnotation, color);
     } else {
-      this.socketService.drawMarker(newAnnotation);
+      return;
     }
   }
 
@@ -620,9 +628,8 @@ export class AnnotationService {
     emitBool = (this.isObjectFeaturesOpen && !this.isMeshSettingsMode);
     if (emitBool && !this.isCollectionInputSelected) {
       emitBool = (this.userdataService.isModelOwner && !this.processingService.isCollectionLoaded ||
-        this.isDemoMode);
+        this.isDefaultModelLoaded);
     }
-    this.socketService.setBroadcastingAllowance(emitBool && this.isDemoMode);
     this.isAnnotatingAllowed = emitBool;
     this.annotationMode(emitBool);
     this.annnotatingAllowed.emit(emitBool);
