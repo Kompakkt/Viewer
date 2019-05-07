@@ -343,7 +343,6 @@ export class ProcessingService {
                 const mesh: BABYLON.Mesh[] = [];
                 mesh.push(model);
                 this.updateActiveModelMeshes(mesh);
-                this.Subjects.actualMediaType.next('audio');
 
                 const center = BABYLON.MeshBuilder.CreateBox('audioCenter', {size: 1}, this.babylonService.getScene());
                 BABYLON.Tags.AddTagsTo(center, 'audioCenter');
@@ -364,6 +363,7 @@ export class ProcessingService {
 
                     })));
                 });
+                this.Subjects.actualMediaType.next('audio');
 
               });
 
