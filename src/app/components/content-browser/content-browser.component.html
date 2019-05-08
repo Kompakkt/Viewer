@@ -25,30 +25,35 @@
       </mat-card-content>
     </mat-card>
 
-    <mat-card *ngIf="!isObjectCategory">
+    <div *ngIf="!isObjectCategory">
 
-      <mat-card-header>Public Collections</mat-card-header>
+      <mat-card>
 
-      <mat-card-content>
+        <mat-card-header>Public Collections</mat-card-header>
 
-        <mat-checkbox *ngIf="this.userdataService.personalCollections.length > 0" [checked]="filterPersonalCollections"
-                      (change)="filterPersonalCollections = !filterPersonalCollections">Show only my Collections
-        </mat-checkbox>
-        <br>
+        <mat-card-content>
 
-        <mat-form-field>
-          <mat-select (selectionChange)="processingService.fetchAndLoad(undefined, $event.value._id, undefined)"
-                      placeholder="Choose Collection">
-            <mat-option *ngFor="let collection of filterPersonalCollections ?
+          <mat-checkbox *ngIf="this.userdataService.personalCollections.length > 0"
+                        [checked]="filterPersonalCollections"
+                        (change)="filterPersonalCollections = !filterPersonalCollections">Show only my Collections
+          </mat-checkbox>
+          <br>
+
+          <mat-form-field class="full-width">
+            <mat-select (selectionChange)="processingService.fetchAndLoad(undefined, $event.value._id, undefined)"
+                        placeholder="Choose Collection">
+              <mat-option *ngFor="let collection of filterPersonalCollections ?
               userdataService.personalCollections :
               processingService.Observables.collections | async"
-                        [value]="collection">
-              {{collection.name}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+                          [value]="collection">
+                {{collection.name}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
 
-      </mat-card-content>
+        </mat-card-content>
+
+      </mat-card>
 
       <mat-card>
 
@@ -68,7 +73,7 @@
         </mat-card-content>
 
       </mat-card>
-    </mat-card>
+    </div>
 
     <div *ngIf="isObjectCategory && processingService.Observables.models | async">
 
@@ -80,7 +85,8 @@
 
         <mat-card-content>
 
-          <mat-checkbox id="checkbox-show-my-objects" *ngIf="this.userdataService.userOwnedFinishedModels.length" [checked]="filterPersonalObjects"
+          <mat-checkbox id="checkbox-show-my-objects" *ngIf="this.userdataService.userOwnedFinishedModels.length"
+                        [checked]="filterPersonalObjects"
                         (change)="filterPersonalObjects = !filterPersonalObjects">Show only my Objects
           </mat-checkbox>
 
@@ -104,7 +110,7 @@
                         (change)="showText = !showText">Text
           </mat-checkbox>
 
-          <mat-form-field id="dropdown-filtered-objects">
+          <mat-form-field class="full-width">
             <mat-select
               (selectionChange)="processingService.fetchAndLoad($event.value._id, undefined, !isObjectCategory)"
               placeholder="Choose Object">
