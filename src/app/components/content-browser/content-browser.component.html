@@ -1,74 +1,76 @@
-<mat-card *ngIf="!isLoggedIn">
-  <mat-card-content>
-    <p>Please Login with your university account to see data from the repository.</p>
-    <button class="fullwidth-button"
-            mat-raised-button
-            (click)="loginDialog()">
-      <mat-icon>account_circle</mat-icon>
-      <span>Login</span>
-    </button>
-  </mat-card-content>
-</mat-card>
+<div id="content-browser">
 
-<mat-card *ngIf="isLoggedIn">
-
-  <mat-card-content>
-    <mat-radio-group aria-label="Select Browsing Category" (change)="changeCategory($event)"
-                     [disabled]="!processingService.Observables.collections | async">
-                                <!--TODO is this the correct way to check if collections exist? -->
-      <mat-radio-button value="obj" [checked]=isObjectCategory>Object</mat-radio-button>
-      <mat-radio-button value="col">Collection</mat-radio-button></mat-radio-group>
-  </mat-card-content>
-
-
-  <mat-card *ngIf="!isObjectCategory">
-
-    <mat-card-header>Public Collections</mat-card-header>
-
+  <mat-card *ngIf="!isLoggedIn">
     <mat-card-content>
-
-      <mat-checkbox *ngIf="this.userdataService.personalCollections.length > 0" [checked]="filterPersonalCollections"
-                    (change)="filterPersonalCollections = !filterPersonalCollections">Show only my Collections
-      </mat-checkbox>
-      <br>
-
-      <mat-form-field>
-        <mat-select (selectionChange)="processingService.fetchAndLoad(undefined, $event.value._id, undefined)"
-                    placeholder="Choose Collection">
-          <mat-option *ngFor="let collection of filterPersonalCollections ?
-              userdataService.personalCollections :
-              processingService.Observables.collections | async"
-                      [value]="collection">
-            {{collection.name}}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-
+      <p>Please Login with your university account to see data from the repository.</p>
+      <button class="fullwidth-button"
+              mat-raised-button
+              (click)="loginDialog()">
+        <mat-icon>account_circle</mat-icon>
+        <span>Login</span>
+      </button>
     </mat-card-content>
+  </mat-card>
+
+  <div *ngIf="isLoggedIn">
 
     <mat-card>
+      <mat-card-content>
+        <mat-radio-group aria-label="Select Browsing Category" (change)="changeCategory($event)"
+                         [disabled]="!processingService.Observables.collections | async">
+          <!--TODO is this the correct way to check if collections exist? -->
+          <mat-radio-button value="obj" [checked]=isObjectCategory>Object</mat-radio-button>
+          <mat-radio-button value="col">Collection</mat-radio-button>
+        </mat-radio-group>
+      </mat-card-content>
+    </mat-card>
 
-      <mat-card-header>
-        Select Collection by ID
-      </mat-card-header>
+    <mat-card *ngIf="!isObjectCategory">
+
+      <mat-card-header>Public Collections</mat-card-header>
 
       <mat-card-content>
 
-        <mat-form-field>
-          <input matInput name="identifierCollection" #description="ngModel" type="text"
-                 placeholder="What's the ID?" [(ngModel)]="identifierCollection">
-        </mat-form-field>
-        <button mat-raised-button (click)="searchCollectionByID()">Search it</button>
+        <mat-checkbox *ngIf="this.userdataService.personalCollections.length > 0" [checked]="filterPersonalCollections"
+                      (change)="filterPersonalCollections = !filterPersonalCollections">Show only my Collections
+        </mat-checkbox>
+        <br>
 
+        <mat-form-field>
+          <mat-select (selectionChange)="processingService.fetchAndLoad(undefined, $event.value._id, undefined)"
+                      placeholder="Choose Collection">
+            <mat-option *ngFor="let collection of filterPersonalCollections ?
+              userdataService.personalCollections :
+              processingService.Observables.collections | async"
+                        [value]="collection">
+              {{collection.name}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
 
       </mat-card-content>
 
+      <mat-card>
+
+        <mat-card-header>
+          Select Collection by ID
+        </mat-card-header>
+
+        <mat-card-content>
+
+          <mat-form-field>
+            <input matInput name="identifierCollection" #description="ngModel" type="text"
+                   placeholder="What's the ID?" [(ngModel)]="identifierCollection">
+          </mat-form-field>
+          <button mat-raised-button (click)="searchCollectionByID()">Search it</button>
+
+
+        </mat-card-content>
+
+      </mat-card>
     </mat-card>
-  </mat-card>
 
-  <div *ngIf="isObjectCategory">
-
-    <div *ngIf="processingService.Observables.models | async">
+    <div *ngIf="isObjectCategory && processingService.Observables.models | async">
 
       <mat-card>
 
@@ -78,11 +80,9 @@
 
         <mat-card-content>
 
-          <mat-checkbox *ngIf="this.userdataService.userOwnedFinishedModels.length" [checked]="filterPersonalObjects"
+          <mat-checkbox id="checkbox-show-my-objects" *ngIf="this.userdataService.userOwnedFinishedModels.length" [checked]="filterPersonalObjects"
                         (change)="filterPersonalObjects = !filterPersonalObjects">Show only my Objects
           </mat-checkbox>
-
-          <br>
 
           <mat-checkbox [checked]="showModels"
                         (change)="showModels = !showModels">Models
@@ -104,11 +104,10 @@
                         (change)="showText = !showText">Text
           </mat-checkbox>
 
-          <br>
-
-          <mat-form-field>
-            <mat-select (selectionChange)="processingService.fetchAndLoad($event.value._id, undefined, !isObjectCategory)"
-                        placeholder="Choose Object">
+          <mat-form-field id="dropdown-filtered-objects">
+            <mat-select
+              (selectionChange)="processingService.fetchAndLoad($event.value._id, undefined, !isObjectCategory)"
+              placeholder="Choose Object">
 
               <mat-option *ngFor="let object of filterPersonalObjects ? this.userdataService.userOwnedFinishedModels
                 : processingService.Observables.models | async
@@ -119,7 +118,6 @@
 
             </mat-select>
           </mat-form-field>
-
 
         </mat-card-content>
 
@@ -141,6 +139,8 @@
         </mat-card-content>
 
       </mat-card>
+
     </div>
   </div>
-</mat-card>
+
+</div>
