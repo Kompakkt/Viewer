@@ -10,7 +10,8 @@
             class="btn-add-medium">
       <mat-icon aria-label="Add External Image">image</mat-icon>
     </button>
-    <button mat-icon-button
+    <button *ngIf="objects"
+            mat-icon-button
             (click)="addCollectionObject = !addCollectionObject"
             matTooltip="Add Object From Collection"
             matTooltipPosition="above"
