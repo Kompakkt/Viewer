@@ -21,11 +21,6 @@
 
     <mat-card-content *ngIf="!collapsed">
 
-      <mat-icon id="add-medium"
-                *ngIf="isEditMode"
-                (click)="showMediaBrowser = !showMediaBrowser">add_photo_alternate
-      </mat-icon>
-
       <markdown id="annotation-content"
                 *ngIf="!isEditMode"
                 [data]="annotation.body.content.description"></markdown>
