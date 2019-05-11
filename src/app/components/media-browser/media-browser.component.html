@@ -1,69 +1,73 @@
 <div id="media-browser">
 
-  <button *ngIf="!showMediaBrowser"
-          mat-icon-button
-          (click)="showMediaBrowser = !showMediaBrowser"
-          matTooltip="Open Media Browser"
-          matTooltipPosition="above"
-          type="mat-icon-button"
-          class="btn-add-medium">
-    <mat-icon aria-label="Add Image">add_photo_alternate</mat-icon>
-  </button>
+  <div id="menu">
 
-  <div *ngIf="showMediaBrowser">
-
-    <div id="external-image">
-
-      <h3>Embed an external image at cursor position:</h3>
-
-      <mat-form-field>
-        <input matInput
-               #url
-               placeholder="URL"
-               name="URL"
-               type="text">
-      </mat-form-field>
-
-      <mat-form-field>
-        <input matInput
-               #description
-               placeholder="Image Description"
-               name="Image Description"
-               type="text">
-      </mat-form-field>
-
-      <button mat-icon-button
-              (click)="addObject(url.value, description.value)"
-              matTooltip="Add Image at Cursor Position"
-              matTooltipPosition="above"
-              type="button">
-        <mat-icon aria-label="Add Image">add</mat-icon>
-        Add Image
-      </button>
-
-    </div>
-
-    <div id="collection-objects">
-
-      <h3>Or embed an object of your collection:</h3>
-
-      <ng-container *ngFor="let object of objects.models">
-
-        <mat-card *ngIf="object.mediaType === 'image' || object.mediaType === 'text'"
-                  (click)="addObject(object.settings.preview, object.name)"
-                  class="collection-object">
-          <img mat-card-image src="{{object.settings.preview}}" alt="{{object.name}}">
-          <mat-card-footer>{{object.name}}</mat-card-footer>
-        </mat-card>
-
-      </ng-container>
-
-    </div>
-
-    <button mat-button
-            (click)="showMediaBrowser = !showMediaBrowser"
-            type="mat-button">Cancel
+    <button mat-icon-button
+            (click)="addExternalImage = !addExternalImage"
+            matTooltip="Add External Image"
+            matTooltipPosition="above"
+            type="mat-icon-button"
+            class="btn-add-medium">
+      <mat-icon aria-label="Add External Image">image</mat-icon>
     </button>
+    <button mat-icon-button
+            (click)="addCollectionObject = !addCollectionObject"
+            matTooltip="Add Object From Collection"
+            matTooltipPosition="above"
+            type="mat-icon-button"
+            class="btn-add-medium">
+      <mat-icon aria-label="Add Object From Collection">folder_open</mat-icon>
+    </button>
+
+  </div>
+
+  <div *ngIf="addExternalImage"
+       id="external-image">
+
+    <h3>Embed an external image at cursor position:</h3>
+
+    <mat-form-field>
+      <input matInput
+             #url
+             placeholder="URL"
+             name="URL"
+             type="text">
+    </mat-form-field>
+
+    <mat-form-field>
+      <input matInput
+             #description
+             placeholder="Image Description"
+             name="Image Description"
+             type="text">
+    </mat-form-field>
+
+    <button mat-icon-button
+            (click)="addObject(url.value, description.value)"
+            matTooltip="Add Image at Cursor Position"
+            matTooltipPosition="above"
+            type="button">
+      <mat-icon aria-label="Add Image">add</mat-icon>
+      Add Image
+    </button>
+
+  </div>
+
+  <div *ngIf="addCollectionObject"
+       id="collection-objects">
+
+    <h3>Or embed an object of your collection:</h3>
+
+    <ng-container *ngFor="let object of objects.models">
+
+      <mat-card *ngIf="object.mediaType === 'image' || object.mediaType === 'text'"
+                (click)="addObject(object.settings.preview, object.name)"
+                class="collection-object">
+        <img mat-card-image src="{{object.settings.preview}}" alt="{{object.name}}">
+        <mat-card-footer>{{object.name}}</mat-card-footer>
+      </mat-card>
+
+    </ng-container>
 
   </div>
 

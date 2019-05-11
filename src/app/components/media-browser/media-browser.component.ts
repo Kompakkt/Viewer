@@ -15,7 +15,8 @@ export class MediaBrowserComponent implements OnInit {
   public objects: any;
   public description = '';
 
-  public showMediaBrowser = false;
+  public addExternalImage = false;
+  public addCollectionObject = false;
 
   constructor(public processingService: ProcessingService) {
   }
@@ -28,7 +29,7 @@ export class MediaBrowserComponent implements OnInit {
 
   addObject(adress, text) {
 
-    this.showMediaBrowser = false;
+    this.addExternalImage = this.addCollectionObject = false;
 
     this.addMedia.emit({
       url: adress,
