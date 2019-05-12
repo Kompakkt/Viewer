@@ -44,7 +44,7 @@
     </mat-form-field>
 
     <button mat-icon-button
-            (click)="addObject(url.value, description.value)"
+            (click)="addImage(url.value, description.value)"
             matTooltip="Add Image at Cursor Position"
             matTooltipPosition="above"
             type="button">
@@ -59,10 +59,9 @@
 
     <h3>Or embed an object of your collection:</h3>
 
-    <ng-container *ngFor="let object of objects.models">
+    <ng-container *ngFor="let object of objects.models; let i = index">
 
-      <mat-card *ngIf="object.mediaType === 'image' || object.mediaType === 'text'"
-                (click)="addObject(object.settings.preview, object.name)"
+      <mat-card (click)="addObject(i)"
                 class="collection-object">
         <img mat-card-image src="{{object.settings.preview}}" alt="{{object.name}}">
         <mat-card-footer>{{object.name}}</mat-card-footer>
