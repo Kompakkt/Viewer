@@ -61,14 +61,14 @@
               matTooltip="Edit in Fullscreen Mode"
               matTooltipPosition="above"
               type="button"
-              *ngIf="isAnnotatingAllowed">
+              *ngIf="isAnnotatingAllowed && isAnnotationOwner">
         <mat-icon aria-label="Fullscreen">select_all</mat-icon>
       </button>
 
       <button mat-icon-button
               (click)= toggleEditViewMode();
               [matTooltip]="isEditMode ? 'View Annotation' : 'Edit Annotation'"
-              *ngIf="isAnnotatingAllowed"
+              *ngIf="isAnnotatingAllowed && isAnnotationOwner"
               matTooltipPosition="above"
               type="button">
         <mat-icon [attr.aria-label]= "isEditMode ? 'View Annotation' : 'Edit Annotation'">{{isEditMode ? 'remove_red_eye' : 'edit'}}</mat-icon>
