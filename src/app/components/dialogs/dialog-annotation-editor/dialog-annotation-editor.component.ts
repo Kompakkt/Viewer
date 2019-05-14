@@ -1,6 +1,8 @@
 import {Component, Inject, ViewChild} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 
+import {environment} from '../../../../environments/environment';
+
 export interface IDialogData {
   title: string;
   content: string;
@@ -19,11 +21,15 @@ export class DialogAnnotationEditorComponent {
   public labelMode = 'edit';
   public labelModeText = 'Edit';
 
+  private repository = `${environment.repository}/`;
+
   constructor(public dialogRef: MatDialogRef<DialogAnnotationEditorComponent>,
               @Inject(MAT_DIALOG_DATA) public data: IDialogData) {
   }
 
   public addObject(object) {
+
+    console.log(object);
 
     switch (object.mediaType) {
 
@@ -100,10 +106,11 @@ export class DialogAnnotationEditorComponent {
     this.data.content = this.createMarkdown(mdText);
   }
 
-  // ToDo: Link to Model in Object Repository
   private addModel(model) {
 
-    const mdModel = `<img src="${model.settings.preview}" alt="${model.name}">`;
+    let mdModel = `<a href="${this.repository}model-overview?model=${model._id}" target="_blank">`;
+    mdModel += `<img src="${model.settings.preview}" alt="${model.name}"></a>`;
+
     this.data.content = this.createMarkdown(mdModel);
   }
 
