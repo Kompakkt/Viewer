@@ -30,8 +30,6 @@ export class DialogAnnotationEditorComponent {
 
   public addObject(object) {
 
-    console.log(object);
-
     switch (object.mediaType) {
 
       case 'externalImage':
