@@ -334,11 +334,11 @@ export class ProcessingService {
 
             await this.babylonService.loadImage(this.baseUrl + newModel.processed[this.quality])
               .then(async model => {
+                this.Subjects.actualMediaType.next('image');
                 this.updateActiveModel(newModel);
                 const mesh: BABYLON.Mesh[] = [];
                 mesh.push(model);
                 this.updateActiveModelMeshes(mesh);
-                this.Subjects.actualMediaType.next('image');
               });
 
             break;

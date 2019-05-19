@@ -391,6 +391,8 @@ export class BabylonService {
 
         const mypicture = new BABYLON.Texture(rootUrl, scene);  // rem about CORS rules for cross-domain
         const ground = BABYLON.Mesh.CreateGround('gnd', width / 10, height / 10, 1, scene);
+        ground.rotate(BABYLON.Axis.X, Math.PI / 180 * 90, BABYLON.Space.WORLD);
+
         const gndmat = new BABYLON.StandardMaterial('gmat', scene);
         ground.material = gndmat;
         gndmat.diffuseTexture = mypicture;
@@ -402,7 +404,7 @@ export class BabylonService {
     });
   }
 
-  public loadVideo(rootUrl: string): Promise<any>  {
+  public loadVideo(rootUrl: string): Promise<any> {
 
     const message = this.message;
     const engine = this.engine;
@@ -427,6 +429,7 @@ export class BabylonService {
         const width = tex.getSize().width;
         const height = tex.getSize().height;
         const ground = BABYLON.Mesh.CreateGround('gnd', width / 10, height / 10, 1, scene);
+        ground.rotate(BABYLON.Axis.X, Math.PI / 180 * 90, BABYLON.Space.WORLD);
         ground.material = videoMat;
         // GUI
         const advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('UI');
