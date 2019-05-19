@@ -49,7 +49,6 @@ export class DialogAnnotationEditorComponent {
         break;
 
       case 'video':
-        console.log(object);
         this.addVideo(object);
         break;
 
