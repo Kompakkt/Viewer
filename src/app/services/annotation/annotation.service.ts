@@ -457,6 +457,7 @@ export class AnnotationService {
     let newAnnotation = annotation;
     newAnnotation.lastModificationDate = new Date().toISOString();
     if (!this.isDemoMode) {
+      if (this.userdataService.isAnnotationOwner(annotation) || (this.isCollectionLoaded && this.userdataService.isCollectionOwner)) {
       this.mongo.updateAnnotation(annotation)
         .then((resultAnnotation: IAnnotation) => {
           newAnnotation = resultAnnotation;
@@ -464,6 +465,7 @@ export class AnnotationService {
         .catch((errorMessage: any) => {
           console.log(errorMessage);
         });
+      }
       this.dataService.updateAnnotation(newAnnotation);
     }
     this.annotations
