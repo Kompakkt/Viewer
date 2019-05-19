@@ -429,7 +429,10 @@ export class BabylonService {
         const height = tex.getSize().height;
         const ground = BABYLON.Mesh.CreateGround('gnd', width / 10, height / 10, 1, scene);
         ground.rotate(BABYLON.Axis.X, Math.PI / 180 * 90, BABYLON.Space.WORLD);
-        ground.material = videoMat;
+
+        // ToDo:  Create and use VideoMat correctly
+        // ground.material = videoMat;
+
         // GUI
         const advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('UI');
 
