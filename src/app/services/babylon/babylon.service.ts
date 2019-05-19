@@ -391,7 +391,8 @@ export class BabylonService {
 
         const mypicture = new BABYLON.Texture(rootUrl, scene);  // rem about CORS rules for cross-domain
         const ground = BABYLON.Mesh.CreateGround('gnd', width / 10, height / 10, 1, scene);
-        ground.rotate(BABYLON.Axis.X, Math.PI / 180 * 90, BABYLON.Space.WORLD);
+        BABYLON.Tags.AddTagsTo(ground, 'mediaGround');
+        ground.rotate(BABYLON.Axis.X, Math.PI / 180 * -90, BABYLON.Space.WORLD);
 
         const gndmat = new BABYLON.StandardMaterial('gmat', scene);
         ground.material = gndmat;
@@ -418,10 +419,8 @@ export class BabylonService {
     this.scene.meshes = [];
 
     // Video material
-    const videoMat = new BABYLON.StandardMaterial('textVid', scene);
     const videoTexture = new BABYLON.VideoTexture('video', rootUrl, scene, false);
-    videoMat.diffuseTexture = videoTexture;
-    videoMat.backFaceCulling = false;
+    // videoMat.backFaceCulling = false;
 
     return new Promise<any>((resolve, reject) => {
       videoTexture.onLoadObservable.add(tex => {

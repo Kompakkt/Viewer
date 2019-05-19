@@ -133,8 +133,8 @@ export class CameraService {
     this.arcRotateCamera.setPosition(new BABYLON.Vector3(0, Math.PI / 180 * 90, 10));
 
 
-    this.arcRotateCamera.lowerAlphaLimit = Math.PI / 180 * 90;
-    this.arcRotateCamera.upperAlphaLimit = Math.PI / 180 * 90;
+    this.arcRotateCamera.lowerAlphaLimit = Math.PI / 180 * -90;
+    this.arcRotateCamera.upperAlphaLimit = Math.PI / 180 * -90;
     this.arcRotateCamera.lowerBetaLimit = Math.PI / 180 * 90;
     this.arcRotateCamera.upperBetaLimit = Math.PI / 180 * 90;
   }
