@@ -22,12 +22,15 @@ export class DialogAnnotationEditorComponent {
   public labelModeText = 'Edit';
 
   private repository = `${environment.repository}/`;
+  private serverUrl = `${environment.express_server_url}:${environment.express_server_port}`;
 
   constructor(public dialogRef: MatDialogRef<DialogAnnotationEditorComponent>,
               @Inject(MAT_DIALOG_DATA) public data: IDialogData) {
   }
 
   public addObject(object) {
+
+    console.log(object);
 
     switch (object.mediaType) {
 
@@ -48,6 +51,7 @@ export class DialogAnnotationEditorComponent {
         break;
 
       case 'video':
+        console.log(object);
         this.addVideo(object);
         break;
 
@@ -115,7 +119,11 @@ export class DialogAnnotationEditorComponent {
   private addVideo(video) {
 
     let mdVideo = `<video class="video" controls poster="">`;
-    mdVideo += `<source src="https://miskatonic.hki.uni-koeln.de:1337/${video.processed.medium}" `;
+
+    let url = '';
+    if (!video.dataSource.isExternal) url += `${this.serverUrl}/`;
+
+    mdVideo += `<source src="${url}/${video.processed.medium}" `;
     mdVideo += `type="video/mp4">`;
     mdVideo += `</video>`;
 
@@ -125,7 +133,11 @@ export class DialogAnnotationEditorComponent {
   private addAudio(audio) {
 
     let mdAudio = `<audio controls>`;
-    mdAudio += `<source src="https://miskatonic.hki.uni-koeln.de:1337/${audio.processed.medium}" `;
+
+    let url = '';
+    if (!audio.dataSource.isExternal) url += `${this.serverUrl}/`;
+
+    mdAudio += `<source src="${url}${audio.processed.medium}" `;
     mdAudio += `type="audio/mpeg">`;
     mdAudio += `</audio>`;
 
