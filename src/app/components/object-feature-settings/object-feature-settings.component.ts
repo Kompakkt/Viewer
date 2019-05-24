@@ -638,7 +638,7 @@ export class ObjectFeatureSettingsComponent implements OnInit {
         this.cameraService.setCamerato2DMode();
 
         // Upload
-        if (this.activeModel.settings === undefined) {
+        if (this.activeModel.settings === undefined || this.isModelOwner && !this.isFinished) {
           this.activeModel['settings'] = await this.get2DMediaSettings();
           this.createMissingInitialDefaultScreenshot()
             .then(result => {
@@ -650,10 +650,7 @@ export class ObjectFeatureSettingsComponent implements OnInit {
             });
         }
 
-        if (this.mediaType === 'audio') {
-          // Mesh (rotation & size)
-          await this.setRotationScale();
-        }
+
 
         this.babylonService.createAmbientlightUp('ambientlightUp', {x: 0, y: 1, z: 0});
         this.babylonService.setLightIntensity('ambientlightUp', 1);
