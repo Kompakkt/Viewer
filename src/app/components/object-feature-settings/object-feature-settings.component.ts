@@ -654,7 +654,15 @@ export class ObjectFeatureSettingsComponent implements OnInit {
           // Mesh (rotation & size)
           await this.setRotationScale();
         }
-        await this.setLightBackground();
+
+        this.babylonService.createAmbientlightUp('ambientlightUp', {x: 0, y: 1, z: 0});
+        this.babylonService.setLightIntensity('ambientlightUp', 1);
+        this.ambientlightUpintensity = 1;
+
+        this.babylonService.createAmbientlightDown('ambientlightDown', {x: 0, y: -1, z: 0});
+        this.babylonService.setLightIntensity('ambientlightDown', 1);
+        this.ambientlightDownintensity = 1;
+
       } else {
 
         // No settings (upload)
