@@ -42,18 +42,20 @@ export class AnnotationService {
 
   private _annotations: IAnnotation[] = [];
   public readonly annotations = new Proxy(this._annotations, {
-      get: (obj, prop) => {
-        // After splicing or pushing to this.annotations we want to
-        // update the currentAnnotations Subject.
-        // Use setTimeout with time 0 to append it to the end of the
-        // JavaScript execution queue
-        try { return obj[prop]; } finally {
-          if (['splice', 'push'].includes(prop.toString())) {
-            setTimeout(() => this.updateCurrentAnnotationsSubject(), 0);
-          }
+    get: (obj, prop) => {
+      // After splicing or pushing to this.annotations we want to
+      // update the currentAnnotations Subject.
+      // Use setTimeout with time 0 to append it to the end of the
+      // JavaScript execution queue
+      try {
+        return obj[prop];
+      } finally {
+        if (['splice', 'push'].includes(prop.toString())) {
+          setTimeout(() => this.updateCurrentAnnotationsSubject(), 0);
         }
-      },
-    });
+      }
+    },
+  });
 
   private actualModel: IModel;
   public actualCompilation: ICompilation;
@@ -185,11 +187,7 @@ export class AnnotationService {
     this.selectedAnnotation.next('');
     this.editModeAnnotation.next('');
     await this.annotationmarkerService.deleteAllMarker();
-    if (this.annotations.length > 0) {
-      this.annotations.forEach((item, index) => {
-        this.annotations.splice(index, 1);
-      });
-    }
+    this.annotations.splice(0, this.annotations.length);
 
     if (!this.isDemoMode) {
       // Filter null/undefined annotations
@@ -461,13 +459,13 @@ export class AnnotationService {
     newAnnotation.lastModificationDate = new Date().toISOString();
     if (!this.isDemoMode) {
       if (this.userdataService.isAnnotationOwner(annotation) || (this.isCollectionLoaded && this.userdataService.isCollectionOwner)) {
-      this.mongo.updateAnnotation(annotation)
-        .then((resultAnnotation: IAnnotation) => {
-          newAnnotation = resultAnnotation;
-        })
-        .catch((errorMessage: any) => {
-          console.log(errorMessage);
-        });
+        this.mongo.updateAnnotation(annotation)
+          .then((resultAnnotation: IAnnotation) => {
+            newAnnotation = resultAnnotation;
+          })
+          .catch((errorMessage: any) => {
+            console.log(errorMessage);
+          });
       }
       this.dataService.updateAnnotation(newAnnotation);
     }
