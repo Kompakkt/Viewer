@@ -72,6 +72,15 @@
       </button>
 
       <button mat-icon-button
+              (click)="editFullscreen()"
+              matTooltip="Edit in Fullscreen Mode"
+              matTooltipPosition="above"
+              type="button"
+              *ngIf="isAnnotatingAllowed && isAnnotationOwner">
+        <mat-icon aria-label="Fullscreen">select_all</mat-icon>
+      </button>
+
+      <button mat-icon-button
               *ngIf="annotation._id !== 'DefaultAnnotation'"
               (click)="shareAnnotation()"
               matTooltip="Copy to collection"
