@@ -635,7 +635,7 @@ export class ObjectFeatureSettingsComponent implements OnInit {
       // Nicht Default oder Fallback Modell
 
       if (this.mediaType === 'image' || this.mediaType === 'video' || this.mediaType === 'audio') {
-        this.cameraService.setCamerato2DMode();
+        this.mediaType === 'audio' ? this.cameraService.setCamerato2DMode(true) : this.cameraService.setCamerato2DMode();
 
         // Upload
         if (this.activeModel.settings === undefined || this.isModelOwner && !this.isFinished) {

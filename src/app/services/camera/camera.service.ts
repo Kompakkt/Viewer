@@ -119,14 +119,19 @@ export class CameraService {
     }
   }
 
-  public setCamerato2DMode() {
+  public setCamerato2DMode(audio?: boolean) {
   // This positions the camera
-    this.arcRotateCamera.setPosition(new BABYLON.Vector3(0, Math.PI / 180 * 90, 150));
-    this.setDefaultPosition(0, Math.PI / 180 * 90, 150, 0, 0, 0);
+    this.arcRotateCamera.setPosition(new BABYLON.Vector3(0, Math.PI / 180 * 90, (audio ? 5 : 150)));
+    this.setDefaultPosition(0, Math.PI / 180 * 90, (audio ? 5 : 150), 0, 0, 0);
     this.arcRotateCamera.lowerAlphaLimit = Math.PI / 180 * -90;
     this.arcRotateCamera.upperAlphaLimit = Math.PI / 180 * -90;
     this.arcRotateCamera.lowerBetaLimit = Math.PI / 180 * 90;
     this.arcRotateCamera.upperBetaLimit = Math.PI / 180 * 90;
+
+    if (audio) {
+     this.arcRotateCamera.lowerRadiusLimit = 5;
+     this.arcRotateCamera.upperRadiusLimit = 5;
+    }
 
     // const ground: BABYLON.AbstractMesh = this.scene.getMeshesByTags('mediaGround')[0];
     // this.arcRotateCamera.zoomOn(ground);

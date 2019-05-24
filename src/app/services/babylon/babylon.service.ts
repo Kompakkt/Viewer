@@ -590,7 +590,7 @@ export class BabylonService {
     };
   }
 
-  private createAudioScene() {
+  private createAudioScene(): BABYLON.AbstractMesh {
 
     // create a Center of Transformation
     const CoT = new BABYLON.TransformNode('mediaPanel');
@@ -655,7 +655,7 @@ export class BabylonService {
       }
     });
     this.slider.onPointerUpObservable.add(() => {
-      //   this.currentTime = this.slider.value;
+      this.currentTime = this.slider.value;
       this.audio.play(0, this.slider.value);
     });
 
@@ -685,7 +685,8 @@ export class BabylonService {
 
     // Cube
 
-    BABYLON.SceneLoader.ImportMeshAsync(null, 'assets/models/', 'kompakkt.babylon', this.scene, function (progress) {
+    BABYLON.SceneLoader.ImportMeshAsync(null, 'assets/models/',
+      'kompakkt.babylon', this.scene, function (progress) {
       console.log('LOADED');
     })
       .then(result => {
@@ -726,8 +727,8 @@ export class BabylonService {
 
               })));
           });
-        return plane;
       });
+    return plane;
 
   }
 
