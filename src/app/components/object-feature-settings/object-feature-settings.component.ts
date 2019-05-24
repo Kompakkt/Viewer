@@ -655,8 +655,6 @@ export class ObjectFeatureSettingsComponent implements OnInit {
           await this.setRotationScale();
 
         }
-        await this.setLightBackground();
-        await this.setPreview();
       } else {
 
         // No settings (upload)
