@@ -653,6 +653,8 @@ export class ObjectFeatureSettingsComponent implements OnInit {
         if (this.mediaType === 'audio') {
           // Mesh (rotation & size)
           await this.setRotationScale();
+          await this.setLightBackground();
+          await this.setPreview();
         }
       } else {
 
