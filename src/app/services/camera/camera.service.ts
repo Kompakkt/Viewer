@@ -139,11 +139,13 @@ export class CameraService {
   }
 
   public resetCameraMode() {
-
     // Arc Rotate Camera
     if (this.arcRotateCamera) {
       this.arcRotateCamera.dispose();
     }
+
+    this.setDefaultPosition(0,10,100,0,0,0);
+
     // Parameters (initial Position): alpha, beta, radius, target position, scene
     // this.arcRotateCamera = this.babylonService.createArcRotateCam(0, 10, 100);
     this.arcRotateCamera = this.babylonService.createArcRotateCam(0, 10, 100);

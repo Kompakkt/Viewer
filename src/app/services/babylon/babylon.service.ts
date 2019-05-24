@@ -176,7 +176,7 @@ export class BabylonService {
         // TODO
         this.scene.registerAfterRender(() => {
           if (this.currentTime && this.mediaType === 'audio') {
-            if (this.audio) {
+            if (this.audio && this.audio.isPlaying) {
               if (BABYLON.Engine.audioEngine.audioContext) {
                 this.currentTime = BABYLON.Engine.audioEngine.audioContext['currentTime'];
               }
@@ -288,8 +288,10 @@ export class BabylonService {
     }
     this.currentTime = 0;
     if (this.video) {
+      this.video.pause();
       this.video.remove();
     }
+
   }
 
   public loadModel(rootUrl: string, filename: string): Promise<any> {
@@ -651,12 +653,13 @@ export class BabylonService {
     });
     this.slider.onPointerDownObservable.add(() => {
       if (this.audio.isPlaying) {
-        this.audio.pause();
+        this.audio.stop();
+        console.log(this.slider.value);
       }
     });
     this.slider.onPointerUpObservable.add(() => {
-      this.currentTime = this.slider.value;
       this.audio.play(0, this.slider.value);
+      console.log(this.slider.value);
     });
 
     panel.addControl(this.slider);

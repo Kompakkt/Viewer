@@ -623,13 +623,13 @@ export class ObjectFeatureSettingsComponent implements OnInit {
       await this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
         this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
 
-      this.cameraService.setUpperRadiusLimit(500);
+      /*this.cameraService.setUpperRadiusLimit(500);
       this.isFallbackModelLoaded ? this.cameraService
           .setDefaultPosition(1.5, 1.5, 50,
             0, 0, 0) :
         this.cameraService
           .setDefaultPosition(2.7065021761026817, 1.3419080619941322, 90.44884111420268, 0, 0, 0);
-
+*/
     } else {
 
       // Nicht Default oder Fallback Modell
