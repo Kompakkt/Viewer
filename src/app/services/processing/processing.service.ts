@@ -1,6 +1,5 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
 import * as BABYLON from 'babylonjs';
-import {ActionManager, ExecuteCodeAction, Mesh as IMesh} from 'babylonjs';
 import {BehaviorSubject} from 'rxjs';
 import {ReplaySubject} from 'rxjs/internal/ReplaySubject';
 
@@ -346,33 +345,12 @@ export class ProcessingService {
           case 'audio':
             await this.babylonService.loadAudio(this.baseUrl + newModel.processed[this.quality])
               .then(async model => {
-
-                const center = BABYLON.MeshBuilder.CreateBox('audioCenter', {size: 1}, this.babylonService.getScene());
-                BABYLON.Tags.AddTagsTo(center, 'audioCenter');
-                center.isVisible = false;
-                model.meshes.forEach(mesh => {
-                  BABYLON.Tags.AddTagsTo(mesh, 'audio');
-                  mesh.parent = center;
-                  mesh.isPickable = true;
-
-                  mesh.actionManager = new ActionManager(this.babylonService.getScene());
-                  mesh.actionManager.registerAction(new ExecuteCodeAction(
-                    ActionManager.OnPickTrigger, (() => {
-                      console.log('click');
-                      const buffer = this.babylonService.audio.getAudioBuffer();
-                      //console.log('dauer', buffer.duration / 60);
-                      this.babylonService.audio.isPlaying ?
-                        this.babylonService.audio.pause() : this.babylonService.audio.play();
-
-                    })));
-                });
-
+                this.Subjects.actualMediaType.next('audio');
                 this.updateActiveModel(newModel);
                 const mesh: BABYLON.Mesh[] = [];
-                mesh.push(center);
+                mesh.push(model);
+                console.log(model, 'bekommen');
                 this.updateActiveModelMeshes(mesh);
-                this.Subjects.actualMediaType.next('audio');
-
               });
 
             break;

@@ -41,7 +41,11 @@ export class CameraService {
         this.canvas = newCanvas;
 
         // Arc Rotate Camera
+        if (this.arcRotateCamera) {
+          this.arcRotateCamera.dispose();
+        }
         // Parameters (initial Position): alpha, beta, radius, target position, scene
+        // this.arcRotateCamera = this.babylonService.createArcRotateCam(0, 10, 100);
         this.arcRotateCamera = this.babylonService.createArcRotateCam(0, 10, 100);
         this.arcRotateCamera.allowUpsideDown = false;
         this.arcRotateCamera.panningSensibility = 25;
@@ -117,31 +121,26 @@ export class CameraService {
 
   public setCamerato2DMode() {
   // This positions the camera
-    this.arcRotateCamera.dispose();
-    this.arcRotateCamera = this.babylonService.createArcRotateCam(0, 0, 0);
-    this.arcRotateCamera.allowUpsideDown = false;
-    this.arcRotateCamera.panningSensibility = 25;
-    this.arcRotateCamera.keysUp.push(87);
-    this.arcRotateCamera.keysDown.push(83);
-    this.arcRotateCamera.keysLeft.push(65);
-    this.arcRotateCamera.keysRight.push(68);
-
-    this.arcRotateCamera.attachControl(this.canvas, false);
-    this.arcRotateCamera.checkCollisions = true;
-    this.arcRotateCamera.collisionRadius = new BABYLON.Vector3(4, 4, 4);
-
-    this.arcRotateCamera.setPosition(new BABYLON.Vector3(0, Math.PI / 180 * 90, 10));
-
-
+    this.arcRotateCamera.setPosition(new BABYLON.Vector3(0, Math.PI / 180 * 90, 150));
+    this.setDefaultPosition(0, Math.PI / 180 * 90, 150, 0, 0, 0);
     this.arcRotateCamera.lowerAlphaLimit = Math.PI / 180 * -90;
     this.arcRotateCamera.upperAlphaLimit = Math.PI / 180 * -90;
     this.arcRotateCamera.lowerBetaLimit = Math.PI / 180 * 90;
     this.arcRotateCamera.upperBetaLimit = Math.PI / 180 * 90;
+
+    // const ground: BABYLON.AbstractMesh = this.scene.getMeshesByTags('mediaGround')[0];
+    // this.arcRotateCamera.zoomOn(ground);
+    //this.arcRotateCamera.radius = this.arcRotateCamera.radius + 0.2 * this.arcRotateCamera.radius;
   }
 
   public resetCameraMode() {
 
-    this.arcRotateCamera.dispose();
+    // Arc Rotate Camera
+    if (this.arcRotateCamera) {
+      this.arcRotateCamera.dispose();
+    }
+    // Parameters (initial Position): alpha, beta, radius, target position, scene
+    // this.arcRotateCamera = this.babylonService.createArcRotateCam(0, 10, 100);
     this.arcRotateCamera = this.babylonService.createArcRotateCam(0, 10, 100);
     this.arcRotateCamera.allowUpsideDown = false;
     this.arcRotateCamera.panningSensibility = 25;
@@ -164,7 +163,6 @@ export class CameraService {
      camera.keysRight.push(68);
      camera.setTarget(BABYLON.Vector3.Zero());
    }
-
    private setCameraActive(newActiveCamera: any): void {
      if (!this.scene.activeCamera) { return; }
      this.scene.activeCamera.detachControl(this.canvas);

@@ -347,6 +347,7 @@ export class AnnotationService {
   // Die Annotationsfunktionalität wird zum aktuellen Modell hinzugefügt
   public initializeAnnotationMode() {
     this.actualModelMeshes.forEach(mesh => {
+      console.log(mesh, 'annotatable');
       this.actionService.createActionManager(mesh, ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
     });
     this.annotationMode(false);
@@ -449,8 +450,6 @@ export class AnnotationService {
     this.annotations.push(newAnnotation);
     this.selectedAnnotation.next(newAnnotation._id);
     this.editModeAnnotation.next(newAnnotation._id);
-
-
   }
 
   public updateAnnotation(annotation: IAnnotation) {
@@ -471,8 +470,6 @@ export class AnnotationService {
     this.annotations
       .splice(this.annotations
         .findIndex(ann => ann._id === annotation._id), 1, newAnnotation);
-
-
   }
 
   public deleteAnnotation(annotation: IAnnotation) {
@@ -492,7 +489,6 @@ export class AnnotationService {
     } else {
       this.message.error('You are not the Owner of this Annotation.');
     }
-
 
   }
 

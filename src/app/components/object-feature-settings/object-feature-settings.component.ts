@@ -87,6 +87,8 @@ export class ObjectFeatureSettingsComponent implements OnInit {
         this.activeModel = this.processingService.getCurrentModel();
         this.isFinished = this.activeModel.finished;
         this.setSettings();
+        this.babylonService.getScene().meshes
+          .forEach(mesh => mesh.checkCollisions = true);
       }
     });
 
@@ -102,11 +104,12 @@ export class ObjectFeatureSettingsComponent implements OnInit {
       this.isSingleModel = !collection;
     });
     // camera should not move through mesh
+    /*
     this.processingService.Observables.actualModelMeshes.subscribe(actualModelMeshes => {
       actualModelMeshes.forEach(mesh => {
         mesh.checkCollisions = true;
       });
-    });
+    });*/
 
     this.processingService.fallbackModelLoaded.subscribe(fallback => {
       this.isFallbackModelLoaded = fallback;
@@ -122,13 +125,13 @@ export class ObjectFeatureSettingsComponent implements OnInit {
 
     dialogRef.afterClosed()
       .subscribe(finish => {
-      if (finish) {
-        this.resetHelpers();
-        this.stepper.selected.completed = true;
-        this.stepper.selected.editable = false;
-        this.stepper.next();
-      }
-    });
+        if (finish) {
+          this.resetHelpers();
+          this.stepper.selected.completed = true;
+          this.stepper.selected.editable = false;
+          this.stepper.next();
+        }
+      });
   }
 
   public nextSecondStep() {
@@ -454,46 +457,46 @@ export class ObjectFeatureSettingsComponent implements OnInit {
 
   private async setCamera() {
 
-    if(this.mediaType !== 'image' && this.mediaType !== 'video') {
+    if (this.mediaType !== 'image' && this.mediaType !== 'video') {
 
-     // this.cameraService.resetCameraMode();
+      // this.cameraService.resetCameraMode();
 
-    if (this.activeModel.settings.cameraPositionInitial === undefined) {
-      this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
-      // TODO: Camera Setting Interface
-      const cameraSettings: any[] = [];
-      cameraSettings.push(this.cameraService.getActualCameraPosInitialView());
-      this.activeModel.settings['cameraPositionInitial'] = cameraSettings;
-    } else {
-      let camera;
-      if (this.activeModel.settings.cameraPositionInitial.length > 1) {
-        camera = this.activeModel.settings.cameraPositionInitial.filter(obj => obj.cameraType === 'arcRotateCam')[0];
+      if (this.activeModel.settings.cameraPositionInitial === undefined) {
+        this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
+        // TODO: Camera Setting Interface
+        const cameraSettings: any[] = [];
+        cameraSettings.push(this.cameraService.getActualCameraPosInitialView());
+        this.activeModel.settings['cameraPositionInitial'] = cameraSettings;
       } else {
-        camera = this.activeModel.settings.cameraPositionInitial;
-      }
-      if (camera !== undefined) {
-        const positionVector = new BABYLON.Vector3(camera.position.x, camera.position.y, camera.position.z);
-        let targetVector: BABYLON.Vector3;
-        // TODO if Abfrage nicht mehr nötig, wenn Modelle resetet sind
-        if (camera.target) {
-          targetVector = new BABYLON.Vector3(camera.target.x, camera.target.y, camera.target.z);
-          this.cameraService.setDefaultPosition(camera.position.x, camera.position.y, camera.position.z,
-            camera.target.x, camera.target.y, camera.target.z);
+        let camera;
+        if (this.activeModel.settings.cameraPositionInitial.length > 1) {
+          camera = this.activeModel.settings.cameraPositionInitial.filter(obj => obj.cameraType === 'arcRotateCam')[0];
         } else {
-          targetVector = BABYLON.Vector3.Zero();
-          this.cameraService.setDefaultPosition(camera.position.x, camera.position.y, camera.position.z,
-            0, 0, 0);
+          camera = this.activeModel.settings.cameraPositionInitial;
         }
-        this.cameraService.moveCameraToTarget(positionVector);
-        this.cameraService.arcRotateCamera.setTarget(targetVector);
-        this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
-      } else {
-        this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
-        this.activeModel.settings.cameraPositionInitial.push(this.cameraService.getActualCameraPosInitialView());
+        if (camera !== undefined) {
+          const positionVector = new BABYLON.Vector3(camera.position.x, camera.position.y, camera.position.z);
+          let targetVector: BABYLON.Vector3;
+          // TODO if Abfrage nicht mehr nötig, wenn Modelle resetet sind
+          if (camera.target) {
+            targetVector = new BABYLON.Vector3(camera.target.x, camera.target.y, camera.target.z);
+            this.cameraService.setDefaultPosition(camera.position.x, camera.position.y, camera.position.z,
+              camera.target.x, camera.target.y, camera.target.z);
+          } else {
+            targetVector = BABYLON.Vector3.Zero();
+            this.cameraService.setDefaultPosition(camera.position.x, camera.position.y, camera.position.z,
+              0, 0, 0);
+          }
+          this.cameraService.moveCameraToTarget(positionVector);
+          this.cameraService.arcRotateCamera.setTarget(targetVector);
+          this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
+        } else {
+          this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
+          this.activeModel.settings.cameraPositionInitial.push(this.cameraService.getActualCameraPosInitialView());
+        }
       }
-    }
     } else {
-   //   this.cameraService.setCamerato2DMode();
+      //   this.cameraService.setCamerato2DMode();
     }
   }
 
@@ -595,35 +598,9 @@ export class ObjectFeatureSettingsComponent implements OnInit {
 
   private async setSettings() {
 
-    if (this.mediaType === 'image' || this.mediaType === 'video') {
-      console.log('2DMode');
-      this.cameraService.setCamerato2DMode();
-    } else {
-      this.cameraService.resetCameraMode();
-    }
-    // Default Model
-    if (this.isDefault || this.isFallbackModelLoaded || this.mediaType === 'audio') {
+    this.cameraService.resetCameraMode();
 
-      // during upload process
-      if (this.isModelOwner && !this.isFinished) {
-
-        if (this.mediaType === 'audio') {
-          this.activeModel['settings'] = this.getDefaultLoadSettings();
-          this.mongohandlerService
-            .updateSettings(this.activeModel._id, this.getDefaultLoadSettings())
-            .then(result => {
-              console.log(result);
-            });
-        } else {
-            this.activeModel['settings'] = this.getDefaultLoadSettings(true);
-            this.mongohandlerService
-              .updateSettings(this.activeModel._id, this.getDefaultLoadSettings(true))
-              .then(result => {
-                console.log(result);
-              });
-        }
-      }
-
+    if (this.isDefault || this.isFallbackModelLoaded) {
       this.isFallbackModelLoaded ?
         this.activeModel['settings'] = this.getDefaultLoadSettings(true) :
         this.activeModel['settings'] = this.getDefaultLoadSettings();
@@ -655,30 +632,53 @@ export class ObjectFeatureSettingsComponent implements OnInit {
 
     } else {
 
-      // Nicht Default Modell
+      // Nicht Default oder Fallback Modell
 
-      // No settings (upload)
-      if (this.activeModel.settings === undefined) {
-        const settings = {
-          preview: '',
-        };
-        this.activeModel['settings'] = settings;
+      if (this.mediaType === 'image' || this.mediaType === 'video' || this.mediaType === 'audio') {
+        this.cameraService.setCamerato2DMode();
+
+
+        // Upload
+        if (this.activeModel.settings === undefined) {
+          this.activeModel['settings'] = this.get2DMediaSettings();
+          this.createMissingInitialDefaultScreenshot()
+            .then(result => {
+              this.mongohandlerService
+                .updateSettings(this.activeModel._id, this.activeModel['settings'])
+                .then(settings => {
+                  console.log(settings);
+                });
+            });
+        }
+
+        if (this.mediaType === 'audio') {
+          // Mesh (rotation & size)
+          await this.setRotationScale();
+        }
+      } else {
+
+        // No settings (upload)
+        if (this.activeModel.settings === undefined) {
+          const settings = {
+            preview: '',
+          };
+          this.activeModel['settings'] = settings;
+        }
+
+        // Mesh (rotation & size)
+        await this.setRotationScale();
+
+        // Camera
+        await this.setCamera();
+
+        // Lights & Background
+        await this.setLightBackground();
+
+        // Preview
+        await this.setPreview();
+
       }
-
-      // Mesh (rotation & size)
-      await this.setRotationScale();
-
-      // Camera
-      await this.setCamera();
-
-      // Lights & Background
-      await this.setLightBackground();
-
-      // Preview
-      await this.setPreview();
-
     }
-
     await this.backToDefault();
   }
 
@@ -808,6 +808,69 @@ export class ObjectFeatureSettingsComponent implements OnInit {
         scale: 1,
       };
     }
+  }
+
+  private get2DMediaSettings() {
+    return {
+      preview: '',
+      cameraPositionInitial: {
+        cameraType: 'arcRotateCam',
+        position: {
+          x: 0,
+          y: Math.PI / 180 * 90,
+          z: 10,
+        },
+        target: {
+          x: 0,
+          y: 0,
+          z: 0,
+        },
+      },
+      background: {
+        color: {
+          r: 0,
+          g: 158,
+          b: 224,
+          a: 1,
+        },
+        effect: true,
+      },
+      lights: [
+        {
+          type: 'HemisphericLight',
+          position: {
+            x: 0,
+            y: -1,
+            z: 0,
+          },
+          intensity: 1,
+        },
+        {
+          type: 'HemisphericLight',
+          position: {
+            x: 0,
+            y: 1,
+            z: 0,
+          },
+          intensity: 1,
+        },
+        {
+          type: 'PointLight',
+          position: {
+            x: -9,
+            y: 8,
+            z: 7,
+          },
+          intensity: 1,
+        },
+      ],
+      rotation: {
+        x: 0,
+        y: 0,
+        z: 0,
+      },
+      scale: 1,
+    };
   }
 
 }
