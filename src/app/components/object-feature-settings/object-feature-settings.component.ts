@@ -637,10 +637,9 @@ export class ObjectFeatureSettingsComponent implements OnInit {
       if (this.mediaType === 'image' || this.mediaType === 'video' || this.mediaType === 'audio') {
         this.cameraService.setCamerato2DMode();
 
-
         // Upload
         if (this.activeModel.settings === undefined) {
-          this.activeModel['settings'] = this.get2DMediaSettings();
+          this.activeModel['settings'] = await this.get2DMediaSettings();
           this.createMissingInitialDefaultScreenshot()
             .then(result => {
               this.mongohandlerService
@@ -810,7 +809,7 @@ export class ObjectFeatureSettingsComponent implements OnInit {
     }
   }
 
-  private get2DMediaSettings() {
+  private async get2DMediaSettings() {
     return {
       preview: '',
       cameraPositionInitial: {
