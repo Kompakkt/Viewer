@@ -185,6 +185,11 @@ export class AnnotationService {
     this.selectedAnnotation.next('');
     this.editModeAnnotation.next('');
     await this.annotationmarkerService.deleteAllMarker();
+    if (this.annotations.length > 0) {
+      this.annotations.forEach((item, index) => {
+        this.annotations.splice(index, 1);
+      });
+    }
 
     if (!this.isDemoMode) {
       // Filter null/undefined annotations
@@ -200,7 +205,6 @@ export class AnnotationService {
     } else {
       this.annotations.push(this.createDefaultAnnotation());
       this.selectedAnnotation.next(this.annotations[this.annotations.length - 1]._id);
-
     }
     this.initializeAnnotationMode();
     this.toggleAnnotationSource(false);
