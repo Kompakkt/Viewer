@@ -359,7 +359,7 @@ export class BabylonService {
       this.makeRequest(rootUrl)
         .then(posts => {
 
-          this.audio = new BABYLON.Sound('Music', posts.response,
+          this.audio = new BABYLON.Sound('Music', posts,
                                          scene, () => {
               engine.hideLoadingUI();
               const plane = this.createAudioScene();
@@ -840,7 +840,7 @@ export class BabylonService {
   private makeRequest(url) {
 
     // Create the XHR request
-    const request = new XMLHttpRequest();
+    const request: XMLHttpRequest = new XMLHttpRequest();
 
     request.responseType = 'arraybuffer';
 
@@ -860,7 +860,7 @@ export class BabylonService {
         // Process the response
         if (request.status >= 200 && request.status < 300) {
           // If successful
-          resolve(request);
+          resolve(request.response);
         } else {
           // If failed
           reject({
