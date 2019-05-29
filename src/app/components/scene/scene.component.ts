@@ -11,7 +11,7 @@ import {ProcessingService} from '../../services/processing/processing.service';
 })
 export class SceneComponent implements AfterViewInit {
 
-  @ViewChild('canvas') private canvasRef: ElementRef;
+  @ViewChild('canvas', { static: false }) private canvasRef: ElementRef;
 
   @HostListener('window:resize', ['$event'])
 

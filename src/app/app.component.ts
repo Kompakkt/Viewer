@@ -7,5 +7,5 @@ import {Component, ViewChild} from '@angular/core';
 })
 export class AppComponent {
 
-  @ViewChild('sidenav') public sidenav;
+  @ViewChild('sidenav', { static: false }) public sidenav;
 }

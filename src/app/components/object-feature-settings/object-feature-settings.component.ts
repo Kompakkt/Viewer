@@ -26,7 +26,7 @@ import {DialogMeshsettingsComponent} from '../dialogs/dialog-meshsettings/dialog
 
 export class ObjectFeatureSettingsComponent implements OnInit {
 
-  @ViewChild('stepper') stepper;
+  @ViewChild('stepper', { static: false }) stepper;
 
   public activeModel;
   private preview: string;

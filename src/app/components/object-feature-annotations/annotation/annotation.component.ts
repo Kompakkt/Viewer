@@ -28,7 +28,7 @@ export class AnnotationComponent implements OnInit {
   @Input() modelFileName: string;
   @Input() annotation: IAnnotation;
 
-  @ViewChild('annotationContent') private annotationContent;
+  @ViewChild('annotationContent', { static: false }) private annotationContent;
 
   // internal
   public isEditMode: boolean;

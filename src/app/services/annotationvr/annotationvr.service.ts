@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import { text } from '@angular/core/src/render3';
+// import { text } from '@angular/core/src/render3';
 import * as BABYLON from 'babylonjs';
 import * as GUI from 'babylonjs-gui';
 

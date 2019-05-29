@@ -15,7 +15,7 @@ export interface IDialogData {
            })
 export class DialogAnnotationEditorComponent {
 
-  @ViewChild('annotationContent') private annotationContent;
+  @ViewChild('annotationContent', { static: false }) private annotationContent;
 
   public editMode = false;
   public labelMode = 'edit';

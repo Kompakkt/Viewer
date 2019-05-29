@@ -11,7 +11,7 @@ import {OverlayService} from '../../services/overlay/overlay.service';
 export class ObjectFeaturesComponent implements OnInit {
 
   @HostBinding('class.is-open') private isOpen = false;
-  @ViewChild('tabGroup') tabGroup;
+  @ViewChild('tabGroup', { static: false }) tabGroup;
 
   // external
   public isMeshSettingsMode: boolean;
