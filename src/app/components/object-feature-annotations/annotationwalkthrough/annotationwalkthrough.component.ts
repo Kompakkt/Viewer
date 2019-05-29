@@ -1,6 +1,5 @@
 import {Component, OnInit} from '@angular/core';
 import {Vector3} from 'babylonjs';
-import * as BABYLON from 'babylonjs';
 
 import {AnnotationService} from '../../../services/annotation/annotation.service';
 import {BabylonService} from '../../../services/babylon/babylon.service';
@@ -50,9 +49,9 @@ export class AnnotationwalkthroughComponent implements OnInit {
 
     if (camera !== undefined) {
       const positionVector =
-        new BABYLON.Vector3(camera.position.x, camera.position.y, camera.position.z);
+        new Vector3(camera.position.x, camera.position.y, camera.position.z);
       const targetVector =
-        new BABYLON.Vector3(camera.target.x, camera.target.y, camera.target.z);
+        new Vector3(camera.target.x, camera.target.y, camera.target.z);
 
       this.cameraService.moveCameraToTarget(positionVector);
       this.cameraService.arcRotateCamera.setTarget(targetVector);

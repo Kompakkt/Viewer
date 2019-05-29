@@ -1,8 +1,7 @@
 import {moveItemInArray} from '@angular/cdk/drag-drop';
 import {EventEmitter, Injectable, Output} from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material';
-import {ActionManager} from 'babylonjs';
-import * as BABYLON from 'babylonjs';
+import {ActionManager, Mesh, Tags} from 'babylonjs';
 import {Socket} from 'ngx-socket-io';
 import {BehaviorSubject} from 'rxjs/internal/BehaviorSubject';
 
@@ -59,7 +58,7 @@ export class AnnotationService {
 
   private actualModel: IModel;
   public actualCompilation: ICompilation;
-  private actualModelMeshes: BABYLON.Mesh[] = [];
+  private actualModelMeshes: Mesh[] = [];
 
   private isannotationSourceCollection = false;
   @Output() annotationSourceCollection: EventEmitter<boolean> = new EventEmitter();
@@ -182,7 +181,7 @@ export class AnnotationService {
 
   public async loadAnnotations() {
 
-    BABYLON.Tags.AddTagsTo(this.actualModelMeshes, this.actualModel._id);
+    Tags.AddTagsTo(this.actualModelMeshes, this.actualModel._id);
     // this.annotations = [];
     this.selectedAnnotation.next('');
     this.editModeAnnotation.next('');

@@ -1,10 +1,11 @@
+/* tslint:disable:max-line-length */
 import {DOCUMENT} from '@angular/common';
 import {EventEmitter, Inject, Injectable, Output} from '@angular/core';
-import * as BABYLON from 'babylonjs';
-import {ActionManager, ExecuteCodeAction} from 'babylonjs';
-import * as GUI from 'babylonjs-gui';
+import {ActionManager, ExecuteCodeAction, Analyser, Engine, Scene, VRExperienceHelper, PointLight, HemisphericLight, Layer, Sound, Vector3, Color3, ArcRotateCamera, SceneLoader, Axis, Tags, Mesh, Space, Texture, StandardMaterial, VideoTexture, SceneSerializer, Tools, Camera, MeshBuilder, Quaternion, Color4, AbstractMesh, TransformNode} from 'babylonjs';
+import {Slider, AdvancedDynamicTexture, StackPanel, Control, TextBlock} from 'babylonjs-gui';
 import 'babylonjs-loaders';
 import {ReplaySubject} from 'rxjs';
+/* tslint:enable:max-line-length */
 
 import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreenhandler.service';
 import {MessageService} from '../message/message.service';
@@ -19,12 +20,12 @@ export class BabylonService {
   @Output() vrModeIsActive: EventEmitter<boolean> = new EventEmitter();
   public isVRModeActive = false;
 
-  private scene: BABYLON.Scene;
-  private engine: BABYLON.Engine;
+  private scene: Scene;
+  private engine: Engine;
 
-  private analyser: BABYLON.Analyser;
+  private analyser: Analyser;
 
-  private VRHelper: BABYLON.VRExperienceHelper;
+  private VRHelper: VRExperienceHelper;
 
   private CanvasSubject = new ReplaySubject<HTMLCanvasElement>();
   public CanvasObservable = this.CanvasSubject.asObservable();
@@ -42,24 +43,24 @@ export class BabylonService {
     a: number;
   };
 
-  private pointlight: BABYLON.PointLight;
-  private ambientlightUp: BABYLON.HemisphericLight;
-  private ambientlightDown: BABYLON.HemisphericLight;
+  private pointlight: PointLight;
+  private ambientlightUp: HemisphericLight;
+  private ambientlightDown: HemisphericLight;
 
   private pointlightPosX: number;
   private pointlightPosY: number;
   private pointlightPosZ: number;
   public pointlightIntensity: number;
 
-  private background: BABYLON.Layer;
+  private background: Layer;
   private isBackground: boolean;
 
   // FOR VR-HUD
   public vrJump: boolean;
 
-  public audio: BABYLON.Sound;
+  public audio: Sound;
   public mediaType = '';
-  private slider: GUI.Slider;
+  private slider: Slider;
   private currentTime: number;
   public video: HTMLVideoElement;
 
@@ -71,16 +72,16 @@ export class BabylonService {
 
       if (newCanvas) {
 
-        this.engine = new BABYLON.Engine(newCanvas, true, {
+        this.engine = new Engine(newCanvas, true, {
           audioEngine: true,
           preserveDrawingBuffer: true, stencil: true,
         });
-        this.scene = new BABYLON.Scene(this.engine);
+        this.scene = new Scene(this.engine);
         this.engine.loadingScreen = new LoadingScreen(newCanvas, '',
           '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
 
-        this.analyser = new BABYLON.Analyser(this.scene);
-        BABYLON.Engine.audioEngine['connectToAnalyser'](this.analyser);
+        this.analyser = new Analyser(this.scene);
+        Engine.audioEngine['connectToAnalyser'](this.analyser);
         this.analyser.FFT_SIZE = 32;
         this.analyser.SMOOTHING = 0.9;
 
@@ -91,12 +92,12 @@ export class BabylonService {
               const fft = this.analyser.getByteFrequencyData();
               const audioMeshes = this.scene.getMeshesByTags('audioCenter');
               audioMeshes.forEach(mesh => {
-                mesh.scaling = new BABYLON.Vector3((0.05 + (fft[15] / 320)),
+                mesh.scaling = new Vector3((0.05 + (fft[15] / 320)),
                   (0.05 + (fft[15] / 320)), (0.05 + (fft[15] / 320)));
               });
-              if (BABYLON.Engine.audioEngine.audioContext) {
+              if (Engine.audioEngine.audioContext) {
                 // TODO
-                this.currentTime = BABYLON.Engine.audioEngine.audioContext['currentTime'] - this.currentTime;
+                this.currentTime = Engine.audioEngine.audioContext['currentTime'] - this.currentTime;
                 if (this.slider) {
                   this.slider.value = (this.slider.value + this.currentTime);
                 }
@@ -125,7 +126,7 @@ export class BabylonService {
 
             this.actualControl.scaling.x += 0.005;
             this.actualControl.scaling.y += 0.005;
-            this.actualControl.material.diffuseColor = BABYLON.Color3.Red();
+            this.actualControl.material.diffuseColor = Color3.Red();
 
             if (this.actualControl.scaling.x >= 1.5) {
               this.selectedControl = true;
@@ -137,7 +138,7 @@ export class BabylonService {
             this.actualControl.metadata = '1';
             this.actualControl.scaling.x = 1;
             this.actualControl.scaling.y = 1;
-            this.actualControl.material.diffuseColor = BABYLON.Color3.Black();
+            this.actualControl.material.diffuseColor = Color3.Black();
             this.selectedControl = false;
             this.actualControl = false;
           }
@@ -157,7 +158,7 @@ export class BabylonService {
             let i = 1;
             this.scene.getMeshesByTags('control', mesh => {
 
-              const newPosition = new BABYLON.Vector3();
+              const newPosition = new Vector3();
               if ((i % 2) != 0) {
                 newPosition.x = _activeCamera.position.x - 5;
                 newPosition.y = _activeCamera.position.y;
@@ -177,8 +178,8 @@ export class BabylonService {
         this.scene.registerAfterRender(() => {
           if (this.currentTime && this.mediaType === 'audio') {
             if (this.audio && this.audio.isPlaying) {
-              if (BABYLON.Engine.audioEngine.audioContext) {
-                this.currentTime = BABYLON.Engine.audioEngine.audioContext['currentTime'];
+              if (Engine.audioEngine.audioContext) {
+                this.currentTime = Engine.audioEngine.audioContext['currentTime'];
               }
             }
           }
@@ -203,16 +204,16 @@ export class BabylonService {
     this.engine.resize();
   }
 
-  public getEngine(): BABYLON.Engine {
+  public getEngine(): Engine {
     return this.engine;
   }
 
-  public getScene(): BABYLON.Scene {
+  public getScene(): Scene {
     return this.scene;
   }
 
-  public createArcRotateCam(alpha: number, beta: number, radius: number): BABYLON.ArcRotateCamera {
-    return new BABYLON.ArcRotateCamera('arcRotateCamera', alpha, beta, radius, BABYLON.Vector3.Zero(), this.scene);
+  public createArcRotateCam(alpha: number, beta: number, radius: number): ArcRotateCamera {
+    return new ArcRotateCamera('arcRotateCamera', alpha, beta, radius, Vector3.Zero(), this.scene);
   }
 
   public createVRHelper() {
@@ -227,7 +228,7 @@ export class BabylonService {
       customVRButton: vrButton,
     });
 
-    // this.VRHelper.gazeTrackerMesh = BABYLON.Mesh.CreateSphere("sphere1", 32, 0.1, this.scene);
+    // this.VRHelper.gazeTrackerMesh = Mesh.CreateSphere("sphere1", 32, 0.1, this.scene);
     this.VRHelper.enableInteractions();
     // this.VRHelper.displayGaze = true;
 
@@ -306,7 +307,7 @@ export class BabylonService {
 
     return new Promise<any>((resolve, reject) => {
 
-      BABYLON.SceneLoader.ImportMeshAsync(null, rootUrl, filename, this.scene, function (progress) {
+      SceneLoader.ImportMeshAsync(null, rootUrl, filename, this.scene, function (progress) {
 
         if (progress.lengthComputable) {
           engine.loadingUIText = (progress.loaded * 100 / progress.total).toFixed() + '%';
@@ -361,7 +362,7 @@ export class BabylonService {
       this.makeRequest(rootUrl)
         .then(posts => {
 
-          this.audio = new BABYLON.Sound('Music', posts,
+          this.audio = new Sound('Music', posts,
                                          scene, () => {
               engine.hideLoadingUI();
               const plane = this.createAudioScene();
@@ -395,12 +396,12 @@ export class BabylonService {
         const width = img.width;
         const height = img.height;
 
-        const mypicture = new BABYLON.Texture(rootUrl, scene);  // rem about CORS rules for cross-domain
-        const ground = BABYLON.Mesh.CreateGround('gnd', width / 10, height / 10, 1, scene);
-        BABYLON.Tags.AddTagsTo(ground, 'mediaGround');
-        ground.rotate(BABYLON.Axis.X, Math.PI / 180 * -90, BABYLON.Space.WORLD);
+        const mypicture = new Texture(rootUrl, scene);  // rem about CORS rules for cross-domain
+        const ground = Mesh.CreateGround('gnd', width / 10, height / 10, 1, scene);
+        Tags.AddTagsTo(ground, 'mediaGround');
+        ground.rotate(Axis.X, Math.PI / 180 * -90, Space.WORLD);
 
-        const gndmat = new BABYLON.StandardMaterial('gmat', scene);
+        const gndmat = new StandardMaterial('gmat', scene);
         ground.material = gndmat;
         gndmat.diffuseTexture = mypicture;
 
@@ -423,7 +424,7 @@ export class BabylonService {
     engine.displayLoadingUI();
 
     // Video material
-    const videoTexture = new BABYLON.VideoTexture('video', rootUrl, scene, false);
+    const videoTexture = new VideoTexture('video', rootUrl, scene, false);
     // videoMat.backFaceCulling = false;
 
     return new Promise<any>((resolve, reject) => {
@@ -431,17 +432,17 @@ export class BabylonService {
         this.video = videoTexture.video;
         const width = tex.getSize().width;
         const height = tex.getSize().height;
-        const ground = BABYLON.Mesh.CreateGround('videoGround', width / 10, height / 10, 1, scene);
-        BABYLON.Tags.AddTagsTo(ground, 'mediaGround');
-        ground.rotate(BABYLON.Axis.X, Math.PI / 180 * -90, BABYLON.Space.WORLD);
+        const ground = Mesh.CreateGround('videoGround', width / 10, height / 10, 1, scene);
+        Tags.AddTagsTo(ground, 'mediaGround');
+        ground.rotate(Axis.X, Math.PI / 180 * -90, Space.WORLD);
 
-        const videoMat = new BABYLON.StandardMaterial('textVid', scene);
+        const videoMat = new StandardMaterial('textVid', scene);
         ground.material = videoMat;
         videoMat.diffuseTexture = videoTexture;
         const plane = this.createVideoScene();
 
         new Promise<any>((resolve, reject) => {
-          //const dummy = new BABYLON.Mesh('dummy', scene);
+          //const dummy = new Mesh('dummy', scene);
           engine.hideLoadingUI();
           resolve(plane);
         })
@@ -452,7 +453,7 @@ export class BabylonService {
   }
 
   public saveScene(): void {
-    return BABYLON.SceneSerializer.Serialize(this.scene);
+    return SceneSerializer.Serialize(this.scene);
   }
 
   public async createScreenshot() {
@@ -461,9 +462,9 @@ export class BabylonService {
     await new Promise<any>((resolve, reject) => this.engine.onEndFrameObservable.add(resolve));
     const result = await new Promise<string>((resolve, reject) => {
       const _activeCamera = this.getScene().activeCamera;
-      if (_activeCamera instanceof BABYLON.Camera) {
-        BABYLON.Tools.CreateScreenshot(this.getEngine(), _activeCamera, {precision: 2}, screenshot => {
-          fetch(screenshot).then(res => res.blob()).then(blob => BABYLON.Tools.Download(blob, `Kompakkt-${Date.now().toString()}`));
+      if (_activeCamera instanceof Camera) {
+        Tools.CreateScreenshot(this.getEngine(), _activeCamera, {precision: 2}, screenshot => {
+          fetch(screenshot).then(res => res.blob()).then(blob => Tools.Download(blob, `Kompakkt-${Date.now().toString()}`));
           resolve(screenshot);
         });
       }
@@ -479,8 +480,8 @@ export class BabylonService {
     await new Promise<any>((resolve, reject) => this.engine.onEndFrameObservable.add(resolve));
     const result = await new Promise<string>((resolve, reject) => {
       const _activeCamera = this.getScene().activeCamera;
-      if (_activeCamera instanceof BABYLON.Camera) {
-        BABYLON.Tools.CreateScreenshot(this.getEngine(), _activeCamera,
+      if (_activeCamera instanceof Camera) {
+        Tools.CreateScreenshot(this.getEngine(), _activeCamera,
           (width === undefined) ? {width: 400, height: 225} : {width, height: Math.round((width / 16) * 9)}, screenshot => {
             resolve(screenshot);
           });
@@ -497,8 +498,8 @@ export class BabylonService {
 
   public setBackgroundImage(background: boolean): void {
     if (background && !this.isBackground) {
-      this.background = new BABYLON.Layer('background', this.backgroundURL, this.scene, true);
-      this.background.alphaBlendingMode = BABYLON.Engine.ALPHA_ADD;
+      this.background = new Layer('background', this.backgroundURL, this.scene, true);
+      this.background.alphaBlendingMode = Engine.ALPHA_ADD;
       this.background.isBackground = true;
       this.isBackground = true;
     }
@@ -512,7 +513,7 @@ export class BabylonService {
 
   public setBackgroundColor(color: any): void {
     this.color = color;
-    this.scene.clearColor = new BABYLON.Color4(color.r / 255, color.g / 255, color.b / 255, color.a);
+    this.scene.clearColor = new Color4(color.r / 255, color.g / 255, color.b / 255, color.a);
   }
 
   public setLightIntensity(light: string, intensity: number) {
@@ -532,7 +533,7 @@ export class BabylonService {
     if (this.pointlight !== undefined && this.pointlight !== null) {
       this.pointlight.dispose();
     }
-    const pointLight = new BABYLON.PointLight(name, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
+    const pointLight = new PointLight(name, new Vector3(position.x, position.y, position.z), this.scene);
     this.pointlightPosX = position.x;
     this.pointlightPosY = position.y;
     this.pointlightPosZ = position.z;
@@ -547,7 +548,7 @@ export class BabylonService {
     if (this.ambientlightDown !== undefined) {
       this.ambientlightDown.dispose();
     }
-    const hemiLight = new BABYLON.HemisphericLight(name, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
+    const hemiLight = new HemisphericLight(name, new Vector3(position.x, position.y, position.z), this.scene);
     this.ambientlightDown = hemiLight;
   }
 
@@ -555,7 +556,7 @@ export class BabylonService {
     if (this.ambientlightUp !== undefined) {
       this.ambientlightUp.dispose();
     }
-    const hemiLight = new BABYLON.HemisphericLight(name, new BABYLON.Vector3(position.x, position.y, position.z), this.scene);
+    const hemiLight = new HemisphericLight(name, new Vector3(position.x, position.y, position.z), this.scene);
     this.ambientlightUp = hemiLight;
   }
 
@@ -592,40 +593,40 @@ export class BabylonService {
     };
   }
 
-  private createAudioScene(): BABYLON.AbstractMesh {
+  private createAudioScene(): AbstractMesh {
 
     // create a Center of Transformation
-    const CoT = new BABYLON.TransformNode('mediaPanel');
-    CoT.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+    const CoT = new TransformNode('mediaPanel');
+    CoT.billboardMode = Mesh.BILLBOARDMODE_ALL;
     CoT.position.x = 0;
     CoT.position.y = 0;
     CoT.position.z = 0;
 
     // PLANE for Annotations
-    const plane = BABYLON.MeshBuilder.CreatePlane(name, {height: 1.5, width: 20}, this.scene);
-    BABYLON.Tags.AddTagsTo(plane, 'controller');
+    const plane = MeshBuilder.CreatePlane(name, {height: 1.5, width: 20}, this.scene);
+    Tags.AddTagsTo(plane, 'controller');
     plane.renderingGroupId = 1;
-    plane.material = new BABYLON.StandardMaterial('controlMat', this.scene);
+    plane.material = new StandardMaterial('controlMat', this.scene);
     plane.material.alpha = 1;
     plane.parent = CoT;
     plane.position.y = -1.4;
     // plane.position.x = -8;
-    plane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+    plane.billboardMode = Mesh.BILLBOARDMODE_ALL;
 
 
-    const plane2 = BABYLON.MeshBuilder.CreatePlane(name, {height: 3, width: 20}, this.scene);
-    plane2.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+    const plane2 = MeshBuilder.CreatePlane(name, {height: 3, width: 20}, this.scene);
+    plane2.billboardMode = Mesh.BILLBOARDMODE_ALL;
     plane2.renderingGroupId = 1;
     plane2.parent = CoT;
     plane2.position.y = -1;
     // plane2.position.x = -8;
 
     // GUI
-    const advancedTexture = GUI.AdvancedDynamicTexture.CreateForMesh(plane2);
+    const advancedTexture = AdvancedDynamicTexture.CreateForMesh(plane2);
 
-    const panel = new GUI.StackPanel();
-    panel.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
-    panel.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+    const panel = new StackPanel();
+    panel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+    panel.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
     advancedTexture.addControl(panel);
 
     this.currentTime = 0;
@@ -633,7 +634,7 @@ export class BabylonService {
     const buffer = this.audio ? this.audio.getAudioBuffer() : undefined;
     this.currentTime = 0;
 
-    const header = new GUI.TextBlock();
+    const header = new TextBlock();
     buffer ? header.text = 'Length: ' + this.secondsToHms(buffer.duration) :
       header.text = 'Can not calculate length.';
     header.width = '400px';
@@ -641,7 +642,7 @@ export class BabylonService {
     header.color = 'black';
     panel.addControl(header);
 
-    this.slider = new GUI.Slider();
+    this.slider = new Slider();
     this.slider.minimum = 0;
     buffer ? this.slider.maximum = buffer.duration : this.slider.maximum = 0;
     this.slider.value = 0;
@@ -666,15 +667,15 @@ export class BabylonService {
 
 // Volume
 
-    const plane3 = BABYLON.MeshBuilder.CreatePlane(name, {height: 15, width: 2}, this.scene);
-    plane3.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+    const plane3 = MeshBuilder.CreatePlane(name, {height: 15, width: 2}, this.scene);
+    plane3.billboardMode = Mesh.BILLBOARDMODE_ALL;
     plane3.renderingGroupId = 1;
     plane3.parent = CoT;
     plane3.position.x = 2;
 
-    const advancedTextureVol = GUI.AdvancedDynamicTexture.CreateForMesh(plane3);
+    const advancedTextureVol = AdvancedDynamicTexture.CreateForMesh(plane3);
 
-    const sliderVol = new GUI.Slider();
+    const sliderVol = new Slider();
     sliderVol.isVertical = true;
     sliderVol.minimum = 0;
     sliderVol.maximum = 1;
@@ -688,32 +689,32 @@ export class BabylonService {
 
     // Cube
 
-    BABYLON.SceneLoader.ImportMeshAsync(null, 'assets/models/',
+    SceneLoader.ImportMeshAsync(null, 'assets/models/',
       'kompakkt.babylon', this.scene, function (progress) {
       console.log('LOADED');
     })
       .then(result => {
         console.log(result);
-        const center = BABYLON.MeshBuilder.CreateBox('audioCenter', {size: 1}, this.scene);
-        BABYLON.Tags.AddTagsTo(center, 'audioCenter');
+        const center = MeshBuilder.CreateBox('audioCenter', {size: 1}, this.scene);
+        Tags.AddTagsTo(center, 'audioCenter');
         center.isVisible = false;
 
-        const axisX = BABYLON.Axis['X'];
-        const axisY = BABYLON.Axis['Y'];
+        const axisX = Axis['X'];
+        const axisY = Axis['Y'];
 
         if (!center.rotationQuaternion) {
-          center.rotationQuaternion = BABYLON.Quaternion.RotationYawPitchRoll(0, 0, 0);
+          center.rotationQuaternion = Quaternion.RotationYawPitchRoll(0, 0, 0);
         }
 
-        const rotationQuaternionX = BABYLON.Quaternion.RotationAxis(axisX, Math.PI / 180 * 1);
+        const rotationQuaternionX = Quaternion.RotationAxis(axisX, Math.PI / 180 * 1);
         let end = rotationQuaternionX.multiply(center.rotationQuaternion);
 
-        const rotationQuaternionY = BABYLON.Quaternion.RotationAxis(axisY, Math.PI / 180 * 240);
+        const rotationQuaternionY = Quaternion.RotationAxis(axisY, Math.PI / 180 * 240);
         end = rotationQuaternionY.multiply(end);
 
         center.rotationQuaternion = end;
 
-        center.scaling = new BABYLON.Vector3(0.05,0.05,0.05);
+        center.scaling = new Vector3(0.05,0.05,0.05);
 
         result.meshes
           .forEach(mesh => {
@@ -737,7 +738,7 @@ export class BabylonService {
 
   private createVideoScene() {
     // create a Center of Transformation
-    const CoT = new BABYLON.TransformNode('mediaPanel');
+    const CoT = new TransformNode('mediaPanel');
     CoT.position.x = 0;
     CoT.position.y = 0;
     CoT.position.z = 0;
@@ -759,16 +760,16 @@ export class BabylonService {
       })));
 
     // PLANE for Annotations
-    const plane = BABYLON.MeshBuilder.CreatePlane(name, {height: initialSize.y * 0.1, width: initialSize.x}, this.scene);
-    BABYLON.Tags.AddTagsTo(plane, 'controller');
+    const plane = MeshBuilder.CreatePlane(name, {height: initialSize.y * 0.1, width: initialSize.x}, this.scene);
+    Tags.AddTagsTo(plane, 'controller');
     plane.renderingGroupId = 1;
-    plane.material = new BABYLON.StandardMaterial('controlMat', this.scene);
+    plane.material = new StandardMaterial('controlMat', this.scene);
     plane.material.alpha = 1;
     plane.parent = CoT;
     plane.position.y = minimum.y - (initialSize.y * 0.1 > 15 ? initialSize.y * 0.1 : 15);
 
     // Plane for Time-Slider
-    const plane2 = BABYLON.MeshBuilder.CreatePlane(name, {
+    const plane2 = MeshBuilder.CreatePlane(name, {
       height: (initialSize.y * 0.1 > 15 ? initialSize.y * 0.1 : 15),
       width: initialSize.x
     }, this.scene);
@@ -777,23 +778,23 @@ export class BabylonService {
     plane2.position.y = minimum.y - (initialSize.y * 0.1 > 15 ? initialSize.y * 0.1 : 15) + (0.5 * (initialSize.y * 0.2 > 30 ? initialSize.y * 0.2 : 30));
 
     // GUI
-    const advancedTexture = GUI.AdvancedDynamicTexture.CreateForMesh(plane2);
+    const advancedTexture = AdvancedDynamicTexture.CreateForMesh(plane2);
 
-    const panel = new GUI.StackPanel();
-    panel.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
-    panel.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+    const panel = new StackPanel();
+    panel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+    panel.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
     advancedTexture.addControl(panel);
 
     this.currentTime = 0;
 
-    const header = new GUI.TextBlock();
+    const header = new TextBlock();
     header.text = 'Length: ' + this.video ? String(this.video.duration) : 'Can not calculate length in' + ' sec';
     header.width = '1000px';
     header.height = '700px';
     header.color = 'black';
     panel.addControl(header);
 
-    this.slider = new GUI.Slider();
+    this.slider = new Slider();
     this.slider.minimum = 0;
     this.video ? this.slider.maximum = this.video.duration : 0;
     this.slider.value = 0;
@@ -815,7 +816,7 @@ export class BabylonService {
 
 // Volume
 
-    const plane3 = BABYLON.MeshBuilder.CreatePlane(name, {
+    const plane3 = MeshBuilder.CreatePlane(name, {
       height: initialSize.y * 0.8,
       width: (initialSize.x * 0.1 > 30 ? initialSize.x * 0.1 : 30)
     }, this.scene);
@@ -823,9 +824,9 @@ export class BabylonService {
     plane3.parent = CoT;
     plane3.position.x = maximum.x + initialSize.x * 0.1;
 
-    const advancedTextureVol = GUI.AdvancedDynamicTexture.CreateForMesh(plane3);
+    const advancedTextureVol = AdvancedDynamicTexture.CreateForMesh(plane3);
 
-    const sliderVol = new GUI.Slider();
+    const sliderVol = new Slider();
     sliderVol.isVertical = true;
     sliderVol.minimum = 0;
     sliderVol.maximum = 1;

@@ -1,6 +1,5 @@
-import * as BABYLON from 'babylonjs';
+import {ILoadingScreen, Nullable} from 'babylonjs';
 
-import Nullable = BABYLON.Nullable;
 import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreenhandler.service';
 
 /**
@@ -8,7 +7,7 @@ import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreen
  * @author Jan G. Wieners
  */
 
-export class LoadingScreen implements BABYLON.ILoadingScreen {
+export class LoadingScreen implements ILoadingScreen {
 
   private loadingDiv: Nullable<HTMLDivElement>;
   private loadingTextDiv: HTMLDivElement;

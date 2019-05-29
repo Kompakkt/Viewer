@@ -1,5 +1,5 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
-import * as BABYLON from 'babylonjs';
+import {Mesh} from 'babylonjs';
 import {BehaviorSubject} from 'rxjs';
 import {ReplaySubject} from 'rxjs/internal/ReplaySubject';
 
@@ -25,7 +25,7 @@ export class ProcessingService {
     models: new BehaviorSubject<IModel[]>(Array<IModel>()),
     collections: new BehaviorSubject<ICompilation[]>(Array<ICompilation>()),
     actualModel: new ReplaySubject<IModel>(),
-    actualModelMeshes: new ReplaySubject<BABYLON.Mesh[]>(),
+    actualModelMeshes: new ReplaySubject<Mesh[]>(),
     actualCollection: new ReplaySubject<ICompilation | undefined>(),
     actualMediaType: new ReplaySubject<string>(),
   };
@@ -138,7 +138,7 @@ export class ProcessingService {
     }
   }
 
-  public updateActiveModelMeshes(meshes: BABYLON.Mesh[]) {
+  public updateActiveModelMeshes(meshes: Mesh[]) {
     this.Subjects.actualModelMeshes.next(meshes);
   }
 
@@ -335,7 +335,7 @@ export class ProcessingService {
               .then(async model => {
                 this.Subjects.actualMediaType.next('image');
                 this.updateActiveModel(newModel);
-                const mesh: BABYLON.Mesh[] = [];
+                const mesh: Mesh[] = [];
                 mesh.push(model);
                 this.updateActiveModelMeshes(mesh);
               });
@@ -347,7 +347,7 @@ export class ProcessingService {
               .then(async model => {
                 this.Subjects.actualMediaType.next('audio');
                 this.updateActiveModel(newModel);
-                const mesh: BABYLON.Mesh[] = [];
+                const mesh: Mesh[] = [];
                 mesh.push(model);
                 console.log(model, 'bekommen');
                 this.updateActiveModelMeshes(mesh);
@@ -361,7 +361,7 @@ export class ProcessingService {
               .then(async model => {
 
                 this.updateActiveModel(newModel);
-                const mesh: BABYLON.Mesh[] = [];
+                const mesh: Mesh[] = [];
                 mesh.push(model);
                 this.updateActiveModelMeshes(mesh);
                 this.Subjects.actualMediaType.next('video');

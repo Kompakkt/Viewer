@@ -4,7 +4,7 @@ TODO: Not yet refactored by ZOE
  */
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {MatDialog} from '@angular/material';
-import * as BABYLON from 'babylonjs';
+import {Vector3} from 'babylonjs';
 import {ColorEvent} from 'ngx-color';
 
 import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
@@ -475,15 +475,15 @@ export class ObjectFeatureSettingsComponent implements OnInit {
           camera = this.activeModel.settings.cameraPositionInitial;
         }
         if (camera !== undefined) {
-          const positionVector = new BABYLON.Vector3(camera.position.x, camera.position.y, camera.position.z);
-          let targetVector: BABYLON.Vector3;
+          const positionVector = new Vector3(camera.position.x, camera.position.y, camera.position.z);
+          let targetVector: Vector3;
           // TODO if Abfrage nicht mehr nötig, wenn Modelle resetet sind
           if (camera.target) {
-            targetVector = new BABYLON.Vector3(camera.target.x, camera.target.y, camera.target.z);
+            targetVector = new Vector3(camera.target.x, camera.target.y, camera.target.z);
             this.cameraService.setDefaultPosition(camera.position.x, camera.position.y, camera.position.z,
               camera.target.x, camera.target.y, camera.target.z);
           } else {
-            targetVector = BABYLON.Vector3.Zero();
+            targetVector = Vector3.Zero();
             this.cameraService.setDefaultPosition(camera.position.x, camera.position.y, camera.position.z,
               0, 0, 0);
           }

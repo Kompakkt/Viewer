@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 // import { text } from '@angular/core/src/render3';
-import * as BABYLON from 'babylonjs';
-import * as GUI from 'babylonjs-gui';
+import { AbstractMesh, Mesh, MeshBuilder, StandardMaterial, Tags } from 'babylonjs';
+import { AdvancedDynamicTexture,  Control, Ellipse, TextBlock } from 'babylonjs-gui';
 
 import {AnnotationService} from '../annotation/annotation.service';
 import {BabylonService} from '../babylon/babylon.service';
@@ -12,12 +12,12 @@ import {CameraService} from '../camera/camera.service';
 })
 export class AnnotationvrService {
 
-  private controlPrevious: BABYLON.AbstractMesh;
-  private controlNext: BABYLON.AbstractMesh;
+  private controlPrevious: AbstractMesh;
+  private controlNext: AbstractMesh;
 
   // FOR VR-HUD
-  private advancedTextureFullscreen: GUI.AdvancedDynamicTexture;
-  private text1: GUI.TextBlock;
+  private advancedTextureFullscreen: AdvancedDynamicTexture;
+  private text1: TextBlock;
 
   public actualRanking: number;
 
@@ -46,7 +46,7 @@ export class AnnotationvrService {
       if (vrModeIsActive) {
 
         // FOR VR-HUD
-        this.advancedTextureFullscreen = GUI.AdvancedDynamicTexture.CreateFullscreenUI('myUI2');
+        this.advancedTextureFullscreen = AdvancedDynamicTexture.CreateFullscreenUI('myUI2');
         this.advancedTextureFullscreen.isForeground = true;
 
         this.createVRAnnotationControls();
@@ -61,47 +61,47 @@ export class AnnotationvrService {
   public createVRAnnotationControls() {
 
     // Previous Control
-    this.controlPrevious = BABYLON.MeshBuilder.CreatePlane('controlPrevious', {height: 1, width: 1}, this.babylonService.getScene());
+    this.controlPrevious = MeshBuilder.CreatePlane('controlPrevious', {height: 1, width: 1}, this.babylonService.getScene());
     this.controlPrevious.parent = this.babylonService.getScene().activeCamera;
     // console.log("position of Camera before Controls are positioned ");
     // console.log(this.babylonService.getActiveCamera().position);
     this.controlPrevious.position.x = this.posXcontrolPrevious;
     this.controlPrevious.position.y = this.posYcontrolPrevious;
     this.controlPrevious.position.z = this.posZcontrolPrevious;
-    this.controlPrevious.material = new BABYLON.StandardMaterial('controlMat', this.babylonService.getScene());
+    this.controlPrevious.material = new StandardMaterial('controlMat', this.babylonService.getScene());
     this.controlPrevious.material.alpha = 1;
     this.controlPrevious.renderingGroupId = 1;
-    this.controlPrevious.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
-    BABYLON.Tags.AddTagsTo(this.controlPrevious, 'control');
+    this.controlPrevious.billboardMode = Mesh.BILLBOARDMODE_ALL;
+    Tags.AddTagsTo(this.controlPrevious, 'control');
 
     const label = this.createLabel();
-    GUI.AdvancedDynamicTexture.CreateForMesh(this.controlPrevious).addControl(label);
+    AdvancedDynamicTexture.CreateForMesh(this.controlPrevious).addControl(label);
 
     // Next Control
-    this.controlNext = BABYLON.MeshBuilder.CreatePlane('controlNext', {height: 1, width: 1}, this.babylonService.getScene());
+    this.controlNext = MeshBuilder.CreatePlane('controlNext', {height: 1, width: 1}, this.babylonService.getScene());
     this.controlNext.parent = this.babylonService.getScene().activeCamera;
     this.controlNext.position.x = this.posXcontrolNext;
     this.controlNext.position.y = this.posYcontrolNext;
     this.controlNext.position.z = this.posZcontrolNext;
-    this.controlNext.material = new BABYLON.StandardMaterial('controlMat', this.babylonService.getScene());
+    this.controlNext.material = new StandardMaterial('controlMat', this.babylonService.getScene());
     this.controlNext.material.alpha = 1;
     this.controlNext.renderingGroupId = 1;
-    this.controlNext.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
-    BABYLON.Tags.AddTagsTo(this.controlNext, 'control');
+    this.controlNext.billboardMode = Mesh.BILLBOARDMODE_ALL;
+    Tags.AddTagsTo(this.controlNext, 'control');
 
     const label2 = this.createLabel2();
-    GUI.AdvancedDynamicTexture.CreateForMesh(this.controlNext).addControl(label2);
+    AdvancedDynamicTexture.CreateForMesh(this.controlNext).addControl(label2);
   }
 
   private createLabel() {
 
-    const label = new GUI.Ellipse('controlPreviousLabel');
+    const label = new Ellipse('controlPreviousLabel');
     label.width = '100%';
     label.height = '100%';
     label.color = 'white';
     label.thickness = 1;
     label.background = 'white';
-    label.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+    label.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
 
     label.onPointerMoveObservable.add(() => {
       if (this.controlPrevious.metadata) {
@@ -114,13 +114,13 @@ export class AnnotationvrService {
 
   private createLabel2() {
 
-    const label = new GUI.Ellipse('controlNextLabel');
+    const label = new Ellipse('controlNextLabel');
     label.width = '100%';
     label.height = '100%';
     label.color = 'white';
     label.thickness = 1;
     label.background = 'black';
-    label.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+    label.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
 
     label.onPointerMoveObservable.add(() => {
       if (this.controlNext.metadata) {
@@ -134,11 +134,11 @@ export class AnnotationvrService {
   public createVRAnnotationContentField() {
 
     // FOR VR-HUD
-    this.text1 = new GUI.TextBlock();
+    this.text1 = new TextBlock();
     this.text1.text = 'Look around to start the annotation tour. \n Look at black button => next annotation \n Look at white button => previous annotation';
     this.text1.color = 'white';
     this.text1.fontSize = 24;
-    this.text1.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+    this.text1.verticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
     this.advancedTextureFullscreen.addControl(this.text1);
   }
 
