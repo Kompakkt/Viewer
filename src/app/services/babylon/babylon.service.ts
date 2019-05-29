@@ -1,8 +1,8 @@
 /* tslint:disable:max-line-length */
 import {DOCUMENT} from '@angular/common';
 import {EventEmitter, Inject, Injectable, Output} from '@angular/core';
-import {ActionManager, ExecuteCodeAction, Analyser, Engine, Scene, VRExperienceHelper, PointLight, HemisphericLight, Layer, Sound, Vector3, Color3, ArcRotateCamera, SceneLoader, Axis, Tags, Mesh, Space, Texture, StandardMaterial, VideoTexture, SceneSerializer, Tools, Camera, MeshBuilder, Quaternion, Color4, AbstractMesh, TransformNode} from 'babylonjs';
-import {Slider, AdvancedDynamicTexture, StackPanel, Control, TextBlock} from 'babylonjs-gui';
+import {AbstractMesh, ActionManager, Analyser, ArcRotateCamera, Axis, Camera, Color3, Color4, Engine, ExecuteCodeAction, HemisphericLight, Layer, Mesh, MeshBuilder, PointLight, Quaternion, Scene, SceneLoader, SceneSerializer, Sound, Space, StandardMaterial, Tags, Texture, Tools, TransformNode, Vector3, VideoTexture, VRExperienceHelper} from 'babylonjs';
+import {AdvancedDynamicTexture, Control, Slider, StackPanel, TextBlock} from 'babylonjs-gui';
 import 'babylonjs-loaders';
 import {ReplaySubject} from 'rxjs';
 /* tslint:enable:max-line-length */
@@ -78,7 +78,7 @@ export class BabylonService {
         });
         this.scene = new Scene(this.engine);
         this.engine.loadingScreen = new LoadingScreen(newCanvas, '',
-          '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
+                                                      '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
 
         this.analyser = new Analyser(this.scene);
         Engine.audioEngine['connectToAnalyser'](this.analyser);
@@ -93,7 +93,7 @@ export class BabylonService {
               const audioMeshes = this.scene.getMeshesByTags('audioCenter');
               audioMeshes.forEach(mesh => {
                 mesh.scaling = new Vector3((0.05 + (fft[15] / 320)),
-                  (0.05 + (fft[15] / 320)), (0.05 + (fft[15] / 320)));
+                                           (0.05 + (fft[15] / 320)), (0.05 + (fft[15] / 320)));
               });
               if (Engine.audioEngine.audioContext) {
                 // TODO
@@ -307,15 +307,15 @@ export class BabylonService {
 
     return new Promise<any>((resolve, reject) => {
 
-      SceneLoader.ImportMeshAsync(null, rootUrl, filename, this.scene, function (progress) {
+      SceneLoader.ImportMeshAsync(null, rootUrl, filename, this.scene, function(progress) {
 
         if (progress.lengthComputable) {
           engine.loadingUIText = (progress.loaded * 100 / progress.total).toFixed() + '%';
         }
-      }).then(function (result) {
+      }).then(function(result) {
         engine.hideLoadingUI();
         resolve(result);
-      }, function (error) {
+      },      function(error) {
 
         engine.hideLoadingUI();
         message.error(error);
@@ -363,15 +363,15 @@ export class BabylonService {
         .then(posts => {
 
           this.audio = new Sound('Music', posts,
-                                         scene, () => {
+                                 scene, () => {
               engine.hideLoadingUI();
               const plane = this.createAudioScene();
               resolve(plane);
             },
-            null);
+                                 null);
           console.log('Success!', posts);
         })
-        .catch(function (error) {
+        .catch(function(error) {
           message.error(error);
           engine.hideLoadingUI();
           reject(error);
@@ -442,7 +442,7 @@ export class BabylonService {
         const plane = this.createVideoScene();
 
         new Promise<any>((resolve, reject) => {
-          //const dummy = new Mesh('dummy', scene);
+          // const dummy = new Mesh('dummy', scene);
           engine.hideLoadingUI();
           resolve(plane);
         })
@@ -482,7 +482,7 @@ export class BabylonService {
       const _activeCamera = this.getScene().activeCamera;
       if (_activeCamera instanceof Camera) {
         Tools.CreateScreenshot(this.getEngine(), _activeCamera,
-          (width === undefined) ? {width: 400, height: 225} : {width, height: Math.round((width / 16) * 9)}, screenshot => {
+                               (width === undefined) ? {width: 400, height: 225} : {width, height: Math.round((width / 16) * 9)}, screenshot => {
             resolve(screenshot);
           });
       }
@@ -613,7 +613,6 @@ export class BabylonService {
     // plane.position.x = -8;
     plane.billboardMode = Mesh.BILLBOARDMODE_ALL;
 
-
     const plane2 = MeshBuilder.CreatePlane(name, {height: 3, width: 20}, this.scene);
     plane2.billboardMode = Mesh.BILLBOARDMODE_ALL;
     plane2.renderingGroupId = 1;
@@ -690,7 +689,7 @@ export class BabylonService {
     // Cube
 
     SceneLoader.ImportMeshAsync(null, 'assets/models/',
-      'kompakkt.babylon', this.scene, function (progress) {
+                                'kompakkt.babylon', this.scene, function(progress) {
       console.log('LOADED');
     })
       .then(result => {
@@ -714,7 +713,7 @@ export class BabylonService {
 
         center.rotationQuaternion = end;
 
-        center.scaling = new Vector3(0.05,0.05,0.05);
+        center.scaling = new Vector3(0.05, 0.05, 0.05);
 
         result.meshes
           .forEach(mesh => {
@@ -771,8 +770,8 @@ export class BabylonService {
     // Plane for Time-Slider
     const plane2 = MeshBuilder.CreatePlane(name, {
       height: (initialSize.y * 0.1 > 15 ? initialSize.y * 0.1 : 15),
-      width: initialSize.x
-    }, this.scene);
+      width: initialSize.x,
+    },                                     this.scene);
     plane2.renderingGroupId = 1;
     plane2.parent = CoT;
     plane2.position.y = minimum.y - (initialSize.y * 0.1 > 15 ? initialSize.y * 0.1 : 15) + (0.5 * (initialSize.y * 0.2 > 30 ? initialSize.y * 0.2 : 30));
@@ -818,8 +817,8 @@ export class BabylonService {
 
     const plane3 = MeshBuilder.CreatePlane(name, {
       height: initialSize.y * 0.8,
-      width: (initialSize.x * 0.1 > 30 ? initialSize.x * 0.1 : 30)
-    }, this.scene);
+      width: (initialSize.x * 0.1 > 30 ? initialSize.x * 0.1 : 30),
+    },                                     this.scene);
     plane3.renderingGroupId = 1;
     plane3.parent = CoT;
     plane3.position.x = maximum.x + initialSize.x * 0.1;
@@ -854,10 +853,10 @@ export class BabylonService {
     };
 
     // Return it as a Promise
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
 
       // Setup our listener to process compeleted requests
-      request.onreadystatechange = function () {
+      request.onreadystatechange = function() {
 
         // Only run if the request is complete
         if (request.readyState !== 4) return;

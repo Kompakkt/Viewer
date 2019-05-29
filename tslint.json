@@ -96,6 +96,7 @@
     ],
     "no-input-rename": true,
     "no-misused-new": true,
+    "no-magic-numbers": false,
     "no-non-null-assertion": true,
     "no-output-on-prefix": true,
     "no-output-rename": true,

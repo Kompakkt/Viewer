@@ -3,7 +3,7 @@ import {MatDialog} from '@angular/material';
 import {Matrix, Vector3} from 'babylonjs';
 import {
   PerfectScrollbarComponent,
-  PerfectScrollbarConfigInterface, PerfectScrollbarDirective
+  PerfectScrollbarConfigInterface, PerfectScrollbarDirective,
 } from 'ngx-perfect-scrollbar';
 
 import {IAnnotation} from '../../../interfaces/interfaces';
@@ -12,10 +12,10 @@ import {AnnotationmarkerService} from '../../../services/annotationmarker/annota
 import {BabylonService} from '../../../services/babylon/babylon.service';
 import {CameraService} from '../../../services/camera/camera.service';
 import {DataService} from '../../../services/data/data.service';
+import {ProcessingService} from '../../../services/processing/processing.service';
 import {SocketService} from '../../../services/socket/socket.service';
 import {UserdataService} from '../../../services/userdata/userdata.service';
 import {DialogAnnotationEditorComponent} from '../../dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
-import {ProcessingService} from '../../../services/processing/processing.service';
 
 @Component({
   selector: 'app-annotation',
@@ -109,7 +109,7 @@ export class AnnotationComponent implements OnInit {
 
     setInterval(() => {
       this.setPosition(this.annotation);
-    }, 15);
+    },          15);
   }
 
   public closeAnnotation(): void {

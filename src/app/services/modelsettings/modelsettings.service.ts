@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Mesh, Vector3, MeshBuilder, Tags, StandardMaterial, Axis, Quaternion, DynamicTexture, Color3, Animation} from 'babylonjs';
+import {Animation, Axis, Color3, DynamicTexture, Mesh, MeshBuilder, Quaternion, StandardMaterial, Tags, Vector3} from 'babylonjs';
 import {ColorEvent} from 'ngx-color';
 
 import {BabylonService} from '../babylon/babylon.service';
@@ -268,7 +268,7 @@ export class ModelsettingsService {
 
     const end = Quaternion.RotationYawPitchRoll(0, 0, 0);
     const anim = new Animation('anim', 'rotationQuaternion',
-                                       120, Animation.ANIMATIONTYPE_QUATERNION, Animation.ANIMATIONLOOPMODE_RELATIVE);
+                               120, Animation.ANIMATIONTYPE_QUATERNION, Animation.ANIMATIONLOOPMODE_RELATIVE);
     const frame = [{frame: 0, value: start},
                    {frame: 100, value: end}];
     anim.setKeys(frame);
@@ -384,7 +384,7 @@ export class ModelsettingsService {
 
     this.boundingBox = MeshBuilder.CreateBox('boundingBox', {
       width: this.initialSize.x, height: this.initialSize.y, depth: this.initialSize.z,
-    },                                               this.babylonService.getScene());
+    },                                       this.babylonService.getScene());
     Tags.AddTagsTo(this.boundingBox, 'boundingBox');
     this.boundingBox.parent = this.center;
 
@@ -422,7 +422,7 @@ export class ModelsettingsService {
   private createGround(size: number) {
     this.scalingFactorGround = 1;
     this.ground = MeshBuilder.CreateGround('ground', {height: size, width: size, subdivisions: 1},
-                                                   this.babylonService.getScene());
+                                           this.babylonService.getScene());
     Tags.AddTagsTo(this.ground, 'ground');
     this.showGround = true;
   }
@@ -477,7 +477,7 @@ export class ModelsettingsService {
     const vecThreeX = new Vector3(sizeWorldAxis, 0, 0);
     const vecFourX = new Vector3(sizeWorldAxis * 0.95, -0.05 * sizeWorldAxis, 0);
     const axisX = Mesh.CreateLines('axisX', [Vector3.Zero(), vecOneX, vecTwoX, vecThreeX, vecFourX],
-                                           this.babylonService.getScene());
+                                   this.babylonService.getScene());
     Tags.AddTagsTo(axisX, 'worldAxis');
     axisX.color = new Color3(1, 0, 0);
     const xChar = this.createTextPlane('X', 'red', sizeWorldAxis / 10, 'worldAxis', 'worldAxisX');
@@ -488,7 +488,7 @@ export class ModelsettingsService {
     const vecThreeY = new Vector3(0, sizeWorldAxis, 0);
     const vecFourY = new Vector3(0.05 * sizeWorldAxis, sizeWorldAxis * 0.95, 0);
     const axisY = Mesh.CreateLines('axisY', [Vector3.Zero(), vecOneY, vecTwoY, vecThreeY, vecFourY],
-                                           this.babylonService.getScene());
+                                   this.babylonService.getScene());
     Tags.AddTagsTo(axisY, 'worldAxis');
     axisY.color = new Color3(0, 1, 0);
     const yChar = this.createTextPlane('Y', 'green', sizeWorldAxis / 10, 'worldAxis', 'worldAxisY');
@@ -499,7 +499,7 @@ export class ModelsettingsService {
     const vecThreeZ = new Vector3(0, 0, sizeWorldAxis);
     const vecFourZ = new Vector3(0, 0.05 * sizeWorldAxis, sizeWorldAxis * 0.95);
     const axisZ = Mesh.CreateLines('axisZ', [Vector3.Zero(), vecOneZ, vecTwoZ, vecThreeZ, vecFourZ],
-                                           this.babylonService.getScene());
+                                   this.babylonService.getScene());
     Tags.AddTagsTo(axisZ, 'worldAxis');
     axisZ.color = new Color3(0, 0, 1);
     const zChar = this.createTextPlane('Z', 'blue', sizeWorldAxis / 10, 'worldAxis', 'worldAxisZ');
@@ -563,7 +563,7 @@ export class ModelsettingsService {
     const vecThreeX = new Vector3(sizeLocalAxis, 0, 0);
     const vecFourX = new Vector3(sizeLocalAxis * 0.95, -0.05 * sizeLocalAxis, 0);
     const local_axisX = Mesh.CreateLines('local_axisX', [Vector3.Zero(), vecOneX, vecTwoX, vecThreeX, vecFourX],
-                                                 this.babylonService.getScene());
+                                         this.babylonService.getScene());
     Tags.AddTagsTo(local_axisX, 'localAxis');
     local_axisX.color = new Color3(1, 0, 0);
     const xChar = this.createTextPlane('X', 'red', sizeLocalAxis / 10, 'localAxis', 'localAxisX');
@@ -574,7 +574,7 @@ export class ModelsettingsService {
     const vecThreeY = new Vector3(0, sizeLocalAxis, 0);
     const vecFourY = new Vector3(0.05 * sizeLocalAxis, sizeLocalAxis * 0.95, 0);
     const local_axisY = Mesh.CreateLines('local_axisY', [Vector3.Zero(), vecOneY, vecTwoY, vecThreeY, vecFourY],
-                                                 this.babylonService.getScene());
+                                         this.babylonService.getScene());
     Tags.AddTagsTo(local_axisY, 'localAxis');
     local_axisY.color = new Color3(0, 1, 0);
     const yChar = this.createTextPlane('Y', 'green', sizeLocalAxis / 10, 'localAxis', 'localAxisY');
@@ -585,7 +585,7 @@ export class ModelsettingsService {
     const vecThreeZ = new Vector3(0, 0, sizeLocalAxis);
     const vecFourZ = new Vector3(0, 0.05 * sizeLocalAxis, sizeLocalAxis * 0.95);
     const local_axisZ = Mesh.CreateLines('local_axisZ', [Vector3.Zero(), vecOneZ, vecTwoZ, vecThreeZ, vecFourZ],
-                                                 this.babylonService.getScene());
+                                         this.babylonService.getScene());
     Tags.AddTagsTo(local_axisZ, 'localAxis');
     local_axisZ.color = new Color3(0, 0, 1);
     const zChar = this.createTextPlane('Z', 'blue', sizeLocalAxis / 10, 'localAxis', 'localAxisZ');
@@ -729,7 +729,7 @@ export class ModelsettingsService {
     end = rotationQuaternionZ.multiply(end);
 
     const anim = new Animation('anim', 'rotationQuaternion',
-                                       120, Animation.ANIMATIONTYPE_QUATERNION, Animation.ANIMATIONLOOPMODE_RELATIVE);
+                               120, Animation.ANIMATIONTYPE_QUATERNION, Animation.ANIMATIONLOOPMODE_RELATIVE);
     const frame = [{frame: 0, value: start},
                    {frame: 100, value: end}];
     anim.setKeys(frame);

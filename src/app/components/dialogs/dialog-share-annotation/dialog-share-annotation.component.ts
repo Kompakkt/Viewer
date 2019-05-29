@@ -9,7 +9,7 @@ import {UserdataService} from '../../../services/userdata/userdata.service';
 @Component({
   selector: 'app-dialog-share-annotation',
   templateUrl: './dialog-share-annotation.component.html',
-  styleUrls: ['./dialog-share-annotation.component.scss']
+  styleUrls: ['./dialog-share-annotation.component.scss'],
 })
 
 export class DialogShareAnnotationComponent implements OnInit {
@@ -57,16 +57,16 @@ export class DialogShareAnnotationComponent implements OnInit {
             }
           } else if (compilation['status'] === 'ok'
             && compilation['message'] === 'Password protected compilation') {
-            //'password'
+            // 'password'
             this.checkPwdMode = true;
           } else {
             // collection ist nicht erreichbar
-            //missing'
+            // missing'
             this.message.error('Can not find Collection with ID ' + this.targetCollectionId + '.');
           }
-        }, error => {
+        },    error => {
           this.message.error('Connection to object server refused.');
-          //'missing'
+          // 'missing'
           this.message.error('Can not find Collection with ID ' + this.targetCollectionId + '.');
         });
 
@@ -85,7 +85,6 @@ export class DialogShareAnnotationComponent implements OnInit {
         .then(compilation => {
           compilation.annotationList ? compilation.annotationList.length : 1;
 
-
           if (compilation['_id']) {
             this.response.status = true;
             this.response.collectionId = this.targetCollectionId;
@@ -95,7 +94,7 @@ export class DialogShareAnnotationComponent implements OnInit {
             this.message.error('Password is wrong. For Colelction with ID '
               + this.targetCollectionId + '.');
           }
-        }, error => {
+        },    error => {
           this.message.error('Connection to object server refused.');
           this.dialogRef.close(this.response);
         });

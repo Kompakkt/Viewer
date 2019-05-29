@@ -4,10 +4,10 @@ import {MatDialog, MatDialogConfig, MatRadioChange} from '@angular/material';
 import {MediaTypePipe} from '../../pipes/media-type.pipe';
 import {MessageService} from '../../services/message/message.service';
 import {OverlayService} from '../../services/overlay/overlay.service';
+import {ProcessingService} from '../../services/processing/processing.service';
 import {UserdataService} from '../../services/userdata/userdata.service';
 import {LoginComponent} from '../dialogs/dialog-login/login.component';
 import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-password.component';
-import {ProcessingService} from '../../services/processing/processing.service';
 
 @Component({
   selector: 'app-content-browser',
@@ -97,7 +97,7 @@ import {ProcessingService} from '../../services/processing/processing.service';
         default:
           this.message.error('Can not find Collection with ID ' + this.identifierCollection + '.');
       }
-    },                                                  error => {
+    },                                                   error => {
       this.message.error('Connection to object server refused.');
     });
   }

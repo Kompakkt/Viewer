@@ -9,7 +9,7 @@ import {
   ISocketMessage,
   ISocketRoomData,
   ISocketUser,
-  ISocketUserInfo
+  ISocketUserInfo,
 } from '../../interfaces/interfaces';
 import {AnnotationService} from '../annotation/annotation.service';
 import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';

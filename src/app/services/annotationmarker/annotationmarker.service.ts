@@ -67,7 +67,7 @@ export class AnnotationmarkerService {
 
   private createPlane(name: string, height: number, width: number, tag: string, position: Vector3, normal: Vector3) {
     const plane = MeshBuilder.CreatePlane(name,
-                                                  {height, width}, this.babylonService.getScene());
+                                          {height, width}, this.babylonService.getScene());
     Tags.AddTagsTo(plane, tag + ' plane');
     plane.position = position;
     plane.translate(normal, 0.5, Space.WORLD);

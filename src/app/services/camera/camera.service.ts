@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Animation, Scene, ArcRotateCamera, VRDeviceOrientationFreeCamera, VRDeviceOrientationArcRotateCamera, Vector3} from 'babylonjs';
+import {Animation, ArcRotateCamera, Scene, Vector3, VRDeviceOrientationArcRotateCamera, VRDeviceOrientationFreeCamera} from 'babylonjs';
 
 import {BabylonService} from '../babylon/babylon.service';
 
@@ -135,7 +135,7 @@ export class CameraService {
 
     // const ground: AbstractMesh = this.scene.getMeshesByTags('mediaGround')[0];
     // this.arcRotateCamera.zoomOn(ground);
-    //this.arcRotateCamera.radius = this.arcRotateCamera.radius + 0.2 * this.arcRotateCamera.radius;
+    // this.arcRotateCamera.radius = this.arcRotateCamera.radius + 0.2 * this.arcRotateCamera.radius;
   }
 
   public resetCameraMode() {
@@ -144,7 +144,7 @@ export class CameraService {
       this.arcRotateCamera.dispose();
     }
 
-    this.setDefaultPosition(0,10,100,0,0,0);
+    this.setDefaultPosition(0, 10, 100, 0, 0, 0);
 
     // Parameters (initial Position): alpha, beta, radius, target position, scene
     // this.arcRotateCamera = this.babylonService.createArcRotateCam(0, 10, 100);
@@ -303,8 +303,8 @@ export class CameraService {
       frames = 30;
 
     const animCamAlpha = new Animation(name, 'alpha', frames,
-                                               Animation.ANIMATIONTYPE_FLOAT,
-                                               Animation.ANIMATIONLOOPMODE_CYCLE);
+                                       Animation.ANIMATIONTYPE_FLOAT,
+                                       Animation.ANIMATIONLOOPMODE_CYCLE);
 
     animCamAlpha.setKeys([
       {
@@ -318,8 +318,8 @@ export class CameraService {
     this.arcRotateCamera.animations.push(animCamAlpha);
 
     const animCamBeta = new Animation(name, 'beta', frames,
-                                              Animation.ANIMATIONTYPE_FLOAT,
-                                              Animation.ANIMATIONLOOPMODE_CYCLE);
+                                      Animation.ANIMATIONTYPE_FLOAT,
+                                      Animation.ANIMATIONLOOPMODE_CYCLE);
 
     animCamBeta.setKeys([
       {
@@ -332,8 +332,8 @@ export class CameraService {
     this.arcRotateCamera.animations.push(animCamBeta);
 
     const animCamRadius = new Animation(name, 'radius', frames,
-                                                Animation.ANIMATIONTYPE_FLOAT,
-                                                Animation.ANIMATIONLOOPMODE_CYCLE);
+                                        Animation.ANIMATIONTYPE_FLOAT,
+                                        Animation.ANIMATIONLOOPMODE_CYCLE);
 
     animCamRadius.setKeys([
       {
@@ -361,8 +361,8 @@ export class CameraService {
       frames = 30;
 
     const animCamAlpha = new Animation(name, 'position.x', frames,
-                                               Animation.ANIMATIONTYPE_FLOAT,
-                                               Animation.ANIMATIONLOOPMODE_CYCLE);
+                                       Animation.ANIMATIONTYPE_FLOAT,
+                                       Animation.ANIMATIONLOOPMODE_CYCLE);
 
     animCamAlpha.setKeys([
       {
@@ -376,8 +376,8 @@ export class CameraService {
     this.scene.activeCamera.animations.push(animCamAlpha);
 
     const animCamBeta = new Animation(name, 'position.y', frames,
-                                              Animation.ANIMATIONTYPE_FLOAT,
-                                              Animation.ANIMATIONLOOPMODE_CYCLE);
+                                      Animation.ANIMATIONTYPE_FLOAT,
+                                      Animation.ANIMATIONLOOPMODE_CYCLE);
 
     animCamBeta.setKeys([
       {
@@ -390,8 +390,8 @@ export class CameraService {
     this.scene.activeCamera.animations.push(animCamBeta);
 
     const animCamRadius = new Animation(name, 'position.z', frames,
-                                                Animation.ANIMATIONTYPE_FLOAT,
-                                                Animation.ANIMATIONLOOPMODE_CYCLE);
+                                        Animation.ANIMATIONTYPE_FLOAT,
+                                        Animation.ANIMATIONLOOPMODE_CYCLE);
 
     animCamRadius.setKeys([
       {

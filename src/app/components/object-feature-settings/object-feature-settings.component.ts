@@ -261,13 +261,13 @@ export class ObjectFeatureSettingsComponent implements OnInit {
     this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
     console.log(this.cameraPositionInitial);
     this.cameraService.setDefaultPosition(this.cameraService.arcRotateCamera.alpha,
-      this.cameraService.arcRotateCamera.beta, this.cameraService.arcRotateCamera.radius,
-      this.cameraService.arcRotateCamera.target.x, this.cameraService.arcRotateCamera.target.y,
-      this.cameraService.arcRotateCamera.target.z);
+                                          this.cameraService.arcRotateCamera.beta, this.cameraService.arcRotateCamera.radius,
+                                          this.cameraService.arcRotateCamera.target.x, this.cameraService.arcRotateCamera.target.y,
+                                          this.cameraService.arcRotateCamera.target.z);
     return new Promise<string>((resolve, reject) => this.babylonService.createPreviewScreenshot(400).then(screenshot => {
       this.preview = screenshot;
       resolve(screenshot);
-    }, error => {
+    },                                                                                                    error => {
       this.message.error(error);
       reject(error);
     }));
@@ -451,7 +451,7 @@ export class ObjectFeatureSettingsComponent implements OnInit {
     } else {
       // settings exist
       await this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
-        this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
+                                                   this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
     }
   }
 
@@ -481,11 +481,11 @@ export class ObjectFeatureSettingsComponent implements OnInit {
           if (camera.target) {
             targetVector = new Vector3(camera.target.x, camera.target.y, camera.target.z);
             this.cameraService.setDefaultPosition(camera.position.x, camera.position.y, camera.position.z,
-              camera.target.x, camera.target.y, camera.target.z);
+                                                  camera.target.x, camera.target.y, camera.target.z);
           } else {
             targetVector = Vector3.Zero();
             this.cameraService.setDefaultPosition(camera.position.x, camera.position.y, camera.position.z,
-              0, 0, 0);
+                                                  0, 0, 0);
           }
           this.cameraService.moveCameraToTarget(positionVector);
           this.cameraService.arcRotateCamera.setTarget(targetVector);
@@ -621,7 +621,7 @@ export class ObjectFeatureSettingsComponent implements OnInit {
       // End
 
       await this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
-        this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
+                                                   this.activeModel.settings.rotation.x, this.activeModel.settings.rotation.y, this.activeModel.settings.rotation.z);
 
       /*this.cameraService.setUpperRadiusLimit(500);
       this.isFallbackModelLoaded ? this.cameraService
@@ -649,8 +649,6 @@ export class ObjectFeatureSettingsComponent implements OnInit {
                 });
             });
         }
-
-
 
         this.babylonService.createAmbientlightUp('ambientlightUp', {x: 0, y: 1, z: 0});
         this.babylonService.setLightIntensity('ambientlightUp', 1);

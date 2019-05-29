@@ -1,6 +1,6 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
 
-import {IAnnotation, ICompilation, ILoginData, IModel, IUserData, ILDAPData} from '../../interfaces/interfaces';
+import {IAnnotation, ICompilation, ILDAPData, ILoginData, IModel, IUserData} from '../../interfaces/interfaces';
 import {MessageService} from '../message/message.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
 import {ProcessingService} from '../processing/processing.service';
@@ -115,7 +115,7 @@ export class UserdataService {
             }
           }
           console.log('Meine Modelle', this.userOwnedFinishedModels, 'compis', this.personalCollections, 'meine Annos', this.userOwnedAnnotations);
-        }, error => {
+        },    error => {
           this.message.error('Connection to object server refused.');
           reject('Connection to object server refused.');
         });
