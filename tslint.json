@@ -108,10 +108,10 @@
     "no-switch-case-fall-through": false,
     "no-trailing-whitespace": true,
     "no-unbound-method": false,
+    "no-use-before-declare": false,
     "no-unnecessary-initializer": true,
     "no-unsafe-any": false,
     "no-unused-expression": true,
-    "no-use-before-declare": true,
     "no-var-keyword": true,
     "no-void-expression": [
       true,
@@ -154,10 +154,10 @@
       }
     ],
     "unified-signatures": true,
-    "use-host-property-decorator": true,
-    "use-input-property-decorator": true,
-    "use-life-cycle-interface": true,
-    "use-output-property-decorator": true,
+    "no-host-metadata-property": true,
+    "no-inputs-metadata-property": true,
+    "use-lifecycle-interface": true,
+    "no-outputs-metadata-property": true,
     "use-pipe-transform-interface": true,
     "variable-name": false,
     "whitespace": [
