@@ -52,7 +52,7 @@
     "marked": "^0.6.2",
     "ngx-color": "^3.0.3",
     "ngx-markdown": "^8.0.2",
-    "ngx-perfect-scrollbar": "^7.2.1",
+    "ngx-perfect-scrollbar": "^8.0.0",
     "ngx-socket-io": "^2.1.1",
     "pepjs": "^0.4.3",
     "pouchdb": "^7.1.1",
