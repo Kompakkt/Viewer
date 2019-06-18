@@ -54,7 +54,7 @@
     "ngx-markdown": "^8.0.2",
     "ngx-perfect-scrollbar": "^8.0.0",
     "ngx-socket-io": "^2.1.1",
-    "pepjs": "^0.4.3",
+    "pepjs": "^0.5.2",
     "pouchdb": "^7.1.1",
     "pouchdb-find": "^7.1.1",
     "pouchdb-upsert": "^2.2.0",
