@@ -29,7 +29,7 @@
               "src/styles.scss"
             ],
             "scripts": [
-              "node_modules/pepjs/dist/pep.min.js",
+              "node_modules/pepjs/dist/pep.js",
               "node_modules/marked/lib/marked.js"]
           },
           "configurations": {
@@ -87,7 +87,7 @@
               "src/styles.scss"
             ],
             "scripts": [
-              "node_modules/pepjs/dist/pep.min.js",
+              "node_modules/pepjs/dist/pep.js",
               "node_modules/marked/lib/marked.js"
             ],
             "assets": [
