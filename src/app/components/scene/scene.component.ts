@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, HostListener, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, HostListener, ViewChild, ViewContainerRef} from '@angular/core';
 
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
@@ -11,8 +11,6 @@ import {ProcessingService} from '../../services/processing/processing.service';
 })
 export class SceneComponent implements AfterViewInit {
 
-  @ViewChild('canvas', { static: false }) private canvasRef: ElementRef;
-
   @HostListener('window:resize', ['$event'])
 
   public onResize() {
@@ -21,12 +19,13 @@ export class SceneComponent implements AfterViewInit {
 
   constructor(private babylonService: BabylonService,
               private processingService: ProcessingService,
-              public annotationService: AnnotationService) {
+              public annotationService: AnnotationService,
+              private viewContainerRef: ViewContainerRef) {
   }
 
   ngAfterViewInit() {
-
-    this.babylonService.updateCanvas(this.canvasRef.nativeElement);
+    this.babylonService.attachCanvas(this.viewContainerRef);
     this.processingService.bootstrap();
+    this.babylonService.resize();
   }
 }

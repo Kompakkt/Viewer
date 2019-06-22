@@ -348,7 +348,6 @@ export class AnnotationService {
   // Die Annotationsfunktionalität wird zum aktuellen Modell hinzugefügt
   public initializeAnnotationMode() {
     this.actualModelMeshes.forEach(mesh => {
-      console.log(mesh, 'annotatable');
       this.actionService.createActionManager(mesh, ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
     });
     this.annotationMode(false);

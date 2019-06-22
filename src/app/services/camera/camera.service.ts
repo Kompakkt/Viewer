@@ -11,7 +11,7 @@ export class CameraService {
   private canvas: HTMLCanvasElement;
   private scene: Scene;
 
-  public arcRotateCamera: ArcRotateCamera;
+  public arcRotateCamera = this.babylonService.createArcRotateCam(0, 10, 100);
   // private universalCamera: UniversalCamera;
   private vrCamera: VRDeviceOrientationFreeCamera | VRDeviceOrientationArcRotateCamera;
 
@@ -29,46 +29,33 @@ export class CameraService {
     private xRot: number;
     private yRot: number;*/
 
-  constructor(
-    private babylonService: BabylonService) {
+  constructor(private babylonService: BabylonService) {
+    this.scene = this.babylonService.getScene();
+    this.scene.collisionsEnabled = true;
+    this.canvas = this.babylonService.getCanvas();
 
-    this.babylonService.CanvasObservable.subscribe(newCanvas => {
+    // Parameters (initial Position): alpha, beta, radius, target position, scene
+    // this.arcRotateCamera = this.babylonService.createArcRotateCam(0, 10, 100);
+    this.arcRotateCamera.allowUpsideDown = false;
+    this.arcRotateCamera.panningSensibility = 25;
+    this.arcRotateCamera.keysUp.push(87);
+    this.arcRotateCamera.keysDown.push(83);
+    this.arcRotateCamera.keysLeft.push(65);
+    this.arcRotateCamera.keysRight.push(68);
 
-      if (newCanvas) {
+    this.arcRotateCamera.attachControl(this.canvas, false);
+    this.arcRotateCamera.checkCollisions = true;
+    this.arcRotateCamera.collisionRadius = new Vector3(4, 4, 4);
 
-        this.scene = this.babylonService.getScene();
-        this.scene.collisionsEnabled = true;
-        this.canvas = newCanvas;
+    /*
+this.universalCamera = new UniversalCamera('universalCamera',
+new Vector3(this.x, this.y, this.z), this.scene);
 
-        // Arc Rotate Camera
-        if (this.arcRotateCamera) {
-          this.arcRotateCamera.dispose();
-        }
-        // Parameters (initial Position): alpha, beta, radius, target position, scene
-        // this.arcRotateCamera = this.babylonService.createArcRotateCam(0, 10, 100);
-        this.arcRotateCamera = this.babylonService.createArcRotateCam(0, 10, 100);
-        this.arcRotateCamera.allowUpsideDown = false;
-        this.arcRotateCamera.panningSensibility = 25;
-        this.arcRotateCamera.keysUp.push(87);
-        this.arcRotateCamera.keysDown.push(83);
-        this.arcRotateCamera.keysLeft.push(65);
-        this.arcRotateCamera.keysRight.push(68);
+this.universalSettings();
 
-        this.arcRotateCamera.attachControl(newCanvas, false);
-        this.arcRotateCamera.checkCollisions = true;
-        this.arcRotateCamera.collisionRadius = new Vector3(4, 4, 4);
-
-        /*
-  this.universalCamera = new UniversalCamera('universalCamera',
-    new Vector3(this.x, this.y, this.z), this.scene);
-
-  this.universalSettings();
-
-  this.xRot = this.universalCamera.rotation.x;
-  this.yRot = this.universalCamera.rotation.y;
+this.xRot = this.universalCamera.rotation.x;
+this.yRot = this.universalCamera.rotation.y;
 */
-      }
-    });
   }
 
   // VR BUTTON

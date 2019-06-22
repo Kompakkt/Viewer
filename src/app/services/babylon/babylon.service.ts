@@ -1,16 +1,17 @@
 /* tslint:disable:max-line-length */
-import {DOCUMENT} from '@angular/common';
-import {EventEmitter, Inject, Injectable, Output} from '@angular/core';
-import {AbstractMesh, ActionManager, Analyser, ArcRotateCamera, Axis, Camera, Color3, Color4, Engine, ExecuteCodeAction, HemisphericLight, Layer, Mesh, MeshBuilder, PointLight, Quaternion, Scene, SceneLoader, SceneSerializer, Sound, Space, StandardMaterial, Tags, Texture, Tools, TransformNode, Vector3, VideoTexture, VRExperienceHelper} from 'babylonjs';
-import {AdvancedDynamicTexture, Control, Slider, StackPanel, TextBlock} from 'babylonjs-gui';
+import { DOCUMENT } from '@angular/common';
+import { ApplicationRef, ComponentRef, ElementRef, EventEmitter, Inject, Injectable, Injector, Output, ViewChild, ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
+import { AbstractMesh, ActionManager, Analyser, ArcRotateCamera, Axis, Camera, Color3, Color4, Engine, ExecuteCodeAction, HemisphericLight, Layer, Mesh, MeshBuilder, PointLight, Quaternion, Scene, SceneLoader, SceneSerializer, Sound, Space, StandardMaterial, Tags, Texture, Tools, TransformNode, Vector3, VideoTexture, VRExperienceHelper } from 'babylonjs';
+import { AdvancedDynamicTexture, Control, Slider, StackPanel, TextBlock } from 'babylonjs-gui';
 import 'babylonjs-loaders';
-import {ReplaySubject} from 'rxjs';
+import { ReplaySubject } from 'rxjs';
+import { RenderCanvasComponent } from '../../components/render-canvas/render-canvas.component';
 /* tslint:enable:max-line-length */
 
-import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreenhandler.service';
-import {MessageService} from '../message/message.service';
+import { LoadingscreenhandlerService } from '../loadingscreenhandler/loadingscreenhandler.service';
+import { MessageService } from '../message/message.service';
 
-import {LoadingScreen} from './loadingscreen';
+import { LoadingScreen } from './loadingscreen';
 
 @Injectable({
   providedIn: 'root',
@@ -20,8 +21,9 @@ export class BabylonService {
   @Output() vrModeIsActive: EventEmitter<boolean> = new EventEmitter();
   public isVRModeActive = false;
 
-  private scene: Scene;
+  private canvas: HTMLCanvasElement;
   private engine: Engine;
+  private scene: Scene;
 
   private analyser: Analyser;
 
@@ -64,132 +66,140 @@ export class BabylonService {
   private currentTime: number;
   public video: HTMLVideoElement;
 
-  constructor(private message: MessageService,
-              private loadingScreenHandler: LoadingscreenhandlerService,
-              @Inject(DOCUMENT) private document: any) {
+  private canvasRef: ComponentRef<RenderCanvasComponent>;
 
-    this.CanvasObservable.subscribe(newCanvas => {
+  constructor(
+    private message: MessageService,
+    private loadingScreenHandler: LoadingscreenhandlerService,
+    @Inject(DOCUMENT) private document: HTMLDocument,
+    private factoryResolver: ComponentFactoryResolver,
+    private injector: Injector) {
+    const factory = this.factoryResolver.resolveComponentFactory(RenderCanvasComponent);
+    this.canvasRef = factory.create(this.injector);
+    this.canvas = this.canvasRef.location.nativeElement.childNodes[0] as HTMLCanvasElement;
+    this.updateCanvas(this.canvas);
 
-      if (newCanvas) {
+    this.canvas.id = 'renderCanvas';
+    this.engine = new Engine(this.canvas, true, {
+      audioEngine: true,
+      preserveDrawingBuffer: true, stencil: true,
+    });
+    this.scene = new Scene(this.engine);
+    this.engine.loadingScreen = new LoadingScreen(this.canvas, '',
+      '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
 
-        this.engine = new Engine(newCanvas, true, {
-          audioEngine: true,
-          preserveDrawingBuffer: true, stencil: true,
-        });
-        this.scene = new Scene(this.engine);
-        this.engine.loadingScreen = new LoadingScreen(newCanvas, '',
-                                                      '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
+    this.analyser = new Analyser(this.scene);
+    Engine.audioEngine['connectToAnalyser'](this.analyser);
+    this.analyser.FFT_SIZE = 32;
+    this.analyser.SMOOTHING = 0.9;
 
-        this.analyser = new Analyser(this.scene);
-        Engine.audioEngine['connectToAnalyser'](this.analyser);
-        this.analyser.FFT_SIZE = 32;
-        this.analyser.SMOOTHING = 0.9;
+    this.scene.registerBeforeRender(() => {
 
-        this.scene.registerBeforeRender(() => {
-
-          if (this.mediaType === 'audio' && this.audio) {
-            if (this.audio.isPlaying) {
-              const fft = this.analyser.getByteFrequencyData();
-              const audioMeshes = this.scene.getMeshesByTags('audioCenter');
-              audioMeshes.forEach(mesh => {
-                mesh.scaling = new Vector3((0.05 + (fft[15] / 320)),
-                                           (0.05 + (fft[15] / 320)), (0.05 + (fft[15] / 320)));
-              });
-              if (Engine.audioEngine.audioContext) {
-                // TODO
-                this.currentTime = Engine.audioEngine.audioContext['currentTime'] - this.currentTime;
-                if (this.slider) {
-                  this.slider.value = (this.slider.value + this.currentTime);
-                }
-              }
-            }
-
-            const _cam = this.scene.getCameraByName('arcRotateCamera');
-            if (_cam && _cam['radius']) {
-              const radius = Math.abs(_cam['radius']);
-              const node = this.scene.getTransformNodeByName('mediaPanel');
-              if (node) {
-                node.getChildMeshes()
-                  .forEach(mesh => mesh.scalingDeterminant = radius / 35);
-              }
+      if (this.mediaType === 'audio' && this.audio) {
+        if (this.audio.isPlaying) {
+          const fft = this.analyser.getByteFrequencyData();
+          const audioMeshes = this.scene.getMeshesByTags('audioCenter');
+          audioMeshes.forEach(mesh => {
+            mesh.scaling = new Vector3((0.05 + (fft[15] / 320)),
+              (0.05 + (fft[15] / 320)), (0.05 + (fft[15] / 320)));
+          });
+          if (Engine.audioEngine.audioContext) {
+            // TODO
+            this.currentTime = Engine.audioEngine.audioContext['currentTime'] - this.currentTime;
+            if (this.slider) {
+              this.slider.value = (this.slider.value + this.currentTime);
             }
           }
+        }
 
-          if (this.mediaType === 'video' && this.video) {
-            if (!this.video.paused) {
-              this.slider.value = this.video.currentTime;
-            }
+        const _cam = this.scene.getCameraByName('arcRotateCamera');
+        if (_cam && _cam['radius']) {
+          const radius = Math.abs(_cam['radius']);
+          const node = this.scene.getTransformNodeByName('mediaPanel');
+          if (node) {
+            node.getChildMeshes()
+              .forEach(mesh => mesh.scalingDeterminant = radius / 35);
           }
+        }
+      }
 
-          // VR-Annotation-Text-Walk
-          if (this.actualControl && this.selectingControl && !this.selectedControl) {
+      if (this.mediaType === 'video' && this.video) {
+        if (!this.video.paused) {
+          this.slider.value = this.video.currentTime;
+        }
+      }
 
-            this.actualControl.scaling.x += 0.005;
-            this.actualControl.scaling.y += 0.005;
-            this.actualControl.material.diffuseColor = Color3.Red();
+      // VR-Annotation-Text-Walk
+      if (this.actualControl && this.selectingControl && !this.selectedControl) {
 
-            if (this.actualControl.scaling.x >= 1.5) {
-              this.selectedControl = true;
-            }
+        this.actualControl.scaling.x += 0.005;
+        this.actualControl.scaling.y += 0.005;
+        this.actualControl.material.diffuseColor = Color3.Red();
+
+        if (this.actualControl.scaling.x >= 1.5) {
+          this.selectedControl = true;
+        }
+      }
+
+      if (this.selectedControl) {
+
+        this.actualControl.metadata = '1';
+        this.actualControl.scaling.x = 1;
+        this.actualControl.scaling.y = 1;
+        this.actualControl.material.diffuseColor = Color3.Black();
+        this.selectedControl = false;
+        this.actualControl = false;
+      }
+
+      // Annotation_Marker -- Fixed_Size_On_Zoom
+      const _cam = this.scene.getCameraByName('arcRotateCamera');
+      if (_cam && _cam['radius']) {
+        const radius = Math.abs(_cam['radius']);
+        this.scene.getMeshesByTags('plane', mesh => mesh.scalingDeterminant = radius / 35);
+        this.scene.getMeshesByTags('label', mesh => mesh.scalingDeterminant = radius / 35);
+      }
+
+      // FOR VR-HUD
+      const _activeCamera = this.getActiveCamera();
+      if (this.vrJump && _activeCamera) {
+        this.vrJump = false;
+        let i = 1;
+        this.scene.getMeshesByTags('control', mesh => {
+
+          const newPosition = new Vector3();
+          if ((i % 2) != 0) {
+            newPosition.x = _activeCamera.position.x - 5;
+            newPosition.y = _activeCamera.position.y;
+            newPosition.z = _activeCamera.position.z;
+            i++;
+          } else {
+            newPosition.x = _activeCamera.position.x + 5;
+            newPosition.y = _activeCamera.position.y;
+            newPosition.z = _activeCamera.position.z;
           }
-
-          if (this.selectedControl) {
-
-            this.actualControl.metadata = '1';
-            this.actualControl.scaling.x = 1;
-            this.actualControl.scaling.y = 1;
-            this.actualControl.material.diffuseColor = Color3.Black();
-            this.selectedControl = false;
-            this.actualControl = false;
-          }
-
-          // Annotation_Marker -- Fixed_Size_On_Zoom
-          const _cam = this.scene.getCameraByName('arcRotateCamera');
-          if (_cam && _cam['radius']) {
-            const radius = Math.abs(_cam['radius']);
-            this.scene.getMeshesByTags('plane', mesh => mesh.scalingDeterminant = radius / 35);
-            this.scene.getMeshesByTags('label', mesh => mesh.scalingDeterminant = radius / 35);
-          }
-
-          // FOR VR-HUD
-          const _activeCamera = this.getActiveCamera();
-          if (this.vrJump && _activeCamera) {
-            this.vrJump = false;
-            let i = 1;
-            this.scene.getMeshesByTags('control', mesh => {
-
-              const newPosition = new Vector3();
-              if ((i % 2) != 0) {
-                newPosition.x = _activeCamera.position.x - 5;
-                newPosition.y = _activeCamera.position.y;
-                newPosition.z = _activeCamera.position.z;
-                i++;
-              } else {
-                newPosition.x = _activeCamera.position.x + 5;
-                newPosition.y = _activeCamera.position.y;
-                newPosition.z = _activeCamera.position.z;
-              }
-              mesh.setAbsolutePosition(newPosition);
-            });
-          }
-        });
-
-        // TODO
-        this.scene.registerAfterRender(() => {
-          if (this.currentTime && this.mediaType === 'audio') {
-            if (this.audio && this.audio.isPlaying) {
-              if (Engine.audioEngine.audioContext) {
-                this.currentTime = Engine.audioEngine.audioContext['currentTime'];
-              }
-            }
-          }
-        });
-
-        this.engine.runRenderLoop(() => {
-          this.scene.render();
+          mesh.setAbsolutePosition(newPosition);
         });
       }
     });
+
+    // TODO
+    this.scene.registerAfterRender(() => {
+      if (this.currentTime && this.mediaType === 'audio') {
+        if (this.audio && this.audio.isPlaying) {
+          if (Engine.audioEngine.audioContext) {
+            this.currentTime = Engine.audioEngine.audioContext['currentTime'];
+          }
+        }
+      }
+    });
+
+    this.engine.runRenderLoop(() => {
+      this.scene.render();
+    });
+  }
+
+  public attachCanvas(viewContainerRef: ViewContainerRef) {
+    viewContainerRef.insert(this.canvasRef.hostView);
   }
 
   public getActiveCamera() {
@@ -202,6 +212,7 @@ export class BabylonService {
 
   public resize(): void {
     this.engine.resize();
+    this.scene.cameras.forEach(camera => camera.attachControl(this.canvas, false));
   }
 
   public getEngine(): Engine {
@@ -212,13 +223,17 @@ export class BabylonService {
     return this.scene;
   }
 
+  public getCanvas(): HTMLCanvasElement {
+    return this.canvas;
+  }
+
   public createArcRotateCam(alpha: number, beta: number, radius: number): ArcRotateCamera {
     return new ArcRotateCamera('arcRotateCamera', alpha, beta, radius, Vector3.Zero(), this.scene);
   }
 
   public createVRHelper() {
 
-    const vrButton: HTMLButtonElement = this.document.getElementById('vrbutton');
+    const vrButton = this.document.getElementById('vrbutton') as HTMLButtonElement;
 
     this.VRHelper = this.scene.createDefaultVRExperience({
       // Camera für VR ohne Cardboard!
@@ -315,7 +330,7 @@ export class BabylonService {
       }).then(function(result) {
         engine.hideLoadingUI();
         resolve(result);
-      },      function(error) {
+      }, function(error) {
 
         engine.hideLoadingUI();
         message.error(error);
@@ -363,12 +378,12 @@ export class BabylonService {
         .then(posts => {
 
           this.audio = new Sound('Music', posts,
-                                 scene, () => {
+            scene, () => {
               engine.hideLoadingUI();
               const plane = this.createAudioScene();
               resolve(plane);
             },
-                                 null);
+            null);
           console.log('Success!', posts);
         })
         .catch(function(error) {
@@ -463,7 +478,7 @@ export class BabylonService {
     const result = await new Promise<string>((resolve, reject) => {
       const _activeCamera = this.getScene().activeCamera;
       if (_activeCamera instanceof Camera) {
-        Tools.CreateScreenshot(this.getEngine(), _activeCamera, {precision: 2}, screenshot => {
+        Tools.CreateScreenshot(this.getEngine(), _activeCamera, { precision: 2 }, screenshot => {
           fetch(screenshot).then(res => res.blob()).then(blob => Tools.Download(blob, `Kompakkt-${Date.now().toString()}`));
           resolve(screenshot);
         });
@@ -482,7 +497,7 @@ export class BabylonService {
       const _activeCamera = this.getScene().activeCamera;
       if (_activeCamera instanceof Camera) {
         Tools.CreateScreenshot(this.getEngine(), _activeCamera,
-                               (width === undefined) ? {width: 400, height: 225} : {width, height: Math.round((width / 16) * 9)}, screenshot => {
+          (width === undefined) ? { width: 400, height: 225 } : { width, height: Math.round((width / 16) * 9) }, screenshot => {
             resolve(screenshot);
           });
       }
@@ -573,7 +588,7 @@ export class BabylonService {
           this.pointlightPosZ = pos;
       }
 
-      this.createPointLight('pointlight', {x: this.pointlightPosX, y: this.pointlightPosY, z: this.pointlightPosZ});
+      this.createPointLight('pointlight', { x: this.pointlightPosX, y: this.pointlightPosY, z: this.pointlightPosZ });
     }
   }
 
@@ -603,7 +618,7 @@ export class BabylonService {
     CoT.position.z = 0;
 
     // PLANE for Annotations
-    const plane = MeshBuilder.CreatePlane(name, {height: 1.5, width: 20}, this.scene);
+    const plane = MeshBuilder.CreatePlane(name, { height: 1.5, width: 20 }, this.scene);
     Tags.AddTagsTo(plane, 'controller');
     plane.renderingGroupId = 1;
     plane.material = new StandardMaterial('controlMat', this.scene);
@@ -613,7 +628,7 @@ export class BabylonService {
     // plane.position.x = -8;
     plane.billboardMode = Mesh.BILLBOARDMODE_ALL;
 
-    const plane2 = MeshBuilder.CreatePlane(name, {height: 3, width: 20}, this.scene);
+    const plane2 = MeshBuilder.CreatePlane(name, { height: 3, width: 20 }, this.scene);
     plane2.billboardMode = Mesh.BILLBOARDMODE_ALL;
     plane2.renderingGroupId = 1;
     plane2.parent = CoT;
@@ -664,9 +679,9 @@ export class BabylonService {
 
     panel.addControl(this.slider);
 
-// Volume
+    // Volume
 
-    const plane3 = MeshBuilder.CreatePlane(name, {height: 15, width: 2}, this.scene);
+    const plane3 = MeshBuilder.CreatePlane(name, { height: 15, width: 2 }, this.scene);
     plane3.billboardMode = Mesh.BILLBOARDMODE_ALL;
     plane3.renderingGroupId = 1;
     plane3.parent = CoT;
@@ -689,12 +704,12 @@ export class BabylonService {
     // Cube
 
     SceneLoader.ImportMeshAsync(null, 'assets/models/',
-                                'kompakkt.babylon', this.scene, function(progress) {
-      console.log('LOADED');
-    })
+      'kompakkt.babylon', this.scene, function(progress) {
+        console.log('LOADED');
+      })
       .then(result => {
         console.log(result);
-        const center = MeshBuilder.CreateBox('audioCenter', {size: 1}, this.scene);
+        const center = MeshBuilder.CreateBox('audioCenter', { size: 1 }, this.scene);
         Tags.AddTagsTo(center, 'audioCenter');
         center.isVisible = false;
 
@@ -759,7 +774,7 @@ export class BabylonService {
       })));
 
     // PLANE for Annotations
-    const plane = MeshBuilder.CreatePlane(name, {height: initialSize.y * 0.1, width: initialSize.x}, this.scene);
+    const plane = MeshBuilder.CreatePlane(name, { height: initialSize.y * 0.1, width: initialSize.x }, this.scene);
     Tags.AddTagsTo(plane, 'controller');
     plane.renderingGroupId = 1;
     plane.material = new StandardMaterial('controlMat', this.scene);
@@ -771,7 +786,7 @@ export class BabylonService {
     const plane2 = MeshBuilder.CreatePlane(name, {
       height: (initialSize.y * 0.1 > 15 ? initialSize.y * 0.1 : 15),
       width: initialSize.x,
-    },                                     this.scene);
+    }, this.scene);
     plane2.renderingGroupId = 1;
     plane2.parent = CoT;
     plane2.position.y = minimum.y - (initialSize.y * 0.1 > 15 ? initialSize.y * 0.1 : 15) + (0.5 * (initialSize.y * 0.2 > 30 ? initialSize.y * 0.2 : 30));
@@ -813,12 +828,12 @@ export class BabylonService {
     });
     panel.addControl(this.slider);
 
-// Volume
+    // Volume
 
     const plane3 = MeshBuilder.CreatePlane(name, {
       height: initialSize.y * 0.8,
       width: (initialSize.x * 0.1 > 30 ? initialSize.x * 0.1 : 30),
-    },                                     this.scene);
+    }, this.scene);
     plane3.renderingGroupId = 1;
     plane3.parent = CoT;
     plane3.position.x = maximum.x + initialSize.x * 0.1;

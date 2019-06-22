@@ -48,6 +48,7 @@ import { ObjectFeatureSettingsComponent } from './components/object-feature-sett
 import { ObjectFeaturesComponent } from './components/object-features/object-features.component';
 import { SceneComponent } from './components/scene/scene.component';
 import {MediaTypePipe} from './pipes/media-type.pipe';
+import { RenderCanvasComponent } from './components/render-canvas/render-canvas.component';
 
 @NgModule({
   declarations: [
@@ -77,6 +78,7 @@ import {MediaTypePipe} from './pipes/media-type.pipe';
     MediaBrowserComponent,
     DialogShareAnnotationComponent,
     DialogInviteBroadcastingComponent,
+    RenderCanvasComponent,
   ],
   imports: [
     BrowserModule,
@@ -122,6 +124,7 @@ import {MediaTypePipe} from './pipes/media-type.pipe';
     DialogGetUserDataComponent,
     DialogShareAnnotationComponent,
     DialogInviteBroadcastingComponent,
+    RenderCanvasComponent,
   ],
   providers: [],
   bootstrap: [AppComponent],

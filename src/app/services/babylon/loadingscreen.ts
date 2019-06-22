@@ -43,7 +43,10 @@ export class LoadingScreen implements ILoadingScreen {
    */
   public hideLoadingUI(): void {
     if (this.loadingScreenHandler.isLoading) {
-      this.loadingScreenHandler.updateOpacity('0');
+      // setTimeout of half a second to prevent pop-in
+      // of some bigger meshes
+      setTimeout(() =>
+        this.loadingScreenHandler.updateOpacity('0'), 500);
     }
   }
 
