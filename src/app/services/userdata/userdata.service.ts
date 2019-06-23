@@ -42,15 +42,11 @@ export class UserdataService {
       return obj.data !== undefined;
     };
 
-    this.getUserData()
-      .then(() => console.log('Logged in user with sessionID cookie', this.currentUserData))
-      .catch(() => console.log('No session cookie. User not logged in'));
-
     this.processingService.loggedIn.subscribe(loggedIn => {
       this.loggedIn = loggedIn;
-      if (loggedIn) {
-        this.getUserData();
-      }
+      this.getUserData()
+        .then(() => console.log('Logged in as user:', this.currentUserData))
+        .catch(() => console.warn('Not logged in'));
     });
 
     this.processingService.Observables.actualModel.subscribe(actualModel => {
@@ -84,10 +80,19 @@ export class UserdataService {
           resolve(userData);
           if (userData && userData.message === 'Invalid session') {
             this.message.info('User is not logged in');
+            this.currentUserData = {
+              fullname: 'Guest', username: 'guest',
+              _id: this.mongoService.generateObjectId(),
+            };
           } else if (!userData || !userData.data) {
             this.message.info('No valid userdata received');
+            this.currentUserData = {
+              fullname: 'Guest', username: 'guest',
+              _id: this.mongoService.generateObjectId(),
+            };
           } else {
             this.currentUserData = userData;
+            this.message.info(`Logged in as ${this.currentUserData.fullname}`);
             if (!userData.data) return;
             if (userData.data.model) {
               userData.data.model.forEach((model: IModel | null) => {
