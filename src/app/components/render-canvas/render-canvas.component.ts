@@ -8,7 +8,8 @@ import { AfterViewInit, Component,  ElementRef, ViewChild } from '@angular/core'
 export class RenderCanvasComponent implements AfterViewInit {
 
   @ViewChild('renderCanvas', { read: ElementRef, static: false })
-  public canvasRef: ElementRef<HTMLCanvasElement>;
+  public canvasRef: ElementRef<HTMLCanvasElement> =
+    new ElementRef<HTMLCanvasElement>(document.createElement('canvas'));
 
   ngAfterViewInit() {
   }

@@ -1,11 +1,11 @@
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 // import { text } from '@angular/core/src/render3';
 import { AbstractMesh, Mesh, MeshBuilder, StandardMaterial, Tags } from 'babylonjs';
-import { AdvancedDynamicTexture,  Control, Ellipse, TextBlock } from 'babylonjs-gui';
+import { AdvancedDynamicTexture, Control, Ellipse, TextBlock } from 'babylonjs-gui';
 
-import {AnnotationService} from '../annotation/annotation.service';
-import {BabylonService} from '../babylon/babylon.service';
-import {CameraService} from '../camera/camera.service';
+import { AnnotationService } from '../annotation/annotation.service';
+import { BabylonService } from '../babylon/babylon.service';
+import { CameraService } from '../camera/camera.service';
 
 @Injectable({
   providedIn: 'root',
@@ -29,8 +29,8 @@ export class AnnotationvrService {
   private posZcontrolNext: number;
 
   constructor(private babylonService: BabylonService,
-              private annotationService: AnnotationService,
-              private cameraService: CameraService) {
+    private annotationService: AnnotationService,
+    private cameraService: CameraService) {
 
     this.actualRanking = 0;
 
@@ -61,7 +61,7 @@ export class AnnotationvrService {
   public createVRAnnotationControls() {
 
     // Previous Control
-    this.controlPrevious = MeshBuilder.CreatePlane('controlPrevious', {height: 1, width: 1}, this.babylonService.getScene());
+    this.controlPrevious = MeshBuilder.CreatePlane('controlPrevious', { height: 1, width: 1 }, this.babylonService.getScene());
     this.controlPrevious.parent = this.babylonService.getScene().activeCamera;
     // console.log("position of Camera before Controls are positioned ");
     // console.log(this.babylonService.getActiveCamera().position);
@@ -78,7 +78,7 @@ export class AnnotationvrService {
     AdvancedDynamicTexture.CreateForMesh(this.controlPrevious).addControl(label);
 
     // Next Control
-    this.controlNext = MeshBuilder.CreatePlane('controlNext', {height: 1, width: 1}, this.babylonService.getScene());
+    this.controlNext = MeshBuilder.CreatePlane('controlNext', { height: 1, width: 1 }, this.babylonService.getScene());
     this.controlNext.parent = this.babylonService.getScene().activeCamera;
     this.controlNext.position.x = this.posXcontrolNext;
     this.controlNext.position.y = this.posYcontrolNext;
@@ -148,9 +148,11 @@ export class AnnotationvrService {
     this.advancedTextureFullscreen.isForeground = false;
     this.advancedTextureFullscreen.removeControl(this.text1);
 
-    this.babylonService.getScene().getMeshesByTags('control').forEach(function(value) {
-      value.dispose();
-    });
+    this.babylonService.getScene()
+      .getMeshesByTags('control')
+      .forEach(value => {
+        value.dispose();
+      });
   }
 
   private previousAnnotation() {

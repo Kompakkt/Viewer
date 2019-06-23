@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Animation, ArcRotateCamera, Scene, Vector3, VRDeviceOrientationArcRotateCamera, VRDeviceOrientationFreeCamera} from 'babylonjs';
+import {Animation, ArcRotateCamera, Camera, Scene, Vector3, VRDeviceOrientationArcRotateCamera, VRDeviceOrientationFreeCamera} from 'babylonjs';
 
 import {BabylonService} from '../babylon/babylon.service';
 
@@ -13,18 +13,18 @@ export class CameraService {
 
   public arcRotateCamera = this.babylonService.createArcRotateCam(0, 10, 100);
   // private universalCamera: UniversalCamera;
-  private vrCamera: VRDeviceOrientationFreeCamera | VRDeviceOrientationArcRotateCamera;
+  private vrCamera: VRDeviceOrientationFreeCamera | VRDeviceOrientationArcRotateCamera | undefined;
 
   private vrHelper;
 
   // Parameters (initial Position): alpha, beta, radius,
-  public alpha: number;
-  public beta: number;
-  public radius: number;
+  public alpha: number | undefined;
+  public beta: number | undefined;
+  public radius: number | undefined;
   // target
-  public x: number;
-  public y: number;
-  public z: number;
+  public x: number | undefined;
+  public y: number | undefined;
+  public z: number | undefined;
   /*
     private xRot: number;
     private yRot: number;*/
@@ -241,7 +241,6 @@ this.yRot = this.universalCamera.rotation.y;
   }
 
   private setCamUniversalDefault() {
-
     const setBackAnm = new Animation('animCam', 'position', 30,
       Animation.ANIMATIONTYPE_VECTOR3,
       Animation.ANIMATIONLOOPMODE_CONSTANT);
@@ -284,120 +283,57 @@ this.yRot = this.universalCamera.rotation.y;
     });
   }*/
 
+  private createAnimationsForCamera(
+    camera: Camera | ArcRotateCamera, positionVector: Vector3,
+    cameraAxis = ['x', 'y', 'z'], positionAxis = ['x', 'y', 'z'], frames = 30) {
+    const creatAnimCam = (camAxis: string, posAxis: string) => {
+      const anim = new Animation(
+        'animCam', camAxis, frames,
+        Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CYCLE);
+      const multipleProperties = camAxis.indexOf('.') !== -1;
+      let value = camera[camAxis];
+      if (multipleProperties) {
+        const props = camAxis.split('.');
+        value = camera[props[0]][props[1]];
+      }
+      anim.setKeys([
+        { frame: 0, value },
+        { frame: frames, value: positionVector[posAxis] },
+      ]);
+      return anim;
+    };
+
+    const arr: Animation[] = [];
+    for (let i = 0; i < 3; i++) {
+      arr.push(creatAnimCam(cameraAxis[i], positionAxis[i]));
+    }
+    return arr;
+  }
+
   public moveCameraToTarget(positionVector: Vector3) {
+    this.arcRotateCamera.animations.push(
+      ...this.createAnimationsForCamera(
+        this.arcRotateCamera, positionVector, ['alpha', 'beta', 'radius']));
 
-    const name = 'animCam',
-      frames = 30;
-
-    const animCamAlpha = new Animation(name, 'alpha', frames,
-                                       Animation.ANIMATIONTYPE_FLOAT,
-                                       Animation.ANIMATIONLOOPMODE_CYCLE);
-
-    animCamAlpha.setKeys([
-      {
-        frame: 0,
-        value: this.arcRotateCamera.alpha,
-      }, {
-        frame: 30,
-        value: positionVector.x,
-      },
-    ]);
-    this.arcRotateCamera.animations.push(animCamAlpha);
-
-    const animCamBeta = new Animation(name, 'beta', frames,
-                                      Animation.ANIMATIONTYPE_FLOAT,
-                                      Animation.ANIMATIONLOOPMODE_CYCLE);
-
-    animCamBeta.setKeys([
-      {
-        frame: 0,
-        value: this.arcRotateCamera.beta,
-      }, {
-        frame: 30,
-        value: positionVector.y,
-      }]);
-    this.arcRotateCamera.animations.push(animCamBeta);
-
-    const animCamRadius = new Animation(name, 'radius', frames,
-                                        Animation.ANIMATIONTYPE_FLOAT,
-                                        Animation.ANIMATIONLOOPMODE_CYCLE);
-
-    animCamRadius.setKeys([
-      {
-        frame: 0,
-        value: this.arcRotateCamera.radius,
-      }, {
-        frame: 30,
-        value: positionVector.z,
-      }]);
-    this.arcRotateCamera.animations.push(animCamRadius);
-
-    this.scene.beginAnimation(this.arcRotateCamera, 0, 30, false, 1, function() {
-    });
-
+    this.scene.beginAnimation(this.arcRotateCamera, 0, 30, false, 1, () => {});
   }
 
   public moveVRCameraToTarget(positionVector: Vector3) {
+    if (!this.scene.activeCamera) return;
 
-    if (!this.scene.activeCamera) {
-      return;
-    }
+    this.scene.activeCamera.animations.push(
+      ...this.createAnimationsForCamera(
+        this.scene.activeCamera, positionVector,
+        ['position.x', 'position.y', 'position.z']));
 
-    // ANIMATION
-    const name = 'animCam',
-      frames = 30;
-
-    const animCamAlpha = new Animation(name, 'position.x', frames,
-                                       Animation.ANIMATIONTYPE_FLOAT,
-                                       Animation.ANIMATIONLOOPMODE_CYCLE);
-
-    animCamAlpha.setKeys([
-      {
-        frame: 0,
-        value: this.scene.activeCamera.position.x,
-      }, {
-        frame: 30,
-        value: positionVector.x - 15,
-      },
-    ]);
-    this.scene.activeCamera.animations.push(animCamAlpha);
-
-    const animCamBeta = new Animation(name, 'position.y', frames,
-                                      Animation.ANIMATIONTYPE_FLOAT,
-                                      Animation.ANIMATIONLOOPMODE_CYCLE);
-
-    animCamBeta.setKeys([
-      {
-        frame: 0,
-        value: this.scene.activeCamera.position.y,
-      }, {
-        frame: 30,
-        value: positionVector.y + 15,
-      }]);
-    this.scene.activeCamera.animations.push(animCamBeta);
-
-    const animCamRadius = new Animation(name, 'position.z', frames,
-                                        Animation.ANIMATIONTYPE_FLOAT,
-                                        Animation.ANIMATIONLOOPMODE_CYCLE);
-
-    animCamRadius.setKeys([
-      {
-        frame: 0,
-        value: this.scene.activeCamera.position.z,
-      }, {
-        frame: 30,
-        value: positionVector.z - 15,
-      }]);
-    this.scene.activeCamera.animations.push(animCamRadius);
-
-    this.scene.beginAnimation(this.scene.activeCamera, 0, 30, false, 1, function() {
-    }).onAnimationEndObservable.add(() => {
-
-      // FOR VR-HUD
-      // console.log("Active-Camera - 0 Sek After Animation");
-      // console.log(this.scene.activeCamera.position);
-      this.babylonService.vrJump = true;
-    });
+    this.scene.beginAnimation(this.scene.activeCamera, 0, 30, false, 1, () => {})
+      .onAnimationEndObservable
+      .add(() => {
+        // FOR VR-HUD
+        // console.log("Active-Camera - 0 Sek After Animation");
+        // console.log(this.scene.activeCamera.position);
+        this.babylonService.vrJump = true;
+      });
   }
 
   public getActualCameraPosAnnotation() {

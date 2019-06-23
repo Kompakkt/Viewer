@@ -7,13 +7,15 @@
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
+    "module": "esnext",
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "noImplicitAny": false,
-    "strictNullChecks": true,
+    "strict": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
+    "noImplicitReturns": false,
+    "noImplicitAny": false,
     "target": "es5",
     "typeRoots": [
       "node_modules/@types"
@@ -25,6 +27,16 @@
     "lib": [
       "es2017",
       "dom"
-    ]
+    ],
+    "paths": {
+      "core-js/es7/reflect": [
+        "node_modules/core-js/proposals/reflect-metadata"
+      ]
+    }
+  },
+  "angularCompilerOptions": {
+    "enableIvy": false,
+    "disableTypeScriptVersionCheck": true,
+    "strictInjectionParameters": true
   }
 }

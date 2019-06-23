@@ -128,7 +128,7 @@ export class AnnotationmarkerService {
 
   public deleteMarker(annotationID: string) {
     const marker = this.babylonService.getScene().getMeshesByTags(annotationID);
-    marker.forEach(function(value) {
+    marker.forEach(value => {
       value.dispose();
     });
   }
