@@ -3,7 +3,6 @@ import {MatDialog, MatDialogConfig, MatRadioChange} from '@angular/material';
 
 import {MediaTypePipe} from '../../pipes/media-type.pipe';
 import {MessageService} from '../../services/message/message.service';
-import {OverlayService} from '../../services/overlay/overlay.service';
 import {ProcessingService} from '../../services/processing/processing.service';
 import {UserdataService} from '../../services/userdata/userdata.service';
 import {LoginComponent} from '../dialogs/dialog-login/login.component';
@@ -37,8 +36,7 @@ import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-passwor
   private identifierCollection;
   private identifierObject;
 
-  constructor(private overlayService: OverlayService,
-              public processingService: ProcessingService,
+  constructor(public processingService: ProcessingService,
               private message: MessageService,
               public dialog: MatDialog,
               public userdataService: UserdataService) {

@@ -1,6 +1,6 @@
 /* tslint:disable:max-line-length */
 import { DOCUMENT } from '@angular/common';
-import { ApplicationRef, ComponentRef, ElementRef, EventEmitter, Inject, Injectable, Injector, Output, ViewChild, ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
+import { ComponentRef, EventEmitter, Inject, Injectable, Injector, Output, ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
 import { AbstractMesh, ActionManager, Analyser, ArcRotateCamera, Axis, Camera, Color3, Color4, Engine, ExecuteCodeAction, HemisphericLight, Layer, Mesh, MeshBuilder, PointLight, Quaternion, Scene, SceneLoader, SceneSerializer, Sound, Space, StandardMaterial, Tags, Texture, Tools, TransformNode, Vector3, VideoTexture, VRExperienceHelper } from 'babylonjs';
 import { AdvancedDynamicTexture, Control, Slider, StackPanel, TextBlock } from 'babylonjs-gui';
 import 'babylonjs-loaders';
@@ -86,8 +86,7 @@ export class BabylonService {
     });
     this.scene = new Scene(this.engine);
     this.engine.loadingScreen = new LoadingScreen(
-      this.canvas, '', '#111111',
-      'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
+      this.canvas, '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
 
     this.analyser = new Analyser(this.scene);
     Engine.audioEngine['connectToAnalyser'](this.analyser);
@@ -402,12 +401,7 @@ export class BabylonService {
   }
 
   public loadImage(rootUrl: string): Promise<any> {
-
-    const message = this.message;
-    const engine = this.engine;
-    const scene = this.scene;
-
-    engine.displayLoadingUI();
+    this.engine.displayLoadingUI();
     this.clearScene();
     this.mediaType = 'image';
 
@@ -418,16 +412,16 @@ export class BabylonService {
         const width = img.width;
         const height = img.height;
 
-        const mypicture = new Texture(rootUrl, scene);  // rem about CORS rules for cross-domain
-        const ground = Mesh.CreateGround('gnd', width / 10, height / 10, 1, scene);
+        const mypicture = new Texture(rootUrl, this.scene);  // rem about CORS rules for cross-domain
+        const ground = Mesh.CreateGround('gnd', width / 10, height / 10, 1, this.scene);
         Tags.AddTagsTo(ground, 'mediaGround');
         ground.rotate(Axis.X, Math.PI / 180 * -90, Space.WORLD);
 
-        const gndmat = new StandardMaterial('gmat', scene);
+        const gndmat = new StandardMaterial('gmat', this.scene);
         ground.material = gndmat;
         gndmat.diffuseTexture = mypicture;
 
-        engine.hideLoadingUI();
+        this.engine.hideLoadingUI();
         resolve(ground);
       };
       img.src = rootUrl;
@@ -435,18 +429,13 @@ export class BabylonService {
   }
 
   public loadVideo(rootUrl: string): Promise<any> {
-
-    const message = this.message;
-    const engine = this.engine;
-    const scene = this.scene;
-
     this.clearScene();
     this.mediaType = 'video';
 
-    engine.displayLoadingUI();
+    this.engine.displayLoadingUI();
 
     // Video material
-    const videoTexture = new VideoTexture('video', rootUrl, scene, false);
+    const videoTexture = new VideoTexture('video', rootUrl, this.scene, false);
     // videoMat.backFaceCulling = false;
 
     return new Promise<any>((resolve, reject) => {
@@ -454,18 +443,18 @@ export class BabylonService {
         this.video = videoTexture.video;
         const width = tex.getSize().width;
         const height = tex.getSize().height;
-        const ground = Mesh.CreateGround('videoGround', width / 10, height / 10, 1, scene);
+        const ground = Mesh.CreateGround('videoGround', width / 10, height / 10, 1, this.scene);
         Tags.AddTagsTo(ground, 'mediaGround');
         ground.rotate(Axis.X, Math.PI / 180 * -90, Space.WORLD);
 
-        const videoMat = new StandardMaterial('textVid', scene);
+        const videoMat = new StandardMaterial('textVid', this.scene);
         ground.material = videoMat;
         videoMat.diffuseTexture = videoTexture;
         const plane = this.createVideoScene();
 
         new Promise<any>((innerResolve, _) => {
-          // const dummy = new Mesh('dummy', scene);
-          engine.hideLoadingUI();
+          // const dummy = new Mesh('dummy', this.scene);
+          this.engine.hideLoadingUI();
           innerResolve(plane);
         })
           .then(resolve)

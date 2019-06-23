@@ -1,9 +1,8 @@
 import {Component, OnInit} from '@angular/core';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {MatDialog} from '@angular/material';
 
 import {MessageService} from '../../../services/message/message.service';
 import {MongohandlerService} from '../../../services/mongohandler/mongohandler.service';
-import {OverlayService} from '../../../services/overlay/overlay.service';
 import {ProcessingService} from '../../../services/processing/processing.service';
 import {UserdataService} from '../../../services/userdata/userdata.service';
 
@@ -16,21 +15,15 @@ export class LoginComponent implements OnInit {
 
   public username = '';
   public password = '';
-  private isOpen: boolean;
 
   constructor(private mongohandlerService: MongohandlerService,
               private message: MessageService,
-              private overlayService: OverlayService,
               private userDataService: UserdataService,
               private processingService: ProcessingService,
               private dialog: MatDialog) {
   }
 
   ngOnInit() {
-
-    this.overlayService.collectionsOverview.subscribe(collectionsOverviewIsOpen => {
-      this.isOpen = collectionsOverviewIsOpen;
-    });
   }
 
   public login() {

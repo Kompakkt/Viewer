@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import PouchDB from 'pouchdb';
 
-import {IAnnotation, ICompilation, IModel} from '../../interfaces/interfaces';
+import {IAnnotation} from '../../interfaces/interfaces';
 
 @Injectable({
   providedIn: 'root',
@@ -29,7 +29,7 @@ export class DataService {
         ? annotation.target.source.relatedCompilation === compilation : true;
       const correctModel = annotation.target.source.relatedModel === model;
 
-      if (!correctModel || !correctModel) return;
+      if (!correctModel || !correctCompilation) return;
 
       annotationList.push(annotation);
     });

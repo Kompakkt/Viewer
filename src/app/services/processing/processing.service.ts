@@ -4,10 +4,8 @@ import {BehaviorSubject} from 'rxjs';
 import {ReplaySubject} from 'rxjs/internal/ReplaySubject';
 
 import {environment} from '../../../environments/environment';
-import {IAnnotation, ICompilation, IModel} from '../../interfaces/interfaces';
-import {ActionService} from '../action/action.service';
+import {ICompilation, IModel} from '../../interfaces/interfaces';
 import {BabylonService} from '../babylon/babylon.service';
-import {CameraService} from '../camera/camera.service';
 import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreenhandler.service';
 import {MessageService} from '../message/message.service';
 import {MetadataService} from '../metadata/metadata.service';
@@ -42,7 +40,6 @@ export class ProcessingService {
   private isFirstLoad = true;
   public isLoggedIn: boolean;
   public isShowCatalogue: boolean;
-  private isLoaded = false;
   public isCollectionLoaded = false;
   public isDefaultModelLoaded = false;
   public isFallbackModelLoaded = false;
@@ -97,8 +94,6 @@ export class ProcessingService {
               private message: MessageService,
               private overlayService: OverlayService,
               public babylonService: BabylonService,
-              private actionService: ActionService,
-              private cameraService: CameraService,
               private loadingScreenHandler: LoadingscreenhandlerService,
               private metadataService: MetadataService) {
   }
@@ -170,7 +165,6 @@ export class ProcessingService {
     const queryParams = new URLSearchParams(searchParams);
     const modelParam = queryParams.get('model');
     const compParam = queryParams.get('compilation');
-    const url_split = location.href.split('?');
 
     this.firstLoad.emit(false);
     this.isFirstLoad = false;
@@ -242,12 +236,10 @@ export class ProcessingService {
   }
 
   public loadDefaultModelData() {
-    this.isLoaded = false;
     this.loaded.emit(false);
     this.quality = 'low';
     this.loadModel(this.defaultModel, '')
       .then(result => {
-        this.isLoaded = true;
         this.loaded.emit(true);
         this.metadataService.addDefaultMetadata();
       },    error => {
@@ -256,7 +248,6 @@ export class ProcessingService {
   }
 
   public fetchAndLoad(modelId?: string, collectionId?: string, isfromCollection?: boolean) {
-    this.isLoaded = false;
     this.loaded.emit(false);
     this.quality = 'low';
     if (modelId) {
@@ -288,7 +279,6 @@ export class ProcessingService {
       .then(resultModel => {
         this.loadModel(resultModel)
           .then(result => {
-            this.isLoaded = true;
             this.loaded.emit(true);
             console.log('Load:', result);
           },    error => {
@@ -301,7 +291,6 @@ export class ProcessingService {
 
   public async loadModel(newModel: IModel, overrideUrl?: string) {
     const URL = (overrideUrl !== undefined) ? overrideUrl : this.baseUrl;
-    const fallBackURL = '';
     this.isFallbackModelLoaded = false;
     this.fallbackModelLoaded.emit(false);
 
@@ -407,11 +396,9 @@ export class ProcessingService {
 
       if (!model || !model.processed) return;
       if (model && model.processed[this.quality] !== undefined) {
-        this.isLoaded = false;
         this.loaded.emit(false);
         this.loadModel(model._id === 'Cube' ? this.defaultModel : model, model._id === 'Cube' ? '' : undefined)
           .then(result => {
-            this.isLoaded = true;
             this.loaded.emit(true);
           },    error => {
             this.message.error('Loading not possible');

@@ -31,9 +31,6 @@ export class ModelsettingsService {
   public height;
   public width;
   public depth;
-  private lastHeight;
-  private lastWidth;
-  private lastDepth;
 
   private ground: Mesh;
   public showGround = false;
@@ -81,9 +78,6 @@ export class ModelsettingsService {
     this.height = 0;
     this.width = 0;
     this.depth = 0;
-    this.lastHeight = 0;
-    this.lastWidth = 0;
-    this.lastDepth = 0;
 
     for (let _i = 0; _i < this.actualModelMeshes.length; _i++) {
       const mesh = this.actualModelMeshes[_i];
@@ -97,9 +91,6 @@ export class ModelsettingsService {
     this.height = this.initialSize.y.toFixed(2);
     this.width = this.initialSize.x.toFixed(2);
     this.depth = this.initialSize.z.toFixed(2);
-    this.lastHeight = this.initialSize.y;
-    this.lastWidth = this.initialSize.x;
-    this.lastDepth = this.initialSize.z;
 
     this.cameraService.setUpperRadiusLimit(Math.max(this.max.x, this.max.y, this.max.z) * this.scalingFactor * 5);
     this.cameraService.setDefaultPosition(2.7, 1.3, Math.max(this.max.x, this.max.y, this.max.z) + 50, 0, 0, 0);
@@ -312,9 +303,6 @@ export class ModelsettingsService {
     this.height = 0;
     this.width = 0;
     this.depth = 0;
-    this.lastHeight = 0;
-    this.lastWidth = 0;
-    this.lastDepth = 0;
 
     this.showBoundingBoxModel = false;
 

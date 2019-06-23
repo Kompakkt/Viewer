@@ -2,9 +2,8 @@ import {EventEmitter, Injectable, Output} from '@angular/core';
 import {Socket} from 'ngx-socket-io';
 
 import {
-  IAnnotation, ICompilation, IModel,
+  IAnnotation,
   ISocketAnnotation,
-  ISocketChangeRanking,
   ISocketChangeRoom,
   ISocketMessage,
   ISocketRoomData,

@@ -3,8 +3,6 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 
 import {MessageService} from '../../../services/message/message.service';
 import {MongohandlerService} from '../../../services/mongohandler/mongohandler.service';
-import {ProcessingService} from '../../../services/processing/processing.service';
-import {UserdataService} from '../../../services/userdata/userdata.service';
 
 @Component({
   selector: 'app-dialog-share-annotation',
@@ -25,8 +23,6 @@ export class DialogShareAnnotationComponent implements OnInit {
   };
 
   constructor(private mongohandlerService: MongohandlerService,
-              private processingService: ProcessingService,
-              private userdataService: UserdataService,
               private message: MessageService,
               private dialogRef: MatDialogRef<DialogShareAnnotationComponent>,
               @Inject(MAT_DIALOG_DATA) data) {

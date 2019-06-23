@@ -16,9 +16,7 @@ import { ColorChromeModule } from 'ngx-color/chrome';
 import { DeviceDetectorModule } from 'ngx-device-detector';
 import {MarkdownModule} from 'ngx-markdown';
 import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
-import { PERFECT_SCROLLBAR_CONFIG } from 'ngx-perfect-scrollbar';
-import { PerfectScrollbarConfigInterface } from 'ngx-perfect-scrollbar';
-import { SocketIoConfig, SocketIoModule } from 'ngx-socket-io';
+import { SocketIoModule } from 'ngx-socket-io';
 
 import { environment } from '../environments/environment';
 

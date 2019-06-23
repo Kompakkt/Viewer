@@ -12,7 +12,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "strict": false,
-    "noUnusedLocals": false,
+    "noUnusedLocals": true,
     "noUnusedParameters": false,
     "noImplicitReturns": false,
     "noImplicitAny": false,

@@ -1,4 +1,4 @@
-import {ILoadingScreen, Nullable} from 'babylonjs';
+import {ILoadingScreen} from 'babylonjs';
 
 import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreenhandler.service';
 
@@ -9,9 +9,6 @@ import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreen
 
 export class LoadingScreen implements ILoadingScreen {
 
-  private loadingDiv: Nullable<HTMLDivElement>;
-  private loadingTextDiv: HTMLDivElement;
-
   /**
    * Creates a new default loading screen
    * @param renderingCanvas defines the canvas used to render the scene
@@ -20,7 +17,6 @@ export class LoadingScreen implements ILoadingScreen {
    * @param logo defines the logo getting displayed
    */
   constructor(private renderingCanvas: HTMLCanvasElement,
-              private loadingText = '',
               private loadingDivBackgroundColor = 'black',
               private logo = '',
               private loadingScreenHandler: LoadingscreenhandlerService) {

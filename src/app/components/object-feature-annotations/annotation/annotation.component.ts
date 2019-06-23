@@ -1,17 +1,13 @@
 import {Component, Input, OnInit, ViewChild} from '@angular/core';
 import {MatDialog} from '@angular/material';
 import {Matrix, Vector3} from 'babylonjs';
-import {
-  PerfectScrollbarComponent,
-  PerfectScrollbarConfigInterface, PerfectScrollbarDirective,
-} from 'ngx-perfect-scrollbar';
+import {PerfectScrollbarConfigInterface} from 'ngx-perfect-scrollbar';
 
 import {IAnnotation} from '../../../interfaces/interfaces';
 import {AnnotationService} from '../../../services/annotation/annotation.service';
 import {AnnotationmarkerService} from '../../../services/annotationmarker/annotationmarker.service';
 import {BabylonService} from '../../../services/babylon/babylon.service';
 import {CameraService} from '../../../services/camera/camera.service';
-import {DataService} from '../../../services/data/data.service';
 import {ProcessingService} from '../../../services/processing/processing.service';
 import {SocketService} from '../../../services/socket/socket.service';
 import {UserdataService} from '../../../services/userdata/userdata.service';
@@ -37,7 +33,6 @@ export class AnnotationComponent implements OnInit {
   public positionLeft: number;
   public collapsed: boolean;
   public selectedAnnotation: string;
-  private editModeAnnotation: string;
   // --- JAN ----
   public showMediaBrowser = false;
   public config: PerfectScrollbarConfigInterface = {};
@@ -50,8 +45,7 @@ export class AnnotationComponent implements OnInit {
   public isCollectionOwner: boolean;
   public isInSocket: boolean;
 
-  constructor(private dataService: DataService,
-              public annotationService: AnnotationService,
+  constructor(public annotationService: AnnotationService,
               public babylonService: BabylonService,
               public annotationmarkerService: AnnotationmarkerService,
               public socketService: SocketService,
@@ -91,7 +85,6 @@ export class AnnotationComponent implements OnInit {
     });
 
     this.annotationService.isEditModeAnnotation.subscribe(selectedEditAnno => {
-      this.editModeAnnotation = selectedEditAnno;
       const isEditAnno = selectedEditAnno === this.annotation._id;
       if (!isEditAnno && this.isEditMode) {
         this.isEditMode = false;

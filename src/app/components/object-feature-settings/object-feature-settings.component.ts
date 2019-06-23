@@ -7,7 +7,6 @@ import {MatDialog} from '@angular/material';
 import {Vector3} from 'babylonjs';
 import {ColorEvent} from 'ngx-color';
 
-import {AnnotationmarkerService} from '../../services/annotationmarker/annotationmarker.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
 import {CameraService} from '../../services/camera/camera.service';
 import {MessageService} from '../../services/message/message.service';
@@ -36,7 +35,6 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   public isSingleModel: boolean;
   private isFinished: boolean;
   private initialSettingsMode = false;
-  private isLoaded: boolean;
   public showHelpers = false;
   public showHelperBackground = false;
   public showScaling = false;
@@ -69,7 +67,6 @@ export class ObjectFeatureSettingsComponent implements OnInit {
               private babylonService: BabylonService,
               private mongohandlerService: MongohandlerService,
               private message: MessageService,
-              private annotationmarkerService: AnnotationmarkerService,
               private processingService: ProcessingService,
               public modelSettingsService: ModelsettingsService,
               public dialog: MatDialog,
@@ -82,7 +79,6 @@ export class ObjectFeatureSettingsComponent implements OnInit {
     this.mediaType = this.processingService.getCurrentMediaType();
 
     this.processingService.loaded.subscribe(isLoaded => {
-      this.isLoaded = isLoaded;
       if (isLoaded) {
         this.activeModel = this.processingService.getCurrentModel();
         this.isFinished = this.activeModel.finished;

@@ -5,13 +5,9 @@ import {EventEmitter, Injectable, Output} from '@angular/core';
 })
 export class OverlayService {
 
-  constructor() {
-  }
-
   public editorIsOpen = false;
   public collectionsOverviewIsOpen = false;
   public editorSettingIsOpen = false;
-  private defaultAnnotationsIsOpen = false;
 
   @Output() editor: EventEmitter<boolean> = new EventEmitter();
   @Output() collectionsOverview: EventEmitter<boolean> = new EventEmitter();
@@ -59,7 +55,6 @@ export class OverlayService {
     this.editorSettingIsOpen = false;
     this.editorSetting.emit(false);
 
-    this.defaultAnnotationsIsOpen = true;
     this.defaultAnnotations.emit(true);
 
     return false;

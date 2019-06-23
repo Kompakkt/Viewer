@@ -3,7 +3,7 @@ import {MatDialog} from '@angular/material';
 
 import {SocketService} from '../../services/socket/socket.service';
 import {DialogInviteBroadcastingComponent} from '../dialogs/dialog-invite-broadcasting/dialog-invite-broadcasting.component';
-import {DialogMeshsettingsComponent} from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
+// import {DialogMeshsettingsComponent} from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
 
 @Component({
   selector: 'app-broadcast',

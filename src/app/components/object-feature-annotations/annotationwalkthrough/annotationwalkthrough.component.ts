@@ -13,7 +13,6 @@ import {CameraService} from '../../../services/camera/camera.service';
 export class AnnotationwalkthroughComponent implements OnInit {
 
   public title: string;
-  private positionVector: Vector3;
   private actualRanking: number;
 
   constructor(private cameraService: CameraService,
@@ -22,7 +21,6 @@ export class AnnotationwalkthroughComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.positionVector = Vector3.Zero();
     this.actualRanking = 0;
     this.title = 'Annotation Walkthrough';
   }

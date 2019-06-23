@@ -14,7 +14,7 @@ export class MessageService {
   }
 
   public info(message: string) {
-    const instance = this.snackBar.open(message, 'Dismiss', {
+    this.snackBar.open(message, 'Dismiss', {
       duration: 5000,
     });
   }

@@ -10,7 +10,7 @@ import {ProcessingService} from '../../services/processing/processing.service';
 
 export class ContentComponent implements OnInit {
 
-  @HostBinding('class.is-open') private isOpen = false;
+  @HostBinding('class.is-open') public isOpen = false;
 
   // external
   public isCollectionLoaded: boolean;

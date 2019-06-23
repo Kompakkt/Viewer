@@ -29,8 +29,8 @@ export class MenuComponent implements OnInit {
   public fullscreen: boolean;
 
   constructor(
-    private iconRegistry: MatIconRegistry,
-    private sanitizer: DomSanitizer,
+    public iconRegistry: MatIconRegistry,
+    public sanitizer: DomSanitizer,
     public cameraService: CameraService,
     public overlayService: OverlayService,
     public processingService: ProcessingService,

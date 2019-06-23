@@ -2,7 +2,6 @@ import {Injectable} from '@angular/core';
 import {Mesh, MeshBuilder, Space, Tags, Vector3} from 'babylonjs';
 import {AdvancedDynamicTexture, Control, Ellipse, TextBlock} from 'babylonjs-gui';
 import {BehaviorSubject} from 'rxjs/internal/BehaviorSubject';
-import {Observable} from 'rxjs/internal/Observable';
 // 11/02/19
 
 import {IAnnotation} from '../../interfaces/interfaces';

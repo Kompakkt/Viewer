@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, HostListener, ViewChild, ViewContainerRef} from '@angular/core';
+import {AfterViewInit, Component, HostListener, ViewContainerRef} from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material';
 
 import {AnnotationService} from '../../services/annotation/annotation.service';

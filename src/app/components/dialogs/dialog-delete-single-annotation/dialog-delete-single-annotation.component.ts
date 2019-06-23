@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 
-import {MessageService} from '../../../services/message/message.service';
+/*import {MessageService} from '../../../services/message/message.service';
 import {ProcessingService} from '../../../services/processing/processing.service';
-import {UserdataService} from '../../../services/userdata/userdata.service';
+import {UserdataService} from '../../../services/userdata/userdata.service';*/
 
 @Component({
   selector: 'app-dialog-delete-single-annotation',
@@ -15,9 +15,9 @@ export class DialogDeleteSingleAnnotationComponent implements OnInit {
   public password = '';
   public success = false;
 
-  constructor(private processingService: ProcessingService,
+  /*constructor(private processingService: ProcessingService,
               private message: MessageService,
-              private userdataService: UserdataService) { }
+              private userdataService: UserdataService) { }*/
 
   ngOnInit() {
   }
