@@ -14,7 +14,7 @@ export class ObjectFeaturesComponent implements OnInit {
   @ViewChild('tabGroup', { static: false }) tabGroup;
 
   // external
-  public isMeshSettingsMode: boolean;
+  public isMeshSettingsMode = false;
 
   // internal
   public selectedTab;

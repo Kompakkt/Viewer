@@ -14,7 +14,7 @@ export class DialogInviteBroadcastingComponent implements OnInit {
 
   public baseURL = 'https://blacklodge.hki.uni-koeln.de/builds/Kompakkt/live/?compilation=';
   public defaultURL = 'https://blacklodge.hki.uni-koeln.de/builds/Kompakkt/live/';
-  public collectionId: string;
+  public collectionId: string | undefined;
 
   constructor(public processingService: ProcessingService) {
   }

@@ -9,7 +9,7 @@ import {LoadingscreenhandlerService} from '../../services/loadingscreenhandler/l
 })
 export class LoadingscreenComponent implements OnInit {
 
-  public logo: string;
+  public logo = '';
   public loadingText = 'Loading...';
   public opacity = '1';
   public backgroundColor = '#111111';

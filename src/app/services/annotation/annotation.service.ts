@@ -29,7 +29,7 @@ export class AnnotationService {
   private isDemoMode: boolean;
   private isDefaultModelLoaded: boolean;
 
-  public isBroadcasting: boolean;
+  public isBroadcasting = false;
 
   private isMeshSettingsMode: boolean;
   public isAnnotatingAllowed = false;
@@ -56,20 +56,20 @@ export class AnnotationService {
     },
   });
 
-  private actualModel: IModel;
-  public actualCompilation: ICompilation;
+  private actualModel: IModel | undefined;
+  public actualCompilation: ICompilation | undefined;
   private actualModelMeshes: Mesh[] = [];
 
   private isannotationSourceCollection = false;
   @Output() annotationSourceCollection: EventEmitter<boolean> = new EventEmitter();
 
-  private selectedAnnotation: BehaviorSubject<string> = new BehaviorSubject('');
+  private selectedAnnotation = new BehaviorSubject('');
   public isSelectedAnnotation = this.selectedAnnotation.asObservable();
 
-  private editModeAnnotation: BehaviorSubject<string> = new BehaviorSubject('');
+  private editModeAnnotation = new BehaviorSubject('');
   public isEditModeAnnotation = this.editModeAnnotation.asObservable();
 
-  private currentAnnotationSubject: BehaviorSubject<IAnnotation[]> = new BehaviorSubject([]);
+  private currentAnnotationSubject = new BehaviorSubject([] as IAnnotation[]);
   public currentAnnotations = this.currentAnnotationSubject.asObservable();
 
   constructor(private babylonService: BabylonService,
@@ -180,7 +180,7 @@ export class AnnotationService {
   }
 
   public async loadAnnotations() {
-
+    if (!this.actualModel) return;
     Tags.AddTagsTo(this.actualModelMeshes, this.actualModel._id);
     // this.annotations = [];
     this.selectedAnnotation.next('');
@@ -211,15 +211,15 @@ export class AnnotationService {
   private getAnnotationsfromServerDB() {
     const serverAnnotations: IAnnotation[] = [];
     // Annotationen vom Server des aktuellen Modells...
-    if (this.actualModel.annotationList) {
-      this.actualModel.annotationList
-        .filter(annotation => annotation && annotation._id)
+    if (this.actualModel && this.actualModel.annotationList) {
+      (this.actualModel.annotationList
+        .filter(annotation => annotation && annotation._id) as IAnnotation[])
         .forEach((annotation: IAnnotation) => serverAnnotations.push(annotation));
     }
     // ...und der aktuellen Compilation (if existing)
-    if (this.isCollectionLoaded && this.actualCompilation.annotationList) {
-      this.actualCompilation.annotationList
-        .filter(annotation => annotation && annotation._id)
+    if (this.isCollectionLoaded && this.actualCompilation && this.actualCompilation.annotationList) {
+      (this.actualCompilation.annotationList
+        .filter(annotation => annotation && annotation._id) as IAnnotation[])
         .forEach((annotation: IAnnotation) => serverAnnotations.push(annotation));
     }
     console.log('getAnnotationsfromServerDB', serverAnnotations);
@@ -227,12 +227,15 @@ export class AnnotationService {
   }
 
   private async getAnnotationsfromLocalDB() {
-    let pouchAnnotations: IAnnotation[] = await this.fetchAnnotations(this.actualModel._id);
+    let pouchAnnotations: IAnnotation[] = (this.actualModel)
+      ? await this.fetchAnnotations(this.actualModel._id)
+      : [];
     // Annotationen aus PouchDB des aktuellen Modells und der aktuellen Compilation (if existing)
 
     if (this.isCollectionLoaded) {
-      const _compilationAnnotations = await this.fetchAnnotations(this.actualModel._id
-        && this.actualCompilation._id);
+      const _compilationAnnotations = (this.actualModel && this.actualCompilation)
+        ? await this.fetchAnnotations(this.actualModel._id && this.actualCompilation._id)
+        : [];
       pouchAnnotations = pouchAnnotations.concat(_compilationAnnotations);
     }
     console.log('getAnnotationsfromLocalDB', pouchAnnotations);
@@ -354,11 +357,15 @@ export class AnnotationService {
   }
 
   public async createNewAnnotation(result: any) {
-
     const camera = this.cameraService.getActualCameraPosAnnotation();
 
     this.babylonService.createPreviewScreenshot(400)
       .then(detailScreenshot => {
+        if (!this.actualModel) {
+          throw new Error(`this.actualModel not defined: ${this.actualModel}`);
+          console.error('AnnotationService:', this);
+          return;
+        }
         const generatedId = this.mongo.generateObjectId();
 
         const personName = this.userdataService.currentUserData.fullname;
@@ -412,7 +419,8 @@ export class AnnotationService {
           target: {
             source: {
               relatedModel: this.actualModel._id,
-              relatedCompilation: this.isCollectionLoaded ? this.actualCompilation._id : '',
+              relatedCompilation: (this.isCollectionLoaded && this.actualCompilation)
+                ? this.actualCompilation._id : '',
             },
             selector: {
               referencePoint: {
@@ -591,6 +599,8 @@ export class AnnotationService {
     dialogConfig.disableClose = true;
     dialogConfig.autoFocus = true;
 
+    if (!this.actualModel) return;
+
     dialogConfig.data = {
       modelId: this.actualModel._id,
     };
@@ -622,6 +632,8 @@ export class AnnotationService {
     console.log('Erstelle die Kopie');
 
     const generatedId = this.mongo.generateObjectId();
+
+    if (!this.actualModel) return;
 
     return {
       validated: false,

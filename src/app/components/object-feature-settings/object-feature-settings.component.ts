@@ -28,12 +28,12 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   @ViewChild('stepper', { static: false }) stepper;
 
   public activeModel;
-  private preview: string;
+  private preview: string | undefined;
   private setEffect = false;
-  private isDefault: boolean;
-  private isModelOwner: boolean;
-  public isSingleModel: boolean;
-  private isFinished: boolean;
+  private isDefault = false;
+  private isModelOwner = false;
+  public isSingleModel = false;
+  private isFinished = false;
   private initialSettingsMode = false;
   public showHelpers = false;
   public showHelperBackground = false;
@@ -43,7 +43,7 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   public showBackground = false;
   public showLights = false;
   public isFallbackModelLoaded = false;
-  public mediaType: string;
+  public mediaType: string | undefined;
 
   private cameraPositionInitial: {
     cameraType: string;
@@ -57,10 +57,10 @@ export class ObjectFeatureSettingsComponent implements OnInit {
       y: number;
       z: number;
     };
-  };
+  } | undefined;
 
-  private ambientlightUpintensity: number;
-  private ambientlightDownintensity: number;
+  private ambientlightUpintensity: number | undefined;
+  private ambientlightDownintensity: number | undefined;
 
   constructor(private overlayService: OverlayService,
               private cameraService: CameraService,

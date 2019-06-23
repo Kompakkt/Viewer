@@ -38,8 +38,8 @@ export class ProcessingService {
   };
 
   private isFirstLoad = true;
-  public isLoggedIn: boolean;
-  public isShowCatalogue: boolean;
+  public isLoggedIn = false;
+  public isShowCatalogue = false;
   public isCollectionLoaded = false;
   public isDefaultModelLoaded = false;
   public isFallbackModelLoaded = false;

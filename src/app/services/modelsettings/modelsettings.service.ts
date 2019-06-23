@@ -11,13 +11,13 @@ import {ProcessingService} from '../processing/processing.service';
 })
 export class ModelsettingsService {
 
-  public actualModelMeshes: Mesh[];
+  public actualModelMeshes: Mesh[] = [];
   public showBoundingBoxMeshes = false;
   private min = new Vector3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
   private max = new Vector3(Number.MAX_VALUE * -1, Number.MAX_VALUE * -1, Number.MAX_VALUE * -1);
-  private initialSize: Vector3;
+  private initialSize = new Vector3(0, 0, 0);
 
-  private center: Mesh;
+  private center: Mesh | undefined;
   public rotationX = 0;
   private lastRotationX = 0;
   public rotationY = 0;
@@ -26,13 +26,13 @@ export class ModelsettingsService {
   private lastRotationZ = 0;
   public scalingFactor = 1;
 
-  private boundingBox: Mesh;
+  private boundingBox: Mesh | undefined;
   public showBoundingBoxModel = false;
   public height;
   public width;
   public depth;
 
-  private ground: Mesh;
+  private ground: Mesh | undefined;
   public showGround = false;
   public scalingFactorGround = 1;
 
@@ -104,6 +104,7 @@ export class ModelsettingsService {
 
   private loadScalingFactor(factor: number) {
     this.scalingFactor = factor;
+    if (!this.center) return;
     this.center.scaling = new Vector3(factor, factor, factor);
   }
 
@@ -140,7 +141,7 @@ export class ModelsettingsService {
   }
 
   private async unparentModel() {
-
+    if (!this.center) return;
     for (let _i = 0; _i < this.actualModelMeshes.length; _i++) {
 
       const mesh = this.actualModelMeshes[_i];
@@ -175,7 +176,7 @@ export class ModelsettingsService {
 
     this.createBoundingBox();
     this.showBoundingBoxModel = false;
-    this.boundingBox.visibility = 0;
+    if (this.boundingBox) this.boundingBox.visibility = 0;
     this.createWorldAxis(18);
     this.showWorldAxis = false;
     this.babylonService.getScene().getMeshesByTags('worldAxis').map(mesh => mesh.visibility = 0);
@@ -190,7 +191,7 @@ export class ModelsettingsService {
 
   public resetVisualSettingsHelper() {
     this.showBoundingBoxModel = false;
-    this.boundingBox.visibility = 0;
+    if (this.boundingBox) this.boundingBox.visibility = 0;
 
     this.showBoundingBoxMeshes = false;
     for (let _i = 0; _i < this.actualModelMeshes.length; _i++) {
@@ -227,16 +228,18 @@ export class ModelsettingsService {
     this.showGround = false;
     this.babylonService.getScene().getMeshesByTags('ground').map(mesh => mesh.visibility = 0);
     this.scalingFactorGround = 1;
-    this.ground.scaling = new Vector3(1, 1, 1);
-    const material = new StandardMaterial('GroundPlaneMaterial', this.babylonService.getScene());
-    material.diffuseColor = new Color3(255 / 255, 255 / 255, 255 / 255);
-    this.ground.material = material;
+    if (this.ground) {
+      this.ground.scaling = new Vector3(1, 1, 1);
+      const material = new StandardMaterial('GroundPlaneMaterial', this.babylonService.getScene());
+      material.diffuseColor = new Color3(255 / 255, 255 / 255, 255 / 255);
+      this.ground.material = material;
+    }
   }
 
   public resetMeshSize() {
 
     this.scalingFactor = 1;
-    this.center.scaling = new Vector3(1, 1, 1);
+    if (this.center) this.center.scaling = new Vector3(1, 1, 1);
 
     this.height = this.initialSize.y.toFixed(2);
     this.width = this.initialSize.x.toFixed(2);
@@ -250,6 +253,12 @@ export class ModelsettingsService {
     this.lastRotationY = 0;
     this.rotationZ = 0;
     this.lastRotationZ = 0;
+
+    if (!this.center) {
+      throw new Error('Center not defined');
+      console.error(this);
+      return;
+    }
 
     if (!this.center.rotationQuaternion) {
       this.center.rotationQuaternion = Quaternion.RotationYawPitchRoll(0, 0, 0);
@@ -374,6 +383,11 @@ export class ModelsettingsService {
       width: this.initialSize.x, height: this.initialSize.y, depth: this.initialSize.z,
     },                                       this.babylonService.getScene());
     Tags.AddTagsTo(this.boundingBox, 'boundingBox');
+    if (!this.boundingBox || !this.center) {
+      throw new Error('Center or BoundingBox missing');
+      console.error(this);
+      return;
+    }
     this.boundingBox.parent = this.center;
 
     this.boundingBox.material = new StandardMaterial('boundingBoxMat', this.babylonService.getScene());
@@ -387,11 +401,8 @@ export class ModelsettingsService {
 
   public handleChangeBoundingBoxModel() {
     this.showBoundingBoxModel = (this.showBoundingBoxModel) ? false : true;
-    if (this.showBoundingBoxModel) {
-      this.boundingBox.visibility = 1;
-    } else {
-      this.boundingBox.visibility = 0;
-    }
+    if (!this.boundingBox) return;
+    this.boundingBox.visibility = this.showBoundingBoxModel ? 1 : 0;
   }
 
   private destroyBoundingBox() {
@@ -417,7 +428,7 @@ export class ModelsettingsService {
 
   public setScalingFactorGround(event: any) {
     this.scalingFactorGround = event.value;
-    this.ground.scaling = new Vector3(event.value, event.value, event.value);
+    if (this.ground) this.ground.scaling = new Vector3(event.value, event.value, event.value);
   }
 
   public handleChangeColorGround($event: ColorEvent) {
@@ -438,7 +449,7 @@ export class ModelsettingsService {
     // }
     const material = new StandardMaterial('GroundPlaneMaterial', this.babylonService.getScene());
     material.diffuseColor = new Color3($event.color.rgb.r / 255, $event.color.rgb.g / 255, $event.color.rgb.b / 255);
-    this.ground.material = material;
+    if (this.ground) this.ground.material = material;
   }
 
   public handleChangeGround() {
@@ -579,6 +590,11 @@ export class ModelsettingsService {
     const zChar = this.createTextPlane('Z', 'blue', sizeLocalAxis / 10, 'localAxis', 'localAxisZ');
     zChar.position = new Vector3(0, 0.05 * sizeLocalAxis, 0.9 * sizeLocalAxis);
 
+    if (!this.center) {
+      throw new Error('Center not defined');
+      console.error(this);
+      return;
+    }
     local_axisX.parent = this.center;
     xChar.parent = this.center;
     local_axisY.parent = this.center;
@@ -624,7 +640,10 @@ export class ModelsettingsService {
     this.height = parseFloat((this.initialSize.y * this.scalingFactor).toFixed(2));
     this.width = parseFloat((this.initialSize.x * this.scalingFactor).toFixed(2));
     this.depth = parseFloat((this.initialSize.z * this.scalingFactor).toFixed(2));
-    this.center.scaling = new Vector3(this.scalingFactor, this.scalingFactor, this.scalingFactor);
+    if (this.center) {
+      this.center.scaling =
+        new Vector3(this.scalingFactor, this.scalingFactor, this.scalingFactor);
+    }
   }
 
   public handleChangeHeight() {
@@ -634,6 +653,11 @@ export class ModelsettingsService {
     const factor = this.height / this.initialSize.y;
     this.scalingFactor = parseFloat((this.height / this.initialSize.y).toFixed(2));
 
+    if (!this.center || !this.boundingBox) {
+      throw new Error('Center or BoundingBox not defined');
+      console.error(this);
+      return;
+    }
     this.center.scaling = new Vector3(factor, factor, factor);
 
     const bi = this.boundingBox.getBoundingInfo();
@@ -645,7 +669,11 @@ export class ModelsettingsService {
   }
 
   public handleChangeWidth() {
-
+    if (!this.center || !this.boundingBox) {
+      throw new Error('Center or BoundingBox not defined');
+      console.error(this);
+      return;
+    }
     // originalSize.x => 1 scale
     // originalSize.x  * factor = this.height
     const factor = this.width / this.initialSize.x;
@@ -662,7 +690,11 @@ export class ModelsettingsService {
   }
 
   public handleChangeDepth() {
-
+    if (!this.center || !this.boundingBox) {
+      throw new Error('Center or BoundingBox not defined');
+      console.error(this);
+      return;
+    }
     // originalSize.x => 1 scale
     // originalSize.x  * factor = this.height
     const factor = this.depth / this.initialSize.z;
@@ -680,7 +712,11 @@ export class ModelsettingsService {
   }
 
   private async rotationFunc(axisName: string, degree: number) {
-
+    if (!this.center || !this.boundingBox) {
+      throw new Error('Center or BoundingBox not defined');
+      console.error(this);
+      return;
+    }
     // Math.PI / 2 -> 90 Grad
 
     switch (axisName) {

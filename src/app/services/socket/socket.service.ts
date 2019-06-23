@@ -26,7 +26,7 @@ export class SocketService {
   public color = ['pink', 'red', 'blue', 'yellow', 'purple', 'gold'];
   public maxColoredUsersMinusOne = this.color.length - 1;
 
-  public socketRoom: string;
+  public socketRoom = '';
 
   public isInSocket = false;
   @Output() inSocket: EventEmitter<boolean> = new EventEmitter();

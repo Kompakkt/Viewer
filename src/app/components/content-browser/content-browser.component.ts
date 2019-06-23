@@ -18,12 +18,11 @@ import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-passwor
   export class ContentBrowserComponent implements OnInit {
 
   // external
-  public isLoggedIn: boolean;
-  public isObjectCategory: boolean;
-  public isCollectionLoaded: boolean;
+  public isLoggedIn = false;
+  public isObjectCategory = false;
+  public isCollectionLoaded = false;
 
   // internal
-  public isCollectionInputSelected: boolean;
   public filterPersonalCollections = false;
   public filterPersonalObjects = false;
 

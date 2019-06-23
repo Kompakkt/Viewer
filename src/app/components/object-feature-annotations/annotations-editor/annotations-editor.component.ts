@@ -17,18 +17,18 @@ import {AnnotationComponent} from '../annotation/annotation.component';
 export class AnnotationsEditorComponent implements OnInit {
 
   @ViewChildren(AnnotationComponent)
-  annotationsList: QueryList<AnnotationComponent>;
+  annotationsList: QueryList<AnnotationComponent> | undefined;
 
   // external
-  public isCollectionLoaded: boolean;
-  public isDefaultModelLoaded: boolean;
-  public isAnnotatingAllowed: boolean;
-  public isBroadcastingAllowed: boolean;
-  public isBroadcasting: boolean;
-  public isCollectionOwner: boolean;
+  public isCollectionLoaded = false;
+  public isDefaultModelLoaded = false;
+  public isAnnotatingAllowed = false;
+  public isBroadcastingAllowed = false;
+  public isBroadcasting = false;
+  public isCollectionOwner = false;
 
   // internal
-  public isDefaultAnnotationsSource: boolean;
+  public isDefaultAnnotationsSource = false;
 
   constructor(public annotationService: AnnotationService,
               private socketService: SocketService,
@@ -37,7 +37,6 @@ export class AnnotationsEditorComponent implements OnInit {
   }
 
   ngOnInit() {
-
     this.isDefaultAnnotationsSource = true;
     this.isCollectionLoaded = this.processingService.isCollectionLoaded;
     this.isDefaultModelLoaded = this.processingService.isDefaultModelLoaded;

@@ -13,9 +13,9 @@ export class ContentComponent implements OnInit {
   @HostBinding('class.is-open') public isOpen = false;
 
   // external
-  public isCollectionLoaded: boolean;
-  public isDefaultModelLoaded: boolean;
-  public showContentBrowser: boolean;
+  public isCollectionLoaded = false;
+  public isDefaultModelLoaded = false;
+  public showContentBrowser = false;
 
   constructor(private overlayService: OverlayService,
               public processingService: ProcessingService,

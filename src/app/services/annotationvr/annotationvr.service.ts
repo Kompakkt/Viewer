@@ -12,8 +12,8 @@ import { CameraService } from '../camera/camera.service';
 })
 export class AnnotationvrService {
 
-  private controlPrevious: AbstractMesh;
-  private controlNext: AbstractMesh;
+  private controlPrevious: AbstractMesh | undefined;
+  private controlNext: AbstractMesh | undefined;
 
   // FOR VR-HUD
   private advancedTextureFullscreen: AdvancedDynamicTexture;
@@ -42,11 +42,14 @@ export class AnnotationvrService {
     this.posYcontrolNext = -1;
     this.posZcontrolNext = 2.5;
 
+    this.advancedTextureFullscreen = AdvancedDynamicTexture.CreateFullscreenUI('myUI2');
+    this.text1 = new TextBlock();
+
     this.babylonService.vrModeIsActive.subscribe(vrModeIsActive => {
       if (vrModeIsActive) {
 
         // FOR VR-HUD
-        this.advancedTextureFullscreen = AdvancedDynamicTexture.CreateFullscreenUI('myUI2');
+
         this.advancedTextureFullscreen.isForeground = true;
 
         this.createVRAnnotationControls();
@@ -104,7 +107,7 @@ export class AnnotationvrService {
     label.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
 
     label.onPointerMoveObservable.add(() => {
-      if (this.controlPrevious.metadata) {
+      if (this.controlPrevious && this.controlPrevious.metadata) {
         this.controlPrevious.metadata = null;
         this.previousAnnotation();
       }
@@ -123,7 +126,7 @@ export class AnnotationvrService {
     label.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
 
     label.onPointerMoveObservable.add(() => {
-      if (this.controlNext.metadata) {
+      if (this.controlNext && this.controlNext.metadata) {
         this.controlNext.metadata = null;
         this.nextAnnotation();
       }

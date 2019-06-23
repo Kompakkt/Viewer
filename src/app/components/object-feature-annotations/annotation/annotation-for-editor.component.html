@@ -1,5 +1,5 @@
 <mat-card class="annotation-card">
-  <form class="annotation-form">
+  <form class="annotation-form" *ngIf="annotation">
 
     <mat-card-header (click)="changeOpenPopup()">
 
@@ -98,4 +98,10 @@
     </mat-card-actions>
 
   </form>
+  <div *ngIf="!annotation">
+    <h2>Annotation not defined</h2>
+    <p>Open the devloper console for more information on this error</p>
+    <br>
+    <p>If you're a user, please report this bug to a developer</p>
+  </div>
 </mat-card>

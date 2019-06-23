@@ -10,8 +10,8 @@ import {ProcessingService} from '../processing/processing.service';
 })
 export class UserdataService {
 
-  public isModelOwner: boolean;
-  public isCollectionOwner: boolean;
+  public isModelOwner = false;
+  public isCollectionOwner = false;
 
   @Output() modelOwner: EventEmitter<boolean> = new EventEmitter();
   @Output() collectionOwner: EventEmitter<boolean> = new EventEmitter();
@@ -63,8 +63,9 @@ export class UserdataService {
       if (actualCollection._id && actualCollection.relatedOwner) {
         this.isCollectionOwner =
           (isLDAPUser(this.currentUserData) && this.currentUserData.data.compilation)
-            ? this.currentUserData.data.compilation
-              .find((comp: ICompilation) => comp._id === actualCollection._id) !== undefined
+            ? (this.currentUserData.data.compilation
+              .filter(comp => comp) as ICompilation[])
+              .find(comp => comp._id === actualCollection._id) !== undefined
             : false;
       } else {
         this.isCollectionOwner = false;
@@ -95,32 +96,36 @@ export class UserdataService {
             this.message.info(`Logged in as ${this.currentUserData.fullname}`);
             if (!userData.data) return;
             if (userData.data.model) {
-              userData.data.model.forEach((model: IModel | null) => {
-                if (model !== null && !this.userOwnedModels.find(_m => _m._id === model._id)) {
-                  this.userOwnedModels.push(model);
-                  if (model.finished) {
-                    this.userOwnedFinishedModels.push(model);
+              (userData.data.model.filter(model => model) as IModel[])
+                .forEach(model => {
+                  if (!this.userOwnedModels.find(_m => _m._id === model._id)) {
+                    this.userOwnedModels.push(model);
+                    if (model.finished) {
+                      this.userOwnedFinishedModels.push(model);
+                    }
                   }
-                }
-              });
+                });
             }
             if (userData.data.compilation) {
-              userData.data.compilation.forEach((compilation: ICompilation | null) => {
-                if (compilation !== null && !this.personalCollections.find(_c => _c._id === compilation._id)) {
-                  this.personalCollections.push(compilation);
-                }
-              });
+              (userData.data.compilation.filter(comp => comp) as ICompilation[])
+                .forEach(compilation => {
+                  if (!this.personalCollections.find(_c => _c._id === compilation._id)) {
+                    this.personalCollections.push(compilation);
+                  }
+                });
             }
             if (userData.data.annotation) {
-              userData.data.annotation.forEach((annotation: IAnnotation | null) => {
-                if (annotation !== null && !this.userOwnedAnnotations.find(_a => _a._id === annotation._id)) {
-                  this.userOwnedAnnotations.push(annotation);
-                }
-              });
+              (userData.data.annotation.filter(ann => ann) as IAnnotation[])
+                .forEach(annotation => {
+                  if (!this.userOwnedAnnotations.find(_a => _a._id === annotation._id)) {
+                    this.userOwnedAnnotations.push(annotation);
+                  }
+                });
             }
           }
           console.log('Meine Modelle', this.userOwnedFinishedModels, 'compis', this.personalCollections, 'meine Annos', this.userOwnedAnnotations);
-        }).catch(error => {
+        })
+        .catch(error => {
           console.error(error);
           this.message.error('Connection to object server refused.');
           reject('Connection to object server refused.');

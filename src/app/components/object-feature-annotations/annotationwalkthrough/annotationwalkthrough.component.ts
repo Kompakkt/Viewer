@@ -12,8 +12,8 @@ import {CameraService} from '../../../services/camera/camera.service';
 })
 export class AnnotationwalkthroughComponent implements OnInit {
 
-  public title: string;
-  private actualRanking: number;
+  public title = 'Annotation Walkthrough';
+  private actualRanking = 0;
 
   constructor(private cameraService: CameraService,
               public annotationService: AnnotationService,
@@ -21,8 +21,6 @@ export class AnnotationwalkthroughComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.actualRanking = 0;
-    this.title = 'Annotation Walkthrough';
   }
 
   public previousAnnotation() {

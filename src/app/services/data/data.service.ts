@@ -68,8 +68,8 @@ export class DataService {
   public async updateAnnotationRanking(id: string, ranking: number) {
     if (id === 'DefaultAnnotation') return;
     return this.pouchdb.get(id)
-      .then((result: PouchDB.Core.IdMeta & IAnnotation & PouchDB.Core.GetMeta) => {
-        result.ranking = ranking;
+      .then(result => {
+        (result as PouchDB.Core.IdMeta & IAnnotation & PouchDB.Core.GetMeta).ranking = ranking;
         this.pouchdb.put(result);
       })
       .catch(e => console.log('Failed updating annotation ranking', e));

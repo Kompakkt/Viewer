@@ -21,29 +21,29 @@ import {DialogAnnotationEditorComponent} from '../../dialogs/dialog-annotation-e
 
 export class AnnotationComponent implements OnInit {
 
-  @Input() modelFileName: string;
-  @Input() annotation: IAnnotation;
+  @Input() modelFileName: string | undefined;
+  @Input() annotation: IAnnotation | undefined;
 
   @ViewChild('annotationContent', { static: false }) private annotationContent;
 
   // internal
-  public isEditMode: boolean;
-  public showAnnotation: boolean;
-  public positionTop: number;
-  public positionLeft: number;
-  public collapsed: boolean;
-  public selectedAnnotation: string;
+  public isEditMode = false;
+  public showAnnotation = false;
+  public positionTop = 0;
+  public positionLeft = 0;
+  public collapsed = false;
+  public selectedAnnotation: string | undefined;
   // --- JAN ----
   public showMediaBrowser = false;
   public config: PerfectScrollbarConfigInterface = {};
   // ---
 
   // external
-  public visibility: boolean;
-  public isAnnotatingAllowed: boolean;
-  public isAnnotationOwner: boolean;
-  public isCollectionOwner: boolean;
-  public isInSocket: boolean;
+  public visibility = false;
+  public isAnnotatingAllowed = false;
+  public isAnnotationOwner = false;
+  public isCollectionOwner = false;
+  public isInSocket = false;
 
   constructor(public annotationService: AnnotationService,
               public babylonService: BabylonService,
@@ -56,7 +56,11 @@ export class AnnotationComponent implements OnInit {
   }
 
   ngOnInit() {
-
+    if (!this.annotation) {
+      console.error('AnnotationComponent without annotation', this);
+      throw new Error('AnnotationComponent without annotation');
+      return;
+    }
     this.showAnnotation = true;
     this.collapsed = false;
     this.isAnnotatingAllowed = this.annotationService.isAnnotatingAllowed;
@@ -64,6 +68,7 @@ export class AnnotationComponent implements OnInit {
     this.isCollectionOwner = this.userdataService.isCollectionOwner;
 
     this.processingService.loggedIn.subscribe(_ => {
+      if (!this.annotation) return;
       this.isAnnotationOwner = this.userdataService.isAnnotationOwner(this.annotation);
     });
 
@@ -72,6 +77,7 @@ export class AnnotationComponent implements OnInit {
     });
 
     this.annotationService.isSelectedAnnotation.subscribe(selectedAnno => {
+      if (!this.annotation) return;
       selectedAnno === this.annotation._id ? this.visibility = true : this.visibility = false;
       this.selectedAnnotation = selectedAnno;
     });
@@ -85,6 +91,7 @@ export class AnnotationComponent implements OnInit {
     });
 
     this.annotationService.isEditModeAnnotation.subscribe(selectedEditAnno => {
+      if (!this.annotation) return;
       const isEditAnno = selectedEditAnno === this.annotation._id;
       if (!isEditAnno && this.isEditMode) {
         this.isEditMode = false;
@@ -101,8 +108,9 @@ export class AnnotationComponent implements OnInit {
     });
 
     setInterval(() => {
+      if (!this.annotation) return;
       this.setPosition(this.annotation);
-    },          15);
+    }, 15);
   }
 
   public closeAnnotation(): void {
@@ -110,21 +118,23 @@ export class AnnotationComponent implements OnInit {
   }
 
   public toggleEditViewMode(): void {
+    if (!this.annotation) return;
     this.isEditMode ? this.annotationService.setEditModeAnnotation('') :
       this.annotationService.setEditModeAnnotation(this.annotation._id);
   }
 
   public shareAnnotation() {
+    if (!this.annotation) return;
     this.annotationService.shareAnnotation(this.annotation);
   }
 
   public deleteAnnotation(): void {
+    if (!this.annotation) return;
     this.annotationService.deleteAnnotation(this.annotation);
   }
 
   // TODO get position from babylon Service
   private setPosition(annotation: IAnnotation) {
-
     const scene = this.babylonService.getScene();
 
     if (!scene) {
@@ -150,7 +160,7 @@ export class AnnotationComponent implements OnInit {
 
   // --- JAN ----
   public editFullscreen(): void {
-
+    if (!this.annotation) return;
     const dialogRef = this.dialog.open(DialogAnnotationEditorComponent, {
       width: '75%',
       data: {
@@ -161,8 +171,7 @@ export class AnnotationComponent implements OnInit {
 
     dialogRef.afterClosed()
       .subscribe(result => {
-
-        if (result) {
+        if (result && this.annotation) {
           this.annotation.body.content.title = result.title;
           this.annotation.body.content.description = result.content;
         }
@@ -171,7 +180,7 @@ export class AnnotationComponent implements OnInit {
   }
 
   public addMedium(medium) {
-
+    if (!this.annotation) return;
     const mdImage = `![alt ${medium.description}](${medium.url})`;
 
     this.annotationContent.nativeElement.focus();

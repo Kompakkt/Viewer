@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Animation, ArcRotateCamera, Camera, Scene, Vector3, VRExperienceHelper} from 'babylonjs';
+import {Animation, ArcRotateCamera, Camera, Scene, Vector3} from 'babylonjs';
 
 import {BabylonService} from '../babylon/babylon.service';
 
@@ -13,7 +13,6 @@ export class CameraService {
 
   public arcRotateCamera = this.babylonService.createArcRotateCam(0, 10, 100);
   // private universalCamera: UniversalCamera;
-  private vrHelper: VRExperienceHelper | undefined;
 
   // Parameters (initial Position): alpha, beta, radius,
   public alpha: number | undefined;
@@ -58,9 +57,9 @@ this.yRot = this.universalCamera.rotation.y;
 
   // VR BUTTON
   public createVrHelperInCamera(): void {
-    this.vrHelper = this.babylonService.createVRHelper();
-    console.log(this.vrHelper);
-    this.babylonService.getVRHelper().enterVR();
+    this.babylonService.createVRHelper();
+    const vrHelper = this.babylonService.getVRHelper();
+    if (vrHelper) vrHelper.enterVR();
   }
 
   /*

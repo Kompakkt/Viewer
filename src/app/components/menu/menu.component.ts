@@ -18,7 +18,7 @@ import {LoginComponent} from '../dialogs/dialog-login/login.component';
 export class MenuComponent implements OnInit {
 
   // external
-  public isLoggedIn: boolean;
+  public isLoggedIn = false;
   public isVRModeActive: boolean;
     // available quality of object
   public high = '';
@@ -26,7 +26,7 @@ export class MenuComponent implements OnInit {
   public low = '';
 
   // internal
-  public fullscreen: boolean;
+  public fullscreen = false;
 
   constructor(
     public iconRegistry: MatIconRegistry,
@@ -42,11 +42,7 @@ export class MenuComponent implements OnInit {
     iconRegistry.addSvgIcon(
       'cardboard',
       sanitizer.bypassSecurityTrustResourceUrl('assets/img/google-cardboard.svg'));
-  }
 
-  ngOnInit() {
-
-    this.fullscreen = false;
     this.isVRModeActive = this.babylonService.isVRModeActive;
 
     this.babylonService.vrModeIsActive.subscribe(isActive => {
@@ -64,7 +60,9 @@ export class MenuComponent implements OnInit {
         this.low = (model.processed.low) ? model.processed.low : '';
       }
     });
+  }
 
+  ngOnInit() {
   }
 
   // TODO fullscreen = falls if exit fullscreen by hitting esc Button
