@@ -1,4 +1,5 @@
 import {Component, OnInit} from '@angular/core';
+import {MatDialog, MatDialogConfig} from '@angular/material';
 
 import {MessageService} from '../../../services/message/message.service';
 import {MongohandlerService} from '../../../services/mongohandler/mongohandler.service';
@@ -15,14 +16,14 @@ export class LoginComponent implements OnInit {
 
   public username = '';
   public password = '';
-  public success = false;
   private isOpen: boolean;
 
   constructor(private mongohandlerService: MongohandlerService,
               private message: MessageService,
               private overlayService: OverlayService,
               private userDataService: UserdataService,
-              private processingService: ProcessingService) {
+              private processingService: ProcessingService,
+              private dialog: MatDialog) {
   }
 
   ngOnInit() {
@@ -38,8 +39,8 @@ export class LoginComponent implements OnInit {
       .then(result => {
         if (result.status === 'ok') {
           this.userDataService.setcachedLoginData(this.password, this.username);
-          this.success = true;
           this.processingService.bootstrap();
+          this.dialog.closeAll();
         }
       })
       .catch(error => {

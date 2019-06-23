@@ -14,8 +14,9 @@ import {LoginComponent} from '../dialogs/dialog-login/login.component';
 })
 export class SceneComponent implements AfterViewInit {
 
-  @HostListener('window:resize', ['$event'])
+  private firstAttempt = true;
 
+  @HostListener('window:resize', ['$event'])
   public onResize() {
     this.babylonService.resize();
   }
@@ -34,8 +35,13 @@ export class SceneComponent implements AfterViewInit {
         if (result.status === 'ok') {
           this.setupCanvas();
         } else {
-          // Show Login Screen before loading Babylon
-          this.openLoginDialog();
+          if (this.firstAttempt) {
+            // Show Login Screen before loading Babylon
+            this.openLoginDialog();
+          } else {
+            // Assume user is not interested in logging in
+            this.setupCanvas();
+          }
         }
       })
       .catch(e => console.error(e));
@@ -45,6 +51,7 @@ export class SceneComponent implements AfterViewInit {
     const dialogConfig = new MatDialogConfig();
     dialogConfig.disableClose = true;
     dialogConfig.autoFocus = true;
+    this.firstAttempt = false;
     this.dialog
       .open(LoginComponent, dialogConfig)
       .afterClosed()
