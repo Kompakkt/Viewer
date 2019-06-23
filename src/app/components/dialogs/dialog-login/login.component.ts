@@ -37,6 +37,7 @@ export class LoginComponent implements OnInit {
         }
       })
       .catch(error => {
+        console.error(error);
         this.message.error('Connection to object server refused.');
         this.userDataService.setcachedLoginData('', '');
       });

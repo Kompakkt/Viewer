@@ -63,7 +63,7 @@ export class AnnotationComponent implements OnInit {
     this.isAnnotationOwner = this.userdataService.isAnnotationOwner(this.annotation);
     this.isCollectionOwner = this.userdataService.isCollectionOwner;
 
-    this.processingService.loggedIn.subscribe(colOwner => {
+    this.processingService.loggedIn.subscribe(_ => {
       this.isAnnotationOwner = this.userdataService.isAnnotationOwner(this.annotation);
     });
 

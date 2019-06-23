@@ -549,7 +549,7 @@ export class AnnotationService {
   }
 
   private async fetchAnnotations(model: string, compilation?: string): Promise<IAnnotation[]> {
-    return new Promise<IAnnotation[]>(async (resolve, reject) => {
+    return new Promise<IAnnotation[]>(async (resolve, _) => {
       const annotationList: IAnnotation[] = await this.dataService
         .findAnnotations(model, (compilation) ? compilation : '');
       resolve(annotationList);

@@ -78,26 +78,29 @@ import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-passwor
   searchCollectionByID(event?) {
     let id = '';
     event ? id = event.value._id : id = this.identifierCollection;
-    this.processingService.selectCollectionByID(id).then(result => {
-      switch (result) {
-        case 'loaded':
-          break;
+    this.processingService.selectCollectionByID(id)
+      .then(result => {
+        switch (result) {
+          case 'loaded':
+            break;
 
-        case 'missing':
-          this.message.error('Can not find Collection with ID ' + this.identifierCollection + '.');
-          break;
+          case 'missing':
+            this.message.error('Can not find Collection with ID ' + this.identifierCollection + '.');
+            break;
 
-        case 'password':
-          console.log('password');
-          this.passwordDialog();
-          break;
+          case 'password':
+            console.log('password');
+            this.passwordDialog();
+            break;
 
-        default:
-          this.message.error('Can not find Collection with ID ' + this.identifierCollection + '.');
-      }
-    },                                                   error => {
-      this.message.error('Connection to object server refused.');
-    });
+          default:
+            this.message.error('Can not find Collection with ID ' + this.identifierCollection + '.');
+        }
+      })
+      .catch(error => {
+        console.error(error);
+        this.message.error('Connection to object server refused.');
+      });
   }
 
   public passwordDialog() {

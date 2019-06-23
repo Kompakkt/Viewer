@@ -40,7 +40,9 @@ export class DialogPasswordComponent implements OnInit {
         } else {
           this.message.error('Password is wrong.' + this.identifierCollection + '.');
         }
-      },      error => {
+      })
+      .catch(error => {
+        console.error(error);
         this.message.error('Connection to object server refused.');
         this.dialogRef.close();
       });

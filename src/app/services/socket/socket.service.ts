@@ -49,7 +49,7 @@ export class SocketService {
     this.annotationService.isBroadcasting = false;
     this.isDefaultModelLoaded = this.processingService.isDefaultModelLoaded;
 
-    this.processingService.Observables.actualModel.subscribe(actualModel => {
+    this.processingService.Observables.actualModel.subscribe(_ => {
       const currentCompilation = this.processingService.getCurrentCompilation();
       const currentModel = this.processingService.getCurrentModel();
 
@@ -188,7 +188,7 @@ export class SocketService {
       this.removeKnowledgeAboutUser(result);
     });
 
-    this.socket.on('logout', result => { // socket.id
+    this.socket.on('logout', _ => { // socket.id
       console.log(`logging out of Socket.io...`);
     });
 

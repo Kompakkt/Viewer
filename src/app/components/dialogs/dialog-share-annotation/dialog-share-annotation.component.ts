@@ -60,7 +60,9 @@ export class DialogShareAnnotationComponent implements OnInit {
             // missing'
             this.message.error('Can not find Collection with ID ' + this.targetCollectionId + '.');
           }
-        },    error => {
+        })
+        .catch(error => {
+          console.error(error);
           this.message.error('Connection to object server refused.');
           // 'missing'
           this.message.error('Can not find Collection with ID ' + this.targetCollectionId + '.');
@@ -79,8 +81,6 @@ export class DialogShareAnnotationComponent implements OnInit {
     if (this.targetCollectionId !== '') {
       this.mongohandlerService.getCompilation(this.targetCollectionId, this.passwordCollection)
         .then(compilation => {
-          compilation.annotationList ? compilation.annotationList.length : 1;
-
           if (compilation['_id']) {
             this.response.status = true;
             this.response.collectionId = this.targetCollectionId;
@@ -90,7 +90,9 @@ export class DialogShareAnnotationComponent implements OnInit {
             this.message.error('Password is wrong. For Colelction with ID '
               + this.targetCollectionId + '.');
           }
-        },    error => {
+        })
+        .catch(error => {
+          console.error(error);
           this.message.error('Connection to object server refused.');
           this.dialogRef.close(this.response);
         });

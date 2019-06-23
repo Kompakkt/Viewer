@@ -17,7 +17,7 @@ export class ActionService {
     const scene = this.babylonService.getScene();
     mesh.actionManager = new ActionManager(scene);
     mesh.actionManager.registerAction(new ExecuteCodeAction(
-      trigger, evt => {
+      trigger, () => {
         const pickResult = scene
           .pick(scene.pointerX, scene.pointerY, undefined, false, scene.activeCamera);
         console.log(pickResult);

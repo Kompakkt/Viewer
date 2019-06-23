@@ -637,7 +637,7 @@ export class ObjectFeatureSettingsComponent implements OnInit {
         if (this.activeModel.settings === undefined || this.isModelOwner && !this.isFinished) {
           this.activeModel['settings'] = await this.get2DMediaSettings();
           this.createMissingInitialDefaultScreenshot()
-            .then(result => {
+            .then(_ => {
               this.mongohandlerService
                 .updateSettings(this.activeModel._id, this.activeModel['settings'])
                 .then(settings => {

@@ -423,6 +423,11 @@ export class BabylonService {
 
         this.engine.hideLoadingUI();
         resolve(ground);
+        return;
+      };
+      img.onerror = () => {
+        reject();
+        return;
       };
       img.src = rootUrl;
     });
@@ -470,7 +475,7 @@ export class BabylonService {
   public async createScreenshot() {
     this.hideMesh('plane', false);
     this.hideMesh('label', false);
-    await new Promise<any>((resolve, reject) => this.engine.onEndFrameObservable.add(resolve));
+    await new Promise<any>((resolve, _) => this.engine.onEndFrameObservable.add(resolve));
     const result = await new Promise<string>((resolve, reject) => {
       const _activeCamera = this.getScene().activeCamera;
       if (_activeCamera instanceof Camera) {
@@ -479,8 +484,12 @@ export class BabylonService {
           await fetch(screenshot)
             .then(res => res.blob())
             .then(blob =>
-              Tools.Download(blob, `Kompakkt-${Date.now()}`));
-          resolve(screenshot);
+              Tools.Download(blob, `Kompakkt-${Date.now()}`))
+            .then(() => resolve(screenshot))
+            .catch(e => {
+              console.error(e);
+              reject(e);
+            });
         });
       }
     });
@@ -492,8 +501,8 @@ export class BabylonService {
   public async createPreviewScreenshot(width?: number): Promise<string> {
     this.hideMesh('plane', false);
     this.hideMesh('label', false);
-    await new Promise<any>((resolve, reject) => this.engine.onEndFrameObservable.add(resolve));
-    const result = await new Promise<string>((resolve, reject) => {
+    await new Promise<any>((resolve, _) => this.engine.onEndFrameObservable.add(resolve));
+    const result = await new Promise<string>((resolve, _) => {
       const _activeCamera = this.getScene().activeCamera;
       if (_activeCamera instanceof Camera) {
         Tools.CreateScreenshot(
@@ -699,7 +708,7 @@ export class BabylonService {
     // Cube
 
     SceneLoader.ImportMeshAsync(
-      null, 'assets/models/', 'kompakkt.babylon', this.scene, progress => {
+      null, 'assets/models/', 'kompakkt.babylon', this.scene, _ => {
         console.log('LOADED');
       })
       .then(result => {

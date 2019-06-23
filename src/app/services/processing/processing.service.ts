@@ -154,6 +154,7 @@ export class ProcessingService {
           }
         })
         .catch(error => {
+          console.error(error);
           this.isLoggedIn = false;
           this.loggedIn.emit(false);
           this.message.error('Can not see if you are logged in.');
@@ -200,6 +201,7 @@ export class ProcessingService {
         }
       })
       .catch(error => {
+        console.error(error);
         this.isLoggedIn = false;
         this.loggedIn.emit(false);
         this.message.error(
@@ -212,7 +214,9 @@ export class ProcessingService {
     this.mongoHandlerService.getAllCompilations()
       .then(compilation => {
         this.Subjects.collections.next(compilation);
-      },    error => {
+      })
+      .catch(error => {
+        console.error(error);
         this.message.error('Connection to object server refused.');
       });
   }
@@ -230,7 +234,8 @@ export class ProcessingService {
           }
         });
         this.Subjects.models.next(modelsforBrowser);
-      },    error => {
+      }).catch(error => {
+        console.error(error);
         this.message.error('Connection to object server refused.');
       });
   }
@@ -239,10 +244,12 @@ export class ProcessingService {
     this.loaded.emit(false);
     this.quality = 'low';
     this.loadModel(this.defaultModel, '')
-      .then(result => {
+      .then(() => {
         this.loaded.emit(true);
         this.metadataService.addDefaultMetadata();
-      },    error => {
+      })
+      .catch(error => {
+        console.error(error);
         this.message.error('Loading of default model not possible');
       });
   }
@@ -268,7 +275,9 @@ export class ProcessingService {
           this.updateActiveCollection(compilation);
           const model = compilation.models[0];
           if (isModel(model)) this.fetchModelData(model._id);
-        },    error => {
+        })
+        .catch(error => {
+          console.error(error);
           this.message.error('Connection to object server to load collection refused.');
         });
     }
@@ -281,10 +290,13 @@ export class ProcessingService {
           .then(result => {
             this.loaded.emit(true);
             console.log('Load:', result);
-          },    error => {
+          })
+          .catch(error => {
+            console.error(error);
             this.message.error('Loading of this Model is not possible');
           });
-      },    error => {
+      }).catch(error => {
+        console.error(error);
         this.message.error('Connection to object server to load model refused.');
       });
   }
@@ -398,9 +410,10 @@ export class ProcessingService {
       if (model && model.processed[this.quality] !== undefined) {
         this.loaded.emit(false);
         this.loadModel(model._id === 'Cube' ? this.defaultModel : model, model._id === 'Cube' ? '' : undefined)
-          .then(result => {
+          .then(() => {
             this.loaded.emit(true);
-          },    error => {
+          }).catch(error => {
+            console.error(error);
             this.message.error('Loading not possible');
           });
       } else {
@@ -413,12 +426,14 @@ export class ProcessingService {
 
   public async selectCollectionByID(identifierCollection: string): Promise<string> {
     // Check if collection has been initially loaded and is available in collections
-    const collection = this.Observables.collections.source['value']
-      .find(i => i._id === identifierCollection);
-    // If collection has not been loaded during initial load
-    if (collection === undefined) {
-      // try to find it on the server
-      return new Promise((resolve, reject) => {
+    const collection: ICompilation | null =
+      this.Observables.collections.source['value']
+        .find(i => i._id === identifierCollection);
+
+    return new Promise((resolve, reject) => {
+      if (!collection) {
+        // If collection has not been loaded during initial load
+        // try to find it on the server
         this.mongoHandlerService.getCompilation(identifierCollection)
           .then(compilation => {
             console.log('die compi ist', compilation);
@@ -434,19 +449,22 @@ export class ProcessingService {
               // collection ist nicht erreichbar
               resolve('missing');
             }
-          },    error => {
+          })
+          .catch(error => {
+            console.error(error);
             this.message.error('Connection to object server refused.');
             reject('missing');
           });
-      });
-      // collection is available in collections and will be loaded
-    } else {
-      this.fetchAndLoad(undefined, collection._id, undefined);
-      return 'loaded';
-    }
+      } else {
+        // collection is available in collections and will be loaded
+        this.fetchAndLoad(undefined, collection._id, undefined);
+        return 'loaded';
+      }
+    });
   }
 
   public selectModelByID(identifierModel: string): boolean {
+    // TODO: check if this correctly returns
     const model = this.Observables.models.source['value'].find(i => i._id === identifierModel);
     if (model === undefined) {
       this.mongoHandlerService.getModel(identifierModel)
@@ -455,10 +473,11 @@ export class ProcessingService {
             this.Subjects.models.next([actualModel]);
             this.fetchAndLoad(actualModel._id, undefined, false);
             return true;
-          } else {
-            return false;
           }
-        },    error => {
+          return false;
+        })
+        .catch(error => {
+          console.error(error);
           this.message.error('Connection to object server refused.');
           return false;
         });
