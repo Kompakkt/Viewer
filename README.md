@@ -1,5 +1,7 @@
 # Kompakkt
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/DH-Cologne/Kompakkt.svg)](https://greenkeeper.io/)
+
 ![Kompakkt](src/assets/img/kompakkt-logo.png)
 
 Web Based 3D Viewer and 3D Annotation System
