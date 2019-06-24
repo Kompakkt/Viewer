@@ -54,7 +54,11 @@ export class SocketService {
       const currentModel = this.processingService.getCurrentModel();
 
       // We always need a model loaded
-      if (!currentModel) return;
+      if (!currentModel) {
+        throw new Error('Center missing');
+        console.error(this);
+        return;
+      }
 
       this.socketRoom = (currentCompilation)
         ? `${currentCompilation._id}_${currentModel._id}` : `${currentModel._id}`;
@@ -96,7 +100,11 @@ export class SocketService {
         // nach unbekannter Annotation
         const newAnnotation = newList
           .find(annotation => !this.knownAnnotations.includes(annotation));
-        if (!newAnnotation) return;
+        if (!newAnnotation) {
+          throw new Error('NewAnnotation missing');
+          console.error(this);
+          return;
+        }
         this.knownAnnotations.push(newAnnotation);
         if (this.inSocket && newAnnotation.creator._id === this.getOwnSocketData().user._id) {
           socket.emit('createAnnotation', {
@@ -111,7 +119,11 @@ export class SocketService {
           .findIndex(annotation => !newList.includes(annotation));
         const removedAnnotation = this.knownAnnotations
           .find(annotation => !newList.includes(annotation));
-        if (!removedAnnotation) return;
+        if (!removedAnnotation) {
+          throw new Error('RemovedAnnotation missing');
+          console.error(this);
+          return;
+        }
         this.knownAnnotations.splice(indexOfRemovedAnnotation, 1);
         if (this.inSocket && removedAnnotation.creator._id === this.getOwnSocketData().user._id) {
           socket.emit('deleteAnnotation', {
@@ -124,7 +136,11 @@ export class SocketService {
         // nach unbekannter Annotation und ersetze diese in Bekannten
         const changedAnnotation = newList
           .find(annotation => !this.knownAnnotations.includes(annotation));
-        if (!changedAnnotation || !changedAnnotation._id) return;
+        if (!changedAnnotation || !changedAnnotation._id) {
+          throw new Error('ChangedAnnotation incorrect');
+          console.error(this);
+          return;
+        }
         const indexOfChanged = this.knownAnnotations
           .findIndex(annotation => annotation._id === changedAnnotation._id);
         this.knownAnnotations.splice(indexOfChanged, 1, changedAnnotation);
@@ -295,7 +311,11 @@ export class SocketService {
       .findIndex(user => user.socketId === this.socket.ioSocket.id);
 
     const self = this.collaborators.splice(selfIndex, 1)[0];
-    if (!self) return;
+    if (!self) {
+      throw new Error('Sortuser Self missing');
+      console.error(this);
+      return;
+    }
 
     if (priorityUser) {
       const pUserIndex = this.collaborators.findIndex(x => x.socketId === priorityUser.socketId);

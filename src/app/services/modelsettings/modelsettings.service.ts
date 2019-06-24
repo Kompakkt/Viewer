@@ -1,10 +1,10 @@
-import {Injectable} from '@angular/core';
-import {Animation, Axis, Color3, DynamicTexture, Mesh, MeshBuilder, Quaternion, StandardMaterial, Tags, Vector3} from 'babylonjs';
-import {ColorEvent} from 'ngx-color';
+import { Injectable } from '@angular/core';
+import { Animation, Axis, Color3, DynamicTexture, Mesh, MeshBuilder, Quaternion, StandardMaterial, Tags, Vector3 } from 'babylonjs';
+import { ColorEvent } from 'ngx-color';
 
-import {BabylonService} from '../babylon/babylon.service';
-import {CameraService} from '../camera/camera.service';
-import {ProcessingService} from '../processing/processing.service';
+import { BabylonService } from '../babylon/babylon.service';
+import { CameraService } from '../camera/camera.service';
+import { ProcessingService } from '../processing/processing.service';
 
 @Injectable({
   providedIn: 'root',
@@ -45,8 +45,8 @@ export class ModelsettingsService {
   private rotQuat = new Quaternion();
 
   constructor(private babylonService: BabylonService,
-              private cameraService: CameraService,
-              private processingService: ProcessingService) {
+    private cameraService: CameraService,
+    private processingService: ProcessingService) {
 
     this.processingService.Observables.actualModelMeshes.subscribe(actualModelMeshes => {
       this.actualModelMeshes = actualModelMeshes;
@@ -104,7 +104,11 @@ export class ModelsettingsService {
 
   private loadScalingFactor(factor: number) {
     this.scalingFactor = factor;
-    if (!this.center) return;
+    if (!this.center) {
+      throw new Error('Center missing');
+      console.error(this);
+      return;
+    }
     this.center.scaling = new Vector3(factor, factor, factor);
   }
 
@@ -141,7 +145,12 @@ export class ModelsettingsService {
   }
 
   private async unparentModel() {
-    if (!this.center) return;
+    if (!this.center) {
+      throw new Error('Center missing');
+      console.error(this);
+      return;
+    }
+
     for (let _i = 0; _i < this.actualModelMeshes.length; _i++) {
 
       const mesh = this.actualModelMeshes[_i];
@@ -268,9 +277,9 @@ export class ModelsettingsService {
 
     const end = Quaternion.RotationYawPitchRoll(0, 0, 0);
     const anim = new Animation('anim', 'rotationQuaternion',
-                               120, Animation.ANIMATIONTYPE_QUATERNION, Animation.ANIMATIONLOOPMODE_RELATIVE);
-    const frame = [{frame: 0, value: start},
-                   {frame: 100, value: end}];
+      120, Animation.ANIMATIONTYPE_QUATERNION, Animation.ANIMATIONLOOPMODE_RELATIVE);
+    const frame = [{ frame: 0, value: start },
+    { frame: 100, value: end }];
     anim.setKeys(frame);
     this.center.animations = [];
     this.center.animations.push(anim);
@@ -364,7 +373,7 @@ export class ModelsettingsService {
   }
 
   private async createCenter() {
-    this.center = MeshBuilder.CreateBox('center', {size: 1}, this.babylonService.getScene());
+    this.center = MeshBuilder.CreateBox('center', { size: 1 }, this.babylonService.getScene());
     Tags.AddTagsTo(this.center, 'center');
     this.center.isVisible = false;
     for (let _i = 0; _i < this.actualModelMeshes.length; _i++) {
@@ -381,7 +390,7 @@ export class ModelsettingsService {
 
     this.boundingBox = MeshBuilder.CreateBox('boundingBox', {
       width: this.initialSize.x, height: this.initialSize.y, depth: this.initialSize.z,
-    },                                       this.babylonService.getScene());
+    }, this.babylonService.getScene());
     Tags.AddTagsTo(this.boundingBox, 'boundingBox');
     if (!this.boundingBox || !this.center) {
       throw new Error('Center or BoundingBox missing');
@@ -401,7 +410,11 @@ export class ModelsettingsService {
 
   public handleChangeBoundingBoxModel() {
     this.showBoundingBoxModel = (this.showBoundingBoxModel) ? false : true;
-    if (!this.boundingBox) return;
+    if (!this.boundingBox) {
+      throw new Error('BoundingBox missing');
+      console.error(this);
+      return;
+    }
     this.boundingBox.visibility = this.showBoundingBoxModel ? 1 : 0;
   }
 
@@ -420,8 +433,8 @@ export class ModelsettingsService {
 
   private createGround(size: number) {
     this.scalingFactorGround = 1;
-    this.ground = MeshBuilder.CreateGround('ground', {height: size, width: size, subdivisions: 1},
-                                           this.babylonService.getScene());
+    this.ground = MeshBuilder.CreateGround('ground', { height: size, width: size, subdivisions: 1 },
+      this.babylonService.getScene());
     Tags.AddTagsTo(this.ground, 'ground');
     this.showGround = true;
   }
@@ -476,7 +489,7 @@ export class ModelsettingsService {
     const vecThreeX = new Vector3(sizeWorldAxis, 0, 0);
     const vecFourX = new Vector3(sizeWorldAxis * 0.95, -0.05 * sizeWorldAxis, 0);
     const axisX = Mesh.CreateLines('axisX', [Vector3.Zero(), vecOneX, vecTwoX, vecThreeX, vecFourX],
-                                   this.babylonService.getScene());
+      this.babylonService.getScene());
     Tags.AddTagsTo(axisX, 'worldAxis');
     axisX.color = new Color3(1, 0, 0);
     const xChar = this.createTextPlane('X', 'red', sizeWorldAxis / 10, 'worldAxis', 'worldAxisX');
@@ -487,7 +500,7 @@ export class ModelsettingsService {
     const vecThreeY = new Vector3(0, sizeWorldAxis, 0);
     const vecFourY = new Vector3(0.05 * sizeWorldAxis, sizeWorldAxis * 0.95, 0);
     const axisY = Mesh.CreateLines('axisY', [Vector3.Zero(), vecOneY, vecTwoY, vecThreeY, vecFourY],
-                                   this.babylonService.getScene());
+      this.babylonService.getScene());
     Tags.AddTagsTo(axisY, 'worldAxis');
     axisY.color = new Color3(0, 1, 0);
     const yChar = this.createTextPlane('Y', 'green', sizeWorldAxis / 10, 'worldAxis', 'worldAxisY');
@@ -498,7 +511,7 @@ export class ModelsettingsService {
     const vecThreeZ = new Vector3(0, 0, sizeWorldAxis);
     const vecFourZ = new Vector3(0, 0.05 * sizeWorldAxis, sizeWorldAxis * 0.95);
     const axisZ = Mesh.CreateLines('axisZ', [Vector3.Zero(), vecOneZ, vecTwoZ, vecThreeZ, vecFourZ],
-                                   this.babylonService.getScene());
+      this.babylonService.getScene());
     Tags.AddTagsTo(axisZ, 'worldAxis');
     axisZ.color = new Color3(0, 0, 1);
     const zChar = this.createTextPlane('Z', 'blue', sizeWorldAxis / 10, 'worldAxis', 'worldAxisZ');
@@ -562,7 +575,7 @@ export class ModelsettingsService {
     const vecThreeX = new Vector3(sizeLocalAxis, 0, 0);
     const vecFourX = new Vector3(sizeLocalAxis * 0.95, -0.05 * sizeLocalAxis, 0);
     const local_axisX = Mesh.CreateLines('local_axisX', [Vector3.Zero(), vecOneX, vecTwoX, vecThreeX, vecFourX],
-                                         this.babylonService.getScene());
+      this.babylonService.getScene());
     Tags.AddTagsTo(local_axisX, 'localAxis');
     local_axisX.color = new Color3(1, 0, 0);
     const xChar = this.createTextPlane('X', 'red', sizeLocalAxis / 10, 'localAxis', 'localAxisX');
@@ -573,7 +586,7 @@ export class ModelsettingsService {
     const vecThreeY = new Vector3(0, sizeLocalAxis, 0);
     const vecFourY = new Vector3(0.05 * sizeLocalAxis, sizeLocalAxis * 0.95, 0);
     const local_axisY = Mesh.CreateLines('local_axisY', [Vector3.Zero(), vecOneY, vecTwoY, vecThreeY, vecFourY],
-                                         this.babylonService.getScene());
+      this.babylonService.getScene());
     Tags.AddTagsTo(local_axisY, 'localAxis');
     local_axisY.color = new Color3(0, 1, 0);
     const yChar = this.createTextPlane('Y', 'green', sizeLocalAxis / 10, 'localAxis', 'localAxisY');
@@ -584,7 +597,7 @@ export class ModelsettingsService {
     const vecThreeZ = new Vector3(0, 0, sizeLocalAxis);
     const vecFourZ = new Vector3(0, 0.05 * sizeLocalAxis, sizeLocalAxis * 0.95);
     const local_axisZ = Mesh.CreateLines('local_axisZ', [Vector3.Zero(), vecOneZ, vecTwoZ, vecThreeZ, vecFourZ],
-                                         this.babylonService.getScene());
+      this.babylonService.getScene());
     Tags.AddTagsTo(local_axisZ, 'localAxis');
     local_axisZ.color = new Color3(0, 0, 1);
     const zChar = this.createTextPlane('Z', 'blue', sizeLocalAxis / 10, 'localAxis', 'localAxisZ');
@@ -753,9 +766,9 @@ export class ModelsettingsService {
     end = rotationQuaternionZ.multiply(end);
 
     const anim = new Animation('anim', 'rotationQuaternion',
-                               120, Animation.ANIMATIONTYPE_QUATERNION, Animation.ANIMATIONLOOPMODE_RELATIVE);
-    const frame = [{frame: 0, value: start},
-                   {frame: 100, value: end}];
+      120, Animation.ANIMATIONTYPE_QUATERNION, Animation.ANIMATIONLOOPMODE_RELATIVE);
+    const frame = [{ frame: 0, value: start },
+    { frame: 100, value: end }];
     anim.setKeys(frame);
     this.center.animations = [];
     this.center.animations.push(anim);

@@ -64,7 +64,11 @@ this.yRot = this.universalCamera.rotation.y;
 
   /*
   public setCamArcRotate(): void {
-    if (!this.scene.activeCamera) return;
+    if (!this.scene.activeCamera) {
+      throw new Error('ActiveCamera missing');
+      console.error(this);
+      return;
+    }
     if (this.scene.activeCamera.getClassName() !== 'ArcRotateCamera') {
 
       this.setCameraActive(this.arcRotateCamera);
@@ -73,7 +77,11 @@ this.yRot = this.universalCamera.rotation.y;
   }
 
   public setCamUniversal(): void {
-    if (!this.scene.activeCamera) return;
+    if (!this.scene.activeCamera) {
+      throw new Error('ActiveCamera missing');
+      console.error(this);
+      return;
+    }
     if (this.scene.activeCamera.getClassName() !== 'UniversalCamera') {
 
       this.setCameraActive(this.universalCamera);
@@ -156,7 +164,11 @@ this.yRot = this.universalCamera.rotation.y;
      camera.setTarget(Vector3.Zero());
    }
    private setCameraActive(newActiveCamera: any): void {
-     if (!this.scene.activeCamera) { return; }
+     if (!this.scene.activeCamera) {
+      throw new Error('ActiveCamera missing');
+      console.error(this);
+      return;
+      }
      this.scene.activeCamera.detachControl(this.canvas);
      this.scene.activeCamera = newActiveCamera;
      newActiveCamera.attachControl(this.canvas, false);
@@ -317,7 +329,11 @@ this.yRot = this.universalCamera.rotation.y;
   }
 
   public moveVRCameraToTarget(positionVector: Vector3) {
-    if (!this.scene.activeCamera) return;
+    if (!this.scene.activeCamera) {
+      throw new Error('ActiveCamera missing');
+      console.error(this);
+      return;
+    }
 
     this.scene.activeCamera.animations.push(
       ...this.createAnimationsForCamera(

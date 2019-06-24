@@ -180,7 +180,11 @@ export class AnnotationService {
   }
 
   public async loadAnnotations() {
-    if (!this.actualModel) return;
+    if (!this.actualModel) {
+      throw new Error('ActualModel missing');
+      console.error(this);
+      return;
+    }
     Tags.AddTagsTo(this.actualModelMeshes, this.actualModel._id);
     // this.annotations = [];
     this.selectedAnnotation.next('');
@@ -599,7 +603,11 @@ export class AnnotationService {
     dialogConfig.disableClose = true;
     dialogConfig.autoFocus = true;
 
-    if (!this.actualModel) return;
+    if (!this.actualModel) {
+      throw new Error('ActualModel missing');
+      console.error(this);
+      return;
+    }
 
     dialogConfig.data = {
       modelId: this.actualModel._id,
@@ -633,7 +641,11 @@ export class AnnotationService {
 
     const generatedId = this.mongo.generateObjectId();
 
-    if (!this.actualModel) return;
+    if (!this.actualModel) {
+      throw new Error('ActualModel missing');
+      console.error(this);
+      return;
+    }
 
     return {
       validated: false,

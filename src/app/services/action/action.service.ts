@@ -12,7 +12,11 @@ export class ActionService {
   }
 
   public createActionManager(mesh: IMesh | null, trigger: number, actionExecuted: (result: any) => void) {
-    if (!mesh) return;
+    if (!mesh) {
+      throw new Error('Mesh missing');
+      console.error(this);
+      return;
+    }
 
     const scene = this.babylonService.getScene();
     mesh.actionManager = new ActionManager(scene);

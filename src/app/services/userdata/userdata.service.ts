@@ -59,7 +59,11 @@ export class UserdataService {
     });
 
     this.processingService.Observables.actualCollection.subscribe(actualCollection => {
-      if (!actualCollection) return;
+      if (!actualCollection) {
+        throw new Error('ActualCollection undefined');
+        console.error(this);
+        return;
+      }
       if (actualCollection._id && actualCollection.relatedOwner) {
         this.isCollectionOwner =
           (isLDAPUser(this.currentUserData) && this.currentUserData.data.compilation)
@@ -94,7 +98,10 @@ export class UserdataService {
           } else {
             this.currentUserData = userData;
             this.message.info(`Logged in as ${this.currentUserData.fullname}`);
-            if (!userData.data) return;
+            if (!userData.data) {
+              console.warn('User has no data property', userData, this);
+              return;
+            }
             if (userData.data.model) {
               (userData.data.model.filter(model => model) as IModel[])
                 .forEach(model => {

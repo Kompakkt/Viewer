@@ -406,13 +406,18 @@ export class ProcessingService {
       this.quality = quality;
       const model = this.getCurrentModel();
 
-      if (!model || !model.processed) return;
+      if (!model || !model.processed) {
+        throw new Error('Model or Model.processed');
+        console.error(this);
+        return;
+      }
       if (model && model.processed[this.quality] !== undefined) {
         this.loaded.emit(false);
         this.loadModel(model._id === 'Cube' ? this.defaultModel : model, model._id === 'Cube' ? '' : undefined)
           .then(() => {
             this.loaded.emit(true);
-          }).catch(error => {
+          })
+          .catch(error => {
             console.error(error);
             this.message.error('Loading not possible');
           });

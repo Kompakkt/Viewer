@@ -1,17 +1,17 @@
-import {Component, Input, OnInit, ViewChild} from '@angular/core';
-import {MatDialog} from '@angular/material';
-import {Matrix, Vector3} from 'babylonjs';
-import {PerfectScrollbarConfigInterface} from 'ngx-perfect-scrollbar';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { MatDialog } from '@angular/material';
+import { Matrix, Vector3 } from 'babylonjs';
+import { PerfectScrollbarConfigInterface } from 'ngx-perfect-scrollbar';
 
-import {IAnnotation} from '../../../interfaces/interfaces';
-import {AnnotationService} from '../../../services/annotation/annotation.service';
-import {AnnotationmarkerService} from '../../../services/annotationmarker/annotationmarker.service';
-import {BabylonService} from '../../../services/babylon/babylon.service';
-import {CameraService} from '../../../services/camera/camera.service';
-import {ProcessingService} from '../../../services/processing/processing.service';
-import {SocketService} from '../../../services/socket/socket.service';
-import {UserdataService} from '../../../services/userdata/userdata.service';
-import {DialogAnnotationEditorComponent} from '../../dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
+import { IAnnotation } from '../../../interfaces/interfaces';
+import { AnnotationService } from '../../../services/annotation/annotation.service';
+import { AnnotationmarkerService } from '../../../services/annotationmarker/annotationmarker.service';
+import { BabylonService } from '../../../services/babylon/babylon.service';
+import { CameraService } from '../../../services/camera/camera.service';
+import { ProcessingService } from '../../../services/processing/processing.service';
+import { SocketService } from '../../../services/socket/socket.service';
+import { UserdataService } from '../../../services/userdata/userdata.service';
+import { DialogAnnotationEditorComponent } from '../../dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
 
 @Component({
   selector: 'app-annotation',
@@ -45,14 +45,15 @@ export class AnnotationComponent implements OnInit {
   public isCollectionOwner = false;
   public isInSocket = false;
 
-  constructor(public annotationService: AnnotationService,
-              public babylonService: BabylonService,
-              public annotationmarkerService: AnnotationmarkerService,
-              public socketService: SocketService,
-              public dialog: MatDialog,
-              private userdataService: UserdataService,
-              public cameraService: CameraService,
-              private processingService: ProcessingService) {
+  constructor(
+    public annotationService: AnnotationService,
+    public babylonService: BabylonService,
+    public annotationmarkerService: AnnotationmarkerService,
+    public socketService: SocketService,
+    public dialog: MatDialog,
+    private userdataService: UserdataService,
+    public cameraService: CameraService,
+    private processingService: ProcessingService) {
   }
 
   ngOnInit() {
@@ -68,7 +69,11 @@ export class AnnotationComponent implements OnInit {
     this.isCollectionOwner = this.userdataService.isCollectionOwner;
 
     this.processingService.loggedIn.subscribe(_ => {
-      if (!this.annotation) return;
+      if (!this.annotation) {
+        console.error('AnnotationComponent without annotation', this);
+        throw new Error('AnnotationComponent without annotation');
+        return;
+      }
       this.isAnnotationOwner = this.userdataService.isAnnotationOwner(this.annotation);
     });
 
@@ -77,7 +82,11 @@ export class AnnotationComponent implements OnInit {
     });
 
     this.annotationService.isSelectedAnnotation.subscribe(selectedAnno => {
-      if (!this.annotation) return;
+      if (!this.annotation) {
+        console.error('AnnotationComponent without annotation', this);
+        throw new Error('AnnotationComponent without annotation');
+        return;
+      }
       selectedAnno === this.annotation._id ? this.visibility = true : this.visibility = false;
       this.selectedAnnotation = selectedAnno;
     });
@@ -91,7 +100,11 @@ export class AnnotationComponent implements OnInit {
     });
 
     this.annotationService.isEditModeAnnotation.subscribe(selectedEditAnno => {
-      if (!this.annotation) return;
+      if (!this.annotation) {
+        console.error('AnnotationComponent without annotation', this);
+        throw new Error('AnnotationComponent without annotation');
+        return;
+      }
       const isEditAnno = selectedEditAnno === this.annotation._id;
       if (!isEditAnno && this.isEditMode) {
         this.isEditMode = false;
@@ -108,7 +121,11 @@ export class AnnotationComponent implements OnInit {
     });
 
     setInterval(() => {
-      if (!this.annotation) return;
+      if (!this.annotation) {
+        console.error('AnnotationComponent without annotation', this);
+        throw new Error('AnnotationComponent without annotation');
+        return;
+      }
       this.setPosition(this.annotation);
     }, 15);
   }
@@ -118,18 +135,30 @@ export class AnnotationComponent implements OnInit {
   }
 
   public toggleEditViewMode(): void {
-    if (!this.annotation) return;
+    if (!this.annotation) {
+      console.error('AnnotationComponent without annotation', this);
+      throw new Error('AnnotationComponent without annotation');
+      return;
+    }
     this.isEditMode ? this.annotationService.setEditModeAnnotation('') :
       this.annotationService.setEditModeAnnotation(this.annotation._id);
   }
 
   public shareAnnotation() {
-    if (!this.annotation) return;
+    if (!this.annotation) {
+      console.error('AnnotationComponent without annotation', this);
+      throw new Error('AnnotationComponent without annotation');
+      return;
+    }
     this.annotationService.shareAnnotation(this.annotation);
   }
 
   public deleteAnnotation(): void {
-    if (!this.annotation) return;
+    if (!this.annotation) {
+      console.error('AnnotationComponent without annotation', this);
+      throw new Error('AnnotationComponent without annotation');
+      return;
+    }
     this.annotationService.deleteAnnotation(this.annotation);
   }
 
@@ -160,7 +189,11 @@ export class AnnotationComponent implements OnInit {
 
   // --- JAN ----
   public editFullscreen(): void {
-    if (!this.annotation) return;
+    if (!this.annotation) {
+      console.error('AnnotationComponent without annotation', this);
+      throw new Error('AnnotationComponent without annotation');
+      return;
+    }
     const dialogRef = this.dialog.open(DialogAnnotationEditorComponent, {
       width: '75%',
       data: {
@@ -180,7 +213,11 @@ export class AnnotationComponent implements OnInit {
   }
 
   public addMedium(medium) {
-    if (!this.annotation) return;
+    if (!this.annotation) {
+      console.error('AnnotationComponent without annotation', this);
+      throw new Error('AnnotationComponent without annotation');
+      return;
+    }
     const mdImage = `![alt ${medium.description}](${medium.url})`;
 
     this.annotationContent.nativeElement.focus();

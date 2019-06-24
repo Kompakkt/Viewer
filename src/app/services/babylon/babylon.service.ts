@@ -331,8 +331,10 @@ export class BabylonService {
     return new Promise<any>((resolve, reject) => {
       SceneLoader
         .ImportMeshAsync(null, rootUrl, filename, this.scene, progress => {
-          if (!progress.lengthComputable) return;
-          engine.loadingUIText = `${(progress.loaded * 100 / progress.total).toFixed()}%`;
+          if (progress.lengthComputable) {
+            engine.loadingUIText =
+              `${(progress.loaded * 100 / progress.total).toFixed()}%`;
+          }
         })
         .then(result => {
           engine.hideLoadingUI();
@@ -583,7 +585,6 @@ export class BabylonService {
   }
 
   public setLightPosition(dimension: string, pos: number) {
-    if (!this.pointlight) return;
     switch (dimension) {
       case 'x': this.pointlightPosX = pos; break;
       case 'y': this.pointlightPosY = pos; break;
