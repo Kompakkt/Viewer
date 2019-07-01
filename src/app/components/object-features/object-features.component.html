@@ -13,21 +13,27 @@
         <mat-icon class="tab-icon">place</mat-icon>
       </ng-template>
       <mat-card *ngIf="isMeshSettingsMode">Please set and save the settings before you add annotations.</mat-card>
-      <app-annotations-editor *ngIf="!isMeshSettingsMode"></app-annotations-editor>
+      <perfect-scrollbar>
+        <app-annotations-editor *ngIf="!isMeshSettingsMode"></app-annotations-editor>
+      </perfect-scrollbar>
     </mat-tab>
 
     <mat-tab>
       <ng-template mat-tab-label>
         <mat-icon class="tab-icon">settings</mat-icon>
       </ng-template>
+      <perfect-scrollbar>
         <app-object-feature-settings></app-object-feature-settings>
+      </perfect-scrollbar>
     </mat-tab>
 
     <mat-tab>
       <ng-template mat-tab-label>
         <mat-icon class="tab-icon">description</mat-icon>
       </ng-template>
+      <perfect-scrollbar>
         <app-object-feature-metadata></app-object-feature-metadata>
+      </perfect-scrollbar>
     </mat-tab>
 
   </mat-tab-group>
