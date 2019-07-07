@@ -11,7 +11,6 @@ import {
   MatSnackBarModule
 } from '@angular/material';
 import {FormsModule} from '@angular/forms';
-import {ModelComponent} from '../model/model.component';
 import {HttpClientModule} from '@angular/common/http';
 import {MediaTypePipe} from '../../pipes/media-type.pipe';
 
@@ -23,7 +22,6 @@ describe('CollectionsOverviewComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         ContentComponent,
-        ModelComponent,
         MediaTypePipe,
       ],
       imports: [

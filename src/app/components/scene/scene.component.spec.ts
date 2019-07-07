@@ -11,13 +11,11 @@ import {
   MatTooltipModule
 } from '@angular/material';
 import {AnnotationwalkthroughComponent} from '../object-feature-annotations/annotationwalkthrough/annotationwalkthrough.component';
-import {AnnotationcardsComponent} from '../object-feature-annotations/annotationcards/annotationcards.component';
 import {AnnotationComponent} from '../object-feature-annotations/annotation/annotation.component';
 import {FormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 import {SocketIoModule} from 'ngx-socket-io';
 import {environment} from '../../../environments/environment';
-import {MediaComponent} from '../media/media.component';
 import {MediaBrowserComponent} from '../media-browser/media-browser.component';
 import {MarkdownComponent} from 'ngx-markdown';
 
@@ -31,10 +29,8 @@ describe('SceneComponent', () => {
         SceneComponent,
         AnnotationComponent,
         AnnotationwalkthroughComponent,
-        AnnotationcardsComponent,
         MatDialogContent,
         MatDialogActions,
-        MediaComponent,
         MediaBrowserComponent,
         MarkdownComponent,
       ],

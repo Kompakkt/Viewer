@@ -2,7 +2,7 @@ import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {ObjectFeatureMetadataComponent} from './object-feature-metadata.component';
 import {HttpClientModule} from '@angular/common/http';
-import {MatCardModule, MatIconModule, MatSnackBarModule, MatStepperModule} from '@angular/material';
+import {MatCardModule, MatIconModule, MatSnackBarModule} from '@angular/material';
 import {SocketIoModule} from 'ngx-socket-io';
 import {environment} from '../../../environments/environment';
 

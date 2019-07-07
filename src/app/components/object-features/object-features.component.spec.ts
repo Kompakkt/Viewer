@@ -15,8 +15,6 @@ import {
   MatTooltipModule
 } from '@angular/material';
 import {AnnotationsEditorComponent} from '../object-feature-annotations/annotations-editor/annotations-editor.component';
-import {ObjectFeatureSettingsComponent} from '../object-feature-settings/object-settings.component';
-import {ObjectMetadataComponent} from '../object-feature-metadata/metadata.component';
 import {FormsModule} from '@angular/forms';
 import {ColorChromeModule} from 'ngx-color/chrome';
 import {HttpClientModule} from '@angular/common/http';
@@ -35,8 +33,6 @@ describe('EditorComponent', () => {
       declarations: [
         ObjectFeaturesComponent,
         AnnotationsEditorComponent,
-        ObjectFeatureSettingsComponent,
-        ObjectMetadataComponent,
         MediaBrowserComponent,
         MarkdownComponent,
       ],
