@@ -48,7 +48,6 @@
     "hammerjs": "^2.0.8",
     "marked": "^0.7.0",
     "ngx-color": "^3.0.3",
-    "ngx-device-detector": "^1.3.9",
     "ngx-markdown": "^8.1.0",
     "ngx-perfect-scrollbar": "^8.0.0",
     "ngx-socket-io": "^2.1.1",
