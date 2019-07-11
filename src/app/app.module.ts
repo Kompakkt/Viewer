@@ -13,7 +13,6 @@ import {
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ColorChromeModule } from 'ngx-color/chrome';
-import { DeviceDetectorModule } from 'ngx-device-detector';
 import {MarkdownModule} from 'ngx-markdown';
 import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
 import { SocketIoModule } from 'ngx-socket-io';
@@ -97,7 +96,6 @@ import { RenderCanvasComponent } from './components/render-canvas/render-canvas.
     MatDividerModule,
     HttpClientModule,
     DragDropModule,
-    DeviceDetectorModule.forRoot(),
     ColorChromeModule,
     MatSliderModule,
     MatRadioModule,
