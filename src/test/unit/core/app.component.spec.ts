@@ -56,6 +56,7 @@ describe('AppComponent', () => {
           ObjectFeatureSettingsComponent,
           ObjectFeatureMetadataComponent,
           ContentBrowserComponent,
+          RenderCanvasComponent,
           MediaTypePipe,
         ],
         imports: [
