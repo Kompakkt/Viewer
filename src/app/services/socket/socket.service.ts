@@ -63,7 +63,7 @@ export class SocketService {
       this.socketRoom = (currentCompilation)
         ? `${currentCompilation._id}_${currentModel._id}` : `${currentModel._id}`;
 
-      if (this.inSocket) {
+      if (this.isInSocket) {
         this.changeSocketRoom();
       }
     });
@@ -132,6 +132,8 @@ export class SocketService {
           this.redrawMarker();
         }
       } else {
+        // Ignoriere DefaultAnnotation
+        if (newList.length === 1 && newList[0]._id === 'DefaultAnnotation') return;
         // Annotation geändert, also suche in neuen Annotationen
         // nach unbekannter Annotation und ersetze diese in Bekannten
         const changedAnnotation = newList
