@@ -59,12 +59,7 @@ export class UserdataService {
     });
 
     this.processingService.Observables.actualCollection.subscribe(actualCollection => {
-      if (!actualCollection) {
-        throw new Error('ActualCollection undefined');
-        console.error(this);
-        return;
-      }
-      if (actualCollection._id && actualCollection.relatedOwner) {
+      if (actualCollection && actualCollection._id && actualCollection.relatedOwner) {
         this.isCollectionOwner =
           (isLDAPUser(this.currentUserData) && this.currentUserData.data.compilation)
             ? (this.currentUserData.data.compilation
