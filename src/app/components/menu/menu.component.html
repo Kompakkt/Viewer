@@ -67,7 +67,7 @@
   </button>
 
   <!-- Fullscreen Buttons -->
-  <button mat-icon-button (click)="fullscreen ? quitFullscreen() : enterFullscreen()"
+  <button *ngIf="fullscreenCapable" mat-icon-button (click)="toggleFullscreen()"
           matTooltip="{{fullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}}" matTooltipPosition="above">
     <mat-icon aria-label="Exit fullscreen mode">{{fullscreen ? 'fullscreen_exit' : 'fullscreen'}}</mat-icon>
   </button>

@@ -1,5 +1,4 @@
-import {DOCUMENT} from '@angular/common';
-import {Component, Inject, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {MatDialog, MatDialogConfig, MatIconRegistry} from '@angular/material';
 import {DomSanitizer} from '@angular/platform-browser';
 
@@ -25,8 +24,7 @@ export class MenuComponent implements OnInit {
   public medium = '';
   public low = '';
 
-  // internal
-  public fullscreen = false;
+  public fullscreenCapable = document.fullscreenEnabled;
 
   constructor(
     public iconRegistry: MatIconRegistry,
@@ -36,8 +34,7 @@ export class MenuComponent implements OnInit {
     public processingService: ProcessingService,
     public babylonService: BabylonService,
     private mongohandlerService: MongohandlerService,
-    public dialog: MatDialog,
-    @Inject(DOCUMENT) private document: any) {
+    public dialog: MatDialog) {
 
     iconRegistry.addSvgIcon(
       'cardboard',
@@ -63,35 +60,32 @@ export class MenuComponent implements OnInit {
   }
 
   ngOnInit() {
+    document.addEventListener('fullscreenchange', _ => {
+      if (!document.fullscreen && this.babylonService.getEngine().isFullscreen) {
+        this.babylonService.getEngine()
+          .switchFullscreen(false);
+      }
+    });
   }
 
-  // TODO fullscreen = falls if exit fullscreen by hitting esc Button
-  enterFullscreen(): void {
-
+  toggleFullscreen() {
     // BabylonJS' this.engine.switchFullscreen(false); creates a fullscreen without our menu.
     // To display the menu, we have to switch to fullscreen on our own.
-    const element = this.document.documentElement;
-
-    if (element.requestFullscreen) {
-      element.requestFullscreen();
-    } else if (element.mozRequestFullScreen) {
-      element.mozRequestFullScreen();
-    } else if (element.webkitRequestFullscreen) {
-      element.webkitRequestFullscreen();
-    } else if (element.msRequestFullscreen) {
-      element.msRequestFullscreen();
+    const _tf = (): Promise<void> => {
+      const _docEl = document.documentElement as any;
+      return (_docEl.mozRequestFullScreen) ? _docEl.mozRequestFullScreen()
+        : (_docEl.webkitRequestFullscreen) ? _docEl.webkitRequestFullscreen()
+        : _docEl.requestFullscreen();
+    };
+    const isFullscreen = document.fullscreen;
+    if (isFullscreen) {
+      this.babylonService.getEngine()
+        .switchFullscreen(false);
     } else {
-      this.fullscreen = false;
-      return;
+      _tf()
+        .then(() => {})
+        .catch(e => console.error(e));
     }
-
-    this.fullscreen = true;
-  }
-
-  quitFullscreen() {
-    this.babylonService.getEngine()
-      .switchFullscreen(false);
-    this.fullscreen = false;
   }
 
   loginDialog() {
