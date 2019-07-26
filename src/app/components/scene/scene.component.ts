@@ -44,7 +44,11 @@ export class SceneComponent implements AfterViewInit {
           }
         }
       })
-      .catch(e => console.error(e));
+      .catch(e => {
+        // Server might not be reachable, skip login
+        console.error(e);
+        this.setupCanvas();
+      });
   }
 
   private openLoginDialog() {
@@ -70,6 +74,17 @@ export class SceneComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.loginAttempt();
+    const searchParams = location.search;
+    const queryParams = new URLSearchParams(searchParams);
+    const isDragDrop = queryParams.get('dragdrop');
+
+    if (isDragDrop) {
+      // Assume we are inside an iframe and in the upload process
+      // Set up the canvas
+      // Drag&Drop is set up in ProcessingService
+      this.setupCanvas();
+    } else {
+      this.loginAttempt();
+    }
   }
 }

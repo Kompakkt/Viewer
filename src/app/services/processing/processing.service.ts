@@ -166,10 +166,22 @@ export class ProcessingService {
     const queryParams = new URLSearchParams(searchParams);
     const modelParam = queryParams.get('model');
     const compParam = queryParams.get('compilation');
+    const isDragDrop = queryParams.get('dragdrop');
 
     this.firstLoad.emit(false);
     this.isFirstLoad = false;
     this.isShowCatalogue = false;
+
+    if (isDragDrop) {
+      console.log('Drag Drop mode');
+      this.babylonService.setupDragAndDrop();
+
+      document.ondragover = event => {
+        event.preventDefault();
+        // TODO: document.ondragover for cool effects
+      };
+      return;
+    }
 
     if (!modelParam && !compParam) {
       this.loadDefaultModelData();
@@ -234,7 +246,8 @@ export class ProcessingService {
           }
         });
         this.Subjects.models.next(modelsforBrowser);
-      }).catch(error => {
+      })
+      .catch(error => {
         console.error(error);
         this.message.error('Connection to object server refused.');
       });
@@ -295,7 +308,8 @@ export class ProcessingService {
             console.error(error);
             this.message.error('Loading of this Model is not possible');
           });
-      }).catch(error => {
+      })
+      .catch(error => {
         console.error(error);
         this.message.error('Connection to object server to load model refused.');
       });

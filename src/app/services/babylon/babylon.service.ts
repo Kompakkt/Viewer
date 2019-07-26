@@ -1,11 +1,12 @@
 /* tslint:disable:max-line-length */
 import { DOCUMENT } from '@angular/common';
 import { ComponentRef, EventEmitter, Inject, Injectable, Injector, Output, ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
-import { AbstractMesh, ActionManager, Analyser, ArcRotateCamera, Axis, Camera, Color3, Color4, Engine, ExecuteCodeAction, HemisphericLight, Layer, Mesh, MeshBuilder, PointLight, Quaternion, Scene, SceneLoader, SceneSerializer, Sound, Space, StandardMaterial, Tags, Texture, Tools, TransformNode, Vector3, VideoTexture, VRExperienceHelper } from 'babylonjs';
+import { AbstractMesh, ActionManager, Analyser, ArcRotateCamera, Axis, Camera, Color3, Color4, Engine, ExecuteCodeAction, HemisphericLight, Layer, Mesh, MeshBuilder, PointLight, Quaternion, Scene, SceneLoader, SceneSerializer, Sound, Space, StandardMaterial, Tags, Texture, Tools, TransformNode, Vector3, VideoTexture, VRExperienceHelper, FilesInput } from 'babylonjs';
 import { AdvancedDynamicTexture, Control, Slider, StackPanel, TextBlock } from 'babylonjs-gui';
 import 'babylonjs-loaders';
 import { ReplaySubject } from 'rxjs';
 import { RenderCanvasComponent } from '../../components/render-canvas/render-canvas.component';
+import { environment } from '../../../environments/environment';
 /* tslint:enable:max-line-length */
 
 import { LoadingscreenhandlerService } from '../loadingscreenhandler/loadingscreenhandler.service';
@@ -237,8 +238,92 @@ export class BabylonService {
     return this.canvas;
   }
 
-  public createArcRotateCam(alpha: number, beta: number, radius: number): ArcRotateCamera {
-    return new ArcRotateCamera('arcRotateCamera', alpha, beta, radius, Vector3.Zero(), this.scene);
+  public setupDragAndDrop() {
+    // Determine mediaType by extension
+    const modelExts = ['.babylon', '.obj', '.stl', '.glft'];
+    const imageExts = ['.jpg', '.jpeg', '.png'];
+    const videoExts = ['.webm', '.mp4', '.avi'];
+    const audioExts = ['.ogg', '.mp3'];
+    const fileExts: string[] = [];
+
+    // Send this to parent window
+    const fileList: File[] = [];
+
+    const filesInput = new FilesInput(
+      this.engine, this.scene,
+      (_, scene) => {
+        // sceneLoadedCallback
+        // happens after all files have been loaded
+        const camera = this.createArcRotateCam(0, 10, 100, scene);
+        camera.attachControl(this.getCanvas(), false);
+        scene.addCamera(camera);
+        console.log('Drag&Drop Scene loaded');
+        // TODO: Initialize Settings
+        let mediaType = '';
+        const _countMedia = {
+          model: 0, image: 0,
+          video: 0, audio: 0,
+        };
+
+        // Count file occurences
+        for (const ext of fileExts) {
+          switch (true) {
+            case modelExts.includes(ext): _countMedia.model++; break;
+            case imageExts.includes(ext): _countMedia.image++; break;
+            case videoExts.includes(ext): _countMedia.video++; break;
+            case audioExts.includes(ext): _countMedia.audio++; break;
+            default:
+          }
+        }
+
+        // Since this is checking in order (model first)
+        // we are able to determine models, even if e.g. textures are
+        // also found
+        switch (true) {
+          case _countMedia.model > 0: mediaType = 'model'; break;
+          case _countMedia.image > 0: mediaType = 'image'; break;
+          case _countMedia.video > 0: mediaType = 'video'; break;
+          case _countMedia.audio > 0: mediaType = 'audio'; break;
+          default:
+        }
+
+        // TODO: convert image, video or audio to blob
+        // Load blob as source
+
+        console.log(fileList, mediaType);
+        window.top.postMessage({ files: fileList, mediaType, type: 'fileList' }, environment.repository);
+      },
+      progress => {
+        const asPercent = (progress.loaded / progress.total) * 100;
+        const progressString = `${asPercent.toFixed(0)}%`;
+        this.engine.loadingUIText = progressString;
+      },
+      () => {},
+      _ => {},
+      _ => {
+        fileExts.splice(0, fileExts.length);
+        fileList.splice(0, fileList.length);
+        window.top.postMessage({ type: 'resetQueue' }, environment.repository);
+      },
+      _ => {},
+      (sceneFile, scene, error) => console.error(sceneFile, scene, error));
+
+    filesInput.onProcessFileCallback = (file, _, __) => {
+      // TODO: Check filetypes for support
+      const _fileName = Tools.GetFilename(file.name);
+      const _ext = _fileName.substr(_fileName.indexOf('.'));
+      fileExts.push(_ext.toLowerCase());
+      fileList.push(file);
+
+      return true;
+    };
+    filesInput.monitorElementForDragNDrop(this.getCanvas());
+
+    this.loadingScreenHandler.updateLoadingText('Drag & Drop a model anywhere to preview it');
+  }
+
+  public createArcRotateCam(alpha: number, beta: number, radius: number, scene?: Scene): ArcRotateCamera {
+    return new ArcRotateCamera('arcRotateCamera', alpha, beta, radius, Vector3.Zero(), (scene) ? scene : this.scene);
   }
 
   public createVRHelper() {
@@ -391,7 +476,7 @@ export class BabylonService {
               const plane = this.createAudioScene();
               resolve(plane);
             },
-            null);
+            undefined);
           console.log('Success!', posts);
         })
         .catch(error => {
