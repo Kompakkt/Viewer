@@ -98,11 +98,11 @@ export class ProcessingService {
               private metadataService: MetadataService) {
   }
 
-  public getCurrentModel(): IModel | null {
+  public getCurrentModel(): IModel | undefined {
     return this.Observables.actualModel.source['_events'].slice(-1)[0];
   }
 
-  public getCurrentCompilation(): ICompilation | null {
+  public getCurrentCompilation(): ICompilation | undefined {
     return this.Observables.actualCollection.source['_events'].slice(-1)[0];
   }
 
@@ -156,6 +156,10 @@ export class ProcessingService {
     };
 
     document.ondrop = async event => {
+      if (!event.dataTransfer) {
+        console.warn('No dataTransfer on event', event);
+        return;
+      }
       console.log('Drop event', event, event.dataTransfer.files);
       event.preventDefault();
       mediaType = '';

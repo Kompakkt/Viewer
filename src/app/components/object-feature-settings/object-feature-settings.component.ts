@@ -81,6 +81,10 @@ export class ObjectFeatureSettingsComponent implements OnInit {
     this.processingService.loaded.subscribe(isLoaded => {
       if (isLoaded) {
         this.activeModel = this.processingService.getCurrentModel();
+        if (!this.activeModel) {
+          console.warn('No this.activeModel', this);
+          return;
+        }
         this.isFinished = this.activeModel.finished;
         this.setSettings();
         // camera should not move through mesh
@@ -191,6 +195,10 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   }
 
   public resetHelpers() {
+    if (!this.activeModel || !this.activeModel.settings) {
+      console.warn('No this.activeModel', this);
+      return;
+    }
     this.modelSettingsService.resetVisualSettingsHelper();
     this.babylonService.setBackgroundColor(this.activeModel.settings.background.color);
     this.setEffect = this.activeModel.settings.background.effect;
@@ -301,6 +309,10 @@ export class ObjectFeatureSettingsComponent implements OnInit {
    */
 
   private async setSettings() {
+    if (!this.activeModel || !this.activeModel.settings) {
+      console.warn('No this.activeModel', this);
+      return;
+    }
     // Settings available?
     if (this.activeModel.settings === undefined ||
       this.activeModel.settings.preview === undefined ||
@@ -362,7 +374,9 @@ export class ObjectFeatureSettingsComponent implements OnInit {
       }
       upload = true;
     }
-    this.activeModel['settings'] = settings;
+    if (this.activeModel) {
+      this.activeModel['settings'] = settings;
+    }
     console.log('SETTINGS', settings);
     return upload;
     }
@@ -389,6 +403,10 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   }
 
   private async setCamera() {
+    if (!this.activeModel || !this.activeModel.settings) {
+      console.warn('No this.activeModel', this);
+      return;
+    }
     const camera =
       Array.isArray(this.activeModel.settings.cameraPositionInitial)
         ? (this.activeModel.settings.cameraPositionInitial as any[])
@@ -407,6 +425,10 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   }
 
   private async setLightBackground() {
+    if (!this.activeModel || !this.activeModel.settings) {
+      console.warn('No this.activeModel', this);
+      return;
+    }
     // Background
     this.babylonService.setBackgroundColor(this.activeModel.settings.background.color);
     this.setEffect = this.activeModel.settings.background.effect;
@@ -431,6 +453,10 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   }
 
   private async setPreview() {
+    if (!this.activeModel || !this.activeModel.settings) {
+      console.warn('No this.activeModel', this);
+      return;
+    }
     if (this.activeModel.settings.preview !== undefined &&
       this.activeModel.settings.preview !== '') {
       this.preview = this.activeModel.settings.preview;
@@ -444,6 +470,10 @@ export class ObjectFeatureSettingsComponent implements OnInit {
     await new Promise<string>((resolve, reject) =>
       this.babylonService.createPreviewScreenshot(400)
         .then(screenshot => {
+          if (!this.activeModel || !this.activeModel.settings) {
+            console.warn('No this.activeModel', this);
+            return;
+          }
           this.preview = screenshot;
           this.activeModel.settings.preview = screenshot;
           resolve(screenshot);
@@ -495,6 +525,11 @@ export class ObjectFeatureSettingsComponent implements OnInit {
     };
     settings.lights.push(this.babylonService.getPointlightData());
 
+    if (!this.activeModel || !this.activeModel.settings) {
+      console.warn('No this.activeModel', this);
+      return;
+    }
+
     this.activeModel.settings = settings;
 
     if (!this.isDefault && !this.isFallbackModelLoaded) {
@@ -502,6 +537,10 @@ export class ObjectFeatureSettingsComponent implements OnInit {
         .updateSettings(this.activeModel._id, settings)
         .then(result => {
           console.log(result);
+          if (!this.activeModel || !this.activeModel.settings) {
+            console.warn('No this.activeModel', this);
+            return;
+          }
 
           if (this.initialSettingsMode) {
 
