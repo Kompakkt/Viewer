@@ -136,6 +136,8 @@ export class UserdataService {
   }
 
   private checkOwnerState(identifier: string) {
+    if (['dragdrop'].includes(identifier)) return true;
+
     if (this.userOwnedModels.find(obj => obj && obj._id === identifier)) {
       this.isModelOwner = true;
       this.modelOwner.emit(true);

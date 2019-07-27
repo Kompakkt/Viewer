@@ -34,7 +34,7 @@ export class ObjectFeatureMetadataComponent implements OnInit {
     this.overlayService.editor.subscribe(async editorIsOpen => {
         this.isOpen = editorIsOpen;
         const currentModel = this.processingService.getCurrentModel();
-        if (this.isOpen && currentModel) {
+        if (this.isOpen && currentModel && currentModel.relatedDigitalObject) {
           if (this.actualMetadata_id !== currentModel.relatedDigitalObject._id) {
             this.actualMetadata_id = currentModel.relatedDigitalObject._id;
             if (this.actualMetadata_id && this.actualMetadata_id !== '') {

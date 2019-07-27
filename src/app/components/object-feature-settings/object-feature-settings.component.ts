@@ -15,6 +15,7 @@ import {ProcessingService} from '../../services/processing/processing.service';
 import {UserdataService} from '../../services/userdata/userdata.service';
 // tslint:disable-next-line:max-line-length
 import {DialogMeshsettingsComponent} from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
+import {IModel} from '../../interfaces/interfaces';
 
 @Component({
   selector: 'app-object-feature-settings',
@@ -26,7 +27,7 @@ export class ObjectFeatureSettingsComponent implements OnInit {
 
   @ViewChild('stepper', { static: false }) stepper;
 
-  public activeModel;
+  public activeModel: IModel | undefined;
   private preview: string | undefined;
   private setEffect = false;
   private isDefault = false;
@@ -367,7 +368,11 @@ export class ObjectFeatureSettingsComponent implements OnInit {
     }
 
   private async initialiseUpload() {
-    if (this.isModelOwner && !this.isFinished) {
+    const searchParams = location.search;
+    const queryParams = new URLSearchParams(searchParams);
+    const isDragDrop = queryParams.get('dragdrop');
+
+    if ((isDragDrop || this.isModelOwner) && !this.isFinished) {
       this.initialSettingsMode = true;
       await this.modelSettingsService.createVisualSettings();
       this.overlayService.activateSettingsTab();
@@ -384,16 +389,17 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   }
 
   private async setCamera() {
-    let camera;
-    this.activeModel.settings.cameraPositionInitial.length > 1 ?
-      camera = this.activeModel.settings.cameraPositionInitial
-        .filter(obj => obj.cameraType === 'arcRotateCam')[0] :
-      camera = this.activeModel.settings.cameraPositionInitial;
+    const camera =
+      Array.isArray(this.activeModel.settings.cameraPositionInitial)
+        ? (this.activeModel.settings.cameraPositionInitial as any[])
+          .find(obj => obj.cameraType === 'arcRotateCam')
+        : this.activeModel.settings.cameraPositionInitial;
 
     const positionVector = new Vector3(camera.position.x, camera.position.y, camera.position.z);
     const targetVector = new Vector3(camera.target.x, camera.target.y, camera.target.z);
-    this.cameraService.setDefaultPosition(positionVector.x, positionVector.y, positionVector.z,
-                                          targetVector.x, targetVector.y, targetVector.z);
+    this.cameraService.setDefaultPosition(
+      positionVector.x, positionVector.y, positionVector.z,
+      targetVector.x, targetVector.y, targetVector.z);
 
     this.cameraService.moveCameraToTarget(positionVector);
     this.cameraService.arcRotateCamera.setTarget(targetVector);

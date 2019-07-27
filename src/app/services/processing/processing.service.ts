@@ -137,6 +137,143 @@ export class ProcessingService {
     this.Subjects.actualModelMeshes.next(meshes);
   }
 
+  public setupDragAndDrop() {
+    const readDir = async dir => {
+      const dirReader = dir.createReader();
+      return new Promise<File[]>((resolve, _) => {
+        const files: File[] = [];
+        dirReader.readEntries((entries: any[]) => {
+          for (let i = 0; i < entries.length; i++) {
+            entries[i].file(file => {
+              files.push(file);
+              if (i === entries.length - 1) {
+                resolve(files);
+              }
+            });
+          }
+        });
+      });
+    };
+
+    document.ondrop = async event => {
+      console.log('Drop event', event, event.dataTransfer.files);
+      event.preventDefault();
+      mediaType = '';
+      fileExts.splice(0, fileExts.length);
+      fileList.splice(0, fileList.length);
+      window.top.postMessage({ type: 'resetQueue' }, environment.repository);
+      for (let i = 0; i < event.dataTransfer.items.length; i++) {
+        const _item = event.dataTransfer.items[i];
+        const _entry = _item.webkitGetAsEntry();
+        console.log(_entry);
+        if (_entry.isDirectory) {
+          const res = await readDir(_entry);
+          console.log(res);
+          fileList.push(...res);
+        } else {
+          await new Promise((resolve, _) => {
+            _entry.file(file => {
+              fileList.push(file);
+              resolve();
+            });
+          });
+        }
+      }
+      for (const _file of fileList) {
+        const _fileName = _file.name;
+        const _ext = _fileName.substr(_fileName.lastIndexOf('.'));
+        fileExts.push(_ext.toLowerCase());
+      }
+      window.top.postMessage({ files: fileList, mediaType, type: 'fileList' }, environment.repository);
+
+      getMediaType();
+    };
+    document.ondragover = event => {
+      event.preventDefault();
+      // TODO: document.ondragover for cool effects
+    };
+
+    // Determine mediaType by extension
+    const modelExts = ['.babylon', '.obj', '.stl', '.glft'];
+    const imageExts = ['.jpg', '.jpeg', '.png'];
+    const videoExts = ['.webm', '.mp4', '.avi'];
+    const audioExts = ['.ogg', '.mp3'];
+    const fileExts: string[] = [];
+    const fileList: File[] = [];
+    let mediaType = '';
+    let ext = '.babylon';
+
+    const fileReader = new FileReader();
+    fileReader.onload = evt => {
+      const base64 = (evt.currentTarget as FileReader).result as string;
+      this.loadModel(
+        {
+          _id: 'dragdrop',
+          name: 'dragdrop',
+          annotationList: [],
+          files: [],
+          finished: false,
+          online: false,
+          mediaType,
+          dataSource: {
+            isExternal: false,
+          },
+          processed: {
+            low: base64, medium: base64,
+            high: base64, raw: base64,
+          },
+        },
+        '', ext)
+        .then(() => this.loaded.emit(true));
+    };
+
+    const getMediaType = () => {
+      const _countMedia = {
+        model: 0, image: 0,
+        video: 0, audio: 0,
+      };
+
+      // Count file occurences
+      for (const _ext of fileExts) {
+        switch (true) {
+          case modelExts.includes(_ext): _countMedia.model++; break;
+          case imageExts.includes(_ext): _countMedia.image++; break;
+          case videoExts.includes(_ext): _countMedia.video++; break;
+          case audioExts.includes(_ext): _countMedia.audio++; break;
+          default:
+        }
+      }
+
+      // Since this is checking in order (model first)
+      // we are able to determine models, even if e.g. textures are
+      // also found
+      switch (true) {
+        case _countMedia.model > 0: mediaType = 'model'; break;
+        case _countMedia.image > 0: mediaType = 'image'; break;
+        case _countMedia.video > 0: mediaType = 'video'; break;
+        case _countMedia.audio > 0: mediaType = 'audio'; break;
+        default:
+      }
+
+      // Read content of single non-model file
+      if (mediaType !== 'model') {
+        if (fileList.length > 1) {
+          return;
+          // Too many files
+        }
+        fileReader.readAsDataURL(fileList[0]);
+      } else {
+        const largest = fileList
+          .filter(file => modelExts.includes(file.name.substr(file.name.lastIndexOf('.'))))
+          .sort((a, b) => b.size - a.size)[0];
+        ext = largest.name.substr(largest.name.lastIndexOf('.'));
+        fileReader.readAsDataURL(largest);
+      }
+    };
+
+    this.babylonService.getEngine().loadingUIText = `Drop a single file (model, image, audio, video) or a folder containing a 3d model here`;
+  }
+
   public bootstrap(): void {
     if (!this.isFirstLoad) {
       this.firstLoad.emit(false);
@@ -173,13 +310,8 @@ export class ProcessingService {
     this.isShowCatalogue = false;
 
     if (isDragDrop) {
-      console.log('Drag Drop mode');
-      this.babylonService.setupDragAndDrop();
-
-      document.ondragover = event => {
-        event.preventDefault();
-        // TODO: document.ondragover for cool effects
-      };
+      // this.babylonService.setupDragAndDrop();
+      this.setupDragAndDrop();
       return;
     }
 
@@ -315,7 +447,7 @@ export class ProcessingService {
       });
   }
 
-  public async loadModel(newModel: IModel, overrideUrl?: string) {
+  public async loadModel(newModel: IModel, overrideUrl?: string, extension = '.babylon') {
     const URL = (overrideUrl !== undefined) ? overrideUrl : this.baseUrl;
     this.isFallbackModelLoaded = false;
     this.fallbackModelLoaded.emit(false);
@@ -327,11 +459,7 @@ export class ProcessingService {
         // cases: model, image, audio, video, text
         switch (newModel.mediaType) {
           case 'model':
-            await this.babylonService.loadModel(URL +
-              newModel.processed[this.quality].substring(0, newModel.processed[this.quality]
-                .lastIndexOf('/')) + '/',
-                                                newModel.processed[this.quality]
-              .replace(/^.*[\\\/]/, ''))
+            await this.babylonService.loadModel(URL + newModel.processed[this.quality], extension)
               .then(async model => {
                 // Warte auf Antwort von loadModel,
                 // da loadModel ein Promise<object> von ImportMeshAync übergibt
@@ -346,7 +474,7 @@ export class ProcessingService {
 
           case 'image':
 
-            await this.babylonService.loadImage(this.baseUrl + newModel.processed[this.quality])
+            await this.babylonService.loadImage(URL + newModel.processed[this.quality])
               .then(async model => {
                 this.Subjects.actualMediaType.next('image');
                 this.updateActiveModel(newModel);
@@ -358,7 +486,7 @@ export class ProcessingService {
             break;
 
           case 'audio':
-            await this.babylonService.loadAudio(this.baseUrl + newModel.processed[this.quality])
+            await this.babylonService.loadAudio(URL + newModel.processed[this.quality])
               .then(async model => {
                 this.Subjects.actualMediaType.next('audio');
                 this.updateActiveModel(newModel);
