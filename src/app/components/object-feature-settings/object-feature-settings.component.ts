@@ -5,8 +5,10 @@ import {ColorEvent} from 'ngx-color';
 
 // tslint:disable-next-line:max-line-length
 import { settings2D, settingsFallback, settingsKompakktLogo, settingsModel } from '../../../assets/settings/settings';
+import {IModel} from '../../interfaces/interfaces';
 import {BabylonService} from '../../services/babylon/babylon.service';
 import {CameraService} from '../../services/camera/camera.service';
+import {LightService} from '../../services/light/light.service';
 import {MessageService} from '../../services/message/message.service';
 import {ModelsettingsService} from '../../services/modelsettings/modelsettings.service';
 import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
@@ -15,7 +17,6 @@ import {ProcessingService} from '../../services/processing/processing.service';
 import {UserdataService} from '../../services/userdata/userdata.service';
 // tslint:disable-next-line:max-line-length
 import {DialogMeshsettingsComponent} from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
-import {IModel} from '../../interfaces/interfaces';
 
 @Component({
   selector: 'app-object-feature-settings',
@@ -65,6 +66,7 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   constructor(private overlayService: OverlayService,
               private cameraService: CameraService,
               private babylonService: BabylonService,
+              private lightService: LightService,
               private mongohandlerService: MongohandlerService,
               private message: MessageService,
               private processingService: ProcessingService,
@@ -224,31 +226,31 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   // Ambientlights
 
   setAmbientlightIntensityUp(event: any) {
-    this.babylonService.setLightIntensity('ambientlightUp', event.value);
+    this.lightService.setLightIntensity('ambientlightUp', event.value);
     this.ambientlightUpintensity = event.value;
   }
 
   setAmbientlightIntensityDown(event: any) {
-    this.babylonService.setLightIntensity('ambientlightDown', event.value);
+    this.lightService.setLightIntensity('ambientlightDown', event.value);
     this.ambientlightDownintensity = event.value;
   }
 
   // Pointlight
 
   setPointlightIntensity(event: any) {
-    this.babylonService.setLightIntensity('pointlight', event.value);
+    this.lightService.setLightIntensity('pointlight', event.value);
   }
 
   pointlightPosX(event: any) {
-    this.babylonService.setLightPosition('x', event.value);
+    this.lightService.setLightPosition('x', event.value);
   }
 
   pointlightPosY(event: any) {
-    this.babylonService.setLightPosition('y', event.value);
+    this.lightService.setLightPosition('y', event.value);
   }
 
   pointlightPosZ(event: any) {
-    this.babylonService.setLightPosition('z', event.value);
+    this.lightService.setLightPosition('z', event.value);
   }
 
   /*
@@ -265,7 +267,7 @@ export class ObjectFeatureSettingsComponent implements OnInit {
                                           this.cameraService.arcRotateCamera.target.y,
                                           this.cameraService.arcRotateCamera.target.z);
     return new Promise<string>((resolve, reject) =>
-      this.babylonService.createPreviewScreenshot(400)
+      this.cameraService.createPreviewScreenshot(400)
         .then(screenshot => {
       this.preview = screenshot;
       resolve(screenshot);
@@ -436,19 +438,19 @@ export class ObjectFeatureSettingsComponent implements OnInit {
 
     // Lights
     const pointLight = this.activeModel.settings.lights.filter(obj => obj.type === 'PointLight')[0];
-    this.babylonService.createPointLight('pointlight', pointLight.position);
-    this.babylonService.setLightIntensity('pointlight', pointLight.intensity);
+    this.lightService.createPointLight('pointlight', pointLight.position);
+    this.lightService.setLightIntensity('pointlight', pointLight.intensity);
 
     const hemisphericLightUp = this.activeModel.settings.lights.filter(
       obj => obj.type === 'HemisphericLight' && obj.position.y === 1)[0];
-    this.babylonService.createAmbientlightUp('ambientlightUp', hemisphericLightUp.position);
-    this.babylonService.setLightIntensity('ambientlightUp', hemisphericLightUp.intensity);
+    this.lightService.createAmbientlightUp('ambientlightUp', hemisphericLightUp.position);
+    this.lightService.setLightIntensity('ambientlightUp', hemisphericLightUp.intensity);
     this.ambientlightUpintensity = hemisphericLightUp.intensity;
 
     const hemisphericLightDown = this.activeModel.settings.lights.filter(
       obj => obj.type === 'HemisphericLight' && obj.position.y === -1)[0];
-    this.babylonService.createAmbientlightDown('ambientlightDown', hemisphericLightDown.position);
-    this.babylonService.setLightIntensity('ambientlightDown', hemisphericLightDown.intensity);
+    this.lightService.createAmbientlightDown('ambientlightDown', hemisphericLightDown.position);
+    this.lightService.setLightIntensity('ambientlightDown', hemisphericLightDown.intensity);
     this.ambientlightDownintensity = hemisphericLightDown.intensity;
   }
 
@@ -468,7 +470,7 @@ export class ObjectFeatureSettingsComponent implements OnInit {
 
   private async createMissingInitialDefaultScreenshot() {
     await new Promise<string>((resolve, reject) =>
-      this.babylonService.createPreviewScreenshot(400)
+      this.cameraService.createPreviewScreenshot(400)
         .then(screenshot => {
           if (!this.activeModel || !this.activeModel.settings) {
             console.warn('No this.activeModel', this);
@@ -523,7 +525,7 @@ export class ObjectFeatureSettingsComponent implements OnInit {
       },
       scale: this.modelSettingsService.scalingFactor,
     };
-    settings.lights.push(this.babylonService.getPointlightData());
+    settings.lights.push(this.lightService.getPointlightData());
 
     if (!this.activeModel || !this.activeModel.settings) {
       console.warn('No this.activeModel', this);

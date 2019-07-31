@@ -1,72 +1,58 @@
 /* tslint:disable:max-line-length */
 import { DOCUMENT } from '@angular/common';
-import { ComponentRef, EventEmitter, Inject, Injectable, Injector, Output, ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
-import { AbstractMesh, ActionManager, Analyser, ArcRotateCamera, Axis, Camera, Color3, Color4, Engine, ExecuteCodeAction, HemisphericLight, Layer, Mesh, MeshBuilder, PointLight, Quaternion, Scene, SceneLoader, SceneSerializer, Sound, Space, StandardMaterial, Tags, Texture, Tools, TransformNode, Vector3, VideoTexture, VRExperienceHelper } from 'babylonjs';
+import { ComponentFactoryResolver, ComponentRef, EventEmitter, Inject, Injectable, Injector, Output, ViewContainerRef } from '@angular/core';
+import { AbstractMesh, ActionManager, Analyser, Axis, Color3, Color4, Engine, ExecuteCodeAction, Layer, Mesh, MeshBuilder, Quaternion, Scene, SceneLoader, SceneSerializer, Sound, Space, StandardMaterial, Tags, Texture, Tools, TransformNode, Vector3, VideoTexture, VRExperienceHelper } from 'babylonjs';
 import { AdvancedDynamicTexture, Control, Slider, StackPanel, TextBlock } from 'babylonjs-gui';
 import 'babylonjs-loaders';
 import { ReplaySubject } from 'rxjs';
-import { RenderCanvasComponent } from '../../components/render-canvas/render-canvas.component';
-/* tslint:enable:max-line-length */
 
+import { RenderCanvasComponent } from '../../components/render-canvas/render-canvas.component';
 import { LoadingscreenhandlerService } from '../loadingscreenhandler/loadingscreenhandler.service';
 import { MessageService } from '../message/message.service';
 
 import { LoadingScreen } from './loadingscreen';
+/* tslint:enable:max-line-length */
 
 @Injectable({
   providedIn: 'root',
 })
 export class BabylonService {
 
+  // VR
   @Output() vrModeIsActive: EventEmitter<boolean> = new EventEmitter();
   public isVRModeActive = false;
-
-  private canvas: HTMLCanvasElement;
-  private engine: Engine;
-  private scene: Scene;
-
-  private analyser: Analyser;
-
   private VRHelper: VRExperienceHelper | undefined;
-
-  private CanvasSubject = new ReplaySubject<HTMLCanvasElement>();
-  public CanvasObservable = this.CanvasSubject.asObservable();
-
-  private backgroundURL = 'assets/textures/backgrounds/darkgrey.jpg';
-
   private actualControl: AbstractMesh | undefined;
   private selectingControl = false;
   private selectedControl = false;
+  // FOR VR-HUD
+  public vrJump = false;
+  // VR END
 
+  private canvas: HTMLCanvasElement;
+  private CanvasSubject = new ReplaySubject<HTMLCanvasElement>();
+  public CanvasObservable = this.CanvasSubject.asObservable();
+  private canvasRef: ComponentRef<RenderCanvasComponent>;
+
+  private engine: Engine;
+  private scene: Scene;
+
+  public mediaType = '';
+  public video: HTMLVideoElement;
+  public audio: Sound;
+  private analyser: Analyser;
+  private slider: Slider;
+  private currentTime = 0;
+
+  private backgroundURL = 'assets/textures/backgrounds/darkgrey.jpg';
   private color: {
     r: number;
     g: number;
     b: number;
     a: number;
   } = { r: 0, g: 0, b: 0, a: 0 };
-
-  private pointlight: PointLight | undefined;
-  private ambientlightUp: HemisphericLight | undefined;
-  private ambientlightDown: HemisphericLight | undefined;
-
-  private pointlightPosX: number | undefined;
-  private pointlightPosY: number | undefined;
-  private pointlightPosZ: number | undefined;
-  public pointlightIntensity: number | undefined;
-
   private background: Layer | undefined;
   private isBackground: boolean | undefined;
-
-  // FOR VR-HUD
-  public vrJump = false;
-
-  public audio: Sound;
-  public mediaType = '';
-  private slider: Slider;
-  private currentTime = 0;
-  public video: HTMLVideoElement;
-
-  private canvasRef: ComponentRef<RenderCanvasComponent>;
 
   constructor(
     private message: MessageService,
@@ -160,7 +146,6 @@ export class BabylonService {
           this.actualControl = undefined;
         }
       }
-
       // Annotation_Marker -- Fixed_Size_On_Zoom
       // const _cam = this.scene.getCameraByName('arcRotateCamera');
       if (_cam && _cam['radius']) {
@@ -168,9 +153,8 @@ export class BabylonService {
         this.scene.getMeshesByTags('plane', mesh => mesh.scalingDeterminant = radius / 35);
         this.scene.getMeshesByTags('label', mesh => mesh.scalingDeterminant = radius / 35);
       }
-
       // FOR VR-HUD
-      const _activeCamera = this.getActiveCamera();
+      const _activeCamera = this.scene.activeCamera;
       if (this.vrJump && _activeCamera) {
         this.vrJump = false;
         let i = 1;
@@ -208,12 +192,20 @@ export class BabylonService {
     });
   }
 
+  public getScene(): Scene {
+    return this.scene;
+  }
+
+  public saveScene(): void {
+    return SceneSerializer.Serialize(this.scene);
+  }
+
   public attachCanvas(viewContainerRef: ViewContainerRef) {
     viewContainerRef.insert(this.canvasRef.hostView);
   }
 
-  public getActiveCamera() {
-    return this.scene.activeCamera;
+  public getCanvas(): HTMLCanvasElement {
+    return this.canvas;
   }
 
   public updateCanvas(newCanvas: HTMLCanvasElement) {
@@ -229,22 +221,37 @@ export class BabylonService {
     return this.engine;
   }
 
-  public getScene(): Scene {
-    return this.scene;
+  public setBackgroundImage(background: boolean): void {
+    if (background && !this.isBackground) {
+      this.background = new Layer('background', this.backgroundURL, this.scene, true);
+      this.background.alphaBlendingMode = Engine.ALPHA_ADD;
+      this.background.isBackground = true;
+      this.isBackground = true;
+    }
+    if (!background && this.background) {
+      this.background.dispose();
+      this.isBackground = false;
+    } else {
+      return;
+    }
   }
 
-  public getCanvas(): HTMLCanvasElement {
-    return this.canvas;
+  public setBackgroundColor(color: any): void {
+    this.color = color;
+    this.scene.clearColor = new Color4(color.r / 255, color.g / 255, color.b / 255, color.a);
   }
 
-  public createArcRotateCam(alpha: number, beta: number, radius: number, scene?: Scene): ArcRotateCamera {
-    return new ArcRotateCamera('arcRotateCamera', alpha, beta, radius, Vector3.Zero(), (scene) ? scene : this.scene);
+  public getColor(): any {
+    return this.color;
+  }
+
+  public hideMesh(tag: string, visibility: boolean) {
+    this.scene.getMeshesByTags(tag, mesh => mesh.isVisible = visibility);
   }
 
   public createVRHelper() {
 
     const vrButton = this.document.getElementById('vrbutton') as HTMLButtonElement;
-
     this.VRHelper = this.scene.createDefaultVRExperience({
       // Camera für VR ohne Cardboard!
       createDeviceOrientationCamera: false,
@@ -304,7 +311,6 @@ export class BabylonService {
   private clearScene() {
     this.scene.meshes.forEach(mesh => mesh.dispose());
     this.scene.meshes = [];
-
     if (this.audio) {
       this.audio.dispose();
     }
@@ -316,9 +322,121 @@ export class BabylonService {
       this.video.pause();
       this.video.remove();
     }
-
   }
 
+  /*
+  public loadEntity(rootUrl: string, mediaType: string, extension = 'babylon'): Promise<any> {
+
+    const message = this.message;
+    const engine = this.engine;
+    const scene = this.scene;
+    this.mediaType = mediaType;
+    const root = Tools.GetFolderPath(rootUrl);
+    const filename = Tools.GetFilename(rootUrl);
+
+    engine.displayLoadingUI();
+    this.clearScene();
+
+    switch (mediaType) {
+      case 'model': {
+        return new Promise<any>((resolve, reject) => {
+          SceneLoader
+            .ImportMeshAsync(
+              null, root, filename, scene, progress => {
+                if (progress.lengthComputable) {
+                  engine.loadingUIText =
+                    `${(progress.loaded * 100 / progress.total).toFixed()}%`;
+                }
+              },
+              extension)
+            .then(result => {
+              engine.hideLoadingUI();
+              resolve(result);
+            })
+            .catch(error => {
+              engine.hideLoadingUI();
+              message.error(error);
+              reject(error);
+            });
+        });
+        break;
+      }
+      case 'image': {
+        return new Promise<any>((resolve, reject) => {
+
+          const img = new Image();
+          img.onload = () => {
+            const width = img.width;
+            const height = img.height;
+
+            const image = new Texture(rootUrl, scene);  // rem about CORS rules for cross-domain
+
+            this.createMediaScreen(width, height, image);
+            const ground = this.scene.getMeshesByTags('mediaGround')[0];
+
+            this.engine.hideLoadingUI();
+            resolve(ground);
+            return;
+          };
+          img.onerror = err => {
+            reject(err);
+            return;
+          };
+          img.src = rootUrl;
+        });
+        break;
+      }
+      case 'video': {
+        const videoTexture = new VideoTexture('video', rootUrl, scene, false);
+
+        return new Promise<any>((resolve, reject) => {
+          videoTexture.onLoadObservable.add(tex => {
+            this.video = videoTexture.video;
+            const width = tex.getSize().width;
+            const height = tex.getSize().height;
+
+            this.createMediaScreen(width, height, videoTexture);
+            const plane = this.createVideoScene();
+
+            new Promise<any>((innerResolve, _) => {
+              // const dummy = new Mesh('dummy', this.scene);
+              this.engine.hideLoadingUI();
+              innerResolve(plane);
+            })
+              .then(resolve)
+              .catch(reject);
+          });
+        });
+        break;
+      }
+      case 'audio': {
+        return new Promise((resolve, reject) => {
+          this.makeRequest(rootUrl)
+            .then(posts => {
+              this.audio = new Sound(
+                'Music', posts,
+                scene, () => {
+                  engine.hideLoadingUI();
+                  const plane = this.createAudioScene();
+                  resolve(plane);
+                },
+                undefined);
+              console.log('Success!', posts);
+            })
+            .catch(error => {
+              message.error(error);
+              engine.hideLoadingUI();
+              reject(error);
+            });
+        });
+        break;
+      }
+      default: {
+        // statements;
+      }
+    }
+  }
+*/
   public loadModel(rootUrl: string, extension = 'babylon'): Promise<any> {
     this.clearScene();
     this.mediaType = 'model';
@@ -351,28 +469,6 @@ export class BabylonService {
           reject(error);
         });
     });
-
-  }
-
-  private str_pad_left(string, pad, length) {
-    return (new Array(length + 1).join(pad) + string).slice(-length);
-  }
-
-  private getCurrentTime(time: number): string {
-    const minutes = Math.floor(time / 60);
-    const seconds = time - minutes * 60;
-
-    return `${this.str_pad_left(minutes, '0', 2)}:${this.str_pad_left(seconds, '0', 2)}`;
-  }
-
-  private secondsToHms(sek) {
-    const d = Number(sek);
-
-    const h = Math.floor(d / 3600);
-    const m = Math.floor(d % 3600 / 60);
-    const s = Math.floor(d % 3600 % 60);
-
-    return `${('0' + h).slice(-2)}:${('0' + m).slice(-2)}:${('0' + s).slice(-2)}`;
   }
 
   public loadAudio(rootUrl: string): Promise<any> {
@@ -475,147 +571,25 @@ export class BabylonService {
     });
   }
 
-  public saveScene(): void {
-    return SceneSerializer.Serialize(this.scene);
+  private str_pad_left(string, pad, length) {
+    return (new Array(length + 1).join(pad) + string).slice(-length);
   }
 
-  public async createScreenshot() {
-    this.hideMesh('plane', false);
-    this.hideMesh('label', false);
-    await new Promise<any>((resolve, _) => this.engine.onEndFrameObservable.add(resolve));
-    const result = await new Promise<string>((resolve, reject) => {
-      const _activeCamera = this.getScene().activeCamera;
-      if (_activeCamera instanceof Camera) {
-        Tools.CreateScreenshot(
-          this.getEngine(), _activeCamera, { precision: 2 }, async screenshot => {
-          await fetch(screenshot)
-            .then(res => res.blob())
-            .then(blob =>
-              Tools.Download(blob, `Kompakkt-${Date.now()}`))
-            .then(() => resolve(screenshot))
-            .catch(e => {
-              console.error(e);
-              reject(e);
-            });
-        });
-      }
-    });
-    this.hideMesh('plane', true);
-    this.hideMesh('label', true);
-    return result;
+  private getCurrentTime(time: number): string {
+    const minutes = Math.floor(time / 60);
+    const seconds = time - minutes * 60;
+
+    return `${this.str_pad_left(minutes, '0', 2)}:${this.str_pad_left(seconds, '0', 2)}`;
   }
 
-  public async createPreviewScreenshot(width?: number): Promise<string> {
-    this.hideMesh('plane', false);
-    this.hideMesh('label', false);
-    await new Promise<any>((resolve, _) => this.engine.onEndFrameObservable.add(resolve));
-    const result = await new Promise<string>((resolve, _) => {
-      const _activeCamera = this.getScene().activeCamera;
-      if (_activeCamera instanceof Camera) {
-        Tools.CreateScreenshot(
-          this.getEngine(), _activeCamera,
-          (width)
-            ? { width, height: Math.round((width / 16) * 9) }
-            : { width: 400, height: 225 },
-          screenshot => {
-            resolve(screenshot);
-          });
-      }
-    });
-    this.hideMesh('plane', true);
-    this.hideMesh('label', true);
-    return result;
-  }
+  private secondsToHms(sek) {
+    const d = Number(sek);
 
-  public hideMesh(tag: string, visibility: boolean) {
-    this.scene.getMeshesByTags(tag, mesh => mesh.isVisible = visibility);
-  }
+    const h = Math.floor(d / 3600);
+    const m = Math.floor(d % 3600 / 60);
+    const s = Math.floor(d % 3600 % 60);
 
-  public setBackgroundImage(background: boolean): void {
-    if (background && !this.isBackground) {
-      this.background = new Layer('background', this.backgroundURL, this.scene, true);
-      this.background.alphaBlendingMode = Engine.ALPHA_ADD;
-      this.background.isBackground = true;
-      this.isBackground = true;
-    }
-    if (!background && this.background) {
-      this.background.dispose();
-      this.isBackground = false;
-    } else {
-      return;
-    }
-  }
-
-  public setBackgroundColor(color: any): void {
-    this.color = color;
-    this.scene.clearColor = new Color4(color.r / 255, color.g / 255, color.b / 255, color.a);
-  }
-
-  public setLightIntensity(light: string, intensity: number) {
-    if (light === 'pointlight' && this.pointlight) {
-      this.pointlight.intensity = intensity;
-      this.pointlightIntensity = intensity;
-    }
-    if (light === 'ambientlightUp' && this.ambientlightUp) {
-      this.ambientlightUp.intensity = intensity;
-    }
-    if (light === 'ambientlightDown' && this.ambientlightDown) {
-      this.ambientlightDown.intensity = intensity;
-    }
-  }
-
-  public createPointLight(name: string, position: any) {
-    if (this.pointlight) this.pointlight.dispose();
-    this.pointlight = new PointLight(
-      name, new Vector3(position.x, position.y, position.z), this.scene);
-    this.pointlightPosX = position.x;
-    this.pointlightPosY = position.y;
-    this.pointlightPosZ = position.z;
-
-    this.pointlight.intensity = (this.pointlightIntensity) ? this.pointlightIntensity : 1.0;
-
-    // return this.pointlight;
-  }
-
-  public createAmbientlightDown(name: string, position: any) {
-    if (this.ambientlightDown) this.ambientlightDown.dispose();
-    this.ambientlightDown = new HemisphericLight(
-      name, new Vector3(position.x, position.y, position.z), this.scene);
-  }
-
-  public createAmbientlightUp(name: string, position: any) {
-    if (this.ambientlightUp) this.ambientlightUp.dispose();
-    this.ambientlightUp = new HemisphericLight(
-      name, new Vector3(position.x, position.y, position.z), this.scene);
-  }
-
-  public setLightPosition(dimension: string, pos: number) {
-    switch (dimension) {
-      case 'x': this.pointlightPosX = pos; break;
-      case 'y': this.pointlightPosY = pos; break;
-      case 'z': this.pointlightPosZ = pos; break;
-      default:
-    }
-
-    this.createPointLight(
-      'pointlight',
-      { x: this.pointlightPosX, y: this.pointlightPosY, z: this.pointlightPosZ });
-  }
-
-  public getColor(): any {
-    return this.color;
-  }
-
-  public getPointlightData(): any {
-    return {
-      type: 'PointLight',
-      position: {
-        x: this.pointlightPosX,
-        y: this.pointlightPosY,
-        z: this.pointlightPosZ,
-      },
-      intensity: this.pointlightIntensity ? this.pointlightIntensity : 1,
-    };
+    return `${('0' + h).slice(-2)}:${('0' + m).slice(-2)}:${('0' + s).slice(-2)}`;
   }
 
   private createAudioScene(): AbstractMesh {

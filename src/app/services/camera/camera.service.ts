@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Animation, ArcRotateCamera, Camera, Scene, Vector3} from 'babylonjs';
+import {Animation, ArcRotateCamera, Camera, Scene, Tools, Vector3} from 'babylonjs';
 
 import {BabylonService} from '../babylon/babylon.service';
 
@@ -11,8 +11,7 @@ export class CameraService {
   private canvas: HTMLCanvasElement;
   private scene: Scene;
 
-  public arcRotateCamera = this.babylonService.createArcRotateCam(0, 10, 100);
-  // private universalCamera: UniversalCamera;
+  public arcRotateCamera: ArcRotateCamera;
 
   // Parameters (initial Position): alpha, beta, radius,
   public alpha: number | undefined;
@@ -22,9 +21,6 @@ export class CameraService {
   public x: number | undefined;
   public y: number | undefined;
   public z: number | undefined;
-  /*
-    private xRot: number;
-    private yRot: number;*/
 
   constructor(private babylonService: BabylonService) {
     this.scene = this.babylonService.getScene();
@@ -32,7 +28,7 @@ export class CameraService {
     this.canvas = this.babylonService.getCanvas();
 
     // Parameters (initial Position): alpha, beta, radius, target position, scene
-    // this.arcRotateCamera = this.babylonService.createArcRotateCam(0, 10, 100);
+    this.arcRotateCamera = this.createArcRotateCam(0, 10, 100);
     this.arcRotateCamera.allowUpsideDown = false;
     this.arcRotateCamera.panningSensibility = 25;
     this.arcRotateCamera.keysUp.push(87);
@@ -43,16 +39,6 @@ export class CameraService {
     this.arcRotateCamera.attachControl(this.canvas, false);
     this.arcRotateCamera.checkCollisions = true;
     this.arcRotateCamera.collisionRadius = new Vector3(4, 4, 4);
-
-    /*
-this.universalCamera = new UniversalCamera('universalCamera',
-new Vector3(this.x, this.y, this.z), this.scene);
-
-this.universalSettings();
-
-this.xRot = this.universalCamera.rotation.x;
-this.yRot = this.universalCamera.rotation.y;
-*/
   }
 
   // VR BUTTON
@@ -62,32 +48,11 @@ this.yRot = this.universalCamera.rotation.y;
     if (vrHelper) vrHelper.enterVR();
   }
 
-  /*
-  public setCamArcRotate(): void {
-    if (!this.scene.activeCamera) {
-      throw new Error('ActiveCamera missing');
-      console.error(this);
-      return;
-    }
-    if (this.scene.activeCamera.getClassName() !== 'ArcRotateCamera') {
-
-      this.setCameraActive(this.arcRotateCamera);
-      this.arcRotateSettings();
-    }
+  public createArcRotateCam(alpha: number, beta: number,
+                            radius: number, scene?: Scene): ArcRotateCamera {
+    return new ArcRotateCamera('arcRotateCamera',
+                               alpha, beta, radius, Vector3.Zero(), (scene) ? scene : this.scene);
   }
-
-  public setCamUniversal(): void {
-    if (!this.scene.activeCamera) {
-      throw new Error('ActiveCamera missing');
-      console.error(this);
-      return;
-    }
-    if (this.scene.activeCamera.getClassName() !== 'UniversalCamera') {
-
-      this.setCameraActive(this.universalCamera);
-      this.universalSettings();
-    }
-  }*/
 
   public backToDefault(): void {
     const positionVector = new Vector3(this.alpha, this.beta, this.radius);
@@ -97,7 +62,8 @@ this.yRot = this.universalCamera.rotation.y;
 
   }
 
-  public setDefaultPosition(alpha: number, beta: number, radius: number, x: number, y: number, z: number) {
+  public setDefaultPosition(alpha: number, beta: number,
+                            radius: number, x: number, y: number, z: number) {
     this.alpha = alpha;
     this.beta = beta;
     this.radius = radius;
@@ -128,6 +94,7 @@ this.yRot = this.universalCamera.rotation.y;
 
     // const ground: AbstractMesh = this.scene.getMeshesByTags('mediaGround')[0];
     // this.arcRotateCamera.zoomOn(ground);
+    // tslint:disable-next-line:max-line-length
     // this.arcRotateCamera.radius = this.arcRotateCamera.radius + 0.2 * this.arcRotateCamera.radius;
   }
 
@@ -141,7 +108,7 @@ this.yRot = this.universalCamera.rotation.y;
 
     // Parameters (initial Position): alpha, beta, radius, target position, scene
     // this.arcRotateCamera = this.babylonService.createArcRotateCam(0, 10, 100);
-    this.arcRotateCamera = this.babylonService.createArcRotateCam(0, 10, 100);
+    this.arcRotateCamera = this.createArcRotateCam(0, 10, 100);
     this.arcRotateCamera.allowUpsideDown = false;
     this.arcRotateCamera.panningSensibility = 25;
     this.arcRotateCamera.keysUp.push(87);
@@ -154,144 +121,6 @@ this.yRot = this.universalCamera.rotation.y;
     this.arcRotateCamera.collisionRadius = new Vector3(4, 4, 4);
 
   }
-  /*
-   private setCameraDefaults(camera: any): void {
-
-     camera.keysUp.push(87);
-     camera.keysDown.push(83);
-     camera.keysLeft.push(65);
-     camera.keysRight.push(68);
-     camera.setTarget(Vector3.Zero());
-   }
-   private setCameraActive(newActiveCamera: any): void {
-     if (!this.scene.activeCamera) {
-      throw new Error('ActiveCamera missing');
-      console.error(this);
-      return;
-      }
-     this.scene.activeCamera.detachControl(this.canvas);
-     this.scene.activeCamera = newActiveCamera;
-     newActiveCamera.attachControl(this.canvas, false);
-   }
-
-   private arcRotateSettings(): void {
-
-     this.arcRotateCamera.panningSensibility = 25;
-     this.arcRotateCamera.upperRadiusLimit = 500;
-     this.setCameraDefaults(this.arcRotateCamera);
-     this.canvas.focus();
-   }
-
-   private universalSettings(): void {
-
-     this.universalCamera.position.x = this.x;
-     this.universalCamera.position.y = this.y;
-     this.universalCamera.position.z = this.z;
-     this.universalCamera.ellipsoid = new Vector3(10, 10, 10);
-     this.universalCamera.checkCollisions = true;
-     this.setCameraDefaults(this.universalCamera);
-     this.canvas.focus();
-   }
-
-  private setCamArcRotateDefault() {
-
-    this.scene.activeCamera = this.arcRotateCamera;
-    this.arcRotateCamera.attachControl(this.canvas, false);
-
-    const name = 'animCam',
-      frames = 30;
-
-    const animCamAlpha = new Animation(name, 'alpha', frames,
-      Animation.ANIMATIONTYPE_FLOAT,
-      Animation.ANIMATIONLOOPMODE_CYCLE);
-
-    animCamAlpha.setKeys([
-      {
-        frame: 0,
-        value: this.arcRotateCamera.alpha
-      }, {
-        frame: 30,
-        value: this.alpha
-      }
-    ]);
-    this.arcRotateCamera.animations.push(animCamAlpha);
-
-    const animCamBeta = new Animation(name, 'beta', frames,
-      Animation.ANIMATIONTYPE_FLOAT,
-      Animation.ANIMATIONLOOPMODE_CYCLE);
-
-    animCamBeta.setKeys([
-      {
-        frame: 0,
-        value: this.arcRotateCamera.beta
-      }, {
-        frame: 30,
-        value: this.beta
-      }]);
-    this.arcRotateCamera.animations.push(animCamBeta);
-
-    const animCamRadius = new Animation(name, 'radius', frames,
-      Animation.ANIMATIONTYPE_FLOAT,
-      Animation.ANIMATIONLOOPMODE_CYCLE);
-
-    animCamRadius.setKeys([
-      {
-        frame: 0,
-        value: this.arcRotateCamera.radius
-      }, {
-        frame: 30,
-        value: this.radius
-      }]);
-    this.arcRotateCamera.animations.push(animCamRadius);
-
-    this.arcRotateCamera.setTarget(Vector3.Zero());
-
-    this.scene.beginAnimation(this.arcRotateCamera, 0, 30, false, 1, function () {
-    });
-  }
-
-  private setCamUniversalDefault() {
-    const setBackAnm = new Animation('animCam', 'position', 30,
-      Animation.ANIMATIONTYPE_VECTOR3,
-      Animation.ANIMATIONLOOPMODE_CONSTANT);
-
-    const setBackRotXAnm = new Animation('animCam', 'rotation.x', 30,
-      Animation.ANIMATIONTYPE_FLOAT,
-      Animation.ANIMATIONLOOPMODE_CYCLE);
-
-    const setBackRotYAnm = new Animation('animCam', 'rotation.y', 30,
-      Animation.ANIMATIONTYPE_FLOAT,
-      Animation.ANIMATIONLOOPMODE_CYCLE);
-
-    setBackAnm.setKeys([{
-      frame: 0,
-      value: new Vector3(this.universalCamera.position.x, this.universalCamera.position.y, this.universalCamera.position.z)
-    }, {
-      frame: 30,
-      value: new Vector3(this.x, this.y, this.z)
-    }]);
-    setBackRotXAnm.setKeys([{
-      frame: 15,
-      value: this.universalCamera.rotation.x
-    }, {
-      frame: 30,
-      value: this.xRot
-    }]);
-    setBackRotYAnm.setKeys([{
-      frame: 15,
-      value: this.universalCamera.rotation.y
-    }, {
-      frame: 30,
-      value: this.yRot
-    }]);
-
-    this.universalCamera.animations.push(setBackAnm);
-    this.universalCamera.animations.push(setBackRotXAnm);
-    this.universalCamera.animations.push(setBackRotYAnm);
-
-    this.scene.beginAnimation(this.universalCamera, 0, 30, false, 1, function () {
-    });
-  }*/
 
   private createAnimationsForCamera(
     camera: Camera | ArcRotateCamera, positionVector: Vector3,
@@ -383,6 +212,58 @@ this.yRot = this.universalCamera.rotation.y;
         z: this.arcRotateCamera.target.z,
       },
     };
+  }
+
+  public async createScreenshot() {
+    this.babylonService.hideMesh('plane', false);
+    this.babylonService.hideMesh('label', false);
+    await new Promise<any>((resolve, _) => this.babylonService.getEngine()
+      .onEndFrameObservable
+      .add(resolve));
+    const result = await new Promise<string>((resolve, reject) => {
+      const _activeCamera = this.babylonService.getScene().activeCamera;
+      if (_activeCamera instanceof Camera) {
+        Tools.CreateScreenshot(
+          this.babylonService.getEngine(), _activeCamera, { precision: 2 }, async screenshot => {
+            await fetch(screenshot)
+              .then(res => res.blob())
+              .then(blob =>
+                Tools.Download(blob, `Kompakkt-${Date.now()}`))
+              .then(() => resolve(screenshot))
+              .catch(e => {
+                console.error(e);
+                reject(e);
+              });
+          });
+      }
+    });
+    this.babylonService.hideMesh('plane', true);
+    this.babylonService.hideMesh('label', true);
+    return result;
+  }
+
+  public async createPreviewScreenshot(width?: number): Promise<string> {
+    this.babylonService.hideMesh('plane', false);
+    this.babylonService.hideMesh('label', false);
+    await new Promise<any>((resolve, _) => this.babylonService.getEngine()
+      .onEndFrameObservable
+      .add(resolve));
+    const result = await new Promise<string>((resolve, _) => {
+      const _activeCamera = this.babylonService.getScene().activeCamera;
+      if (_activeCamera instanceof Camera) {
+        Tools.CreateScreenshot(
+          this.babylonService.getEngine(), _activeCamera,
+          (width)
+            ? { width, height: Math.round((width / 16) * 9) }
+            : { width: 400, height: 225 },
+          screenshot => {
+            resolve(screenshot);
+          });
+      }
+    });
+    this.babylonService.hideMesh('plane', true);
+    this.babylonService.hideMesh('label', true);
+    return result;
   }
 
 }

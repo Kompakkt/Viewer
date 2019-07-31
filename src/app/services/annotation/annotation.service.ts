@@ -6,12 +6,13 @@ import {Socket} from 'ngx-socket-io';
 import {BehaviorSubject} from 'rxjs/internal/BehaviorSubject';
 
 import {environment} from '../../../environments/environment';
+// tslint:disable-next-line:max-line-length
 import {DialogGetUserDataComponent} from '../../components/dialogs/dialog-get-user-data/dialog-get-user-data.component';
+// tslint:disable-next-line:max-line-length
 import {DialogShareAnnotationComponent} from '../../components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
 import {IAnnotation, ICompilation, IModel} from '../../interfaces/interfaces';
 import {ActionService} from '../action/action.service';
 import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
-import {BabylonService} from '../babylon/babylon.service';
 import {CameraService} from '../camera/camera.service';
 import {DataService} from '../data/data.service';
 import {MessageService} from '../message/message.service';
@@ -72,8 +73,7 @@ export class AnnotationService {
   private currentAnnotationSubject = new BehaviorSubject([] as IAnnotation[]);
   public currentAnnotations = this.currentAnnotationSubject.asObservable();
 
-  constructor(private babylonService: BabylonService,
-              private dataService: DataService,
+  constructor(private dataService: DataService,
               private actionService: ActionService,
               private annotationmarkerService: AnnotationmarkerService,
               private mongo: MongohandlerService,
@@ -363,7 +363,7 @@ export class AnnotationService {
   public async createNewAnnotation(result: any) {
     const camera = this.cameraService.getActualCameraPosAnnotation();
 
-    this.babylonService.createPreviewScreenshot(400)
+    this.cameraService.createPreviewScreenshot(400)
       .then(detailScreenshot => {
         if (!this.actualModel) {
           throw new Error(`this.actualModel not defined: ${this.actualModel}`);
