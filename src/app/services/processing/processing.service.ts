@@ -6,7 +6,7 @@ import {ReplaySubject} from 'rxjs/internal/ReplaySubject';
 import {environment} from '../../../environments/environment';
 import {ICompilation, IModel} from '../../interfaces/interfaces';
 import {BabylonService} from '../babylon/babylon.service';
-import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreenhandler.service';
+import {LoadingscreenhandlerService} from '../babylon/loadingscreenhandler.service';
 import {MessageService} from '../message/message.service';
 import {MetadataService} from '../metadata/metadata.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
@@ -461,72 +461,58 @@ export class ProcessingService {
 
       if (!newModel.dataSource.isExternal) {
         // cases: model, image, audio, video, text
+        const _url = URL + newModel.processed[this.quality];
+        const mediaType = newModel.mediaType;
         switch (newModel.mediaType) {
           case 'model':
-            await this.babylonService.loadModel(URL + newModel.processed[this.quality], extension)
-              .then(async model => {
-                // Warte auf Antwort von loadModel,
-                // da loadModel ein Promise<object> von ImportMeshAync übergibt
-                // model ist hier das neu geladene Model
-
+            await this.babylonService.loadEntity(_url, mediaType, extension)
+              .then(() => {
                 this.updateActiveModel(newModel);
-                this.updateActiveModelMeshes(model.meshes);
+                this.updateActiveModelMeshes(this.babylonService.modelContainer.meshes as Mesh[]);
                 this.Subjects.actualMediaType.next('model');
-
               });
             break;
-
           case 'image':
-
-            await this.babylonService.loadImage(URL + newModel.processed[this.quality])
-              .then(async model => {
-                this.Subjects.actualMediaType.next('image');
-                this.updateActiveModel(newModel);
-                const mesh: Mesh[] = [];
-                mesh.push(model);
-                this.updateActiveModelMeshes(mesh);
+            await this.babylonService.loadEntity(_url, mediaType)
+              .then(() => {
+                const plane = this.babylonService.imageContainer.plane;
+                if (plane) {
+                  this.Subjects.actualMediaType.next('image');
+                  this.updateActiveModel(newModel);
+                  this.updateActiveModelMeshes([plane as Mesh]);
+                }
               });
-
             break;
-
           case 'audio':
-            await this.babylonService.loadAudio(URL + newModel.processed[this.quality])
-              .then(async model => {
-                this.Subjects.actualMediaType.next('audio');
-                this.updateActiveModel(newModel);
-                const mesh: Mesh[] = [];
-                mesh.push(model);
-                console.log(model, 'bekommen');
-                this.updateActiveModelMeshes(mesh);
+            await this.babylonService.loadEntity(_url, mediaType)
+              .then(() => {
+                const plane = this.babylonService.audioContainer.plane;
+                if (plane) {
+                  this.Subjects.actualMediaType.next('audio');
+                  this.updateActiveModel(newModel);
+                  this.updateActiveModelMeshes([plane as Mesh]);
+                }
               });
-
             break;
-
           case 'video':
-
-            await this.babylonService.loadVideo(URL + newModel.processed[this.quality])
-              .then(async model => {
-
-                this.updateActiveModel(newModel);
-                const mesh: Mesh[] = [];
-                mesh.push(model);
-                this.updateActiveModelMeshes(mesh);
-                this.Subjects.actualMediaType.next('video');
-
+            await this.babylonService.loadEntity(_url, mediaType)
+              .then(() => {
+                const plane = this.babylonService.videoContainer.plane;
+                if (plane) {
+                  this.Subjects.actualMediaType.next('video');
+                  this.updateActiveModel(newModel);
+                  this.updateActiveModelMeshes([plane as Mesh]);
+                }
               });
             break;
-
           case 'text':
             this.Subjects.actualModel.next(newModel);
             await this.loadFallbackModel();
             this.Subjects.actualMediaType.next('text');
-
             break;
-
           default:
         }
-      }
-      if (newModel.dataSource.isExternal) {
+      } else {
         this.Subjects.actualModel.next(newModel);
         await this.loadFallbackModel();
         return;
@@ -535,12 +521,9 @@ export class ProcessingService {
   }
 
   public async loadFallbackModel() {
-    await this.babylonService.loadModel('assets/models/sketch_cat/', 'scene.gltf')
-      .then(async model => {
-        // Warte auf Antwort von loadModel,
-        // da loadModel ein Promise<object> von ImportMeshAync übergibt
-        // model ist hier das neu geladene Model
-        this.updateActiveModelMeshes(model.meshes);
+    await this.babylonService.loadEntity('assets/models/sketch_cat/scene.gltf', 'model', '.gltf')
+      .then(() => {
+        this.updateActiveModelMeshes(this.babylonService.modelContainer.meshes as Mesh[]);
         this.isFallbackModelLoaded = true;
         this.fallbackModelLoaded.emit(true);
         this.Subjects.actualMediaType.next('model');

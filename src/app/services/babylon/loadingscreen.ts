@@ -1,6 +1,6 @@
 import {ILoadingScreen} from 'babylonjs';
 
-import {LoadingscreenhandlerService} from '../loadingscreenhandler/loadingscreenhandler.service';
+import {LoadingscreenhandlerService} from './loadingscreenhandler.service';
 
 /**
  * Extends Babylon.js/src/Loading/babylon.loadingScreen.ts

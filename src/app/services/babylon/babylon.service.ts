@@ -1,16 +1,17 @@
 /* tslint:disable:max-line-length */
 import { DOCUMENT } from '@angular/common';
-import { ComponentFactoryResolver, ComponentRef, Inject, Injectable, Injector, ViewContainerRef } from '@angular/core';
-import { AbstractMesh, ActionManager, Analyser, Axis, Color4, Engine, ExecuteCodeAction, Layer, Mesh, MeshBuilder, Quaternion, Scene, SceneLoader, SceneSerializer, Sound, Space, StandardMaterial, Tags, Texture, Tools, TransformNode, Vector3, VideoTexture } from 'babylonjs';
-import { AdvancedDynamicTexture, Control, Slider, StackPanel, TextBlock } from 'babylonjs-gui';
+import { ComponentFactoryResolver, Inject, Injectable, Injector, ViewContainerRef } from '@angular/core';
+import { Color4, Engine, Layer, Scene, SceneSerializer, Sound, Texture } from 'babylonjs';
+import { Slider } from 'babylonjs-gui';
 import 'babylonjs-loaders';
-import { ReplaySubject } from 'rxjs';
 
 import { RenderCanvasComponent } from '../../components/render-canvas/render-canvas.component';
-import { LoadingscreenhandlerService } from '../loadingscreenhandler/loadingscreenhandler.service';
-import { MessageService } from '../message/message.service';
 
+import { I3DModelContainer, IAudioContainer, IImageContainer, IVideoContainer } from './container.interfaces';
+import { load3DModel, loadAudio, loadImage, loadVideo } from './loading-strategies';
 import { LoadingScreen } from './loadingscreen';
+import { LoadingscreenhandlerService } from './loadingscreenhandler.service';
+import { afterAudioRender, beforeAudioRender, beforeVideoRender } from './render-strategies';
 /* tslint:enable:max-line-length */
 
 @Injectable({
@@ -18,23 +19,25 @@ import { LoadingScreen } from './loadingscreen';
 })
 export class BabylonService {
 
-  private canvas: HTMLCanvasElement;
-  private CanvasSubject = new ReplaySubject<HTMLCanvasElement>();
-  public CanvasObservable = this.CanvasSubject.asObservable();
-  private canvasRef: ComponentRef<RenderCanvasComponent>;
+  // Create an instance of RenderCanvasComponent
+  // and use this for the Engine
+  private canvasRef =
+    this.factoryResolver
+      .resolveComponentFactory(RenderCanvasComponent)
+      .create(this.injector);
+  private canvas = this.canvasRef.location.nativeElement.childNodes[0] as HTMLCanvasElement;
 
   private engine: Engine;
   private scene: Scene;
 
   public mediaType = '';
-  public video: HTMLVideoElement;
-  public audio: Sound;
-  private analyser: Analyser;
-  private slider: Slider;
-  private currentTime = 0;
+  public videoContainer: IVideoContainer;
+  public audioContainer: IAudioContainer;
+  public imageContainer: IImageContainer;
+  public modelContainer: I3DModelContainer;
 
   private backgroundURL = 'assets/textures/backgrounds/darkgrey.jpg';
-  private color: {
+  private backgroundColor: {
     r: number;
     g: number;
     b: number;
@@ -44,15 +47,10 @@ export class BabylonService {
   private isBackground: boolean | undefined;
 
   constructor(
-    private message: MessageService,
     private loadingScreenHandler: LoadingscreenhandlerService,
     @Inject(DOCUMENT) private document: HTMLDocument,
     private factoryResolver: ComponentFactoryResolver,
     private injector: Injector) {
-    const factory = this.factoryResolver.resolveComponentFactory(RenderCanvasComponent);
-    this.canvasRef = factory.create(this.injector);
-    this.canvas = this.canvasRef.location.nativeElement.childNodes[0] as HTMLCanvasElement;
-    this.updateCanvas(this.canvas);
 
     this.canvas.id = 'renderCanvas';
     this.engine = new Engine(this.canvas, true, {
@@ -63,71 +61,25 @@ export class BabylonService {
     this.engine.loadingScreen = new LoadingScreen(
       this.canvas, '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
 
-    this.analyser = new Analyser(this.scene);
-    Engine.audioEngine['connectToAnalyser'](this.analyser);
-    this.analyser.FFT_SIZE = 32;
-    this.analyser.SMOOTHING = 0.9;
-
     // Initialize empty, otherwise we would need to check against
     // undefined in strict mode
-    this.audio = new Sound('', '', this.scene);
-    this.slider = new Slider();
-    this.video = this.document.createElement('video');
-
-    this.scene.registerBeforeRender(() => {
-      const _cam = this.scene.getCameraByName('arcRotateCamera');
-      if (this.mediaType === 'audio' && this.audio) {
-        if (this.audio.isPlaying) {
-          const fft = this.analyser.getByteFrequencyData();
-          const audioMeshes = this.scene.getMeshesByTags('audioCenter');
-          audioMeshes.forEach(mesh => {
-            const scale = ((fft[15] / 320) + 0.05);
-            mesh.scaling = new Vector3(scale, scale, scale);
-          });
-          if (Engine.audioEngine.audioContext) {
-            // TODO
-            this.currentTime = Engine.audioEngine.audioContext['currentTime'] - this.currentTime;
-            if (this.slider) {
-              this.slider.value = (this.slider.value + this.currentTime);
-            }
-          }
-        }
-
-        if (_cam && _cam['radius']) {
-          const radius = Math.abs(_cam['radius']);
-          const node = this.scene.getTransformNodeByName('mediaPanel');
-          if (node) {
-            node.getChildMeshes()
-              .forEach(mesh => mesh.scalingDeterminant = radius / 35);
-          }
-        }
-      }
-
-      if (this.mediaType === 'video' && this.video) {
-        if (!this.video.paused) {
-          this.slider.value = this.video.currentTime;
-        }
-      }
-
-      // Annotation_Marker -- Fixed_Size_On_Zoom
-      // const _cam = this.scene.getCameraByName('arcRotateCamera');
-      if (_cam && _cam['radius']) {
-        const radius = Math.abs(_cam['radius']);
-        this.scene.getMeshesByTags('plane', mesh => mesh.scalingDeterminant = radius / 35);
-        this.scene.getMeshesByTags('label', mesh => mesh.scalingDeterminant = radius / 35);
-      }
-    });
-
-    // TODO
-    this.scene.registerAfterRender(() => {
-      if (this.currentTime && this.mediaType === 'audio') {
-        if (this.audio && this.audio.isPlaying) {
-          if (Engine.audioEngine.audioContext) {
-            this.currentTime = Engine.audioEngine.audioContext['currentTime'];
-          }
-        }
-      }
-    });
+    this.audioContainer = {
+      audio: new Sound('', '', this.scene),
+      currentTime: 0,
+      slider: new Slider(),
+    };
+    this.videoContainer = {
+      video: this.document.createElement('video'),
+      slider: new Slider(),
+      currentTime: 0,
+    };
+    this.imageContainer = {
+      image: new Texture('', this.scene),
+    };
+    this.modelContainer = {
+      meshes: [], particleSystems: [],
+      skeletons: [], animationGroups: [],
+    };
 
     this.engine.runRenderLoop(() => {
       this.scene.render();
@@ -148,10 +100,6 @@ export class BabylonService {
 
   public getCanvas(): HTMLCanvasElement {
     return this.canvas;
-  }
-
-  public updateCanvas(newCanvas: HTMLCanvasElement) {
-    this.CanvasSubject.next(newCanvas);
   }
 
   public resize(): void {
@@ -179,12 +127,12 @@ export class BabylonService {
   }
 
   public setBackgroundColor(color: any): void {
-    this.color = color;
+    this.backgroundColor = color;
     this.scene.clearColor = new Color4(color.r / 255, color.g / 255, color.b / 255, color.a);
   }
 
   public getColor(): any {
-    return this.color;
+    return this.backgroundColor;
   }
 
   public hideMesh(tag: string, visibility: boolean) {
@@ -192,583 +140,82 @@ export class BabylonService {
   }
 
   private clearScene() {
+    // Meshes
     this.scene.meshes.forEach(mesh => mesh.dispose());
     this.scene.meshes = [];
-    if (this.audio) {
-      this.audio.dispose();
+    // Audio
+    this.audioContainer.audio.dispose();
+    this.audioContainer.slider.dispose();
+    this.audioContainer.currentTime = 0;
+    // Video
+    this.videoContainer.video.pause();
+    this.videoContainer.video.remove();
+    this.videoContainer.slider.dispose();
+    this.videoContainer.currentTime = 0;
+    // Unregister renderers
+    const preObservers = this.scene.onBeforeRenderObservable['_observers'];
+    const postObservers = this.scene.onAfterRenderObservable['_observers'];
+    for (const observer of preObservers) {
+      this.scene.unregisterBeforeRender(observer.callback);
     }
-    if (this.slider) {
-      this.slider.dispose();
-    }
-    this.currentTime = 0;
-    if (this.video) {
-      this.video.pause();
-      this.video.remove();
+    for (const observer of postObservers) {
+      this.scene.unregisterBeforeRender(observer.callback);
     }
   }
 
-  /*
-  public loadEntity(rootUrl: string, mediaType: string, extension = 'babylon'): Promise<any> {
+  public loadEntity(rootUrl: string, mediaType = 'model', extension = 'babylon') {
 
-    const message = this.message;
-    const engine = this.engine;
-    const scene = this.scene;
+    this.engine.displayLoadingUI();
+    this.clearScene();
+    // TODO: manage mediaType via Observable
     this.mediaType = mediaType;
-    const root = Tools.GetFolderPath(rootUrl);
-    const filename = Tools.GetFilename(rootUrl);
-
-    engine.displayLoadingUI();
-    this.clearScene();
-
     switch (mediaType) {
-      case 'model': {
-        return new Promise<any>((resolve, reject) => {
-          SceneLoader
-            .ImportMeshAsync(
-              null, root, filename, scene, progress => {
-                if (progress.lengthComputable) {
-                  engine.loadingUIText =
-                    `${(progress.loaded * 100 / progress.total).toFixed()}%`;
-                }
-              },
-              extension)
-            .then(result => {
-              engine.hideLoadingUI();
-              resolve(result);
-            })
-            .catch(error => {
-              engine.hideLoadingUI();
-              message.error(error);
-              reject(error);
-            });
-        });
-        break;
-      }
-      case 'image': {
-        return new Promise<any>((resolve, reject) => {
-
-          const img = new Image();
-          img.onload = () => {
-            const width = img.width;
-            const height = img.height;
-
-            const image = new Texture(rootUrl, scene);  // rem about CORS rules for cross-domain
-
-            this.createMediaScreen(width, height, image);
-            const ground = this.scene.getMeshesByTags('mediaGround')[0];
-
-            this.engine.hideLoadingUI();
-            resolve(ground);
-            return;
-          };
-          img.onerror = err => {
-            reject(err);
-            return;
-          };
-          img.src = rootUrl;
-        });
-        break;
-      }
-      case 'video': {
-        const videoTexture = new VideoTexture('video', rootUrl, scene, false);
-
-        return new Promise<any>((resolve, reject) => {
-          videoTexture.onLoadObservable.add(tex => {
-            this.video = videoTexture.video;
-            const width = tex.getSize().width;
-            const height = tex.getSize().height;
-
-            this.createMediaScreen(width, height, videoTexture);
-            const plane = this.createVideoScene();
-
-            new Promise<any>((innerResolve, _) => {
-              // const dummy = new Mesh('dummy', this.scene);
-              this.engine.hideLoadingUI();
-              innerResolve(plane);
-            })
-              .then(resolve)
-              .catch(reject);
-          });
-        });
-        break;
-      }
-      case 'audio': {
-        return new Promise((resolve, reject) => {
-          this.makeRequest(rootUrl)
-            .then(posts => {
-              this.audio = new Sound(
-                'Music', posts,
-                scene, () => {
-                  engine.hideLoadingUI();
-                  const plane = this.createAudioScene();
-                  resolve(plane);
-                },
-                undefined);
-              console.log('Success!', posts);
-            })
-            .catch(error => {
-              message.error(error);
-              engine.hideLoadingUI();
-              reject(error);
-            });
-        });
-        break;
-      }
-      default: {
-        // statements;
-      }
-    }
-  }
-*/
-  public loadModel(rootUrl: string, extension = 'babylon'): Promise<any> {
-    this.clearScene();
-    this.mediaType = 'model';
-
-    const message = this.message;
-    const engine = this.engine;
-
-    const root = Tools.GetFolderPath(rootUrl);
-    const filename = Tools.GetFilename(rootUrl);
-
-    engine.displayLoadingUI();
-
-    return new Promise<any>((resolve, reject) => {
-      SceneLoader
-        .ImportMeshAsync(
-          null, root, filename, this.scene, progress => {
-            if (progress.lengthComputable) {
-              engine.loadingUIText =
-                `${(progress.loaded * 100 / progress.total).toFixed()}%`;
+      case 'audio':
+        return loadAudio(rootUrl, this.scene, this.audioContainer)
+          .then(result => {
+            if (result) {
+              this.audioContainer = result;
+              this.scene.registerBeforeRender(() =>
+                beforeAudioRender(this.scene, this.audioContainer));
+              this.scene.registerAfterRender(() =>
+                afterAudioRender(this.audioContainer));
+            } else {
+              throw new Error('No audio result');
             }
-          },
-          extension)
-        .then(result => {
-          engine.hideLoadingUI();
-          resolve(result);
-        })
-        .catch(error => {
-          engine.hideLoadingUI();
-          message.error(error);
-          reject(error);
-        });
-    });
-  }
-
-  public loadAudio(rootUrl: string): Promise<any> {
-
-    const message = this.message;
-    const engine = this.engine;
-    const scene = this.scene;
-
-    this.clearScene();
-    this.mediaType = 'audio';
-
-    engine.displayLoadingUI();
-
-    return new Promise((resolve, reject) => {
-      this.makeRequest(rootUrl)
-        .then(posts => {
-          this.audio = new Sound(
-            'Music', posts,
-            scene, () => {
-              engine.hideLoadingUI();
-              const plane = this.createAudioScene();
-              resolve(plane);
-            },
-            undefined);
-          console.log('Success!', posts);
-        })
-        .catch(error => {
-          message.error(error);
-          engine.hideLoadingUI();
-          reject(error);
-        });
-    });
-  }
-
-  public loadImage(rootUrl: string): Promise<any> {
-    this.engine.displayLoadingUI();
-    this.clearScene();
-    this.mediaType = 'image';
-
-    return new Promise<any>((resolve, reject) => {
-
-      const img = new Image();
-      img.onload = () => {
-        const width = img.width;
-        const height = img.height;
-
-        const mypicture = new Texture(rootUrl, this.scene);  // rem about CORS rules for cross-domain
-        const ground = Mesh.CreateGround('gnd', width / 10, height / 10, 1, this.scene);
-        Tags.AddTagsTo(ground, 'mediaGround');
-        ground.rotate(Axis.X, Math.PI / 180 * -90, Space.WORLD);
-
-        const gndmat = new StandardMaterial('gmat', this.scene);
-        ground.material = gndmat;
-        gndmat.diffuseTexture = mypicture;
-
-        this.engine.hideLoadingUI();
-        resolve(ground);
-        return;
-      };
-      img.onerror = err => {
-        reject(err);
-        return;
-      };
-      img.src = rootUrl;
-    });
-  }
-
-  public loadVideo(rootUrl: string): Promise<any> {
-    this.clearScene();
-    this.mediaType = 'video';
-
-    this.engine.displayLoadingUI();
-
-    // Video material
-    const videoTexture = new VideoTexture('video', rootUrl, this.scene, false);
-    // videoMat.backFaceCulling = false;
-
-    return new Promise<any>((resolve, reject) => {
-      videoTexture.onLoadObservable.add(tex => {
-        this.video = videoTexture.video;
-        const width = tex.getSize().width;
-        const height = tex.getSize().height;
-        const ground = Mesh.CreateGround('videoGround', width / 10, height / 10, 1, this.scene);
-        Tags.AddTagsTo(ground, 'mediaGround');
-        ground.rotate(Axis.X, Math.PI / 180 * -90, Space.WORLD);
-
-        const videoMat = new StandardMaterial('textVid', this.scene);
-        ground.material = videoMat;
-        videoMat.diffuseTexture = videoTexture;
-        const plane = this.createVideoScene();
-
-        new Promise<any>((innerResolve, _) => {
-          // const dummy = new Mesh('dummy', this.scene);
-          this.engine.hideLoadingUI();
-          innerResolve(plane);
-        })
-          .then(resolve)
-          .catch(reject);
-      });
-    });
-  }
-
-  private str_pad_left(string, pad, length) {
-    return (new Array(length + 1).join(pad) + string).slice(-length);
-  }
-
-  private getCurrentTime(time: number): string {
-    const minutes = Math.floor(time / 60);
-    const seconds = time - minutes * 60;
-
-    return `${this.str_pad_left(minutes, '0', 2)}:${this.str_pad_left(seconds, '0', 2)}`;
-  }
-
-  private secondsToHms(sek) {
-    const d = Number(sek);
-
-    const h = Math.floor(d / 3600);
-    const m = Math.floor(d % 3600 / 60);
-    const s = Math.floor(d % 3600 % 60);
-
-    return `${('0' + h).slice(-2)}:${('0' + m).slice(-2)}:${('0' + s).slice(-2)}`;
-  }
-
-  private createAudioScene(): AbstractMesh {
-
-    // create a Center of Transformation
-    const CoT = new TransformNode('mediaPanel');
-    CoT.billboardMode = Mesh.BILLBOARDMODE_ALL;
-    CoT.position.x = 0;
-    CoT.position.y = 0;
-    CoT.position.z = 0;
-
-    // PLANE for Annotations
-    const plane = MeshBuilder.CreatePlane(name, { height: 1.5, width: 20 }, this.scene);
-    Tags.AddTagsTo(plane, 'controller');
-    plane.renderingGroupId = 1;
-    plane.material = new StandardMaterial('controlMat', this.scene);
-    plane.material.alpha = 1;
-    plane.parent = CoT;
-    plane.position.y = -1.4;
-    // plane.position.x = -8;
-    plane.billboardMode = Mesh.BILLBOARDMODE_ALL;
-
-    const plane2 = MeshBuilder.CreatePlane(name, { height: 3, width: 20 }, this.scene);
-    plane2.billboardMode = Mesh.BILLBOARDMODE_ALL;
-    plane2.renderingGroupId = 1;
-    plane2.parent = CoT;
-    plane2.position.y = -1;
-    // plane2.position.x = -8;
-
-    // GUI
-    const advancedTexture = AdvancedDynamicTexture.CreateForMesh(plane2);
-
-    const panel = new StackPanel();
-    panel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
-    panel.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-    advancedTexture.addControl(panel);
-
-    this.currentTime = 0;
-
-    const buffer = this.audio ? this.audio.getAudioBuffer() : undefined;
-    this.currentTime = 0;
-
-    const header = new TextBlock();
-    buffer ? header.text = 'Length: ' + this.secondsToHms(buffer.duration) :
-      header.text = 'Can not calculate length.';
-    header.width = '400px';
-    header.height = '150px';
-    header.color = 'black';
-    panel.addControl(header);
-
-    this.slider = new Slider();
-    this.slider.minimum = 0;
-    this.slider.maximum = buffer ? buffer.duration : 0;
-    this.slider.value = 0;
-    this.slider.width = '2000px';
-    this.slider.height = '300px';
-    this.slider.onValueChangedObservable.add(() => {
-      header.text = `Current time: ${this.secondsToHms(this.slider.value)}`;
-      // Video:       header.text = 'Current time: ' + this.getCurrentTime(this.video.currentTime) + ' min.';
-    });
-    this.slider.onPointerDownObservable.add(() => {
-      if (this.audio.isPlaying) {
-        this.audio.stop();
-        console.log(this.slider.value);
-      }
-    });
-    this.slider.onPointerUpObservable.add(() => {
-      this.audio.play(0, this.slider.value);
-      console.log(this.slider.value);
-    });
-
-    panel.addControl(this.slider);
-
-    // Volume
-
-    const plane3 = MeshBuilder.CreatePlane(name, { height: 15, width: 2 }, this.scene);
-    plane3.billboardMode = Mesh.BILLBOARDMODE_ALL;
-    plane3.renderingGroupId = 1;
-    plane3.parent = CoT;
-    plane3.position.x = 2;
-
-    const advancedTextureVol = AdvancedDynamicTexture.CreateForMesh(plane3);
-
-    const sliderVol = new Slider();
-    sliderVol.isVertical = true;
-    sliderVol.minimum = 0;
-    sliderVol.maximum = 1;
-    sliderVol.value = this.audio.getVolume();
-    sliderVol.height = '1000px';
-    sliderVol.width = '150px';
-    sliderVol.onValueChangedObservable.add(() => {
-      this.audio.setVolume(sliderVol.value);
-    });
-    advancedTextureVol.addControl(sliderVol);
-
-    // Cube
-
-    SceneLoader.ImportMeshAsync(
-      null, 'assets/models/', 'kompakkt.babylon', this.scene, _ => {
-        console.log('LOADED');
-      })
-      .then(result => {
-        console.log(result);
-        const center = MeshBuilder.CreateBox('audioCenter', { size: 1 }, this.scene);
-        Tags.AddTagsTo(center, 'audioCenter');
-        center.isVisible = false;
-
-        const axisX = Axis['X'];
-        const axisY = Axis['Y'];
-
-        if (!center.rotationQuaternion) {
-          center.rotationQuaternion = Quaternion.RotationYawPitchRoll(0, 0, 0);
-        }
-
-        const rotationQuaternionX = Quaternion.RotationAxis(axisX, Math.PI / 180 * 1);
-        let end = rotationQuaternionX.multiply(center.rotationQuaternion);
-
-        const rotationQuaternionY = Quaternion.RotationAxis(axisY, Math.PI / 180 * 240);
-        end = rotationQuaternionY.multiply(end);
-
-        center.rotationQuaternion = end;
-
-        center.scaling = new Vector3(0.05, 0.05, 0.05);
-
-        result.meshes
-          .forEach(mesh => {
-            console.log('Audio gefunden');
-            mesh.parent = center;
-            mesh.isPickable = true;
-
-            mesh.actionManager = new ActionManager(this.scene);
-            mesh.actionManager.registerAction(new ExecuteCodeAction(
-              ActionManager.OnPickTrigger, (() => {
-                console.log('click');
-                this.audio.isPlaying ?
-                  this.audio.pause() : this.audio.play();
-
-              })));
           });
-      });
-    return plane;
-
-  }
-
-  private createVideoScene() {
-    // create a Center of Transformation
-    const CoT = new TransformNode('mediaPanel');
-    CoT.position.x = 0;
-    CoT.position.y = 0;
-    CoT.position.z = 0;
-
-    const ground = this.scene.getMeshesByTags('mediaGround')[0];
-    ground.computeWorldMatrix(true);
-    const bi = ground.getBoundingInfo();
-    const minimum = bi.boundingBox.minimumWorld;
-    const maximum = bi.boundingBox.maximumWorld;
-    const initialSize = maximum.subtract(minimum);
-
-    ground.isPickable = true;
-
-    ground.actionManager = new ActionManager(this.scene);
-    ground.actionManager.registerAction(new ExecuteCodeAction(
-      ActionManager.OnPickTrigger, (() => {
-        console.log('click');
-        this.video.paused ? this.video.play() : this.video.pause();
-      })));
-
-    // PLANE for Annotations
-    const plane = MeshBuilder.CreatePlane(
-      name, { height: initialSize.y * 0.1, width: initialSize.x }, this.scene);
-    Tags.AddTagsTo(plane, 'controller');
-    plane.renderingGroupId = 1;
-    plane.material = new StandardMaterial('controlMat', this.scene);
-    plane.material.alpha = 1;
-    plane.parent = CoT;
-    plane.position.y = minimum.y - (initialSize.y * 0.1 > 15 ? initialSize.y * 0.1 : 15);
-
-    // Plane for Time-Slider
-    const plane2 = MeshBuilder.CreatePlane(
-      name, {
-        height: (initialSize.y * 0.1 > 15 ? initialSize.y * 0.1 : 15),
-        width: initialSize.x,
-      },
-      this.scene);
-    plane2.renderingGroupId = 1;
-    plane2.parent = CoT;
-    plane2.position.y =
-      minimum.y -
-      (initialSize.y * 0.1 > 15
-        ? initialSize.y * 0.1
-        : 15) +
-      ((initialSize.y * 0.2 > 30
-        ? initialSize.y * 0.2
-        : 30) * 0.5);
-
-    // GUI
-    const advancedTexture = AdvancedDynamicTexture.CreateForMesh(plane2);
-
-    const panel = new StackPanel();
-    panel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
-    panel.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-    advancedTexture.addControl(panel);
-
-    this.currentTime = 0;
-
-    const header = new TextBlock();
-    const duration = this.video ? String(this.video.duration) : 'Can not calculate length in';
-    header.text = `Length: ${duration} sec`;
-    header.width = '1000px';
-    header.height = '700px';
-    header.color = 'black';
-    panel.addControl(header);
-
-    this.slider = new Slider();
-    this.slider.minimum = 0;
-    this.slider.maximum = this.video ? this.video.duration : 0;
-    this.slider.value = 0;
-    this.slider.width = '1100px';
-    this.slider.height = '500px';
-    this.slider.onValueChangedObservable.add(() => {
-      header.text = `Current time: ${this.getCurrentTime(this.video.currentTime)} min.`;
-    });
-    this.slider.onPointerDownObservable.add(() => {
-      if (!this.video.paused) {
-        this.video.pause();
-      }
-    });
-    this.slider.onPointerUpObservable.add(() => {
-      this.video.currentTime = this.slider.value;
-      this.video.play();
-    });
-    panel.addControl(this.slider);
-
-    // Volume
-
-    const plane3 = MeshBuilder.CreatePlane(
-      name, {
-        height: initialSize.y * 0.8,
-        width: (initialSize.x * 0.1 > 30 ? initialSize.x * 0.1 : 30),
-      },
-      this.scene);
-    plane3.renderingGroupId = 1;
-    plane3.parent = CoT;
-    plane3.position.x = maximum.x + initialSize.x * 0.1;
-
-    const advancedTextureVol = AdvancedDynamicTexture.CreateForMesh(plane3);
-
-    const sliderVol = new Slider();
-    sliderVol.isVertical = true;
-    sliderVol.minimum = 0;
-    sliderVol.maximum = 1;
-    sliderVol.value = this.video.volume;
-    sliderVol.height = '400px';
-    sliderVol.width = '50px';
-    sliderVol.onValueChangedObservable.add(() => {
-      this.video.volume = sliderVol.value;
-    });
-    advancedTextureVol.addControl(sliderVol);
-
-    return plane;
-
-  }
-
-  private makeRequest(url) {
-
-    // Create the XHR request
-    const request: XMLHttpRequest = new XMLHttpRequest();
-
-    request.responseType = 'arraybuffer';
-
-    request.onprogress = event => {
-      this.engine.loadingUIText = `${(event.loaded * 100 / event.total).toFixed()}%`;
-    };
-
-    // Return it as a Promise
-    return new Promise<any>((resolve, reject) => {
-      // Setup our listener to process compeleted requests
-      request.onreadystatechange = () => {
-        // Only run if the request is complete
-        if (request.readyState === 4) {
-          // Process the response
-          if (request.status >= 200 && request.status < 300) {
-            // If successful
-            resolve(request.response);
-          } else {
-            // If failed
-            reject({ ...request });
-          }
-        }
-      };
-      // Setup our HTTP request
-      request.open('GET', url, true);
-
-      // Send the request
-      request.send();
-
-    });
+        break;
+      case 'video':
+        return loadVideo(rootUrl, this.scene, this.videoContainer)
+          .then(result => {
+            if (result) {
+              this.videoContainer = result;
+              this.scene.registerBeforeRender(() =>
+                beforeVideoRender(this.videoContainer));
+            } else {
+              throw new Error('No video result');
+            }
+          });
+        break;
+      case 'image':
+        return loadImage(rootUrl, this.scene, this.imageContainer)
+          .then(result => {
+            if (result) {
+              this.imageContainer = result;
+            } else {
+              throw new Error('No video result');
+            }
+          });
+        break;
+      case 'model':
+      default:
+        return load3DModel(rootUrl, extension, this.scene)
+          .then(result => {
+            if (result) {
+              this.modelContainer = result;
+            } else {
+              throw new Error('No video result');
+            }
+          });
+    }
   }
 }

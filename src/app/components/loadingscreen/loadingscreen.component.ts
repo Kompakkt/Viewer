@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 
-import {LoadingscreenhandlerService} from '../../services/loadingscreenhandler/loadingscreenhandler.service';
+import {LoadingscreenhandlerService} from '../../services/babylon/loadingscreenhandler.service';
 
 @Component({
   selector: 'app-loading-screen',
