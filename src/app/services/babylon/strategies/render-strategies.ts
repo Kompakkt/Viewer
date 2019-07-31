@@ -1,15 +1,16 @@
 import { Engine, Scene, Vector3 } from 'babylonjs';
 
-import { IAudioContainer, IVideoContainer } from './container.interfaces';
+import { IAudioContainer, IVideoContainer } from '../container.interfaces';
 
 export const beforeAudioRender = (scene: Scene, audioContainer: IAudioContainer) => {
-
   if (audioContainer.audio.isPlaying) {
     if (audioContainer.analyser) {
       const fft = audioContainer.analyser.getByteFrequencyData();
-      const audioMeshes = scene.getMeshesByTags('audioCenter');
-      audioMeshes.forEach(mesh => {
-        const scale = ((fft[15] / 320) + 0.05);
+      const fftAverage =
+        (fft.map(val => Math.abs(val))
+          .reduce((acc, val) => acc + val)) / fft.length;
+      scene.getMeshesByTags('audioCenter').forEach(mesh => {
+        const scale = ((fftAverage / 255) + 0.05);
         mesh.scaling = new Vector3(scale, scale, scale);
       });
     }

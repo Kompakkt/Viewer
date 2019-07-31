@@ -7,7 +7,6 @@ import { IAnnotation } from '../../../interfaces/interfaces';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
 import { AnnotationmarkerService } from '../../../services/annotationmarker/annotationmarker.service';
 import { BabylonService } from '../../../services/babylon/babylon.service';
-import { CameraService } from '../../../services/camera/camera.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
 import { SocketService } from '../../../services/socket/socket.service';
 import { UserdataService } from '../../../services/userdata/userdata.service';
@@ -52,7 +51,6 @@ export class AnnotationComponent implements OnInit {
     public socketService: SocketService,
     public dialog: MatDialog,
     private userdataService: UserdataService,
-    public cameraService: CameraService,
     private processingService: ProcessingService) {
   }
 

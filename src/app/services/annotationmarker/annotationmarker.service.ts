@@ -6,7 +6,6 @@ import {BehaviorSubject} from 'rxjs/internal/BehaviorSubject';
 
 import {IAnnotation} from '../../interfaces/interfaces';
 import {BabylonService} from '../babylon/babylon.service';
-import {CameraService} from '../camera/camera.service';
 
 @Injectable({
   providedIn: 'root',
@@ -16,8 +15,7 @@ export class AnnotationmarkerService {
   private selectedAnnotation: BehaviorSubject<string> = new BehaviorSubject('');
   public isSelectedAnnotation = this.selectedAnnotation.asObservable();
 
-  constructor(private babylonService: BabylonService,
-              private cameraService: CameraService) {
+  constructor(private babylonService: BabylonService) {
 
   }
 
@@ -99,8 +97,8 @@ export class AnnotationmarkerService {
 
     const positionVector = new Vector3(camera.position.x, camera.position.y, camera.position.z);
     const targetVector = new Vector3(camera.target.x, camera.target.y, camera.target.z);
-    this.cameraService.moveCameraToTarget(positionVector);
-    this.cameraService.arcRotateCamera.setTarget(targetVector);
+    this.babylonService.cameraManager.moveActiveCameraToPosition(positionVector);
+    this.babylonService.cameraManager.setActiveCameraTarget(targetVector);
 
   }
 

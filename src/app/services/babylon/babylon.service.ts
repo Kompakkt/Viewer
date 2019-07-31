@@ -1,16 +1,17 @@
 /* tslint:disable:max-line-length */
 import { DOCUMENT } from '@angular/common';
 import { ComponentFactoryResolver, Inject, Injectable, Injector, ViewContainerRef } from '@angular/core';
-import { Color4, Engine, Layer, Scene, SceneSerializer, Sound, Texture } from 'babylonjs';
+import { ArcRotateCamera, Camera, Color4, Engine, Layer, Scene, Sound, Texture, Tools, Vector3 } from 'babylonjs';
 import { Slider } from 'babylonjs-gui';
 import 'babylonjs-loaders';
 
 import { RenderCanvasComponent } from '../../components/render-canvas/render-canvas.component';
 
+import { createDefaultCamera, moveCameraToTarget, resetCamera, setCameraTarget, updateDefaults, setCameraTo2DMode } from './camera-handler';
 import { I3DModelContainer, IAudioContainer, IImageContainer, IVideoContainer } from './container.interfaces';
-import { load3DModel, loadAudio, loadImage, loadVideo } from './loading-strategies';
+import { load3DModel, loadAudio, loadImage, loadVideo } from './strategies/loading-strategies';
 import { LoadingScreen, LoadingscreenhandlerService } from './loadingscreen';
-import { afterAudioRender, beforeAudioRender, beforeVideoRender } from './render-strategies';
+import { afterAudioRender, beforeAudioRender, beforeVideoRender } from './strategies/render-strategies';
 /* tslint:enable:max-line-length */
 
 @Injectable({
@@ -34,6 +35,24 @@ export class BabylonService {
   public audioContainer: IAudioContainer;
   public imageContainer: IImageContainer;
   public modelContainer: I3DModelContainer;
+
+  public cameraManager = {
+    getActiveCamera: this.getActiveCamera,
+    moveActiveCameraToPosition: (positionVector: Vector3) => {
+      moveCameraToTarget(this.getActiveCamera(), this.scene, positionVector);
+    },
+    resetCamera: () => resetCamera(this.getActiveCamera(), this.canvas),
+    getInitialPosition: () => ({
+      cameraType: 'arcRotateCam',
+      position: this.getActiveCamera().position,
+      target: this.getActiveCamera().target,
+    }),
+    setActiveCameraTarget: (targetVector: Vector3) =>
+      setCameraTarget(this.getActiveCamera(), targetVector),
+    updateDefaults,
+    setActiveCameraTo2D: () =>
+      setCameraTo2DMode(this.getActiveCamera(), this.mediaType === 'audio'),
+  };
 
   private backgroundURL = 'assets/textures/backgrounds/darkgrey.jpg';
   private backgroundColor: {
@@ -59,6 +78,9 @@ export class BabylonService {
     this.scene = new Scene(this.engine);
     this.engine.loadingScreen = new LoadingScreen(
       this.canvas, '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
+
+    // Add default camera
+    this.scene.addCamera(createDefaultCamera(this.scene, this.canvas));
 
     // Initialize empty, otherwise we would need to check against
     // undefined in strict mode
@@ -89,16 +111,20 @@ export class BabylonService {
     return this.scene;
   }
 
-  public saveScene(): void {
-    return SceneSerializer.Serialize(this.scene);
-  }
-
   public attachCanvas(viewContainerRef: ViewContainerRef) {
     viewContainerRef.insert(this.canvasRef.hostView);
   }
 
   public getCanvas(): HTMLCanvasElement {
     return this.canvas;
+  }
+
+  public getActiveCamera() {
+    if (!this.scene.activeCamera) {
+      const cam = this.scene.cameras[0];
+      this.scene.activeCamera = cam;
+    }
+    return this.scene.activeCamera as ArcRotateCamera;
   }
 
   public resize(): void {
@@ -168,6 +194,13 @@ export class BabylonService {
     this.clearScene();
     // TODO: manage mediaType via Observable
     this.mediaType = mediaType;
+
+    if (this.mediaType !== 'model') {
+      this.cameraManager.setActiveCameraTo2D();
+    } else {
+      this.cameraManager.resetCamera();
+    }
+
     switch (mediaType) {
       case 'audio':
         return loadAudio(rootUrl, this.scene, this.audioContainer)
@@ -216,5 +249,57 @@ export class BabylonService {
             }
           });
     }
+  }
+
+  public async createScreenshot() {
+    this.hideMesh('plane', false);
+    this.hideMesh('label', false);
+    await new Promise<any>((resolve, _) => this.getEngine()
+      .onEndFrameObservable
+      .add(resolve));
+    const result = await new Promise<string>((resolve, reject) => {
+      const _activeCamera = this.getScene().activeCamera;
+      if (_activeCamera instanceof Camera) {
+        Tools.CreateScreenshot(
+          this.getEngine(), _activeCamera, { precision: 2 }, async screenshot => {
+            await fetch(screenshot)
+              .then(res => res.blob())
+              .then(blob =>
+                Tools.Download(blob, `Kompakkt-${Date.now()}`))
+              .then(() => resolve(screenshot))
+              .catch(e => {
+                console.error(e);
+                reject(e);
+              });
+          });
+      }
+    });
+    this.hideMesh('plane', true);
+    this.hideMesh('label', true);
+    return result;
+  }
+
+  public async createPreviewScreenshot(width?: number): Promise<string> {
+    this.hideMesh('plane', false);
+    this.hideMesh('label', false);
+    await new Promise<any>((resolve, _) => this.getEngine()
+      .onEndFrameObservable
+      .add(resolve));
+    const result = await new Promise<string>((resolve, _) => {
+      const _activeCamera = this.getScene().activeCamera;
+      if (_activeCamera instanceof Camera) {
+        Tools.CreateScreenshot(
+          this.getEngine(), _activeCamera,
+          (width)
+            ? { width, height: Math.round((width / 16) * 9) }
+            : { width: 400, height: 225 },
+          screenshot => {
+            resolve(screenshot);
+          });
+      }
+    });
+    this.hideMesh('plane', true);
+    this.hideMesh('label', true);
+    return result;
   }
 }

@@ -32,26 +32,22 @@ export class AnnotationComponentForEditorComponent extends AnnotationComponent {
   // TODO set perspective in annotation Service and make it not async and public and save!
   public async selectPerspective() {
 
-    await this.cameraService.createPreviewScreenshot(400)
+    await this.babylonService.createPreviewScreenshot(400)
       .then(detailScreenshot => {
         if (!this.annotation) {
           console.error('AnnotationComponentForEditorComponent without Annotation', this);
           throw new Error('AnnotationComponentForEditorComponent without Annotation');
           return;
         }
-        const camera = this.cameraService.getActualCameraPosAnnotation();
+        const camera = this.babylonService.getActiveCamera();
+        if (!camera) {
+          console.error('AnnotationComponentForEditorComponent cannot get ActiveCamera', this);
+          throw new Error('AnnotationComponentForEditorComponent cannot get ActiveCamera');
+          return;
+        }
+
         this.annotation.body.content.relatedPerspective = {
-          cameraType: camera.cameraType,
-          position: {
-            x: camera.position.x,
-            y: camera.position.y,
-            z: camera.position.z,
-          },
-          target: {
-            x: camera.target.x,
-            y: camera.target.y,
-            z: camera.target.z,
-          },
+          ...this.babylonService.cameraManager.getInitialPosition(),
           preview: detailScreenshot,
         };
 

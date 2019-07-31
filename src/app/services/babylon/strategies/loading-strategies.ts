@@ -5,7 +5,7 @@ import {
 } from 'babylonjs';
 import { AdvancedDynamicTexture, Control, Slider, StackPanel, TextBlock } from 'babylonjs-gui';
 
-import { IAudioContainer, IImageContainer, IVideoContainer } from './container.interfaces';
+import { IAudioContainer, IImageContainer, IVideoContainer } from '../container.interfaces';
 
 const updateLoadingUI = (engine: Engine) => (progress: SceneLoaderProgressEvent) => {
   if (progress.lengthComputable) {
@@ -49,7 +49,7 @@ export const loadAudio = (rootUrl: string, scene: Scene, audioContainer: IAudioC
       const { plane, slider } = createAudioScene(audio, scene);
       const analyser = new Analyser(scene);
       Engine.audioEngine['connectToAnalyser'](analyser);
-      analyser.FFT_SIZE = 32;
+      analyser.FFT_SIZE = 4096;
       analyser.SMOOTHING = 0.9;
       return {
         ...audioContainer,
@@ -68,7 +68,7 @@ export const loadImage = (rootUrl: string, scene: Scene, imageContainer: IImageC
   return new Promise<IImageContainer>((resolve, reject) => {
     const texture = new Texture(
       rootUrl, scene,
-      false, false, undefined,
+      false, true, undefined,
       () => {
         const [width, height] = [texture.getSize().width, texture.getSize().height];
         const ground = Mesh.CreateGround('gnd', width / 10, height / 10, 1, scene);
@@ -101,7 +101,7 @@ export const loadImage = (rootUrl: string, scene: Scene, imageContainer: IImageC
       engine.hideLoadingUI();
       console.error(e);
     });
-}
+};
 
 export const loadVideo = (rootUrl: string, scene: Scene, videoContainer: IVideoContainer) => {
   const engine = scene.getEngine();

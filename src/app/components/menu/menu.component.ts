@@ -3,7 +3,6 @@ import {MatDialog, MatDialogConfig, MatIconRegistry} from '@angular/material';
 import {DomSanitizer} from '@angular/platform-browser';
 
 import {BabylonService} from '../../services/babylon/babylon.service';
-import {CameraService} from '../../services/camera/camera.service';
 import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
 import {OverlayService} from '../../services/overlay/overlay.service';
 import {ProcessingService} from '../../services/processing/processing.service';
@@ -28,7 +27,6 @@ export class MenuComponent implements OnInit {
   constructor(
     public iconRegistry: MatIconRegistry,
     public sanitizer: DomSanitizer,
-    public cameraService: CameraService,
     public overlayService: OverlayService,
     public processingService: ProcessingService,
     public babylonService: BabylonService,

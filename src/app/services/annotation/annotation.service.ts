@@ -12,8 +12,8 @@ import {DialogGetUserDataComponent} from '../../components/dialogs/dialog-get-us
 import {DialogShareAnnotationComponent} from '../../components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
 import {IAnnotation, ICompilation, IModel} from '../../interfaces/interfaces';
 import {ActionService} from '../action/action.service';
+import {BabylonService} from '../babylon/babylon.service';
 import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
-import {CameraService} from '../camera/camera.service';
 import {DataService} from '../data/data.service';
 import {MessageService} from '../message/message.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
@@ -76,11 +76,11 @@ export class AnnotationService {
   constructor(private dataService: DataService,
               private actionService: ActionService,
               private annotationmarkerService: AnnotationmarkerService,
+              private babylon: BabylonService,
               private mongo: MongohandlerService,
               private message: MessageService,
               public socket: Socket,
               private processingService: ProcessingService,
-              private cameraService: CameraService,
               private dialog: MatDialog,
               private userdataService: UserdataService,
               private overlayService: OverlayService) {
@@ -361,9 +361,9 @@ export class AnnotationService {
   }
 
   public async createNewAnnotation(result: any) {
-    const camera = this.cameraService.getActualCameraPosAnnotation();
+    const camera = this.babylon.cameraManager.getInitialPosition();
 
-    this.cameraService.createPreviewScreenshot(400)
+    this.babylon.createPreviewScreenshot(400)
       .then(detailScreenshot => {
         if (!this.actualModel) {
           throw new Error(`this.actualModel not defined: ${this.actualModel}`);

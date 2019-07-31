@@ -7,7 +7,6 @@ import {ColorEvent} from 'ngx-color';
 import { settings2D, settingsFallback, settingsKompakktLogo, settingsModel } from '../../../assets/settings/settings';
 import {IModel} from '../../interfaces/interfaces';
 import {BabylonService} from '../../services/babylon/babylon.service';
-import {CameraService} from '../../services/camera/camera.service';
 import {LightService} from '../../services/light/light.service';
 import {MessageService} from '../../services/message/message.service';
 import {ModelsettingsService} from '../../services/modelsettings/modelsettings.service';
@@ -64,7 +63,6 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   private ambientlightDownintensity: number | undefined;
 
   constructor(private overlayService: OverlayService,
-              private cameraService: CameraService,
               private babylonService: BabylonService,
               private lightService: LightService,
               private mongohandlerService: MongohandlerService,
@@ -206,17 +204,18 @@ export class ObjectFeatureSettingsComponent implements OnInit {
     this.setEffect = this.activeModel.settings.background.effect;
     this.babylonService.setBackgroundImage(this.setEffect);
     this.showHelpers = false;
-    this.cameraService.backToDefault();
+
+    this.babylonService.cameraManager.resetCamera();
   }
 
   public resetMeshSize() {
     this.modelSettingsService.resetMeshSize();
-    this.cameraService.backToDefault();
+    this.babylonService.cameraManager.resetCamera();
   }
 
   public resetMeshRotation() {
     this.modelSettingsService.resetMeshRotation();
-    this.cameraService.backToDefault();
+    this.babylonService.cameraManager.resetCamera();
   }
 
   /*
@@ -258,16 +257,10 @@ export class ObjectFeatureSettingsComponent implements OnInit {
    */
 
   public async setInitialView() {
-    this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
+    this.cameraPositionInitial = this.babylonService.cameraManager.getInitialPosition();
     console.log(this.cameraPositionInitial);
-    this.cameraService.setDefaultPosition(this.cameraService.arcRotateCamera.alpha,
-                                          this.cameraService.arcRotateCamera.beta,
-                                          this.cameraService.arcRotateCamera.radius,
-                                          this.cameraService.arcRotateCamera.target.x,
-                                          this.cameraService.arcRotateCamera.target.y,
-                                          this.cameraService.arcRotateCamera.target.z);
     return new Promise<string>((resolve, reject) =>
-      this.cameraService.createPreviewScreenshot(400)
+      this.babylonService.createPreviewScreenshot(400)
         .then(screenshot => {
       this.preview = screenshot;
       resolve(screenshot);
@@ -352,9 +345,8 @@ export class ObjectFeatureSettingsComponent implements OnInit {
       switch (this.mediaType) {
         case 'model': {
           settings = settingsModel;
-          this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
-          const cameraSettings: any[] = [];
-          cameraSettings.push(this.cameraService.getActualCameraPosInitialView());
+          this.cameraPositionInitial = this.babylonService.cameraManager.getInitialPosition();
+          const cameraSettings: any[] = [this.cameraPositionInitial];
           settings['cameraPositionInitial'] = cameraSettings;
           break;
         }
@@ -396,7 +388,7 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   }
 
   async backToDefault() {
-    this.cameraService.backToDefault();
+    this.babylonService.cameraManager.resetCamera();
     this.setLightBackground();
     this.setPreview();
     if (this.initialSettingsMode) {
@@ -417,13 +409,11 @@ export class ObjectFeatureSettingsComponent implements OnInit {
 
     const positionVector = new Vector3(camera.position.x, camera.position.y, camera.position.z);
     const targetVector = new Vector3(camera.target.x, camera.target.y, camera.target.z);
-    this.cameraService.setDefaultPosition(
-      positionVector.x, positionVector.y, positionVector.z,
-      targetVector.x, targetVector.y, targetVector.z);
 
-    this.cameraService.moveCameraToTarget(positionVector);
-    this.cameraService.arcRotateCamera.setTarget(targetVector);
-    this.cameraPositionInitial = this.cameraService.getActualCameraPosInitialView();
+    this.babylonService.cameraManager.updateDefaults(positionVector, targetVector);
+    this.babylonService.cameraManager.moveActiveCameraToPosition(positionVector);
+    this.babylonService.cameraManager.setActiveCameraTarget(targetVector);
+    this.cameraPositionInitial = this.babylonService.cameraManager.getInitialPosition();
   }
 
   private async setLightBackground() {
@@ -463,14 +453,14 @@ export class ObjectFeatureSettingsComponent implements OnInit {
       this.activeModel.settings.preview !== '') {
       this.preview = this.activeModel.settings.preview;
     } else {
-      this.cameraService.backToDefault();
+      this.babylonService.cameraManager.resetCamera();
       await this.createMissingInitialDefaultScreenshot();
     }
   }
 
   private async createMissingInitialDefaultScreenshot() {
     await new Promise<string>((resolve, reject) =>
-      this.cameraService.createPreviewScreenshot(400)
+      this.babylonService.createPreviewScreenshot(400)
         .then(screenshot => {
           if (!this.activeModel || !this.activeModel.settings) {
             console.warn('No this.activeModel', this);

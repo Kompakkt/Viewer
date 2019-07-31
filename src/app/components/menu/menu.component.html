@@ -30,7 +30,7 @@
       <span>Quality</span>
     </button>
 
-    <button mat-menu-item (click)="cameraService.createScreenshot();">
+    <button mat-menu-item (click)="babylonService.createScreenshot();">
       <mat-icon>camera</mat-icon>
       <span>Screenshot</span>
     </button>
@@ -45,7 +45,7 @@
   <!-- Cameras Submenu -->
   <mat-menu #cameras="matMenu">
 
-    <button mat-menu-item (click)="cameraService.backToDefault();">Reset Camera</button>
+    <button mat-menu-item (click)="babylonService.cameraManager.resetCamera();">Reset Camera</button>
 
   </mat-menu>
   <!-- / Cameras Submenu -->

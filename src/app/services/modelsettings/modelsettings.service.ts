@@ -3,7 +3,6 @@ import { Animation, Axis, Color3, DynamicTexture, Mesh, MeshBuilder, Quaternion,
 import { ColorEvent } from 'ngx-color';
 
 import { BabylonService } from '../babylon/babylon.service';
-import { CameraService } from '../camera/camera.service';
 import { ProcessingService } from '../processing/processing.service';
 
 @Injectable({
@@ -45,7 +44,6 @@ export class ModelsettingsService {
   private rotQuat = new Quaternion();
 
   constructor(private babylonService: BabylonService,
-    private cameraService: CameraService,
     private processingService: ProcessingService) {
 
     this.processingService.Observables.actualModelMeshes.subscribe(actualModelMeshes => {
@@ -92,8 +90,11 @@ export class ModelsettingsService {
     this.width = this.initialSize.x.toFixed(2);
     this.depth = this.initialSize.z.toFixed(2);
 
-    this.cameraService.setUpperRadiusLimit(Math.max(this.max.x, this.max.y, this.max.z) * this.scalingFactor * 5);
-    this.cameraService.setDefaultPosition(2.7, 1.3, Math.max(this.max.x, this.max.y, this.max.z) + 50, 0, 0, 0);
+    // TODO: Check if needed
+    //this.cameraService.setUpperRadiusLimit(Math.max(this.max.x, this.max.y, this.max.z) * this.scalingFactor * 5);
+    const pos = new Vector3(2.7, 1.3, Math.max(this.max.x, this.max.y, this.max.z) + 50);
+    const target = new Vector3(0, 0, 0);
+    this.babylonService.cameraManager.updateDefaults(pos, target);
   }
 
   private async setSettings(scalingFactor, rotX, rotY, rotZ) {
@@ -289,7 +290,8 @@ export class ModelsettingsService {
 
   public async decomposeAfterSetting() {
     if (this.center) {
-      this.cameraService.setUpperRadiusLimit(Math.max(this.max.x, this.max.y, this.max.z) * this.scalingFactor * 5);
+      // TODO: Check if needed
+      //this.cameraService.setUpperRadiusLimit(Math.max(this.max.x, this.max.y, this.max.z) * this.scalingFactor * 5);
 
       for (let _i = 0; _i < this.actualModelMeshes.length; _i++) {
         const mesh = this.actualModelMeshes[_i];

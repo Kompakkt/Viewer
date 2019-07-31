@@ -3,7 +3,6 @@ import {Vector3} from 'babylonjs';
 
 import {AnnotationService} from '../../../services/annotation/annotation.service';
 import {BabylonService} from '../../../services/babylon/babylon.service';
-import {CameraService} from '../../../services/camera/camera.service';
 
 @Component({
   selector: 'app-annotationwalkthrough',
@@ -15,8 +14,7 @@ export class AnnotationwalkthroughComponent implements OnInit {
   public title = 'Annotation Walkthrough';
   private actualRanking = 0;
 
-  constructor(private cameraService: CameraService,
-              public annotationService: AnnotationService,
+  constructor(public annotationService: AnnotationService,
               private babylonService: BabylonService) {
   }
 
@@ -40,17 +38,16 @@ export class AnnotationwalkthroughComponent implements OnInit {
 
     this.title = this.annotationService.getCurrentAnnotations()[index].body.content.title;
 
-    let camera;
-    camera = this.annotationService.getCurrentAnnotations()[index].body.content.relatedPerspective;
+    const perspective = this.annotationService.getCurrentAnnotations()[index].body.content.relatedPerspective;
 
-    if (camera !== undefined) {
+    if (perspective !== undefined) {
       const positionVector =
-        new Vector3(camera.position.x, camera.position.y, camera.position.z);
+        new Vector3(perspective.position.x, perspective.position.y, perspective.position.z);
       const targetVector =
-        new Vector3(camera.target.x, camera.target.y, camera.target.z);
+        new Vector3(perspective.target.x, perspective.target.y, perspective.target.z);
 
-      this.cameraService.moveCameraToTarget(positionVector);
-      this.cameraService.arcRotateCamera.setTarget(targetVector);
+      this.babylonService.cameraManager.moveActiveCameraToPosition(positionVector);
+      this.babylonService.cameraManager.getActiveCamera().setTarget(targetVector);
     }
 
     this.annotationService.setSelectedAnnotation(
