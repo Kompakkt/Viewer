@@ -41,13 +41,6 @@ export class CameraService {
     this.arcRotateCamera.collisionRadius = new Vector3(4, 4, 4);
   }
 
-  // VR BUTTON
-  public createVrHelperInCamera(): void {
-    this.babylonService.createVRHelper();
-    const vrHelper = this.babylonService.getVRHelper();
-    if (vrHelper) vrHelper.enterVR();
-  }
-
   public createArcRotateCam(alpha: number, beta: number,
                             radius: number, scene?: Scene): ArcRotateCamera {
     return new ArcRotateCamera('arcRotateCamera',
@@ -155,28 +148,6 @@ export class CameraService {
         this.arcRotateCamera, positionVector, ['alpha', 'beta', 'radius']));
 
     this.scene.beginAnimation(this.arcRotateCamera, 0, 30, false, 1, () => {});
-  }
-
-  public moveVRCameraToTarget(positionVector: Vector3) {
-    if (!this.scene.activeCamera) {
-      throw new Error('ActiveCamera missing');
-      console.error(this);
-      return;
-    }
-
-    this.scene.activeCamera.animations.push(
-      ...this.createAnimationsForCamera(
-        this.scene.activeCamera, positionVector,
-        ['position.x', 'position.y', 'position.z']));
-
-    this.scene.beginAnimation(this.scene.activeCamera, 0, 30, false, 1, () => {})
-      .onAnimationEndObservable
-      .add(() => {
-        // FOR VR-HUD
-        // console.log("Active-Camera - 0 Sek After Animation");
-        // console.log(this.scene.activeCamera.position);
-        this.babylonService.vrJump = true;
-      });
   }
 
   public getActualCameraPosAnnotation() {

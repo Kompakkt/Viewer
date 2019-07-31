@@ -1,7 +1,7 @@
 /* tslint:disable:max-line-length */
 import { DOCUMENT } from '@angular/common';
-import { ComponentFactoryResolver, ComponentRef, EventEmitter, Inject, Injectable, Injector, Output, ViewContainerRef } from '@angular/core';
-import { AbstractMesh, ActionManager, Analyser, Axis, Color3, Color4, Engine, ExecuteCodeAction, Layer, Mesh, MeshBuilder, Quaternion, Scene, SceneLoader, SceneSerializer, Sound, Space, StandardMaterial, Tags, Texture, Tools, TransformNode, Vector3, VideoTexture, VRExperienceHelper } from 'babylonjs';
+import { ComponentFactoryResolver, ComponentRef, Inject, Injectable, Injector, ViewContainerRef } from '@angular/core';
+import { AbstractMesh, ActionManager, Analyser, Axis, Color4, Engine, ExecuteCodeAction, Layer, Mesh, MeshBuilder, Quaternion, Scene, SceneLoader, SceneSerializer, Sound, Space, StandardMaterial, Tags, Texture, Tools, TransformNode, Vector3, VideoTexture } from 'babylonjs';
 import { AdvancedDynamicTexture, Control, Slider, StackPanel, TextBlock } from 'babylonjs-gui';
 import 'babylonjs-loaders';
 import { ReplaySubject } from 'rxjs';
@@ -17,17 +17,6 @@ import { LoadingScreen } from './loadingscreen';
   providedIn: 'root',
 })
 export class BabylonService {
-
-  // VR
-  @Output() vrModeIsActive: EventEmitter<boolean> = new EventEmitter();
-  public isVRModeActive = false;
-  private VRHelper: VRExperienceHelper | undefined;
-  private actualControl: AbstractMesh | undefined;
-  private selectingControl = false;
-  private selectedControl = false;
-  // FOR VR-HUD
-  public vrJump = false;
-  // VR END
 
   private canvas: HTMLCanvasElement;
   private CanvasSubject = new ReplaySubject<HTMLCanvasElement>();
@@ -120,59 +109,12 @@ export class BabylonService {
         }
       }
 
-      // VR-Annotation-Text-Walk
-      if (this.actualControl) {
-        if (this.selectingControl && !this.selectedControl) {
-          this.actualControl.scaling.x += 0.005;
-          this.actualControl.scaling.y += 0.005;
-          // TODO: diffuseColor does not exist on type Material
-          if (this.actualControl.material) {
-            this.actualControl.material['diffuseColor'] = Color3.Red();
-          }
-
-          if (this.actualControl.scaling.x >= 1.5) {
-            this.selectedControl = true;
-          }
-        }
-        if (this.selectedControl) {
-          this.actualControl.metadata = '1';
-          this.actualControl.scaling.x = 1;
-          this.actualControl.scaling.y = 1;
-          // TODO: diffuseColor does not exist on type Material
-          if (this.actualControl.material) {
-            this.actualControl.material['diffuseColor'] = Color3.Black();
-          }
-          this.selectedControl = false;
-          this.actualControl = undefined;
-        }
-      }
       // Annotation_Marker -- Fixed_Size_On_Zoom
       // const _cam = this.scene.getCameraByName('arcRotateCamera');
       if (_cam && _cam['radius']) {
         const radius = Math.abs(_cam['radius']);
         this.scene.getMeshesByTags('plane', mesh => mesh.scalingDeterminant = radius / 35);
         this.scene.getMeshesByTags('label', mesh => mesh.scalingDeterminant = radius / 35);
-      }
-      // FOR VR-HUD
-      const _activeCamera = this.scene.activeCamera;
-      if (this.vrJump && _activeCamera) {
-        this.vrJump = false;
-        let i = 1;
-        this.scene.getMeshesByTags('control', mesh => {
-
-          const newPosition = new Vector3();
-          if ((i % 2) !== 0) {
-            newPosition.x = _activeCamera.position.x - 5;
-            newPosition.y = _activeCamera.position.y;
-            newPosition.z = _activeCamera.position.z;
-            i++;
-          } else {
-            newPosition.x = _activeCamera.position.x + 5;
-            newPosition.y = _activeCamera.position.y;
-            newPosition.z = _activeCamera.position.z;
-          }
-          mesh.setAbsolutePosition(newPosition);
-        });
       }
     });
 
@@ -247,65 +189,6 @@ export class BabylonService {
 
   public hideMesh(tag: string, visibility: boolean) {
     this.scene.getMeshesByTags(tag, mesh => mesh.isVisible = visibility);
-  }
-
-  public createVRHelper() {
-
-    const vrButton = this.document.getElementById('vrbutton') as HTMLButtonElement;
-    this.VRHelper = this.scene.createDefaultVRExperience({
-      // Camera für VR ohne Cardboard!
-      createDeviceOrientationCamera: false,
-      // createDeviceOrientationCamera: false,
-      useCustomVRButton: true,
-      customVRButton: vrButton,
-    });
-
-    // this.VRHelper.gazeTrackerMesh = Mesh.CreateSphere("sphere1", 32, 0.1, this.scene);
-    this.VRHelper.enableInteractions();
-    // this.VRHelper.displayGaze = true;
-
-    this.VRHelper.onNewMeshSelected.add(mesh => {
-
-      switch (mesh.name) {
-
-        case 'controlPrevious':
-          this.selectingControl = true;
-          this.actualControl = mesh;
-          this.selectingControl = true;
-          break;
-
-        case 'controlNext':
-          this.selectingControl = true;
-          this.actualControl = mesh;
-          this.selectingControl = true;
-          break;
-
-        default:
-          this.selectingControl = false;
-          this.selectedControl = false;
-
-          if (this.actualControl) {
-            this.actualControl.scaling.x = 1;
-            this.actualControl.scaling.y = 1;
-            this.actualControl = undefined;
-          }
-      }
-    });
-
-    this.VRHelper.onEnteringVRObservable.add(() => {
-      this.vrModeIsActive.emit(true);
-      this.isVRModeActive = true;
-    });
-    this.VRHelper.onExitingVRObservable.add(() => {
-      this.vrModeIsActive.emit(false);
-      this.isVRModeActive = false;
-    });
-
-    return this.VRHelper;
-  }
-
-  public getVRHelper() {
-    return this.VRHelper;
   }
 
   private clearScene() {

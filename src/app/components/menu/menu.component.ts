@@ -18,7 +18,6 @@ export class MenuComponent implements OnInit {
 
   // external
   public isLoggedIn = false;
-  public isVRModeActive: boolean;
     // available quality of object
   public high = '';
   public medium = '';
@@ -39,12 +38,6 @@ export class MenuComponent implements OnInit {
     iconRegistry.addSvgIcon(
       'cardboard',
       sanitizer.bypassSecurityTrustResourceUrl('assets/img/google-cardboard.svg'));
-
-    this.isVRModeActive = this.babylonService.isVRModeActive;
-
-    this.babylonService.vrModeIsActive.subscribe(isActive => {
-      this.isVRModeActive = isActive;
-    });
 
     this.processingService.loggedIn.subscribe(isLoggedIn => {
       this.isLoggedIn = isLoggedIn;

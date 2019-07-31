@@ -1,5 +1,4 @@
-<div [style.visibility]="!isVRModeActive ? 'visible' : 'hidden'">
-
+<div>
   <button mat-icon-button (click)="overlayService.toggleCollectionsOverview()"
           [class.active]="overlayService.collectionsOverview | async"
           matTooltip="Catalogue"
@@ -58,13 +57,6 @@
     <button mat-menu-item *ngIf="low !== ''" (click)="processingService.updateModelQuality('low')">Low</button>
   </mat-menu>
   <!-- / Quality Submenu -->
-
-  <!-- VR Button -->
-  <button id="vrbutton"
-          mat-icon-button (click)="cameraService.createVrHelperInCamera()"
-          matTooltip="VR Camera" matTooltipPosition="above">
-    <mat-icon aria-label="VR Camera" svgIcon="cardboard"></mat-icon>
-  </button>
 
   <!-- Fullscreen Buttons -->
   <button *ngIf="fullscreenCapable" mat-icon-button (click)="toggleFullscreen()"
