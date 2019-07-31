@@ -6,7 +6,7 @@ import {ReplaySubject} from 'rxjs/internal/ReplaySubject';
 import {environment} from '../../../environments/environment';
 import {ICompilation, IModel} from '../../interfaces/interfaces';
 import {BabylonService} from '../babylon/babylon.service';
-import {LoadingscreenhandlerService} from '../babylon/loadingscreenhandler.service';
+import {LoadingscreenhandlerService} from '../babylon/loadingscreen';
 import {MessageService} from '../message/message.service';
 import {MetadataService} from '../metadata/metadata.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';

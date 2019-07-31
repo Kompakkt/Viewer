@@ -9,8 +9,7 @@ import { RenderCanvasComponent } from '../../components/render-canvas/render-can
 
 import { I3DModelContainer, IAudioContainer, IImageContainer, IVideoContainer } from './container.interfaces';
 import { load3DModel, loadAudio, loadImage, loadVideo } from './loading-strategies';
-import { LoadingScreen } from './loadingscreen';
-import { LoadingscreenhandlerService } from './loadingscreenhandler.service';
+import { LoadingScreen, LoadingscreenhandlerService } from './loadingscreen';
 import { afterAudioRender, beforeAudioRender, beforeVideoRender } from './render-strategies';
 /* tslint:enable:max-line-length */
 
