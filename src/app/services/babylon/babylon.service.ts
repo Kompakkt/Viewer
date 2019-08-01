@@ -188,14 +188,14 @@ export class BabylonService {
     }
   }
 
-  public loadEntity(rootUrl: string, mediaType = 'entity', extension = 'babylon') {
+  public loadEntity(rootUrl: string, mediaType = 'model', extension = 'babylon') {
 
     this.engine.displayLoadingUI();
     this.clearScene();
     // TODO: manage mediaType via Observable
     this.mediaType = mediaType;
 
-    if (this.mediaType !== 'entity') {
+    if (this.mediaType !== 'entity' && this.mediaType !== 'model') {
       this.cameraManager.setActiveCameraTo2D();
     } else {
       this.cameraManager.resetCamera();
@@ -239,6 +239,7 @@ export class BabylonService {
           });
         break;
       case 'entity':
+      case 'model':
       default:
         return load3DEntity(rootUrl, extension, this.scene)
           .then(result => {

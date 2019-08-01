@@ -465,6 +465,7 @@ export class ProcessingService {
         const _url = URL + newEntity.processed[this.quality];
         const mediaType = newEntity.mediaType;
         switch (newEntity.mediaType) {
+          case 'model':
           case 'entity':
             await this.babylonService.loadEntity(_url, mediaType, extension)
               .then(() => {

@@ -12,10 +12,10 @@ export class MediaTypePipe implements PipeTransform {
     const response: string[] = [];
 
     items.forEach(item => {
-
       if (item.mediaType) {
         switch (item.mediaType) {
           case 'entity':
+          case 'model':
             if (entity) {
               response.push(item);
             }
