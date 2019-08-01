@@ -12,23 +12,23 @@ export class MediaBrowserComponent implements OnInit {
   @Output() addMedia = new EventEmitter();
 
   public url = '';
-  public objects: any;
+  public entities: any;
   public description = '';
 
   public addExternalImage = false;
-  public addCollectionObject = false;
+  public addCollectionEntity = false;
 
   constructor(public processingService: ProcessingService) {
   }
 
   ngOnInit() {
     this.processingService.Observables.actualCollection.subscribe(actualCollection => {
-      this.objects = actualCollection;
+      this.entities = actualCollection;
     });
   }
 
   private hideBrowser() {
-    this.addExternalImage = this.addCollectionObject = false;
+    this.addExternalImage = this.addCollectionEntity = false;
   }
 
   addImage(address, text) {
@@ -37,10 +37,10 @@ export class MediaBrowserComponent implements OnInit {
     this.addMedia.emit({mediaType: 'externalImage', url: address, description: text});
   }
 
-  addObject(index) {
+  addEntity(index) {
 
     this.hideBrowser();
-    this.addMedia.emit(this.objects.models[index]);
+    this.addMedia.emit(this.entities.entities[index]);
   }
 
 }

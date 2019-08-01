@@ -20,7 +20,7 @@ import { DialogAnnotationEditorComponent } from '../../dialogs/dialog-annotation
 
 export class AnnotationComponent implements OnInit {
 
-  @Input() modelFileName: string | undefined;
+  @Input() entityFileName: string | undefined;
   @Input() annotation: IAnnotation | undefined;
 
   @ViewChild('annotationContent', { static: false }) private annotationContent;

@@ -17,7 +17,7 @@ export class MenuComponent implements OnInit {
 
   // external
   public isLoggedIn = false;
-    // available quality of object
+    // available quality of entity
   public high = '';
   public medium = '';
   public low = '';
@@ -41,11 +41,11 @@ export class MenuComponent implements OnInit {
       this.isLoggedIn = isLoggedIn;
     });
 
-    this.processingService.Observables.actualModel.subscribe(model => {
-      if (model.processed) {
-        this.high = (model.processed.high) ? model.processed.high : '';
-        this.medium = (model.processed.medium) ? model.processed.medium : '';
-        this.low = (model.processed.low) ? model.processed.low : '';
+    this.processingService.Observables.actualEntity.subscribe(entity => {
+      if (entity.processed) {
+        this.high = (entity.processed.high) ? entity.processed.high : '';
+        this.medium = (entity.processed.medium) ? entity.processed.medium : '';
+        this.low = (entity.processed.low) ? entity.processed.low : '';
       }
     });
   }

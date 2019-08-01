@@ -14,7 +14,7 @@ export class DataService {
     return this.pouchdb.allDocs({ include_docs: true });
   }
 
-  public async findAnnotations(model: string, compilation?: string): Promise<IAnnotation[]> {
+  public async findAnnotations(entity: string, compilation?: string): Promise<IAnnotation[]> {
     const allDocs = await this.fetch();
     const annotationList: IAnnotation[] = [];
     allDocs.rows.forEach(annotation => {
@@ -26,10 +26,10 @@ export class DataService {
       if (isAnnotation(annotation)) {
         const correctCompilation = (compilation)
           ? annotation.target.source.relatedCompilation === compilation : true;
-        const correctModel = annotation.target.source.relatedModel === model;
+        const correctEntity = annotation.target.source.relatedEntity === entity;
 
-        if (!correctModel || !correctCompilation) {
-          throw new Error('Model or Compilation undefined');
+        if (!correctEntity || !correctCompilation) {
+          throw new Error('Entity or Compilation undefined');
           console.error(this, annotation);
           return;
         }
@@ -37,7 +37,7 @@ export class DataService {
         annotationList.push(annotation);
       }
     });
-    console.log(allDocs.rows, annotationList, model, compilation);
+    console.log(allDocs.rows, annotationList, entity, compilation);
     return annotationList;
   }
 

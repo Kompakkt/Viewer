@@ -1,38 +1,39 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
-import {MatDialog} from '@angular/material';
-import {Vector3} from 'babylonjs';
-import {ColorEvent} from 'ngx-color';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { MatDialog } from '@angular/material';
+import { Vector3 } from 'babylonjs';
+import { ColorEvent } from 'ngx-color';
 
 // tslint:disable-next-line:max-line-length
-import { settings2D, settingsFallback, settingsKompakktLogo, settingsModel } from '../../../assets/settings/settings';
-import {IModel} from '../../interfaces/interfaces';
-import {BabylonService} from '../../services/babylon/babylon.service';
-import {LightService} from '../../services/light/light.service';
-import {MessageService} from '../../services/message/message.service';
-import {ModelsettingsService} from '../../services/modelsettings/modelsettings.service';
-import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
-import {OverlayService} from '../../services/overlay/overlay.service';
-import {ProcessingService} from '../../services/processing/processing.service';
-import {UserdataService} from '../../services/userdata/userdata.service';
+import { settings2D, settingsFallback, settingsKompakktLogo, settingsEntity } from '../../../assets/settings/settings';
+import { IEntity } from '../../interfaces/interfaces';
+import { BabylonService } from '../../services/babylon/babylon.service';
+import { LightService } from '../../services/light/light.service';
+import { MessageService } from '../../services/message/message.service';
+import { EntitySettingsService } from '../../services/modelsettings/modelsettings.service';
+import { MongohandlerService } from '../../services/mongohandler/mongohandler.service';
+import { OverlayService } from '../../services/overlay/overlay.service';
+import { ProcessingService } from '../../services/processing/processing.service';
+import { UserdataService } from '../../services/userdata/userdata.service';
 // tslint:disable-next-line:max-line-length
-import {DialogMeshsettingsComponent} from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
+import { DialogMeshsettingsComponent } from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
+import { environment } from '../../../environments/environment';
 
 @Component({
-  selector: 'app-object-feature-settings',
+  selector: 'app-entity-feature-settings',
   templateUrl: './object-feature-settings.component.html',
   styleUrls: ['./object-feature-settings.component.scss'],
 })
 
-export class ObjectFeatureSettingsComponent implements OnInit {
+export class EntityFeatureSettingsComponent implements OnInit {
 
   @ViewChild('stepper', { static: false }) stepper;
 
-  public activeModel: IModel | undefined;
+  public activeEntity: IEntity | undefined;
   private preview: string | undefined;
   private setEffect = false;
   private isDefault = false;
-  private isModelOwner = false;
-  public isSingleModel = false;
+  private isEntityOwner = false;
+  public isSingleEntity = false;
   private isFinished = false;
   private initialSettingsMode = false;
   public showHelpers = false;
@@ -42,7 +43,7 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   public showPreview = false;
   public showBackground = false;
   public showLights = false;
-  public isFallbackModelLoaded = false;
+  public isFallbackEntityLoaded = false;
   public mediaType: string | undefined;
 
   private cameraPositionInitial: {
@@ -63,14 +64,14 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   private ambientlightDownintensity: number | undefined;
 
   constructor(private overlayService: OverlayService,
-              private babylonService: BabylonService,
-              private lightService: LightService,
-              private mongohandlerService: MongohandlerService,
-              private message: MessageService,
-              private processingService: ProcessingService,
-              public modelSettingsService: ModelsettingsService,
-              public dialog: MatDialog,
-              private userdataService: UserdataService,
+    private babylonService: BabylonService,
+    private lightService: LightService,
+    private mongohandlerService: MongohandlerService,
+    private message: MessageService,
+    private processingService: ProcessingService,
+    public entitySettingsService: EntitySettingsService,
+    public dialog: MatDialog,
+    private userdataService: UserdataService,
   ) {
   }
 
@@ -80,12 +81,12 @@ export class ObjectFeatureSettingsComponent implements OnInit {
 
     this.processingService.loaded.subscribe(isLoaded => {
       if (isLoaded) {
-        this.activeModel = this.processingService.getCurrentModel();
-        if (!this.activeModel) {
-          console.warn('No this.activeModel', this);
+        this.activeEntity = this.processingService.getCurrentEntity();
+        if (!this.activeEntity) {
+          console.warn('No this.activeEntity', this);
           return;
         }
-        this.isFinished = this.activeModel.finished;
+        this.isFinished = this.activeEntity.finished;
         this.setSettings();
         // camera should not move through mesh
         this.babylonService.getScene().meshes
@@ -93,20 +94,20 @@ export class ObjectFeatureSettingsComponent implements OnInit {
       }
     });
 
-    this.processingService.defaultModelLoaded.subscribe(isDefaultLoad => {
+    this.processingService.defaultEntityLoaded.subscribe(isDefaultLoad => {
       this.isDefault = isDefaultLoad;
     });
 
-    this.userdataService.modelOwner.subscribe(isModelOwner => {
-      this.isModelOwner = isModelOwner;
+    this.userdataService.entityOwner.subscribe(isEntityOwner => {
+      this.isEntityOwner = isEntityOwner;
     });
 
     this.processingService.collectionLoaded.subscribe(collection => {
-      this.isSingleModel = !collection;
+      this.isSingleEntity = !collection;
     });
 
-    this.processingService.fallbackModelLoaded.subscribe(fallback => {
-      this.isFallbackModelLoaded = fallback;
+    this.processingService.fallbackEntityLoaded.subscribe(fallback => {
+      this.isFallbackEntityLoaded = fallback;
     });
 
     this.processingService.Observables.actualMediaType.subscribe(mediaType => {
@@ -195,13 +196,13 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   }
 
   public resetHelpers() {
-    if (!this.activeModel || !this.activeModel.settings) {
-      console.warn('No this.activeModel', this);
+    if (!this.activeEntity || !this.activeEntity.settings) {
+      console.warn('No this.activeEntity', this);
       return;
     }
-    this.modelSettingsService.resetVisualSettingsHelper();
-    this.babylonService.setBackgroundColor(this.activeModel.settings.background.color);
-    this.setEffect = this.activeModel.settings.background.effect;
+    this.entitySettingsService.resetVisualSettingsHelper();
+    this.babylonService.setBackgroundColor(this.activeEntity.settings.background.color);
+    this.setEffect = this.activeEntity.settings.background.effect;
     this.babylonService.setBackgroundImage(this.setEffect);
     this.showHelpers = false;
 
@@ -209,12 +210,12 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   }
 
   public resetMeshSize() {
-    this.modelSettingsService.resetMeshSize();
+    this.entitySettingsService.resetMeshSize();
     this.babylonService.cameraManager.resetCamera();
   }
 
   public resetMeshRotation() {
-    this.modelSettingsService.resetMeshRotation();
+    this.entitySettingsService.resetMeshRotation();
     this.babylonService.cameraManager.resetCamera();
   }
 
@@ -262,12 +263,12 @@ export class ObjectFeatureSettingsComponent implements OnInit {
     return new Promise<string>((resolve, reject) =>
       this.babylonService.createPreviewScreenshot(400)
         .then(screenshot => {
-      this.preview = screenshot;
-      resolve(screenshot);
-    },        error => {
-      this.message.error(error);
-      reject(error);
-    }));
+          this.preview = screenshot;
+          resolve(screenshot);
+        }, error => {
+          this.message.error(error);
+          reject(error);
+        }));
   }
 
   /*
@@ -304,31 +305,32 @@ export class ObjectFeatureSettingsComponent implements OnInit {
    */
 
   private async setSettings() {
-    if (!this.activeModel || !this.activeModel.settings) {
-      console.warn('No this.activeModel', this);
-      return;
-    }
     // Settings available?
-    if (this.activeModel.settings === undefined ||
-      this.activeModel.settings.preview === undefined ||
-      this.activeModel.settings.cameraPositionInitial === undefined ||
-      this.activeModel.settings.background === undefined ||
-      this.activeModel.settings.lights === undefined ||
-      this.activeModel.settings.rotation === undefined ||
-      this.activeModel.settings.scale === undefined) {
+    if (!this.activeEntity || !this.activeEntity.settings ||
+      this.activeEntity.settings === undefined ||
+      this.activeEntity.settings.preview === undefined ||
+      this.activeEntity.settings.cameraPositionInitial === undefined ||
+      this.activeEntity.settings.background === undefined ||
+      this.activeEntity.settings.lights === undefined ||
+      this.activeEntity.settings.rotation === undefined ||
+      this.activeEntity.settings.scale === undefined) {
       // Settings missing? => Cases: Upload || Default, Fallback
       const upload = await this.createSettings();
       if (upload) {
         await this.initialiseUpload();
       }
     }
-    await this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
-                                                 this.activeModel.settings.rotation.x,
-                                                 this.activeModel.settings.rotation.y,
-                                                 this.activeModel.settings.rotation.z);
-    await this.setCamera();
-    await this.setLightBackground();
-    await this.setPreview();
+    if (this.activeEntity && this.activeEntity.settings) {
+      await this.entitySettingsService.loadSettings(
+        this.activeEntity.settings.scale,
+        this.activeEntity.settings.rotation.x,
+        this.activeEntity.settings.rotation.y,
+        this.activeEntity.settings.rotation.z);
+      await this.setCamera();
+      await this.setLightBackground();
+      await this.setPreview();
+    }
+
   }
 
   private createSettings(): boolean {
@@ -339,12 +341,12 @@ export class ObjectFeatureSettingsComponent implements OnInit {
     if (this.isDefault) {
       console.log('DEFAULT');
       settings = settingsKompakktLogo;
-    } else if (this.isFallbackModelLoaded) {
+    } else if (this.isFallbackEntityLoaded) {
       settings = settingsFallback;
-   } else {
+    } else {
       switch (this.mediaType) {
-        case 'model': {
-          settings = settingsModel;
+        case 'entity': {
+          settings = settingsEntity;
           break;
         }
         case 'audio': {
@@ -360,31 +362,31 @@ export class ObjectFeatureSettingsComponent implements OnInit {
           break;
         }
         default: {
-          settings = settingsModel;
+          settings = settingsEntity;
         }
       }
       upload = true;
     }
-    if (this.activeModel) {
-      this.activeModel['settings'] = settings;
+    if (this.activeEntity) {
+      this.activeEntity['settings'] = settings;
     }
     console.log('SETTINGS', settings);
     return upload;
-    }
+  }
 
   private async initialiseUpload() {
     const searchParams = location.search;
     const queryParams = new URLSearchParams(searchParams);
     const isDragDrop = queryParams.get('dragdrop');
 
-    if ((isDragDrop || this.isModelOwner) && !this.isFinished) {
+    if ((isDragDrop || this.isEntityOwner) && !this.isFinished) {
       this.initialSettingsMode = true;
-      await this.modelSettingsService.createVisualSettings();
+      await this.entitySettingsService.createVisualSettings();
 
-      if (this.activeModel && this.activeModel.settings) {
+      if (this.activeEntity && this.activeEntity.settings) {
       this.cameraPositionInitial = this.babylonService.cameraManager.getInitialPosition();
       const cameraSettings: any[] = [this.cameraPositionInitial];
-      this.activeModel['settings']['cameraPositionInitial'] = cameraSettings;
+      this.activeEntity['settings']['cameraPositionInitial'] = cameraSettings;
       }
       this.overlayService.activateSettingsTab();
     }
@@ -400,15 +402,15 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   }
 
   private async setCamera() {
-    if (!this.activeModel || !this.activeModel.settings) {
-      console.warn('No this.activeModel', this);
+    if (!this.activeEntity || !this.activeEntity.settings) {
+      console.warn('No this.activeEntity', this);
       return;
     }
     const camera =
-      Array.isArray(this.activeModel.settings.cameraPositionInitial)
-        ? (this.activeModel.settings.cameraPositionInitial as any[])
+      Array.isArray(this.activeEntity.settings.cameraPositionInitial)
+        ? (this.activeEntity.settings.cameraPositionInitial as any[])
           .find(obj => obj.cameraType === 'arcRotateCam')
-        : this.activeModel.settings.cameraPositionInitial;
+        : this.activeEntity.settings.cameraPositionInitial;
 
     const positionVector = new Vector3(camera.position.x, camera.position.y, camera.position.z);
     const targetVector = new Vector3(camera.target.x, camera.target.y, camera.target.z);
@@ -420,27 +422,27 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   }
 
   private async setLightBackground() {
-    if (!this.activeModel || !this.activeModel.settings) {
-      console.warn('No this.activeModel', this);
+    if (!this.activeEntity || !this.activeEntity.settings) {
+      console.warn('No this.activeEntity', this);
       return;
     }
     // Background
-    this.babylonService.setBackgroundColor(this.activeModel.settings.background.color);
-    this.setEffect = this.activeModel.settings.background.effect;
+    this.babylonService.setBackgroundColor(this.activeEntity.settings.background.color);
+    this.setEffect = this.activeEntity.settings.background.effect;
     this.babylonService.setBackgroundImage(this.setEffect);
 
     // Lights
-    const pointLight = this.activeModel.settings.lights.filter(obj => obj.type === 'PointLight')[0];
+    const pointLight = this.activeEntity.settings.lights.filter(obj => obj.type === 'PointLight')[0];
     this.lightService.createPointLight('pointlight', pointLight.position);
     this.lightService.setLightIntensity('pointlight', pointLight.intensity);
 
-    const hemisphericLightUp = this.activeModel.settings.lights.filter(
+    const hemisphericLightUp = this.activeEntity.settings.lights.filter(
       obj => obj.type === 'HemisphericLight' && obj.position.y === 1)[0];
     this.lightService.createAmbientlightUp('ambientlightUp', hemisphericLightUp.position);
     this.lightService.setLightIntensity('ambientlightUp', hemisphericLightUp.intensity);
     this.ambientlightUpintensity = hemisphericLightUp.intensity;
 
-    const hemisphericLightDown = this.activeModel.settings.lights.filter(
+    const hemisphericLightDown = this.activeEntity.settings.lights.filter(
       obj => obj.type === 'HemisphericLight' && obj.position.y === -1)[0];
     this.lightService.createAmbientlightDown('ambientlightDown', hemisphericLightDown.position);
     this.lightService.setLightIntensity('ambientlightDown', hemisphericLightDown.intensity);
@@ -448,13 +450,13 @@ export class ObjectFeatureSettingsComponent implements OnInit {
   }
 
   private async setPreview() {
-    if (!this.activeModel || !this.activeModel.settings) {
-      console.warn('No this.activeModel', this);
+    if (!this.activeEntity || !this.activeEntity.settings) {
+      console.warn('No this.activeEntity', this);
       return;
     }
-    if (this.activeModel.settings.preview !== undefined &&
-      this.activeModel.settings.preview !== '') {
-      this.preview = this.activeModel.settings.preview;
+    if (this.activeEntity.settings.preview !== undefined &&
+      this.activeEntity.settings.preview !== '') {
+      this.preview = this.activeEntity.settings.preview;
     } else {
       this.babylonService.cameraManager.resetCamera();
       await this.createMissingInitialDefaultScreenshot();
@@ -465,12 +467,12 @@ export class ObjectFeatureSettingsComponent implements OnInit {
     await new Promise<string>((resolve, reject) =>
       this.babylonService.createPreviewScreenshot(400)
         .then(screenshot => {
-          if (!this.activeModel || !this.activeModel.settings) {
-            console.warn('No this.activeModel', this);
+          if (!this.activeEntity || !this.activeEntity.settings) {
+            console.warn('No this.activeEntity', this);
             return;
           }
           this.preview = screenshot;
-          this.activeModel.settings.preview = screenshot;
+          this.activeEntity.settings.preview = screenshot;
           resolve(screenshot);
         })
         .catch(error => {
@@ -512,43 +514,50 @@ export class ObjectFeatureSettingsComponent implements OnInit {
         },
       ],
       rotation: {
-        x: this.modelSettingsService.rotationX,
-        y: this.modelSettingsService.rotationY,
-        z: this.modelSettingsService.rotationZ,
+        x: this.entitySettingsService.rotationX,
+        y: this.entitySettingsService.rotationY,
+        z: this.entitySettingsService.rotationZ,
       },
-      scale: this.modelSettingsService.scalingFactor,
+      scale: this.entitySettingsService.scalingFactor,
     };
     settings.lights.push(this.lightService.getPointlightData());
 
-    if (!this.activeModel || !this.activeModel.settings) {
-      console.warn('No this.activeModel', this);
+    if (!this.activeEntity || !this.activeEntity.settings) {
+      console.warn('No this.activeEntity', this);
       return;
     }
 
-    this.activeModel.settings = settings;
+    this.activeEntity.settings = settings;
 
-    if (!this.isDefault && !this.isFallbackModelLoaded) {
+    const searchParams = location.search;
+    const queryParams = new URLSearchParams(searchParams);
+    const isDragDrop = queryParams.get('dragdrop');
+
+    if (isDragDrop) {
+      console.log(this.activeEntity, settings);
+      window.top.postMessage({ type: 'settings', settings }, environment.repository);
+    } else if (!this.isDefault && !this.isFallbackEntityLoaded) {
       this.mongohandlerService
-        .updateSettings(this.activeModel._id, settings)
+        .updateSettings(this.activeEntity._id, settings)
         .then(result => {
           console.log(result);
-          if (!this.activeModel || !this.activeModel.settings) {
-            console.warn('No this.activeModel', this);
+          if (!this.activeEntity || !this.activeEntity.settings) {
+            console.warn('No this.activeEntity', this);
             return;
           }
 
           if (this.initialSettingsMode) {
 
             this.initialSettingsMode = false;
-            this.modelSettingsService.decomposeAfterSetting();
+            this.entitySettingsService.decomposeAfterSetting();
             // allow Annotations
             this.overlayService.deactivateMeshSettings();
 
-            this.modelSettingsService.loadSettings(
-              this.activeModel.settings.scale,
-              this.activeModel.settings.rotation.x,
-              this.activeModel.settings.rotation.y,
-              this.activeModel.settings.rotation.z);
+            this.entitySettingsService.loadSettings(
+              this.activeEntity.settings.scale,
+              this.activeEntity.settings.rotation.x,
+              this.activeEntity.settings.rotation.y,
+              this.activeEntity.settings.rotation.z);
           }
         });
     }

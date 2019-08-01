@@ -13,9 +13,9 @@
         <br>
 
         <div *ngIf="isExternal">
-          <div> Object from {{service}}</div>
+          <div> Entity from {{service}}</div>
           <br>
-          <div>Find Object in {{service}} here: <br>
+          <div>Find Entity in {{service}} here: <br>
             <a [href]="metadata['digobj_externalLink'][0]['externalLink_value']" target="_blank">Link to Landingpage</a>
           </div>
           <br>
@@ -115,7 +115,7 @@
 
           <br>
           <br>
-          <div *ngIf="!isDefaultModelLoaded">Find Object in ObjectsRepository here: <br>
+          <div *ngIf="!isDefaultEntityLoaded">Find Entity in EntitiesRepository here: <br>
             <a [href]="baseURL + metadata['_id']" target="_blank">Link to Landingpage</a>
           </div>
           <br>

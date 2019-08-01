@@ -43,7 +43,7 @@ export class DialogPasswordComponent implements OnInit {
       })
       .catch(error => {
         console.error(error);
-        this.message.error('Connection to object server refused.');
+        this.message.error('Connection to entity server refused.');
         this.dialogRef.close();
       });
 

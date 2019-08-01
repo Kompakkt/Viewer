@@ -22,7 +22,7 @@ export interface IImageContainer {
   material?: StandardMaterial;
 }
 
-export interface I3DModelContainer {
+export interface I3DEntityContainer {
   meshes: AbstractMesh[];
   particleSystems: IParticleSystem[];
   skeletons: Skeleton[];

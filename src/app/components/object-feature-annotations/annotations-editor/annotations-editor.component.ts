@@ -21,7 +21,7 @@ export class AnnotationsEditorComponent implements OnInit {
 
   // external
   public isCollectionLoaded = false;
-  public isDefaultModelLoaded = false;
+  public isDefaultEntityLoaded = false;
   public isAnnotatingAllowed = false;
   public isBroadcastingAllowed = false;
   public isBroadcasting = false;
@@ -39,7 +39,7 @@ export class AnnotationsEditorComponent implements OnInit {
   ngOnInit() {
     this.isDefaultAnnotationsSource = true;
     this.isCollectionLoaded = this.processingService.isCollectionLoaded;
-    this.isDefaultModelLoaded = this.processingService.isDefaultModelLoaded;
+    this.isDefaultEntityLoaded = this.processingService.isDefaultEntityLoaded;
     this.isAnnotatingAllowed = this.annotationService.isAnnotatingAllowed;
     this.isCollectionOwner = this.userDataService.isCollectionOwner;
 
@@ -51,8 +51,8 @@ export class AnnotationsEditorComponent implements OnInit {
       this.isCollectionLoaded = isLoaded;
     });
 
-    this.processingService.defaultModelLoaded.subscribe(isLoaded => {
-      this.isDefaultModelLoaded = isLoaded;
+    this.processingService.defaultEntityLoaded.subscribe(isLoaded => {
+      this.isDefaultEntityLoaded = isLoaded;
     });
 
     this.annotationService.annnotatingAllowed.subscribe(allowed => {

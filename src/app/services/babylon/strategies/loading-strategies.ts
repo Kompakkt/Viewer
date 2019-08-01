@@ -14,7 +14,7 @@ const updateLoadingUI = (engine: Engine) => (progress: SceneLoaderProgressEvent)
   }
 };
 
-export const load3DModel = (rootUrl: string, extension: string, scene: Scene) => {
+export const load3DEntity = (rootUrl: string, extension: string, scene: Scene) => {
   const rootFolder = Tools.GetFolderPath(rootUrl);
   const filename = Tools.GetFilename(rootUrl);
 

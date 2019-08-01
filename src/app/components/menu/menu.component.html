@@ -8,7 +8,7 @@
 
   <button mat-icon-button (click)="overlayService.toggleEditor()"
           [class.active]="overlayService.editor | async"
-          matTooltip="Object Features" matTooltipPosition="above">
+          matTooltip="Entity Features" matTooltipPosition="above">
     <mat-icon aria-label="Edit scene and annotations">edit</mat-icon>
   </button>
 
@@ -52,9 +52,9 @@
 
   <!-- Quality Submenu -->
   <mat-menu #quality="matMenu">
-    <button mat-menu-item *ngIf="high !== ''" (click)="processingService.updateModelQuality('high')">High</button>
-    <button mat-menu-item *ngIf="medium !== ''" (click)="processingService.updateModelQuality('medium')">Medium</button>
-    <button mat-menu-item *ngIf="low !== ''" (click)="processingService.updateModelQuality('low')">Low</button>
+    <button mat-menu-item *ngIf="high !== ''" (click)="processingService.updateEntityQuality('high')">High</button>
+    <button mat-menu-item *ngIf="medium !== ''" (click)="processingService.updateEntityQuality('medium')">Medium</button>
+    <button mat-menu-item *ngIf="low !== ''" (click)="processingService.updateEntityQuality('low')">Low</button>
   </mat-menu>
   <!-- / Quality Submenu -->
 

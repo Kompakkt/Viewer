@@ -29,7 +29,7 @@ export class ActionService {
       }));
   }
 
-  public pickableModel(mesh: IMesh, pickable: boolean) {
+  public pickableEntity(mesh: IMesh, pickable: boolean) {
     mesh.isPickable = pickable;
   }
 

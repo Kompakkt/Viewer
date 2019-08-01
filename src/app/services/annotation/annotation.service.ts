@@ -10,7 +10,7 @@ import {environment} from '../../../environments/environment';
 import {DialogGetUserDataComponent} from '../../components/dialogs/dialog-get-user-data/dialog-get-user-data.component';
 // tslint:disable-next-line:max-line-length
 import {DialogShareAnnotationComponent} from '../../components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
-import {IAnnotation, ICompilation, IModel} from '../../interfaces/interfaces';
+import {IAnnotation, ICompilation, IEntity} from '../../interfaces/interfaces';
 import {ActionService} from '../action/action.service';
 import {BabylonService} from '../babylon/babylon.service';
 import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
@@ -28,7 +28,7 @@ import {UserdataService} from '../userdata/userdata.service';
 export class AnnotationService {
 
   private isDemoMode: boolean;
-  private isDefaultModelLoaded: boolean;
+  private isDefaultEntityLoaded: boolean;
 
   public isBroadcasting = false;
 
@@ -38,7 +38,7 @@ export class AnnotationService {
 
   public isCollectionInputSelected: boolean;
   private isCollectionLoaded: boolean;
-  private isObjectFeaturesOpen = false;
+  private isEntityFeaturesOpen = false;
 
   private _annotations: IAnnotation[] = [];
   public readonly annotations = new Proxy(this._annotations, {
@@ -57,9 +57,9 @@ export class AnnotationService {
     },
   });
 
-  private actualModel: IModel | undefined;
+  private actualEntity: IEntity | undefined;
   public actualCompilation: ICompilation | undefined;
-  private actualModelMeshes: Mesh[] = [];
+  private actualEntityMeshes: Mesh[] = [];
 
   private isannotationSourceCollection = false;
   @Output() annotationSourceCollection: EventEmitter<boolean> = new EventEmitter();
@@ -87,18 +87,18 @@ export class AnnotationService {
 
     this.isCollectionLoaded = this.processingService.isCollectionLoaded;
     this.isMeshSettingsMode = this.overlayService.editorIsOpen;
-    this.isDemoMode = this.processingService.isDefaultModelLoaded
-      || this.processingService.isFallbackModelLoaded;
+    this.isDemoMode = this.processingService.isDefaultEntityLoaded
+      || this.processingService.isFallbackEntityLoaded;
 
     this.isCollectionInputSelected = false;
-    this.isDefaultModelLoaded = this.processingService.isDefaultModelLoaded;
+    this.isDefaultEntityLoaded = this.processingService.isDefaultEntityLoaded;
 
-    this.processingService.Observables.actualModel.subscribe(actualModel => {
-      this.actualModel = actualModel;
+    this.processingService.Observables.actualEntity.subscribe(actualEntity => {
+      this.actualEntity = actualEntity;
     });
 
-    this.processingService.Observables.actualModelMeshes.subscribe(actualModelMeshes => {
-      this.actualModelMeshes = actualModelMeshes;
+    this.processingService.Observables.actualEntityMeshes.subscribe(actualEntityMeshes => {
+      this.actualEntityMeshes = actualEntityMeshes;
       this.loadAnnotations();
     });
 
@@ -112,7 +112,7 @@ export class AnnotationService {
     });
 
     this.overlayService.editor.subscribe(open => {
-      this.isObjectFeaturesOpen = open;
+      this.isEntityFeaturesOpen = open;
       this.setAnnotatingAllowance();
     });
 
@@ -121,12 +121,12 @@ export class AnnotationService {
       this.setAnnotatingAllowance();
     });
 
-    this.processingService.defaultModelLoaded.subscribe(defaultLoad => {
+    this.processingService.defaultEntityLoaded.subscribe(defaultLoad => {
       this.isDemoMode = defaultLoad;
-      this.isDefaultModelLoaded = defaultLoad;
+      this.isDefaultEntityLoaded = defaultLoad;
     });
 
-    this.processingService.fallbackModelLoaded.subscribe(fallback => {
+    this.processingService.fallbackEntityLoaded.subscribe(fallback => {
       this.isDemoMode = fallback;
     });
 
@@ -180,12 +180,12 @@ export class AnnotationService {
   }
 
   public async loadAnnotations() {
-    if (!this.actualModel) {
-      throw new Error('ActualModel missing');
+    if (!this.actualEntity) {
+      throw new Error('ActualEntity missing');
       console.error(this);
       return;
     }
-    Tags.AddTagsTo(this.actualModelMeshes, this.actualModel._id);
+    Tags.AddTagsTo(this.actualEntityMeshes, this.actualEntity._id);
     // this.annotations = [];
     this.selectedAnnotation.next('');
     this.editModeAnnotation.next('');
@@ -214,9 +214,9 @@ export class AnnotationService {
 
   private getAnnotationsfromServerDB() {
     const serverAnnotations: IAnnotation[] = [];
-    // Annotationen vom Server des aktuellen Modells...
-    if (this.actualModel && this.actualModel.annotationList) {
-      (this.actualModel.annotationList
+    // Annotationen vom Server des aktuellen Entityls...
+    if (this.actualEntity && this.actualEntity.annotationList) {
+      (this.actualEntity.annotationList
         .filter(annotation => annotation && annotation._id) as IAnnotation[])
         .forEach((annotation: IAnnotation) => serverAnnotations.push(annotation));
     }
@@ -231,14 +231,14 @@ export class AnnotationService {
   }
 
   private async getAnnotationsfromLocalDB() {
-    let pouchAnnotations: IAnnotation[] = (this.actualModel)
-      ? await this.fetchAnnotations(this.actualModel._id)
+    let pouchAnnotations: IAnnotation[] = (this.actualEntity)
+      ? await this.fetchAnnotations(this.actualEntity._id)
       : [];
-    // Annotationen aus PouchDB des aktuellen Modells und der aktuellen Compilation (if existing)
+    // Annotationen aus PouchDB des aktuellen Entityls und der aktuellen Compilation (if existing)
 
     if (this.isCollectionLoaded) {
-      const _compilationAnnotations = (this.actualModel && this.actualCompilation)
-        ? await this.fetchAnnotations(this.actualModel._id && this.actualCompilation._id)
+      const _compilationAnnotations = (this.actualEntity && this.actualCompilation)
+        ? await this.fetchAnnotations(this.actualEntity._id && this.actualCompilation._id)
         : [];
       pouchAnnotations = pouchAnnotations.concat(_compilationAnnotations);
     }
@@ -352,9 +352,9 @@ export class AnnotationService {
     }
   }
 
-  // Die Annotationsfunktionalität wird zum aktuellen Modell hinzugefügt
+  // Die Annotationsfunktionalität wird zum aktuellen Entityl hinzugefügt
   public initializeAnnotationMode() {
-    this.actualModelMeshes.forEach(mesh => {
+    this.actualEntityMeshes.forEach(mesh => {
       this.actionService.createActionManager(mesh, ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
     });
     this.annotationMode(false);
@@ -365,12 +365,12 @@ export class AnnotationService {
 
     this.babylon.createPreviewScreenshot(400)
       .then(detailScreenshot => {
-        if (!this.actualModel) {
-          throw new Error(`this.actualModel not defined: ${this.actualModel}`);
+        if (!this.actualEntity) {
+          throw new Error(`this.actualEntity not defined: ${this.actualEntity}`);
           console.error('AnnotationService:', this);
           return;
         }
-        const generatedId = this.mongo.generateObjectId();
+        const generatedId = this.mongo.generateEntityId();
 
         const personName = this.userdataService.currentUserData.fullname;
         const personID = this.userdataService.currentUserData._id;
@@ -422,7 +422,7 @@ export class AnnotationService {
           },
           target: {
             source: {
-              relatedModel: this.actualModel._id,
+              relatedEntity: this.actualEntity._id,
               relatedCompilation: (this.isCollectionLoaded && this.actualCompilation)
                 ? this.actualCompilation._id : '',
             },
@@ -560,10 +560,10 @@ export class AnnotationService {
     }
   }
 
-  private async fetchAnnotations(model: string, compilation?: string): Promise<IAnnotation[]> {
+  private async fetchAnnotations(entity: string, compilation?: string): Promise<IAnnotation[]> {
     return new Promise<IAnnotation[]>(async (resolve, _) => {
       const annotationList: IAnnotation[] = await this.dataService
-        .findAnnotations(model, (compilation) ? compilation : '');
+        .findAnnotations(entity, (compilation) ? compilation : '');
       resolve(annotationList);
     });
   }
@@ -603,14 +603,14 @@ export class AnnotationService {
     dialogConfig.disableClose = true;
     dialogConfig.autoFocus = true;
 
-    if (!this.actualModel) {
-      throw new Error('ActualModel missing');
+    if (!this.actualEntity) {
+      throw new Error('ActualEntity missing');
       console.error(this);
       return;
     }
 
     dialogConfig.data = {
-      modelId: this.actualModel._id,
+      entityId: this.actualEntity._id,
     };
 
     const dialogRef = this.dialog.open(DialogShareAnnotationComponent, dialogConfig);
@@ -639,10 +639,10 @@ export class AnnotationService {
                                 annotationLength: number): any {
     console.log('Erstelle die Kopie');
 
-    const generatedId = this.mongo.generateObjectId();
+    const generatedId = this.mongo.generateEntityId();
 
-    if (!this.actualModel) {
-      throw new Error('ActualModel missing');
+    if (!this.actualEntity) {
+      throw new Error('ActualEntity missing');
       console.error(this);
       return;
     }
@@ -664,7 +664,7 @@ export class AnnotationService {
       body: annotation.body,
       target: {
         source: {
-          relatedModel: this.actualModel._id,
+          relatedEntity: this.actualEntity._id,
           relatedCompilation: collectionId,
         },
         selector: annotation.target.selector,
@@ -674,10 +674,10 @@ export class AnnotationService {
 
   public setAnnotatingAllowance() {
     let emitBool = false;
-    emitBool = (this.isObjectFeaturesOpen && !this.isMeshSettingsMode);
+    emitBool = (this.isEntityFeaturesOpen && !this.isMeshSettingsMode);
     if (emitBool && !this.isCollectionInputSelected) {
-      emitBool = (this.userdataService.isModelOwner && !this.processingService.isCollectionLoaded ||
-        this.isDefaultModelLoaded);
+      emitBool = (this.userdataService.isEntityOwner && !this.processingService.isCollectionLoaded ||
+        this.isDefaultEntityLoaded);
     }
     this.isAnnotatingAllowed = emitBool;
     this.annotationMode(emitBool);
@@ -690,10 +690,10 @@ export class AnnotationService {
     this.setAnnotatingAllowance();
   }
 
-  // Das aktuelle Modell wird anklickbar und damit annotierbar
+  // Das aktuelle Entityl wird anklickbar und damit annotierbar
   public annotationMode(value: boolean) {
-    this.actualModelMeshes.forEach(mesh => {
-      this.actionService.pickableModel(mesh, value);
+    this.actualEntityMeshes.forEach(mesh => {
+      this.actionService.pickableEntity(mesh, value);
     });
   }
 
@@ -720,7 +720,7 @@ export class AnnotationService {
       `![alt Kompakkt Logo](https://raw.githubusercontent.com/DH-Cologne/Kompakkt/master/src/assets/img/kompakkt-logo.png)
       Hi! I am an annotation of this cool logo. Please feel free to add a friend for me by clicking on the edit button in the corner on the right bottom and double click this 3D logo!`;
     const fallbackTitle = 'Hi there!';
-    const fallbackMessage = 'maybe this is not what you were looking for. Unfortunately we cannot display the requested object but we are working on it. But we have something better as you can see... This model is from https://sketchfab.com/mark2580';
+    const fallbackMessage = 'maybe this is not what you were looking for. Unfortunately we cannot display the requested entity but we are working on it. But we have something better as you can see... This entity is from https://sketchfab.com/mark2580';
     /* tslint:enable:max-line-length */
 
     return {
@@ -751,8 +751,8 @@ export class AnnotationService {
         type: 'annotation',
         content: {
           type: 'text',
-          title: (this.processingService.isFallbackModelLoaded) ? fallbackTitle : defaultTitle,
-          description: (this.processingService.isFallbackModelLoaded) ? fallbackMessage : defaultMessage,
+          title: (this.processingService.isFallbackEntityLoaded) ? fallbackTitle : defaultTitle,
+          description: (this.processingService.isFallbackEntityLoaded) ? fallbackMessage : defaultMessage,
           relatedPerspective: {
             cameraType: 'arcRotateCam',
             position: {
@@ -765,17 +765,17 @@ export class AnnotationService {
               y: 0,
               z: 0,
             },
-            preview: (this.processingService.isFallbackModelLoaded) ? fallbackPreview : defaultPreview,
+            preview: (this.processingService.isFallbackEntityLoaded) ? fallbackPreview : defaultPreview,
           },
         },
       },
       target: {
         source: {
-          relatedModel: 'Cube',
+          relatedEntity: 'Cube',
         },
         selector: {
-          referencePoint: (this.processingService.isFallbackModelLoaded) ? fallbackRefPoint : defaultRefPoint,
-          referenceNormal: (this.processingService.isFallbackModelLoaded) ? fallbackRefNormal : defaultRefNormal,
+          referencePoint: (this.processingService.isFallbackEntityLoaded) ? fallbackRefPoint : defaultRefPoint,
+          referenceNormal: (this.processingService.isFallbackEntityLoaded) ? fallbackRefNormal : defaultRefNormal,
         },
       },
     };

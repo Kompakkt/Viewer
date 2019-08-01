@@ -19,21 +19,21 @@ import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-passwor
 
   // external
   public isLoggedIn = false;
-  public isObjectCategory = false;
+  public isEntityCategory = false;
   public isCollectionLoaded = false;
 
   // internal
   public filterPersonalCollections = false;
-  public filterPersonalObjects = false;
+  public filterPersonalEntities = false;
 
-  public showModels = true;
+  public showEntities = true;
   public showImages = true;
   public showAudio = true;
   public showVideo = true;
   public showText = true;
 
   private identifierCollection;
-  private identifierObject;
+  private identifierEntity;
 
   constructor(public processingService: ProcessingService,
               private message: MessageService,
@@ -45,7 +45,7 @@ import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-passwor
 
     this.isLoggedIn = this.processingService.isLoggedIn;
     this.isCollectionLoaded = this.processingService.isCollectionLoaded;
-    this.isObjectCategory = true;
+    this.isEntityCategory = true;
 
     this.processingService.loggedIn.subscribe(loggedIn => {
       this.isLoggedIn = loggedIn;
@@ -67,10 +67,10 @@ import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-passwor
     // for other values check:
     // const mrButton: MatRadioButton = mrChange.source;
     if (mrChange.value === 'col') {
-      this.isObjectCategory = false;
+      this.isEntityCategory = false;
     }
     if (mrChange.value === 'obj') {
-      this.isObjectCategory = true;
+      this.isEntityCategory = true;
     }
   }
 
@@ -98,7 +98,7 @@ import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-passwor
       })
       .catch(error => {
         console.error(error);
-        this.message.error('Connection to object server refused.');
+        this.message.error('Connection to entity server refused.');
       });
   }
 
@@ -122,13 +122,13 @@ import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-passwor
     });
   }
 
-  searchObjectByID(event?) {
+  searchEntityByID(event?) {
     let id = '';
-    event ? id = event.value._id : id = this.identifierObject;
-    const isloadable = this.processingService.selectModelByID(id);
+    event ? id = event.value._id : id = this.identifierEntity;
+    const isloadable = this.processingService.selectEntityByID(id);
     if (isloadable) {
     } else {
-      this.message.error('Can not find Model with ID ' + id + '.');
+      this.message.error('Can not find Entity with ID ' + id + '.');
     }
   }
 

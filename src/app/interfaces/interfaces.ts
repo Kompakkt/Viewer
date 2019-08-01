@@ -1,5 +1,5 @@
 // Metadata related
-export interface IUnresolvedObject {
+export interface IUnresolvedEntity {
   _id: string;
 }
 
@@ -56,7 +56,7 @@ export interface IMetaDataTag {
   value: string;
 }
 
-export interface IMetaDataPhysicalObject {
+export interface IMetaDataPhysicalEntity {
   _id: string;
   phyobj_title: string;
   phyobj_description: string;
@@ -79,7 +79,7 @@ export interface IMetaDataPhysicalObject {
   phyobj_institution_existing: Array<IMetaDataInstitution | null>;
 }
 
-export interface IMetaDataDigitalObject {
+export interface IMetaDataDigitalEntity {
   _id: string;
   digobj_type: string;
   digobj_title: string;
@@ -87,7 +87,7 @@ export interface IMetaDataDigitalObject {
   digobj_licence: string;
   digobj_discipline: string[];
   digobj_tags: IMetaDataTag[];
-  digobj_objecttype: string;
+  digobj_entitytype: string;
   digobj_externalIdentifier: any[];
   digobj_dimensions: any[];
   digobj_creation: any[];
@@ -95,7 +95,7 @@ export interface IMetaDataDigitalObject {
   digobj_metadata_files: any[];
   digobj_files: Array<IFile | null>;
   digobj_statement: string;
-  phyObjs: Array<IMetaDataPhysicalObject | null>;
+  phyObjs: Array<IMetaDataPhysicalEntity | null>;
 
   digobj_rightsownerSelector: number;
   digobj_rightsowner: Array<IMetaDataPerson | IMetaDataInstitution | null>;
@@ -132,7 +132,7 @@ export interface ILDAPData {
   role: string;
 
   data: {
-    [key: string]: Array<string | null | IModel | IAnnotation | ICompilation>;
+    [key: string]: Array<string | null | IEntity | IAnnotation | ICompilation>;
   };
 }
 
@@ -196,7 +196,7 @@ export interface ITarget {
 
 export interface ISource {
   link?: string;
-  relatedModel: string;
+  relatedEntity: string;
   relatedCompilation?: string;
 }
 
@@ -205,7 +205,7 @@ export interface ISelector {
   referenceNormal: IVector;
 }
 
-// Object related
+// Entity related
 export interface IFile {
   file_name: string;
   file_link: string;
@@ -213,15 +213,15 @@ export interface IFile {
   file_format: string;
 }
 
-export interface IModel {
+export interface IEntity {
   _id: string;
   annotationList: Array<IAnnotation | null>;
   name: string;
   files: IFile[] | null;
   finished: boolean;
   ranking?: number;
-  relatedDigitalObject?: any;
-  relatedModelOwners?: IRelatedOwner[];
+  relatedDigitalEntity?: any;
+  relatedEntityOwners?: IRelatedOwner[];
   online: boolean;
   isExternal?: boolean;
   externalService?: string;
@@ -263,7 +263,7 @@ export interface ICompilation {
   description: string;
   relatedOwner?: IRelatedOwner;
   password?: string;
-  models: Array<IModel | null | IUnresolvedObject>;
+  entities: Array<IEntity | null | IUnresolvedEntity>;
   annotationList: Array<IAnnotation | null>;
 }
 

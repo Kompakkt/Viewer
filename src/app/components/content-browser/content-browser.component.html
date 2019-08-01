@@ -19,13 +19,13 @@
         <mat-radio-group aria-label="Select Browsing Category" (change)="changeCategory($event)"
                          [disabled]="!processingService.Observables.collections | async">
           <!--TODO is this the correct way to check if collections exist? -->
-          <mat-radio-button value="obj" [checked]=isObjectCategory>Object</mat-radio-button>
+          <mat-radio-button value="obj" [checked]=isEntityCategory>Entity</mat-radio-button>
           <mat-radio-button value="col">Collection</mat-radio-button>
         </mat-radio-group>
       </mat-card-content>
     </mat-card>
 
-    <div *ngIf="!isObjectCategory">
+    <div *ngIf="!isEntityCategory">
 
       <mat-card>
 
@@ -75,23 +75,23 @@
       </mat-card>
     </div>
 
-    <div *ngIf="isObjectCategory && processingService.Observables.models | async">
+    <div *ngIf="isEntityCategory && processingService.Observables.entities | async">
 
       <mat-card>
 
         <mat-card-header>
-          Select by List of Objects
+          Select by List of Entities
         </mat-card-header>
 
         <mat-card-content>
 
-          <mat-checkbox id="checkbox-show-my-objects" *ngIf="this.userdataService.userOwnedFinishedModels.length"
-                        [checked]="filterPersonalObjects"
-                        (change)="filterPersonalObjects = !filterPersonalObjects">Show only my Objects
+          <mat-checkbox id="checkbox-show-my-entities" *ngIf="this.userdataService.userOwnedFinishedEntities.length"
+                        [checked]="filterPersonalEntities"
+                        (change)="filterPersonalEntities = !filterPersonalEntities">Show only my Entities
           </mat-checkbox>
 
-          <mat-checkbox [checked]="showModels"
-                        (change)="showModels = !showModels">Models
+          <mat-checkbox [checked]="showEntities"
+                        (change)="showEntities = !showEntities">Entities
           </mat-checkbox>
 
           <mat-checkbox [checked]="showImages"
@@ -112,14 +112,14 @@
 
           <mat-form-field class="full-width">
             <mat-select
-              (selectionChange)="processingService.fetchAndLoad($event.value._id, undefined, !isObjectCategory)"
-              placeholder="Choose Object">
+              (selectionChange)="processingService.fetchAndLoad($event.value._id, undefined, !isEntityCategory)"
+              placeholder="Choose Entity">
 
-              <mat-option *ngFor="let object of filterPersonalObjects ? this.userdataService.userOwnedFinishedModels
-                : processingService.Observables.models | async
-                | mediaType: showModels:showImages:showAudio:showVideo:showText"
-                          [value]="object">
-                {{object.name}} ({{object.mediaType}})
+              <mat-option *ngFor="let entity of filterPersonalEntities ? this.userdataService.userOwnedFinishedEntities
+                : processingService.Observables.entities | async
+                | mediaType: showEntities:showImages:showAudio:showVideo:showText"
+                          [value]="entity">
+                {{entity.name}} ({{entity.mediaType}})
               </mat-option>
 
             </mat-select>
@@ -131,16 +131,16 @@
 
       <mat-card>
         <mat-card-header>
-          Select Object by ID
+          Select Entity by ID
         </mat-card-header>
 
         <mat-card-content>
 
           <mat-form-field>
-            <input matInput name="identifierModel" #description="ngModel" type="text"
-                   placeholder="What's the ID?" [(ngModel)]="identifierObject">
+            <input matInput name="identifierEntity" #description="ngModel" type="text"
+                   placeholder="What's the ID?" [(ngModel)]="identifierEntity">
           </mat-form-field>
-          <button mat-raised-button (click)="searchObjectByID()">Search it</button>
+          <button mat-raised-button (click)="searchEntityByID()">Search it</button>
 
         </mat-card-content>
 

@@ -1,6 +1,6 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
 
-import {IAnnotation, ICompilation, ILDAPData, ILoginData, IModel, IUserData} from '../../interfaces/interfaces';
+import {IAnnotation, ICompilation, ILDAPData, ILoginData, IEntity, IUserData} from '../../interfaces/interfaces';
 import {MessageService} from '../message/message.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
 import {ProcessingService} from '../processing/processing.service';
@@ -10,21 +10,21 @@ import {ProcessingService} from '../processing/processing.service';
 })
 export class UserdataService {
 
-  public isModelOwner = false;
+  public isEntityOwner = false;
   public isCollectionOwner = false;
 
-  @Output() modelOwner: EventEmitter<boolean> = new EventEmitter();
+  @Output() entityOwner: EventEmitter<boolean> = new EventEmitter();
   @Output() collectionOwner: EventEmitter<boolean> = new EventEmitter();
 
   public personalCollections: ICompilation[] = [];
-  public userOwnedModels: IModel[] = [];
-  public userOwnedFinishedModels: IModel[] = [];
+  public userOwnedEntities: IEntity[] = [];
+  public userOwnedFinishedEntities: IEntity[] = [];
   public userOwnedAnnotations: IAnnotation[] = [];
 
   public currentUserData: IUserData | ILDAPData = {
     fullname: 'Guest',
     username: 'guest',
-    _id: this.mongoService.generateObjectId(),
+    _id: this.mongoService.generateEntityId(),
   };
 
   public cachedLoginData: ILoginData = {
@@ -49,12 +49,12 @@ export class UserdataService {
         .catch(() => console.warn('Not logged in'));
     });
 
-    this.processingService.Observables.actualModel.subscribe(actualModel => {
-      if (actualModel._id && this.userOwnedModels.length && this.loggedIn) {
-        this.checkOwnerState(actualModel._id);
+    this.processingService.Observables.actualEntity.subscribe(actualEntity => {
+      if (actualEntity._id && this.userOwnedEntities.length && this.loggedIn) {
+        this.checkOwnerState(actualEntity._id);
       } else {
-        this.isModelOwner = false;
-        this.modelOwner.emit(false);
+        this.isEntityOwner = false;
+        this.entityOwner.emit(false);
       }
     });
 
@@ -82,13 +82,13 @@ export class UserdataService {
             this.message.info('User is not logged in');
             this.currentUserData = {
               fullname: 'Guest', username: 'guest',
-              _id: this.mongoService.generateObjectId(),
+              _id: this.mongoService.generateEntityId(),
             };
           } else if (!userData || !userData.data) {
             this.message.info('No valid userdata received');
             this.currentUserData = {
               fullname: 'Guest', username: 'guest',
-              _id: this.mongoService.generateObjectId(),
+              _id: this.mongoService.generateEntityId(),
             };
           } else {
             this.currentUserData = userData;
@@ -97,13 +97,13 @@ export class UserdataService {
               console.warn('User has no data property', userData, this);
               return;
             }
-            if (userData.data.model) {
-              (userData.data.model.filter(model => model) as IModel[])
-                .forEach(model => {
-                  if (!this.userOwnedModels.find(_m => _m._id === model._id)) {
-                    this.userOwnedModels.push(model);
-                    if (model.finished) {
-                      this.userOwnedFinishedModels.push(model);
+            if (userData.data.entity) {
+              (userData.data.entity.filter(entity => entity) as IEntity[])
+                .forEach(entity => {
+                  if (!this.userOwnedEntities.find(_m => _m._id === entity._id)) {
+                    this.userOwnedEntities.push(entity);
+                    if (entity.finished) {
+                      this.userOwnedFinishedEntities.push(entity);
                     }
                   }
                 });
@@ -125,12 +125,12 @@ export class UserdataService {
                 });
             }
           }
-          console.log('Meine Modelle', this.userOwnedFinishedModels, 'compis', this.personalCollections, 'meine Annos', this.userOwnedAnnotations);
+          console.log('Meine Entityle', this.userOwnedFinishedEntities, 'compis', this.personalCollections, 'meine Annos', this.userOwnedAnnotations);
         })
         .catch(error => {
           console.error(error);
-          this.message.error('Connection to object server refused.');
-          reject('Connection to object server refused.');
+          this.message.error('Connection to entity server refused.');
+          reject('Connection to entity server refused.');
         });
     });
   }
@@ -138,12 +138,12 @@ export class UserdataService {
   private checkOwnerState(identifier: string) {
     if (['dragdrop'].includes(identifier)) return true;
 
-    if (this.userOwnedModels.find(obj => obj && obj._id === identifier)) {
-      this.isModelOwner = true;
-      this.modelOwner.emit(true);
+    if (this.userOwnedEntities.find(obj => obj && obj._id === identifier)) {
+      this.isEntityOwner = true;
+      this.entityOwner.emit(true);
     } else {
-      this.isModelOwner = false;
-      this.modelOwner.emit(false);
+      this.isEntityOwner = false;
+      this.entityOwner.emit(false);
     }
   }
 

@@ -8,15 +8,9 @@ import 'babylonjs-loaders';
 
 import { RenderCanvasComponent } from '../../components/render-canvas/render-canvas.component';
 
-import {
-  createDefaultCamera,
-  moveCameraToTarget,
-  resetCamera,
-  setCameraTarget,
-  setUpCamera,
-  updateDefaults,
-} from './camera-handler';
-import { I3DModelContainer, IAudioContainer, IImageContainer, IVideoContainer } from './container.interfaces';
+import { createDefaultCamera, moveCameraToTarget, resetCamera, setCameraTarget, updateDefaults, setCameraTo2DMode } from './camera-handler';
+import { I3DEntityContainer, IAudioContainer, IImageContainer, IVideoContainer } from './container.interfaces';
+import { load3DEntity, loadAudio, loadImage, loadVideo } from './strategies/loading-strategies';
 import { LoadingScreen, LoadingscreenhandlerService } from './loadingscreen';
 import { load3DModel, loadAudio, loadImage, loadVideo } from './strategies/loading-strategies';
 import { afterAudioRender, beforeAudioRender, beforeVideoRender } from './strategies/render-strategies';
@@ -41,7 +35,7 @@ export class BabylonService {
   public videoContainer: IVideoContainer;
   public audioContainer: IAudioContainer;
   public imageContainer: IImageContainer;
-  public modelContainer: I3DModelContainer;
+  public entityContainer: I3DEntityContainer;
 
   public cameraManager = {
     getActiveCamera: this.getActiveCamera,
@@ -104,7 +98,7 @@ export class BabylonService {
     this.imageContainer = {
       image: new Texture('', this.scene),
     };
-    this.modelContainer = {
+    this.entityContainer = {
       meshes: [], particleSystems: [],
       skeletons: [], animationGroups: [],
     };
@@ -246,12 +240,13 @@ export class BabylonService {
             }
           });
         break;
+      case 'entity':
       case 'model':
       default:
-        return load3DModel(rootUrl, extension, this.scene)
+        return load3DEntity(rootUrl, extension, this.scene)
           .then(result => {
             if (result) {
-              this.modelContainer = result;
+              this.entityContainer = result;
             } else {
               throw new Error('No video result');
             }

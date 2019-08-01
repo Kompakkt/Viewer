@@ -6,11 +6,11 @@ import {OverlayService} from '../../services/overlay/overlay.service';
 import {ProcessingService} from '../../services/processing/processing.service';
 
 @Component({
-  selector: 'app-object-feature-metadata',
+  selector: 'app-entity-feature-metadata',
   templateUrl: './object-feature-metadata.component.html',
   styleUrls: ['./object-feature-metadata.component.scss'],
 })
-export class ObjectFeatureMetadataComponent implements OnInit {
+export class EntityFeatureMetadataComponent implements OnInit {
 
   @HostBinding('class.is-open') private isOpen = false;
 
@@ -18,11 +18,11 @@ export class ObjectFeatureMetadataComponent implements OnInit {
   public showMetadata = false;
   private actualMetadata_id: string | undefined;
   public isExternal = false;
-  public service = 'Objects Repository';
+  public service = 'Entities Repository';
   public downloadJsonHref: any;
-  public isDefaultModelLoaded: boolean | undefined;
+  public isDefaultEntityLoaded: boolean | undefined;
   // TODO better to set somewhere global
-  public baseURL = 'https://blacklodge.hki.uni-koeln.de/builds/ObjectsRepository/live/#/model-overview?model=';
+  public baseURL = 'https://blacklodge.hki.uni-koeln.de/builds/EntitiesRepository/live/#/entity-overview?entity=';
 
   constructor(private overlayService: OverlayService,
               private metadataService: MetadataService,
@@ -33,16 +33,16 @@ export class ObjectFeatureMetadataComponent implements OnInit {
   ngOnInit() {
     this.overlayService.editor.subscribe(async editorIsOpen => {
         this.isOpen = editorIsOpen;
-        const currentModel = this.processingService.getCurrentModel();
-        if (this.isOpen && currentModel && currentModel.relatedDigitalObject) {
-          if (this.actualMetadata_id !== currentModel.relatedDigitalObject._id) {
-            this.actualMetadata_id = currentModel.relatedDigitalObject._id;
+        const currentEntity = this.processingService.getCurrentEntity();
+        if (this.isOpen && currentEntity && currentEntity.relatedDigitalEntity) {
+          if (this.actualMetadata_id !== currentEntity.relatedDigitalEntity._id) {
+            this.actualMetadata_id = currentEntity.relatedDigitalEntity._id;
             if (this.actualMetadata_id && this.actualMetadata_id !== '') {
               this.metadata = await this.metadataService.fetchMetadata(this.actualMetadata_id);
               this.showMetadata = (this.metadata && this.metadata !== '');
-              this.isExternal = currentModel.dataSource.isExternal;
-              this.service = this.isExternal && currentModel.dataSource.service ?
-                currentModel.dataSource.service : 'Objects Repository';
+              this.isExternal = currentEntity.dataSource.isExternal;
+              this.service = this.isExternal && currentEntity.dataSource.service ?
+                currentEntity.dataSource.service : 'Entities Repository';
             } else {
               this.showMetadata = false;
             }

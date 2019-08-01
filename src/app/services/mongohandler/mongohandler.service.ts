@@ -2,14 +2,14 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { environment } from '../../../environments/environment';
-import { IAnnotation, ICompilation, ILDAPData, IMetaDataDigitalObject, IModel, IServerResponse } from '../../interfaces/interfaces';
+import { IAnnotation, ICompilation, ILDAPData, IMetaDataDigitalEntity, IEntity, IServerResponse } from '../../interfaces/interfaces';
 
 @Injectable({
   providedIn: 'root',
 })
 export class MongohandlerService {
 
-  // Needed for ObjectId gen
+  // Needed for EntityId gen
   /* tslint:disable:no-magic-numbers */
   private genIndex = parseInt((Math.random() * 0xFFFFFF).toString(), 10);
   private MACHINE_ID = Math.floor(Math.random() * 0xFFFFFF);
@@ -46,12 +46,12 @@ export class MongohandlerService {
     return this.get(`api/v1/get/findall/compilation`);
   }
 
-  public async getAllModels(): Promise<IModel[]> {
-    return this.get(`api/v1/get/findall/model`);
+  public async getAllEntities(): Promise<IEntity[]> {
+    return this.get(`api/v1/get/findall/entity`);
   }
 
-  public async getModel(identifier: string): Promise<IModel & IServerResponse> {
-    return this.get(`api/v1/get/find/model/${identifier}`);
+  public async getEntity(identifier: string): Promise<IEntity & IServerResponse> {
+    return this.get(`api/v1/get/find/entity/${identifier}`);
   }
 
   public async getCompilation(identifier: string, password?: string): Promise<ICompilation & IServerResponse> {
@@ -59,8 +59,8 @@ export class MongohandlerService {
       : this.get(`api/v1/get/find/compilation/${identifier}`);
   }
 
-  public async getModelMetadata(identifier: string): Promise<IMetaDataDigitalObject & IServerResponse> {
-    return this.get(`api/v1/get/find/digitalobject/${identifier}`);
+  public async getEntityMetadata(identifier: string): Promise<IMetaDataDigitalEntity & IServerResponse> {
+    return this.get(`api/v1/get/find/digitalentity/${identifier}`);
   }
 
   public async getCurrentUserData(): Promise<ILDAPData & IServerResponse> {
@@ -101,10 +101,10 @@ export class MongohandlerService {
   }
 
   /**
-   * Generates an ObjectId
-   * This is used as fallback when we cannot get an ObjectId from Server
+   * Generates an EntityId
+   * This is used as fallback when we cannot get an EntityId from Server
    */
-  public generateObjectId(): string {
+  public generateEntityId(): string {
     /* tslint:disable:no-magic-numbers */
     const next = () => {
       return this.genIndex = (this.genIndex + 1) % 0xFFFFFF;

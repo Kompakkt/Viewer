@@ -8,9 +8,9 @@ import { ProcessingService } from '../processing/processing.service';
 @Injectable({
   providedIn: 'root',
 })
-export class ModelsettingsService {
+export class EntitySettingsService {
 
-  public actualModelMeshes: Mesh[] = [];
+  public actualEntityMeshes: Mesh[] = [];
   public showBoundingBoxMeshes = false;
   private min = new Vector3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
   private max = new Vector3(Number.MAX_VALUE * -1, Number.MAX_VALUE * -1, Number.MAX_VALUE * -1);
@@ -26,7 +26,7 @@ export class ModelsettingsService {
   public scalingFactor = 1;
 
   private boundingBox: Mesh | undefined;
-  public showBoundingBoxModel = false;
+  public showBoundingBoxEntity = false;
   public height;
   public width;
   public depth;
@@ -46,14 +46,14 @@ export class ModelsettingsService {
   constructor(private babylonService: BabylonService,
     private processingService: ProcessingService) {
 
-    this.processingService.Observables.actualModelMeshes.subscribe(actualModelMeshes => {
-      this.actualModelMeshes = actualModelMeshes;
+    this.processingService.Observables.actualEntityMeshes.subscribe(actualEntityMeshes => {
+      this.actualEntityMeshes = actualEntityMeshes;
     });
   }
 
   /*
   *
-  *   Load Settings for actual Model
+  *   Load Settings for actual Entity
   *
    */
 
@@ -77,8 +77,8 @@ export class ModelsettingsService {
     this.width = 0;
     this.depth = 0;
 
-    for (let _i = 0; _i < this.actualModelMeshes.length; _i++) {
-      const mesh = this.actualModelMeshes[_i];
+    for (let _i = 0; _i < this.actualEntityMeshes.length; _i++) {
+      const mesh = this.actualEntityMeshes[_i];
       this.getMinMax(mesh, true);
     }
   }
@@ -143,20 +143,20 @@ export class ModelsettingsService {
   }
 
   public async decomposeAfterLoading() {
-    await this.unparentModel();
+    await this.unparentEntity();
     await this.destroyCenter();
   }
 
-  private async unparentModel() {
+  private async unparentEntity() {
     if (!this.center) {
       throw new Error('Center missing');
       console.error(this);
       return;
     }
 
-    for (let _i = 0; _i < this.actualModelMeshes.length; _i++) {
+    for (let _i = 0; _i < this.actualEntityMeshes.length; _i++) {
 
-      const mesh = this.actualModelMeshes[_i];
+      const mesh = this.actualEntityMeshes[_i];
 
       this.center.computeWorldMatrix();
       mesh.computeWorldMatrix();
@@ -187,7 +187,7 @@ export class ModelsettingsService {
     await this.generateHelpers();
 
     this.createBoundingBox();
-    this.showBoundingBoxModel = false;
+    this.showBoundingBoxEntity = false;
     if (this.boundingBox) this.boundingBox.visibility = 0;
     this.createWorldAxis(18);
     this.showWorldAxis = false;
@@ -202,12 +202,12 @@ export class ModelsettingsService {
   }
 
   public resetVisualSettingsHelper() {
-    this.showBoundingBoxModel = false;
+    this.showBoundingBoxEntity = false;
     if (this.boundingBox) this.boundingBox.visibility = 0;
 
     this.showBoundingBoxMeshes = false;
-    for (let _i = 0; _i < this.actualModelMeshes.length; _i++) {
-      const mesh = this.actualModelMeshes[_i];
+    for (let _i = 0; _i < this.actualEntityMeshes.length; _i++) {
+      const mesh = this.actualEntityMeshes[_i];
       mesh.showBoundingBox = false;
     }
 
@@ -295,8 +295,8 @@ export class ModelsettingsService {
       // TODO: Check if needed
       //this.cameraService.setUpperRadiusLimit(Math.max(this.max.x, this.max.y, this.max.z) * this.scalingFactor * 5);
 
-      for (let _i = 0; _i < this.actualModelMeshes.length; _i++) {
-        const mesh = this.actualModelMeshes[_i];
+      for (let _i = 0; _i < this.actualEntityMeshes.length; _i++) {
+        const mesh = this.actualEntityMeshes[_i];
         mesh.parent = null;
       }
 
@@ -326,7 +326,7 @@ export class ModelsettingsService {
     this.width = 0;
     this.depth = 0;
 
-    this.showBoundingBoxModel = false;
+    this.showBoundingBoxEntity = false;
 
     this.showGround = false;
     this.scalingFactorGround = 1;
@@ -337,8 +337,8 @@ export class ModelsettingsService {
     this.scalingFactorLocalAxis = 1;
     this.scalingFactorWorldAxis = 1;
 
-    for (let _i = 0; _i < this.actualModelMeshes.length; _i++) {
-      const mesh = this.actualModelMeshes[_i];
+    for (let _i = 0; _i < this.actualEntityMeshes.length; _i++) {
+      const mesh = this.actualEntityMeshes[_i];
       this.getMinMax(mesh, true);
     }
 
@@ -380,8 +380,8 @@ export class ModelsettingsService {
     this.center = MeshBuilder.CreateBox('center', { size: 1 }, this.babylonService.getScene());
     Tags.AddTagsTo(this.center, 'center');
     this.center.isVisible = false;
-    for (let _i = 0; _i < this.actualModelMeshes.length; _i++) {
-      const mesh = this.actualModelMeshes[_i];
+    for (let _i = 0; _i < this.actualEntityMeshes.length; _i++) {
+      const mesh = this.actualEntityMeshes[_i];
       mesh.parent = this.center;
     }
   }
@@ -405,32 +405,32 @@ export class ModelsettingsService {
 
     this.boundingBox.material = new StandardMaterial('boundingBoxMat', this.babylonService.getScene());
     this.boundingBox.material.wireframe = true;
-    this.showBoundingBoxModel = true;
+    this.showBoundingBoxEntity = true;
 
     this.boundingBox.position.x = this.max.x - this.initialSize.x / 2;
     this.boundingBox.position.y = this.max.y - this.initialSize.y / 2;
     this.boundingBox.position.z = this.max.z - this.initialSize.z / 2;
   }
 
-  public handleChangeBoundingBoxModel() {
-    this.showBoundingBoxModel = (this.showBoundingBoxModel) ? false : true;
+  public handleChangeBoundingBoxEntity() {
+    this.showBoundingBoxEntity = (this.showBoundingBoxEntity) ? false : true;
     if (!this.boundingBox) {
       throw new Error('BoundingBox missing');
       console.error(this);
       return;
     }
-    this.boundingBox.visibility = this.showBoundingBoxModel ? 1 : 0;
+    this.boundingBox.visibility = this.showBoundingBoxEntity ? 1 : 0;
   }
 
   private destroyBoundingBox() {
     this.babylonService.getScene().getMeshesByTags('boundingBox').map(mesh => mesh.dispose());
-    this.showBoundingBoxModel = false;
+    this.showBoundingBoxEntity = false;
   }
 
   public handleChangeBoundingBoxMeshes() {
     this.showBoundingBoxMeshes = (this.showBoundingBoxMeshes) ? false : true;
-    for (let _i = 0; _i < this.actualModelMeshes.length; _i++) {
-      const mesh = this.actualModelMeshes[_i];
+    for (let _i = 0; _i < this.actualEntityMeshes.length; _i++) {
+      const mesh = this.actualEntityMeshes[_i];
       mesh.showBoundingBox = this.showBoundingBoxMeshes;
     }
   }

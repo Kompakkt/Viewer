@@ -15,7 +15,7 @@ export class DialogShareAnnotationComponent implements OnInit {
   public targetCollectionId = '';
   public checkPwdMode = false;
   private passwordCollection = '';
-  private modelId = '';
+  private entityId = '';
   private response: any = {
     status: false,
     collectionId: '',
@@ -27,7 +27,7 @@ export class DialogShareAnnotationComponent implements OnInit {
               private dialogRef: MatDialogRef<DialogShareAnnotationComponent>,
               @Inject(MAT_DIALOG_DATA) data) {
 
-    this.modelId = data.modelId;
+    this.entityId = data.entityId;
   }
 
   ngOnInit() {
@@ -43,13 +43,13 @@ export class DialogShareAnnotationComponent implements OnInit {
           if (compilation['_id']) {
             // loaded'
 
-            if (compilation.models.filter(model => model && (model._id === this.modelId)).length !== 0) {
+            if (compilation.entities.filter(entity => entity && (entity._id === this.entityId)).length !== 0) {
               this.response.status = true;
               this.response.collectionId = this.targetCollectionId;
               this.response.annotationListLength = compilation.annotationList ? compilation.annotationList.length : 0;
               this.dialogRef.close(this.response);
             } else {
-              this.message.error('The model of this annotation is not part of the target collection.');
+              this.message.error('The entity of this annotation is not part of the target collection.');
             }
           } else if (compilation['status'] === 'ok'
             && compilation['message'] === 'Password protected compilation') {
@@ -63,7 +63,7 @@ export class DialogShareAnnotationComponent implements OnInit {
         })
         .catch(error => {
           console.error(error);
-          this.message.error('Connection to object server refused.');
+          this.message.error('Connection to entity server refused.');
           // 'missing'
           this.message.error('Can not find Collection with ID ' + this.targetCollectionId + '.');
         });
@@ -93,7 +93,7 @@ export class DialogShareAnnotationComponent implements OnInit {
         })
         .catch(error => {
           console.error(error);
-          this.message.error('Connection to object server refused.');
+          this.message.error('Connection to entity server refused.');
           this.dialogRef.close(this.response);
         });
     }
