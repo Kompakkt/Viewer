@@ -4,11 +4,11 @@ import {AnnotationService} from '../../services/annotation/annotation.service';
 import {OverlayService} from '../../services/overlay/overlay.service';
 
 @Component({
-  selector: 'app-object-features',
+  selector: 'app-entity-features',
   templateUrl: './object-features.component.html',
   styleUrls: ['./object-features.component.scss'],
 })
-export class ObjectFeaturesComponent implements OnInit {
+export class EntityFeaturesComponent implements OnInit {
 
   @HostBinding('class.is-open') private isOpen = false;
   @ViewChild('tabGroup', { static: false }) tabGroup;

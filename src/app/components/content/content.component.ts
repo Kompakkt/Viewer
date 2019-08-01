@@ -14,7 +14,7 @@ export class ContentComponent implements OnInit {
 
   // external
   public isCollectionLoaded = false;
-  public isDefaultModelLoaded = false;
+  public isDefaultEntityLoaded = false;
   public showContentBrowser = false;
 
   constructor(private overlayService: OverlayService,
@@ -25,7 +25,7 @@ export class ContentComponent implements OnInit {
   ngOnInit() {
 
     this.isCollectionLoaded = this.processingService.isCollectionLoaded;
-    this.isDefaultModelLoaded = this.processingService.isDefaultModelLoaded;
+    this.isDefaultEntityLoaded = this.processingService.isDefaultEntityLoaded;
     this.isOpen = this.overlayService.collectionsOverviewIsOpen;
     this.showContentBrowser = this.processingService.isShowCatalogue;
 
@@ -33,8 +33,8 @@ export class ContentComponent implements OnInit {
       this.isCollectionLoaded = isCollectionLoaded;
     });
 
-    this.processingService.defaultModelLoaded.subscribe(isDefaultModelLoaded => {
-      this.isDefaultModelLoaded = isDefaultModelLoaded;
+    this.processingService.defaultEntityLoaded.subscribe(isDefaultEntityLoaded => {
+      this.isDefaultEntityLoaded = isDefaultEntityLoaded;
     });
 
     this.overlayService.collectionsOverview.subscribe(collectionsOverviewIsOpen => {

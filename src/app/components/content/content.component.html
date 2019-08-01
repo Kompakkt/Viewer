@@ -8,36 +8,36 @@
     </div>
   </div>
 
-  <div id="model-overview"
-       *ngIf="processingService.Observables.actualModel | async; let object">
-    <mat-card class="model-card">
+  <div id="entity-overview"
+       *ngIf="processingService.Observables.actualEntity | async; let entity">
+    <mat-card class="entity-card">
       <mat-card-header>
         <mat-card-title>
-          Selected Object: {{object.name}}
+          Selected Entity: {{entity.name}}
         </mat-card-title>
       </mat-card-header>
       <img
-        *ngIf="object.settings && object.settings.preview"
-        src={{object.settings.preview}}>
+        *ngIf="entity.settings && entity.settings.preview"
+        src={{entity.settings.preview}}>
     </mat-card>
   </div>
 
   <div *ngIf="isCollectionLoaded">
         <div class="category">
-          Objects in {{processingService.getCurrentCompilation().name}}
+          Entities in {{processingService.getCurrentCompilation().name}}
         </div>
 
-        <mat-card class="model-card"
-                  *ngFor="let object of processingService.getCurrentCompilation().models">
+        <mat-card class="entity-card"
+                  *ngFor="let entity of processingService.getCurrentCompilation().entities">
           <mat-card-header>
             <mat-card-title>
-              {{object.name}}
+              {{entity.name}}
             </mat-card-title>
           </mat-card-header>
           <img
-            *ngIf="object.settings && object.settings.preview"
-            src={{object.settings.preview}}
-            (click)="processingService.fetchAndLoad(object._id, undefined, true)">
+            *ngIf="entity.settings && entity.settings.preview"
+            src={{entity.settings.preview}}
+            (click)="processingService.fetchAndLoad(entity._id, undefined, true)">
         </mat-card>
     </div>
 

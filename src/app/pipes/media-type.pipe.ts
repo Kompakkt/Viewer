@@ -5,8 +5,8 @@ import {Pipe, PipeTransform} from '@angular/core';
 })
 export class MediaTypePipe implements PipeTransform {
 
-  // cases: model, image, audio, video, text
-  transform(items: any[], model: boolean, image: boolean,
+  // cases: entity, image, audio, video, text
+  transform(items: any[], entity: boolean, image: boolean,
             audio: boolean, video: boolean, text: boolean): any[] {
     if (!items) return [];
     const response: string[] = [];
@@ -15,8 +15,8 @@ export class MediaTypePipe implements PipeTransform {
 
       if (item.mediaType) {
         switch (item.mediaType) {
-          case 'model':
-            if (model) {
+          case 'entity':
+            if (entity) {
               response.push(item);
             }
             break;

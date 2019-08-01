@@ -8,8 +8,8 @@ import 'babylonjs-loaders';
 import { RenderCanvasComponent } from '../../components/render-canvas/render-canvas.component';
 
 import { createDefaultCamera, moveCameraToTarget, resetCamera, setCameraTarget, updateDefaults, setCameraTo2DMode } from './camera-handler';
-import { I3DModelContainer, IAudioContainer, IImageContainer, IVideoContainer } from './container.interfaces';
-import { load3DModel, loadAudio, loadImage, loadVideo } from './strategies/loading-strategies';
+import { I3DEntityContainer, IAudioContainer, IImageContainer, IVideoContainer } from './container.interfaces';
+import { load3DEntity, loadAudio, loadImage, loadVideo } from './strategies/loading-strategies';
 import { LoadingScreen, LoadingscreenhandlerService } from './loadingscreen';
 import { afterAudioRender, beforeAudioRender, beforeVideoRender } from './strategies/render-strategies';
 /* tslint:enable:max-line-length */
@@ -34,7 +34,7 @@ export class BabylonService {
   public videoContainer: IVideoContainer;
   public audioContainer: IAudioContainer;
   public imageContainer: IImageContainer;
-  public modelContainer: I3DModelContainer;
+  public entityContainer: I3DEntityContainer;
 
   public cameraManager = {
     getActiveCamera: this.getActiveCamera,
@@ -97,7 +97,7 @@ export class BabylonService {
     this.imageContainer = {
       image: new Texture('', this.scene),
     };
-    this.modelContainer = {
+    this.entityContainer = {
       meshes: [], particleSystems: [],
       skeletons: [], animationGroups: [],
     };
@@ -188,14 +188,14 @@ export class BabylonService {
     }
   }
 
-  public loadEntity(rootUrl: string, mediaType = 'model', extension = 'babylon') {
+  public loadEntity(rootUrl: string, mediaType = 'entity', extension = 'babylon') {
 
     this.engine.displayLoadingUI();
     this.clearScene();
     // TODO: manage mediaType via Observable
     this.mediaType = mediaType;
 
-    if (this.mediaType !== 'model') {
+    if (this.mediaType !== 'entity') {
       this.cameraManager.setActiveCameraTo2D();
     } else {
       this.cameraManager.resetCamera();
@@ -238,12 +238,12 @@ export class BabylonService {
             }
           });
         break;
-      case 'model':
+      case 'entity':
       default:
-        return load3DModel(rootUrl, extension, this.scene)
+        return load3DEntity(rootUrl, extension, this.scene)
           .then(result => {
             if (result) {
-              this.modelContainer = result;
+              this.entityContainer = result;
             } else {
               throw new Error('No video result');
             }

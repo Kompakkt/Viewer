@@ -2,7 +2,7 @@
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms'; // <-- NgModel lives here
+import { FormsModule } from '@angular/forms'; // <-- NgEntity lives here
 import {
   MatButtonModule, MatCardModule, MatCheckboxModule, MatChipsModule,
   MatDialogModule, MatDividerModule, MatExpansionModule, MatFormFieldModule,
@@ -40,9 +40,9 @@ import { AnnotationComponentForEditorComponent } from './components/object-featu
 import { AnnotationComponent } from './components/object-feature-annotations/annotation/annotation.component';
 import { AnnotationsEditorComponent } from './components/object-feature-annotations/annotations-editor/annotations-editor.component';
 import { AnnotationwalkthroughComponent } from './components/object-feature-annotations/annotationwalkthrough/annotationwalkthrough.component';
-import { ObjectFeatureMetadataComponent } from './components/object-feature-metadata/object-feature-metadata.component';
-import { ObjectFeatureSettingsComponent } from './components/object-feature-settings/object-feature-settings.component';
-import { ObjectFeaturesComponent } from './components/object-features/object-features.component';
+import { EntityFeatureMetadataComponent } from './components/object-feature-metadata/object-feature-metadata.component';
+import { EntityFeatureSettingsComponent } from './components/object-feature-settings/object-feature-settings.component';
+import { EntityFeaturesComponent } from './components/object-features/object-features.component';
 import { SceneComponent } from './components/scene/scene.component';
 import {MediaTypePipe} from './pipes/media-type.pipe';
 import { RenderCanvasComponent } from './components/render-canvas/render-canvas.component';
@@ -52,7 +52,7 @@ import { RenderCanvasComponent } from './components/render-canvas/render-canvas.
     AppComponent,
     SceneComponent,
     MenuComponent,
-    ObjectFeaturesComponent,
+    EntityFeaturesComponent,
     AnnotationsEditorComponent,
     AnnotationComponent,
     AnnotationComponentForEditorComponent,
@@ -60,8 +60,8 @@ import { RenderCanvasComponent } from './components/render-canvas/render-canvas.
     ContentComponent,
     ContentBrowserComponent,
     LoadingscreenComponent,
-    ObjectFeatureMetadataComponent,
-    ObjectFeatureSettingsComponent,
+    EntityFeatureMetadataComponent,
+    EntityFeatureSettingsComponent,
     LoginComponent,
     DialogPasswordComponent,
     DialogDeleteAnnotationsComponent,

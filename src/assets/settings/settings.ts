@@ -192,7 +192,7 @@ export const settings2D = {
     scale: 1,
   };
 
-export const settingsModel = {
+export const settingsEntity = {
   preview: '',
   cameraPositionInitial: {
     cameraType: 'arcRotateCam',

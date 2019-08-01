@@ -4,7 +4,7 @@ import {BehaviorSubject} from 'rxjs';
 import {ReplaySubject} from 'rxjs/internal/ReplaySubject';
 
 import {environment} from '../../../environments/environment';
-import {ICompilation, IModel} from '../../interfaces/interfaces';
+import {ICompilation, IEntity} from '../../interfaces/interfaces';
 import {BabylonService} from '../babylon/babylon.service';
 import {LoadingscreenhandlerService} from '../babylon/loadingscreen';
 import {MessageService} from '../message/message.service';
@@ -20,19 +20,19 @@ export class ProcessingService {
 
   // TODO: ReplaySubjects
   private Subjects = {
-    models: new BehaviorSubject<IModel[]>(Array<IModel>()),
+    entities: new BehaviorSubject<IEntity[]>(Array<IEntity>()),
     collections: new BehaviorSubject<ICompilation[]>(Array<ICompilation>()),
-    actualModel: new ReplaySubject<IModel>(),
-    actualModelMeshes: new ReplaySubject<Mesh[]>(),
+    actualEntity: new ReplaySubject<IEntity>(),
+    actualEntityMeshes: new ReplaySubject<Mesh[]>(),
     actualCollection: new ReplaySubject<ICompilation | undefined>(),
     actualMediaType: new ReplaySubject<string>(),
   };
 
   public Observables = {
-    models: this.Subjects.models.asObservable(),
+    entities: this.Subjects.entities.asObservable(),
     collections: this.Subjects.collections.asObservable(),
-    actualModel: this.Subjects.actualModel.asObservable(),
-    actualModelMeshes: this.Subjects.actualModelMeshes.asObservable(),
+    actualEntity: this.Subjects.actualEntity.asObservable(),
+    actualEntityMeshes: this.Subjects.actualEntityMeshes.asObservable(),
     actualCollection: this.Subjects.actualCollection.asObservable(),
     actualMediaType: this.Subjects.actualMediaType.asObservable(),
   };
@@ -41,25 +41,25 @@ export class ProcessingService {
   public isLoggedIn = false;
   public isShowCatalogue = false;
   public isCollectionLoaded = false;
-  public isDefaultModelLoaded = false;
-  public isFallbackModelLoaded = false;
+  public isDefaultEntityLoaded = false;
+  public isFallbackEntityLoaded = false;
 
   @Output() showCatalogue: EventEmitter<boolean> = new EventEmitter();
   @Output() loggedIn: EventEmitter<boolean> = new EventEmitter();
   @Output() firstLoad: EventEmitter<boolean> = new EventEmitter();
   @Output() loaded: EventEmitter<boolean> = new EventEmitter();
   @Output() collectionLoaded: EventEmitter<boolean> = new EventEmitter();
-  @Output() defaultModelLoaded: EventEmitter<boolean> = new EventEmitter();
-  @Output() fallbackModelLoaded: EventEmitter<boolean> = new EventEmitter();
+  @Output() defaultEntityLoaded: EventEmitter<boolean> = new EventEmitter();
+  @Output() fallbackEntityLoaded: EventEmitter<boolean> = new EventEmitter();
 
   private baseUrl = `${environment.express_server_url}:${environment.express_server_port}/`;
   public quality = 'low';
 
-  private defaultModel: IModel = {
+  private defaultEntity: IEntity = {
     _id: 'default',
     annotationList: [],
-    relatedDigitalObject: {_id: 'default_model'},
-    mediaType: 'model',
+    relatedDigitalEntity: {_id: 'default_entity'},
+    mediaType: 'entity',
     name: 'Cube',
     dataSource: {isExternal: false},
     files: [{
@@ -98,8 +98,8 @@ export class ProcessingService {
               private metadataService: MetadataService) {
   }
 
-  public getCurrentModel(): IModel | undefined {
-    return this.Observables.actualModel.source['_events'].slice(-1)[0];
+  public getCurrentEntity(): IEntity | undefined {
+    return this.Observables.actualEntity.source['_events'].slice(-1)[0];
   }
 
   public getCurrentCompilation(): ICompilation | undefined {
@@ -111,14 +111,14 @@ export class ProcessingService {
       this.Observables.actualMediaType.source['_events'].slice(-1)[0] : '';
   }
 
-  public updateActiveModel(model: IModel) {
-    this.Subjects.actualModel.next(model);
-    if (model && model._id === 'default') {
-      this.isDefaultModelLoaded = true;
-      this.defaultModelLoaded.emit(true);
+  public updateActiveEntity(entity: IEntity) {
+    this.Subjects.actualEntity.next(entity);
+    if (entity && entity._id === 'default') {
+      this.isDefaultEntityLoaded = true;
+      this.defaultEntityLoaded.emit(true);
     } else {
-      this.isDefaultModelLoaded = false;
-      this.defaultModelLoaded.emit(false);
+      this.isDefaultEntityLoaded = false;
+      this.defaultEntityLoaded.emit(false);
     }
   }
 
@@ -133,8 +133,8 @@ export class ProcessingService {
     }
   }
 
-  public updateActiveModelMeshes(meshes: Mesh[]) {
-    this.Subjects.actualModelMeshes.next(meshes);
+  public updateActiveEntityMeshes(meshes: Mesh[]) {
+    this.Subjects.actualEntityMeshes.next(meshes);
   }
 
   public setupDragAndDrop() {
@@ -188,9 +188,10 @@ export class ProcessingService {
         const _ext = _fileName.substr(_fileName.lastIndexOf('.'));
         fileExts.push(_ext.toLowerCase());
       }
-      window.top.postMessage({ files: fileList, mediaType, type: 'fileList' }, environment.repository);
 
       getMediaType();
+
+      window.top.postMessage({ files: fileList, mediaType, type: 'fileList' }, environment.repository);
     };
     document.ondragover = event => {
       event.preventDefault();
@@ -198,7 +199,7 @@ export class ProcessingService {
     };
 
     // Determine mediaType by extension
-    const modelExts = ['.babylon', '.obj', '.stl', '.glft'];
+    const entityExts = ['.babylon', '.obj', '.stl', '.glft'];
     const imageExts = ['.jpg', '.jpeg', '.png'];
     const videoExts = ['.webm', '.mp4', '.avi'];
     const audioExts = ['.ogg', '.mp3'];
@@ -210,7 +211,7 @@ export class ProcessingService {
     const fileReader = new FileReader();
     fileReader.onload = evt => {
       const base64 = (evt.currentTarget as FileReader).result as string;
-      this.loadModel(
+      this.loadEntity(
         {
           _id: 'dragdrop',
           name: 'dragdrop',
@@ -233,14 +234,14 @@ export class ProcessingService {
 
     const getMediaType = () => {
       const _countMedia = {
-        model: 0, image: 0,
+        entity: 0, image: 0,
         video: 0, audio: 0,
       };
 
       // Count file occurences
       for (const _ext of fileExts) {
         switch (true) {
-          case modelExts.includes(_ext): _countMedia.model++; break;
+          case entityExts.includes(_ext): _countMedia.entity++; break;
           case imageExts.includes(_ext): _countMedia.image++; break;
           case videoExts.includes(_ext): _countMedia.video++; break;
           case audioExts.includes(_ext): _countMedia.audio++; break;
@@ -248,19 +249,19 @@ export class ProcessingService {
         }
       }
 
-      // Since this is checking in order (model first)
-      // we are able to determine models, even if e.g. textures are
+      // Since this is checking in order (entity first)
+      // we are able to determine entities, even if e.g. textures are
       // also found
       switch (true) {
-        case _countMedia.model > 0: mediaType = 'model'; break;
+        case _countMedia.entity > 0: mediaType = 'entity'; break;
         case _countMedia.image > 0: mediaType = 'image'; break;
         case _countMedia.video > 0: mediaType = 'video'; break;
         case _countMedia.audio > 0: mediaType = 'audio'; break;
         default:
       }
 
-      // Read content of single non-model file
-      if (mediaType !== 'model') {
+      // Read content of single non-entity file
+      if (mediaType !== 'entity') {
         if (fileList.length > 1) {
           return;
           // Too many files
@@ -268,14 +269,14 @@ export class ProcessingService {
         fileReader.readAsDataURL(fileList[0]);
       } else {
         const largest = fileList
-          .filter(file => modelExts.includes(file.name.substr(file.name.lastIndexOf('.'))))
+          .filter(file => entityExts.includes(file.name.substr(file.name.lastIndexOf('.'))))
           .sort((a, b) => b.size - a.size)[0];
         ext = largest.name.substr(largest.name.lastIndexOf('.'));
         fileReader.readAsDataURL(largest);
       }
     };
 
-    this.babylonService.getEngine().loadingUIText = `Drop a single file (model, image, audio, video) or a folder containing a 3d model here`;
+    this.babylonService.getEngine().loadingUIText = `Drop a single file (entity, image, audio, video) or a folder containing a 3d entity here`;
   }
 
   public bootstrap(): void {
@@ -286,7 +287,7 @@ export class ProcessingService {
         .then(result => {
           if (result.status === 'ok') {
             this.fetchCollectionsData();
-            this.fetchModelsData();
+            this.fetchEntitiesData();
             this.isLoggedIn = true;
             this.loggedIn.emit(true);
           } else {
@@ -305,7 +306,7 @@ export class ProcessingService {
 
     const searchParams = location.search;
     const queryParams = new URLSearchParams(searchParams);
-    const modelParam = queryParams.get('model');
+    const entityParam = queryParams.get('entity');
     const compParam = queryParams.get('compilation');
     const isDragDrop = queryParams.get('dragdrop');
 
@@ -319,8 +320,8 @@ export class ProcessingService {
       return;
     }
 
-    if (!modelParam && !compParam) {
-      this.loadDefaultModelData();
+    if (!entityParam && !compParam) {
+      this.loadDefaultEntityData();
       this.isShowCatalogue = true;
       this.showCatalogue.emit(true);
     }
@@ -336,16 +337,16 @@ export class ProcessingService {
         this.isLoggedIn = true;
         this.loggedIn.emit(true);
 
-        if (modelParam && !compParam) {
-          this.fetchAndLoad(modelParam, undefined, false);
+        if (entityParam && !compParam) {
+          this.fetchAndLoad(entityParam, undefined, false);
           this.showCatalogue.emit(false);
-        } else if (!modelParam && compParam) {
+        } else if (!entityParam && compParam) {
           this.fetchAndLoad(undefined, compParam, undefined);
           this.showCatalogue.emit(false);
           this.overlayService.toggleCollectionsOverview();
         } else {
           this.fetchCollectionsData();
-          this.fetchModelsData();
+          this.fetchEntitiesData();
         }
       })
       .catch(error => {
@@ -353,7 +354,7 @@ export class ProcessingService {
         this.isLoggedIn = false;
         this.loggedIn.emit(false);
         this.message.error(
-          'Other Models and Collections are only available in the Cologne University ' +
+          'Other Entities and Collections are only available in the Cologne University ' +
           'Network for logged in Users.');
       });
   }
@@ -365,49 +366,49 @@ export class ProcessingService {
       })
       .catch(error => {
         console.error(error);
-        this.message.error('Connection to object server refused.');
+        this.message.error('Connection to entity server refused.');
       });
   }
 
-  public fetchModelsData() {
-    this.mongoHandlerService.getAllModels()
-      .then(models => {
-        const modelsforBrowser: IModel[] = [];
+  public fetchEntitiesData() {
+    this.mongoHandlerService.getAllEntities()
+      .then(entities => {
+        const entitiesforBrowser: IEntity[] = [];
 
-        models
-          .filter(model => model)
-          .forEach((model: IModel) => {
-          if (model.finished) {
-            modelsforBrowser.push(model);
+        entities
+          .filter(entity => entity)
+          .forEach((entity: IEntity) => {
+          if (entity.finished) {
+            entitiesforBrowser.push(entity);
           }
         });
-        this.Subjects.models.next(modelsforBrowser);
+        this.Subjects.entities.next(entitiesforBrowser);
       })
       .catch(error => {
         console.error(error);
-        this.message.error('Connection to object server refused.');
+        this.message.error('Connection to entity server refused.');
       });
   }
 
-  public loadDefaultModelData() {
+  public loadDefaultEntityData() {
     this.loaded.emit(false);
     this.quality = 'low';
-    this.loadModel(this.defaultModel, '')
+    this.loadEntity(this.defaultEntity, '')
       .then(() => {
         this.loaded.emit(true);
         this.metadataService.addDefaultMetadata();
       })
       .catch(error => {
         console.error(error);
-        this.message.error('Loading of default model not possible');
+        this.message.error('Loading of default entity not possible');
       });
   }
 
-  public fetchAndLoad(modelId?: string, collectionId?: string, isfromCollection?: boolean) {
+  public fetchAndLoad(entityId?: string, collectionId?: string, isfromCollection?: boolean) {
     this.loaded.emit(false);
     this.quality = 'low';
-    if (modelId) {
-      this.fetchModelData(modelId);
+    if (entityId) {
+      this.fetchEntityData(entityId);
       if (!isfromCollection) {
         this.updateActiveCollection(undefined);
       }
@@ -416,60 +417,60 @@ export class ProcessingService {
       this.mongoHandlerService.getCompilation(collectionId)
         .then(compilation => {
           // TODO: Put Typeguards in its own service?
-          const isModel = (obj: any): obj is IModel => {
-            const _model = obj as IModel;
-            return _model && _model.name !== undefined && _model.mediaType !== undefined
-              && _model.online !== undefined && _model.finished !== undefined;
+          const isEntity = (obj: any): obj is IEntity => {
+            const _entity = obj as IEntity;
+            return _entity && _entity.name !== undefined && _entity.mediaType !== undefined
+              && _entity.online !== undefined && _entity.finished !== undefined;
           };
           this.updateActiveCollection(compilation);
-          const model = compilation.models[0];
-          if (isModel(model)) this.fetchModelData(model._id);
+          const entity = compilation.entities[0];
+          if (isEntity(entity)) this.fetchEntityData(entity._id);
         })
         .catch(error => {
           console.error(error);
-          this.message.error('Connection to object server to load collection refused.');
+          this.message.error('Connection to entity server to load collection refused.');
         });
     }
   }
 
-  public fetchModelData(query: string) {
-    this.mongoHandlerService.getModel(query)
-      .then(resultModel => {
-        this.loadModel(resultModel)
+  public fetchEntityData(query: string) {
+    this.mongoHandlerService.getEntity(query)
+      .then(resultEntity => {
+        this.loadEntity(resultEntity)
           .then(result => {
             this.loaded.emit(true);
             console.log('Load:', result);
           })
           .catch(error => {
             console.error(error);
-            this.message.error('Loading of this Model is not possible');
+            this.message.error('Loading of this Entity is not possible');
           });
       })
       .catch(error => {
         console.error(error);
-        this.message.error('Connection to object server to load model refused.');
+        this.message.error('Connection to entity server to load entity refused.');
       });
   }
 
-  public async loadModel(newModel: IModel, overrideUrl?: string, extension = '.babylon') {
+  public async loadEntity(newEntity: IEntity, overrideUrl?: string, extension = '.babylon') {
     const URL = (overrideUrl !== undefined) ? overrideUrl : this.baseUrl;
-    this.isFallbackModelLoaded = false;
-    this.fallbackModelLoaded.emit(false);
+    this.isFallbackEntityLoaded = false;
+    this.fallbackEntityLoaded.emit(false);
 
-    if (!this.loadingScreenHandler.isLoading && newModel.processed
-      && newModel.mediaType) {
+    if (!this.loadingScreenHandler.isLoading && newEntity.processed
+      && newEntity.mediaType) {
 
-      if (!newModel.dataSource.isExternal) {
-        // cases: model, image, audio, video, text
-        const _url = URL + newModel.processed[this.quality];
-        const mediaType = newModel.mediaType;
-        switch (newModel.mediaType) {
-          case 'model':
+      if (!newEntity.dataSource.isExternal) {
+        // cases: entity, image, audio, video, text
+        const _url = URL + newEntity.processed[this.quality];
+        const mediaType = newEntity.mediaType;
+        switch (newEntity.mediaType) {
+          case 'entity':
             await this.babylonService.loadEntity(_url, mediaType, extension)
               .then(() => {
-                this.updateActiveModel(newModel);
-                this.updateActiveModelMeshes(this.babylonService.modelContainer.meshes as Mesh[]);
-                this.Subjects.actualMediaType.next('model');
+                this.updateActiveEntity(newEntity);
+                this.updateActiveEntityMeshes(this.babylonService.entityContainer.meshes as Mesh[]);
+                this.Subjects.actualMediaType.next('entity');
               });
             break;
           case 'image':
@@ -478,8 +479,8 @@ export class ProcessingService {
                 const plane = this.babylonService.imageContainer.plane;
                 if (plane) {
                   this.Subjects.actualMediaType.next('image');
-                  this.updateActiveModel(newModel);
-                  this.updateActiveModelMeshes([plane as Mesh]);
+                  this.updateActiveEntity(newEntity);
+                  this.updateActiveEntityMeshes([plane as Mesh]);
                 }
               });
             break;
@@ -489,8 +490,8 @@ export class ProcessingService {
                 const plane = this.babylonService.audioContainer.plane;
                 if (plane) {
                   this.Subjects.actualMediaType.next('audio');
-                  this.updateActiveModel(newModel);
-                  this.updateActiveModelMeshes([plane as Mesh]);
+                  this.updateActiveEntity(newEntity);
+                  this.updateActiveEntityMeshes([plane as Mesh]);
                 }
               });
             break;
@@ -500,49 +501,49 @@ export class ProcessingService {
                 const plane = this.babylonService.videoContainer.plane;
                 if (plane) {
                   this.Subjects.actualMediaType.next('video');
-                  this.updateActiveModel(newModel);
-                  this.updateActiveModelMeshes([plane as Mesh]);
+                  this.updateActiveEntity(newEntity);
+                  this.updateActiveEntityMeshes([plane as Mesh]);
                 }
               });
             break;
           case 'text':
-            this.Subjects.actualModel.next(newModel);
-            await this.loadFallbackModel();
+            this.Subjects.actualEntity.next(newEntity);
+            await this.loadFallbackEntity();
             this.Subjects.actualMediaType.next('text');
             break;
           default:
         }
       } else {
-        this.Subjects.actualModel.next(newModel);
-        await this.loadFallbackModel();
+        this.Subjects.actualEntity.next(newEntity);
+        await this.loadFallbackEntity();
         return;
       }
     }
   }
 
-  public async loadFallbackModel() {
-    await this.babylonService.loadEntity('assets/models/sketch_cat/scene.gltf', 'model', '.gltf')
+  public async loadFallbackEntity() {
+    await this.babylonService.loadEntity('assets/models/sketch_cat/scene.gltf', 'entity', '.gltf')
       .then(() => {
-        this.updateActiveModelMeshes(this.babylonService.modelContainer.meshes as Mesh[]);
-        this.isFallbackModelLoaded = true;
-        this.fallbackModelLoaded.emit(true);
-        this.Subjects.actualMediaType.next('model');
+        this.updateActiveEntityMeshes(this.babylonService.entityContainer.meshes as Mesh[]);
+        this.isFallbackEntityLoaded = true;
+        this.fallbackEntityLoaded.emit(true);
+        this.Subjects.actualMediaType.next('entity');
       });
   }
 
-  public updateModelQuality(quality: string) {
+  public updateEntityQuality(quality: string) {
     if (this.quality !== quality) {
       this.quality = quality;
-      const model = this.getCurrentModel();
+      const entity = this.getCurrentEntity();
 
-      if (!model || !model.processed) {
-        throw new Error('Model or Model.processed');
+      if (!entity || !entity.processed) {
+        throw new Error('Entity or Entity.processed');
         console.error(this);
         return;
       }
-      if (model && model.processed[this.quality] !== undefined) {
+      if (entity && entity.processed[this.quality] !== undefined) {
         this.loaded.emit(false);
-        this.loadModel(model._id === 'Cube' ? this.defaultModel : model, model._id === 'Cube' ? '' : undefined)
+        this.loadEntity(entity._id === 'Cube' ? this.defaultEntity : entity, entity._id === 'Cube' ? '' : undefined)
           .then(() => {
             this.loaded.emit(true);
           })
@@ -551,7 +552,7 @@ export class ProcessingService {
             this.message.error('Loading not possible');
           });
       } else {
-        this.message.error('Model quality is not available.');
+        this.message.error('Entity quality is not available.');
       }
     } else {
       return;
@@ -586,7 +587,7 @@ export class ProcessingService {
           })
           .catch(error => {
             console.error(error);
-            this.message.error('Connection to object server refused.');
+            this.message.error('Connection to entity server refused.');
             reject('missing');
           });
       } else {
@@ -597,26 +598,26 @@ export class ProcessingService {
     });
   }
 
-  public selectModelByID(identifierModel: string): boolean {
+  public selectEntityByID(identifierEntity: string): boolean {
     // TODO: check if this correctly returns
-    const model = this.Observables.models.source['value'].find(i => i._id === identifierModel);
-    if (model === undefined) {
-      this.mongoHandlerService.getModel(identifierModel)
-        .then(actualModel => {
-          if (actualModel['_id']) {
-            this.Subjects.models.next([actualModel]);
-            this.fetchAndLoad(actualModel._id, undefined, false);
+    const entity = this.Observables.entities.source['value'].find(i => i._id === identifierEntity);
+    if (entity === undefined) {
+      this.mongoHandlerService.getEntity(identifierEntity)
+        .then(actualEntity => {
+          if (actualEntity['_id']) {
+            this.Subjects.entities.next([actualEntity]);
+            this.fetchAndLoad(actualEntity._id, undefined, false);
             return true;
           }
           return false;
         })
         .catch(error => {
           console.error(error);
-          this.message.error('Connection to object server refused.');
+          this.message.error('Connection to entity server refused.');
           return false;
         });
     }
-    this.fetchAndLoad(model._id, undefined, false);
+    this.fetchAndLoad(entity._id, undefined, false);
 
     return true;
   }

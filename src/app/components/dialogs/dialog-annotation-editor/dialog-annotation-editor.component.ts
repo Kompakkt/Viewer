@@ -28,36 +28,36 @@ export class DialogAnnotationEditorComponent {
               @Inject(MAT_DIALOG_DATA) public data: IDialogData) {
   }
 
-  public addObject(object) {
+  public addEntitySwitch(entity) {
 
-    switch (object.mediaType) {
+    switch (entity.mediaType) {
 
       case 'externalImage':
-        this.addExternalImage(object);
+        this.addExternalImage(entity);
         break;
 
       case 'image':
-        this.addImage(object);
+        this.addImage(entity);
         break;
 
       case 'text':
-        this.addText(object);
+        this.addText(entity);
         break;
 
-      case 'model':
-        this.addModel(object);
+      case 'entity':
+        this.addEntity(entity);
         break;
 
       case 'video':
-        this.addVideo(object);
+        this.addVideo(entity);
         break;
 
       case 'audio':
-        this.addAudio(object);
+        this.addAudio(entity);
         break;
 
       default:
-        console.log(`Unknown media type ${object.mediaType}`);
+        console.log(`Unknown media type ${entity.mediaType}`);
     }
   }
 
@@ -87,7 +87,7 @@ export class DialogAnnotationEditorComponent {
   // ToDo: Reduce doubled / redundant code in addImage vs. addText or unify functions
   private addImage(image) {
 
-    const target = image.relatedDigitalObject.digobj_externalLink[0].externalLink_value;
+    const target = image.relatedDigitalEntity.digobj_externalLink[0].externalLink_value;
 
     let mdImage = `<a href="${target}" target="_blank">`;
     mdImage += `<img src="${image.settings.preview}" alt="${image.name}"></a>`;
@@ -97,7 +97,7 @@ export class DialogAnnotationEditorComponent {
 
   private addText(text) {
 
-    const target = text.relatedDigitalObject.digobj_externalLink[0].externalLink_value;
+    const target = text.relatedDigitalEntity.digobj_externalLink[0].externalLink_value;
 
     let mdText = `<a href="${target}" target="_blank">`;
     mdText += `<img src="${text.settings.preview}" alt="${text.name}"></a>`;
@@ -105,12 +105,12 @@ export class DialogAnnotationEditorComponent {
     this.data.content = this.createMarkdown(mdText);
   }
 
-  private addModel(model) {
+  private addEntity(entity) {
 
-    let mdModel = `<a href="${this.repository}model-overview?model=${model._id}" target="_blank">`;
-    mdModel += `<img src="${model.settings.preview}" alt="${model.name}"></a>`;
+    let mdEntity = `<a href="${this.repository}entity-overview?entity=${entity._id}" target="_blank">`;
+    mdEntity += `<img src="${entity.settings.preview}" alt="${entity.name}"></a>`;
 
-    this.data.content = this.createMarkdown(mdModel);
+    this.data.content = this.createMarkdown(mdEntity);
   }
 
   private addVideo(video) {

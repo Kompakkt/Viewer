@@ -34,7 +34,7 @@ export class SocketService {
   public isBroadcastingAllowed = false;
   @Output() broadcastingAllowed: EventEmitter<boolean> = new EventEmitter();
 
-  private isDefaultModelLoaded: boolean;
+  private isDefaultEntityLoaded: boolean;
 
   private knownAnnotations: IAnnotation[] = [];
 
@@ -47,21 +47,21 @@ export class SocketService {
     this.isInSocket = false;
     this.inSocket.emit(false);
     this.annotationService.isBroadcasting = false;
-    this.isDefaultModelLoaded = this.processingService.isDefaultModelLoaded;
+    this.isDefaultEntityLoaded = this.processingService.isDefaultEntityLoaded;
 
-    this.processingService.Observables.actualModel.subscribe(_ => {
+    this.processingService.Observables.actualEntity.subscribe(_ => {
       const currentCompilation = this.processingService.getCurrentCompilation();
-      const currentModel = this.processingService.getCurrentModel();
+      const currentEntity = this.processingService.getCurrentEntity();
 
-      // We always need a model loaded
-      if (!currentModel) {
+      // We always need a entity loaded
+      if (!currentEntity) {
         throw new Error('Center missing');
         console.error(this);
         return;
       }
 
       this.socketRoom = (currentCompilation)
-        ? `${currentCompilation._id}_${currentModel._id}` : `${currentModel._id}`;
+        ? `${currentCompilation._id}_${currentEntity._id}` : `${currentEntity._id}`;
 
       if (this.isInSocket) {
         this.changeSocketRoom();
@@ -69,7 +69,7 @@ export class SocketService {
     });
 
     this.annotationService.annnotatingAllowed.subscribe(allowed => {
-      if (!allowed && this.isDefaultModelLoaded) {
+      if (!allowed && this.isDefaultEntityLoaded) {
         this.isBroadcastingAllowed = true;
         this.broadcastingAllowed.emit(true);
       } else {
@@ -78,8 +78,8 @@ export class SocketService {
       }
     });
 
-    this.processingService.defaultModelLoaded.subscribe(loaded => {
-      this.isDefaultModelLoaded = loaded;
+    this.processingService.defaultEntityLoaded.subscribe(loaded => {
+      this.isDefaultEntityLoaded = loaded;
     });
 
     this.knownAnnotations = [];

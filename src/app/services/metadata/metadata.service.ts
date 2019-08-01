@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 
-import {IMetaDataDigitalObject} from '../../interfaces/interfaces';
+import {IMetaDataDigitalEntity} from '../../interfaces/interfaces';
 import {MessageService} from '../message/message.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
 
@@ -9,37 +9,37 @@ import {MongohandlerService} from '../mongohandler/mongohandler.service';
 })
 export class MetadataService {
 
-  private actualModelMetadata: IMetaDataDigitalObject | undefined;
-  private modelsMetadata: IMetaDataDigitalObject[] = [];
+  private actualEntityMetadata: IMetaDataDigitalEntity | undefined;
+  private entitiesMetadata: IMetaDataDigitalEntity[] = [];
 
   constructor(private mongohandlerService: MongohandlerService,
               private message: MessageService) {
   }
 
-  public updateMetadata(metadata: IMetaDataDigitalObject) {
-    this.modelsMetadata.push(metadata);
+  public updateMetadata(metadata: IMetaDataDigitalEntity) {
+    this.entitiesMetadata.push(metadata);
   }
 
-  public async fetchMetadata(metadata_id: string): Promise<IMetaDataDigitalObject> {
-    this.actualModelMetadata = this.modelsMetadata.find(e => e['_id'] === metadata_id);
+  public async fetchMetadata(metadata_id: string): Promise<IMetaDataDigitalEntity> {
+    this.actualEntityMetadata = this.entitiesMetadata.find(e => e['_id'] === metadata_id);
 
-    if (this.actualModelMetadata) {
-      return this.actualModelMetadata;
+    if (this.actualEntityMetadata) {
+      return this.actualEntityMetadata;
     } else {
-      this.actualModelMetadata = undefined;
+      this.actualEntityMetadata = undefined;
       return new Promise((resolve, reject) => {
-        this.mongohandlerService.getModelMetadata(metadata_id).then(result => {
+        this.mongohandlerService.getEntityMetadata(metadata_id).then(result => {
           if (result['_id']) {
             console.log('Metadaten: ', result);
             this.updateMetadata(result);
-            this.actualModelMetadata = result;
+            this.actualEntityMetadata = result;
             resolve(result);
           } else {
-            this.actualModelMetadata = undefined;
-            reject(this.actualModelMetadata);
+            this.actualEntityMetadata = undefined;
+            reject(this.actualEntityMetadata);
           }
         }).catch(error => {
-          this.message.error('Connection to object server refused.');
+          this.message.error('Connection to entity server refused.');
           reject(error);
         });
       });
@@ -49,9 +49,9 @@ export class MetadataService {
   public addDefaultMetadata() {
     this.updateMetadata(
       {
-        _id: 'default_model',
+        _id: 'default_entity',
         digobj_title: 'Kompakkt',
-        digobj_description: 'Kompakkt brings your 3D models to the web and makes them annotatable! See our code here: ' +
+        digobj_description: 'Kompakkt brings your 3D entities to the web and makes them annotatable! See our code here: ' +
           'https://github.com/DH-Cologne/Kompakkt',
         digobj_licence: 'MIT',
         digobj_rightsowner_person: [],
@@ -88,7 +88,7 @@ export class MetadataService {
         digobj_type: 'type_3d',
         digobj_discipline: [],
         digobj_tags: [],
-        digobj_objecttype: 'Typ',
+        digobj_entitytype: 'Typ',
         digobj_externalIdentifier: [],
         digobj_creation: [],
         digobj_dimensions: [],

@@ -10,14 +10,14 @@
             class="btn-add-medium">
       <mat-icon aria-label="Add External Image">image</mat-icon>
     </button>
-    <button *ngIf="objects"
+    <button *ngIf="entities"
             mat-icon-button
-            (click)="addCollectionObject = !addCollectionObject"
-            matTooltip="Add Object From Collection"
+            (click)="addCollectionEntity = !addCollectionEntity"
+            matTooltip="Add Entity From Collection"
             matTooltipPosition="above"
             type="mat-icon-button"
             class="btn-add-medium">
-      <mat-icon aria-label="Add Object From Collection">folder_open</mat-icon>
+      <mat-icon aria-label="Add Entity From Collection">folder_open</mat-icon>
     </button>
 
   </div>
@@ -54,17 +54,17 @@
 
   </div>
 
-  <div *ngIf="addCollectionObject"
-       id="collection-objects">
+  <div *ngIf="addCollectionEntity"
+       id="collection-entities">
 
-    <h3>Or embed an object of your collection:</h3>
+    <h3>Or embed an entity of your collection:</h3>
 
-    <ng-container *ngFor="let object of objects.models; let i = index">
+    <ng-container *ngFor="let entity of entities.entities; let i = index">
 
-      <mat-card (click)="addObject(i)"
-                class="collection-object">
-        <img mat-card-image src="{{object.settings.preview}}" alt="{{object.name}}">
-        <mat-card-footer>{{object.name}}</mat-card-footer>
+      <mat-card (click)="addEntity(i)"
+                class="collection-entity">
+        <img mat-card-image src="{{entity.settings.preview}}" alt="{{entity.name}}">
+        <mat-card-footer>{{entity.name}}</mat-card-footer>
       </mat-card>
 
     </ng-container>

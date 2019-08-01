@@ -58,7 +58,7 @@ export class AnnotationmarkerService {
     if (plane2.material) {
       plane2.material.alpha = 0.5;
     }
-    // TODO: click is not working if renderingGroup == 1 and Object is behind another object
+    // TODO: click is not working if renderingGroup == 1 and Entity is behind another entity
     plane2.renderingGroupId = 1;
   }
 

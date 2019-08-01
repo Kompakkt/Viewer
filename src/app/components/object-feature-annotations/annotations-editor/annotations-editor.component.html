@@ -1,17 +1,17 @@
 <mat-card
   *ngIf="isAnnotatingAllowed && !annotationService.isCollectionInputSelected && !(annotationService.currentAnnotations | async).length">
-  All annotations here are default annotations and visible for everyone who can access the model. If you
-  don't want that, load this model from a collection.
+  All annotations here are default annotations and visible for everyone who can access the entity. If you
+  don't want that, load this entity from a collection.
 </mat-card>
 
-<mat-card *ngIf="!isAnnotatingAllowed && !annotationService.isCollectionInputSelected && !isDefaultModelLoaded">
-  Default Annotations are not editable for foreign models. Load model from a collection to save your
-  annotations to make them visible for others. If you are the owner of this model do not load it
+<mat-card *ngIf="!isAnnotatingAllowed && !annotationService.isCollectionInputSelected && !isDefaultEntityLoaded">
+  Default Annotations are not editable for foreign entities. Load entity from a collection to save your
+  annotations to make them visible for others. If you are the owner of this entity do not load it
   from a collection to edit the default Annotations.
 </mat-card>
 
 <mat-card *ngIf="isAnnotatingAllowed && !(annotationService.currentAnnotations | async).length">
-  To add annotations, simply double-click on the model.
+  To add annotations, simply double-click on the entity.
 </mat-card>
 
 <div cdkDropList
@@ -40,11 +40,11 @@
   <div>
 
     Mode:
-    <mat-radio-group [disabled]="!isCollectionLoaded || isBroadcasting || isDefaultModelLoaded"
+    <mat-radio-group [disabled]="!isCollectionLoaded || isBroadcasting || isDefaultEntityLoaded"
                      aria-label="Select Annotation Category"
                      (change)="changeCategory($event)">
       <mat-radio-button value="def"
-                        [checked]="!isCollectionLoaded || isDefaultModelLoaded || isDefaultAnnotationsSource"> Default
+                        [checked]="!isCollectionLoaded || isDefaultEntityLoaded || isDefaultAnnotationsSource"> Default
       </mat-radio-button>
       <mat-radio-button value="col"> Collection</mat-radio-button>
     </mat-radio-group>
