@@ -322,11 +322,11 @@ export class ObjectFeatureSettingsComponent implements OnInit {
         await this.initialiseUpload();
       }
     }
-    await this.setCamera();
     await this.modelSettingsService.loadSettings(this.activeModel.settings.scale,
                                                  this.activeModel.settings.rotation.x,
                                                  this.activeModel.settings.rotation.y,
                                                  this.activeModel.settings.rotation.z);
+    await this.setCamera();
     await this.setLightBackground();
     await this.setPreview();
   }
@@ -345,9 +345,6 @@ export class ObjectFeatureSettingsComponent implements OnInit {
       switch (this.mediaType) {
         case 'model': {
           settings = settingsModel;
-          this.cameraPositionInitial = this.babylonService.cameraManager.getInitialPosition();
-          const cameraSettings: any[] = [this.cameraPositionInitial];
-          settings['cameraPositionInitial'] = cameraSettings;
           break;
         }
         case 'audio': {
@@ -383,6 +380,12 @@ export class ObjectFeatureSettingsComponent implements OnInit {
     if ((isDragDrop || this.isModelOwner) && !this.isFinished) {
       this.initialSettingsMode = true;
       await this.modelSettingsService.createVisualSettings();
+
+      if (this.activeModel && this.activeModel.settings) {
+      this.cameraPositionInitial = this.babylonService.cameraManager.getInitialPosition();
+      const cameraSettings: any[] = [this.cameraPositionInitial];
+      this.activeModel['settings']['cameraPositionInitial'] = cameraSettings;
+      }
       this.overlayService.activateSettingsTab();
     }
   }

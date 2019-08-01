@@ -140,6 +140,7 @@ export const loadVideo = (rootUrl: string, scene: Scene, videoContainer: IVideoC
 };
 
 const createAudioScene = (audio: Sound, scene: Scene) => {
+
   // create a Center of Transformation
   const CoT = new TransformNode('mediaPanel');
   CoT.billboardMode = Mesh.BILLBOARDMODE_ALL;

@@ -3,16 +3,23 @@ import { DOCUMENT } from '@angular/common';
 import { ComponentFactoryResolver, Inject, Injectable, Injector, ViewContainerRef } from '@angular/core';
 import { ArcRotateCamera, Camera, Color4, Engine, Layer, Scene, Sound, Texture, Tools, Vector3 } from 'babylonjs';
 import { Slider } from 'babylonjs-gui';
+// tslint:disable-next-line:no-import-side-effect
 import 'babylonjs-loaders';
 
 import { RenderCanvasComponent } from '../../components/render-canvas/render-canvas.component';
 
-import { createDefaultCamera, moveCameraToTarget, resetCamera, setCameraTarget, updateDefaults, setCameraTo2DMode } from './camera-handler';
+import {
+  createDefaultCamera,
+  moveCameraToTarget,
+  resetCamera,
+  setCameraTarget,
+  setUpCamera,
+  updateDefaults,
+} from './camera-handler';
 import { I3DModelContainer, IAudioContainer, IImageContainer, IVideoContainer } from './container.interfaces';
-import { load3DModel, loadAudio, loadImage, loadVideo } from './strategies/loading-strategies';
 import { LoadingScreen, LoadingscreenhandlerService } from './loadingscreen';
+import { load3DModel, loadAudio, loadImage, loadVideo } from './strategies/loading-strategies';
 import { afterAudioRender, beforeAudioRender, beforeVideoRender } from './strategies/render-strategies';
-/* tslint:enable:max-line-length */
 
 @Injectable({
   providedIn: 'root',
@@ -41,7 +48,7 @@ export class BabylonService {
     moveActiveCameraToPosition: (positionVector: Vector3) => {
       moveCameraToTarget(this.getActiveCamera(), this.scene, positionVector);
     },
-    resetCamera: () => resetCamera(this.getActiveCamera(), this.canvas),
+    resetCamera: () => resetCamera(this.getActiveCamera(), this.scene),
     getInitialPosition: () => ({
       cameraType: 'arcRotateCam',
       position: this.getActiveCamera().position,
@@ -50,9 +57,9 @@ export class BabylonService {
     setActiveCameraTarget: (targetVector: Vector3) =>
       setCameraTarget(this.getActiveCamera(), targetVector),
     updateDefaults,
-    setActiveCameraTo2D: () =>
-      setCameraTo2DMode(this.getActiveCamera(), this.mediaType === 'audio'),
-  };
+    setUpActiveCamera: (maxSize: number) =>
+      setUpCamera(this.getActiveCamera(), maxSize, this.mediaType),
+};
 
   private backgroundURL = 'assets/textures/backgrounds/darkgrey.jpg';
   private backgroundColor: {
@@ -195,11 +202,12 @@ export class BabylonService {
     // TODO: manage mediaType via Observable
     this.mediaType = mediaType;
 
+    /*
     if (this.mediaType !== 'model') {
       this.cameraManager.setActiveCameraTo2D();
     } else {
       this.cameraManager.resetCamera();
-    }
+    }*/
 
     switch (mediaType) {
       case 'audio':

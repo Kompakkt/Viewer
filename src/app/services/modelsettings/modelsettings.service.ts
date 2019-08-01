@@ -90,11 +90,13 @@ export class ModelsettingsService {
     this.width = this.initialSize.x.toFixed(2);
     this.depth = this.initialSize.z.toFixed(2);
 
-    // TODO: Check if needed
-    //this.cameraService.setUpperRadiusLimit(Math.max(this.max.x, this.max.y, this.max.z) * this.scalingFactor * 5);
+    // TODO: Check
     const pos = new Vector3(2.7, 1.3, Math.max(this.max.x, this.max.y, this.max.z) + 50);
-    const target = new Vector3(0, 0, 0);
+    const target = new Vector3(this.max.x - this.initialSize.x / 2,
+      this.max.y - this.initialSize.y / 2, this.max.z - this.initialSize.z / 2);
     this.babylonService.cameraManager.updateDefaults(pos, target);
+    this.babylonService.cameraManager
+      .setUpActiveCamera(Math.max(this.height, this.width, this.depth));
   }
 
   private async setSettings(scalingFactor, rotX, rotY, rotZ) {

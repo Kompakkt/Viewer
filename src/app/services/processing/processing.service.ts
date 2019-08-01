@@ -18,7 +18,6 @@ import {OverlayService} from '../overlay/overlay.service';
 
 export class ProcessingService {
 
-  // TODO: ReplaySubjects
   private Subjects = {
     models: new BehaviorSubject<IModel[]>(Array<IModel>()),
     collections: new BehaviorSubject<ICompilation[]>(Array<ICompilation>()),

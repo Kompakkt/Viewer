@@ -30,49 +30,81 @@ export const updateDefaults = (positionVector: Vector3, targetVector: Vector3) =
   DEFAULTS.target = targetVector;
 };
 
-export const resetCamera = (camera: ArcRotateCamera, canvas: HTMLCanvasElement) => {
-  camera.allowUpsideDown = false;
-  camera.panningSensibility = 25;
-  camera.keysUp.push(87);
-  camera.keysDown.push(83);
-  camera.keysLeft.push(65);
-  camera.keysRight.push(68);
-  camera.attachControl(canvas, false);
-
-  // Set limits to ArcRotateCamera defaults
-  camera.lowerAlphaLimit = camera.upperAlphaLimit = null;
-  camera.lowerBetaLimit = 0.01;
-  camera.upperBetaLimit = 3.1315926535897933;
-  camera.lowerRadiusLimit = camera.upperRadiusLimit = null;
-
+export const resetCamera = (camera: ArcRotateCamera, scene: Scene) => {
+  const target = new Vector3(DEFAULTS.target.x, DEFAULTS.target.y, DEFAULTS.target.z);
+  setCameraTarget(camera, target);
+  const position = new Vector3(DEFAULTS.position.alpha,
+                               DEFAULTS.position.beta, DEFAULTS.position.radius);
+  moveCameraToTarget(camera, scene, position);
   return camera;
 };
 
 export const createDefaultCamera = (scene: Scene, canvas: HTMLCanvasElement) => {
-  const camera = new ArcRotateCamera('arcRotateCamera', 0, 10, 100, Vector3.Zero(), scene);
 
-  // Override setPosition to always store new Position in DEFAULTS
-  camera.setPosition = (position: Vector3) => {
-    if (!camera._position.equals(position)) {
-      camera._position.copyFrom(position)      ;
-      camera.rebuildAnglesAndRadius();
+  // Dispose existing camera
+  if (scene.activeCamera) {
+    (scene.activeCamera as ArcRotateCamera).dispose();
+    scene.activeCamera = null;
+  }
+  // Camera
+  const worldExtends = scene.getWorldExtends();
+  const worldSize = worldExtends.max.subtract(worldExtends.min);
+  const worldCenter = worldExtends.min.add(worldSize.scale(0.5));
+
+  let camera: ArcRotateCamera;
+  let radius = worldSize.length() * 1.5;
+    // empty scene scenario!
+  if (!isFinite(radius)) {
+      radius = 1;
+      worldCenter.copyFromFloats(0, 0, 0);
     }
-    DEFAULTS.position.alpha = position.x;
-    DEFAULTS.position.beta = position.y;
-    DEFAULTS.position.radius = position.z;
+
+  const arcRotateCamera = new ArcRotateCamera('arcRotateCamera', -(Math.PI / 2),
+                                              Math.PI / 2, radius, worldCenter, scene);
+  arcRotateCamera.lowerRadiusLimit = radius * 0.01;
+  arcRotateCamera.wheelPrecision = 100 / radius;
+  camera = arcRotateCamera;
+
+  camera.minZ = radius * 0.01;
+  camera.maxZ = radius * 1000;
+  camera.speed = radius * 0.2;
+  scene.activeCamera = camera;
+
+  scene.activeCamera.attachControl(canvas);
+  camera.setTarget(Vector3.Zero());
+  camera.allowUpsideDown = false;
+
+    // Override setPosition to always store new Position in DEFAULTS
+  camera.setPosition = (position: Vector3) => {
+      if (!camera._position.equals(position)) {
+        camera._position.copyFrom(position);
+        camera.rebuildAnglesAndRadius();
+      }
+      DEFAULTS.position.alpha = position.x;
+      DEFAULTS.position.beta = position.y;
+      DEFAULTS.position.radius = position.z;
+    };
+
+  return camera;
   };
 
-  return resetCamera(camera, canvas);
-};
-
-export const setCameraTo2DMode = (camera: ArcRotateCamera, isAudio?: boolean) => {
-  camera.setPosition(new Vector3(0, halfPi * 90, (isAudio ? 5 : 150)));
-  camera.lowerAlphaLimit = camera.upperAlphaLimit = halfPi * -90;
-  camera.lowerBetaLimit = camera.upperBetaLimit = halfPi * 90;
-
-  if (isAudio) {
-    camera.lowerRadiusLimit = camera.upperRadiusLimit = 5;
-  }
+export const setUpCamera = (camera: ArcRotateCamera, maxSize: number, mediaType: string) => {
+    if (mediaType === 'model') {
+      camera.lowerAlphaLimit = -Math.PI;
+      camera.upperAlphaLimit = Math.PI;
+      camera.lowerBetaLimit = 0.1;
+      camera.upperBetaLimit = Math.PI;
+    } else {
+      camera.lowerAlphaLimit = camera.upperAlphaLimit = halfPi * -90;
+      camera.lowerBetaLimit = camera.upperBetaLimit = halfPi * 90;
+    }
+    if (mediaType !== 'audio') {
+          camera.lowerRadiusLimit = 0;
+          camera.upperRadiusLimit = maxSize * 4;
+        } else {
+          camera.lowerRadiusLimit = camera.upperRadiusLimit = maxSize * 4;
+        }
+    return camera;
 };
 
 const createAnimationsForCamera = (

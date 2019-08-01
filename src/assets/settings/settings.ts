@@ -137,8 +137,8 @@ export const settings2D = {
       cameraType: 'arcRotateCam',
       position: {
         x: 0,
-        y: Math.PI / 180 * 90,
-        z: 10,
+        y: (Math.PI / 180) * 90,
+        z: 150,
       },
       target: {
         x: 0,
