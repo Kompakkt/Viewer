@@ -198,7 +198,7 @@ export class ProcessingService {
     };
 
     // Determine mediaType by extension
-    const entityExts = ['.babylon', '.obj', '.stl', '.glft'];
+    const modelExts = ['.babylon', '.obj', '.stl', '.glft'];
     const imageExts = ['.jpg', '.jpeg', '.png'];
     const videoExts = ['.webm', '.mp4', '.avi'];
     const audioExts = ['.ogg', '.mp3'];
@@ -233,14 +233,14 @@ export class ProcessingService {
 
     const getMediaType = () => {
       const _countMedia = {
-        entity: 0, image: 0,
+        model: 0, image: 0,
         video: 0, audio: 0,
       };
 
       // Count file occurences
       for (const _ext of fileExts) {
         switch (true) {
-          case entityExts.includes(_ext): _countMedia.entity++; break;
+          case modelExts.includes(_ext): _countMedia.model++; break;
           case imageExts.includes(_ext): _countMedia.image++; break;
           case videoExts.includes(_ext): _countMedia.video++; break;
           case audioExts.includes(_ext): _countMedia.audio++; break;
@@ -248,11 +248,11 @@ export class ProcessingService {
         }
       }
 
-      // Since this is checking in order (entity first)
+      // Since this is checking in order (3d model first)
       // we are able to determine entities, even if e.g. textures are
       // also found
       switch (true) {
-        case _countMedia.entity > 0: mediaType = 'entity'; break;
+        case _countMedia.model > 0: mediaType = 'model'; break;
         case _countMedia.image > 0: mediaType = 'image'; break;
         case _countMedia.video > 0: mediaType = 'video'; break;
         case _countMedia.audio > 0: mediaType = 'audio'; break;
@@ -268,7 +268,7 @@ export class ProcessingService {
         fileReader.readAsDataURL(fileList[0]);
       } else {
         const largest = fileList
-          .filter(file => entityExts.includes(file.name.substr(file.name.lastIndexOf('.'))))
+          .filter(file => modelExts.includes(file.name.substr(file.name.lastIndexOf('.'))))
           .sort((a, b) => b.size - a.size)[0];
         ext = largest.name.substr(largest.name.lastIndexOf('.'));
         fileReader.readAsDataURL(largest);
