@@ -92,10 +92,14 @@ export class EntitySettingsService {
     this.depth = this.initialSize.z.toFixed(2);
 
     // TODO: Check
-    const pos = new Vector3(2.7, 1.3, Math.max(this.max.x, this.max.y, this.max.z) + 50);
+    // this.babylonService.cameraManager.getActiveCamera.zoomOn(this.actualEntityMeshes, false);
+    const pos = new Vector3(0, Math.PI / 180, Math.max(this.height, this.width, this.depth) * 1.5);
     const target = new Vector3(this.max.x - this.initialSize.x / 2,
-      this.max.y - this.initialSize.y / 2, this.max.z - this.initialSize.z / 2);
+                               this.max.y - this.initialSize.y / 2,
+                               this.max.z - this.initialSize.z / 2);
     this.babylonService.cameraManager.updateDefaults(pos, target);
+    this.babylonService.cameraManager.moveActiveCameraToPosition(pos);
+    this.babylonService.cameraManager.setActiveCameraTarget(target);
     this.babylonService.cameraManager
       .setUpActiveCamera(Math.max(this.height, this.width, this.depth));
   }
