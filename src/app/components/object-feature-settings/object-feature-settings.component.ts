@@ -4,7 +4,8 @@ import { Vector3 } from 'babylonjs';
 import { ColorEvent } from 'ngx-color';
 
 // tslint:disable-next-line:max-line-length
-import { settings2D, settingsFallback, settingsKompakktLogo, settingsEntity } from '../../../assets/settings/settings';
+import { settings2D, settingsEntity, settingsFallback, settingsKompakktLogo } from '../../../assets/settings/settings';
+import { environment } from '../../../environments/environment';
 import { IEntity } from '../../interfaces/interfaces';
 import { BabylonService } from '../../services/babylon/babylon.service';
 import { LightService } from '../../services/light/light.service';
@@ -16,7 +17,6 @@ import { ProcessingService } from '../../services/processing/processing.service'
 import { UserdataService } from '../../services/userdata/userdata.service';
 // tslint:disable-next-line:max-line-length
 import { DialogMeshsettingsComponent } from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
-import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-entity-feature-settings',
@@ -64,14 +64,14 @@ export class EntityFeatureSettingsComponent implements OnInit {
   private ambientlightDownintensity: number | undefined;
 
   constructor(private overlayService: OverlayService,
-    private babylonService: BabylonService,
-    private lightService: LightService,
-    private mongohandlerService: MongohandlerService,
-    private message: MessageService,
-    private processingService: ProcessingService,
-    public entitySettingsService: EntitySettingsService,
-    public dialog: MatDialog,
-    private userdataService: UserdataService,
+              private babylonService: BabylonService,
+              private lightService: LightService,
+              private mongohandlerService: MongohandlerService,
+              private message: MessageService,
+              private processingService: ProcessingService,
+              public entitySettingsService: EntitySettingsService,
+              public dialog: MatDialog,
+              private userdataService: UserdataService,
   ) {
   }
 
@@ -265,7 +265,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
         .then(screenshot => {
           this.preview = screenshot;
           resolve(screenshot);
-        }, error => {
+        },    error => {
           this.message.error(error);
           reject(error);
         }));
@@ -306,8 +306,8 @@ export class EntityFeatureSettingsComponent implements OnInit {
 
   private async setSettings() {
     // Settings available?
-    if (!this.activeEntity || !this.activeEntity.settings ||
-      this.activeEntity.settings === undefined ||
+    if (!this.activeEntity ||
+      !this.activeEntity.settings ||
       this.activeEntity.settings.preview === undefined ||
       this.activeEntity.settings.cameraPositionInitial === undefined ||
       this.activeEntity.settings.background === undefined ||
@@ -432,7 +432,8 @@ export class EntityFeatureSettingsComponent implements OnInit {
     this.babylonService.setBackgroundImage(this.setEffect);
 
     // Lights
-    const pointLight = this.activeEntity.settings.lights.filter(obj => obj.type === 'PointLight')[0];
+    const pointLight = this.activeEntity.settings.lights
+      .filter(obj => obj.type === 'PointLight')[0];
     this.lightService.createPointLight('pointlight', pointLight.position);
     this.lightService.setLightIntensity('pointlight', pointLight.intensity);
 

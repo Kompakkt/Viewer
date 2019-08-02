@@ -104,6 +104,9 @@ export const setUpCamera = (camera: ArcRotateCamera, maxSize: number, mediaType:
         } else {
           camera.lowerRadiusLimit = camera.upperRadiusLimit = maxSize * 4;
         }
+    camera.collisionRadius
+      .copyFromFloats(maxSize * 0.8, maxSize * 0.8 - maxSize * 0.35, maxSize * 0.8);
+    camera.checkCollisions = true;
     return camera;
 };
 
@@ -135,7 +138,8 @@ const createAnimationsForCamera = (
   return arr;
 };
 
-export const moveCameraToTarget = (camera: ArcRotateCamera, scene: Scene, positionVector: Vector3) => {
+export const moveCameraToTarget = (camera: ArcRotateCamera,
+                                   scene: Scene, positionVector: Vector3) => {
 
   camera.animations.push(
     ...createAnimationsForCamera(
