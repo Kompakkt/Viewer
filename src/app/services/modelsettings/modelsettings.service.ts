@@ -93,7 +93,7 @@ export class EntitySettingsService {
 
     // TODO: Check
     // this.babylonService.cameraManager.getActiveCamera.zoomOn(this.actualEntityMeshes, false);
-    const pos = new Vector3(0, Math.PI / 180, Math.max(this.height, this.width, this.depth) * 1.5);
+    const pos = new Vector3(0, 10, Math.max(this.height, this.width, this.depth) * 4);
     const target = new Vector3(this.max.x - this.initialSize.x / 2,
                                this.max.y - this.initialSize.y / 2,
                                this.max.z - this.initialSize.z / 2);

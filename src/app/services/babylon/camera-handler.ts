@@ -95,7 +95,7 @@ export const setUpCamera = (camera: ArcRotateCamera, maxSize: number, mediaType:
   camera.wheelPrecision = 1000 / radius;
   camera.panningSensibility = radius * 0.6;
   camera.minZ = radius * 0.01;
-  camera.maxZ = radius + 0.1;
+  camera.maxZ = radius + maxSize;
   camera.speed = radius * 0.8;
 
   if (mediaType === 'entity' || mediaType === 'model') {
