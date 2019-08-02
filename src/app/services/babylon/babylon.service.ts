@@ -207,11 +207,17 @@ export class BabylonService {
     // Unregister renderers
     const preObservers = this.scene.onBeforeRenderObservable['_observers'];
     const postObservers = this.scene.onAfterRenderObservable['_observers'];
+    // The render callbacks have names which we can check
+    const unregisterObservers = ['renderAudio', 'renderVideo'];
     for (const observer of preObservers) {
-      this.scene.unregisterBeforeRender(observer.callback);
+      if (unregisterObservers.includes(observer.callback.name)) {
+        this.scene.unregisterBeforeRender(observer.callback);
+      }
     }
     for (const observer of postObservers) {
-      this.scene.unregisterBeforeRender(observer.callback);
+      if (unregisterObservers.includes(observer.callback.name)) {
+        this.scene.unregisterAfterRender(observer.callback);
+      }
     }
   }
 
@@ -235,10 +241,11 @@ export class BabylonService {
           .then(result => {
             if (result) {
               this.audioContainer = result;
-              this.scene.registerBeforeRender(() =>
-                beforeAudioRender(this.scene, this.audioContainer));
-              this.scene.registerAfterRender(() =>
-                afterAudioRender(this.audioContainer));
+              // Define as function so we can unregister by variable name
+              let renderAudio = () => beforeAudioRender(this.scene, this.audioContainer);
+              this.scene.registerBeforeRender(renderAudio);
+              renderAudio = () => afterAudioRender(this.audioContainer);
+              this.scene.registerAfterRender(renderAudio);
             } else {
               throw new Error('No audio result');
             }
@@ -249,8 +256,9 @@ export class BabylonService {
           .then(result => {
             if (result) {
               this.videoContainer = result;
-              this.scene.registerBeforeRender(() =>
-                beforeVideoRender(this.videoContainer));
+              // Define as function so we can unregister by variable name
+              const renderVideo = () => beforeVideoRender(this.videoContainer);
+              this.scene.registerBeforeRender(renderVideo);
             } else {
               throw new Error('No video result');
             }
