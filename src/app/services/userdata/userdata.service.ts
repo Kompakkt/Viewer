@@ -1,6 +1,7 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
 
-import {IAnnotation, ICompilation, ILDAPData, ILoginData, IEntity, IUserData} from '../../interfaces/interfaces';
+// tslint:disable-next-line:max-line-length
+import {IAnnotation, ICompilation, IEntity, ILDAPData, ILoginData, IUserData} from '../../interfaces/interfaces';
 import {MessageService} from '../message/message.service';
 import {MongohandlerService} from '../mongohandler/mongohandler.service';
 import {ProcessingService} from '../processing/processing.service';

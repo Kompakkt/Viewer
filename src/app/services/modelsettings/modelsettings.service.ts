@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+// tslint:disable-next-line:max-line-length
 import { Animation, Axis, Color3, DynamicTexture, Mesh, MeshBuilder, Quaternion, StandardMaterial, Tags, Vector3 } from 'babylonjs';
 import { ColorEvent } from 'ngx-color';
 
@@ -44,7 +45,7 @@ export class EntitySettingsService {
   private rotQuat = new Quaternion();
 
   constructor(private babylonService: BabylonService,
-    private processingService: ProcessingService) {
+              private processingService: ProcessingService) {
 
     this.processingService.Observables.actualEntityMeshes.subscribe(actualEntityMeshes => {
       this.actualEntityMeshes = actualEntityMeshes;

@@ -17,8 +17,8 @@ import {
   updateDefaults,
 } from './camera-handler';
 import { I3DEntityContainer, IAudioContainer, IImageContainer, IVideoContainer } from './container.interfaces';
-import { load3DEntity, loadAudio, loadImage, loadVideo } from './strategies/loading-strategies';
 import { LoadingScreen, LoadingscreenhandlerService } from './loadingscreen';
+import { load3DEntity, loadAudio, loadImage, loadVideo } from './strategies/loading-strategies';
 import { afterAudioRender, beforeAudioRender, beforeVideoRender } from './strategies/render-strategies';
 
 @Injectable({

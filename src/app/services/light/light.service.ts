@@ -47,6 +47,8 @@ export class LightService {
 
     this.pointlight.intensity = (this.pointlightIntensity) ? this.pointlightIntensity : 1.0;
 
+    this.pointlight.specular = new BABYLON.Color3(0, 0, 0);
+
     // return this.pointlight;
   }
 
@@ -54,12 +56,15 @@ export class LightService {
     if (this.ambientlightDown) this.ambientlightDown.dispose();
     this.ambientlightDown = new HemisphericLight(
       name, new Vector3(position.x, position.y, position.z), this.scene);
+    this.ambientlightDown.specular = new BABYLON.Color3(0, 0, 0);
+
   }
 
   public createAmbientlightUp(name: string, position: any) {
     if (this.ambientlightUp) this.ambientlightUp.dispose();
     this.ambientlightUp = new HemisphericLight(
       name, new Vector3(position.x, position.y, position.z), this.scene);
+    this.ambientlightUp.specular = new BABYLON.Color3(0, 0, 0);
   }
 
   public setLightPosition(dimension: string, pos: number) {
