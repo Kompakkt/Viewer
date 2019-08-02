@@ -101,6 +101,7 @@ export class EntitySettingsService {
     this.babylonService.cameraManager
       .setUpActiveCamera(Math.max(this.height, this.width, this.depth));
     this.babylonService.cameraManager.updateDefaults(pos, target);
+    this.babylonService.cameraManager.setActiveCameraTarget(target);
     this.babylonService.cameraManager.moveActiveCameraToPosition(pos);
   }
 
