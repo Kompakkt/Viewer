@@ -306,6 +306,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
 
   private async setSettings() {
     // Settings available?
+    let upload = false;
     if (!this.activeEntity ||
       !this.activeEntity.settings ||
       this.activeEntity.settings.preview === undefined ||
@@ -315,12 +316,12 @@ export class EntityFeatureSettingsComponent implements OnInit {
       this.activeEntity.settings.rotation === undefined ||
       this.activeEntity.settings.scale === undefined) {
       // Settings missing? => Cases: Upload || Default, Fallback
-      const upload = await this.createSettings();
+      upload = await this.createSettings();
       if (upload) {
         await this.initialiseUpload();
       }
     }
-    if (this.activeEntity && this.activeEntity.settings) {
+    if (this.activeEntity && this.activeEntity.settings && !upload) {
       await this.entitySettingsService.loadSettings(
         this.activeEntity.settings.scale,
         this.activeEntity.settings.rotation.x,
@@ -380,9 +381,11 @@ export class EntityFeatureSettingsComponent implements OnInit {
     const isDragDrop = queryParams.get('dragdrop');
 
     if ((isDragDrop || this.isEntityOwner) && !this.isFinished) {
+      await this.setLightBackground();
       this.initialSettingsMode = true;
       await this.entitySettingsService.createVisualSettings();
-      this.cameraPositionInitial = this.babylonService.cameraManager.getInitialPosition();
+      this.cameraPositionInitial = this.babylonService.cameraManager.getActualDefaultPosition();
+      console.log('initial: ', this.cameraPositionInitial);
       const cameraSettings: any[] = [this.cameraPositionInitial];
 
       if (this.activeEntity && this.activeEntity.settings) {
@@ -402,6 +405,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   private async setCamera() {
+    console.log('KAMERASETZEN');
     if (!this.activeEntity || !this.activeEntity.settings) {
       console.warn('No this.activeEntity', this);
       return;

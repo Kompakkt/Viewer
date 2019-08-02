@@ -104,16 +104,17 @@ export const setUpCamera = (camera: ArcRotateCamera, maxSize: number, mediaType:
       camera.lowerAlphaLimit = camera.upperAlphaLimit = halfPi * -90;
       camera.lowerBetaLimit = camera.upperBetaLimit = halfPi * 90;
     }
-    if (mediaType !== 'audio') {
+  if (mediaType !== 'audio') {
           camera.lowerRadiusLimit = 0;
           camera.upperRadiusLimit = radius;
         } else {
           camera.lowerRadiusLimit = camera.upperRadiusLimit = maxSize * 4;
         }
-    /*
-    camera.collisionRadius
-      .copyFromFloats(maxSize * 0.8, maxSize * 0.8 - maxSize * 0.35, maxSize * 0.8);
-    camera.checkCollisions = true;*/
+
+  /*
+  camera.collisionRadius
+    .copyFromFloats(maxSize * 0.8, maxSize * 0.8 - maxSize * 0.35, maxSize * 0.8);
+  camera.checkCollisions = true;*/
   return camera;
 };
 
@@ -147,13 +148,24 @@ const createAnimationsForCamera = (
 
 export const moveCameraToTarget = (camera: ArcRotateCamera,
                                    scene: Scene, positionVector: Vector3) => {
-
-  camera.animations.push(
+console.log('move Cam to', positionVector);
+camera.animations.push(
     ...createAnimationsForCamera(
       camera, positionVector, ['alpha', 'beta', 'radius']));
-  scene.beginAnimation(camera, 0, 30, false, 1, () => { });
+scene.beginAnimation(camera, 0, 30, false, 1, () => { });
 };
 
 export const setCameraTarget = (camera: ArcRotateCamera, target: Vector3) => {
   camera.setTarget(target, true);
+};
+
+export const getDefaultPosition = () => {
+  const position = new Vector3(DEFAULTS.position.alpha,
+                               DEFAULTS.position.beta, DEFAULTS.position.radius);
+  return position;
+};
+
+export const getDefaultTarget = () => {
+  const target = new Vector3(DEFAULTS.target.x, DEFAULTS.target.y, DEFAULTS.target.z);
+  return target;
 };

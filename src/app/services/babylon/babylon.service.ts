@@ -10,6 +10,8 @@ import { RenderCanvasComponent } from '../../components/render-canvas/render-can
 
 import {
   createDefaultCamera,
+  getDefaultPosition,
+  getDefaultTarget,
   moveCameraToTarget,
   resetCamera,
   setCameraTarget,
@@ -53,6 +55,11 @@ export class BabylonService {
       cameraType: 'arcRotateCam',
       position: this.getActiveCamera().position,
       target: this.getActiveCamera().target,
+    }),
+    getActualDefaultPosition: () => ({
+      cameraType: 'arcRotateCam',
+      position: getDefaultPosition(),
+      target: getDefaultTarget(),
     }),
     setActiveCameraTarget: (targetVector: Vector3) =>
       setCameraTarget(this.getActiveCamera(), targetVector),

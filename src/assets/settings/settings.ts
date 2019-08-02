@@ -197,9 +197,9 @@ export const settingsEntity = {
   cameraPositionInitial: {
     cameraType: 'arcRotateCam',
     position: {
-      x: 2.7065021761026817,
-      y: 1.3419080619941322,
-      z: 90.44884111420268,
+      x: 0,
+      y: 0,
+      z: 0,
     },
     target: {
       x: 0,

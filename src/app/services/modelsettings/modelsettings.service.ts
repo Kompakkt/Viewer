@@ -93,15 +93,15 @@ export class EntitySettingsService {
 
     // TODO: Check
     // this.babylonService.cameraManager.getActiveCamera.zoomOn(this.actualEntityMeshes, false);
-    const pos = new Vector3(0, 10, Math.max(this.height, this.width, this.depth) * 4);
+    console.log('Das ist das Maximum: ', this.height, this.width, this.depth);
+    const pos = new Vector3( Math.PI / 4, Math.PI / 4, Math.max(this.height, this.width, this.depth) * 2.5);
     const target = new Vector3(this.max.x - this.initialSize.x / 2,
                                this.max.y - this.initialSize.y / 2,
                                this.max.z - this.initialSize.z / 2);
-    this.babylonService.cameraManager.updateDefaults(pos, target);
-    this.babylonService.cameraManager.moveActiveCameraToPosition(pos);
-    this.babylonService.cameraManager.setActiveCameraTarget(target);
     this.babylonService.cameraManager
       .setUpActiveCamera(Math.max(this.height, this.width, this.depth));
+    this.babylonService.cameraManager.updateDefaults(pos, target);
+    this.babylonService.cameraManager.moveActiveCameraToPosition(pos);
   }
 
   private async setSettings(scalingFactor, rotX, rotY, rotZ) {
