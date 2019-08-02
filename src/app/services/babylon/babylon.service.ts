@@ -8,11 +8,17 @@ import 'babylonjs-loaders';
 
 import { RenderCanvasComponent } from '../../components/render-canvas/render-canvas.component';
 
-import { createDefaultCamera, moveCameraToTarget, resetCamera, setCameraTarget, updateDefaults, setCameraTo2DMode } from './camera-handler';
+import {
+  createDefaultCamera,
+  moveCameraToTarget,
+  resetCamera,
+  setCameraTarget,
+  setUpCamera,
+  updateDefaults,
+} from './camera-handler';
 import { I3DEntityContainer, IAudioContainer, IImageContainer, IVideoContainer } from './container.interfaces';
 import { load3DEntity, loadAudio, loadImage, loadVideo } from './strategies/loading-strategies';
 import { LoadingScreen, LoadingscreenhandlerService } from './loadingscreen';
-import { load3DModel, loadAudio, loadImage, loadVideo } from './strategies/loading-strategies';
 import { afterAudioRender, beforeAudioRender, beforeVideoRender } from './strategies/render-strategies';
 
 @Injectable({
