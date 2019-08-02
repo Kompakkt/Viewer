@@ -59,6 +59,7 @@ export const createDefaultCamera = (scene: Scene, canvas: HTMLCanvasElement) => 
       worldCenter.copyFromFloats(0, 0, 0);
     }
 
+// Parameters: alpha, beta, radius, target position, scene
   const arcRotateCamera = new ArcRotateCamera('arcRotateCamera', -(Math.PI / 2),
                                               Math.PI / 2, radius, worldCenter, scene);
   arcRotateCamera.lowerRadiusLimit = radius * 0.01;
@@ -89,7 +90,15 @@ export const createDefaultCamera = (scene: Scene, canvas: HTMLCanvasElement) => 
   };
 
 export const setUpCamera = (camera: ArcRotateCamera, maxSize: number, mediaType: string) => {
-    if (mediaType === 'entity' || mediaType === 'model') {
+
+  const radius = maxSize * 4;
+  camera.wheelPrecision = 1000 / radius;
+  camera.panningSensibility = radius * 0.6;
+  camera.minZ = radius * 0.01;
+  camera.maxZ = radius + 0.1;
+  camera.speed = radius * 0.8;
+
+  if (mediaType === 'entity' || mediaType === 'model') {
       camera.lowerAlphaLimit = null;
       camera.upperAlphaLimit = null;
       camera.lowerBetaLimit = 0.1;
@@ -100,7 +109,7 @@ export const setUpCamera = (camera: ArcRotateCamera, maxSize: number, mediaType:
     }
     if (mediaType !== 'audio') {
           camera.lowerRadiusLimit = 0;
-          camera.upperRadiusLimit = maxSize * 4;
+          camera.upperRadiusLimit = radius;
         } else {
           camera.lowerRadiusLimit = camera.upperRadiusLimit = maxSize * 4;
         }
