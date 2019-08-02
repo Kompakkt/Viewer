@@ -117,7 +117,7 @@ export const setUpCamera = (camera: ArcRotateCamera, maxSize: number, mediaType:
     camera.collisionRadius
       .copyFromFloats(maxSize * 0.8, maxSize * 0.8 - maxSize * 0.35, maxSize * 0.8);
     camera.checkCollisions = true;*/
-    return camera;
+  return camera;
 };
 
 const createAnimationsForCamera = (

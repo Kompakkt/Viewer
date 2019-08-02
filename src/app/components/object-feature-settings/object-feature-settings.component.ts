@@ -382,10 +382,10 @@ export class EntityFeatureSettingsComponent implements OnInit {
     if ((isDragDrop || this.isEntityOwner) && !this.isFinished) {
       this.initialSettingsMode = true;
       await this.entitySettingsService.createVisualSettings();
-
-      if (this.activeEntity && this.activeEntity.settings) {
       this.cameraPositionInitial = this.babylonService.cameraManager.getInitialPosition();
       const cameraSettings: any[] = [this.cameraPositionInitial];
+
+      if (this.activeEntity && this.activeEntity.settings) {
       this.activeEntity['settings']['cameraPositionInitial'] = cameraSettings;
       }
       this.overlayService.activateSettingsTab();
