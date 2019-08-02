@@ -222,7 +222,8 @@
         <div *ngIf="showBackground">
           <color-chrome (onChange)="handleChangeColor($event)"></color-chrome>
           <br>
-          <mat-slide-toggle (change)="handleChangeEffekt()">Gradient-Brightness Effect</mat-slide-toggle>
+          <mat-slide-toggle [checked]= "setEffect"
+                            (change)="handleChangeEffekt()">Gradient-Brightness Effect</mat-slide-toggle>
         </div>
 
         <h5>Lights
@@ -316,7 +317,8 @@
       <mat-card-content>
         <color-chrome (onChange)="handleChangeColor($event)"></color-chrome>
         <br>
-        <mat-slide-toggle (change)="handleChangeEffekt()">Gradient-Brightness Effect</mat-slide-toggle>
+        <mat-slide-toggle [checked]= "setEffect"
+          (change)="handleChangeEffekt()">Gradient-Brightness Effect</mat-slide-toggle>
       </mat-card-content>
     </mat-card>
 

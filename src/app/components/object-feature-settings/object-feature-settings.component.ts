@@ -30,7 +30,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
 
   public activeEntity: IEntity | undefined;
   private preview: string | undefined;
-  private setEffect = false;
+  public setEffect = false;
   private isDefault = false;
   private isEntityOwner = false;
   public isSingleEntity = false;
