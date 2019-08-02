@@ -63,7 +63,6 @@ export const createDefaultCamera = (scene: Scene, canvas: HTMLCanvasElement) => 
   const arcRotateCamera = new ArcRotateCamera('arcRotateCamera', -(Math.PI / 2),
                                               Math.PI / 2, radius, worldCenter, scene);
   arcRotateCamera.lowerRadiusLimit = radius * 0.01;
-  arcRotateCamera.wheelPrecision = 100 / radius;
   camera = arcRotateCamera;
 
   camera.minZ = radius * 0.01;
@@ -92,8 +91,6 @@ export const createDefaultCamera = (scene: Scene, canvas: HTMLCanvasElement) => 
 export const setUpCamera = (camera: ArcRotateCamera, maxSize: number, mediaType: string) => {
 
   const radius = maxSize * 4;
-  camera.wheelPrecision = 1000 / radius;
-  camera.panningSensibility = radius * 0.6;
   camera.minZ = radius * 0.01;
   camera.maxZ = radius + maxSize;
   camera.speed = radius * 0.8;

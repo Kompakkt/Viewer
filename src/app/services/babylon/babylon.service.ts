@@ -109,6 +109,23 @@ export class BabylonService {
       skeletons: [], animationGroups: [],
     };
 
+    // Increase mouse precision the closer the camera is to it's target
+    // Increased mouse precision = slower zoom
+    this.scene.registerBeforeRender(() => {
+      const camera = this.getActiveCamera();
+      if (!camera) return;
+
+      const maxPrecision = 45;
+      const minAngular = 2000;
+      camera.wheelPrecision = maxPrecision - Math.min(...[camera.radius, maxPrecision - 5]);
+
+      camera.panningSensibility = camera.wheelPrecision * 50;
+
+      const angularPrecision = camera.wheelPrecision * 125;
+      camera.angularSensibilityX = camera.angularSensibilityY =
+        Math.max(...[angularPrecision, minAngular]);
+    });
+
     this.engine.runRenderLoop(() => {
       this.scene.render();
     });
