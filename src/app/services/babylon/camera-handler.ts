@@ -90,8 +90,8 @@ export const createDefaultCamera = (scene: Scene, canvas: HTMLCanvasElement) => 
 
 export const setUpCamera = (camera: ArcRotateCamera, maxSize: number, mediaType: string) => {
     if (mediaType === 'entity' || mediaType === 'model') {
-      camera.lowerAlphaLimit = -Math.PI;
-      camera.upperAlphaLimit = Math.PI;
+      camera.lowerAlphaLimit = null;
+      camera.upperAlphaLimit = null;
       camera.lowerBetaLimit = 0.1;
       camera.upperBetaLimit = Math.PI;
     } else {
