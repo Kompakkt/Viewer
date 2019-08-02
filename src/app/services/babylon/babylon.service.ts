@@ -175,6 +175,9 @@ export class BabylonService {
     // Meshes
     this.scene.meshes.forEach(mesh => mesh.dispose());
     this.scene.meshes = [];
+    // Lights
+    this.scene.lights.forEach(light => light.dispose());
+    this.scene.lights = [];
     // Audio
     this.audioContainer.audio.dispose();
     this.audioContainer.slider.dispose();
