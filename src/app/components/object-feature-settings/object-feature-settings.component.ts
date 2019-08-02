@@ -89,8 +89,8 @@ export class EntityFeatureSettingsComponent implements OnInit {
         this.isFinished = this.activeEntity.finished;
         this.setSettings();
         // camera should not move through mesh
-        this.babylonService.getScene().meshes
-          .forEach(mesh => mesh.checkCollisions = true);
+        /*this.babylonService.getScene().meshes
+          .forEach(mesh => mesh.checkCollisions = true);*/
       }
     });
 
