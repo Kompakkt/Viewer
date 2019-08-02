@@ -170,6 +170,10 @@ export class BabylonService {
       camera.angularSensibilityX = camera.angularSensibilityY = Math.max(
         ...[angularPrecision, minAngular],
       );
+
+      // Annotation_Marker -- Fixed_Size_On_Zoom
+      this.scene.getMeshesByTags('plane', mesh => mesh.scalingDeterminant = camera.radius / 35);
+      this.scene.getMeshesByTags('label', mesh => mesh.scalingDeterminant = camera.radius / 35);
     });
 
     this.engine.runRenderLoop(() => {
