@@ -79,7 +79,9 @@ export class AnnotationsEditorComponent implements OnInit {
     saveAs(
       new Blob(
         [JSON.stringify(this.annotationService.getCurrentAnnotations())],
-        { type: 'text/plain;charset=utf-8' },
+        {
+          type: 'text/plain;charset=utf-8',
+        },
       ),
       'annotations.json',
     );

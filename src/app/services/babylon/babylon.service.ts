@@ -172,8 +172,14 @@ export class BabylonService {
       );
 
       // Annotation_Marker -- Fixed_Size_On_Zoom
-      this.scene.getMeshesByTags('plane', mesh => mesh.scalingDeterminant = camera.radius / 35);
-      this.scene.getMeshesByTags('label', mesh => mesh.scalingDeterminant = camera.radius / 35);
+      this.scene.getMeshesByTags(
+        'plane',
+        mesh => (mesh.scalingDeterminant = camera.radius / 35),
+      );
+      this.scene.getMeshesByTags(
+        'label',
+        mesh => (mesh.scalingDeterminant = camera.radius / 35),
+      );
     });
 
     this.engine.runRenderLoop(() => {
@@ -294,11 +300,11 @@ export class BabylonService {
     this.mediaType = mediaType;
 
     /*
-    if (this.mediaType !== 'model') {
-      this.cameraManager.setActiveCameraTo2D();
-    } else {
-      this.cameraManager.resetCamera();
-    }*/
+        if (this.mediaType !== 'model') {
+          this.cameraManager.setActiveCameraTo2D();
+        } else {
+          this.cameraManager.resetCamera();
+        }*/
 
     switch (mediaType) {
       case 'audio':
