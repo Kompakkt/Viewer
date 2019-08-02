@@ -1,23 +1,21 @@
-import {EventEmitter, Injectable, Output} from '@angular/core';
-import {Mesh} from 'babylonjs';
-import {BehaviorSubject} from 'rxjs';
-import {ReplaySubject} from 'rxjs/internal/ReplaySubject';
+import { EventEmitter, Injectable, Output } from '@angular/core';
+import { Mesh } from 'babylonjs';
+import { BehaviorSubject } from 'rxjs';
+import { ReplaySubject } from 'rxjs/internal/ReplaySubject';
 
-import {environment} from '../../../environments/environment';
-import {ICompilation, IEntity} from '../../interfaces/interfaces';
-import {BabylonService} from '../babylon/babylon.service';
-import {LoadingscreenhandlerService} from '../babylon/loadingscreen';
-import {MessageService} from '../message/message.service';
-import {MetadataService} from '../metadata/metadata.service';
-import {MongohandlerService} from '../mongohandler/mongohandler.service';
-import {OverlayService} from '../overlay/overlay.service';
+import { environment } from '../../../environments/environment';
+import { ICompilation, IEntity } from '../../interfaces/interfaces';
+import { BabylonService } from '../babylon/babylon.service';
+import { LoadingscreenhandlerService } from '../babylon/loadingscreen';
+import { MessageService } from '../message/message.service';
+import { MetadataService } from '../metadata/metadata.service';
+import { MongohandlerService } from '../mongohandler/mongohandler.service';
+import { OverlayService } from '../overlay/overlay.service';
 
 @Injectable({
   providedIn: 'root',
 })
-
 export class ProcessingService {
-
   private Subjects = {
     entities: new BehaviorSubject<IEntity[]>(Array<IEntity>()),
     collections: new BehaviorSubject<ICompilation[]>(Array<ICompilation>()),
@@ -57,16 +55,18 @@ export class ProcessingService {
   private defaultEntity: IEntity = {
     _id: 'default',
     annotationList: [],
-    relatedDigitalEntity: {_id: 'default_entity'},
+    relatedDigitalEntity: { _id: 'default_entity' },
     mediaType: 'entity',
     name: 'Cube',
-    dataSource: {isExternal: false},
-    files: [{
-      file_name: 'kompakkt.babylon',
-      file_link: 'assets/models/kompakkt.babylon',
-      file_size: 0,
-      file_format: '.babylon',
-    }],
+    dataSource: { isExternal: false },
+    files: [
+      {
+        file_name: 'kompakkt.babylon',
+        file_link: 'assets/models/kompakkt.babylon',
+        file_size: 0,
+        file_format: '.babylon',
+      },
+    ],
     finished: true,
     online: true,
     settings: {
@@ -89,13 +89,14 @@ export class ProcessingService {
     },
   };
 
-  constructor(private mongoHandlerService: MongohandlerService,
-              private message: MessageService,
-              private overlayService: OverlayService,
-              public babylonService: BabylonService,
-              private loadingScreenHandler: LoadingscreenhandlerService,
-              private metadataService: MetadataService) {
-  }
+  constructor(
+    private mongoHandlerService: MongohandlerService,
+    private message: MessageService,
+    private overlayService: OverlayService,
+    public babylonService: BabylonService,
+    private loadingScreenHandler: LoadingscreenhandlerService,
+    private metadataService: MetadataService,
+  ) {}
 
   public getCurrentEntity(): IEntity | undefined {
     return this.Observables.actualEntity.source['_events'].slice(-1)[0];
@@ -106,8 +107,9 @@ export class ProcessingService {
   }
 
   public getCurrentMediaType(): string {
-    return this.Observables.actualMediaType.source['_events'].slice(-1)[0] ?
-      this.Observables.actualMediaType.source['_events'].slice(-1)[0] : '';
+    return this.Observables.actualMediaType.source['_events'].slice(-1)[0]
+      ? this.Observables.actualMediaType.source['_events'].slice(-1)[0]
+      : '';
   }
 
   public updateActiveEntity(entity: IEntity) {
@@ -190,7 +192,10 @@ export class ProcessingService {
 
       getMediaType();
 
-      window.top.postMessage({ files: fileList, mediaType, type: 'fileList' }, environment.repository);
+      window.top.postMessage(
+        { files: fileList, mediaType, type: 'fileList' },
+        environment.repository,
+      );
     };
     document.ondragover = event => {
       event.preventDefault();
@@ -223,27 +228,40 @@ export class ProcessingService {
             isExternal: false,
           },
           processed: {
-            low: base64, medium: base64,
-            high: base64, raw: base64,
+            low: base64,
+            medium: base64,
+            high: base64,
+            raw: base64,
           },
         },
-        '', ext)
-        .then(() => this.loaded.emit(true));
+        '',
+        ext,
+      ).then(() => this.loaded.emit(true));
     };
 
     const getMediaType = () => {
       const _countMedia = {
-        model: 0, image: 0,
-        video: 0, audio: 0,
+        model: 0,
+        image: 0,
+        video: 0,
+        audio: 0,
       };
 
       // Count file occurences
       for (const _ext of fileExts) {
         switch (true) {
-          case modelExts.includes(_ext): _countMedia.model++; break;
-          case imageExts.includes(_ext): _countMedia.image++; break;
-          case videoExts.includes(_ext): _countMedia.video++; break;
-          case audioExts.includes(_ext): _countMedia.audio++; break;
+          case modelExts.includes(_ext):
+            _countMedia.model++;
+            break;
+          case imageExts.includes(_ext):
+            _countMedia.image++;
+            break;
+          case videoExts.includes(_ext):
+            _countMedia.video++;
+            break;
+          case audioExts.includes(_ext):
+            _countMedia.audio++;
+            break;
           default:
         }
       }
@@ -252,10 +270,18 @@ export class ProcessingService {
       // we are able to determine entities, even if e.g. textures are
       // also found
       switch (true) {
-        case _countMedia.model > 0: mediaType = 'model'; break;
-        case _countMedia.image > 0: mediaType = 'image'; break;
-        case _countMedia.video > 0: mediaType = 'video'; break;
-        case _countMedia.audio > 0: mediaType = 'audio'; break;
+        case _countMedia.model > 0:
+          mediaType = 'model';
+          break;
+        case _countMedia.image > 0:
+          mediaType = 'image';
+          break;
+        case _countMedia.video > 0:
+          mediaType = 'video';
+          break;
+        case _countMedia.audio > 0:
+          mediaType = 'audio';
+          break;
         default:
       }
 
@@ -268,7 +294,9 @@ export class ProcessingService {
         fileReader.readAsDataURL(fileList[0]);
       } else {
         const largest = fileList
-          .filter(file => modelExts.includes(file.name.substr(file.name.lastIndexOf('.'))))
+          .filter(file =>
+            modelExts.includes(file.name.substr(file.name.lastIndexOf('.'))),
+          )
           .sort((a, b) => b.size - a.size)[0];
         ext = largest.name.substr(largest.name.lastIndexOf('.'));
         fileReader.readAsDataURL(largest);
@@ -282,7 +310,8 @@ export class ProcessingService {
     if (!this.isFirstLoad) {
       this.firstLoad.emit(false);
       console.log('Page has already been initially loaded.');
-      this.mongoHandlerService.isAuthorized()
+      this.mongoHandlerService
+        .isAuthorized()
         .then(result => {
           if (result.status === 'ok') {
             this.fetchCollectionsData();
@@ -325,7 +354,8 @@ export class ProcessingService {
       this.showCatalogue.emit(true);
     }
 
-    this.mongoHandlerService.isAuthorized()
+    this.mongoHandlerService
+      .isAuthorized()
       .then(result => {
         console.log(result);
         if (result.status !== 'ok') {
@@ -354,12 +384,14 @@ export class ProcessingService {
         this.loggedIn.emit(false);
         this.message.error(
           'Other Entities and Collections are only available in the Cologne University ' +
-          'Network for logged in Users.');
+            'Network for logged in Users.',
+        );
       });
   }
 
   public fetchCollectionsData() {
-    this.mongoHandlerService.getAllCompilations()
+    this.mongoHandlerService
+      .getAllCompilations()
       .then(compilation => {
         this.Subjects.collections.next(compilation);
       })
@@ -370,17 +402,18 @@ export class ProcessingService {
   }
 
   public fetchEntitiesData() {
-    this.mongoHandlerService.getAllEntities()
+    this.mongoHandlerService
+      .getAllEntities()
       .then(entities => {
         const entitiesforBrowser: IEntity[] = [];
 
         entities
           .filter(entity => entity)
           .forEach((entity: IEntity) => {
-          if (entity.finished) {
-            entitiesforBrowser.push(entity);
-          }
-        });
+            if (entity.finished) {
+              entitiesforBrowser.push(entity);
+            }
+          });
         this.Subjects.entities.next(entitiesforBrowser);
       })
       .catch(error => {
@@ -403,7 +436,11 @@ export class ProcessingService {
       });
   }
 
-  public fetchAndLoad(entityId?: string, collectionId?: string, isfromCollection?: boolean) {
+  public fetchAndLoad(
+    entityId?: string,
+    collectionId?: string,
+    isfromCollection?: boolean,
+  ) {
     this.loaded.emit(false);
     this.quality = 'low';
     if (entityId) {
@@ -413,13 +450,19 @@ export class ProcessingService {
       }
     }
     if (collectionId) {
-      this.mongoHandlerService.getCompilation(collectionId)
+      this.mongoHandlerService
+        .getCompilation(collectionId)
         .then(compilation => {
           // TODO: Put Typeguards in its own service?
           const isEntity = (obj: any): obj is IEntity => {
             const _entity = obj as IEntity;
-            return _entity && _entity.name !== undefined && _entity.mediaType !== undefined
-              && _entity.online !== undefined && _entity.finished !== undefined;
+            return (
+              _entity &&
+              _entity.name !== undefined &&
+              _entity.mediaType !== undefined &&
+              _entity.online !== undefined &&
+              _entity.finished !== undefined
+            );
           };
           this.updateActiveCollection(compilation);
           const entity = compilation.entities[0];
@@ -427,13 +470,16 @@ export class ProcessingService {
         })
         .catch(error => {
           console.error(error);
-          this.message.error('Connection to entity server to load collection refused.');
+          this.message.error(
+            'Connection to entity server to load collection refused.',
+          );
         });
     }
   }
 
   public fetchEntityData(query: string) {
-    this.mongoHandlerService.getEntity(query)
+    this.mongoHandlerService
+      .getEntity(query)
       .then(resultEntity => {
         this.loadEntity(resultEntity)
           .then(result => {
@@ -447,18 +493,26 @@ export class ProcessingService {
       })
       .catch(error => {
         console.error(error);
-        this.message.error('Connection to entity server to load entity refused.');
+        this.message.error(
+          'Connection to entity server to load entity refused.',
+        );
       });
   }
 
-  public async loadEntity(newEntity: IEntity, overrideUrl?: string, extension = '.babylon') {
-    const URL = (overrideUrl !== undefined) ? overrideUrl : this.baseUrl;
+  public async loadEntity(
+    newEntity: IEntity,
+    overrideUrl?: string,
+    extension = '.babylon',
+  ) {
+    const URL = overrideUrl !== undefined ? overrideUrl : this.baseUrl;
     this.isFallbackEntityLoaded = false;
     this.fallbackEntityLoaded.emit(false);
 
-    if (!this.loadingScreenHandler.isLoading && newEntity.processed
-      && newEntity.mediaType) {
-
+    if (
+      !this.loadingScreenHandler.isLoading &&
+      newEntity.processed &&
+      newEntity.mediaType
+    ) {
       if (!newEntity.dataSource.isExternal) {
         // cases: entity, image, audio, video, text
         const _url = URL + newEntity.processed[this.quality];
@@ -466,45 +520,44 @@ export class ProcessingService {
         switch (newEntity.mediaType) {
           case 'model':
           case 'entity':
-            await this.babylonService.loadEntity(_url, mediaType, extension)
+            await this.babylonService
+              .loadEntity(_url, mediaType, extension)
               .then(() => {
                 this.updateActiveEntity(newEntity);
-                this.updateActiveEntityMeshes(this.babylonService.entityContainer.meshes as Mesh[]);
+                this.updateActiveEntityMeshes(this.babylonService
+                  .entityContainer.meshes as Mesh[]);
                 this.Subjects.actualMediaType.next('entity');
               });
             break;
           case 'image':
-            await this.babylonService.loadEntity(_url, mediaType)
-              .then(() => {
-                const plane = this.babylonService.imageContainer.plane;
-                if (plane) {
-                  this.Subjects.actualMediaType.next('image');
-                  this.updateActiveEntity(newEntity);
-                  this.updateActiveEntityMeshes([plane as Mesh]);
-                }
-              });
+            await this.babylonService.loadEntity(_url, mediaType).then(() => {
+              const plane = this.babylonService.imageContainer.plane;
+              if (plane) {
+                this.Subjects.actualMediaType.next('image');
+                this.updateActiveEntity(newEntity);
+                this.updateActiveEntityMeshes([plane as Mesh]);
+              }
+            });
             break;
           case 'audio':
-            await this.babylonService.loadEntity(_url, mediaType)
-              .then(() => {
-                const plane = this.babylonService.audioContainer.plane;
-                if (plane) {
-                  this.Subjects.actualMediaType.next('audio');
-                  this.updateActiveEntity(newEntity);
-                  this.updateActiveEntityMeshes([plane as Mesh]);
-                }
-              });
+            await this.babylonService.loadEntity(_url, mediaType).then(() => {
+              const plane = this.babylonService.audioContainer.plane;
+              if (plane) {
+                this.Subjects.actualMediaType.next('audio');
+                this.updateActiveEntity(newEntity);
+                this.updateActiveEntityMeshes([plane as Mesh]);
+              }
+            });
             break;
           case 'video':
-            await this.babylonService.loadEntity(_url, mediaType)
-              .then(() => {
-                const plane = this.babylonService.videoContainer.plane;
-                if (plane) {
-                  this.Subjects.actualMediaType.next('video');
-                  this.updateActiveEntity(newEntity);
-                  this.updateActiveEntityMeshes([plane as Mesh]);
-                }
-              });
+            await this.babylonService.loadEntity(_url, mediaType).then(() => {
+              const plane = this.babylonService.videoContainer.plane;
+              if (plane) {
+                this.Subjects.actualMediaType.next('video');
+                this.updateActiveEntity(newEntity);
+                this.updateActiveEntityMeshes([plane as Mesh]);
+              }
+            });
             break;
           case 'text':
             this.Subjects.actualEntity.next(newEntity);
@@ -522,9 +575,11 @@ export class ProcessingService {
   }
 
   public async loadFallbackEntity() {
-    await this.babylonService.loadEntity('assets/models/sketch_cat/scene.gltf', 'entity', '.gltf')
+    await this.babylonService
+      .loadEntity('assets/models/sketch_cat/scene.gltf', 'entity', '.gltf')
       .then(() => {
-        this.updateActiveEntityMeshes(this.babylonService.entityContainer.meshes as Mesh[]);
+        this.updateActiveEntityMeshes(this.babylonService.entityContainer
+          .meshes as Mesh[]);
         this.isFallbackEntityLoaded = true;
         this.fallbackEntityLoaded.emit(true);
         this.Subjects.actualMediaType.next('entity');
@@ -543,7 +598,10 @@ export class ProcessingService {
       }
       if (entity && entity.processed[this.quality] !== undefined) {
         this.loaded.emit(false);
-        this.loadEntity(entity._id === 'Cube' ? this.defaultEntity : entity, entity._id === 'Cube' ? '' : undefined)
+        this.loadEntity(
+          entity._id === 'Cube' ? this.defaultEntity : entity,
+          entity._id === 'Cube' ? '' : undefined,
+        )
           .then(() => {
             this.loaded.emit(true);
           })
@@ -559,17 +617,20 @@ export class ProcessingService {
     }
   }
 
-  public async selectCollectionByID(identifierCollection: string): Promise<string> {
+  public async selectCollectionByID(
+    identifierCollection: string,
+  ): Promise<string> {
     // Check if collection has been initially loaded and is available in collections
-    const collection: ICompilation | null =
-      this.Observables.collections.source['value']
-        .find(i => i._id === identifierCollection);
+    const collection: ICompilation | null = this.Observables.collections.source[
+      'value'
+    ].find(i => i._id === identifierCollection);
 
     return new Promise((resolve, reject) => {
       if (!collection) {
         // If collection has not been loaded during initial load
         // try to find it on the server
-        this.mongoHandlerService.getCompilation(identifierCollection)
+        this.mongoHandlerService
+          .getCompilation(identifierCollection)
           .then(compilation => {
             console.log('die compi ist', compilation);
             // collection is available on server
@@ -577,8 +638,10 @@ export class ProcessingService {
               // TODO: add to Subjects?
               this.fetchAndLoad(undefined, compilation._id, undefined);
               resolve('loaded');
-            } else if (compilation['status'] === 'ok'
-              && compilation['message'] === 'Password protected compilation') {
+            } else if (
+              compilation['status'] === 'ok' &&
+              compilation['message'] === 'Password protected compilation'
+            ) {
               resolve('password');
             } else {
               // collection ist nicht erreichbar
@@ -600,9 +663,12 @@ export class ProcessingService {
 
   public selectEntityByID(identifierEntity: string): boolean {
     // TODO: check if this correctly returns
-    const entity = this.Observables.entities.source['value'].find(i => i._id === identifierEntity);
+    const entity = this.Observables.entities.source['value'].find(
+      i => i._id === identifierEntity,
+    );
     if (entity === undefined) {
-      this.mongoHandlerService.getEntity(identifierEntity)
+      this.mongoHandlerService
+        .getEntity(identifierEntity)
         .then(actualEntity => {
           if (actualEntity['_id']) {
             this.Subjects.entities.next([actualEntity]);
@@ -621,5 +687,4 @@ export class ProcessingService {
 
     return true;
   }
-
 }

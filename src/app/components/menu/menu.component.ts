@@ -1,12 +1,12 @@
-import {Component, OnInit} from '@angular/core';
-import {MatDialog, MatDialogConfig, MatIconRegistry} from '@angular/material';
-import {DomSanitizer} from '@angular/platform-browser';
+import { Component, OnInit } from '@angular/core';
+import { MatDialog, MatDialogConfig, MatIconRegistry } from '@angular/material';
+import { DomSanitizer } from '@angular/platform-browser';
 
-import {BabylonService} from '../../services/babylon/babylon.service';
-import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
-import {OverlayService} from '../../services/overlay/overlay.service';
-import {ProcessingService} from '../../services/processing/processing.service';
-import {LoginComponent} from '../dialogs/dialog-login/login.component';
+import { BabylonService } from '../../services/babylon/babylon.service';
+import { MongohandlerService } from '../../services/mongohandler/mongohandler.service';
+import { OverlayService } from '../../services/overlay/overlay.service';
+import { ProcessingService } from '../../services/processing/processing.service';
+import { LoginComponent } from '../dialogs/dialog-login/login.component';
 
 @Component({
   selector: 'app-menu',
@@ -14,10 +14,9 @@ import {LoginComponent} from '../dialogs/dialog-login/login.component';
   styleUrls: ['./menu.component.scss'],
 })
 export class MenuComponent implements OnInit {
-
   // external
   public isLoggedIn = false;
-    // available quality of entity
+  // available quality of entity
   public high = '';
   public medium = '';
   public low = '';
@@ -31,11 +30,14 @@ export class MenuComponent implements OnInit {
     public processingService: ProcessingService,
     public babylonService: BabylonService,
     private mongohandlerService: MongohandlerService,
-    public dialog: MatDialog) {
-
+    public dialog: MatDialog,
+  ) {
     iconRegistry.addSvgIcon(
       'cardboard',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/img/google-cardboard.svg'));
+      sanitizer.bypassSecurityTrustResourceUrl(
+        'assets/img/google-cardboard.svg',
+      ),
+    );
 
     this.processingService.loggedIn.subscribe(isLoggedIn => {
       this.isLoggedIn = isLoggedIn;
@@ -43,18 +45,20 @@ export class MenuComponent implements OnInit {
 
     this.processingService.Observables.actualEntity.subscribe(entity => {
       if (entity.processed) {
-        this.high = (entity.processed.high) ? entity.processed.high : '';
-        this.medium = (entity.processed.medium) ? entity.processed.medium : '';
-        this.low = (entity.processed.low) ? entity.processed.low : '';
+        this.high = entity.processed.high ? entity.processed.high : '';
+        this.medium = entity.processed.medium ? entity.processed.medium : '';
+        this.low = entity.processed.low ? entity.processed.low : '';
       }
     });
   }
 
   ngOnInit() {
     document.addEventListener('fullscreenchange', _ => {
-      if (!document.fullscreen && this.babylonService.getEngine().isFullscreen) {
-        this.babylonService.getEngine()
-          .switchFullscreen(false);
+      if (
+        !document.fullscreen &&
+        this.babylonService.getEngine().isFullscreen
+      ) {
+        this.babylonService.getEngine().switchFullscreen(false);
       }
     });
   }
@@ -64,14 +68,15 @@ export class MenuComponent implements OnInit {
     // To display the menu, we have to switch to fullscreen on our own.
     const _tf = (): Promise<void> => {
       const _docEl = document.documentElement as any;
-      return (_docEl.mozRequestFullScreen) ? _docEl.mozRequestFullScreen()
-        : (_docEl.webkitRequestFullscreen) ? _docEl.webkitRequestFullscreen()
+      return _docEl.mozRequestFullScreen
+        ? _docEl.mozRequestFullScreen()
+        : _docEl.webkitRequestFullscreen
+        ? _docEl.webkitRequestFullscreen()
         : _docEl.requestFullscreen();
     };
     const isFullscreen = document.fullscreen;
     if (isFullscreen) {
-      this.babylonService.getEngine()
-        .switchFullscreen(false);
+      this.babylonService.getEngine().switchFullscreen(false);
     } else {
       _tf()
         .then(() => {})
@@ -89,10 +94,8 @@ export class MenuComponent implements OnInit {
   }
 
   logout() {
-    this.mongohandlerService.logout()
-      .then(() => {
-        this.processingService.bootstrap();
-      });
+    this.mongohandlerService.logout().then(() => {
+      this.processingService.bootstrap();
+    });
   }
-
 }

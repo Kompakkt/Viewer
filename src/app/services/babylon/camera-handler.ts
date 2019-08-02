@@ -14,14 +14,21 @@ const DEFAULTS: {
   };
 } = {
   position: {
-    alpha: 0, beta: 10, radius: 100,
+    alpha: 0,
+    beta: 10,
+    radius: 100,
   },
   target: {
-    x: 0, y: 0, z: 0,
+    x: 0,
+    y: 0,
+    z: 0,
   },
 };
 
-export const updateDefaults = (positionVector: Vector3, targetVector: Vector3) => {
+export const updateDefaults = (
+  positionVector: Vector3,
+  targetVector: Vector3,
+) => {
   DEFAULTS.position = {
     alpha: positionVector.x,
     beta: positionVector.y,
@@ -31,16 +38,25 @@ export const updateDefaults = (positionVector: Vector3, targetVector: Vector3) =
 };
 
 export const resetCamera = (camera: ArcRotateCamera, scene: Scene) => {
-  const target = new Vector3(DEFAULTS.target.x, DEFAULTS.target.y, DEFAULTS.target.z);
+  const target = new Vector3(
+    DEFAULTS.target.x,
+    DEFAULTS.target.y,
+    DEFAULTS.target.z,
+  );
   setCameraTarget(camera, target);
-  const position = new Vector3(DEFAULTS.position.alpha,
-                               DEFAULTS.position.beta, DEFAULTS.position.radius);
+  const position = new Vector3(
+    DEFAULTS.position.alpha,
+    DEFAULTS.position.beta,
+    DEFAULTS.position.radius,
+  );
   moveCameraToTarget(camera, scene, position);
   return camera;
 };
 
-export const createDefaultCamera = (scene: Scene, canvas: HTMLCanvasElement) => {
-
+export const createDefaultCamera = (
+  scene: Scene,
+  canvas: HTMLCanvasElement,
+) => {
   // Dispose existing camera
   if (scene.activeCamera) {
     (scene.activeCamera as ArcRotateCamera).dispose();
@@ -53,15 +69,21 @@ export const createDefaultCamera = (scene: Scene, canvas: HTMLCanvasElement) => 
 
   let camera: ArcRotateCamera;
   let radius = worldSize.length() * 1.5;
-    // empty scene scenario!
+  // empty scene scenario!
   if (!isFinite(radius)) {
-      radius = 1;
-      worldCenter.copyFromFloats(0, 0, 0);
-    }
+    radius = 1;
+    worldCenter.copyFromFloats(0, 0, 0);
+  }
 
-// Parameters: alpha, beta, radius, target position, scene
-  const arcRotateCamera = new ArcRotateCamera('arcRotateCamera', -(Math.PI / 2),
-                                              Math.PI / 2, radius, worldCenter, scene);
+  // Parameters: alpha, beta, radius, target position, scene
+  const arcRotateCamera = new ArcRotateCamera(
+    'arcRotateCamera',
+    -(Math.PI / 2),
+    Math.PI / 2,
+    radius,
+    worldCenter,
+    scene,
+  );
   arcRotateCamera.lowerRadiusLimit = radius * 0.01;
   camera = arcRotateCamera;
 
@@ -74,42 +96,45 @@ export const createDefaultCamera = (scene: Scene, canvas: HTMLCanvasElement) => 
   camera.setTarget(Vector3.Zero());
   camera.allowUpsideDown = false;
 
-    // Override setPosition to always store new Position in DEFAULTS
+  // Override setPosition to always store new Position in DEFAULTS
   camera.setPosition = (position: Vector3) => {
-      if (!camera._position.equals(position)) {
-        camera._position.copyFrom(position);
-        camera.rebuildAnglesAndRadius();
-      }
-      DEFAULTS.position.alpha = position.x;
-      DEFAULTS.position.beta = position.y;
-      DEFAULTS.position.radius = position.z;
-    };
-
-  return camera;
+    if (!camera._position.equals(position)) {
+      camera._position.copyFrom(position);
+      camera.rebuildAnglesAndRadius();
+    }
+    DEFAULTS.position.alpha = position.x;
+    DEFAULTS.position.beta = position.y;
+    DEFAULTS.position.radius = position.z;
   };
 
-export const setUpCamera = (camera: ArcRotateCamera, maxSize: number, mediaType: string) => {
+  return camera;
+};
 
+export const setUpCamera = (
+  camera: ArcRotateCamera,
+  maxSize: number,
+  mediaType: string,
+) => {
   const radius = maxSize * 4;
   camera.minZ = radius * 0.01;
   camera.maxZ = radius + maxSize;
   camera.speed = radius * 0.8;
 
   if (mediaType === 'entity' || mediaType === 'model') {
-      camera.lowerAlphaLimit = null;
-      camera.upperAlphaLimit = null;
-      camera.lowerBetaLimit = 0.1;
-      camera.upperBetaLimit = Math.PI;
-    } else {
-      camera.lowerAlphaLimit = camera.upperAlphaLimit = halfPi * -90;
-      camera.lowerBetaLimit = camera.upperBetaLimit = halfPi * 90;
-    }
+    camera.lowerAlphaLimit = null;
+    camera.upperAlphaLimit = null;
+    camera.lowerBetaLimit = 0.1;
+    camera.upperBetaLimit = Math.PI;
+  } else {
+    camera.lowerAlphaLimit = camera.upperAlphaLimit = halfPi * -90;
+    camera.lowerBetaLimit = camera.upperBetaLimit = halfPi * 90;
+  }
   if (mediaType !== 'audio') {
-          camera.lowerRadiusLimit = 0;
-          camera.upperRadiusLimit = radius;
-        } else {
-          camera.lowerRadiusLimit = camera.upperRadiusLimit = maxSize * 4;
-        }
+    camera.lowerRadiusLimit = 0;
+    camera.upperRadiusLimit = radius;
+  } else {
+    camera.lowerRadiusLimit = camera.upperRadiusLimit = maxSize * 4;
+  }
 
   /*
   camera.collisionRadius
@@ -119,13 +144,20 @@ export const setUpCamera = (camera: ArcRotateCamera, maxSize: number, mediaType:
 };
 
 const createAnimationsForCamera = (
-  camera: ArcRotateCamera, positionVector: Vector3,
-  cameraAxis = ['x', 'y', 'z'], positionAxis = ['x', 'y', 'z'], frames = 30) => {
-
+  camera: ArcRotateCamera,
+  positionVector: Vector3,
+  cameraAxis = ['x', 'y', 'z'],
+  positionAxis = ['x', 'y', 'z'],
+  frames = 30,
+) => {
   const creatAnimCam = (camAxis: string, posAxis: string) => {
     const anim = new Animation(
-      'animCam', camAxis, frames,
-      Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CYCLE);
+      'animCam',
+      camAxis,
+      frames,
+      Animation.ANIMATIONTYPE_FLOAT,
+      Animation.ANIMATIONLOOPMODE_CYCLE,
+    );
     const multipleProperties = camAxis.indexOf('.') !== -1;
     let value = camera[camAxis];
     if (multipleProperties) {
@@ -146,13 +178,20 @@ const createAnimationsForCamera = (
   return arr;
 };
 
-export const moveCameraToTarget = (camera: ArcRotateCamera,
-                                   scene: Scene, positionVector: Vector3) => {
-console.log('move Cam to', positionVector);
-camera.animations.push(
-    ...createAnimationsForCamera(
-      camera, positionVector, ['alpha', 'beta', 'radius']));
-scene.beginAnimation(camera, 0, 30, false, 1, () => { });
+export const moveCameraToTarget = (
+  camera: ArcRotateCamera,
+  scene: Scene,
+  positionVector: Vector3,
+) => {
+  console.log('move Cam to', positionVector);
+  camera.animations.push(
+    ...createAnimationsForCamera(camera, positionVector, [
+      'alpha',
+      'beta',
+      'radius',
+    ]),
+  );
+  scene.beginAnimation(camera, 0, 30, false, 1, () => {});
 };
 
 export const setCameraTarget = (camera: ArcRotateCamera, target: Vector3) => {
@@ -160,12 +199,19 @@ export const setCameraTarget = (camera: ArcRotateCamera, target: Vector3) => {
 };
 
 export const getDefaultPosition = () => {
-  const position = new Vector3(DEFAULTS.position.alpha,
-                               DEFAULTS.position.beta, DEFAULTS.position.radius);
+  const position = new Vector3(
+    DEFAULTS.position.alpha,
+    DEFAULTS.position.beta,
+    DEFAULTS.position.radius,
+  );
   return position;
 };
 
 export const getDefaultTarget = () => {
-  const target = new Vector3(DEFAULTS.target.x, DEFAULTS.target.y, DEFAULTS.target.z);
+  const target = new Vector3(
+    DEFAULTS.target.x,
+    DEFAULTS.target.y,
+    DEFAULTS.target.z,
+  );
   return target;
 };

@@ -1,5 +1,14 @@
-import {Sound, AbstractMesh, Analyser, Texture, StandardMaterial, IParticleSystem, Skeleton, AnimationGroup} from 'babylonjs';
-import {Slider} from 'babylonjs-gui';
+import {
+  Sound,
+  AbstractMesh,
+  Analyser,
+  Texture,
+  StandardMaterial,
+  IParticleSystem,
+  Skeleton,
+  AnimationGroup,
+} from 'babylonjs';
+import { Slider } from 'babylonjs-gui';
 
 export interface IAudioContainer {
   audio: Sound;

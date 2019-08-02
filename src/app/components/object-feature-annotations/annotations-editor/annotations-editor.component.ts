@@ -1,13 +1,13 @@
-import {CdkDragDrop} from '@angular/cdk/drag-drop';
-import {Component, OnInit, QueryList, ViewChildren} from '@angular/core';
-import {MatRadioChange} from '@angular/material';
-import {saveAs} from 'file-saver';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { MatRadioChange } from '@angular/material';
+import { saveAs } from 'file-saver';
 
-import {AnnotationService} from '../../../services/annotation/annotation.service';
-import {ProcessingService} from '../../../services/processing/processing.service';
-import {SocketService} from '../../../services/socket/socket.service';
-import {UserdataService} from '../../../services/userdata/userdata.service';
-import {AnnotationComponent} from '../annotation/annotation.component';
+import { AnnotationService } from '../../../services/annotation/annotation.service';
+import { ProcessingService } from '../../../services/processing/processing.service';
+import { SocketService } from '../../../services/socket/socket.service';
+import { UserdataService } from '../../../services/userdata/userdata.service';
+import { AnnotationComponent } from '../annotation/annotation.component';
 
 @Component({
   selector: 'app-annotations-editor',
@@ -15,7 +15,6 @@ import {AnnotationComponent} from '../annotation/annotation.component';
   styleUrls: ['./annotations-editor.component.scss'],
 })
 export class AnnotationsEditorComponent implements OnInit {
-
   @ViewChildren(AnnotationComponent)
   annotationsList: QueryList<AnnotationComponent> | undefined;
 
@@ -30,11 +29,12 @@ export class AnnotationsEditorComponent implements OnInit {
   // internal
   public isDefaultAnnotationsSource = false;
 
-  constructor(public annotationService: AnnotationService,
-              private socketService: SocketService,
-              public processingService: ProcessingService,
-              private  userDataService: UserdataService) {
-  }
+  constructor(
+    public annotationService: AnnotationService,
+    private socketService: SocketService,
+    public processingService: ProcessingService,
+    private userDataService: UserdataService,
+  ) {}
 
   ngOnInit() {
     this.isDefaultAnnotationsSource = true;
@@ -66,18 +66,23 @@ export class AnnotationsEditorComponent implements OnInit {
     this.socketService.broadcastingAllowed.subscribe(broadcast => {
       this.isBroadcastingAllowed = broadcast;
     });
-
   }
 
   drop(event: CdkDragDrop<string[]>) {
-    this.annotationService
-      .moveAnnotationByIndex(event.previousIndex, event.currentIndex);
+    this.annotationService.moveAnnotationByIndex(
+      event.previousIndex,
+      event.currentIndex,
+    );
   }
 
   exportAnnotations() {
-    saveAs(new Blob([JSON.stringify(this.annotationService.getCurrentAnnotations())],
-                    {type: 'text/plain;charset=utf-8'}),
-           'annotations.json');
+    saveAs(
+      new Blob(
+        [JSON.stringify(this.annotationService.getCurrentAnnotations())],
+        { type: 'text/plain;charset=utf-8' },
+      ),
+      'annotations.json',
+    );
   }
 
   changeCategory(mrChange: MatRadioChange) {
@@ -92,5 +97,4 @@ export class AnnotationsEditorComponent implements OnInit {
       this.annotationService.setCollectionInput(false);
     }
   }
-
 }

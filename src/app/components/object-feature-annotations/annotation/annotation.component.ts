@@ -17,9 +17,7 @@ import { DialogAnnotationEditorComponent } from '../../dialogs/dialog-annotation
   templateUrl: './annotation.component.html',
   styleUrls: ['./annotation.component.scss'],
 })
-
 export class AnnotationComponent implements OnInit {
-
   @Input() entityFileName: string | undefined;
   @Input() annotation: IAnnotation | undefined;
 
@@ -51,8 +49,8 @@ export class AnnotationComponent implements OnInit {
     public socketService: SocketService,
     public dialog: MatDialog,
     private userdataService: UserdataService,
-    private processingService: ProcessingService) {
-  }
+    private processingService: ProcessingService,
+  ) {}
 
   ngOnInit() {
     if (!this.annotation) {
@@ -63,7 +61,9 @@ export class AnnotationComponent implements OnInit {
     this.showAnnotation = true;
     this.collapsed = false;
     this.isAnnotatingAllowed = this.annotationService.isAnnotatingAllowed;
-    this.isAnnotationOwner = this.userdataService.isAnnotationOwner(this.annotation);
+    this.isAnnotationOwner = this.userdataService.isAnnotationOwner(
+      this.annotation,
+    );
     this.isCollectionOwner = this.userdataService.isCollectionOwner;
 
     this.processingService.loggedIn.subscribe(_ => {
@@ -72,7 +72,9 @@ export class AnnotationComponent implements OnInit {
         throw new Error('AnnotationComponent without annotation');
         return;
       }
-      this.isAnnotationOwner = this.userdataService.isAnnotationOwner(this.annotation);
+      this.isAnnotationOwner = this.userdataService.isAnnotationOwner(
+        this.annotation,
+      );
     });
 
     this.userdataService.collectionOwner.subscribe(colOwner => {
@@ -85,7 +87,9 @@ export class AnnotationComponent implements OnInit {
         throw new Error('AnnotationComponent without annotation');
         return;
       }
-      selectedAnno === this.annotation._id ? this.visibility = true : this.visibility = false;
+      selectedAnno === this.annotation._id
+        ? (this.visibility = true)
+        : (this.visibility = false);
       this.selectedAnnotation = selectedAnno;
     });
 
@@ -138,8 +142,9 @@ export class AnnotationComponent implements OnInit {
       throw new Error('AnnotationComponent without annotation');
       return;
     }
-    this.isEditMode ? this.annotationService.setEditModeAnnotation('') :
-      this.annotationService.setEditModeAnnotation(this.annotation._id);
+    this.isEditMode
+      ? this.annotationService.setEditModeAnnotation('')
+      : this.annotationService.setEditModeAnnotation(this.annotation._id);
   }
 
   public shareAnnotation() {
@@ -177,7 +182,10 @@ export class AnnotationComponent implements OnInit {
         getMesh.getBoundingInfo().boundingBox.centerWorld,
         Matrix.Identity(),
         scene.getTransformMatrix(),
-        scene.activeCamera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight()),
+        scene.activeCamera.viewport.toGlobal(
+          engine.getRenderWidth(),
+          engine.getRenderHeight(),
+        ),
       );
 
       this.positionTop = Math.round(p.y) + 5;
@@ -200,14 +208,13 @@ export class AnnotationComponent implements OnInit {
       },
     });
 
-    dialogRef.afterClosed()
-      .subscribe(result => {
-        if (result && this.annotation) {
-          this.annotation.body.content.title = result.title;
-          this.annotation.body.content.description = result.content;
-        }
-        console.log(result);
-      });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && this.annotation) {
+        this.annotation.body.content.title = result.title;
+        this.annotation.body.content.description = result.content;
+      }
+      console.log(result);
+    });
   }
 
   public addMedium(medium) {
@@ -223,10 +230,11 @@ export class AnnotationComponent implements OnInit {
     const start = this.annotationContent.nativeElement.selectionStart;
     const value = this.annotationContent.nativeElement.value;
 
-    this.annotation.body.content.description =
-      `${value.substring(0, start)}${mdImage}${value.substring(start, value.length)}`;
+    this.annotation.body.content.description = `${value.substring(
+      0,
+      start,
+    )}${mdImage}${value.substring(start, value.length)}`;
   }
 
   // ---
-
 }

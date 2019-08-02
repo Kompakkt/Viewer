@@ -1,5 +1,5 @@
-import {EventEmitter, Injectable, Output} from '@angular/core';
-import {Socket} from 'ngx-socket-io';
+import { EventEmitter, Injectable, Output } from '@angular/core';
+import { Socket } from 'ngx-socket-io';
 
 import {
   IAnnotation,
@@ -10,16 +10,15 @@ import {
   ISocketUser,
   ISocketUserInfo,
 } from '../../interfaces/interfaces';
-import {AnnotationService} from '../annotation/annotation.service';
-import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
-import {ProcessingService} from '../processing/processing.service';
-import {UserdataService} from '../userdata/userdata.service';
+import { AnnotationService } from '../annotation/annotation.service';
+import { AnnotationmarkerService } from '../annotationmarker/annotationmarker.service';
+import { ProcessingService } from '../processing/processing.service';
+import { UserdataService } from '../userdata/userdata.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SocketService {
-
   public collaborators: ISocketUser[] = [];
   // TODO this array is not needed -> first users (0-maxColoredUsersMinusOne) of collab can be used
   public coloredUsers: ISocketUser[] = [];
@@ -38,12 +37,13 @@ export class SocketService {
 
   private knownAnnotations: IAnnotation[] = [];
 
-  constructor(public socket: Socket,
-              private processingService: ProcessingService,
-              private userdataService: UserdataService,
-              private annotationmarkerService: AnnotationmarkerService,
-              private annotationService: AnnotationService) {
-
+  constructor(
+    public socket: Socket,
+    private processingService: ProcessingService,
+    private userdataService: UserdataService,
+    private annotationmarkerService: AnnotationmarkerService,
+    private annotationService: AnnotationService,
+  ) {
     this.isInSocket = false;
     this.inSocket.emit(false);
     this.annotationService.isBroadcasting = false;
@@ -60,8 +60,9 @@ export class SocketService {
         return;
       }
 
-      this.socketRoom = (currentCompilation)
-        ? `${currentCompilation._id}_${currentEntity._id}` : `${currentEntity._id}`;
+      this.socketRoom = currentCompilation
+        ? `${currentCompilation._id}_${currentEntity._id}`
+        : `${currentEntity._id}`;
 
       if (this.isInSocket) {
         this.changeSocketRoom();
@@ -98,57 +99,76 @@ export class SocketService {
       if (prevLength < newLength) {
         // Annotation hinzugefügt, also suche in neuen Annotationen
         // nach unbekannter Annotation
-        const newAnnotation = newList
-          .find(annotation => !this.knownAnnotations.includes(annotation));
+        const newAnnotation = newList.find(
+          annotation => !this.knownAnnotations.includes(annotation),
+        );
         if (!newAnnotation) {
           throw new Error('NewAnnotation missing');
           console.error(this);
           return;
         }
         this.knownAnnotations.push(newAnnotation);
-        if (this.inSocket && newAnnotation.creator._id === this.getOwnSocketData().user._id) {
+        if (
+          this.inSocket &&
+          newAnnotation.creator._id === this.getOwnSocketData().user._id
+        ) {
           socket.emit('createAnnotation', {
-            annotation: newAnnotation, user: this.getOwnSocketData().user,
+            annotation: newAnnotation,
+            user: this.getOwnSocketData().user,
           });
           this.drawMarker(newAnnotation);
         }
       } else if (prevLength > newLength) {
         // Annotation entfernt, also suche in bekannten Annotationen
         // nach fehlender Annotation
-        const indexOfRemovedAnnotation = this.knownAnnotations
-          .findIndex(annotation => !newList.includes(annotation));
-        const removedAnnotation = this.knownAnnotations
-          .find(annotation => !newList.includes(annotation));
+        const indexOfRemovedAnnotation = this.knownAnnotations.findIndex(
+          annotation => !newList.includes(annotation),
+        );
+        const removedAnnotation = this.knownAnnotations.find(
+          annotation => !newList.includes(annotation),
+        );
         if (!removedAnnotation) {
           throw new Error('RemovedAnnotation missing');
           console.error(this);
           return;
         }
         this.knownAnnotations.splice(indexOfRemovedAnnotation, 1);
-        if (this.inSocket && removedAnnotation.creator._id === this.getOwnSocketData().user._id) {
+        if (
+          this.inSocket &&
+          removedAnnotation.creator._id === this.getOwnSocketData().user._id
+        ) {
           socket.emit('deleteAnnotation', {
-            annotation: removedAnnotation, user: this.getOwnSocketData().user,
+            annotation: removedAnnotation,
+            user: this.getOwnSocketData().user,
           });
           this.redrawMarker();
         }
       } else {
         // Ignoriere DefaultAnnotation
-        if (newList.length === 1 && newList[0]._id === 'DefaultAnnotation') return;
+        if (newList.length === 1 && newList[0]._id === 'DefaultAnnotation')
+          return;
         // Annotation geändert, also suche in neuen Annotationen
         // nach unbekannter Annotation und ersetze diese in Bekannten
-        const changedAnnotation = newList
-          .find(annotation => !this.knownAnnotations.includes(annotation));
+        const changedAnnotation = newList.find(
+          annotation => !this.knownAnnotations.includes(annotation),
+        );
         if (!changedAnnotation || !changedAnnotation._id) {
           throw new Error('ChangedAnnotation incorrect');
           console.error(this);
           return;
         }
-        const indexOfChanged = this.knownAnnotations
-          .findIndex(annotation => annotation._id === changedAnnotation._id);
+        const indexOfChanged = this.knownAnnotations.findIndex(
+          annotation => annotation._id === changedAnnotation._id,
+        );
         this.knownAnnotations.splice(indexOfChanged, 1, changedAnnotation);
-        if (this.inSocket && changedAnnotation.lastModifiedBy._id === this.getOwnSocketData().user._id) {
+        if (
+          this.inSocket &&
+          changedAnnotation.lastModifiedBy._id ===
+            this.getOwnSocketData().user._id
+        ) {
           socket.emit('editAnnotation', {
-            annotation: changedAnnotation, user: this.getOwnSocketData().user,
+            annotation: changedAnnotation,
+            user: this.getOwnSocketData().user,
           });
         }
       }
@@ -175,44 +195,60 @@ export class SocketService {
     });
 
     this.socket.on('createAnnotation', (result: ISocketAnnotation) => {
-      console.log(`COLLABORATOR '${result.user.username}' CREATED AN ANNOTATION - SOCKET.IO`);
+      console.log(
+        `COLLABORATOR '${result.user.username}' CREATED AN ANNOTATION - SOCKET.IO`,
+      );
       if (result.user._id !== this.getOwnSocketData().user._id) {
         this.annotationService.handleReceivedAnnotation(result.annotation);
       }
     });
 
     this.socket.on('editAnnotation', (result: ISocketAnnotation) => {
-      console.log(`COLLABORATOR '${result.user.username}' EDITED AN ANNOTATION - SOCKET.IO`);
+      console.log(
+        `COLLABORATOR '${result.user.username}' EDITED AN ANNOTATION - SOCKET.IO`,
+      );
       if (result.user._id !== this.getOwnSocketData().user._id) {
         this.annotationService.handleReceivedAnnotation(result.annotation);
       }
     });
 
-    this.socket.on('deleteAnnotation', (result: ISocketAnnotation) => { // [socket.id, annotation]
-      console.log(`COLLABORATOR '${result.user.username}' DELETED AN ANNOTATION- SOCKET.IO`);
+    this.socket.on('deleteAnnotation', (result: ISocketAnnotation) => {
+      // [socket.id, annotation]
+      console.log(
+        `COLLABORATOR '${result.user.username}' DELETED AN ANNOTATION- SOCKET.IO`,
+      );
       if (result.user._id !== this.getOwnSocketData().user._id) {
         this.annotationService.deleteRequestAnnotation(result.annotation);
       }
     });
 
     // TODO
-    this.socket.on('changeRanking', result => {  //  [socket.id, IdArray, RankingArray]
-      console.log(`COLLABORATOR '${result[0]}' CHANGED ANNOTATION-RANKING - SOCKET.IO`);
+    this.socket.on('changeRanking', result => {
+      //  [socket.id, IdArray, RankingArray]
+      console.log(
+        `COLLABORATOR '${result[0]}' CHANGED ANNOTATION-RANKING - SOCKET.IO`,
+      );
     });
 
     // A user lost connection, so we remove knowledge about this user
-    this.socket.on('lostConnection', (result: ISocketUserInfo) => { // [user, annotations]);
-      console.log(`COLLABORATOR '${result.user.username}' LOGGED OUT - SOCKET.IO`);
+    this.socket.on('lostConnection', (result: ISocketUserInfo) => {
+      // [user, annotations]);
+      console.log(
+        `COLLABORATOR '${result.user.username}' LOGGED OUT - SOCKET.IO`,
+      );
       this.removeKnowledgeAboutUser(result);
     });
 
-    this.socket.on('logout', _ => { // socket.id
+    this.socket.on('logout', _ => {
+      // socket.id
       console.log(`logging out of Socket.io...`);
     });
 
     // A user left the room, so we remove knowledge about this user
     this.socket.on('changeRoom', (result: ISocketUserInfo) => {
-      console.log(`COLLABORATOR '${result.user.username}' CHANGED ROOM - SOCKET.IO`);
+      console.log(
+        `COLLABORATOR '${result.user.username}' CHANGED ROOM - SOCKET.IO`,
+      );
       this.removeKnowledgeAboutUser(result);
     });
 
@@ -272,7 +308,7 @@ export class SocketService {
     // send info to other Room members,
     // then emit 'logout' from Socket.id for this User
     // TODO sollen die Annotationen "mitgenommen" werden?
-    this.socket.emit('logout', {annotations: []});
+    this.socket.emit('logout', { annotations: [] });
     this.socket.disconnect();
     this.annotationService.redrawMarker();
   }
@@ -290,7 +326,9 @@ export class SocketService {
   }
 
   private updateCollaboratorInfo(data: ISocketUserInfo) {
-    if (!this.collaborators.find(_user => data.user.socketId === _user.socketId)) {
+    if (
+      !this.collaborators.find(_user => data.user.socketId === _user.socketId)
+    ) {
       this.collaborators.push(data.user);
       this.sortUser();
 
@@ -302,15 +340,18 @@ export class SocketService {
   }
 
   private removeKnowledgeAboutUser(userInfo: ISocketUserInfo) {
-    this.collaborators = this.collaborators.filter(_user => _user._id !== userInfo.user._id);
+    this.collaborators = this.collaborators.filter(
+      _user => _user._id !== userInfo.user._id,
+    );
     this.sortUser();
   }
 
   // -- colored Users and colored Annotations and colored Marker
 
   public sortUser(priorityUser?: ISocketUser) {
-    const selfIndex = this.collaborators
-      .findIndex(user => user.socketId === this.socket.ioSocket.id);
+    const selfIndex = this.collaborators.findIndex(
+      user => user.socketId === this.socket.ioSocket.id,
+    );
 
     const self = this.collaborators.splice(selfIndex, 1)[0];
     if (!self) {
@@ -320,9 +361,13 @@ export class SocketService {
     }
 
     if (priorityUser) {
-      const pUserIndex = this.collaborators.findIndex(x => x.socketId === priorityUser.socketId);
-      const pUser = (pUserIndex !== -1)
-        ? this.collaborators.splice(pUserIndex, 1)[0] : priorityUser;
+      const pUserIndex = this.collaborators.findIndex(
+        x => x.socketId === priorityUser.socketId,
+      );
+      const pUser =
+        pUserIndex !== -1
+          ? this.collaborators.splice(pUserIndex, 1)[0]
+          : priorityUser;
       this.collaborators.unshift(pUser);
     }
 
@@ -334,7 +379,8 @@ export class SocketService {
   }
 
   public redrawMarker() {
-    this.annotationmarkerService.deleteAllMarker()
+    this.annotationmarkerService
+      .deleteAllMarker()
       .then(() => {
         for (const annotation of this.knownAnnotations) {
           let color = 'black';
@@ -345,17 +391,21 @@ export class SocketService {
               color = this.color[i];
             }
           }
-          this.annotationmarkerService.createAnnotationMarker(annotation, color);
+          this.annotationmarkerService.createAnnotationMarker(
+            annotation,
+            color,
+          );
         }
       })
       .catch(e => console.error(e));
   }
 
   public drawMarker(newAnnotation: IAnnotation) {
-
     let color = 'black';
     if (this.coloredUsers.length) {
-      const cUserIndex = this.coloredUsers.findIndex(x => x._id === newAnnotation.creator._id);
+      const cUserIndex = this.coloredUsers.findIndex(
+        x => x._id === newAnnotation.creator._id,
+      );
       if (cUserIndex !== -1 && cUserIndex < this.maxColoredUsersMinusOne) {
         color = this.color[cUserIndex];
       }
@@ -367,7 +417,9 @@ export class SocketService {
   public getColor(annotationCreatorId: string): string {
     if (this.inSocket) {
       if (this.coloredUsers.length) {
-        const cUserIndex = this.coloredUsers.findIndex(x => x._id === annotationCreatorId);
+        const cUserIndex = this.coloredUsers.findIndex(
+          x => x._id === annotationCreatorId,
+        );
         if (cUserIndex !== -1 && cUserIndex < this.maxColoredUsersMinusOne) {
           return this.color[cUserIndex];
         } else {

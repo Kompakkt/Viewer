@@ -7,13 +7,16 @@ import { AnnotationComponent } from './annotation.component';
   templateUrl: './annotation-for-editor.component.html',
   styleUrls: ['./annotation-for-editor.component.scss'],
 })
-
 export class AnnotationComponentForEditorComponent extends AnnotationComponent {
-
   toggleVisibility() {
     if (!this.annotation) {
-      console.error('AnnotationComponentForEditorComponent without Annotation', this);
-      throw new Error('AnnotationComponentForEditorComponent without Annotation');
+      console.error(
+        'AnnotationComponentForEditorComponent without Annotation',
+        this,
+      );
+      throw new Error(
+        'AnnotationComponentForEditorComponent without Annotation',
+      );
       return;
     }
     if (this.showAnnotation) {
@@ -31,18 +34,28 @@ export class AnnotationComponentForEditorComponent extends AnnotationComponent {
 
   // TODO set perspective in annotation Service and make it not async and public and save!
   public async selectPerspective() {
-
-    await this.babylonService.createPreviewScreenshot(400)
+    await this.babylonService
+      .createPreviewScreenshot(400)
       .then(detailScreenshot => {
         if (!this.annotation) {
-          console.error('AnnotationComponentForEditorComponent without Annotation', this);
-          throw new Error('AnnotationComponentForEditorComponent without Annotation');
+          console.error(
+            'AnnotationComponentForEditorComponent without Annotation',
+            this,
+          );
+          throw new Error(
+            'AnnotationComponentForEditorComponent without Annotation',
+          );
           return;
         }
         const camera = this.babylonService.getActiveCamera();
         if (!camera) {
-          console.error('AnnotationComponentForEditorComponent cannot get ActiveCamera', this);
-          throw new Error('AnnotationComponentForEditorComponent cannot get ActiveCamera');
+          console.error(
+            'AnnotationComponentForEditorComponent cannot get ActiveCamera',
+            this,
+          );
+          throw new Error(
+            'AnnotationComponentForEditorComponent cannot get ActiveCamera',
+          );
           return;
         }
 
@@ -52,22 +65,26 @@ export class AnnotationComponentForEditorComponent extends AnnotationComponent {
         };
 
         this.annotationService.updateAnnotation(this.annotation);
-
       });
   }
 
   public changeOpenPopup() {
     if (!this.annotation) {
-      console.error('AnnotationComponentForEditorComponent without Annotation', this);
-      throw new Error('AnnotationComponentForEditorComponent without Annotation');
+      console.error(
+        'AnnotationComponentForEditorComponent without Annotation',
+        this,
+      );
+      throw new Error(
+        'AnnotationComponentForEditorComponent without Annotation',
+      );
       return;
     }
     if (!this.isEditMode) {
       this.collapsed = !this.collapsed;
     }
-    this.collapsed && this.selectedAnnotation === this.annotation._id ?
-      this.annotationService.setSelectedAnnotation('') :
-      this.annotationService.setSelectedAnnotation(this.annotation._id);
+    this.collapsed && this.selectedAnnotation === this.annotation._id
+      ? this.annotationService.setSelectedAnnotation('')
+      : this.annotationService.setSelectedAnnotation(this.annotation._id);
     this.babylonService.hideMesh(this.annotation._id, true);
     this.showAnnotation = true;
   }

@@ -1,12 +1,12 @@
-import {Component, OnInit} from '@angular/core';
-import {MatDialog, MatDialogConfig, MatRadioChange} from '@angular/material';
+import { Component, OnInit } from '@angular/core';
+import { MatDialog, MatDialogConfig, MatRadioChange } from '@angular/material';
 
-import {MediaTypePipe} from '../../pipes/media-type.pipe';
-import {MessageService} from '../../services/message/message.service';
-import {ProcessingService} from '../../services/processing/processing.service';
-import {UserdataService} from '../../services/userdata/userdata.service';
-import {LoginComponent} from '../dialogs/dialog-login/login.component';
-import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-password.component';
+import { MediaTypePipe } from '../../pipes/media-type.pipe';
+import { MessageService } from '../../services/message/message.service';
+import { ProcessingService } from '../../services/processing/processing.service';
+import { UserdataService } from '../../services/userdata/userdata.service';
+import { LoginComponent } from '../dialogs/dialog-login/login.component';
+import { DialogPasswordComponent } from '../dialogs/dialog-password/dialog-password.component';
 
 @Component({
   selector: 'app-content-browser',
@@ -14,9 +14,7 @@ import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-passwor
   styleUrls: ['./content-browser.component.scss'],
   providers: [MediaTypePipe],
 })
-
-  export class ContentBrowserComponent implements OnInit {
-
+export class ContentBrowserComponent implements OnInit {
   // external
   public isLoggedIn = false;
   public isEntityCategory = false;
@@ -35,14 +33,14 @@ import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-passwor
   private identifierCollection;
   private identifierEntity;
 
-  constructor(public processingService: ProcessingService,
-              private message: MessageService,
-              public dialog: MatDialog,
-              public userdataService: UserdataService) {
-  }
+  constructor(
+    public processingService: ProcessingService,
+    private message: MessageService,
+    public dialog: MatDialog,
+    public userdataService: UserdataService,
+  ) {}
 
   ngOnInit() {
-
     this.isLoggedIn = this.processingService.isLoggedIn;
     this.isCollectionLoaded = this.processingService.isCollectionLoaded;
     this.isEntityCategory = true;
@@ -76,15 +74,20 @@ import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-passwor
 
   searchCollectionByID(event?) {
     let id = '';
-    event ? id = event.value._id : id = this.identifierCollection;
-    this.processingService.selectCollectionByID(id)
+    event ? (id = event.value._id) : (id = this.identifierCollection);
+    this.processingService
+      .selectCollectionByID(id)
       .then(result => {
         switch (result) {
           case 'loaded':
             break;
 
           case 'missing':
-            this.message.error('Can not find Collection with ID ' + this.identifierCollection + '.');
+            this.message.error(
+              'Can not find Collection with ID ' +
+                this.identifierCollection +
+                '.',
+            );
             break;
 
           case 'password':
@@ -93,7 +96,11 @@ import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-passwor
             break;
 
           default:
-            this.message.error('Can not find Collection with ID ' + this.identifierCollection + '.');
+            this.message.error(
+              'Can not find Collection with ID ' +
+                this.identifierCollection +
+                '.',
+            );
         }
       })
       .catch(error => {
@@ -114,8 +121,7 @@ import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-passwor
     console.log('password');
 
     const dialogRef = this.dialog.open(DialogPasswordComponent, dialogConfig);
-    dialogRef.afterClosed()
-      .subscribe(data => {
+    dialogRef.afterClosed().subscribe(data => {
       if (data === true) {
         this.identifierCollection = '';
       }
@@ -124,12 +130,11 @@ import {DialogPasswordComponent} from '../dialogs/dialog-password/dialog-passwor
 
   searchEntityByID(event?) {
     let id = '';
-    event ? id = event.value._id : id = this.identifierEntity;
+    event ? (id = event.value._id) : (id = this.identifierEntity);
     const isloadable = this.processingService.selectEntityByID(id);
     if (isloadable) {
     } else {
       this.message.error('Can not find Entity with ID ' + id + '.');
     }
   }
-
 }

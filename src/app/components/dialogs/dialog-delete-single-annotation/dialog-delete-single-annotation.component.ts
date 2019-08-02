@@ -10,7 +10,6 @@ import {UserdataService} from '../../../services/userdata/userdata.service';*/
   styleUrls: ['./dialog-delete-single-annotation.component.scss'],
 })
 export class DialogDeleteSingleAnnotationComponent implements OnInit {
-
   public username = '';
   public password = '';
   public success = false;
@@ -19,11 +18,9 @@ export class DialogDeleteSingleAnnotationComponent implements OnInit {
               private message: MessageService,
               private userdataService: UserdataService) { }*/
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   public login() {
-
     /*
     if (this.userdataService.cachedUser.username && this.userdataService.cachedUser.password) {
       if (this.userdataService.cachedUser.username === this.username &&

@@ -4,7 +4,12 @@ import { Vector3 } from 'babylonjs';
 import { ColorEvent } from 'ngx-color';
 
 // tslint:disable-next-line:max-line-length
-import { settings2D, settingsEntity, settingsFallback, settingsKompakktLogo } from '../../../assets/settings/settings';
+import {
+  settings2D,
+  settingsEntity,
+  settingsFallback,
+  settingsKompakktLogo,
+} from '../../../assets/settings/settings';
 import { environment } from '../../../environments/environment';
 import { IEntity } from '../../interfaces/interfaces';
 import { BabylonService } from '../../services/babylon/babylon.service';
@@ -23,9 +28,7 @@ import { DialogMeshsettingsComponent } from '../dialogs/dialog-meshsettings/dial
   templateUrl: './object-feature-settings.component.html',
   styleUrls: ['./object-feature-settings.component.scss'],
 })
-
 export class EntityFeatureSettingsComponent implements OnInit {
-
   @ViewChild('stepper', { static: false }) stepper;
 
   public activeEntity: IEntity | undefined;
@@ -46,37 +49,38 @@ export class EntityFeatureSettingsComponent implements OnInit {
   public isFallbackEntityLoaded = false;
   public mediaType: string | undefined;
 
-  private cameraPositionInitial: {
-    cameraType: string;
-    position: {
-      x: number;
-      y: number;
-      z: number;
-    };
-    target: {
-      x: number;
-      y: number;
-      z: number;
-    };
-  } | undefined;
+  private cameraPositionInitial:
+    | {
+        cameraType: string;
+        position: {
+          x: number;
+          y: number;
+          z: number;
+        };
+        target: {
+          x: number;
+          y: number;
+          z: number;
+        };
+      }
+    | undefined;
 
   private ambientlightUpintensity: number | undefined;
   private ambientlightDownintensity: number | undefined;
 
-  constructor(private overlayService: OverlayService,
-              private babylonService: BabylonService,
-              private lightService: LightService,
-              private mongohandlerService: MongohandlerService,
-              private message: MessageService,
-              private processingService: ProcessingService,
-              public entitySettingsService: EntitySettingsService,
-              public dialog: MatDialog,
-              private userdataService: UserdataService,
-  ) {
-  }
+  constructor(
+    private overlayService: OverlayService,
+    private babylonService: BabylonService,
+    private lightService: LightService,
+    private mongohandlerService: MongohandlerService,
+    private message: MessageService,
+    private processingService: ProcessingService,
+    public entitySettingsService: EntitySettingsService,
+    public dialog: MatDialog,
+    private userdataService: UserdataService,
+  ) {}
 
   ngOnInit() {
-
     this.mediaType = this.processingService.getCurrentMediaType();
 
     this.processingService.loaded.subscribe(isLoaded => {
@@ -118,15 +122,14 @@ export class EntityFeatureSettingsComponent implements OnInit {
   public showNextAlertFirstStep() {
     const dialogRef = this.dialog.open(DialogMeshsettingsComponent);
 
-    dialogRef.afterClosed()
-      .subscribe(finish => {
-        if (finish) {
-          this.resetHelpers();
-          this.stepper.selected.completed = true;
-          this.stepper.selected.editable = false;
-          this.stepper.next();
-        }
-      });
+    dialogRef.afterClosed().subscribe(finish => {
+      if (finish) {
+        this.resetHelpers();
+        this.stepper.selected.completed = true;
+        this.stepper.selected.editable = false;
+        this.stepper.next();
+      }
+    });
   }
 
   public nextSecondStep() {
@@ -144,7 +147,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   public toggleHelpers() {
-    this.showHelpers = (this.showHelpers) ? false : true;
+    this.showHelpers = this.showHelpers ? false : true;
     if (this.showHelpers) {
       this.showOrientation = false;
       this.showScaling = false;
@@ -152,11 +155,11 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   public toggleHelperBackground() {
-    this.showHelperBackground = (this.showHelperBackground) ? false : true;
+    this.showHelperBackground = this.showHelperBackground ? false : true;
   }
 
   public toggleScaling() {
-    this.showScaling = (this.showScaling) ? false : true;
+    this.showScaling = this.showScaling ? false : true;
     if (this.showScaling) {
       this.showOrientation = false;
       this.showHelpers = false;
@@ -164,7 +167,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   public toggleOrientation() {
-    this.showOrientation = (this.showOrientation) ? false : true;
+    this.showOrientation = this.showOrientation ? false : true;
     if (this.showOrientation) {
       this.showScaling = false;
       this.showHelpers = false;
@@ -172,7 +175,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   public togglePreview() {
-    this.showPreview = (this.showPreview) ? false : true;
+    this.showPreview = this.showPreview ? false : true;
     if (this.showPreview) {
       this.showBackground = false;
       this.showLights = false;
@@ -180,7 +183,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   public toggleBackground() {
-    this.showBackground = (this.showBackground) ? false : true;
+    this.showBackground = this.showBackground ? false : true;
     if (this.showBackground) {
       this.showPreview = false;
       this.showLights = false;
@@ -188,7 +191,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   public toggleLights() {
-    this.showLights = (this.showLights) ? false : true;
+    this.showLights = this.showLights ? false : true;
     if (this.showLights) {
       this.showPreview = false;
       this.showBackground = false;
@@ -201,7 +204,9 @@ export class EntityFeatureSettingsComponent implements OnInit {
       return;
     }
     this.entitySettingsService.resetVisualSettingsHelper();
-    this.babylonService.setBackgroundColor(this.activeEntity.settings.background.color);
+    this.babylonService.setBackgroundColor(
+      this.activeEntity.settings.background.color,
+    );
     this.setEffect = this.activeEntity.settings.background.effect;
     this.babylonService.setBackgroundImage(this.setEffect);
     this.showHelpers = false;
@@ -261,14 +266,17 @@ export class EntityFeatureSettingsComponent implements OnInit {
     this.cameraPositionInitial = this.babylonService.cameraManager.getInitialPosition();
     console.log(this.cameraPositionInitial);
     return new Promise<string>((resolve, reject) =>
-      this.babylonService.createPreviewScreenshot(400)
-        .then(screenshot => {
+      this.babylonService.createPreviewScreenshot(400).then(
+        screenshot => {
           this.preview = screenshot;
           resolve(screenshot);
-        },    error => {
+        },
+        error => {
           this.message.error(error);
           reject(error);
-        }));
+        },
+      ),
+    );
   }
 
   /*
@@ -296,7 +304,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   handleChangeEffekt() {
-    this.setEffect = (this.setEffect) ? false : true;
+    this.setEffect = this.setEffect ? false : true;
     this.babylonService.setBackgroundImage(this.setEffect);
   }
 
@@ -307,14 +315,16 @@ export class EntityFeatureSettingsComponent implements OnInit {
   private async setSettings() {
     // Settings available?
     let upload = false;
-    if (!this.activeEntity ||
+    if (
+      !this.activeEntity ||
       !this.activeEntity.settings ||
       this.activeEntity.settings.preview === undefined ||
       this.activeEntity.settings.cameraPositionInitial === undefined ||
       this.activeEntity.settings.background === undefined ||
       this.activeEntity.settings.lights === undefined ||
       this.activeEntity.settings.rotation === undefined ||
-      this.activeEntity.settings.scale === undefined) {
+      this.activeEntity.settings.scale === undefined
+    ) {
       // Settings missing? => Cases: Upload || Default, Fallback
       upload = await this.createSettings();
       if (upload) {
@@ -326,16 +336,15 @@ export class EntityFeatureSettingsComponent implements OnInit {
         this.activeEntity.settings.scale,
         this.activeEntity.settings.rotation.x,
         this.activeEntity.settings.rotation.y,
-        this.activeEntity.settings.rotation.z);
+        this.activeEntity.settings.rotation.z,
+      );
       await this.setCamera();
       await this.setLightBackground();
       await this.setPreview();
     }
-
   }
 
   private createSettings(): boolean {
-
     let settings;
     let upload = false;
 
@@ -389,7 +398,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
       const cameraSettings: any[] = [this.cameraPositionInitial];
 
       if (this.activeEntity && this.activeEntity.settings) {
-      this.activeEntity['settings']['cameraPositionInitial'] = cameraSettings;
+        this.activeEntity['settings']['cameraPositionInitial'] = cameraSettings;
       }
       this.overlayService.activateSettingsTab();
     }
@@ -410,17 +419,32 @@ export class EntityFeatureSettingsComponent implements OnInit {
       console.warn('No this.activeEntity', this);
       return;
     }
-    const camera =
-      Array.isArray(this.activeEntity.settings.cameraPositionInitial)
-        ? (this.activeEntity.settings.cameraPositionInitial as any[])
-          .find(obj => obj.cameraType === 'arcRotateCam')
-        : this.activeEntity.settings.cameraPositionInitial;
+    const camera = Array.isArray(
+      this.activeEntity.settings.cameraPositionInitial,
+    )
+      ? (this.activeEntity.settings.cameraPositionInitial as any[]).find(
+          obj => obj.cameraType === 'arcRotateCam',
+        )
+      : this.activeEntity.settings.cameraPositionInitial;
 
-    const positionVector = new Vector3(camera.position.x, camera.position.y, camera.position.z);
-    const targetVector = new Vector3(camera.target.x, camera.target.y, camera.target.z);
+    const positionVector = new Vector3(
+      camera.position.x,
+      camera.position.y,
+      camera.position.z,
+    );
+    const targetVector = new Vector3(
+      camera.target.x,
+      camera.target.y,
+      camera.target.z,
+    );
 
-    this.babylonService.cameraManager.updateDefaults(positionVector, targetVector);
-    this.babylonService.cameraManager.moveActiveCameraToPosition(positionVector);
+    this.babylonService.cameraManager.updateDefaults(
+      positionVector,
+      targetVector,
+    );
+    this.babylonService.cameraManager.moveActiveCameraToPosition(
+      positionVector,
+    );
     this.babylonService.cameraManager.setActiveCameraTarget(targetVector);
     this.cameraPositionInitial = this.babylonService.cameraManager.getInitialPosition();
   }
@@ -431,26 +455,43 @@ export class EntityFeatureSettingsComponent implements OnInit {
       return;
     }
     // Background
-    this.babylonService.setBackgroundColor(this.activeEntity.settings.background.color);
+    this.babylonService.setBackgroundColor(
+      this.activeEntity.settings.background.color,
+    );
     this.setEffect = this.activeEntity.settings.background.effect;
     this.babylonService.setBackgroundImage(this.setEffect);
 
     // Lights
-    const pointLight = this.activeEntity.settings.lights
-      .filter(obj => obj.type === 'PointLight')[0];
+    const pointLight = this.activeEntity.settings.lights.filter(
+      obj => obj.type === 'PointLight',
+    )[0];
     this.lightService.createPointLight('pointlight', pointLight.position);
     this.lightService.setLightIntensity('pointlight', pointLight.intensity);
 
     const hemisphericLightUp = this.activeEntity.settings.lights.filter(
-      obj => obj.type === 'HemisphericLight' && obj.position.y === 1)[0];
-    this.lightService.createAmbientlightUp('ambientlightUp', hemisphericLightUp.position);
-    this.lightService.setLightIntensity('ambientlightUp', hemisphericLightUp.intensity);
+      obj => obj.type === 'HemisphericLight' && obj.position.y === 1,
+    )[0];
+    this.lightService.createAmbientlightUp(
+      'ambientlightUp',
+      hemisphericLightUp.position,
+    );
+    this.lightService.setLightIntensity(
+      'ambientlightUp',
+      hemisphericLightUp.intensity,
+    );
     this.ambientlightUpintensity = hemisphericLightUp.intensity;
 
     const hemisphericLightDown = this.activeEntity.settings.lights.filter(
-      obj => obj.type === 'HemisphericLight' && obj.position.y === -1)[0];
-    this.lightService.createAmbientlightDown('ambientlightDown', hemisphericLightDown.position);
-    this.lightService.setLightIntensity('ambientlightDown', hemisphericLightDown.intensity);
+      obj => obj.type === 'HemisphericLight' && obj.position.y === -1,
+    )[0];
+    this.lightService.createAmbientlightDown(
+      'ambientlightDown',
+      hemisphericLightDown.position,
+    );
+    this.lightService.setLightIntensity(
+      'ambientlightDown',
+      hemisphericLightDown.intensity,
+    );
     this.ambientlightDownintensity = hemisphericLightDown.intensity;
   }
 
@@ -459,8 +500,10 @@ export class EntityFeatureSettingsComponent implements OnInit {
       console.warn('No this.activeEntity', this);
       return;
     }
-    if (this.activeEntity.settings.preview !== undefined &&
-      this.activeEntity.settings.preview !== '') {
+    if (
+      this.activeEntity.settings.preview !== undefined &&
+      this.activeEntity.settings.preview !== ''
+    ) {
       this.preview = this.activeEntity.settings.preview;
     } else {
       this.babylonService.cameraManager.resetCamera();
@@ -470,7 +513,8 @@ export class EntityFeatureSettingsComponent implements OnInit {
 
   private async createMissingInitialDefaultScreenshot() {
     await new Promise<string>((resolve, reject) =>
-      this.babylonService.createPreviewScreenshot(400)
+      this.babylonService
+        .createPreviewScreenshot(400)
         .then(screenshot => {
           if (!this.activeEntity || !this.activeEntity.settings) {
             console.warn('No this.activeEntity', this);
@@ -483,14 +527,14 @@ export class EntityFeatureSettingsComponent implements OnInit {
         .catch(error => {
           this.message.error(error);
           reject(error);
-        }));
+        }),
+    );
   }
 
   /*
    * Save Settings
    */
   public async saveActualSettings() {
-
     const settings = {
       preview: this.preview,
       cameraPositionInitial: this.cameraPositionInitial,
@@ -506,7 +550,9 @@ export class EntityFeatureSettingsComponent implements OnInit {
             y: -1,
             z: 0,
           },
-          intensity: (this.ambientlightDownintensity) ? this.ambientlightDownintensity : 1,
+          intensity: this.ambientlightDownintensity
+            ? this.ambientlightDownintensity
+            : 1,
         },
         {
           type: 'HemisphericLight',
@@ -515,7 +561,9 @@ export class EntityFeatureSettingsComponent implements OnInit {
             y: 1,
             z: 0,
           },
-          intensity: this.ambientlightUpintensity ? this.ambientlightUpintensity : 1,
+          intensity: this.ambientlightUpintensity
+            ? this.ambientlightUpintensity
+            : 1,
         },
       ],
       rotation: {
@@ -540,7 +588,10 @@ export class EntityFeatureSettingsComponent implements OnInit {
 
     if (isDragDrop) {
       console.log(this.activeEntity, settings);
-      window.top.postMessage({ type: 'settings', settings }, environment.repository);
+      window.top.postMessage(
+        { type: 'settings', settings },
+        environment.repository,
+      );
     } else if (!this.isDefault && !this.isFallbackEntityLoaded) {
       this.mongohandlerService
         .updateSettings(this.activeEntity._id, settings)
@@ -552,7 +603,6 @@ export class EntityFeatureSettingsComponent implements OnInit {
           }
 
           if (this.initialSettingsMode) {
-
             this.initialSettingsMode = false;
             this.entitySettingsService.decomposeAfterSetting();
             // allow Annotations
@@ -562,7 +612,8 @@ export class EntityFeatureSettingsComponent implements OnInit {
               this.activeEntity.settings.scale,
               this.activeEntity.settings.rotation.x,
               this.activeEntity.settings.rotation.y,
-              this.activeEntity.settings.rotation.z);
+              this.activeEntity.settings.rotation.z,
+            );
           }
         });
     }

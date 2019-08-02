@@ -1,35 +1,38 @@
-import {Injectable} from '@angular/core';
-import {Mesh, MeshBuilder, Space, Tags, Vector3} from 'babylonjs';
-import {AdvancedDynamicTexture, Control, Ellipse, TextBlock} from 'babylonjs-gui';
-import {BehaviorSubject} from 'rxjs/internal/BehaviorSubject';
+import { Injectable } from '@angular/core';
+import { Mesh, MeshBuilder, Space, Tags, Vector3 } from 'babylonjs';
+import {
+  AdvancedDynamicTexture,
+  Control,
+  Ellipse,
+  TextBlock,
+} from 'babylonjs-gui';
+import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 // 11/02/19
 
-import {IAnnotation} from '../../interfaces/interfaces';
-import {BabylonService} from '../babylon/babylon.service';
+import { IAnnotation } from '../../interfaces/interfaces';
+import { BabylonService } from '../babylon/babylon.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AnnotationmarkerService {
-
   private selectedAnnotation: BehaviorSubject<string> = new BehaviorSubject('');
   public isSelectedAnnotation = this.selectedAnnotation.asObservable();
 
-  constructor(private babylonService: BabylonService) {
-
-  }
+  constructor(private babylonService: BabylonService) {}
 
   public createAnnotationMarker(annotation: IAnnotation, color: string) {
-
     // 11/02/19
     const positionVector = new Vector3(
       annotation.target.selector.referencePoint.x,
       annotation.target.selector.referencePoint.y,
-      annotation.target.selector.referencePoint.z);
+      annotation.target.selector.referencePoint.z,
+    );
     const normalVector = new Vector3(
       annotation.target.selector.referenceNormal.x,
       annotation.target.selector.referenceNormal.y,
-      annotation.target.selector.referenceNormal.z);
+      annotation.target.selector.referenceNormal.z,
+    );
     const camera = annotation.body.content.relatedPerspective;
     // const positionVector = new Vector3(annotation.referencePoint[0].value,
     //   annotation.referencePoint[1].value, annotation.referencePoint[2].value);
@@ -40,21 +43,55 @@ export class AnnotationmarkerService {
 
     // two Labels: one is for isOccluded true, one for false -> alpha 0.5 for transparancy
 
-    const plane1 = this.createPlane(annotation._id + '_pick', 1, 1, annotation._id, positionVector, normalVector);
-    const label1 = this.createClickLabel(annotation._id, '100%', '100%', annotation._id, 'White', color, camera);
+    const plane1 = this.createPlane(
+      annotation._id + '_pick',
+      1,
+      1,
+      annotation._id,
+      positionVector,
+      normalVector,
+    );
+    const label1 = this.createClickLabel(
+      annotation._id,
+      '100%',
+      '100%',
+      annotation._id,
+      'White',
+      color,
+      camera,
+    );
 
     AdvancedDynamicTexture.CreateForMesh(plane1).addControl(label1);
-    label1.addControl(this.createRankingNumber(annotation._id, annotation.ranking));
+    label1.addControl(
+      this.createRankingNumber(annotation._id, annotation.ranking),
+    );
     if (plane1.material) {
       plane1.material.alpha = 1;
     }
     plane1.renderingGroupId = 0;
 
-    const plane2 = this.createPlane(annotation._id + '_pick', 1, 1, annotation._id, positionVector, normalVector);
-    const label2 = this.createClickLabel(annotation._id, '100%', '100%', annotation._id, 'White', color, camera);
+    const plane2 = this.createPlane(
+      annotation._id + '_pick',
+      1,
+      1,
+      annotation._id,
+      positionVector,
+      normalVector,
+    );
+    const label2 = this.createClickLabel(
+      annotation._id,
+      '100%',
+      '100%',
+      annotation._id,
+      'White',
+      color,
+      camera,
+    );
 
     AdvancedDynamicTexture.CreateForMesh(plane2).addControl(label2);
-    label2.addControl(this.createRankingNumber(annotation._id, annotation.ranking));
+    label2.addControl(
+      this.createRankingNumber(annotation._id, annotation.ranking),
+    );
     if (plane2.material) {
       plane2.material.alpha = 0.5;
     }
@@ -62,9 +99,19 @@ export class AnnotationmarkerService {
     plane2.renderingGroupId = 1;
   }
 
-  private createPlane(name: string, height: number, width: number, tag: string, position: Vector3, normal: Vector3) {
-    const plane = MeshBuilder.CreatePlane(name,
-                                          {height, width}, this.babylonService.getScene());
+  private createPlane(
+    name: string,
+    height: number,
+    width: number,
+    tag: string,
+    position: Vector3,
+    normal: Vector3,
+  ) {
+    const plane = MeshBuilder.CreatePlane(
+      name,
+      { height, width },
+      this.babylonService.getScene(),
+    );
     Tags.AddTagsTo(plane, tag + ' plane');
     plane.position = position;
     plane.translate(normal, 0.5, Space.WORLD);
@@ -72,9 +119,15 @@ export class AnnotationmarkerService {
     return plane;
   }
 
-  private createClickLabel(name: string, height: string, width: string, tag: string, color: string,
-                           backgroundColor: string, camera: any) {
-
+  private createClickLabel(
+    name: string,
+    height: string,
+    width: string,
+    tag: string,
+    color: string,
+    backgroundColor: string,
+    camera: any,
+  ) {
     const label = new Ellipse(name);
     label.width = width;
     label.height = height;
@@ -89,17 +142,25 @@ export class AnnotationmarkerService {
       this.onMarkerClicked(name, camera);
     });
     return label;
-
   }
 
   private onMarkerClicked(id, camera: any) {
     this.selectedAnnotation.next(id);
 
-    const positionVector = new Vector3(camera.position.x, camera.position.y, camera.position.z);
-    const targetVector = new Vector3(camera.target.x, camera.target.y, camera.target.z);
-    this.babylonService.cameraManager.moveActiveCameraToPosition(positionVector);
+    const positionVector = new Vector3(
+      camera.position.x,
+      camera.position.y,
+      camera.position.z,
+    );
+    const targetVector = new Vector3(
+      camera.target.x,
+      camera.target.y,
+      camera.target.z,
+    );
+    this.babylonService.cameraManager.moveActiveCameraToPosition(
+      positionVector,
+    );
     this.babylonService.cameraManager.setActiveCameraTarget(targetVector);
-
   }
 
   public createRankingNumber(annotationID: string, rankingNumber: number) {
@@ -113,7 +174,6 @@ export class AnnotationmarkerService {
   }
 
   public setRankingNumber() {
-
     // need to redraw -> delete and create
     // http://playground.babylonjs.com/#HETZDX#4
     /*
@@ -131,8 +191,14 @@ export class AnnotationmarkerService {
   }
 
   public async deleteAllMarker() {
-    await this.babylonService.getScene().getMeshesByTags('label').map(mesh => mesh.dispose());
-    await this.babylonService.getScene().getMeshesByTags('plane').map(mesh => mesh.dispose());
+    await this.babylonService
+      .getScene()
+      .getMeshesByTags('label')
+      .map(mesh => mesh.dispose());
+    await this.babylonService
+      .getScene()
+      .getMeshesByTags('plane')
+      .map(mesh => mesh.dispose());
   }
 
   public async hideAllMarker(visibility: boolean) {

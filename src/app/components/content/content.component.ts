@@ -1,15 +1,19 @@
-import {ChangeDetectorRef, Component, HostBinding, OnInit} from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  HostBinding,
+  OnInit,
+} from '@angular/core';
 
-import {OverlayService} from '../../services/overlay/overlay.service';
-import {ProcessingService} from '../../services/processing/processing.service';
+import { OverlayService } from '../../services/overlay/overlay.service';
+import { ProcessingService } from '../../services/processing/processing.service';
 
 @Component({
   selector: 'app-content',
   templateUrl: './content.component.html',
-  styleUrls: ['./content.component.scss']})
-
+  styleUrls: ['./content.component.scss'],
+})
 export class ContentComponent implements OnInit {
-
   @HostBinding('class.is-open') public isOpen = false;
 
   // external
@@ -17,13 +21,13 @@ export class ContentComponent implements OnInit {
   public isDefaultEntityLoaded = false;
   public showContentBrowser = false;
 
-  constructor(private overlayService: OverlayService,
-              public processingService: ProcessingService,
-              private cdRef: ChangeDetectorRef) {
-  }
+  constructor(
+    private overlayService: OverlayService,
+    public processingService: ProcessingService,
+    private cdRef: ChangeDetectorRef,
+  ) {}
 
   ngOnInit() {
-
     this.isCollectionLoaded = this.processingService.isCollectionLoaded;
     this.isDefaultEntityLoaded = this.processingService.isDefaultEntityLoaded;
     this.isOpen = this.overlayService.collectionsOverviewIsOpen;
@@ -33,18 +37,21 @@ export class ContentComponent implements OnInit {
       this.isCollectionLoaded = isCollectionLoaded;
     });
 
-    this.processingService.defaultEntityLoaded.subscribe(isDefaultEntityLoaded => {
-      this.isDefaultEntityLoaded = isDefaultEntityLoaded;
-    });
+    this.processingService.defaultEntityLoaded.subscribe(
+      isDefaultEntityLoaded => {
+        this.isDefaultEntityLoaded = isDefaultEntityLoaded;
+      },
+    );
 
-    this.overlayService.collectionsOverview.subscribe(collectionsOverviewIsOpen => {
-      this.isOpen = collectionsOverviewIsOpen;
-    });
+    this.overlayService.collectionsOverview.subscribe(
+      collectionsOverviewIsOpen => {
+        this.isOpen = collectionsOverviewIsOpen;
+      },
+    );
 
     this.processingService.showCatalogue.subscribe(showCatalogue => {
       this.showContentBrowser = showCatalogue;
       this.cdRef.detectChanges();
     });
   }
-
 }

@@ -1,27 +1,68 @@
 import {
-  ActionManager, Analyser, Axis, Engine, ExecuteCodeAction, Mesh, MeshBuilder,  Quaternion,
-  Scene, SceneLoader, SceneLoaderProgressEvent, Sound, Space, StandardMaterial,
-  Tags, Texture, Tools, TransformNode, Vector3, VideoTexture,
+  ActionManager,
+  Analyser,
+  Axis,
+  Engine,
+  ExecuteCodeAction,
+  Mesh,
+  MeshBuilder,
+  Quaternion,
+  Scene,
+  SceneLoader,
+  SceneLoaderProgressEvent,
+  Sound,
+  Space,
+  StandardMaterial,
+  Tags,
+  Texture,
+  Tools,
+  TransformNode,
+  Vector3,
+  VideoTexture,
 } from 'babylonjs';
-import { AdvancedDynamicTexture, Control, Slider, StackPanel, TextBlock } from 'babylonjs-gui';
+import {
+  AdvancedDynamicTexture,
+  Control,
+  Slider,
+  StackPanel,
+  TextBlock,
+} from 'babylonjs-gui';
 
-import { IAudioContainer, IImageContainer, IVideoContainer } from '../container.interfaces';
+import {
+  IAudioContainer,
+  IImageContainer,
+  IVideoContainer,
+} from '../container.interfaces';
 
-const updateLoadingUI = (engine: Engine) => (progress: SceneLoaderProgressEvent) => {
+const updateLoadingUI = (engine: Engine) => (
+  progress: SceneLoaderProgressEvent,
+) => {
   if (progress.lengthComputable) {
-    engine.loadingUIText =
-      `${(progress.loaded * 100 / progress.total).toFixed()}%`;
+    engine.loadingUIText = `${(
+      (progress.loaded * 100) /
+      progress.total
+    ).toFixed()}%`;
   }
 };
 
-export const load3DEntity = (rootUrl: string, extension: string, scene: Scene) => {
+export const load3DEntity = (
+  rootUrl: string,
+  extension: string,
+  scene: Scene,
+) => {
   const rootFolder = Tools.GetFolderPath(rootUrl);
   const filename = Tools.GetFilename(rootUrl);
 
   const engine = scene.getEngine();
 
-  return SceneLoader
-    .ImportMeshAsync(null, rootFolder, filename, scene, updateLoadingUI(engine), extension)
+  return SceneLoader.ImportMeshAsync(
+    null,
+    rootFolder,
+    filename,
+    scene,
+    updateLoadingUI(engine),
+    extension,
+  )
     .then(result => {
       console.log(result);
       engine.hideLoadingUI();
@@ -39,41 +80,66 @@ const requestFile = (url: string) => {
     .catch(e => console.error(e));
 };
 
-export const loadAudio = (rootUrl: string, scene: Scene, audioContainer: IAudioContainer) => {
+export const loadAudio = (
+  rootUrl: string,
+  scene: Scene,
+  audioContainer: IAudioContainer,
+) => {
   const engine = scene.getEngine();
   const filename = Tools.GetFilename(rootUrl);
   return requestFile(rootUrl)
-    .then((arrayBuffer): IAudioContainer => {
-      const audio =
-        new Sound(`Audio: ${filename}`, arrayBuffer, scene, () => engine.hideLoadingUI());
-      const { plane, slider } = createAudioScene(audio, scene);
-      const analyser = new Analyser(scene);
-      Engine.audioEngine['connectToAnalyser'](analyser);
-      analyser.FFT_SIZE = 4096;
-      analyser.SMOOTHING = 0.9;
-      return {
-        ...audioContainer,
-        analyser, audio,
-        plane, slider,
-      };
-    })
+    .then(
+      (arrayBuffer): IAudioContainer => {
+        const audio = new Sound(`Audio: ${filename}`, arrayBuffer, scene, () =>
+          engine.hideLoadingUI(),
+        );
+        const { plane, slider } = createAudioScene(audio, scene);
+        const analyser = new Analyser(scene);
+        Engine.audioEngine['connectToAnalyser'](analyser);
+        analyser.FFT_SIZE = 4096;
+        analyser.SMOOTHING = 0.9;
+        return {
+          ...audioContainer,
+          analyser,
+          audio,
+          plane,
+          slider,
+        };
+      },
+    )
     .catch(e => {
       console.error(e);
       engine.hideLoadingUI();
     });
 };
 
-export const loadImage = (rootUrl: string, scene: Scene, imageContainer: IImageContainer) => {
+export const loadImage = (
+  rootUrl: string,
+  scene: Scene,
+  imageContainer: IImageContainer,
+) => {
   const engine = scene.getEngine();
   return new Promise<IImageContainer>((resolve, reject) => {
     const texture = new Texture(
-      rootUrl, scene,
-      false, true, undefined,
+      rootUrl,
+      scene,
+      false,
+      true,
+      undefined,
       () => {
-        const [width, height] = [texture.getSize().width, texture.getSize().height];
-        const ground = Mesh.CreateGround('gnd', width / 10, height / 10, 1, scene);
+        const [width, height] = [
+          texture.getSize().width,
+          texture.getSize().height,
+        ];
+        const ground = Mesh.CreateGround(
+          'gnd',
+          width / 10,
+          height / 10,
+          1,
+          scene,
+        );
         Tags.AddTagsTo(ground, 'mediaGround');
-        ground.rotate(Axis.X, Math.PI / 180 * -90, Space.WORLD);
+        ground.rotate(Axis.X, (Math.PI / 180) * -90, Space.WORLD);
 
         const gndmat = new StandardMaterial('gmat', scene);
         ground.material = gndmat;
@@ -103,26 +169,45 @@ export const loadImage = (rootUrl: string, scene: Scene, imageContainer: IImageC
     });
 };
 
-export const loadVideo = (rootUrl: string, scene: Scene, videoContainer: IVideoContainer) => {
+export const loadVideo = (
+  rootUrl: string,
+  scene: Scene,
+  videoContainer: IVideoContainer,
+) => {
   const engine = scene.getEngine();
   const filename = Tools.GetFilename(rootUrl);
 
   // TODO: Reject on videoTexture fails loading?
   return new Promise<IVideoContainer>((resolve, _) => {
-    const videoTexture = new VideoTexture(`Video: ${filename}`, rootUrl, scene, false);
+    const videoTexture = new VideoTexture(
+      `Video: ${filename}`,
+      rootUrl,
+      scene,
+      false,
+    );
     videoTexture.onLoadObservable.add(texture => {
       const video = videoTexture.video;
-      const [width, height] = [texture.getSize().width, texture.getSize().height];
-      const ground = Mesh.CreateGround('videoGround', width / 10, height / 10, 1, scene);
+      const [width, height] = [
+        texture.getSize().width,
+        texture.getSize().height,
+      ];
+      const ground = Mesh.CreateGround(
+        'videoGround',
+        width / 10,
+        height / 10,
+        1,
+        scene,
+      );
       Tags.AddTagsTo(ground, 'mediaGround');
-      ground.rotate(Axis.X, Math.PI / 180 * -90, Space.WORLD);
+      ground.rotate(Axis.X, (Math.PI / 180) * -90, Space.WORLD);
       const videoMat = new StandardMaterial('textVid', scene);
       ground.material = videoMat;
       videoMat.diffuseTexture = videoTexture;
       const { plane, slider } = createVideoScene(video, scene);
       const newContainer: IVideoContainer = {
         ...videoContainer,
-        plane, slider,
+        plane,
+        slider,
         currentTime: 0,
       };
       resolve(newContainer);
@@ -140,14 +225,17 @@ export const loadVideo = (rootUrl: string, scene: Scene, videoContainer: IVideoC
 };
 
 const createAudioScene = (audio: Sound, scene: Scene) => {
-
   // create a Center of Transformation
   const CoT = new TransformNode('mediaPanel');
   CoT.billboardMode = Mesh.BILLBOARDMODE_ALL;
   CoT.position = new Vector3(0, 0, 0);
 
   // PLANE for Annotations
-  const plane = MeshBuilder.CreatePlane(name, { height: 1.5, width: 20 }, scene);
+  const plane = MeshBuilder.CreatePlane(
+    name,
+    { height: 1.5, width: 20 },
+    scene,
+  );
   Tags.AddTagsTo(plane, 'controller');
   plane.renderingGroupId = 1;
   plane.material = new StandardMaterial('controlMat', scene);
@@ -226,45 +314,53 @@ const createAudioScene = (audio: Sound, scene: Scene) => {
 
   // Cube
   SceneLoader.ImportMeshAsync(
-    null, 'assets/models/', 'kompakkt.babylon', scene, null)
-    .then(result => {
-      console.log(result);
-      const center = MeshBuilder.CreateBox('audioCenter', { size: 1 }, scene);
-      Tags.AddTagsTo(center, 'audioCenter');
-      center.isVisible = false;
+    null,
+    'assets/models/',
+    'kompakkt.babylon',
+    scene,
+    null,
+  ).then(result => {
+    console.log(result);
+    const center = MeshBuilder.CreateBox('audioCenter', { size: 1 }, scene);
+    Tags.AddTagsTo(center, 'audioCenter');
+    center.isVisible = false;
 
-      const [axisX, axisY] = [Axis['X'], Axis['Y']];
+    const [axisX, axisY] = [Axis['X'], Axis['Y']];
 
-      if (!center.rotationQuaternion) {
-        center.rotationQuaternion = Quaternion.RotationYawPitchRoll(0, 0, 0);
-      }
+    if (!center.rotationQuaternion) {
+      center.rotationQuaternion = Quaternion.RotationYawPitchRoll(0, 0, 0);
+    }
 
-      const rotationQuaternionX = Quaternion.RotationAxis(axisX, Math.PI / 180 * 1);
-      let end = rotationQuaternionX.multiply(center.rotationQuaternion);
+    const rotationQuaternionX = Quaternion.RotationAxis(
+      axisX,
+      (Math.PI / 180) * 1,
+    );
+    let end = rotationQuaternionX.multiply(center.rotationQuaternion);
 
-      const rotationQuaternionY = Quaternion.RotationAxis(axisY, Math.PI / 180 * 240);
-      end = rotationQuaternionY.multiply(end);
+    const rotationQuaternionY = Quaternion.RotationAxis(
+      axisY,
+      (Math.PI / 180) * 240,
+    );
+    end = rotationQuaternionY.multiply(end);
 
-      center.rotationQuaternion = end;
+    center.rotationQuaternion = end;
 
-      center.scaling = new Vector3(0.05, 0.05, 0.05);
+    center.scaling = new Vector3(0.05, 0.05, 0.05);
 
-      result.meshes
-        .forEach(mesh => {
-          console.log('Audio gefunden');
-          mesh.parent = center;
-          mesh.isPickable = true;
+    result.meshes.forEach(mesh => {
+      console.log('Audio gefunden');
+      mesh.parent = center;
+      mesh.isPickable = true;
 
-          mesh.actionManager = new ActionManager(scene);
-          mesh.actionManager.registerAction(new ExecuteCodeAction(
-            ActionManager.OnPickTrigger, (() => {
-              console.log('click');
-              audio.isPlaying ?
-                audio.pause() : audio.play();
-
-            })));
-        });
+      mesh.actionManager = new ActionManager(scene);
+      mesh.actionManager.registerAction(
+        new ExecuteCodeAction(ActionManager.OnPickTrigger, () => {
+          console.log('click');
+          audio.isPlaying ? audio.pause() : audio.play();
+        }),
+      );
     });
+  });
   return { plane, slider };
 };
 
@@ -283,39 +379,42 @@ const createVideoScene = (video: HTMLVideoElement, scene: Scene) => {
   ground.isPickable = true;
 
   ground.actionManager = new ActionManager(scene);
-  ground.actionManager.registerAction(new ExecuteCodeAction(
-    ActionManager.OnPickTrigger, (() => {
+  ground.actionManager.registerAction(
+    new ExecuteCodeAction(ActionManager.OnPickTrigger, () => {
       console.log('click');
       video.paused ? video.play() : video.pause();
-    })));
+    }),
+  );
 
   // PLANE for Annotations
   const plane = MeshBuilder.CreatePlane(
-    name, { height: initialSize.y * 0.1, width: initialSize.x }, scene);
+    name,
+    { height: initialSize.y * 0.1, width: initialSize.x },
+    scene,
+  );
   Tags.AddTagsTo(plane, 'controller');
   plane.renderingGroupId = 1;
   plane.material = new StandardMaterial('controlMat', scene);
   plane.material.alpha = 1;
   plane.parent = CoT;
-  plane.position.y = minimum.y - (initialSize.y * 0.1 > 15 ? initialSize.y * 0.1 : 15);
+  plane.position.y =
+    minimum.y - (initialSize.y * 0.1 > 15 ? initialSize.y * 0.1 : 15);
 
   // Plane for Time-Slider
   const plane2 = MeshBuilder.CreatePlane(
-    name, {
-      height: (initialSize.y * 0.1 > 15 ? initialSize.y * 0.1 : 15),
+    name,
+    {
+      height: initialSize.y * 0.1 > 15 ? initialSize.y * 0.1 : 15,
       width: initialSize.x,
     },
-    scene);
+    scene,
+  );
   plane2.renderingGroupId = 1;
   plane2.parent = CoT;
   plane2.position.y =
     minimum.y -
-    (initialSize.y * 0.1 > 15
-      ? initialSize.y * 0.1
-      : 15) +
-    ((initialSize.y * 0.2 > 30
-      ? initialSize.y * 0.2
-      : 30) * 0.5);
+    (initialSize.y * 0.1 > 15 ? initialSize.y * 0.1 : 15) +
+    (initialSize.y * 0.2 > 30 ? initialSize.y * 0.2 : 30) * 0.5;
 
   // GUI
   const advancedTexture = AdvancedDynamicTexture.CreateForMesh(plane2);
@@ -326,7 +425,9 @@ const createVideoScene = (video: HTMLVideoElement, scene: Scene) => {
   advancedTexture.addControl(panel);
 
   const header = new TextBlock();
-  const duration = video ? String(video.duration) : 'Can not calculate length in';
+  const duration = video
+    ? String(video.duration)
+    : 'Can not calculate length in';
   header.text = `Length: ${duration} sec`;
   header.width = '1000px';
   header.height = '700px';
@@ -356,11 +457,13 @@ const createVideoScene = (video: HTMLVideoElement, scene: Scene) => {
   // Volume
 
   const plane3 = MeshBuilder.CreatePlane(
-    name, {
+    name,
+    {
       height: initialSize.y * 0.8,
-      width: (initialSize.x * 0.1 > 30 ? initialSize.x * 0.1 : 30),
+      width: initialSize.x * 0.1 > 30 ? initialSize.x * 0.1 : 30,
     },
-    scene);
+    scene,
+  );
   plane3.renderingGroupId = 1;
   plane3.parent = CoT;
   plane3.position.x = maximum.x + initialSize.x * 0.1;
@@ -397,8 +500,8 @@ const secondsToHms = (sec: string | number) => {
   const d = Number(sec);
 
   const h = Math.floor(d / 3600);
-  const m = Math.floor(d % 3600 / 60);
-  const s = Math.floor(d % 3600 % 60);
+  const m = Math.floor((d % 3600) / 60);
+  const s = Math.floor((d % 3600) % 60);
 
   return `${('0' + h).slice(-2)}:${('0' + m).slice(-2)}:${('0' + s).slice(-2)}`;
 };

@@ -1,7 +1,24 @@
 /* tslint:disable:max-line-length */
 import { DOCUMENT } from '@angular/common';
-import { ComponentFactoryResolver, Inject, Injectable, Injector, ViewContainerRef } from '@angular/core';
-import { ArcRotateCamera, Camera, Color4, Engine, Layer, Scene, Sound, Texture, Tools, Vector3 } from 'babylonjs';
+import {
+  ComponentFactoryResolver,
+  Inject,
+  Injectable,
+  Injector,
+  ViewContainerRef,
+} from '@angular/core';
+import {
+  ArcRotateCamera,
+  Camera,
+  Color4,
+  Engine,
+  Layer,
+  Scene,
+  Sound,
+  Texture,
+  Tools,
+  Vector3,
+} from 'babylonjs';
 import { Slider } from 'babylonjs-gui';
 // tslint:disable-next-line:no-import-side-effect
 import 'babylonjs-loaders';
@@ -18,23 +35,36 @@ import {
   setUpCamera,
   updateDefaults,
 } from './camera-handler';
-import { I3DEntityContainer, IAudioContainer, IImageContainer, IVideoContainer } from './container.interfaces';
+import {
+  I3DEntityContainer,
+  IAudioContainer,
+  IImageContainer,
+  IVideoContainer,
+} from './container.interfaces';
 import { LoadingScreen, LoadingscreenhandlerService } from './loadingscreen';
-import { load3DEntity, loadAudio, loadImage, loadVideo } from './strategies/loading-strategies';
-import { afterAudioRender, beforeAudioRender, beforeVideoRender } from './strategies/render-strategies';
+import {
+  load3DEntity,
+  loadAudio,
+  loadImage,
+  loadVideo,
+} from './strategies/loading-strategies';
+import {
+  afterAudioRender,
+  beforeAudioRender,
+  beforeVideoRender,
+} from './strategies/render-strategies';
 
 @Injectable({
   providedIn: 'root',
 })
 export class BabylonService {
-
   // Create an instance of RenderCanvasComponent
   // and use this for the Engine
-  private canvasRef =
-    this.factoryResolver
-      .resolveComponentFactory(RenderCanvasComponent)
-      .create(this.injector);
-  private canvas = this.canvasRef.location.nativeElement.childNodes[0] as HTMLCanvasElement;
+  private canvasRef = this.factoryResolver
+    .resolveComponentFactory(RenderCanvasComponent)
+    .create(this.injector);
+  private canvas = this.canvasRef.location.nativeElement
+    .childNodes[0] as HTMLCanvasElement;
 
   private engine: Engine;
   private scene: Scene;
@@ -66,7 +96,7 @@ export class BabylonService {
     updateDefaults,
     setUpActiveCamera: (maxSize: number) =>
       setUpCamera(this.getActiveCamera(), maxSize, this.mediaType),
-};
+  };
 
   private backgroundURL = 'assets/textures/backgrounds/darkgrey.jpg';
   private backgroundColor: {
@@ -82,16 +112,21 @@ export class BabylonService {
     private loadingScreenHandler: LoadingscreenhandlerService,
     @Inject(DOCUMENT) private document: HTMLDocument,
     private factoryResolver: ComponentFactoryResolver,
-    private injector: Injector) {
-
+    private injector: Injector,
+  ) {
     this.canvas.id = 'renderCanvas';
     this.engine = new Engine(this.canvas, true, {
       audioEngine: true,
-      preserveDrawingBuffer: true, stencil: true,
+      preserveDrawingBuffer: true,
+      stencil: true,
     });
     this.scene = new Scene(this.engine);
     this.engine.loadingScreen = new LoadingScreen(
-      this.canvas, '#111111', 'assets/img/kompakkt-icon.png', this.loadingScreenHandler);
+      this.canvas,
+      '#111111',
+      'assets/img/kompakkt-icon.png',
+      this.loadingScreenHandler,
+    );
 
     // Add default camera
     this.scene.addCamera(createDefaultCamera(this.scene, this.canvas));
@@ -112,8 +147,10 @@ export class BabylonService {
       image: new Texture('', this.scene),
     };
     this.entityContainer = {
-      meshes: [], particleSystems: [],
-      skeletons: [], animationGroups: [],
+      meshes: [],
+      particleSystems: [],
+      skeletons: [],
+      animationGroups: [],
     };
 
     // Increase mouse precision the closer the camera is to it's target
@@ -124,13 +161,15 @@ export class BabylonService {
 
       const maxPrecision = 45;
       const minAngular = 2000;
-      camera.wheelPrecision = maxPrecision - Math.min(...[camera.radius, maxPrecision - 5]);
+      camera.wheelPrecision =
+        maxPrecision - Math.min(...[camera.radius, maxPrecision - 5]);
 
       camera.panningSensibility = camera.wheelPrecision * 50;
 
       const angularPrecision = camera.wheelPrecision * 125;
-      camera.angularSensibilityX = camera.angularSensibilityY =
-        Math.max(...[angularPrecision, minAngular]);
+      camera.angularSensibilityX = camera.angularSensibilityY = Math.max(
+        ...[angularPrecision, minAngular],
+      );
     });
 
     this.engine.runRenderLoop(() => {
@@ -160,7 +199,9 @@ export class BabylonService {
 
   public resize(): void {
     this.engine.resize();
-    this.scene.cameras.forEach(camera => camera.attachControl(this.canvas, false));
+    this.scene.cameras.forEach(camera =>
+      camera.attachControl(this.canvas, false),
+    );
   }
 
   public getEngine(): Engine {
@@ -169,7 +210,12 @@ export class BabylonService {
 
   public setBackgroundImage(background: boolean): void {
     if (background && !this.isBackground) {
-      this.background = new Layer('background', this.backgroundURL, this.scene, true);
+      this.background = new Layer(
+        'background',
+        this.backgroundURL,
+        this.scene,
+        true,
+      );
       this.background.alphaBlendingMode = Engine.ALPHA_ADD;
       this.background.isBackground = true;
       this.isBackground = true;
@@ -184,7 +230,12 @@ export class BabylonService {
 
   public setBackgroundColor(color: any): void {
     this.backgroundColor = color;
-    this.scene.clearColor = new Color4(color.r / 255, color.g / 255, color.b / 255, color.a);
+    this.scene.clearColor = new Color4(
+      color.r / 255,
+      color.g / 255,
+      color.b / 255,
+      color.a,
+    );
   }
 
   public getColor(): any {
@@ -192,7 +243,7 @@ export class BabylonService {
   }
 
   public hideMesh(tag: string, visibility: boolean) {
-    this.scene.getMeshesByTags(tag, mesh => mesh.isVisible = visibility);
+    this.scene.getMeshesByTags(tag, mesh => (mesh.isVisible = visibility));
   }
 
   private clearScene() {
@@ -228,8 +279,11 @@ export class BabylonService {
     }
   }
 
-  public loadEntity(rootUrl: string, mediaType = 'model', extension = 'babylon') {
-
+  public loadEntity(
+    rootUrl: string,
+    mediaType = 'model',
+    extension = 'babylon',
+  ) {
     this.engine.displayLoadingUI();
     this.clearScene();
     // TODO: manage mediaType via Observable
@@ -244,23 +298,25 @@ export class BabylonService {
 
     switch (mediaType) {
       case 'audio':
-        return loadAudio(rootUrl, this.scene, this.audioContainer)
-          .then(result => {
+        return loadAudio(rootUrl, this.scene, this.audioContainer).then(
+          result => {
             if (result) {
               this.audioContainer = result;
               // Define as function so we can unregister by variable name
-              let renderAudio = () => beforeAudioRender(this.scene, this.audioContainer);
+              let renderAudio = () =>
+                beforeAudioRender(this.scene, this.audioContainer);
               this.scene.registerBeforeRender(renderAudio);
               renderAudio = () => afterAudioRender(this.audioContainer);
               this.scene.registerAfterRender(renderAudio);
             } else {
               throw new Error('No audio result');
             }
-          });
+          },
+        );
         break;
       case 'video':
-        return loadVideo(rootUrl, this.scene, this.videoContainer)
-          .then(result => {
+        return loadVideo(rootUrl, this.scene, this.videoContainer).then(
+          result => {
             if (result) {
               this.videoContainer = result;
               // Define as function so we can unregister by variable name
@@ -269,53 +325,57 @@ export class BabylonService {
             } else {
               throw new Error('No video result');
             }
-          });
+          },
+        );
         break;
       case 'image':
-        return loadImage(rootUrl, this.scene, this.imageContainer)
-          .then(result => {
+        return loadImage(rootUrl, this.scene, this.imageContainer).then(
+          result => {
             if (result) {
               this.imageContainer = result;
             } else {
               throw new Error('No video result');
             }
-          });
+          },
+        );
         break;
       case 'entity':
       case 'model':
       default:
-        return load3DEntity(rootUrl, extension, this.scene)
-          .then(result => {
-            if (result) {
-              this.entityContainer = result;
-            } else {
-              throw new Error('No video result');
-            }
-          });
+        return load3DEntity(rootUrl, extension, this.scene).then(result => {
+          if (result) {
+            this.entityContainer = result;
+          } else {
+            throw new Error('No video result');
+          }
+        });
     }
   }
 
   public async createScreenshot() {
     this.hideMesh('plane', false);
     this.hideMesh('label', false);
-    await new Promise<any>((resolve, _) => this.getEngine()
-      .onEndFrameObservable
-      .add(resolve));
+    await new Promise<any>((resolve, _) =>
+      this.getEngine().onEndFrameObservable.add(resolve),
+    );
     const result = await new Promise<string>((resolve, reject) => {
       const _activeCamera = this.getScene().activeCamera;
       if (_activeCamera instanceof Camera) {
         Tools.CreateScreenshot(
-          this.getEngine(), _activeCamera, { precision: 2 }, async screenshot => {
+          this.getEngine(),
+          _activeCamera,
+          { precision: 2 },
+          async screenshot => {
             await fetch(screenshot)
               .then(res => res.blob())
-              .then(blob =>
-                Tools.Download(blob, `Kompakkt-${Date.now()}`))
+              .then(blob => Tools.Download(blob, `Kompakkt-${Date.now()}`))
               .then(() => resolve(screenshot))
               .catch(e => {
                 console.error(e);
                 reject(e);
               });
-          });
+          },
+        );
       }
     });
     this.hideMesh('plane', true);
@@ -326,20 +386,22 @@ export class BabylonService {
   public async createPreviewScreenshot(width?: number): Promise<string> {
     this.hideMesh('plane', false);
     this.hideMesh('label', false);
-    await new Promise<any>((resolve, _) => this.getEngine()
-      .onEndFrameObservable
-      .add(resolve));
+    await new Promise<any>((resolve, _) =>
+      this.getEngine().onEndFrameObservable.add(resolve),
+    );
     const result = await new Promise<string>((resolve, _) => {
       const _activeCamera = this.getScene().activeCamera;
       if (_activeCamera instanceof Camera) {
         Tools.CreateScreenshot(
-          this.getEngine(), _activeCamera,
-          (width)
+          this.getEngine(),
+          _activeCamera,
+          width
             ? { width, height: Math.round((width / 16) * 9) }
             : { width: 400, height: 225 },
           screenshot => {
             resolve(screenshot);
-          });
+          },
+        );
       }
     });
     this.hideMesh('plane', true);

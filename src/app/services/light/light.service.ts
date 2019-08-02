@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HemisphericLight, PointLight, Scene, Vector3 } from 'babylonjs';
-import {BabylonService} from '../babylon/babylon.service';
+import { BabylonService } from '../babylon/babylon.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LightService {
-
   private scene: Scene;
 
   private pointlight: PointLight | undefined;
@@ -19,9 +18,7 @@ export class LightService {
   public pointlightIntensity: number | undefined;
 
   constructor(private babylonService: BabylonService) {
-
     this.scene = this.babylonService.getScene();
-
   }
 
   public setLightIntensity(light: string, intensity: number) {
@@ -40,12 +37,17 @@ export class LightService {
   public createPointLight(name: string, position: any) {
     if (this.pointlight) this.pointlight.dispose();
     this.pointlight = new PointLight(
-      name, new Vector3(position.x, position.y, position.z), this.scene);
+      name,
+      new Vector3(position.x, position.y, position.z),
+      this.scene,
+    );
     this.pointlightPosX = position.x;
     this.pointlightPosY = position.y;
     this.pointlightPosZ = position.z;
 
-    this.pointlight.intensity = (this.pointlightIntensity) ? this.pointlightIntensity : 1.0;
+    this.pointlight.intensity = this.pointlightIntensity
+      ? this.pointlightIntensity
+      : 1.0;
 
     this.pointlight.specular = new BABYLON.Color3(0, 0, 0);
 
@@ -55,29 +57,42 @@ export class LightService {
   public createAmbientlightDown(name: string, position: any) {
     if (this.ambientlightDown) this.ambientlightDown.dispose();
     this.ambientlightDown = new HemisphericLight(
-      name, new Vector3(position.x, position.y, position.z), this.scene);
+      name,
+      new Vector3(position.x, position.y, position.z),
+      this.scene,
+    );
     this.ambientlightDown.specular = new BABYLON.Color3(0, 0, 0);
-
   }
 
   public createAmbientlightUp(name: string, position: any) {
     if (this.ambientlightUp) this.ambientlightUp.dispose();
     this.ambientlightUp = new HemisphericLight(
-      name, new Vector3(position.x, position.y, position.z), this.scene);
+      name,
+      new Vector3(position.x, position.y, position.z),
+      this.scene,
+    );
     this.ambientlightUp.specular = new BABYLON.Color3(0, 0, 0);
   }
 
   public setLightPosition(dimension: string, pos: number) {
     switch (dimension) {
-      case 'x': this.pointlightPosX = pos; break;
-      case 'y': this.pointlightPosY = pos; break;
-      case 'z': this.pointlightPosZ = pos; break;
+      case 'x':
+        this.pointlightPosX = pos;
+        break;
+      case 'y':
+        this.pointlightPosY = pos;
+        break;
+      case 'z':
+        this.pointlightPosZ = pos;
+        break;
       default:
     }
 
-    this.createPointLight(
-      'pointlight',
-      { x: this.pointlightPosX, y: this.pointlightPosY, z: this.pointlightPosZ });
+    this.createPointLight('pointlight', {
+      x: this.pointlightPosX,
+      y: this.pointlightPosY,
+      z: this.pointlightPosZ,
+    });
   }
 
   public getPointlightData(): any {

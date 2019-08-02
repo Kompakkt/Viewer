@@ -1,4 +1,4 @@
-import {ILoadingScreen} from 'babylonjs';
+import { ILoadingScreen } from 'babylonjs';
 
 /**
  * Extends Babylon.js/src/Loading/babylon.loadingScreen.ts
@@ -6,7 +6,6 @@ import {ILoadingScreen} from 'babylonjs';
  */
 
 export class LoadingScreen implements ILoadingScreen {
-
   /**
    * Creates a new default loading screen
    * @param renderingCanvas defines the canvas used to render the scene
@@ -14,10 +13,12 @@ export class LoadingScreen implements ILoadingScreen {
    * @param loadingDivBackgroundColor defines the default background color
    * @param logo defines the logo getting displayed
    */
-  constructor(private renderingCanvas: HTMLCanvasElement,
-              private loadingDivBackgroundColor = 'black',
-              private logo = '',
-              private loadingScreenHandler: LoadingscreenhandlerService) {
+  constructor(
+    private renderingCanvas: HTMLCanvasElement,
+    private loadingDivBackgroundColor = 'black',
+    private logo = '',
+    private loadingScreenHandler: LoadingscreenhandlerService,
+  ) {
     this.loadingScreenHandler.backgroundColor = this.loadingDivBackgroundColor;
     this.loadingScreenHandler.logo = this.logo;
     window.addEventListener('resize', this.resizeLoadingUI);
@@ -39,8 +40,7 @@ export class LoadingScreen implements ILoadingScreen {
     if (this.loadingScreenHandler.isLoading) {
       // setTimeout of half a second to prevent pop-in
       // of some bigger meshes
-      setTimeout(() =>
-        this.loadingScreenHandler.updateOpacity('0'), 500);
+      setTimeout(() => this.loadingScreenHandler.updateOpacity('0'), 500);
     }
   }
 
@@ -75,24 +75,22 @@ export class LoadingScreen implements ILoadingScreen {
       width: `${canvasRect.width}px`,
       height: `${canvasRect.height}px`,
     });
-  }
+  };
 }
 
-import {Injectable} from '@angular/core';
-import {BehaviorSubject} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LoadingscreenhandlerService {
-
   private OpacitySubject = new BehaviorSubject<string>('1');
   public opacity = this.OpacitySubject.asObservable();
   private TextSubject = new BehaviorSubject<string>('Loading');
   public loadingText = this.TextSubject.asObservable();
 
   private StyleSubject = new BehaviorSubject<any>({
-
     left: '0px',
     top: '0px',
     width: '100%',
@@ -105,11 +103,9 @@ export class LoadingscreenhandlerService {
   public backgroundColor = '#111111';
   public logo = 'assets/img/kompakkt-icon.png';
 
-  constructor() {
-  }
+  constructor() {}
 
   public updateOpacity(newOpacity: string): void {
-
     if (parseFloat(newOpacity) > 0.5) {
       this.isLoading = true;
     } else {

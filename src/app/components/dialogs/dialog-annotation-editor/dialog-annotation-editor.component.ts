@@ -1,7 +1,7 @@
-import {Component, Inject, ViewChild} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import { Component, Inject, ViewChild } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 
-import {environment} from '../../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 
 export interface IDialogData {
   title: string;
@@ -9,12 +9,11 @@ export interface IDialogData {
 }
 
 @Component({
-             selector: 'app-dialog-annotation-editor',
-             templateUrl: './dialog-annotation-editor.component.html',
-             styleUrls: ['./dialog-annotation-editor.component.scss'],
-           })
+  selector: 'app-dialog-annotation-editor',
+  templateUrl: './dialog-annotation-editor.component.html',
+  styleUrls: ['./dialog-annotation-editor.component.scss'],
+})
 export class DialogAnnotationEditorComponent {
-
   @ViewChild('annotationContent', { static: false }) private annotationContent;
 
   public editMode = false;
@@ -24,14 +23,13 @@ export class DialogAnnotationEditorComponent {
   private repository = `${environment.repository}/`;
   private serverUrl = `${environment.express_server_url}:${environment.express_server_port}`;
 
-  constructor(public dialogRef: MatDialogRef<DialogAnnotationEditorComponent>,
-              @Inject(MAT_DIALOG_DATA) public data: IDialogData) {
-  }
+  constructor(
+    public dialogRef: MatDialogRef<DialogAnnotationEditorComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: IDialogData,
+  ) {}
 
   public addEntitySwitch(entity) {
-
     switch (entity.mediaType) {
-
       case 'externalImage':
         this.addExternalImage(entity);
         break;
@@ -62,7 +60,6 @@ export class DialogAnnotationEditorComponent {
   }
 
   private getCaretPosition() {
-
     this.annotationContent.nativeElement.focus();
 
     return {
@@ -72,22 +69,26 @@ export class DialogAnnotationEditorComponent {
   }
 
   private createMarkdown(mdElement) {
-
     const caret = this.getCaretPosition();
     const start = caret.start;
     const value = caret.value;
 
-    return `${value.substring(0, start)}${mdElement}${value.substring(start, value.length)}`;
+    return `${value.substring(0, start)}${mdElement}${value.substring(
+      start,
+      value.length,
+    )}`;
   }
 
   private addExternalImage(image) {
-    this.data.content = this.createMarkdown(`![alt ${image.description}](${image.url})`);
+    this.data.content = this.createMarkdown(
+      `![alt ${image.description}](${image.url})`,
+    );
   }
 
   // ToDo: Reduce doubled / redundant code in addImage vs. addText or unify functions
   private addImage(image) {
-
-    const target = image.relatedDigitalEntity.digobj_externalLink[0].externalLink_value;
+    const target =
+      image.relatedDigitalEntity.digobj_externalLink[0].externalLink_value;
 
     let mdImage = `<a href="${target}" target="_blank">`;
     mdImage += `<img src="${image.settings.preview}" alt="${image.name}"></a>`;
@@ -96,8 +97,8 @@ export class DialogAnnotationEditorComponent {
   }
 
   private addText(text) {
-
-    const target = text.relatedDigitalEntity.digobj_externalLink[0].externalLink_value;
+    const target =
+      text.relatedDigitalEntity.digobj_externalLink[0].externalLink_value;
 
     let mdText = `<a href="${target}" target="_blank">`;
     mdText += `<img src="${text.settings.preview}" alt="${text.name}"></a>`;
@@ -106,7 +107,6 @@ export class DialogAnnotationEditorComponent {
   }
 
   private addEntity(entity) {
-
     let mdEntity = `<a href="${this.repository}entity-overview?entity=${entity._id}" target="_blank">`;
     mdEntity += `<img src="${entity.settings.preview}" alt="${entity.name}"></a>`;
 
@@ -114,7 +114,6 @@ export class DialogAnnotationEditorComponent {
   }
 
   private addVideo(video) {
-
     let mdVideo = `<video class="video" controls poster="">`;
 
     let url = '';
@@ -128,7 +127,6 @@ export class DialogAnnotationEditorComponent {
   }
 
   private addAudio(audio) {
-
     let mdAudio = `<audio controls>`;
 
     let url = '';
@@ -142,14 +140,11 @@ export class DialogAnnotationEditorComponent {
   }
 
   public toggleEditViewMode() {
-
     if (this.editMode) {
-
       this.editMode = false;
       this.labelMode = 'edit';
       this.labelModeText = 'Edit';
     } else {
-
       this.editMode = true;
       this.labelMode = 'remove_red_eye';
       this.labelModeText = 'View';
@@ -159,5 +154,4 @@ export class DialogAnnotationEditorComponent {
   cancel(): void {
     this.dialogRef.close();
   }
-
 }

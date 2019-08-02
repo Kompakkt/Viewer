@@ -1,13 +1,18 @@
-import {Pipe, PipeTransform} from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
   name: 'mediaType',
 })
 export class MediaTypePipe implements PipeTransform {
-
   // cases: entity, image, audio, video, text
-  transform(items: any[], entity: boolean, image: boolean,
-            audio: boolean, video: boolean, text: boolean): any[] {
+  transform(
+    items: any[],
+    entity: boolean,
+    image: boolean,
+    audio: boolean,
+    video: boolean,
+    text: boolean,
+  ): any[] {
     if (!items) return [];
     const response: string[] = [];
 
@@ -42,11 +47,9 @@ export class MediaTypePipe implements PipeTransform {
             break;
           default:
             console.log('undefined');
-
         }
       }
     });
     return response;
-
   }
 }

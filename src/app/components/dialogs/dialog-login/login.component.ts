@@ -1,10 +1,10 @@
-import {Component, OnInit} from '@angular/core';
-import {MatDialog} from '@angular/material';
+import { Component, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material';
 
-import {MessageService} from '../../../services/message/message.service';
-import {MongohandlerService} from '../../../services/mongohandler/mongohandler.service';
-import {ProcessingService} from '../../../services/processing/processing.service';
-import {UserdataService} from '../../../services/userdata/userdata.service';
+import { MessageService } from '../../../services/message/message.service';
+import { MongohandlerService } from '../../../services/mongohandler/mongohandler.service';
+import { ProcessingService } from '../../../services/processing/processing.service';
+import { UserdataService } from '../../../services/userdata/userdata.service';
 
 @Component({
   selector: 'app-login',
@@ -12,19 +12,18 @@ import {UserdataService} from '../../../services/userdata/userdata.service';
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit {
-
   public username = '';
   public password = '';
 
-  constructor(private mongohandlerService: MongohandlerService,
-              private message: MessageService,
-              private userDataService: UserdataService,
-              private processingService: ProcessingService,
-              private dialog: MatDialog) {
-  }
+  constructor(
+    private mongohandlerService: MongohandlerService,
+    private message: MessageService,
+    private userDataService: UserdataService,
+    private processingService: ProcessingService,
+    private dialog: MatDialog,
+  ) {}
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   public login() {
     this.mongohandlerService
@@ -41,11 +40,9 @@ export class LoginComponent implements OnInit {
         this.message.error('Connection to entity server refused.');
         this.userDataService.setcachedLoginData('', '');
       });
-
   }
 
   public withoutlogin() {
     console.log('username:' + this.username);
   }
-
 }

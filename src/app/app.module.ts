@@ -4,16 +4,32 @@ import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms'; // <-- NgEntity lives here
 import {
-  MatButtonModule, MatCardModule, MatCheckboxModule, MatChipsModule,
-  MatDialogModule, MatDividerModule, MatExpansionModule, MatFormFieldModule,
-  MatIconModule, MatInputModule, MatListModule, MatMenuModule,
-  MatProgressSpinnerModule, MatRadioModule, MatSelectModule, MatSliderModule,
-  MatSlideToggleModule, MatSnackBarModule, MatStepperModule, MatTabsModule, MatTooltipModule,
+  MatButtonModule,
+  MatCardModule,
+  MatCheckboxModule,
+  MatChipsModule,
+  MatDialogModule,
+  MatDividerModule,
+  MatExpansionModule,
+  MatFormFieldModule,
+  MatIconModule,
+  MatInputModule,
+  MatListModule,
+  MatMenuModule,
+  MatProgressSpinnerModule,
+  MatRadioModule,
+  MatSelectModule,
+  MatSliderModule,
+  MatSlideToggleModule,
+  MatSnackBarModule,
+  MatStepperModule,
+  MatTabsModule,
+  MatTooltipModule,
 } from '@angular/material';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ColorChromeModule } from 'ngx-color/chrome';
-import {MarkdownModule} from 'ngx-markdown';
+import { MarkdownModule } from 'ngx-markdown';
 import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
 import { SocketIoModule } from 'ngx-socket-io';
 
@@ -24,7 +40,7 @@ import { BroadcastComponent } from './components/broadcast/broadcast.component';
 import { BroadcastingUsersComponent } from './components/broadcast/broadcasting-users.component';
 import { ContentBrowserComponent } from './components/content-browser/content-browser.component';
 import { ContentComponent } from './components/content/content.component';
-import {DialogAnnotationEditorComponent} from './components/dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
+import { DialogAnnotationEditorComponent } from './components/dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
 import { DialogDeleteAnnotationsComponent } from './components/dialogs/dialog-delete-annotations/dialog-delete-annotations.component';
 import { DialogDeleteSingleAnnotationComponent } from './components/dialogs/dialog-delete-single-annotation/dialog-delete-single-annotation.component';
 import { DialogGetUserDataComponent } from './components/dialogs/dialog-get-user-data/dialog-get-user-data.component';
@@ -34,7 +50,7 @@ import { DialogMeshsettingsComponent } from './components/dialogs/dialog-meshset
 import { DialogPasswordComponent } from './components/dialogs/dialog-password/dialog-password.component';
 import { DialogShareAnnotationComponent } from './components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
 import { LoadingscreenComponent } from './components/loadingscreen/loadingscreen.component';
-import {MediaBrowserComponent} from './components/media-browser/media-browser.component';
+import { MediaBrowserComponent } from './components/media-browser/media-browser.component';
 import { MenuComponent } from './components/menu/menu.component';
 import { AnnotationComponentForEditorComponent } from './components/object-feature-annotations/annotation/annotation-for-editor.component';
 import { AnnotationComponent } from './components/object-feature-annotations/annotation/annotation.component';
@@ -44,7 +60,7 @@ import { EntityFeatureMetadataComponent } from './components/object-feature-meta
 import { EntityFeatureSettingsComponent } from './components/object-feature-settings/object-feature-settings.component';
 import { EntityFeaturesComponent } from './components/object-features/object-features.component';
 import { SceneComponent } from './components/scene/scene.component';
-import {MediaTypePipe} from './pipes/media-type.pipe';
+import { MediaTypePipe } from './pipes/media-type.pipe';
 import { RenderCanvasComponent } from './components/render-canvas/render-canvas.component';
 
 @NgModule({
@@ -125,5 +141,4 @@ import { RenderCanvasComponent } from './components/render-canvas/render-canvas.
   providers: [],
   bootstrap: [AppComponent],
 })
-export class AppModule {
-}
+export class AppModule {}

@@ -1,11 +1,16 @@
-import {AfterViewInit, Component, HostListener, ViewContainerRef} from '@angular/core';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {
+  AfterViewInit,
+  Component,
+  HostListener,
+  ViewContainerRef,
+} from '@angular/core';
+import { MatDialog, MatDialogConfig } from '@angular/material';
 
-import {AnnotationService} from '../../services/annotation/annotation.service';
-import {BabylonService} from '../../services/babylon/babylon.service';
-import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
-import {ProcessingService} from '../../services/processing/processing.service';
-import {LoginComponent} from '../dialogs/dialog-login/login.component';
+import { AnnotationService } from '../../services/annotation/annotation.service';
+import { BabylonService } from '../../services/babylon/babylon.service';
+import { MongohandlerService } from '../../services/mongohandler/mongohandler.service';
+import { ProcessingService } from '../../services/processing/processing.service';
+import { LoginComponent } from '../dialogs/dialog-login/login.component';
 
 @Component({
   selector: 'app-scene',
@@ -13,7 +18,6 @@ import {LoginComponent} from '../dialogs/dialog-login/login.component';
   styleUrls: ['./scene.component.scss'],
 })
 export class SceneComponent implements AfterViewInit {
-
   private firstAttempt = true;
 
   @HostListener('window:resize', ['$event'])
@@ -21,16 +25,18 @@ export class SceneComponent implements AfterViewInit {
     this.babylonService.resize();
   }
 
-  constructor(private babylonService: BabylonService,
-              private processingService: ProcessingService,
-              public annotationService: AnnotationService,
-              private viewContainerRef: ViewContainerRef,
-              private mongo: MongohandlerService,
-              private dialog: MatDialog) {
-  }
+  constructor(
+    private babylonService: BabylonService,
+    private processingService: ProcessingService,
+    public annotationService: AnnotationService,
+    private viewContainerRef: ViewContainerRef,
+    private mongo: MongohandlerService,
+    private dialog: MatDialog,
+  ) {}
 
   private loginAttempt() {
-    this.mongo.isAuthorized()
+    this.mongo
+      .isAuthorized()
       .then(result => {
         if (result.status === 'ok') {
           this.setupCanvas();

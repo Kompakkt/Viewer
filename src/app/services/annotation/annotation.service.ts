@@ -1,32 +1,34 @@
-import {moveItemInArray} from '@angular/cdk/drag-drop';
-import {EventEmitter, Injectable, Output} from '@angular/core';
-import {MatDialog, MatDialogConfig} from '@angular/material';
-import {ActionManager, Mesh, Tags} from 'babylonjs';
-import {Socket} from 'ngx-socket-io';
-import {BehaviorSubject} from 'rxjs/internal/BehaviorSubject';
+import { moveItemInArray } from '@angular/cdk/drag-drop';
+import { EventEmitter, Injectable, Output } from '@angular/core';
+import { MatDialog, MatDialogConfig } from '@angular/material';
+import { ActionManager, Mesh, Tags } from 'babylonjs';
+import { Socket } from 'ngx-socket-io';
+import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 
-import {environment} from '../../../environments/environment';
+import { environment } from '../../../environments/environment';
 // tslint:disable-next-line:max-line-length
-import {DialogGetUserDataComponent} from '../../components/dialogs/dialog-get-user-data/dialog-get-user-data.component';
+import { DialogGetUserDataComponent } from '../../components/dialogs/dialog-get-user-data/dialog-get-user-data.component';
 // tslint:disable-next-line:max-line-length
-import {DialogShareAnnotationComponent} from '../../components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
-import {IAnnotation, ICompilation, IEntity} from '../../interfaces/interfaces';
-import {ActionService} from '../action/action.service';
-import {BabylonService} from '../babylon/babylon.service';
-import {AnnotationmarkerService} from '../annotationmarker/annotationmarker.service';
-import {DataService} from '../data/data.service';
-import {MessageService} from '../message/message.service';
-import {MongohandlerService} from '../mongohandler/mongohandler.service';
-import {OverlayService} from '../overlay/overlay.service';
-import {ProcessingService} from '../processing/processing.service';
-import {UserdataService} from '../userdata/userdata.service';
+import { DialogShareAnnotationComponent } from '../../components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
+import {
+  IAnnotation,
+  ICompilation,
+  IEntity,
+} from '../../interfaces/interfaces';
+import { ActionService } from '../action/action.service';
+import { BabylonService } from '../babylon/babylon.service';
+import { AnnotationmarkerService } from '../annotationmarker/annotationmarker.service';
+import { DataService } from '../data/data.service';
+import { MessageService } from '../message/message.service';
+import { MongohandlerService } from '../mongohandler/mongohandler.service';
+import { OverlayService } from '../overlay/overlay.service';
+import { ProcessingService } from '../processing/processing.service';
+import { UserdataService } from '../userdata/userdata.service';
 
 @Injectable({
   providedIn: 'root',
 })
-
 export class AnnotationService {
-
   private isDemoMode: boolean;
   private isDefaultEntityLoaded: boolean;
 
@@ -62,7 +64,9 @@ export class AnnotationService {
   private actualEntityMeshes: Mesh[] = [];
 
   private isannotationSourceCollection = false;
-  @Output() annotationSourceCollection: EventEmitter<boolean> = new EventEmitter();
+  @Output() annotationSourceCollection: EventEmitter<
+    boolean
+  > = new EventEmitter();
 
   private selectedAnnotation = new BehaviorSubject('');
   public isSelectedAnnotation = this.selectedAnnotation.asObservable();
@@ -73,22 +77,24 @@ export class AnnotationService {
   private currentAnnotationSubject = new BehaviorSubject([] as IAnnotation[]);
   public currentAnnotations = this.currentAnnotationSubject.asObservable();
 
-  constructor(private dataService: DataService,
-              private actionService: ActionService,
-              private annotationmarkerService: AnnotationmarkerService,
-              private babylon: BabylonService,
-              private mongo: MongohandlerService,
-              private message: MessageService,
-              public socket: Socket,
-              private processingService: ProcessingService,
-              private dialog: MatDialog,
-              private userdataService: UserdataService,
-              private overlayService: OverlayService) {
-
+  constructor(
+    private dataService: DataService,
+    private actionService: ActionService,
+    private annotationmarkerService: AnnotationmarkerService,
+    private babylon: BabylonService,
+    private mongo: MongohandlerService,
+    private message: MessageService,
+    public socket: Socket,
+    private processingService: ProcessingService,
+    private dialog: MatDialog,
+    private userdataService: UserdataService,
+    private overlayService: OverlayService,
+  ) {
     this.isCollectionLoaded = this.processingService.isCollectionLoaded;
     this.isMeshSettingsMode = this.overlayService.editorIsOpen;
-    this.isDemoMode = this.processingService.isDefaultEntityLoaded
-      || this.processingService.isFallbackEntityLoaded;
+    this.isDemoMode =
+      this.processingService.isDefaultEntityLoaded ||
+      this.processingService.isFallbackEntityLoaded;
 
     this.isCollectionInputSelected = false;
     this.isDefaultEntityLoaded = this.processingService.isDefaultEntityLoaded;
@@ -97,19 +103,25 @@ export class AnnotationService {
       this.actualEntity = actualEntity;
     });
 
-    this.processingService.Observables.actualEntityMeshes.subscribe(actualEntityMeshes => {
-      this.actualEntityMeshes = actualEntityMeshes;
-      this.loadAnnotations();
-    });
+    this.processingService.Observables.actualEntityMeshes.subscribe(
+      actualEntityMeshes => {
+        this.actualEntityMeshes = actualEntityMeshes;
+        this.loadAnnotations();
+      },
+    );
 
-    this.processingService.Observables.actualCollection.subscribe(actualCompilation => {
-      if (!actualCompilation) {
-        this.isCollectionLoaded = false;
-        return;
-      }
-      actualCompilation._id ? this.isCollectionLoaded = true : this.isCollectionLoaded = false;
-      this.actualCompilation = actualCompilation;
-    });
+    this.processingService.Observables.actualCollection.subscribe(
+      actualCompilation => {
+        if (!actualCompilation) {
+          this.isCollectionLoaded = false;
+          return;
+        }
+        actualCompilation._id
+          ? (this.isCollectionLoaded = true)
+          : (this.isCollectionLoaded = false);
+        this.actualCompilation = actualCompilation;
+      },
+    );
 
     this.overlayService.editor.subscribe(open => {
       this.isEntityFeaturesOpen = open;
@@ -130,30 +142,34 @@ export class AnnotationService {
       this.isDemoMode = fallback;
     });
 
-    this.annotationmarkerService.isSelectedAnnotation.subscribe(selectedAnno => {
-      this.selectedAnnotation.next(selectedAnno);
-    });
-
+    this.annotationmarkerService.isSelectedAnnotation.subscribe(
+      selectedAnno => {
+        this.selectedAnnotation.next(selectedAnno);
+      },
+    );
   }
 
   private getDefaultAnnotations() {
-    return this.annotations.filter(annotation =>
-      !annotation.target.source.relatedCompilation
-      || annotation.target.source.relatedCompilation === '');
+    return this.annotations.filter(
+      annotation =>
+        !annotation.target.source.relatedCompilation ||
+        annotation.target.source.relatedCompilation === '',
+    );
   }
 
   private getCompilationAnnotations() {
-    return this.annotations.filter(annotation =>
-      annotation.target.source.relatedCompilation !== undefined
-      && annotation.target.source.relatedCompilation.length > 0);
+    return this.annotations.filter(
+      annotation =>
+        annotation.target.source.relatedCompilation !== undefined &&
+        annotation.target.source.relatedCompilation.length > 0,
+    );
   }
 
   private updateCurrentAnnotationsSubject() {
-    const next = (this.isannotationSourceCollection)
+    const next = this.isannotationSourceCollection
       ? this.getCompilationAnnotations()
       : this.getDefaultAnnotations();
-    this.currentAnnotationSubject
-      .next(next);
+    this.currentAnnotationSubject.next(next);
     // After the observable updates we want to redraw markers
     setTimeout(() => this.redrawMarker(), 0);
   }
@@ -163,7 +179,7 @@ export class AnnotationService {
     // If you need current annotations in DOM, subscribe to the
     // currentAnnotations Observable using the async pipe
     // e.g. (annotationService.currentAnnotations | async)
-    return (this.isannotationSourceCollection)
+    return this.isannotationSourceCollection
       ? this.getCompilationAnnotations()
       : this.getDefaultAnnotations();
   }
@@ -173,8 +189,9 @@ export class AnnotationService {
     // Since all annotations are in the same array but sorted
     // with defaults first and compilation following
     // we can calculate the offset if needed
-    const offset = (this.isannotationSourceCollection)
-      ? this.getDefaultAnnotations().length : 0;
+    const offset = this.isannotationSourceCollection
+      ? this.getDefaultAnnotations().length
+      : 0;
     moveItemInArray(this.annotations, from_index + offset, to_index + offset);
     await this.changedRankingPositions();
   }
@@ -194,18 +211,27 @@ export class AnnotationService {
 
     if (!this.isDemoMode) {
       // Filter null/undefined annotations
-      const serverAnnotations = this.getAnnotationsfromServerDB()
-        .filter(annotation => annotation && annotation._id && annotation.lastModificationDate);
-      const pouchAnnotations = (await this.getAnnotationsfromLocalDB())
-        .filter(annotation => annotation && annotation._id && annotation.lastModificationDate);
+      const serverAnnotations = this.getAnnotationsfromServerDB().filter(
+        annotation =>
+          annotation && annotation._id && annotation.lastModificationDate,
+      );
+      const pouchAnnotations = (await this.getAnnotationsfromLocalDB()).filter(
+        annotation =>
+          annotation && annotation._id && annotation.lastModificationDate,
+      );
       // Update and sort local
       await this.updateLocalDB(pouchAnnotations, serverAnnotations);
-      const updated = await this.updateAnnotationList(pouchAnnotations, serverAnnotations);
+      const updated = await this.updateAnnotationList(
+        pouchAnnotations,
+        serverAnnotations,
+      );
       this.annotations.push(...updated);
       await this.sortAnnotations();
     } else {
       this.annotations.push(this.createDefaultAnnotation());
-      this.selectedAnnotation.next(this.annotations[this.annotations.length - 1]._id);
+      this.selectedAnnotation.next(
+        this.annotations[this.annotations.length - 1]._id,
+      );
     }
     this.initializeAnnotationMode();
     this.toggleAnnotationSource(false);
@@ -216,40 +242,55 @@ export class AnnotationService {
     const serverAnnotations: IAnnotation[] = [];
     // Annotationen vom Server des aktuellen Entityls...
     if (this.actualEntity && this.actualEntity.annotationList) {
-      (this.actualEntity.annotationList
-        .filter(annotation => annotation && annotation._id) as IAnnotation[])
-        .forEach((annotation: IAnnotation) => serverAnnotations.push(annotation));
+      (this.actualEntity.annotationList.filter(
+        annotation => annotation && annotation._id,
+      ) as IAnnotation[]).forEach((annotation: IAnnotation) =>
+        serverAnnotations.push(annotation),
+      );
     }
     // ...und der aktuellen Compilation (if existing)
-    if (this.isCollectionLoaded && this.actualCompilation && this.actualCompilation.annotationList) {
-      (this.actualCompilation.annotationList
-        .filter(annotation => annotation && annotation._id) as IAnnotation[])
-        .forEach((annotation: IAnnotation) => serverAnnotations.push(annotation));
+    if (
+      this.isCollectionLoaded &&
+      this.actualCompilation &&
+      this.actualCompilation.annotationList
+    ) {
+      (this.actualCompilation.annotationList.filter(
+        annotation => annotation && annotation._id,
+      ) as IAnnotation[]).forEach((annotation: IAnnotation) =>
+        serverAnnotations.push(annotation),
+      );
     }
     console.log('getAnnotationsfromServerDB', serverAnnotations);
     return serverAnnotations;
   }
 
   private async getAnnotationsfromLocalDB() {
-    let pouchAnnotations: IAnnotation[] = (this.actualEntity)
+    let pouchAnnotations: IAnnotation[] = this.actualEntity
       ? await this.fetchAnnotations(this.actualEntity._id)
       : [];
     // Annotationen aus PouchDB des aktuellen Entityls und der aktuellen Compilation (if existing)
 
     if (this.isCollectionLoaded) {
-      const _compilationAnnotations = (this.actualEntity && this.actualCompilation)
-        ? await this.fetchAnnotations(this.actualEntity._id && this.actualCompilation._id)
-        : [];
+      const _compilationAnnotations =
+        this.actualEntity && this.actualCompilation
+          ? await this.fetchAnnotations(
+              this.actualEntity._id && this.actualCompilation._id,
+            )
+          : [];
       pouchAnnotations = pouchAnnotations.concat(_compilationAnnotations);
     }
     console.log('getAnnotationsfromLocalDB', pouchAnnotations);
     return pouchAnnotations;
   }
 
-  private async updateLocalDB(localAnnotations: IAnnotation[], serverAnnotations: IAnnotation[]) {
+  private async updateLocalDB(
+    localAnnotations: IAnnotation[],
+    serverAnnotations: IAnnotation[],
+  ) {
     for (const annotation of serverAnnotations) {
-      const localAnnotation = localAnnotations
-        .find(_localAnnotation => _localAnnotation._id === annotation._id);
+      const localAnnotation = localAnnotations.find(
+        _localAnnotation => _localAnnotation._id === annotation._id,
+      );
       if (!localAnnotation) {
         await this.dataService.updateAnnotation(annotation);
         localAnnotations.push(annotation);
@@ -258,39 +299,59 @@ export class AnnotationService {
     console.log('updateLocalDB', localAnnotations);
   }
 
-  private async updateAnnotationList(localAnnotations: IAnnotation[],
-                                     serverAnnotations: IAnnotation[]) {
+  private async updateAnnotationList(
+    localAnnotations: IAnnotation[],
+    serverAnnotations: IAnnotation[],
+  ) {
     const unsorted: IAnnotation[] = [];
     // Durch alle Annotationen der lokalen DB
     for (const annotation of localAnnotations) {
-      const isLastModifiedByMe = annotation.lastModifiedBy._id
-        === this.userdataService.currentUserData._id;
-      const isCreatedByMe = annotation.creator._id
-        === this.userdataService.currentUserData._id;
+      const isLastModifiedByMe =
+        annotation.lastModifiedBy._id ===
+        this.userdataService.currentUserData._id;
+      const isCreatedByMe =
+        annotation.creator._id === this.userdataService.currentUserData._id;
 
       // Finde die Annotaion in den Server Annotationen
-      const serverAnnotation = serverAnnotations
-        .find(_serverAnnotation => _serverAnnotation._id === annotation._id);
+      const serverAnnotation = serverAnnotations.find(
+        _serverAnnotation => _serverAnnotation._id === annotation._id,
+      );
       // Wenn sie gefunden wurde aktuellere speichern lokal bzw. server
 
       if (serverAnnotation) {
-        if (!annotation.lastModificationDate || !serverAnnotation.lastModificationDate) continue;
+        if (
+          !annotation.lastModificationDate ||
+          !serverAnnotation.lastModificationDate
+        )
+          continue;
         // vergleichen welche aktueller ist
-        const isSame = annotation.lastModificationDate === serverAnnotation.lastModificationDate;
-        const isLocalNewer = annotation.lastModificationDate > serverAnnotation.lastModificationDate;
+        const isSame =
+          annotation.lastModificationDate ===
+          serverAnnotation.lastModificationDate;
+        const isLocalNewer =
+          annotation.lastModificationDate >
+          serverAnnotation.lastModificationDate;
         if (isLocalNewer || isSame) {
           if (!isSame) {
             // Update Server
             this.mongo.updateAnnotation(annotation);
-            serverAnnotations.splice(localAnnotations
-              .findIndex(ann => ann._id === serverAnnotation._id), 1, annotation);
+            serverAnnotations.splice(
+              localAnnotations.findIndex(
+                ann => ann._id === serverAnnotation._id,
+              ),
+              1,
+              annotation,
+            );
           }
           unsorted.push(annotation);
         } else {
           // Update local DB
           await this.dataService.updateAnnotation(serverAnnotation);
-          localAnnotations
-            .splice(localAnnotations.findIndex(ann => ann._id === annotation._id), 1, serverAnnotation);
+          localAnnotations.splice(
+            localAnnotations.findIndex(ann => ann._id === annotation._id),
+            1,
+            serverAnnotation,
+          );
           unsorted.push(serverAnnotation);
         }
         // Wenn sie nicht gefunden wurde: Annotation existiert nicht auf dem Server,
@@ -310,7 +371,9 @@ export class AnnotationService {
           // Nicht local last editor === creator === ich
           // Annotation local löschen
           await this.dataService.deleteAnnotation(annotation._id);
-          localAnnotations.splice(localAnnotations.findIndex(ann => ann._id === annotation._id));
+          localAnnotations.splice(
+            localAnnotations.findIndex(ann => ann._id === annotation._id),
+          );
         }
       }
     }
@@ -318,14 +381,22 @@ export class AnnotationService {
   }
 
   private async sortAnnotations() {
-    const sortedDefault = this.getDefaultAnnotations()
-      .sort((leftSide, rightSide): number =>
-        (+leftSide.ranking === +rightSide.ranking) ? 0
-          : (+leftSide.ranking < +rightSide.ranking) ? -1 : 1);
-    const sortedCompilation = this.getCompilationAnnotations()
-      .sort((leftSide, rightSide): number =>
-        (+leftSide.ranking === +rightSide.ranking) ? 0
-          : (+leftSide.ranking < +rightSide.ranking) ? -1 : 1);
+    const sortedDefault = this.getDefaultAnnotations().sort(
+      (leftSide, rightSide): number =>
+        +leftSide.ranking === +rightSide.ranking
+          ? 0
+          : +leftSide.ranking < +rightSide.ranking
+          ? -1
+          : 1,
+    );
+    const sortedCompilation = this.getCompilationAnnotations().sort(
+      (leftSide, rightSide): number =>
+        +leftSide.ranking === +rightSide.ranking
+          ? 0
+          : +leftSide.ranking < +rightSide.ranking
+          ? -1
+          : 1,
+    );
 
     this.annotations.splice(0, this.annotations.length);
     this.annotations.push(...sortedDefault, ...sortedCompilation);
@@ -335,8 +406,9 @@ export class AnnotationService {
 
   // For Broadcasting
   public handleReceivedAnnotation(newAnnotation: IAnnotation) {
-    const foundIndex = this.annotations
-      .findIndex(annotation => newAnnotation._id === annotation._id);
+    const foundIndex = this.annotations.findIndex(
+      annotation => newAnnotation._id === annotation._id,
+    );
     if (foundIndex === -1) {
       this.annotations.push(newAnnotation);
     } else {
@@ -345,8 +417,9 @@ export class AnnotationService {
   }
 
   public deleteRequestAnnotation(newAnnotation: IAnnotation) {
-    const foundIndex = this.annotations
-      .findIndex(annotation => newAnnotation._id === annotation._id);
+    const foundIndex = this.annotations.findIndex(
+      annotation => newAnnotation._id === annotation._id,
+    );
     if (foundIndex !== -1) {
       this.annotations.splice(foundIndex, 1);
     }
@@ -355,7 +428,11 @@ export class AnnotationService {
   // Die Annotationsfunktionalität wird zum aktuellen Entityl hinzugefügt
   public initializeAnnotationMode() {
     this.actualEntityMeshes.forEach(mesh => {
-      this.actionService.createActionManager(mesh, ActionManager.OnDoublePickTrigger, this.createNewAnnotation.bind(this));
+      this.actionService.createActionManager(
+        mesh,
+        ActionManager.OnDoublePickTrigger,
+        this.createNewAnnotation.bind(this),
+      );
     });
     this.annotationMode(false);
   }
@@ -363,93 +440,95 @@ export class AnnotationService {
   public async createNewAnnotation(result: any) {
     const camera = this.babylon.cameraManager.getInitialPosition();
 
-    this.babylon.createPreviewScreenshot(400)
-      .then(detailScreenshot => {
-        if (!this.actualEntity) {
-          throw new Error(`this.actualEntity not defined: ${this.actualEntity}`);
-          console.error('AnnotationService:', this);
-          return;
-        }
-        const generatedId = this.mongo.generateEntityId();
+    this.babylon.createPreviewScreenshot(400).then(detailScreenshot => {
+      if (!this.actualEntity) {
+        throw new Error(`this.actualEntity not defined: ${this.actualEntity}`);
+        console.error('AnnotationService:', this);
+        return;
+      }
+      const generatedId = this.mongo.generateEntityId();
 
-        const personName = this.userdataService.currentUserData.fullname;
-        const personID = this.userdataService.currentUserData._id;
+      const personName = this.userdataService.currentUserData.fullname;
+      const personID = this.userdataService.currentUserData._id;
 
-        const newAnnotation: IAnnotation = {
-          validated: (!this.isCollectionLoaded),
-          _id: generatedId,
-          identifier: generatedId,
-          ranking: this.getCurrentAnnotations().length + 1,
-          creator: {
-            type: 'person',
-            name: personName,
-            _id: personID,
-          },
-          created: new Date().toISOString(),
-          generator: {
-            type: 'software',
-            name: environment.version,
-            _id: personID,
-            homepage: 'https://github.com/DH-Cologne/Kompakkt',
-          },
-          motivation: 'defaultMotivation',
-          lastModifiedBy: {
-            type: 'person',
-            name: personName,
-            _id: personID,
-          },
-          body: {
-            type: 'annotation',
-            content: {
-              type: 'text',
-              title: '',
-              description: '',
-              relatedPerspective: {
-                cameraType: camera.cameraType,
-                position: {
-                  x: camera.position.x,
-                  y: camera.position.y,
-                  z: camera.position.z,
-                },
-                target: {
-                  x: camera.target.x,
-                  y: camera.target.y,
-                  z: camera.target.z,
-                },
-                preview: detailScreenshot,
+      const newAnnotation: IAnnotation = {
+        validated: !this.isCollectionLoaded,
+        _id: generatedId,
+        identifier: generatedId,
+        ranking: this.getCurrentAnnotations().length + 1,
+        creator: {
+          type: 'person',
+          name: personName,
+          _id: personID,
+        },
+        created: new Date().toISOString(),
+        generator: {
+          type: 'software',
+          name: environment.version,
+          _id: personID,
+          homepage: 'https://github.com/DH-Cologne/Kompakkt',
+        },
+        motivation: 'defaultMotivation',
+        lastModifiedBy: {
+          type: 'person',
+          name: personName,
+          _id: personID,
+        },
+        body: {
+          type: 'annotation',
+          content: {
+            type: 'text',
+            title: '',
+            description: '',
+            relatedPerspective: {
+              cameraType: camera.cameraType,
+              position: {
+                x: camera.position.x,
+                y: camera.position.y,
+                z: camera.position.z,
               },
+              target: {
+                x: camera.target.x,
+                y: camera.target.y,
+                z: camera.target.z,
+              },
+              preview: detailScreenshot,
             },
           },
-          target: {
-            source: {
-              relatedEntity: this.actualEntity._id,
-              relatedCompilation: (this.isCollectionLoaded && this.actualCompilation)
-                ? this.actualCompilation._id : '',
+        },
+        target: {
+          source: {
+            relatedEntity: this.actualEntity._id,
+            relatedCompilation:
+              this.isCollectionLoaded && this.actualCompilation
+                ? this.actualCompilation._id
+                : '',
+          },
+          selector: {
+            referencePoint: {
+              x: result.pickedPoint.x,
+              y: result.pickedPoint.y,
+              z: result.pickedPoint.z,
             },
-            selector: {
-              referencePoint: {
-                x: result.pickedPoint.x,
-                y: result.pickedPoint.y,
-                z: result.pickedPoint.z,
-              },
-              referenceNormal: {
-                x: result.getNormal(true, true).x,
-                y: result.getNormal(true, true).y,
-                z: result.getNormal(true, true).z,
-              },
+            referenceNormal: {
+              x: result.getNormal(true, true).x,
+              y: result.getNormal(true, true).y,
+              z: result.getNormal(true, true).z,
             },
           },
-        };
-        console.log(newAnnotation);
-        this.add(newAnnotation);
-      });
+        },
+      };
+      console.log(newAnnotation);
+      this.add(newAnnotation);
+    });
   }
 
   private add(annotation: IAnnotation): void {
     let newAnnotation = annotation;
     newAnnotation.lastModificationDate = new Date().toISOString();
     if (!this.isDemoMode) {
-      this.mongo.updateAnnotation(annotation)
+      this.mongo
+        .updateAnnotation(annotation)
         .then((resultAnnotation: IAnnotation) => {
           newAnnotation = resultAnnotation;
         })
@@ -468,8 +547,12 @@ export class AnnotationService {
     let newAnnotation = annotation;
     newAnnotation.lastModificationDate = new Date().toISOString();
     if (!this.isDemoMode) {
-      if (this.userdataService.isAnnotationOwner(annotation) || (this.isCollectionLoaded && this.userdataService.isCollectionOwner)) {
-        this.mongo.updateAnnotation(annotation)
+      if (
+        this.userdataService.isAnnotationOwner(annotation) ||
+        (this.isCollectionLoaded && this.userdataService.isCollectionOwner)
+      ) {
+        this.mongo
+          .updateAnnotation(annotation)
           .then((resultAnnotation: IAnnotation) => {
             newAnnotation = resultAnnotation;
           })
@@ -479,18 +562,25 @@ export class AnnotationService {
       }
       this.dataService.updateAnnotation(newAnnotation);
     }
-    this.annotations
-      .splice(this.annotations
-        .findIndex(ann => ann._id === annotation._id), 1, newAnnotation);
+    this.annotations.splice(
+      this.annotations.findIndex(ann => ann._id === annotation._id),
+      1,
+      newAnnotation,
+    );
   }
 
   public deleteAnnotation(annotation: IAnnotation) {
     if (this.userdataService.isAnnotationOwner(annotation)) {
       this.setSelectedAnnotation('');
       this.setEditModeAnnotation('');
-      const index: number = this.annotations.findIndex(ann => ann._id === annotation._id);
+      const index: number = this.annotations.findIndex(
+        ann => ann._id === annotation._id,
+      );
       if (index !== -1) {
-        this.annotations.splice(this.annotations.findIndex(ann => ann._id === annotation._id), 1);
+        this.annotations.splice(
+          this.annotations.findIndex(ann => ann._id === annotation._id),
+          1,
+        );
         this.changedRankingPositions();
         this.redrawMarker();
         if (!this.isDemoMode) {
@@ -501,7 +591,6 @@ export class AnnotationService {
     } else {
       this.message.error('You are not the Owner of this Annotation.');
     }
-
   }
 
   public deleteAnnotationFromServer(annotationId: string) {
@@ -511,7 +600,8 @@ export class AnnotationService {
     if (username === '' || password === '') {
       this.passwordDialog(annotationId);
     } else {
-      this.mongo.deleteRequest(annotationId, 'annotation', username, password)
+      this.mongo
+        .deleteRequest(annotationId, 'annotation', username, password)
         .then((result: any) => {
           if (result.status === 'ok') {
             this.message.info('Deleted from Server');
@@ -534,36 +624,45 @@ export class AnnotationService {
     dialogConfig.data = {
       id: annotationId,
     };
-    const dialogRef = this.dialog.open(DialogGetUserDataComponent, dialogConfig);
-    dialogRef.afterClosed()
-      .subscribe(data => {
-        if (data === true) {
-          this.message.info('Deleted from Server');
-        } else {
-          this.message.info('Not deleted from Server');
-        }
-      });
+    const dialogRef = this.dialog.open(
+      DialogGetUserDataComponent,
+      dialogConfig,
+    );
+    dialogRef.afterClosed().subscribe(data => {
+      if (data === true) {
+        this.message.info('Deleted from Server');
+      } else {
+        this.message.info('Not deleted from Server');
+      }
+    });
   }
 
   private async changedRankingPositions() {
     // Decide whether we iterate over the first part of this.annotations
     // containing all the default annotations or to iterate over the second part
     // containing all of the compilation annotations
-    const offset = (this.isannotationSourceCollection)
-      ? this.getDefaultAnnotations().length : 0;
-    const length = (this.isannotationSourceCollection)
-      ? this.annotations.length : this.getDefaultAnnotations().length;
+    const offset = this.isannotationSourceCollection
+      ? this.getDefaultAnnotations().length
+      : 0;
+    const length = this.isannotationSourceCollection
+      ? this.annotations.length
+      : this.getDefaultAnnotations().length;
     for (let i = offset; i < length; i++) {
       const annotation = this.annotations[i];
       if (!annotation._id) continue;
-      await this.updateAnnotation({...annotation, ranking: i - offset + 1});
+      await this.updateAnnotation({ ...annotation, ranking: i - offset + 1 });
     }
   }
 
-  private async fetchAnnotations(entity: string, compilation?: string): Promise<IAnnotation[]> {
+  private async fetchAnnotations(
+    entity: string,
+    compilation?: string,
+  ): Promise<IAnnotation[]> {
     return new Promise<IAnnotation[]>(async (resolve, _) => {
-      const annotationList: IAnnotation[] = await this.dataService
-        .findAnnotations(entity, (compilation) ? compilation : '');
+      const annotationList: IAnnotation[] = await this.dataService.findAnnotations(
+        entity,
+        compilation ? compilation : '',
+      );
       resolve(annotationList);
     });
   }
@@ -598,7 +697,6 @@ export class AnnotationService {
   }
 
   public async shareAnnotation(annotation: IAnnotation) {
-
     const dialogConfig = new MatDialogConfig();
     dialogConfig.disableClose = true;
     dialogConfig.autoFocus = true;
@@ -613,20 +711,30 @@ export class AnnotationService {
       entityId: this.actualEntity._id,
     };
 
-    const dialogRef = this.dialog.open(DialogShareAnnotationComponent, dialogConfig);
-    dialogRef.afterClosed()
+    const dialogRef = this.dialog.open(
+      DialogShareAnnotationComponent,
+      dialogConfig,
+    );
+    dialogRef
+      .afterClosed()
       .toPromise()
       .then(data => {
         if (data.status !== true) {
           return this.message.error('Annotation has not been shared.');
         }
-        const copyAnnotation =
-          this.createCopyOfAnnotation(annotation, data.collectionId, data.annotationListLength);
+        const copyAnnotation = this.createCopyOfAnnotation(
+          annotation,
+          data.collectionId,
+          data.annotationListLength,
+        );
 
-        this.mongo.updateAnnotation(copyAnnotation)
+        this.mongo
+          .updateAnnotation(copyAnnotation)
           .then(result => {
             if (result.status === 'ok') {
-              this.message.info(`Annotation is shared to Collection with id: ${data.collectionId}`);
+              this.message.info(
+                `Annotation is shared to Collection with id: ${data.collectionId}`,
+              );
             } else {
               console.log('Status:', result);
             }
@@ -635,8 +743,11 @@ export class AnnotationService {
       });
   }
 
-  public createCopyOfAnnotation(annotation: IAnnotation, collectionId: string,
-                                annotationLength: number): any {
+  public createCopyOfAnnotation(
+    annotation: IAnnotation,
+    collectionId: string,
+    annotationLength: number,
+  ): any {
     console.log('Erstelle die Kopie');
 
     const generatedId = this.mongo.generateEntityId();
@@ -674,10 +785,12 @@ export class AnnotationService {
 
   public setAnnotatingAllowance() {
     let emitBool = false;
-    emitBool = (this.isEntityFeaturesOpen && !this.isMeshSettingsMode);
+    emitBool = this.isEntityFeaturesOpen && !this.isMeshSettingsMode;
     if (emitBool && !this.isCollectionInputSelected) {
-      emitBool = (this.userdataService.isEntityOwner && !this.processingService.isCollectionLoaded ||
-        this.isDefaultEntityLoaded);
+      emitBool =
+        (this.userdataService.isEntityOwner &&
+          !this.processingService.isCollectionLoaded) ||
+        this.isDefaultEntityLoaded;
     }
     this.isAnnotatingAllowed = emitBool;
     this.annotationMode(emitBool);
@@ -709,18 +822,34 @@ export class AnnotationService {
     const defaultPreview = 'assets/img/preview-default-annotation.png';
     const fallbackPreview = 'assets/img/preview-fallback-annotation.png';
 
-    const defaultRefPoint = {x: -11.161506782568708, y: 12.026446528767236, z: -4.190899716371533};
-    const fallbackRefPoint = {x: -10.204414220764392, y: 10.142734374740286, z: -3.9197811803792177};
+    const defaultRefPoint = {
+      x: -11.161506782568708,
+      y: 12.026446528767236,
+      z: -4.190899716371533,
+    };
+    const fallbackRefPoint = {
+      x: -10.204414220764392,
+      y: 10.142734374740286,
+      z: -3.9197811803792177,
+    };
 
-    const defaultRefNormal = {x: -0.8949183554821707, y: 0.011999712767034331, z: -0.44606854172267707};
-    const fallbackRefNormal = {x: -0.8949183602315889, y: 0.011999712324764563, z: -0.44606853220612525};
+    const defaultRefNormal = {
+      x: -0.8949183554821707,
+      y: 0.011999712767034331,
+      z: -0.44606854172267707,
+    };
+    const fallbackRefNormal = {
+      x: -0.8949183602315889,
+      y: 0.011999712324764563,
+      z: -0.44606853220612525,
+    };
 
     const defaultTitle = 'Welcome to Kompakkt';
-    const defaultMessage =
-      `![alt Kompakkt Logo](https://raw.githubusercontent.com/DH-Cologne/Kompakkt/master/src/assets/img/kompakkt-logo.png)
+    const defaultMessage = `![alt Kompakkt Logo](https://raw.githubusercontent.com/DH-Cologne/Kompakkt/master/src/assets/img/kompakkt-logo.png)
       Hi! I am an annotation of this cool logo. Please feel free to add a friend for me by clicking on the edit button in the corner on the right bottom and double click this 3D logo!`;
     const fallbackTitle = 'Hi there!';
-    const fallbackMessage = 'maybe this is not what you were looking for. Unfortunately we cannot display the requested entity but we are working on it. But we have something better as you can see... This entity is from https://sketchfab.com/mark2580';
+    const fallbackMessage =
+      'maybe this is not what you were looking for. Unfortunately we cannot display the requested entity but we are working on it. But we have something better as you can see... This entity is from https://sketchfab.com/mark2580';
     /* tslint:enable:max-line-length */
 
     return {
@@ -751,8 +880,12 @@ export class AnnotationService {
         type: 'annotation',
         content: {
           type: 'text',
-          title: (this.processingService.isFallbackEntityLoaded) ? fallbackTitle : defaultTitle,
-          description: (this.processingService.isFallbackEntityLoaded) ? fallbackMessage : defaultMessage,
+          title: this.processingService.isFallbackEntityLoaded
+            ? fallbackTitle
+            : defaultTitle,
+          description: this.processingService.isFallbackEntityLoaded
+            ? fallbackMessage
+            : defaultMessage,
           relatedPerspective: {
             cameraType: 'arcRotateCam',
             position: {
@@ -765,7 +898,9 @@ export class AnnotationService {
               y: 0,
               z: 0,
             },
-            preview: (this.processingService.isFallbackEntityLoaded) ? fallbackPreview : defaultPreview,
+            preview: this.processingService.isFallbackEntityLoaded
+              ? fallbackPreview
+              : defaultPreview,
           },
         },
       },
@@ -774,11 +909,14 @@ export class AnnotationService {
           relatedEntity: 'Cube',
         },
         selector: {
-          referencePoint: (this.processingService.isFallbackEntityLoaded) ? fallbackRefPoint : defaultRefPoint,
-          referenceNormal: (this.processingService.isFallbackEntityLoaded) ? fallbackRefNormal : defaultRefNormal,
+          referencePoint: this.processingService.isFallbackEntityLoaded
+            ? fallbackRefPoint
+            : defaultRefPoint,
+          referenceNormal: this.processingService.isFallbackEntityLoaded
+            ? fallbackRefNormal
+            : defaultRefNormal,
         },
       },
     };
   }
-
 }

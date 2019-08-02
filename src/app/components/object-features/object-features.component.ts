@@ -1,7 +1,7 @@
-import {Component, HostBinding, OnInit, ViewChild} from '@angular/core';
+import { Component, HostBinding, OnInit, ViewChild } from '@angular/core';
 
-import {AnnotationService} from '../../services/annotation/annotation.service';
-import {OverlayService} from '../../services/overlay/overlay.service';
+import { AnnotationService } from '../../services/annotation/annotation.service';
+import { OverlayService } from '../../services/overlay/overlay.service';
 
 @Component({
   selector: 'app-entity-features',
@@ -9,7 +9,6 @@ import {OverlayService} from '../../services/overlay/overlay.service';
   styleUrls: ['./object-features.component.scss'],
 })
 export class EntityFeaturesComponent implements OnInit {
-
   @HostBinding('class.is-open') private isOpen = false;
   @ViewChild('tabGroup', { static: false }) tabGroup;
 
@@ -19,12 +18,12 @@ export class EntityFeaturesComponent implements OnInit {
   // internal
   public selectedTab;
 
-  constructor(public overlayService: OverlayService,
-              public annotationService: AnnotationService) {
-  }
+  constructor(
+    public overlayService: OverlayService,
+    public annotationService: AnnotationService,
+  ) {}
 
   ngOnInit() {
-
     this.overlayService.defaultAnnotations.subscribe(annotationsMode => {
       if (this.isOpen && annotationsMode) {
         this.changeTab(0);
@@ -34,7 +33,7 @@ export class EntityFeaturesComponent implements OnInit {
     this.overlayService.editorSetting.subscribe(meshSettingsMode => {
       this.isMeshSettingsMode = meshSettingsMode;
       if (this.isOpen && meshSettingsMode) {
-          this.changeTab(1);
+        this.changeTab(1);
       }
     });
 
@@ -48,5 +47,4 @@ export class EntityFeaturesComponent implements OnInit {
       this.tabGroup.selectedIndex = tabIndex;
     }
   }
-
 }
