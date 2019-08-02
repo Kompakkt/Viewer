@@ -88,11 +88,11 @@ export const settingsKompakktLogo = {
   background: {
     color: {
       r: 0,
-      g: 158,
-      b: 224,
+      g: 174,
+      b: 230,
       a: 1,
     },
-    effect: true,
+    effect: false,
   },
   lights: [
     {
