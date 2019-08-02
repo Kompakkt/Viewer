@@ -93,7 +93,6 @@ export class UserdataService {
             };
           } else {
             this.currentUserData = userData;
-            this.message.info(`Logged in as ${this.currentUserData.fullname}`);
             if (!userData.data) {
               console.warn('User has no data property', userData, this);
               return;
