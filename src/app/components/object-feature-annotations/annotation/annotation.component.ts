@@ -28,6 +28,8 @@ export class AnnotationComponent implements OnInit {
   public showAnnotation = false;
   public positionTop = 0;
   public positionLeft = 0;
+  public cardWidth = 350;
+  public cardHeight = 175;
   public collapsed = false;
   public selectedAnnotation: string | undefined;
   // --- JAN ----
@@ -178,18 +180,33 @@ export class AnnotationComponent implements OnInit {
     if (getMesh && scene.activeCamera) {
       const engine = this.babylonService.getEngine();
 
+      const [width, height] = [
+        engine.getRenderWidth(),
+        engine.getRenderHeight(),
+      ];
+
       const p = Vector3.Project(
         getMesh.getBoundingInfo().boundingBox.centerWorld,
         Matrix.Identity(),
         scene.getTransformMatrix(),
-        scene.activeCamera.viewport.toGlobal(
-          engine.getRenderWidth(),
-          engine.getRenderHeight(),
-        ),
+        scene.activeCamera.viewport.toGlobal(width, height),
       );
 
-      this.positionTop = Math.round(p.y) + 5;
-      this.positionLeft = Math.round(p.x) + 5;
+      const [left, top] = [Math.round(p.x), Math.round(p.y)];
+
+      // TODO: get actual card width and height from component
+      this.positionTop =
+        top < 0
+          ? 0
+          : top + this.cardHeight > height
+          ? height - this.cardHeight
+          : top;
+      this.positionLeft =
+        left < 0
+          ? 0
+          : left + this.cardWidth > width
+          ? width - this.cardWidth
+          : left;
     }
   }
 
