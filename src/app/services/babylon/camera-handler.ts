@@ -184,6 +184,7 @@ export const moveCameraToTarget = (
   positionVector: Vector3,
 ) => {
   console.log('move Cam to', positionVector);
+
   camera.animations.push(
     ...createAnimationsForCamera(camera, positionVector, [
       'alpha',

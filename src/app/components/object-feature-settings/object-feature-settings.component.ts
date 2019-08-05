@@ -349,13 +349,13 @@ export class EntityFeatureSettingsComponent implements OnInit {
     let upload = false;
 
     if (this.isDefault) {
-      console.log('DEFAULT');
       settings = settingsKompakktLogo;
     } else if (this.isFallbackEntityLoaded) {
       settings = settingsFallback;
     } else {
       switch (this.mediaType) {
-        case 'entity': {
+        case 'entity':
+        case 'model': {
           settings = settingsEntity;
           break;
         }
@@ -380,7 +380,6 @@ export class EntityFeatureSettingsComponent implements OnInit {
     if (this.activeEntity) {
       this.activeEntity['settings'] = settings;
     }
-    console.log('SETTINGS', settings);
     return upload;
   }
 
@@ -394,7 +393,6 @@ export class EntityFeatureSettingsComponent implements OnInit {
       this.initialSettingsMode = true;
       await this.entitySettingsService.createVisualSettings();
       this.cameraPositionInitial = this.babylonService.cameraManager.getActualDefaultPosition();
-      console.log('initial: ', this.cameraPositionInitial);
       const cameraSettings: any[] = [this.cameraPositionInitial];
 
       if (this.activeEntity && this.activeEntity.settings) {
@@ -414,7 +412,6 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   private async setCamera() {
-    console.log('KAMERASETZEN');
     if (!this.activeEntity || !this.activeEntity.settings) {
       console.warn('No this.activeEntity', this);
       return;

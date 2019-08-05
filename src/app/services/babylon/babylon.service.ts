@@ -83,8 +83,16 @@ export class BabylonService {
     resetCamera: () => resetCamera(this.getActiveCamera(), this.scene),
     getInitialPosition: () => ({
       cameraType: 'arcRotateCam',
-      position: this.getActiveCamera().position,
-      target: this.getActiveCamera().target,
+      position: {
+        x: this.getActiveCamera().alpha,
+        y: this.getActiveCamera().beta,
+        z: this.getActiveCamera().radius,
+      },
+      target: {
+        x: this.getActiveCamera().target.x,
+        y: this.getActiveCamera().target.y,
+        z: this.getActiveCamera().target.z,
+      },
     }),
     getActualDefaultPosition: () => ({
       cameraType: 'arcRotateCam',

@@ -105,7 +105,7 @@ export class EntitySettingsService {
     }
   }
 
-  private async generateHelpers() {
+  private async generateHelpers(upload?: boolean) {
     await this.createCenter();
     this.initialSize = await this.max.subtract(this.min);
     this.height = this.initialSize.y.toFixed(2);
@@ -114,23 +114,25 @@ export class EntitySettingsService {
 
     // TODO: Check
     // this.babylonService.cameraManager.getActiveCamera.zoomOn(this.actualEntityMeshes, false);
-    console.log('Das ist das Maximum: ', this.height, this.width, this.depth);
-    const pos = new Vector3(
-      Math.PI / 4,
-      Math.PI / 4,
-      Math.max(this.height, this.width, this.depth) * 2.5,
-    );
-    const target = new Vector3(
-      this.max.x - this.initialSize.x / 2,
-      this.max.y - this.initialSize.y / 2,
-      this.max.z - this.initialSize.z / 2,
-    );
     this.babylonService.cameraManager.setUpActiveCamera(
       Math.max(this.height, this.width, this.depth),
+    );
+
+    if (upload) {
+    const pos = new Vector3(
+        Math.PI / 4,
+        Math.PI / 4,
+        Math.max(this.height, this.width, this.depth) * 2.5,
+    );
+    const target = new Vector3(
+        this.max.x - this.initialSize.x / 2,
+        this.max.y - this.initialSize.y / 2,
+        this.max.z - this.initialSize.z / 2,
     );
     this.babylonService.cameraManager.updateDefaults(pos, target);
     this.babylonService.cameraManager.setActiveCameraTarget(target);
     this.babylonService.cameraManager.moveActiveCameraToPosition(pos);
+    }
   }
 
   private async setSettings(scalingFactor, rotX, rotY, rotZ) {
@@ -229,7 +231,7 @@ export class EntitySettingsService {
 
   public async createVisualSettings() {
     this.initializeVariablesforSettings();
-    await this.generateHelpers();
+    await this.generateHelpers(true);
 
     this.createBoundingBox();
     this.showBoundingBoxEntity = false;
