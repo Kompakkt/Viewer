@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Matrix, Vector3 } from 'babylonjs';
 import { PerfectScrollbarConfigInterface } from 'ngx-perfect-scrollbar';
@@ -28,8 +28,8 @@ export class AnnotationComponent implements OnInit {
   public showAnnotation = false;
   public positionTop = 0;
   public positionLeft = 0;
-  public cardWidth = 350;
-  public cardHeight = 175;
+  public cardWidth = this.el.nativeElement.offsetWidth;
+  public cardHeight = this.el.nativeElement.offsetHeight;
   public collapsed = false;
   public selectedAnnotation: string | undefined;
   // --- JAN ----
@@ -52,6 +52,7 @@ export class AnnotationComponent implements OnInit {
     public dialog: MatDialog,
     private userdataService: UserdataService,
     private processingService: ProcessingService,
+    private el: ElementRef,
   ) {}
 
   ngOnInit() {
@@ -167,7 +168,6 @@ export class AnnotationComponent implements OnInit {
     this.annotationService.deleteAnnotation(this.annotation);
   }
 
-  // TODO get position from babylon Service
   private setPosition(annotation: IAnnotation) {
     const scene = this.babylonService.getScene();
 
@@ -195,6 +195,7 @@ export class AnnotationComponent implements OnInit {
       const [left, top] = [Math.round(p.x), Math.round(p.y)];
 
       // TODO: get actual card width and height from component
+      // console.log('height---' + this.el.nativeElement.offsetHeight);
       this.positionTop =
         top < 0
           ? 0
