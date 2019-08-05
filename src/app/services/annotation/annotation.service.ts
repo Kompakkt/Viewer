@@ -5,6 +5,10 @@ import { ActionManager, Mesh, Tags } from 'babylonjs';
 import { Socket } from 'ngx-socket-io';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 
+import {
+  annotationFallback,
+  annotationLogo,
+} from '../../../assets/annotations/annotations';
 import { environment } from '../../../environments/environment';
 // tslint:disable-next-line:max-line-length
 import { DialogGetUserDataComponent } from '../../components/dialogs/dialog-get-user-data/dialog-get-user-data.component';
@@ -16,8 +20,8 @@ import {
   IEntity,
 } from '../../interfaces/interfaces';
 import { ActionService } from '../action/action.service';
-import { BabylonService } from '../babylon/babylon.service';
 import { AnnotationmarkerService } from '../annotationmarker/annotationmarker.service';
+import { BabylonService } from '../babylon/babylon.service';
 import { DataService } from '../data/data.service';
 import { MessageService } from '../message/message.service';
 import { MongohandlerService } from '../mongohandler/mongohandler.service';
@@ -211,8 +215,8 @@ export class AnnotationService {
 
     if (!this.isDemoMode) {
       // Filter null/undefined annotations
-      const serverAnnotations = this.getAnnotationsfromServerDB().filter(
-        annotation =>
+      const serverAnnotations = this.getAnnotationsfromServerDB()
+          .filter(annotation =>
           annotation && annotation._id && annotation.lastModificationDate,
       );
       const pouchAnnotations = (await this.getAnnotationsfromLocalDB()).filter(
@@ -228,9 +232,15 @@ export class AnnotationService {
       this.annotations.push(...updated);
       await this.sortAnnotations();
     } else {
-      this.annotations.push(this.createDefaultAnnotation());
+      if (this.processingService.isFallbackEntityLoaded) {
+        this.annotations.push(annotationFallback);
+      }
+      if (this.processingService.isDefaultEntityLoaded) {
+        annotationLogo.forEach((annotation: IAnnotation) =>
+            this.annotations.push(annotation),
+        ); }
       this.selectedAnnotation.next(
-        this.annotations[this.annotations.length - 1]._id,
+        this.annotations[0]._id,
       );
     }
     this.initializeAnnotationMode();
@@ -322,8 +332,9 @@ export class AnnotationService {
         if (
           !annotation.lastModificationDate ||
           !serverAnnotation.lastModificationDate
-        )
+        ) {
           continue;
+        }
         // vergleichen welche aktueller ist
         const isSame =
           annotation.lastModificationDate ===
@@ -381,16 +392,16 @@ export class AnnotationService {
   }
 
   private async sortAnnotations() {
-    const sortedDefault = this.getDefaultAnnotations().sort(
-      (leftSide, rightSide): number =>
+    const sortedDefault = this.getDefaultAnnotations()
+        .sort((leftSide, rightSide): number =>
         +leftSide.ranking === +rightSide.ranking
           ? 0
           : +leftSide.ranking < +rightSide.ranking
           ? -1
           : 1,
     );
-    const sortedCompilation = this.getCompilationAnnotations().sort(
-      (leftSide, rightSide): number =>
+    const sortedCompilation = this.getCompilationAnnotations()
+        .sort((leftSide, rightSide): number =>
         +leftSide.ranking === +rightSide.ranking
           ? 0
           : +leftSide.ranking < +rightSide.ranking
@@ -440,7 +451,8 @@ export class AnnotationService {
   public async createNewAnnotation(result: any) {
     const camera = this.babylon.cameraManager.getInitialPosition();
 
-    this.babylon.createPreviewScreenshot(400).then(detailScreenshot => {
+    this.babylon.createPreviewScreenshot(400)
+        .then(detailScreenshot => {
       if (!this.actualEntity) {
         throw new Error(`this.actualEntity not defined: ${this.actualEntity}`);
         console.error('AnnotationService:', this);
@@ -628,7 +640,8 @@ export class AnnotationService {
       DialogGetUserDataComponent,
       dialogConfig,
     );
-    dialogRef.afterClosed().subscribe(data => {
+    dialogRef.afterClosed()
+        .subscribe(data => {
       if (data === true) {
         this.message.info('Deleted from Server');
       } else {
@@ -815,108 +828,5 @@ export class AnnotationService {
       this.isannotationSourceCollection = sourceCol;
       this.updateCurrentAnnotationsSubject();
     }
-  }
-
-  public createDefaultAnnotation(): IAnnotation {
-    /* tslint:disable:max-line-length */
-    const defaultPreview = 'assets/img/preview-default-annotation.png';
-    const fallbackPreview = 'assets/img/preview-fallback-annotation.png';
-
-    const defaultRefPoint = {
-      x: -11.161506782568708,
-      y: 12.026446528767236,
-      z: -4.190899716371533,
-    };
-    const fallbackRefPoint = {
-      x: -10.204414220764392,
-      y: 10.142734374740286,
-      z: -3.9197811803792177,
-    };
-
-    const defaultRefNormal = {
-      x: -0.8949183554821707,
-      y: 0.011999712767034331,
-      z: -0.44606854172267707,
-    };
-    const fallbackRefNormal = {
-      x: -0.8949183602315889,
-      y: 0.011999712324764563,
-      z: -0.44606853220612525,
-    };
-
-    const defaultTitle = 'Welcome to Kompakkt';
-    const defaultMessage = `![alt Kompakkt Logo](https://raw.githubusercontent.com/DH-Cologne/Kompakkt/master/src/assets/img/kompakkt-logo.png)
-      Hi! I am an annotation of this cool logo. Please feel free to add a friend for me by clicking on the edit button in the corner on the right bottom and double click this 3D logo!`;
-    const fallbackTitle = 'Hi there!';
-    const fallbackMessage =
-      'maybe this is not what you were looking for. Unfortunately we cannot display the requested entity but we are working on it. But we have something better as you can see... This entity is from https://sketchfab.com/mark2580';
-    /* tslint:enable:max-line-length */
-
-    return {
-      validated: true,
-      _id: 'DefaultAnnotation',
-      identifier: 'DefaultAnnotation',
-      ranking: 1,
-      creator: {
-        type: 'Person',
-        name: 'Get User Name',
-        _id: 'Get User ID',
-      },
-      created: new Date().toISOString(),
-      generator: {
-        type: 'Person',
-        name: 'Get User Name',
-        _id: 'Get User ID',
-      },
-      generated: 'Creation-Timestamp by Server',
-      motivation: 'defaultMotivation',
-      lastModificationDate: 'Last-Manipulation-Timestamp by Server',
-      lastModifiedBy: {
-        type: 'Person',
-        name: 'Get User Name',
-        _id: 'Get User ID',
-      },
-      body: {
-        type: 'annotation',
-        content: {
-          type: 'text',
-          title: this.processingService.isFallbackEntityLoaded
-            ? fallbackTitle
-            : defaultTitle,
-          description: this.processingService.isFallbackEntityLoaded
-            ? fallbackMessage
-            : defaultMessage,
-          relatedPerspective: {
-            cameraType: 'arcRotateCam',
-            position: {
-              x: 2.7065021761026817,
-              y: 1.3419080619941322,
-              z: 90.44884111420268,
-            },
-            target: {
-              x: 0,
-              y: 0,
-              z: 0,
-            },
-            preview: this.processingService.isFallbackEntityLoaded
-              ? fallbackPreview
-              : defaultPreview,
-          },
-        },
-      },
-      target: {
-        source: {
-          relatedEntity: 'Cube',
-        },
-        selector: {
-          referencePoint: this.processingService.isFallbackEntityLoaded
-            ? fallbackRefPoint
-            : defaultRefPoint,
-          referenceNormal: this.processingService.isFallbackEntityLoaded
-            ? fallbackRefNormal
-            : defaultRefNormal,
-        },
-      },
-    };
   }
 }
