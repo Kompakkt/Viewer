@@ -24,14 +24,14 @@ export class EntitySettingsService {
   public actualEntityMeshes: Mesh[] = [];
   public showBoundingBoxMeshes = false;
   private min = new Vector3(
-    Number.MAX_VALUE,
-    Number.MAX_VALUE,
-    Number.MAX_VALUE,
+      Number.MAX_VALUE,
+      Number.MAX_VALUE,
+      Number.MAX_VALUE,
   );
   private max = new Vector3(
-    Number.MAX_VALUE * -1,
-    Number.MAX_VALUE * -1,
-    Number.MAX_VALUE * -1,
+      Number.MAX_VALUE * -1,
+      Number.MAX_VALUE * -1,
+      Number.MAX_VALUE * -1,
   );
   private initialSize = new Vector3(0, 0, 0);
 
@@ -63,13 +63,13 @@ export class EntitySettingsService {
   private rotQuat = new Quaternion();
 
   constructor(
-    private babylonService: BabylonService,
-    private processingService: ProcessingService,
+      private babylonService: BabylonService,
+      private processingService: ProcessingService,
   ) {
     this.processingService.Observables.actualEntityMeshes.subscribe(
-      actualEntityMeshes => {
-        this.actualEntityMeshes = actualEntityMeshes;
-      },
+        actualEntityMeshes => {
+          this.actualEntityMeshes = actualEntityMeshes;
+        },
     );
   }
 
@@ -117,23 +117,23 @@ export class EntitySettingsService {
 
     // TODO: Check
     // this.babylonService.cameraManager.getActiveCamera.zoomOn(this.actualEntityMeshes, false);
-    const max = !isDefault ? Math.max(this.height, this.width, this.depth) : 300;
+    const max = !isDefault ? Math.max(this.height, this.width, this.depth) : 87.5;
     this.babylonService.cameraManager.setUpActiveCamera(max);
 
     if (upload) {
-    const pos = new Vector3(
-        Math.PI / 4,
-        Math.PI / 4,
-        Math.max(this.height, this.width, this.depth) * 2.5,
-    );
-    const target = new Vector3(
-        this.max.x - this.initialSize.x / 2,
-        this.max.y - this.initialSize.y / 2,
-        this.max.z - this.initialSize.z / 2,
-    );
-    this.babylonService.cameraManager.updateDefaults(pos, target);
-    this.babylonService.cameraManager.setActiveCameraTarget(target);
-    this.babylonService.cameraManager.moveActiveCameraToPosition(pos);
+      const pos = new Vector3(
+          Math.PI / 4,
+          Math.PI / 4,
+          Math.max(this.height, this.width, this.depth) * 2.5,
+      );
+      const target = new Vector3(
+          this.max.x - this.initialSize.x / 2,
+          this.max.y - this.initialSize.y / 2,
+          this.max.z - this.initialSize.z / 2,
+      );
+      this.babylonService.cameraManager.updateDefaults(pos, target);
+      this.babylonService.cameraManager.setActiveCameraTarget(target);
+      this.babylonService.cameraManager.moveActiveCameraToPosition(pos);
     }
   }
 
@@ -165,20 +165,20 @@ export class EntitySettingsService {
     }
 
     const rotationQuaternionX = Quaternion.RotationAxis(
-      axisX,
-      (Math.PI / 180) * rotX,
+        axisX,
+        (Math.PI / 180) * rotX,
     );
     let end = rotationQuaternionX.multiply(mesh.rotationQuaternion);
 
     const rotationQuaternionY = Quaternion.RotationAxis(
-      axisY,
-      (Math.PI / 180) * rotY,
+        axisY,
+        (Math.PI / 180) * rotY,
     );
     end = rotationQuaternionY.multiply(end);
 
     const rotationQuaternionZ = Quaternion.RotationAxis(
-      axisZ,
-      (Math.PI / 180) * rotZ,
+        axisZ,
+        (Math.PI / 180) * rotZ,
     );
     end = rotationQuaternionZ.multiply(end);
 
@@ -210,9 +210,9 @@ export class EntitySettingsService {
 
       if (!mesh.rotationQuaternion) {
         mesh.rotationQuaternion = Quaternion.RotationYawPitchRoll(
-          mesh.rotation.y,
-          mesh.rotation.x,
-          mesh.rotation.z,
+            mesh.rotation.y,
+            mesh.rotation.x,
+            mesh.rotation.z,
         );
       }
       mesh.parent = null;
@@ -241,21 +241,21 @@ export class EntitySettingsService {
     this.createWorldAxis(18);
     this.showWorldAxis = false;
     this.babylonService
-      .getScene()
-      .getMeshesByTags('worldAxis')
-      .map(mesh => (mesh.visibility = 0));
+        .getScene()
+        .getMeshesByTags('worldAxis')
+        .map(mesh => (mesh.visibility = 0));
     this.createlocalAxes(12);
     this.showLocalAxis = false;
     this.babylonService
-      .getScene()
-      .getMeshesByTags('localAxis')
-      .map(mesh => (mesh.visibility = 0));
+        .getScene()
+        .getMeshesByTags('localAxis')
+        .map(mesh => (mesh.visibility = 0));
     this.createGround(20);
     this.showGround = false;
     this.babylonService
-      .getScene()
-      .getMeshesByTags('ground')
-      .map(mesh => (mesh.visibility = 0));
+        .getScene()
+        .getMeshesByTags('ground')
+        .map(mesh => (mesh.visibility = 0));
   }
 
   public resetVisualSettingsHelper() {
@@ -270,75 +270,75 @@ export class EntitySettingsService {
 
     this.showWorldAxis = false;
     this.babylonService
-      .getScene()
-      .getMeshesByTags('worldAxis')
-      .map(mesh => (mesh.visibility = 0));
+        .getScene()
+        .getMeshesByTags('worldAxis')
+        .map(mesh => (mesh.visibility = 0));
     this.scalingFactorWorldAxis = 1;
     const postemp = 1 * 0.9 * 18;
     this.babylonService
-      .getScene()
-      .getMeshesByTags('worldAxis')
-      .map(mesh => (mesh.scaling = new Vector3(1, 1, 1)));
+        .getScene()
+        .getMeshesByTags('worldAxis')
+        .map(mesh => (mesh.scaling = new Vector3(1, 1, 1)));
     this.babylonService
-      .getScene()
-      .getMeshesByTags('worldAxisX')
-      .map(
-        mesh =>
-          (mesh.position = new Vector3(0.9 * postemp, -0.05 * postemp, 0)),
-      );
+        .getScene()
+        .getMeshesByTags('worldAxisX')
+        .map(
+            mesh =>
+                (mesh.position = new Vector3(0.9 * postemp, -0.05 * postemp, 0)),
+        );
     this.babylonService
-      .getScene()
-      .getMeshesByTags('worldAxisY')
-      .map(
-        mesh =>
-          (mesh.position = new Vector3(0, 0.9 * postemp, -0.05 * postemp)),
-      );
+        .getScene()
+        .getMeshesByTags('worldAxisY')
+        .map(
+            mesh =>
+                (mesh.position = new Vector3(0, 0.9 * postemp, -0.05 * postemp)),
+        );
     this.babylonService
-      .getScene()
-      .getMeshesByTags('worldAxisZ')
-      .map(
-        mesh => (mesh.position = new Vector3(0, 0.05 * postemp, 0.9 * postemp)),
-      );
+        .getScene()
+        .getMeshesByTags('worldAxisZ')
+        .map(
+            mesh => (mesh.position = new Vector3(0, 0.05 * postemp, 0.9 * postemp)),
+        );
 
     this.showLocalAxis = false;
     this.babylonService
-      .getScene()
-      .getMeshesByTags('localAxis')
-      .map(mesh => (mesh.visibility = 0));
+        .getScene()
+        .getMeshesByTags('localAxis')
+        .map(mesh => (mesh.visibility = 0));
     this.scalingFactorLocalAxis = 1;
     const posxz = 1 * 0.9 * 12;
     this.babylonService
-      .getScene()
-      .getMeshesByTags('localAxis')
-      .map(mesh => (mesh.scaling = new Vector3(1, 1, 1)));
+        .getScene()
+        .getMeshesByTags('localAxis')
+        .map(mesh => (mesh.scaling = new Vector3(1, 1, 1)));
     this.babylonService
-      .getScene()
-      .getMeshesByTags('localAxisX')
-      .map(
-        mesh => (mesh.position = new Vector3(0.9 * posxz, -0.05 * posxz, 0)),
-      );
+        .getScene()
+        .getMeshesByTags('localAxisX')
+        .map(
+            mesh => (mesh.position = new Vector3(0.9 * posxz, -0.05 * posxz, 0)),
+        );
     this.babylonService
-      .getScene()
-      .getMeshesByTags('localAxisY')
-      .map(
-        mesh => (mesh.position = new Vector3(0, 0.9 * posxz, -0.05 * posxz)),
-      );
+        .getScene()
+        .getMeshesByTags('localAxisY')
+        .map(
+            mesh => (mesh.position = new Vector3(0, 0.9 * posxz, -0.05 * posxz)),
+        );
     this.babylonService
-      .getScene()
-      .getMeshesByTags('localAxisZ')
-      .map(mesh => (mesh.position = new Vector3(0, 0.05 * posxz, 0.9 * posxz)));
+        .getScene()
+        .getMeshesByTags('localAxisZ')
+        .map(mesh => (mesh.position = new Vector3(0, 0.05 * posxz, 0.9 * posxz)));
 
     this.showGround = false;
     this.babylonService
-      .getScene()
-      .getMeshesByTags('ground')
-      .map(mesh => (mesh.visibility = 0));
+        .getScene()
+        .getMeshesByTags('ground')
+        .map(mesh => (mesh.visibility = 0));
     this.scalingFactorGround = 1;
     if (this.ground) {
       this.ground.scaling = new Vector3(1, 1, 1);
       const material = new StandardMaterial(
-        'GroundPlaneMaterial',
-        this.babylonService.getScene(),
+          'GroundPlaneMaterial',
+          this.babylonService.getScene(),
       );
       material.diffuseColor = new Color3(255 / 255, 255 / 255, 255 / 255);
       this.ground.material = material;
@@ -376,11 +376,11 @@ export class EntitySettingsService {
 
     const end = Quaternion.RotationYawPitchRoll(0, 0, 0);
     const anim = new Animation(
-      'anim',
-      'rotationQuaternion',
-      120,
-      Animation.ANIMATIONTYPE_QUATERNION,
-      Animation.ANIMATIONLOOPMODE_RELATIVE,
+        'anim',
+        'rotationQuaternion',
+        120,
+        Animation.ANIMATIONTYPE_QUATERNION,
+        Animation.ANIMATIONLOOPMODE_RELATIVE,
     );
     const frame = [{ frame: 0, value: start }, { frame: 100, value: end }];
     anim.setKeys(frame);
@@ -474,9 +474,9 @@ export class EntitySettingsService {
 
   private async createCenter() {
     this.center = MeshBuilder.CreateBox(
-      'center',
-      { size: 1 },
-      this.babylonService.getScene(),
+        'center',
+        { size: 1 },
+        this.babylonService.getScene(),
     );
     Tags.AddTagsTo(this.center, 'center');
     this.center.isVisible = false;
@@ -488,20 +488,20 @@ export class EntitySettingsService {
 
   private destroyCenter() {
     this.babylonService
-      .getScene()
-      .getMeshesByTags('center')
-      .map(mesh => mesh.dispose());
+        .getScene()
+        .getMeshesByTags('center')
+        .map(mesh => mesh.dispose());
   }
 
   private createBoundingBox() {
     this.boundingBox = MeshBuilder.CreateBox(
-      'boundingBox',
-      {
-        width: this.initialSize.x,
-        height: this.initialSize.y,
-        depth: this.initialSize.z,
-      },
-      this.babylonService.getScene(),
+        'boundingBox',
+        {
+          width: this.initialSize.x,
+          height: this.initialSize.y,
+          depth: this.initialSize.z,
+        },
+        this.babylonService.getScene(),
     );
     Tags.AddTagsTo(this.boundingBox, 'boundingBox');
     if (!this.boundingBox || !this.center) {
@@ -512,8 +512,8 @@ export class EntitySettingsService {
     this.boundingBox.parent = this.center;
 
     this.boundingBox.material = new StandardMaterial(
-      'boundingBoxMat',
-      this.babylonService.getScene(),
+        'boundingBoxMat',
+        this.babylonService.getScene(),
     );
     this.boundingBox.material.wireframe = true;
     this.showBoundingBoxEntity = true;
@@ -535,9 +535,9 @@ export class EntitySettingsService {
 
   private destroyBoundingBox() {
     this.babylonService
-      .getScene()
-      .getMeshesByTags('boundingBox')
-      .map(mesh => mesh.dispose());
+        .getScene()
+        .getMeshesByTags('boundingBox')
+        .map(mesh => mesh.dispose());
     this.showBoundingBoxEntity = false;
   }
 
@@ -552,9 +552,9 @@ export class EntitySettingsService {
   private createGround(size: number) {
     this.scalingFactorGround = 1;
     this.ground = MeshBuilder.CreateGround(
-      'ground',
-      { height: size, width: size, subdivisions: 1 },
-      this.babylonService.getScene(),
+        'ground',
+        { height: size, width: size, subdivisions: 1 },
+        this.babylonService.getScene(),
     );
     Tags.AddTagsTo(this.ground, 'ground');
     this.showGround = true;
@@ -583,13 +583,13 @@ export class EntitySettingsService {
     //   },
     // }
     const material = new StandardMaterial(
-      'GroundPlaneMaterial',
-      this.babylonService.getScene(),
+        'GroundPlaneMaterial',
+        this.babylonService.getScene(),
     );
     material.diffuseColor = new Color3(
-      $event.color.rgb.r / 255,
-      $event.color.rgb.g / 255,
-      $event.color.rgb.b / 255,
+        $event.color.rgb.r / 255,
+        $event.color.rgb.g / 255,
+        $event.color.rgb.b / 255,
     );
     if (this.ground) this.ground.material = material;
   }
@@ -598,22 +598,22 @@ export class EntitySettingsService {
     this.showGround = this.showGround ? false : true;
     if (this.showGround) {
       this.babylonService
-        .getScene()
-        .getMeshesByTags('ground')
-        .map(mesh => (mesh.visibility = 1));
+          .getScene()
+          .getMeshesByTags('ground')
+          .map(mesh => (mesh.visibility = 1));
     } else {
       this.babylonService
-        .getScene()
-        .getMeshesByTags('ground')
-        .map(mesh => (mesh.visibility = 0));
+          .getScene()
+          .getMeshesByTags('ground')
+          .map(mesh => (mesh.visibility = 0));
     }
   }
 
   private destroyGround() {
     this.babylonService
-      .getScene()
-      .getMeshesByTags('ground')
-      .map(mesh => mesh.dispose());
+        .getScene()
+        .getMeshesByTags('ground')
+        .map(mesh => mesh.dispose());
     this.showGround = false;
   }
 
@@ -625,23 +625,23 @@ export class EntitySettingsService {
     const vecTwoX = new Vector3(sizeWorldAxis * 0.95, 0.05 * sizeWorldAxis, 0);
     const vecThreeX = new Vector3(sizeWorldAxis, 0, 0);
     const vecFourX = new Vector3(
-      sizeWorldAxis * 0.95,
-      -0.05 * sizeWorldAxis,
-      0,
+        sizeWorldAxis * 0.95,
+        -0.05 * sizeWorldAxis,
+        0,
     );
     const axisX = Mesh.CreateLines(
-      'axisX',
-      [Vector3.Zero(), vecOneX, vecTwoX, vecThreeX, vecFourX],
-      this.babylonService.getScene(),
+        'axisX',
+        [Vector3.Zero(), vecOneX, vecTwoX, vecThreeX, vecFourX],
+        this.babylonService.getScene(),
     );
     Tags.AddTagsTo(axisX, 'worldAxis');
     axisX.color = new Color3(1, 0, 0);
     const xChar = this.createTextPlane(
-      'X',
-      'red',
-      sizeWorldAxis / 10,
-      'worldAxis',
-      'worldAxisX',
+        'X',
+        'red',
+        sizeWorldAxis / 10,
+        'worldAxis',
+        'worldAxisX',
     );
     xChar.position = new Vector3(0.9 * sizeWorldAxis, -0.05 * sizeWorldAxis, 0);
 
@@ -650,18 +650,18 @@ export class EntitySettingsService {
     const vecThreeY = new Vector3(0, sizeWorldAxis, 0);
     const vecFourY = new Vector3(0.05 * sizeWorldAxis, sizeWorldAxis * 0.95, 0);
     const axisY = Mesh.CreateLines(
-      'axisY',
-      [Vector3.Zero(), vecOneY, vecTwoY, vecThreeY, vecFourY],
-      this.babylonService.getScene(),
+        'axisY',
+        [Vector3.Zero(), vecOneY, vecTwoY, vecThreeY, vecFourY],
+        this.babylonService.getScene(),
     );
     Tags.AddTagsTo(axisY, 'worldAxis');
     axisY.color = new Color3(0, 1, 0);
     const yChar = this.createTextPlane(
-      'Y',
-      'green',
-      sizeWorldAxis / 10,
-      'worldAxis',
-      'worldAxisY',
+        'Y',
+        'green',
+        sizeWorldAxis / 10,
+        'worldAxis',
+        'worldAxisY',
     );
     yChar.position = new Vector3(0, 0.9 * sizeWorldAxis, -0.05 * sizeWorldAxis);
 
@@ -670,18 +670,18 @@ export class EntitySettingsService {
     const vecThreeZ = new Vector3(0, 0, sizeWorldAxis);
     const vecFourZ = new Vector3(0, 0.05 * sizeWorldAxis, sizeWorldAxis * 0.95);
     const axisZ = Mesh.CreateLines(
-      'axisZ',
-      [Vector3.Zero(), vecOneZ, vecTwoZ, vecThreeZ, vecFourZ],
-      this.babylonService.getScene(),
+        'axisZ',
+        [Vector3.Zero(), vecOneZ, vecTwoZ, vecThreeZ, vecFourZ],
+        this.babylonService.getScene(),
     );
     Tags.AddTagsTo(axisZ, 'worldAxis');
     axisZ.color = new Color3(0, 0, 1);
     const zChar = this.createTextPlane(
-      'Z',
-      'blue',
-      sizeWorldAxis / 10,
-      'worldAxis',
-      'worldAxisZ',
+        'Z',
+        'blue',
+        sizeWorldAxis / 10,
+        'worldAxis',
+        'worldAxisZ',
     );
     zChar.position = new Vector3(0, 0.05 * sizeWorldAxis, 0.9 * sizeWorldAxis);
 
@@ -690,34 +690,34 @@ export class EntitySettingsService {
 
   private createTextPlane(text, color, size, tag, tagIndividual) {
     const dynamicTexture = new DynamicTexture(
-      'DynamicTexture',
-      50,
-      this.babylonService.getScene(),
-      true,
+        'DynamicTexture',
+        50,
+        this.babylonService.getScene(),
+        true,
     );
     dynamicTexture.hasAlpha = true;
     dynamicTexture.drawText(
-      text,
-      5,
-      40,
-      'bold 36px Arial',
-      color,
-      'transparent',
-      true,
+        text,
+        5,
+        40,
+        'bold 36px Arial',
+        color,
+        'transparent',
+        true,
     );
 
     const plane = Mesh.CreatePlane(
-      tag,
-      size,
-      this.babylonService.getScene(),
-      true,
+        tag,
+        size,
+        this.babylonService.getScene(),
+        true,
     );
     Tags.AddTagsTo(plane, tag);
     Tags.AddTagsTo(plane, tagIndividual);
 
     const material = new StandardMaterial(
-      'TextPlaneMaterial',
-      this.babylonService.getScene(),
+        'TextPlaneMaterial',
+        this.babylonService.getScene(),
     );
     material.backFaceCulling = false;
     material.specularColor = new Color3(0, 0, 0);
@@ -731,46 +731,46 @@ export class EntitySettingsService {
     this.scalingFactorWorldAxis = event.value;
     const pos = event.value * 0.9 * 18;
     this.babylonService
-      .getScene()
-      .getMeshesByTags('worldAxis')
-      .map(
-        mesh =>
-          (mesh.scaling = new Vector3(event.value, event.value, event.value)),
-      );
+        .getScene()
+        .getMeshesByTags('worldAxis')
+        .map(
+            mesh =>
+                (mesh.scaling = new Vector3(event.value, event.value, event.value)),
+        );
     this.babylonService
-      .getScene()
-      .getMeshesByTags('worldAxisX')
-      .map(mesh => (mesh.position = new Vector3(0.9 * pos, -0.05 * pos, 0)));
+        .getScene()
+        .getMeshesByTags('worldAxisX')
+        .map(mesh => (mesh.position = new Vector3(0.9 * pos, -0.05 * pos, 0)));
     this.babylonService
-      .getScene()
-      .getMeshesByTags('worldAxisY')
-      .map(mesh => (mesh.position = new Vector3(0, 0.9 * pos, -0.05 * pos)));
+        .getScene()
+        .getMeshesByTags('worldAxisY')
+        .map(mesh => (mesh.position = new Vector3(0, 0.9 * pos, -0.05 * pos)));
     this.babylonService
-      .getScene()
-      .getMeshesByTags('worldAxisZ')
-      .map(mesh => (mesh.position = new Vector3(0, 0.05 * pos, 0.9 * pos)));
+        .getScene()
+        .getMeshesByTags('worldAxisZ')
+        .map(mesh => (mesh.position = new Vector3(0, 0.05 * pos, 0.9 * pos)));
   }
 
   public handleChangeWorldAxis() {
     this.showWorldAxis = this.showWorldAxis ? false : true;
     if (this.showWorldAxis) {
       this.babylonService
-        .getScene()
-        .getMeshesByTags('worldAxis')
-        .map(mesh => (mesh.visibility = 1));
+          .getScene()
+          .getMeshesByTags('worldAxis')
+          .map(mesh => (mesh.visibility = 1));
     } else {
       this.babylonService
-        .getScene()
-        .getMeshesByTags('worldAxis')
-        .map(mesh => (mesh.visibility = 0));
+          .getScene()
+          .getMeshesByTags('worldAxis')
+          .map(mesh => (mesh.visibility = 0));
     }
   }
 
   private destroyWorldAxis() {
     this.babylonService
-      .getScene()
-      .getMeshesByTags('worldAxis')
-      .map(mesh => mesh.dispose());
+        .getScene()
+        .getMeshesByTags('worldAxis')
+        .map(mesh => mesh.dispose());
     this.showWorldAxis = false;
   }
 
@@ -782,23 +782,23 @@ export class EntitySettingsService {
     const vecTwoX = new Vector3(sizeLocalAxis * 0.95, 0.05 * sizeLocalAxis, 0);
     const vecThreeX = new Vector3(sizeLocalAxis, 0, 0);
     const vecFourX = new Vector3(
-      sizeLocalAxis * 0.95,
-      -0.05 * sizeLocalAxis,
-      0,
+        sizeLocalAxis * 0.95,
+        -0.05 * sizeLocalAxis,
+        0,
     );
     const local_axisX = Mesh.CreateLines(
-      'local_axisX',
-      [Vector3.Zero(), vecOneX, vecTwoX, vecThreeX, vecFourX],
-      this.babylonService.getScene(),
+        'local_axisX',
+        [Vector3.Zero(), vecOneX, vecTwoX, vecThreeX, vecFourX],
+        this.babylonService.getScene(),
     );
     Tags.AddTagsTo(local_axisX, 'localAxis');
     local_axisX.color = new Color3(1, 0, 0);
     const xChar = this.createTextPlane(
-      'X',
-      'red',
-      sizeLocalAxis / 10,
-      'localAxis',
-      'localAxisX',
+        'X',
+        'red',
+        sizeLocalAxis / 10,
+        'localAxis',
+        'localAxisX',
     );
     xChar.position = new Vector3(0.9 * sizeLocalAxis, -0.05 * sizeLocalAxis, 0);
 
@@ -807,18 +807,18 @@ export class EntitySettingsService {
     const vecThreeY = new Vector3(0, sizeLocalAxis, 0);
     const vecFourY = new Vector3(0.05 * sizeLocalAxis, sizeLocalAxis * 0.95, 0);
     const local_axisY = Mesh.CreateLines(
-      'local_axisY',
-      [Vector3.Zero(), vecOneY, vecTwoY, vecThreeY, vecFourY],
-      this.babylonService.getScene(),
+        'local_axisY',
+        [Vector3.Zero(), vecOneY, vecTwoY, vecThreeY, vecFourY],
+        this.babylonService.getScene(),
     );
     Tags.AddTagsTo(local_axisY, 'localAxis');
     local_axisY.color = new Color3(0, 1, 0);
     const yChar = this.createTextPlane(
-      'Y',
-      'green',
-      sizeLocalAxis / 10,
-      'localAxis',
-      'localAxisY',
+        'Y',
+        'green',
+        sizeLocalAxis / 10,
+        'localAxis',
+        'localAxisY',
     );
     yChar.position = new Vector3(0, 0.9 * sizeLocalAxis, -0.05 * sizeLocalAxis);
 
@@ -827,18 +827,18 @@ export class EntitySettingsService {
     const vecThreeZ = new Vector3(0, 0, sizeLocalAxis);
     const vecFourZ = new Vector3(0, 0.05 * sizeLocalAxis, sizeLocalAxis * 0.95);
     const local_axisZ = Mesh.CreateLines(
-      'local_axisZ',
-      [Vector3.Zero(), vecOneZ, vecTwoZ, vecThreeZ, vecFourZ],
-      this.babylonService.getScene(),
+        'local_axisZ',
+        [Vector3.Zero(), vecOneZ, vecTwoZ, vecThreeZ, vecFourZ],
+        this.babylonService.getScene(),
     );
     Tags.AddTagsTo(local_axisZ, 'localAxis');
     local_axisZ.color = new Color3(0, 0, 1);
     const zChar = this.createTextPlane(
-      'Z',
-      'blue',
-      sizeLocalAxis / 10,
-      'localAxis',
-      'localAxisZ',
+        'Z',
+        'blue',
+        sizeLocalAxis / 10,
+        'localAxis',
+        'localAxisZ',
     );
     zChar.position = new Vector3(0, 0.05 * sizeLocalAxis, 0.9 * sizeLocalAxis);
 
@@ -861,46 +861,46 @@ export class EntitySettingsService {
     this.scalingFactorLocalAxis = event.value;
     const pos = event.value * 0.9 * 12;
     this.babylonService
-      .getScene()
-      .getMeshesByTags('localAxis')
-      .map(
-        mesh =>
-          (mesh.scaling = new Vector3(event.value, event.value, event.value)),
-      );
+        .getScene()
+        .getMeshesByTags('localAxis')
+        .map(
+            mesh =>
+                (mesh.scaling = new Vector3(event.value, event.value, event.value)),
+        );
     this.babylonService
-      .getScene()
-      .getMeshesByTags('localAxisX')
-      .map(mesh => (mesh.position = new Vector3(0.9 * pos, -0.05 * pos, 0)));
+        .getScene()
+        .getMeshesByTags('localAxisX')
+        .map(mesh => (mesh.position = new Vector3(0.9 * pos, -0.05 * pos, 0)));
     this.babylonService
-      .getScene()
-      .getMeshesByTags('localAxisY')
-      .map(mesh => (mesh.position = new Vector3(0, 0.9 * pos, -0.05 * pos)));
+        .getScene()
+        .getMeshesByTags('localAxisY')
+        .map(mesh => (mesh.position = new Vector3(0, 0.9 * pos, -0.05 * pos)));
     this.babylonService
-      .getScene()
-      .getMeshesByTags('localAxisZ')
-      .map(mesh => (mesh.position = new Vector3(0, 0.05 * pos, 0.9 * pos)));
+        .getScene()
+        .getMeshesByTags('localAxisZ')
+        .map(mesh => (mesh.position = new Vector3(0, 0.05 * pos, 0.9 * pos)));
   }
 
   public handleChangeLocalAxis() {
     this.showLocalAxis = this.showLocalAxis ? false : true;
     if (this.showLocalAxis) {
       this.babylonService
-        .getScene()
-        .getMeshesByTags('localAxis')
-        .map(mesh => (mesh.visibility = 1));
+          .getScene()
+          .getMeshesByTags('localAxis')
+          .map(mesh => (mesh.visibility = 1));
     } else {
       this.babylonService
-        .getScene()
-        .getMeshesByTags('localAxis')
-        .map(mesh => (mesh.visibility = 0));
+          .getScene()
+          .getMeshesByTags('localAxis')
+          .map(mesh => (mesh.visibility = 0));
     }
   }
 
   private destroyLocalAxis() {
     this.babylonService
-      .getScene()
-      .getMeshesByTags('localAxis')
-      .map(mesh => mesh.dispose());
+        .getScene()
+        .getMeshesByTags('localAxis')
+        .map(mesh => mesh.dispose());
     this.showLocalAxis = false;
   }
 
@@ -908,19 +908,19 @@ export class EntitySettingsService {
     this.scalingFactor = event.value.toFixed(2);
 
     this.height = parseFloat(
-      (this.initialSize.y * this.scalingFactor).toFixed(2),
+        (this.initialSize.y * this.scalingFactor).toFixed(2),
     );
     this.width = parseFloat(
-      (this.initialSize.x * this.scalingFactor).toFixed(2),
+        (this.initialSize.x * this.scalingFactor).toFixed(2),
     );
     this.depth = parseFloat(
-      (this.initialSize.z * this.scalingFactor).toFixed(2),
+        (this.initialSize.z * this.scalingFactor).toFixed(2),
     );
     if (this.center) {
       this.center.scaling = new Vector3(
-        this.scalingFactor,
-        this.scalingFactor,
-        this.scalingFactor,
+          this.scalingFactor,
+          this.scalingFactor,
+          this.scalingFactor,
       );
     }
   }
@@ -930,7 +930,7 @@ export class EntitySettingsService {
     // originalSize.y * factor = this.height
     const factor = this.height / this.initialSize.y;
     this.scalingFactor = parseFloat(
-      (this.height / this.initialSize.y).toFixed(2),
+        (this.height / this.initialSize.y).toFixed(2),
     );
 
     if (!this.center || !this.boundingBox) {
@@ -958,7 +958,7 @@ export class EntitySettingsService {
     // originalSize.x  * factor = this.height
     const factor = this.width / this.initialSize.x;
     this.scalingFactor = parseFloat(
-      (this.width / this.initialSize.x).toFixed(2),
+        (this.width / this.initialSize.x).toFixed(2),
     );
     this.center.scaling = new Vector3(factor, factor, factor);
 
@@ -980,7 +980,7 @@ export class EntitySettingsService {
     // originalSize.x  * factor = this.height
     const factor = this.depth / this.initialSize.z;
     this.scalingFactor = parseFloat(
-      (this.depth / this.initialSize.z).toFixed(2),
+        (this.depth / this.initialSize.z).toFixed(2),
     );
 
     this.center.scaling = new Vector3(factor, factor, factor);
@@ -1004,10 +1004,10 @@ export class EntitySettingsService {
     switch (axisName) {
       case 'x':
         console.log(
-          'Ich werde jetzt rotieren:',
-          this.lastRotationX,
-          '+',
-          degree,
+            'Ich werde jetzt rotieren:',
+            this.lastRotationX,
+            '+',
+            degree,
         );
         this.lastRotationX = this.lastRotationX + degree;
         break;
@@ -1031,29 +1031,29 @@ export class EntitySettingsService {
     const rotationQuaternion = Quaternion.RotationYawPitchRoll(0, 0, 0);
 
     const rotationQuaternionX = Quaternion.RotationAxis(
-      axisX,
-      (Math.PI / 180) * this.lastRotationX,
+        axisX,
+        (Math.PI / 180) * this.lastRotationX,
     );
     let end = rotationQuaternionX.multiply(rotationQuaternion);
 
     const rotationQuaternionY = Quaternion.RotationAxis(
-      axisY,
-      (Math.PI / 180) * this.lastRotationY,
+        axisY,
+        (Math.PI / 180) * this.lastRotationY,
     );
     end = rotationQuaternionY.multiply(end);
 
     const rotationQuaternionZ = Quaternion.RotationAxis(
-      axisZ,
-      (Math.PI / 180) * this.lastRotationZ,
+        axisZ,
+        (Math.PI / 180) * this.lastRotationZ,
     );
     end = rotationQuaternionZ.multiply(end);
 
     const anim = new Animation(
-      'anim',
-      'rotationQuaternion',
-      120,
-      Animation.ANIMATIONTYPE_QUATERNION,
-      Animation.ANIMATIONLOOPMODE_RELATIVE,
+        'anim',
+        'rotationQuaternion',
+        120,
+        Animation.ANIMATIONTYPE_QUATERNION,
+        Animation.ANIMATIONLOOPMODE_RELATIVE,
     );
     const frame = [{ frame: 0, value: start }, { frame: 100, value: end }];
     anim.setKeys(frame);
@@ -1061,17 +1061,17 @@ export class EntitySettingsService {
     this.center.animations.push(anim);
     this.center.rotationQuaternion = end;
     await this.babylonService
-      .getScene()
-      .beginAnimation(
-        this.center,
-        0,
-        100,
-        false,
-        undefined,
-        undefined,
-        undefined,
-        false,
-      );
+        .getScene()
+        .beginAnimation(
+            this.center,
+            0,
+            100,
+            false,
+            undefined,
+            undefined,
+            undefined,
+            false,
+        );
   }
 
   public async handleChangeRotationX(rotation: number) {
