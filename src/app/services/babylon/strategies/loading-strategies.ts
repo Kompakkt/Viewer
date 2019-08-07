@@ -6,7 +6,6 @@ import {
   ExecuteCodeAction,
   Mesh,
   MeshBuilder,
-  Quaternion,
   Scene,
   SceneLoader,
   SceneLoaderProgressEvent,
@@ -117,6 +116,7 @@ export const loadImage = (
   rootUrl: string,
   scene: Scene,
   imageContainer: IImageContainer,
+  isDefault?: boolean,
 ) => {
   const engine = scene.getEngine();
   return new Promise<IImageContainer>((resolve, reject) => {
@@ -131,6 +131,7 @@ export const loadImage = (
           texture.getSize().width,
           texture.getSize().height,
         ];
+        console.log('size of ground', width, height);
         const ground = Mesh.CreateGround(
           'gnd',
           width / 10,
@@ -144,6 +145,11 @@ export const loadImage = (
         const gndmat = new StandardMaterial('gmat', scene);
         ground.material = gndmat;
         gndmat.diffuseTexture = texture;
+
+        if (isDefault) {
+          ground.billboardMode = Mesh.BILLBOARDMODE_ALL;
+          gndmat.diffuseTexture.hasAlpha = true;
+        }
 
         const newImageContainer: IImageContainer = {
           ...imageContainer,
@@ -225,42 +231,42 @@ export const loadVideo = (
 };
 
 const createAudioScene = (audio: Sound, scene: Scene) => {
+
+  load3DEntity('assets/models/kompakkt.babylon', '.babylon', scene)
+      .then(result => {
+    if (result) {
+      result.meshes.forEach(mesh => {
+        console.log('Audio gefunden');
+        mesh.isPickable = true;
+
+        mesh.actionManager = new ActionManager(scene);
+        mesh.actionManager.registerAction(
+            new ExecuteCodeAction(ActionManager.OnPickTrigger, () => {
+              console.log('click');
+              audio.isPlaying ? audio.pause() : audio.play();
+            }),
+        );
+      });
+    } else {
+      throw new Error('No result');
+    }
+  });
   // create a Center of Transformation
   const CoT = new TransformNode('mediaPanel');
-  CoT.billboardMode = Mesh.BILLBOARDMODE_ALL;
   CoT.position = new Vector3(0, 0, 0);
 
-  // PLANE for Annotations
-  const plane = MeshBuilder.CreatePlane(
-    name,
-    { height: 1.5, width: 20 },
-    scene,
-  );
-  Tags.AddTagsTo(plane, 'controller');
-  plane.renderingGroupId = 1;
-  plane.material = new StandardMaterial('controlMat', scene);
-  plane.material.alpha = 1;
-  plane.parent = CoT;
-  plane.position.y = -1.4;
-  // plane.position.x = -8;
-  plane.billboardMode = Mesh.BILLBOARDMODE_ALL;
-
-  const plane2 = MeshBuilder.CreatePlane(name, { height: 3, width: 20 }, scene);
-  plane2.billboardMode = Mesh.BILLBOARDMODE_ALL;
-  plane2.renderingGroupId = 1;
-  plane2.parent = CoT;
-  plane2.position.y = -1;
-  // plane2.position.x = -8;
-
+  const plane = MeshBuilder.CreatePlane(name, { height: 3, width: 20 }, scene);
+  // plane2.renderingGroupId = 1;
+  // plane2.billboardMode = Mesh.BILLBOARDMODE_ALL;
   // GUI
-  const advancedTexture = AdvancedDynamicTexture.CreateForMesh(plane2);
-
+  const advancedTexture = AdvancedDynamicTexture.CreateForMesh(plane);
   const panel = new StackPanel();
   panel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
   panel.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
   advancedTexture.addControl(panel);
 
   const buffer = audio.getAudioBuffer();
+  console.log('Audio buffer', buffer);
 
   const header = new TextBlock();
   header.text = buffer
@@ -296,7 +302,6 @@ const createAudioScene = (audio: Sound, scene: Scene) => {
   plane3.billboardMode = Mesh.BILLBOARDMODE_ALL;
   plane3.renderingGroupId = 1;
   plane3.parent = CoT;
-  plane3.position.x = 2;
 
   const advancedTextureVol = AdvancedDynamicTexture.CreateForMesh(plane3);
 
@@ -313,6 +318,7 @@ const createAudioScene = (audio: Sound, scene: Scene) => {
   advancedTextureVol.addControl(sliderVol);
 
   // Cube
+  /*
   SceneLoader.ImportMeshAsync(
     null,
     'assets/models/',
@@ -360,7 +366,7 @@ const createAudioScene = (audio: Sound, scene: Scene) => {
         }),
       );
     });
-  });
+  });*/
   return { plane, slider };
 };
 

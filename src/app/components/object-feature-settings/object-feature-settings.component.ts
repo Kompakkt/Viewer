@@ -9,6 +9,7 @@ import {
   settingsEntity,
   settingsFallback,
   settingsKompakktLogo,
+  settingsAudio,
 } from '../../../assets/settings/settings';
 import { environment } from '../../../environments/environment';
 import { IEntity } from '../../interfaces/interfaces';
@@ -323,7 +324,8 @@ export class EntityFeatureSettingsComponent implements OnInit {
       this.activeEntity.settings.background === undefined ||
       this.activeEntity.settings.lights === undefined ||
       this.activeEntity.settings.rotation === undefined ||
-      this.activeEntity.settings.scale === undefined
+      this.activeEntity.settings.scale === undefined ||
+        this.mediaType === 'audio'
     ) {
       // Settings missing? => Cases: Upload || Default, Fallback
       upload = await this.createSettings();
@@ -337,6 +339,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
         this.activeEntity.settings.rotation.x,
         this.activeEntity.settings.rotation.y,
         this.activeEntity.settings.rotation.z,
+        this.isDefault,
       );
       await this.setCamera();
       await this.setLightBackground();
@@ -360,7 +363,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
           break;
         }
         case 'audio': {
-          settings = settingsKompakktLogo;
+          settings = settingsAudio;
           break;
         }
         case 'video': {

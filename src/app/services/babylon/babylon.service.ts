@@ -301,23 +301,16 @@ export class BabylonService {
     rootUrl: string,
     mediaType = 'model',
     extension = 'babylon',
+    isDefault?: boolean,
   ) {
     this.engine.displayLoadingUI();
     this.clearScene();
     // TODO: manage mediaType via Observable
     this.mediaType = mediaType;
-
-    /*
-        if (this.mediaType !== 'model') {
-          this.cameraManager.setActiveCameraTo2D();
-        } else {
-          this.cameraManager.resetCamera();
-        }*/
-
     switch (mediaType) {
       case 'audio':
-        return loadAudio(rootUrl, this.scene, this.audioContainer).then(
-          result => {
+        return loadAudio(rootUrl, this.scene, this.audioContainer)
+            .then(result => {
             if (result) {
               this.audioContainer = result;
               // Define as function so we can unregister by variable name
@@ -360,11 +353,26 @@ export class BabylonService {
       case 'entity':
       case 'model':
       default:
-        return load3DEntity(rootUrl, extension, this.scene).then(result => {
+        return load3DEntity(rootUrl, extension, this.scene)
+            .then(result => {
           if (result) {
+            console.log('result', result);
+            console.log('default', isDefault);
             this.entityContainer = result;
+            if (isDefault) {
+              loadImage('assets/img/logo-background.png', this.scene, this.imageContainer, isDefault)
+                  .then(img => {
+                    console.log('image', img);
+                    if (img) {
+                      // this.imageContainer = img;
+                    } else {
+                      throw new Error('No result');
+                    }
+                  },
+              );
+            }
           } else {
-            throw new Error('No video result');
+            throw new Error('No result');
           }
         });
     }

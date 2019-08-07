@@ -79,10 +79,10 @@ export class EntitySettingsService {
    *
    */
 
-  public async loadSettings(scalingFactor, rotX, rotY, rotZ) {
+  public async loadSettings(scalingFactor, rotX, rotY, rotZ, isDefault?: boolean) {
     this.scalingFactor = scalingFactor;
     await this.initializeVariablesforLoading();
-    await this.generateHelpers();
+    await this.generateHelpers(false, isDefault);
     await this.setSettings(scalingFactor, rotX, rotY, rotZ);
   }
 
@@ -105,18 +105,20 @@ export class EntitySettingsService {
     }
   }
 
-  private async generateHelpers(upload?: boolean) {
+  private async generateHelpers(upload?: boolean, isDefault?: boolean) {
     await this.createCenter();
     this.initialSize = await this.max.subtract(this.min);
     this.height = this.initialSize.y.toFixed(2);
     this.width = this.initialSize.x.toFixed(2);
     this.depth = this.initialSize.z.toFixed(2);
+    console.log('Meine Tiefe ist:', this.depth);
+    console.log('Meine Breite ist:', this.width);
+    console.log('Meine Höhe ist:', this.height);
 
     // TODO: Check
     // this.babylonService.cameraManager.getActiveCamera.zoomOn(this.actualEntityMeshes, false);
-    this.babylonService.cameraManager.setUpActiveCamera(
-      Math.max(this.height, this.width, this.depth),
-    );
+    const max = !isDefault ? Math.max(this.height, this.width, this.depth) : 300;
+    this.babylonService.cameraManager.setUpActiveCamera(max);
 
     if (upload) {
     const pos = new Vector3(
