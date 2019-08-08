@@ -141,6 +141,8 @@ export const loadImage = (
                 );
                 Tags.AddTagsTo(ground, 'mediaGround');
                 ground.rotate(Axis.X, (Math.PI / 180) * -90, Space.WORLD);
+                ground.position = new Vector3(0, -3, -3);
+
 
                 const gndmat = new StandardMaterial('gmat', scene);
                 ground.material = gndmat;

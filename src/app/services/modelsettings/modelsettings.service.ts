@@ -118,6 +118,11 @@ export class EntitySettingsService {
         // TODO: Check
         // this.babylonService.cameraManager.getActiveCamera.zoomOn(this.actualEntityMeshes, false);
         const max = !isDefault ? Math.max(this.height, this.width, this.depth) : 87.5;
+        if (isDefault) {
+            this.actualEntityMeshes.forEach(mesh =>
+                mesh.renderingGroupId = 3);
+        }
+
         this.babylonService.cameraManager.setUpActiveCamera(max);
 
         if (upload) {

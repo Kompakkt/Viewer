@@ -75,14 +75,14 @@ export const settingsKompakktLogo = {
   cameraPositionInitial: {
     cameraType: 'arcRotateCam',
     position: {
-      x: 3.9030659124429237,
-      y: 0.9026275003047659,
-      z: 70.981291193381,
+      x: 0.626160564658183,
+      y: 0.7658985619974201,
+      z: 71.101291193381,
     },
     target: {
-      x: 4.001375709524415,
-      y: 6.041444475834582,
-      z: 3.1366450119867277,
+      x: 0,
+      y: 0,
+      z: 0,
     },
   },
   background: {
@@ -128,7 +128,7 @@ export const settingsKompakktLogo = {
     y: 0,
     z: 0,
   },
-  scale: 0.27,
+  scale: 1.4,
 };
 
 export const settings2D = {
