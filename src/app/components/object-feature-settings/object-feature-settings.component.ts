@@ -6,10 +6,10 @@ import { ColorEvent } from 'ngx-color';
 // tslint:disable-next-line:max-line-length
 import {
   settings2D,
+  settingsAudio,
   settingsEntity,
   settingsFallback,
   settingsKompakktLogo,
-  settingsAudio,
 } from '../../../assets/settings/settings';
 import { environment } from '../../../environments/environment';
 import { IEntity } from '../../interfaces/interfaces';
@@ -325,7 +325,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
       this.activeEntity.settings.lights === undefined ||
       this.activeEntity.settings.rotation === undefined ||
       this.activeEntity.settings.scale === undefined ||
-        this.mediaType === 'audio'
+      this.mediaType === 'audio'
     ) {
       // Settings missing? => Cases: Upload || Default, Fallback
       upload = await this.createSettings();

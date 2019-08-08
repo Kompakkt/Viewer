@@ -75,21 +75,21 @@ export const settingsKompakktLogo = {
   cameraPositionInitial: {
     cameraType: 'arcRotateCam',
     position: {
-      x: 2.8327834819530615,
-      y: 0.8762956603391066,
-      z: 350.14962902972064,
+      x: 3.9030659124429237,
+      y: 0.9026275003047659,
+      z: 70.981291193381,
     },
     target: {
-      x: 1.0696476985556371,
-      y: 2.1496559504851187,
-      z: 0.9269947350394273,
+      x: 4.001375709524415,
+      y: 6.041444475834582,
+      z: 3.1366450119867277,
     },
   },
   background: {
     color: {
-      r: 0,
-      g: 174,
-      b: 230,
+      r: 255,
+      g: 255,
+      b: 255,
       a: 1,
     },
     effect: false,
@@ -128,7 +128,7 @@ export const settingsKompakktLogo = {
     y: 0,
     z: 0,
   },
-  scale: 3,
+  scale: 0.27,
 };
 
 export const settings2D = {

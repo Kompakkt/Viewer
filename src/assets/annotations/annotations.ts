@@ -71,7 +71,8 @@ export const annotationFallback = {
 };
 
 export const annotationLogo = [
-    {
+    /*{
+
         validated: true,
         _id: 'DefaultAnnotation_01',
         identifier: 'DefaultAnnotation_01',
@@ -265,5 +266,5 @@ export const annotationLogo = [
                 },
             },
         },
-    },
+    },*/
 ];

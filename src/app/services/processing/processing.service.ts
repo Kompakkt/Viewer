@@ -521,7 +521,12 @@ export class ProcessingService {
           case 'model':
           case 'entity':
             await this.babylonService
-              .loadEntity(_url, mediaType, extension, newEntity._id === 'default')
+              .loadEntity(
+                _url,
+                mediaType,
+                extension,
+                newEntity._id === 'default',
+              )
               .then(() => {
                 this.updateActiveEntity(newEntity);
                 this.updateActiveEntityMeshes(this.babylonService
