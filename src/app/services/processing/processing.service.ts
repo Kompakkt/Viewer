@@ -285,8 +285,8 @@ export class ProcessingService {
         default:
       }
 
-      // Read content of single non-entity file
-      if (mediaType !== 'entity') {
+      // Read content of single non-model file
+      if (mediaType !== 'model') {
         if (fileList.length > 1) {
           return;
           // Too many files
@@ -298,12 +298,15 @@ export class ProcessingService {
             modelExts.includes(file.name.substr(file.name.lastIndexOf('.'))),
           )
           .sort((a, b) => b.size - a.size)[0];
+        this.loadingScreenHandler.updateLoadingText(
+          `Loading ${largest.name}. Please wait...`,
+        );
         ext = largest.name.substr(largest.name.lastIndexOf('.'));
         fileReader.readAsDataURL(largest);
       }
     };
 
-    this.babylonService.getEngine().loadingUIText = `Drop a single file (entity, image, audio, video) or a folder containing a 3d entity here`;
+    this.babylonService.getEngine().loadingUIText = `Drop a single file (model, image, audio, video) or a folder containing a 3d model here`;
   }
 
   public bootstrap(): void {
@@ -334,7 +337,7 @@ export class ProcessingService {
 
     const searchParams = location.search;
     const queryParams = new URLSearchParams(searchParams);
-    const entityParam = queryParams.get('entity');
+    const entityParam = queryParams.get('model') || queryParams.get('entity');
     const compParam = queryParams.get('compilation');
     const isDragDrop = queryParams.get('dragdrop');
 
