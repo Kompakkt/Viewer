@@ -33,7 +33,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
   @ViewChild('stepper', { static: false }) stepper;
 
   public activeEntity: IEntity | undefined;
-  private preview: string | undefined;
+  private preview = '';
   public setEffect = false;
   private isDefault = false;
   private isEntityOwner = false;
@@ -52,7 +52,6 @@ export class EntityFeatureSettingsComponent implements OnInit {
 
   private cameraPositionInitial:
     | {
-        cameraType: string;
         position: {
           x: number;
           y: number;
@@ -264,7 +263,8 @@ export class EntityFeatureSettingsComponent implements OnInit {
    */
 
   public async setInitialView() {
-    this.cameraPositionInitial = this.babylonService.cameraManager.getInitialPosition();
+    const {position, target} = this.babylonService.cameraManager.getInitialPosition();
+    this.cameraPositionInitial = {position, target};
     console.log(this.cameraPositionInitial);
     return new Promise<string>((resolve, reject) =>
       this.babylonService.createPreviewScreenshot(400).then(
@@ -396,10 +396,10 @@ export class EntityFeatureSettingsComponent implements OnInit {
       this.initialSettingsMode = true;
       await this.entitySettingsService.createVisualSettings();
       this.cameraPositionInitial = this.babylonService.cameraManager.getActualDefaultPosition();
-      const cameraSettings: any[] = [this.cameraPositionInitial];
+      const cameraSettings = this.cameraPositionInitial;
 
       if (this.activeEntity && this.activeEntity.settings) {
-        this.activeEntity['settings']['cameraPositionInitial'] = cameraSettings;
+        this.activeEntity.settings.cameraPositionInitial = cameraSettings;
       }
       this.overlayService.activateSettingsTab();
     }
@@ -535,6 +535,11 @@ export class EntityFeatureSettingsComponent implements OnInit {
    * Save Settings
    */
   public async saveActualSettings() {
+    if (!this.cameraPositionInitial) {
+      console.warn('No initial camera position', this);
+      return;
+    }
+
     const settings = {
       preview: this.preview,
       cameraPositionInitial: this.cameraPositionInitial,
