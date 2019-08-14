@@ -105,7 +105,7 @@ export class EntitySettingsService {
         }
     }
 
-    private async generateHelpers(upload?: boolean, isDefault?: boolean) {
+    private async generateHelpers(upload?: boolean, isDefault?: boolean, isModel?: boolean) {
         await this.createCenter();
         this.initialSize = await this.max.subtract(this.min);
         this.height = this.initialSize.y.toFixed(2);
@@ -126,15 +126,16 @@ export class EntitySettingsService {
         this.babylonService.cameraManager.setUpActiveCamera(max);
 
         if (upload) {
+
             const pos = new Vector3(
-                Math.PI / 4,
-                Math.PI / 4,
-                Math.max(this.height, this.width, this.depth) * 2.5,
+                isModel ? Math.PI / 4 : -Math.PI / 2,
+                isModel ? Math.PI / 4 : Math.PI / 2,
+                Math.max(this.height, this.width, this.depth) * 1.7,
             );
             const target = new Vector3(
-                this.max.x - this.initialSize.x / 2,
-                this.max.y - this.initialSize.y / 2,
-                this.max.z - this.initialSize.z / 2,
+                isModel ? this.max.x - this.initialSize.x / 2 : 0,
+                isModel ? this.max.y - this.initialSize.y / 2 : 0,
+                isModel ? this.max.z - this.initialSize.z / 2 : 0,
             );
             this.babylonService.cameraManager.updateDefaults(pos, target);
             this.babylonService.cameraManager.setActiveCameraTarget(target);
@@ -236,9 +237,9 @@ export class EntitySettingsService {
      * Set Settings during Upload
      */
 
-    public async createVisualSettings() {
+    public async createVisualSettings(isModel: boolean) {
         this.initializeVariablesforSettings();
-        await this.generateHelpers(true);
+        await this.generateHelpers(true, undefined, isModel);
 
         this.createBoundingBox();
         this.showBoundingBoxEntity = false;

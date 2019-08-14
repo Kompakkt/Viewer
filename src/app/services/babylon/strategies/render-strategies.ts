@@ -13,29 +13,17 @@ export const beforeAudioRender = (
         fft.map(val => Math.abs(val)).reduce((acc, val) => acc + val) /
         fft.length;
       scene.getMeshesByTags('audioCenter').forEach(mesh => {
-        const scale = fftAverage / 255 + 0.05;
+        const scale = fftAverage / 255 + 0.7;
         mesh.scaling = new Vector3(scale, scale, scale);
       });
     }
     if (Engine.audioEngine.audioContext) {
-      audioContainer.currentTime =
-        Engine.audioEngine.audioContext['currentTime'] -
-        audioContainer.currentTime;
-      if (audioContainer.slider) {
-        audioContainer.slider.value =
-          audioContainer.slider.value + audioContainer.currentTime;
+      audioContainer.currentTime = Engine.audioEngine.audioContext['currentTime'] -
+          audioContainer.currentTime;
+      if (audioContainer.timeSlider) {
+        audioContainer.timeSlider.value = (audioContainer.timeSlider.value +
+            audioContainer.currentTime);
       }
-    }
-  }
-
-  const _cam = scene.getCameraByName('arcRotateCamera');
-  if (_cam && _cam['radius']) {
-    const radius = Math.abs(_cam['radius']);
-    const node = scene.getTransformNodeByName('mediaPanel');
-    if (node) {
-      node
-        .getChildMeshes()
-        .forEach(mesh => (mesh.scalingDeterminant = radius / 35));
     }
   }
 };
@@ -51,6 +39,6 @@ export const afterAudioRender = (audioContainer: IAudioContainer) => {
 
 export const beforeVideoRender = (videoContainer: IVideoContainer) => {
   if (!videoContainer.video.paused) {
-    videoContainer.slider.value = videoContainer.video.currentTime;
+    videoContainer.timeSlider.value = videoContainer.video.currentTime;
   }
 };

@@ -1,27 +1,26 @@
 import {
-  Sound,
   AbstractMesh,
   Analyser,
-  Texture,
-  StandardMaterial,
+  AnimationGroup,
   IParticleSystem,
   Skeleton,
-  AnimationGroup,
+  Sound,
+  StandardMaterial,
+  Texture,
 } from 'babylonjs';
 import { Slider } from 'babylonjs-gui';
 
 export interface IAudioContainer {
   audio: Sound;
   currentTime: number;
-  slider: Slider;
-  plane?: AbstractMesh;
+  timeSlider: Slider;
   analyser?: Analyser;
 }
 
 export interface IVideoContainer {
   video: HTMLVideoElement;
   currentTime: number;
-  slider: Slider;
+  timeSlider: Slider;
   plane?: AbstractMesh;
 }
 

@@ -29,11 +29,6 @@
     }
   ],
   "private": true,
-  "husky": {
-    "hooks": {
-      "pre-commit": "precise-commits"
-    }
-  },
   "dependencies": {
     "@angular/animations": "^8.1.1",
     "@angular/cdk": "^8.0.2",

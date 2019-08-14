@@ -119,7 +119,6 @@ export const setUpCamera = (
   camera.minZ = radius * 0.01;
   camera.maxZ = radius + maxSize;
   camera.speed = radius * 0.8;
-
   if (mediaType === 'entity' || mediaType === 'model') {
     camera.lowerAlphaLimit = null;
     camera.upperAlphaLimit = null;
@@ -133,13 +132,8 @@ export const setUpCamera = (
     camera.lowerRadiusLimit = 0;
     camera.upperRadiusLimit = radius;
   } else {
-    camera.lowerRadiusLimit = camera.upperRadiusLimit = maxSize * 4;
+   camera.lowerRadiusLimit = camera.upperRadiusLimit = maxSize * 3;
   }
-
-  /*
-  camera.collisionRadius
-    .copyFromFloats(maxSize * 0.8, maxSize * 0.8 - maxSize * 0.35, maxSize * 0.8);
-  camera.checkCollisions = true;*/
   return camera;
 };
 
