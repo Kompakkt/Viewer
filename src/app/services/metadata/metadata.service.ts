@@ -56,61 +56,68 @@ export class MetadataService {
   public addDefaultMetadata() {
     this.updateMetadata({
       _id: 'default_entity',
-      digobj_title: 'Kompakkt',
-      digobj_description:
+      title: 'Kompakkt',
+      description:
         'Kompakkt brings your 3D entities to the web and makes them annotatable! See our code here: ' +
         'https://github.com/DH-Cologne/Kompakkt',
-      digobj_licence: 'MIT',
-      digobj_rightsowner_person: [],
-      digobj_rightsowner_institution: [
-        {
-          _id: 'default_institution',
-          roles: {},
-          institution_address: {
-            address_building: '',
-            address_city: 'Köln',
-            address_country: 'Deutschland',
-            address_number: '22',
-            address_postcode: '50923',
-            address_street: 'Universitätsstraße',
-          },
-          institution_name: 'Institut für Digital Humanities',
-          institution_note: '',
-          institution_role: ['RIGHTS_OWNER'],
-          institution_university: 'Universität zu Köln',
-        },
-      ],
-      contact_person: [
+      licence: 'MIT',
+      persons: [
         {
           _id: 'default_contact_person',
-          person_surname: 'Schubert',
-          person_prename: 'Zoe',
-          person_email: 'zoe.schubert@uni-koeln.de',
-          person_role: ['CONTACT_PERSON'],
-          person_phonenumber: '',
-          person_note: '',
-          person_institution: '',
-          person_institution_data: [],
-          roles: {},
+          name: 'Schubert',
+          prename: 'Zoe',
+          contact_references: {
+            default_entity: {
+              mail: 'zoe.schubert@uni-koeln.de',
+              phonenumber: '',
+              note: '',
+              creation_date: Date.now(),
+            },
+          },
+          roles: {
+            default_entity: ['CONTACT_PERSON'],
+          },
+          institutions: {
+            default_entity: [],
+          },
         },
       ],
-      contact_person_existing: [],
-      digobj_type: 'type_3d',
-      digobj_discipline: [],
-      digobj_tags: [],
-      digobj_entitytype: 'Typ',
-      digobj_externalIdentifier: [],
-      digobj_creation: [],
-      digobj_dimensions: [],
-      digobj_files: [],
-      digobj_rightsowner: [],
-      digobj_statement: '',
-      digobj_externalLink: [],
-      digobj_metadata_files: [],
-      digobj_person: [],
-      digobj_person_existing: [],
-      digobj_person_existing_role: [],
-      digobj_rightsownerSelector: 1,
+      institutions: [
+        {
+          _id: 'default_institution',
+          name: 'Institut für Digital Humanities',
+          university: 'Universität zu Köln',
+
+          addresses: {
+            default_entity: {
+              building: '',
+              city: 'Köln',
+              country: 'Deutschland',
+              number: '22',
+              postcode: '50923',
+              street: 'Universitätsstraße',
+              creation_date: Date.now(),
+            },
+          },
+          notes: {
+            default_entity: '',
+          },
+          roles: {
+            default_entity: ['RIGHTS_OWNER'],
+          },
+        },
+      ],
+      type: 'type_3d',
+      discipline: [],
+      tags: [],
+      objecttype: 'Typ',
+      externalId: [],
+      creation: [],
+      dimensions: [],
+      files: [],
+      statement: '',
+      externalLink: [],
+      metadata_files: [],
       phyObjs: [],
     });
   }

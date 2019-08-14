@@ -263,8 +263,14 @@ export class EntityFeatureSettingsComponent implements OnInit {
    */
 
   public async setInitialView() {
-    const {position, target} = this.babylonService.cameraManager.getInitialPosition();
-    this.cameraPositionInitial = {position, target};
+    const {
+      
+      position,
+      target ,
+    } = this.babylonService.cameraManager.getInitialPosition();
+    this.cameraPositionInitial = {  position,
+      target,
+     };
     console.log(this.cameraPositionInitial);
     return new Promise<string>((resolve, reject) =>
       this.babylonService.createPreviewScreenshot(400).then(
