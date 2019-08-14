@@ -1,111 +1,132 @@
+/* Workaround for
+ * TSLint: Expression is always true */
+export interface IInvalid {
+  [key: string]: any | undefined;
+}
+
 // Metadata related
 export interface IUnresolvedEntity {
   _id: string;
 }
 
-interface IMetaDataExternalLink {
-  externalLink_description: string;
-  externalLink_value: string;
+interface IMetaDataAddress {
+  building: string;
+  number: string;
+  street: string;
+  postcode: string;
+  city: string;
+  country: string;
+
+  // Internal & only used to sort addresses
+  creation_date: number;
 }
 
-interface IMetaDataAddress {
-  address_building: string;
-  address_number: string;
-  address_street: string;
-  address_postcode: string;
-  address_city: string;
-  address_country: string;
+interface IMetaDataContactReference {
+  mail: string;
+  phonenumber: string;
+  note: string;
+
+  // Internal & only used to sort contact references
+  creation_date: number;
 }
 
 export interface IMetaDataPerson {
   _id: string;
-  person_surname: string;
-  person_prename: string;
-  person_email: string;
-  person_role: string[];
-  person_phonenumber: string;
-  person_note: string;
-  person_institution: string | any[];
-  person_institution_data: IMetaDataInstitution[];
-  roles: {
-    [key: string]: string[];
-  };
 
-  display?: string;
-  value?: string;
+  prename: string;
+  name: string;
+
+  // relatedEntityId refers to the _id
+  // of the digital or physical entity
+  // a person refers to
+  roles: {
+    [relatedEntityId: string]: string[];
+  };
+  institutions: {
+    [relatedEntityId: string]: IMetaDataInstitution[];
+  };
+  contact_references: {
+    [relatedEntityId: string]: IMetaDataContactReference;
+  };
 }
 
 export interface IMetaDataInstitution {
   _id: string;
-  institution_name: string;
-  institution_address: IMetaDataAddress;
-  institution_university: string;
-  institution_role: string[];
-  institution_note: string;
-  roles: {
-    [key: string]: string[];
-  };
 
-  display?: string;
-  value?: string;
+  name: string;
+  university: string;
+
+  // relatedEntityId refers to the _id
+  // of the digital or physical entity
+  // a person refers to
+  roles: {
+    [relatedEntityId: string]: string[];
+  };
+  notes: {
+    [relatedEntityId: string]: string;
+  };
+  addresses: {
+    [relatedEntityId: string]: IMetaDataAddress;
+  };
 }
 
 export interface IMetaDataTag {
   _id: string;
-  display: string;
   value: string;
 }
 
-export interface IMetaDataPhysicalEntity {
+interface IMetaDataBaseEntity {
   _id: string;
-  phyobj_title: string;
-  phyobj_description: string;
-  phyobj_externalIdentifier: any[];
-  phyobj_externalLink: IMetaDataExternalLink[];
-  phyobj_externalFile: any;
-  phyobj_place: IMetaDataAddress[];
-  phyobj_person_existing_role: any[];
-  phyobj_institution_existing_role: any[];
-  phyobj_metadata_files: IFile[];
-  phyobj_collection: string;
+  title: string;
+  description: string;
+  externalId: Array<{
+    type: string;
+    value: string;
+  }>;
+  externalLink: Array<{
+    description: string;
+    value: string;
+  }>;
 
-  phyobj_rightsownerSelector: number;
-  phyobj_rightsowner: Array<IMetaDataPerson | IMetaDataInstitution>;
-  phyobj_rightsowner_person: Array<IMetaDataPerson | null>;
-  phyobj_rightsowner_institution: Array<IMetaDataInstitution | null>;
-  phyobj_person_existing: Array<IMetaDataPerson | null>;
-  phyobj_person: Array<IMetaDataPerson | null>;
-  phyobj_institution: Array<IMetaDataInstitution | null>;
-  phyobj_institution_existing: Array<IMetaDataInstitution | null>;
+  metadata_files: IFile[];
+
+  persons: IMetaDataPerson[];
+  institutions: IMetaDataInstitution[];
 }
 
-export interface IMetaDataDigitalEntity {
-  _id: string;
-  digobj_type: string;
-  digobj_title: string;
-  digobj_description: string;
-  digobj_licence: string;
-  digobj_discipline: string[];
-  digobj_tags: IMetaDataTag[];
-  digobj_entitytype: string;
-  digobj_externalIdentifier: any[];
-  digobj_dimensions: any[];
-  digobj_creation: any[];
-  digobj_externalLink: IMetaDataExternalLink[];
-  digobj_metadata_files: any[];
-  digobj_files: Array<IFile | null>;
-  digobj_statement: string;
-  phyObjs: Array<IMetaDataPhysicalEntity | null>;
+export interface IMetaDataPhysicalEntity extends IMetaDataBaseEntity {
+  place: {
+    name: string;
+    geopolarea: string;
+    address: IMetaDataAddress;
+  };
+  collection: string;
+}
 
-  digobj_rightsownerSelector: number;
-  digobj_rightsowner: Array<IMetaDataPerson | IMetaDataInstitution | null>;
-  digobj_rightsowner_person: Array<IMetaDataPerson | null>;
-  digobj_rightsowner_institution: Array<IMetaDataInstitution | null>;
-  contact_person_existing: Array<IMetaDataPerson | null>;
-  contact_person: Array<IMetaDataPerson | null>;
-  digobj_person_existing: Array<IMetaDataPerson | null>;
-  digobj_person: Array<IMetaDataPerson | null>;
-  digobj_person_existing_role: any[];
+export interface IMetaDataDigitalEntity extends IMetaDataBaseEntity {
+  type: string;
+  licence: string;
+
+  discipline: string[];
+  tags: IMetaDataTag[] | string[];
+
+  dimensions: Array<{
+    type: string;
+    value: string;
+    name: string;
+  }>;
+  creation: Array<{
+    technique: string;
+    program: string;
+    equipment: string;
+    date: string;
+  }>;
+  files: IFile[];
+
+  statement: string;
+  objecttype: string;
+
+  phyObjs: IMetaDataPhysicalEntity[];
 }
 
 // User related
@@ -134,6 +155,16 @@ export interface ILDAPData {
   data: {
     [key: string]: Array<string | null | IEntity | IAnnotation | ICompilation>;
   };
+}
+
+export interface IGroup {
+  _id: string;
+
+  name: string;
+
+  creator: IUserData;
+  owners: IUserData[];
+  members: IUserData[];
 }
 
 // Annotation related
@@ -213,41 +244,61 @@ export interface IFile {
   file_format: string;
 }
 
-export interface IEntity {
+interface IWhitelist {
+  whitelist: {
+    enabled: boolean;
+    persons: IUserData[];
+    groups: IGroup[];
+  };
+}
+
+interface IEntitySettings {
+  settings: {
+    preview: string;
+    cameraPositionInitial: {
+      position: { x: number; y: number; z: number };
+      target: { x: number; y: number; z: number };
+    };
+    background: {
+      color: { r: number; b: number; g: number; a: number };
+      effect: boolean;
+    };
+    lights: Array<{
+      type: string;
+      position: { x: number; y: number; z: number };
+      intensity: number;
+    }>;
+    rotation: { x: number; y: number; z: number };
+    scale: number;
+  };
+}
+
+export interface IEntity extends IWhitelist, IEntitySettings {
   _id: string;
-  annotationList: Array<IAnnotation | null>;
+
   name: string;
-  files: IFile[] | null;
-  finished: boolean;
-  ranking?: number;
-  relatedDigitalEntity?: any;
-  relatedEntityOwners?: IRelatedOwner[];
+
+  files: IFile[];
+  annotationList: Array<IAnnotation | IUnresolvedEntity>;
+
+  relatedDigitalEntity: IUnresolvedEntity | IMetaDataDigitalEntity;
+  relatedEntityOwners: IRelatedOwner[];
+
   online: boolean;
-  isExternal?: boolean;
-  externalService?: string;
+  finished: boolean;
+
   mediaType: string;
+
   dataSource: {
     isExternal: boolean;
-    service?: string;
+    service: string;
   };
-  settings?: {
-    preview?: string;
-    cameraPositionInitial?: any;
-    background?: any;
-    lights?: any;
-    rotation?: any;
-    scale?: any;
-  };
-  processed?: {
-    time?: {
-      start: string;
-      end: string;
-      total: string;
-    };
-    low?: string;
-    medium?: string;
-    high?: string;
-    raw?: string;
+
+  processed: {
+    low: string;
+    medium: string;
+    high: string;
+    raw: string;
   };
 }
 
@@ -257,7 +308,7 @@ interface IRelatedOwner {
   fullname: string;
 }
 
-export interface ICompilation {
+export interface ICompilation extends IWhitelist {
   _id: string;
   name: string;
   description: string;
