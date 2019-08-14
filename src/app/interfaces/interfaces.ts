@@ -252,28 +252,26 @@ interface IWhitelist {
   };
 }
 
-interface IEntitySettings {
-  settings: {
-    preview: string;
-    cameraPositionInitial: {
-      position: { x: number; y: number; z: number };
-      target: { x: number; y: number; z: number };
-    };
-    background: {
-      color: { r: number; b: number; g: number; a: number };
-      effect: boolean;
-    };
-    lights: Array<{
-      type: string;
-      position: { x: number; y: number; z: number };
-      intensity: number;
-    }>;
-    rotation: { x: number; y: number; z: number };
-    scale: number;
+export interface IEntitySettings {
+  preview: string;
+  cameraPositionInitial: {
+    position: { x: number; y: number; z: number };
+    target: { x: number; y: number; z: number };
   };
+  background: {
+    color: { r: number; b: number; g: number; a: number };
+    effect: boolean;
+  };
+  lights: Array<{
+    type: string;
+    position: { x: number; y: number; z: number };
+    intensity: number;
+  }>;
+  rotation: { x: number; y: number; z: number };
+  scale: number;
 }
 
-export interface IEntity extends IWhitelist, IEntitySettings {
+export interface IEntity extends IWhitelist {
   _id: string;
 
   name: string;
@@ -293,6 +291,8 @@ export interface IEntity extends IWhitelist, IEntitySettings {
     isExternal: boolean;
     service: string;
   };
+
+  settings: IEntitySettings;
 
   processed: {
     low: string;

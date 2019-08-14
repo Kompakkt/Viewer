@@ -4,14 +4,9 @@ import {BehaviorSubject} from 'rxjs';
 import {ReplaySubject} from 'rxjs/internal/ReplaySubject';
 
 import {environment} from '../../../environments/environment';
-import {
-    IAnnotation,
-    ICompilation,
-    IEntity,
-    IFile,
-    IMetaDataDigitalEntity,
-    IUnresolvedEntity
-} from '../../interfaces/interfaces';
+import {settingsKompakktLogo} from '../../../assets/settings/settings';
+import {baseEntity} from '../../../assets/defaults';
+import {ICompilation, IEntity} from '../../interfaces/interfaces';
 import {BabylonService} from '../babylon/babylon.service';
 import {LoadingscreenhandlerService} from '../babylon/loadingscreen';
 import {MessageService} from '../message/message.service';
@@ -60,6 +55,7 @@ export class ProcessingService {
     public quality = 'low';
 
     private defaultEntity: IEntity = {
+        ...baseEntity(),
         _id: 'default',
         name: 'Cube',
         files: [
@@ -77,21 +73,14 @@ export class ProcessingService {
             username: 'kompakkt',
             fullname: 'kompakkt',
         }],
-        finished: true,
-        online: true,
-
-        mediaType: 'entity',
-        dataSource: {
-            isExternal: false,
-            service: 'kompakkt',
-        },
-
+        mediaType: 'model',
         processed: {
             low: 'assets/models/kompakkt.babylon',
             medium: 'assets/models/kompakkt.babylon',
             high: 'assets/models/kompakkt.babylon',
             raw: 'assets/models/kompakkt.babylon',
         },
+        settings: settingsKompakktLogo,
     };
 
     constructor(
@@ -223,12 +212,9 @@ export class ProcessingService {
             const base64 = (evt.currentTarget as FileReader).result as string;
             this.loadEntity(
                 {
+                  ...baseEntity(),
                     _id: 'dragdrop',
                     name: 'dragdrop',
-                    annotationList: [],
-                    files: [],
-                    finished: false,
-                    online: false,
                     mediaType,
                     dataSource: {
                         isExternal: false,
