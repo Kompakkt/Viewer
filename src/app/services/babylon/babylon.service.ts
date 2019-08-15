@@ -15,7 +15,7 @@ import {
     Layer,
     Scene,
     Sound,
-    SSAORenderingPipeline,
+    // SSAORenderingPipeline,
     Texture,
     Tools,
     Vector3,
@@ -141,6 +141,7 @@ export class BabylonService {
         this.scene.addCamera(createDefaultCamera(this.scene, this.canvas));
 
         // Create SSAO and configure all properties (for the example)
+        /*
         const ssaoRatio = {
             ssaoRatio: 0.5, // Ratio of the SSAO post-process, in a lower resolution
             combineRatio: 1, // Ratio of the combine post-process (combines the SSAO and the scene)
@@ -179,7 +180,7 @@ export class BabylonService {
                 }
                 this.scene.postProcessRenderPipelineManager.disableEffectInPipeline('ssao', ssao.SSAOCombineRenderEffect, this.scene.activeCamera);
             }
-        }));
+        }));*/
 
         // Initialize empty, otherwise we would need to check against
         // undefined in strict mode

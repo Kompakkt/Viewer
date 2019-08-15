@@ -50,8 +50,6 @@ export class LightService {
       : 1;
 
     this.pointlight.specular = new BABYLON.Color3(0, 0, 0);
-
-    // return this.pointlight;
   }
 
   public createAmbientlightDown(name: string, position: any) {
