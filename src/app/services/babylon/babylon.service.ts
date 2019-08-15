@@ -16,6 +16,7 @@ import {
     Scene,
     Sound,
     // SSAORenderingPipeline,
+    FxaaPostProcess,
     Texture,
     Tools,
     Vector3,
@@ -139,6 +140,10 @@ export class BabylonService {
 
         // Add default camera
         this.scene.addCamera(createDefaultCamera(this.scene, this.canvas));
+
+        const fxaa = new FxaaPostProcess('fxaa', 1.0, this.getActiveCamera());
+        fxaa.forceFullscreenViewport = true;
+        fxaa.samples = 16;
 
         // Create SSAO and configure all properties (for the example)
         /*
