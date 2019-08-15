@@ -199,9 +199,9 @@ export class ProcessingService {
         };
 
         // Determine mediaType by extension
-        const modelExts = ['.babylon', '.obj', '.stl', '.glft'];
-        const imageExts = ['.jpg', '.jpeg', '.png'];
-        const videoExts = ['.webm', '.mp4', '.avi', '.mov'];
+        const modelExts = ['.babylon', '.obj', '.stl', '.glft', '.glb'];
+        const imageExts = ['.jpg', '.jpeg', '.png', '.tga', '.gif', '.bmp'];
+        const videoExts = ['.webm', '.mp4', '.ogv'];
         const audioExts = ['.ogg', '.mp3', '.m4a'];
         const fileExts: string[] = [];
         const fileList: File[] = [];
@@ -300,7 +300,9 @@ export class ProcessingService {
             }
         };
 
-        this.babylonService.getEngine().loadingUIText = `Drop a single file (model, image, audio, video) or a folder containing a 3d model here`;
+        this.babylonService.getEngine().loadingUIText =
+            // tslint:disable-next-line:max-line-length
+            `Drop a single file (model, image, audio, video) or a folder containing a 3d model here`;
     }
 
     public bootstrap(): void {
