@@ -192,11 +192,11 @@ const createVideoScene = (videoTexture: VideoTexture, texture, scene: Scene) => 
     // Click on plane -> start/ stop sound
     groundVideo.isPickable = true;
     groundVideo.actionManager = new ActionManager(scene);
-    groundVideo.renderingGroupId = 3;
+    groundVideo.renderingGroupId = 2;
     groundVideo.actionManager.registerAction(
         new ExecuteCodeAction(ActionManager.OnPickTrigger, () => {
             video.paused ? video.play() : video.pause();
-            console.log('KLICK'); }));
+            }));
 
     // Create mediaControls
     const timeSlider = createMediaControls(_width, _height, scene, video, undefined);
@@ -279,7 +279,7 @@ const createMediaControls = (_width: number, _height: number,
         .CreatePlane('timeSlider',
                      { height: _height, width: _width }, scene);
     plane.position = new Vector3(0, - _height * 0.6, 0);
-    plane.renderingGroupId = 2;
+    plane.renderingGroupId = 3;
     const advancedTexture = AdvancedDynamicTexture.CreateForMesh(plane);
 
     let duration = 0;
@@ -343,7 +343,7 @@ const createMediaControls = (_width: number, _height: number,
           width: _width * 0.5},
         scene);
     planeVol.position = new Vector3(_width * 0.6, 0, 0);
-    planeVol.renderingGroupId = 2;
+    planeVol.renderingGroupId = 3;
 
     const advancedTextureVol = AdvancedDynamicTexture.CreateForMesh(planeVol);
 
