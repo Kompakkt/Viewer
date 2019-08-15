@@ -83,8 +83,9 @@ export class SceneComponent implements AfterViewInit {
     const searchParams = location.search;
     const queryParams = new URLSearchParams(searchParams);
     const isDragDrop = queryParams.get('dragdrop');
+    const isSkipLogin = queryParams.get('skiplogin');
 
-    if (isDragDrop) {
+    if (isDragDrop || isSkipLogin) {
       // Assume we are inside an iframe and in the upload process
       // Set up the canvas
       // Drag&Drop is set up in ProcessingService
