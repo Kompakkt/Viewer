@@ -33,8 +33,8 @@ import { UserdataService } from '../userdata/userdata.service';
   providedIn: 'root',
 })
 export class AnnotationService {
-  private isDemoMode: boolean;
-  private isDefaultEntityLoaded: boolean;
+  private isDemoMode = false;
+  private isDefaultEntityLoaded = false;
 
   public isBroadcasting = false;
 
@@ -66,6 +66,7 @@ export class AnnotationService {
   private actualEntity: IEntity | undefined;
   public actualCompilation: ICompilation | undefined;
   private actualEntityMeshes: Mesh[] = [];
+  private mediaType: string | undefined;
 
   private isannotationSourceCollection = false;
   @Output() annotationSourceCollection: EventEmitter<
@@ -94,14 +95,23 @@ export class AnnotationService {
     private userdataService: UserdataService,
     private overlayService: OverlayService,
   ) {
+    this.processingService.Observables.actualMediaType.subscribe(type => {
+      this.mediaType = type;
+    });
+
     this.isCollectionLoaded = this.processingService.isCollectionLoaded;
     this.isMeshSettingsMode = this.overlayService.editorIsOpen;
-    this.isDemoMode =
-      this.processingService.isDefaultEntityLoaded ||
-      this.processingService.isFallbackEntityLoaded;
+
+    this.processingService.fallbackEntityLoaded.subscribe(isFallback => {
+      this.isDemoMode = isFallback;
+    });
+
+    this.processingService.defaultEntityLoaded.subscribe(isDefault => {
+      this.isDefaultEntityLoaded = isDefault;
+      this.isDemoMode = isDefault;
+    });
 
     this.isCollectionInputSelected = false;
-    this.isDefaultEntityLoaded = this.processingService.isDefaultEntityLoaded;
 
     this.processingService.Observables.actualEntity.subscribe(actualEntity => {
       this.actualEntity = actualEntity;
@@ -110,7 +120,11 @@ export class AnnotationService {
     this.processingService.Observables.actualEntityMeshes.subscribe(
       actualEntityMeshes => {
         this.actualEntityMeshes = actualEntityMeshes;
-        this.loadAnnotations();
+        if (this.mediaType === 'model' ||
+            this.mediaType === 'entity' ||
+            this.mediaType === 'image') {
+          this.loadAnnotations();
+        }
       },
     );
 
@@ -236,12 +250,16 @@ export class AnnotationService {
         this.annotations.push(annotationFallback);
       }
       if (this.processingService.isDefaultEntityLoaded) {
-        annotationLogo.forEach((annotation: IAnnotation) =>
+        if (annotationLogo.length) {
+         annotationLogo.forEach((annotation: IAnnotation) =>
             this.annotations.push(annotation),
-        ); }
+         ); }
+      }
+      if (this.annotations.length) {
       this.selectedAnnotation.next(
         this.annotations[0]._id,
       );
+      }
     }
     this.initializeAnnotationMode();
     this.toggleAnnotationSource(false);
@@ -798,7 +816,8 @@ export class AnnotationService {
 
   public setAnnotatingAllowance() {
     let emitBool = false;
-    emitBool = this.isEntityFeaturesOpen && !this.isMeshSettingsMode;
+    emitBool = this.isEntityFeaturesOpen && (!this.isMeshSettingsMode ?
+         true : (this.isDefaultEntityLoaded || this.isDemoMode));
     if (emitBool && !this.isCollectionInputSelected) {
       emitBool =
         (this.userdataService.isEntityOwner &&

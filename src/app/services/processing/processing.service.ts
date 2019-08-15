@@ -3,9 +3,9 @@ import {Mesh} from 'babylonjs';
 import {BehaviorSubject} from 'rxjs';
 import {ReplaySubject} from 'rxjs/internal/ReplaySubject';
 
-import {environment} from '../../../environments/environment';
-import {settingsKompakktLogo} from '../../../assets/settings/settings';
 import {baseEntity} from '../../../assets/defaults';
+import {settingsKompakktLogo} from '../../../assets/settings/settings';
+import {environment} from '../../../environments/environment';
 import {ICompilation, IEntity} from '../../interfaces/interfaces';
 import {BabylonService} from '../babylon/babylon.service';
 import {LoadingscreenhandlerService} from '../babylon/loadingscreen';
@@ -112,6 +112,7 @@ export class ProcessingService {
         if (entity && entity._id === 'default') {
             this.isDefaultEntityLoaded = true;
             this.defaultEntityLoaded.emit(true);
+            console.log('update: ', entity, entity._id);
         } else {
             this.isDefaultEntityLoaded = false;
             this.defaultEntityLoaded.emit(false);
@@ -421,6 +422,7 @@ export class ProcessingService {
     public loadDefaultEntityData() {
         this.loaded.emit(false);
         this.quality = 'low';
+        this.Subjects.actualMediaType.next('entity');
         this.loadEntity(this.defaultEntity, '')
             .then(() => {
                 this.loaded.emit(true);
@@ -525,10 +527,10 @@ export class ProcessingService {
                                 newEntity._id === 'default',
                             )
                             .then(() => {
+                                this.Subjects.actualMediaType.next('entity');
                                 this.updateActiveEntity(newEntity);
                                 this.updateActiveEntityMeshes(this.babylonService
                                     .entityContainer.meshes as Mesh[]);
-                                this.Subjects.actualMediaType.next('entity');
                             });
                         break;
                     case 'image':
