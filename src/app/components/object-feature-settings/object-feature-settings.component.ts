@@ -323,6 +323,8 @@ export class EntityFeatureSettingsComponent implements OnInit {
             !this.activeEntity ||
             !this.activeEntity.settings ||
             this.activeEntity.settings.preview === undefined ||
+            // TODO: how to check if settings need to be set? atm next line
+            this.activeEntity.settings.preview === '' ||
             this.activeEntity.settings.cameraPositionInitial === undefined ||
             this.activeEntity.settings.background === undefined ||
             this.activeEntity.settings.lights === undefined ||
@@ -336,6 +338,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
             }
         }
         if (this.activeEntity && this.activeEntity.settings && !upload) {
+            console.log('SETTINGS', this.activeEntity.settings);
             await this.entitySettingsService.loadSettings(
                 this.activeEntity.settings.scale,
                 this.activeEntity.settings.rotation.x,
