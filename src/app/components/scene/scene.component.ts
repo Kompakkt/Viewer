@@ -19,6 +19,7 @@ import { LoginComponent } from '../dialogs/dialog-login/login.component';
 })
 export class SceneComponent implements AfterViewInit {
   private firstAttempt = true;
+  public isLightMode = false;
 
   @HostListener('window:resize', ['$event'])
   public onResize() {
@@ -84,6 +85,14 @@ export class SceneComponent implements AfterViewInit {
     const queryParams = new URLSearchParams(searchParams);
     const isDragDrop = queryParams.get('dragdrop');
     const isSkipLogin = queryParams.get('skiplogin');
+    const isLightMode = queryParams.get('light');
+
+    if (isLightMode) {
+     this.isLightMode = true;
+     console.log('LIGHT');
+    } else {
+      console.log('NOT LIGHT');
+    }
 
     if (isDragDrop || isSkipLogin) {
       // Assume we are inside an iframe and in the upload process

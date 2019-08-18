@@ -37,6 +37,7 @@ export class ProcessingService {
     };
 
     private isFirstLoad = true;
+    public isLightMode = false;
     public isLoggedIn = false;
     public isShowCatalogue = false;
     public isCollectionLoaded = false;
@@ -308,6 +309,7 @@ export class ProcessingService {
         const entityParam = queryParams.get('model') || queryParams.get('entity');
         const compParam = queryParams.get('compilation');
         const isDragDrop = queryParams.get('dragdrop');
+        const isLight = queryParams.get('light');
 
         this.firstLoad.emit(false);
         this.isFirstLoad = false;
@@ -317,6 +319,11 @@ export class ProcessingService {
             // this.babylonService.setupDragAndDrop();
             this.setupDragAndDrop();
             return;
+        }
+
+        if (isLight) {
+            this.isLightMode = true;
+            this.lightMode.emit(true);
         }
 
         if (!entityParam && !compParam) {
@@ -397,7 +404,7 @@ export class ProcessingService {
         this.loaded.emit(false);
         this.quality = 'low';
         this.Subjects.actualMediaType.next('entity');
-        this.loadEntity(this.defaultEntity, '')
+        this.loadEntity(defaultEntity, '')
             .then(() => {
                 this.loaded.emit(true);
                 this.metadataService.addDefaultMetadata();
@@ -591,7 +598,7 @@ export class ProcessingService {
             if (entity && entity.processed[this.quality] !== undefined) {
                 this.loaded.emit(false);
                 this.loadEntity(
-                    entity._id === 'Cube' ? this.defaultEntity : entity,
+                    entity._id === 'Cube' ? defaultEntity : entity,
                     entity._id === 'Cube' ? '' : undefined,
                 )
                     .then(() => {
