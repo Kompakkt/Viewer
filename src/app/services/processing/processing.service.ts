@@ -1,11 +1,13 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
+import {MatDialog, MatDialogConfig} from '@angular/material';
 import {Mesh} from 'babylonjs';
 import {BehaviorSubject} from 'rxjs';
 import {ReplaySubject} from 'rxjs/internal/ReplaySubject';
 
 import {baseEntity} from '../../../assets/defaults';
-import { defaultEntity } from '../../../assets/entities/entities';
+import {defaultEntity} from '../../../assets/entities/entities';
 import {environment} from '../../../environments/environment';
+import {LoginComponent} from '../../components/dialogs/dialog-login/login.component';
 import {ICompilation, IEntity} from '../../interfaces/interfaces';
 import {BabylonService} from '../babylon/babylon.service';
 import {LoadingscreenhandlerService} from '../babylon/loadingscreen';
@@ -36,22 +38,25 @@ export class ProcessingService {
         actualMediaType: this.Subjects.actualMediaType.asObservable(),
     };
 
-    private isFirstLoad = true;
-    public isLightMode = false;
-    public isLoggedIn = false;
-    public isShowCatalogue = false;
+    private firstAttempt = true;
+    // private isLoaded = false;
     public isCollectionLoaded = false;
     public isDefaultEntityLoaded = false;
     public isFallbackEntityLoaded = false;
+    public isLightMode = true;
+    public isLoggedIn = false;
+    public isShowCatalogue = false;
+    public isShowMetadata = false;
 
-    @Output() showCatalogue: EventEmitter<boolean> = new EventEmitter();
-    @Output() loggedIn: EventEmitter<boolean> = new EventEmitter();
     @Output() firstLoad: EventEmitter<boolean> = new EventEmitter();
     @Output() loaded: EventEmitter<boolean> = new EventEmitter();
     @Output() collectionLoaded: EventEmitter<boolean> = new EventEmitter();
     @Output() defaultEntityLoaded: EventEmitter<boolean> = new EventEmitter();
     @Output() fallbackEntityLoaded: EventEmitter<boolean> = new EventEmitter();
     @Output() lightMode: EventEmitter<boolean> = new EventEmitter();
+    @Output() loggedIn: EventEmitter<boolean> = new EventEmitter();
+    @Output() showCatalogue: EventEmitter<boolean> = new EventEmitter();
+    @Output() showMetadata: EventEmitter<boolean> = new EventEmitter();
 
     private baseUrl = `${environment.express_server_url}:${environment.express_server_port}/`;
     public quality = 'low';
@@ -63,6 +68,7 @@ export class ProcessingService {
         public babylonService: BabylonService,
         private loadingScreenHandler: LoadingscreenhandlerService,
         private metadataService: MetadataService,
+        private dialog: MatDialog,
     ) {
     }
 
@@ -85,7 +91,6 @@ export class ProcessingService {
         if (entity && entity._id === 'default') {
             this.isDefaultEntityLoaded = true;
             this.defaultEntityLoaded.emit(true);
-            console.log('update: ', entity, entity._id);
         } else {
             this.isDefaultEntityLoaded = false;
             this.defaultEntityLoaded.emit(false);
@@ -186,7 +191,7 @@ export class ProcessingService {
             const base64 = (evt.currentTarget as FileReader).result as string;
             this.loadEntity(
                 {
-                  ...baseEntity(),
+                    ...baseEntity(),
                     _id: 'dragdrop',
                     name: 'dragdrop',
                     mediaType,
@@ -203,7 +208,8 @@ export class ProcessingService {
                 },
                 '',
                 ext,
-            ).then(() => this.loaded.emit(true));
+            )
+                .then(() => this.loaded.emit(true));
         };
 
         const getMediaType = () => {
@@ -279,91 +285,137 @@ export class ProcessingService {
     }
 
     public bootstrap(): void {
-        if (!this.isFirstLoad) {
-            this.firstLoad.emit(false);
-            console.log('Page has already been initially loaded.');
-            this.mongoHandlerService
-                .isAuthorized()
-                .then(result => {
-                    if (result.status === 'ok') {
-                        this.fetchCollectionsData();
-                        this.fetchEntitiesData();
-                        this.isLoggedIn = true;
-                        this.loggedIn.emit(true);
-                    } else {
-                        this.isLoggedIn = false;
-                        this.loggedIn.emit(false);
-                    }
-                })
-                .catch(error => {
-                    console.error(error);
-                    this.isLoggedIn = false;
-                    this.loggedIn.emit(false);
-                    this.message.error('Can not see if you are logged in.');
-                });
-            return;
-        }
 
         const searchParams = location.search;
         const queryParams = new URLSearchParams(searchParams);
         const entityParam = queryParams.get('model') || queryParams.get('entity');
         const compParam = queryParams.get('compilation');
-        const isDragDrop = queryParams.get('dragdrop');
-        const isLight = queryParams.get('light');
+        // values = dragdrop, explore, edit, annotation, ilias, full
+        const mode = queryParams.get('mode');
 
-        this.firstLoad.emit(false);
-        this.isFirstLoad = false;
-        this.isShowCatalogue = false;
-
-        if (isDragDrop) {
-            // this.babylonService.setupDragAndDrop();
+        if (mode === 'dragdrop') {
             this.setupDragAndDrop();
             return;
         }
 
-        if (isLight) {
-            this.isLightMode = true;
-            this.lightMode.emit(true);
-        }
-
+        // case default Model
         if (!entityParam && !compParam) {
             this.loadDefaultEntityData();
-            this.isShowCatalogue = true;
-            this.showCatalogue.emit(true);
+            if (mode === 'annotation') {
+                this.isLightMode = false;
+                this.lightMode.emit(false);
+                this.overlayService.activateAnnotationsTab();
+            }
+            if (mode === 'fullLoad') {
+                this.isLightMode = false;
+                this.lightMode.emit(false);
+                this.isShowCatalogue = true;
+                this.showCatalogue.emit(true);
+                this.isShowMetadata = true;
+                this.showMetadata.emit(true);
+                if (this.isLoggedIn) {
+                    this.fetchCollectionsData();
+                    this.fetchEntitiesData();
+                } else {
+                    // TODO: case logout -> clear collection & Entities
+                    // this.Subjects.collections.next([]);
+                    // this.Subjects.entities.next([]);
+                    this.loginAttempt();
+                }
+
+            }
         }
 
+        // case whole compilation, only for external (not repo) usage
+        if (!entityParam && compParam) {
+            this.fetchAndLoad(undefined, compParam, undefined);
+            this.overlayService.toggleCollectionsOverview();
+            if (mode === 'ilias') {
+                this.isShowMetadata = true;
+                this.showMetadata.emit(true);
+                if (this.isLoggedIn) {
+                    this.isLightMode = false;
+                    this.lightMode.emit(false);
+                } else {
+                    this.isLightMode = true;
+                    this.lightMode.emit(true);
+                    this.loginAttempt();
+                }
+            }
+        }
+
+        // case single model || case Entity from collection
+        if (entityParam && !compParam || entityParam && compParam) {
+            this.fetchAndLoad(entityParam, compParam ? compParam : undefined, !!compParam);
+            if (mode === 'explore') {
+                this.isLightMode = false;
+                this.lightMode.emit(false);
+                this.overlayService.activateSettingsTab();
+            }
+            if (mode === 'annotation') {
+                if (this.isLoggedIn) {
+                    this.isLightMode = false;
+                    this.lightMode.emit(false);
+                    this.overlayService.activateAnnotationsTab();
+                } else {
+                    this.isLightMode = true;
+                    this.lightMode.emit(true);
+                    this.loginAttempt();
+                }
+            }
+            if (mode === 'edit') {
+                if (this.isLoggedIn) {
+                    // TODO check if user is entity owner
+                    this.isLightMode = false;
+                    this.lightMode.emit(false);
+                    this.overlayService.activateSettingsTab();
+                } else {
+                    this.isLightMode = true;
+                    this.lightMode.emit(true);
+                    this.loginAttempt();
+                }
+            }
+        }
+    }
+
+    private loginAttempt() {
         this.mongoHandlerService
             .isAuthorized()
             .then(result => {
-                console.log(result);
-                if (result.status !== 'ok') {
-                    this.isLoggedIn = false;
-                    this.loggedIn.emit(false);
-                    return;
-                }
-                this.isLoggedIn = true;
-                this.loggedIn.emit(true);
-
-                if (entityParam && !compParam) {
-                    this.fetchAndLoad(entityParam, undefined, false);
-                    this.showCatalogue.emit(false);
-                } else if (!entityParam && compParam) {
-                    this.fetchAndLoad(undefined, compParam, undefined);
-                    this.showCatalogue.emit(false);
-                    this.overlayService.toggleCollectionsOverview();
+                if (result.status === 'ok') {
+                    this.isLoggedIn = true;
+                    this.loggedIn.emit(true);
+                    this.bootstrap();
                 } else {
-                    this.fetchCollectionsData();
-                    this.fetchEntitiesData();
+                    if (this.firstAttempt) {
+                        this.openLoginDialog();
+                    } else {
+                        // Assume user is not interested in logging in
+                        this.isLoggedIn = false;
+                        this.loggedIn.emit(false);
+                    }
                 }
             })
-            .catch(error => {
-                console.error(error);
-                this.isLoggedIn = false;
-                this.loggedIn.emit(false);
-                this.message.error(
-                    'Other Entities and Collections are only available in the Cologne University ' +
-                    'Network for logged in Users.',
-                );
+            .catch(e => {
+                // Server might not be reachable, skip login
+                console.error(e);
+                this.message.error('Sorry, I can not check if you are logged in.');
+            });
+    }
+
+    private openLoginDialog() {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.disableClose = true;
+        dialogConfig.autoFocus = true;
+        this.firstAttempt = false;
+        this.dialog
+            .open(LoginComponent, dialogConfig)
+            .afterClosed()
+            .toPromise()
+            .then(() => this.loginAttempt())
+            .catch(e => {
+                console.error(e);
+                this.loginAttempt();
             });
     }
 
@@ -517,17 +569,17 @@ export class ProcessingService {
                     case 'image':
                         await this.babylonService.loadEntity(true, _url, mediaType)
                             .then(() => {
-                            const plane = this.babylonService.imageContainer.plane;
-                            if (plane) {
-                                this.Subjects.actualMediaType.next('image');
-                                this.updateActiveEntity(newEntity);
-                                this.updateActiveEntityMeshes([plane as Mesh]);
-                            }
-                        });
+                                const plane = this.babylonService.imageContainer.plane;
+                                if (plane) {
+                                    this.Subjects.actualMediaType.next('image');
+                                    this.updateActiveEntity(newEntity);
+                                    this.updateActiveEntityMeshes([plane as Mesh]);
+                                }
+                            });
                         break;
                     case 'audio':
 
-                       await this.babylonService.loadEntity(
+                        await this.babylonService.loadEntity(
                             true,
                             'assets/models/kompakkt.babylon',
                             'model',
@@ -545,18 +597,18 @@ export class ProcessingService {
                                     });
                             });
 
-                       break;
+                        break;
                     case 'video':
                         await this.babylonService.loadEntity(true, _url, mediaType)
                             .then(() => {
-                            const plane = this.babylonService.videoContainer.plane;
-                            if (plane) {
-                                this.Subjects.actualMediaType.next('video');
-                                this.updateActiveEntity(newEntity);
-                                this.updateActiveEntityMeshes([plane as Mesh]);
-                            }
+                                const plane = this.babylonService.videoContainer.plane;
+                                if (plane) {
+                                    this.Subjects.actualMediaType.next('video');
+                                    this.updateActiveEntity(newEntity);
+                                    this.updateActiveEntityMeshes([plane as Mesh]);
+                                }
 
-                        });
+                            });
                         break;
                     case 'text':
                         this.Subjects.actualEntity.next(newEntity);

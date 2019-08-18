@@ -37,6 +37,12 @@ export class EntityFeaturesComponent implements OnInit {
       }
     });
 
+    this.overlayService.editorAnnotations.subscribe(editorAnnotations => {
+      if (this.isOpen && editorAnnotations) {
+        this.changeTab(0);
+      }
+    });
+
     this.overlayService.editor.subscribe(editor => {
       this.isOpen = editor;
     });

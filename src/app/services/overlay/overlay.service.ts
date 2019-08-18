@@ -7,10 +7,12 @@ export class OverlayService {
   public editorIsOpen = false;
   public collectionsOverviewIsOpen = false;
   public editorSettingIsOpen = false;
+  public editorAnnotationsIsOpen = false;
 
   @Output() editor: EventEmitter<boolean> = new EventEmitter();
   @Output() collectionsOverview: EventEmitter<boolean> = new EventEmitter();
   @Output() editorSetting: EventEmitter<boolean> = new EventEmitter();
+  @Output() editorAnnotations: EventEmitter<boolean> = new EventEmitter();
   @Output() defaultAnnotations: EventEmitter<boolean> = new EventEmitter();
 
   public toggleEditor(): boolean {
@@ -53,5 +55,14 @@ export class OverlayService {
     this.defaultAnnotations.emit(true);
 
     return false;
+  }
+
+  public activateAnnotationsTab(): boolean {
+    this.editorIsOpen = !this.editorIsOpen;
+    this.editor.emit(this.editorIsOpen);
+    this.editorAnnotationsIsOpen = true;
+    this.editorAnnotations.emit(true);
+
+    return this.editorIsOpen;
   }
 }
