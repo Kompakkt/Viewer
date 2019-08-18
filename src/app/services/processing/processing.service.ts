@@ -4,7 +4,7 @@ import {BehaviorSubject} from 'rxjs';
 import {ReplaySubject} from 'rxjs/internal/ReplaySubject';
 
 import {baseEntity} from '../../../assets/defaults';
-import {settingsKompakktLogo} from '../../../assets/settings/settings';
+import { defaultEntity } from '../../../assets/entities/entities';
 import {environment} from '../../../environments/environment';
 import {ICompilation, IEntity} from '../../interfaces/interfaces';
 import {BabylonService} from '../babylon/babylon.service';
@@ -50,38 +50,10 @@ export class ProcessingService {
     @Output() collectionLoaded: EventEmitter<boolean> = new EventEmitter();
     @Output() defaultEntityLoaded: EventEmitter<boolean> = new EventEmitter();
     @Output() fallbackEntityLoaded: EventEmitter<boolean> = new EventEmitter();
+    @Output() lightMode: EventEmitter<boolean> = new EventEmitter();
 
     private baseUrl = `${environment.express_server_url}:${environment.express_server_port}/`;
     public quality = 'low';
-
-    private defaultEntity: IEntity = {
-        ...baseEntity(),
-        _id: 'default',
-        name: 'Cube',
-        files: [
-            {
-                file_name: 'kompakkt.babylon',
-                file_link: 'assets/models/kompakkt.babylon',
-                file_size: 0,
-                file_format: '.babylon',
-            },
-        ],
-        annotationList: [],
-        relatedDigitalEntity: {_id: 'default_entity'},
-        relatedEntityOwners: [{
-            _id: '',
-            username: 'kompakkt',
-            fullname: 'kompakkt',
-        }],
-        mediaType: 'model',
-        processed: {
-            low: 'assets/models/kompakkt.babylon',
-            medium: 'assets/models/kompakkt.babylon',
-            high: 'assets/models/kompakkt.babylon',
-            raw: 'assets/models/kompakkt.babylon',
-        },
-        settings: settingsKompakktLogo,
-    };
 
     constructor(
         private mongoHandlerService: MongohandlerService,
