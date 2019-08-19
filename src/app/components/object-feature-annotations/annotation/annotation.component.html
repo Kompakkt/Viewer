@@ -4,9 +4,9 @@
           [style.left.px]="positionLeft"
           *ngIf="visibility"
           [style.background-color]="socketService.getColor(annotation.creator._id)"
-          id={{annotation._id}}>
+          [id]="annotation._id">
 
-  <form class="annotation-form">
+  <form class="annotation-form" #annotationForm>
 
     <mat-card-header>
 

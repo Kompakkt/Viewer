@@ -23,15 +23,17 @@ export class AnnotationComponent implements OnInit {
   @Input() entityFileName: string | undefined;
   @Input() annotation: IAnnotation | undefined;
 
-  @ViewChild('annotationContent', { static: false }) private annotationContent;
+  @ViewChild('annotationContent', { static: false })
+  private annotationContent;
+
+  @ViewChild('annotationForm', { static: false })
+  private annotationForm: ElementRef<HTMLFormElement> | undefined;
 
   // internal
   public isEditMode = false;
   public showAnnotation = false;
   public positionTop = 0;
   public positionLeft = 0;
-  public cardWidth = this.el.nativeElement.offsetWidth;
-  public cardHeight = this.el.nativeElement.offsetHeight;
   public collapsed = false;
   public selectedAnnotation: string | undefined;
   // --- JAN ----
@@ -54,7 +56,6 @@ export class AnnotationComponent implements OnInit {
     public dialog: MatDialog,
     private userdataService: UserdataService,
     private processingService: ProcessingService,
-    private el: ElementRef,
   ) {}
 
   ngOnInit() {
@@ -180,6 +181,10 @@ export class AnnotationComponent implements OnInit {
     const getMesh = scene.getMeshByName(annotation._id + '_pick');
 
     if (getMesh && scene.activeCamera) {
+      if (!this.annotationForm || !this.annotationForm.nativeElement.parentElement) {
+        return;
+      }
+
       const engine = this.babylonService.getEngine();
 
       const [width, height] = [
@@ -194,21 +199,21 @@ export class AnnotationComponent implements OnInit {
         scene.activeCamera.viewport.toGlobal(width, height),
       );
 
+      const parent = this.annotationForm.nativeElement.parentElement;
       const [left, top] = [Math.round(p.x), Math.round(p.y)];
+      const [elHeight, elWidth] = [parent.clientHeight, parent.clientWidth];
 
-      // TODO: get actual card width and height from component
-      // console.log('height---' + this.el.nativeElement.offsetHeight);
       this.positionTop =
         top < 0
           ? 0
-          : top + this.el.nativeElement.offsetHeight > height
-          ? height - this.el.nativeElement.offsetHeight
+          : top + elHeight > height
+          ? height - elHeight
           : top;
       this.positionLeft =
         left < 0
           ? 0
-          : left + this.el.nativeElement.offsetWidth > width
-          ? width - this.el.nativeElement.offsetWidth
+          : left + elWidth > width
+          ? width - elWidth
             : left;
     }
   }
