@@ -30,7 +30,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ColorChromeModule } from 'ngx-color/chrome';
 import { MarkdownModule } from 'ngx-markdown';
-import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
 import { SocketIoModule } from 'ngx-socket-io';
 
 import { environment } from '../environments/environment';
@@ -125,7 +124,6 @@ import { RenderCanvasComponent } from './components/render-canvas/render-canvas.
       url: `${environment.express_server_url}:${environment.express_server_port}`,
     }),
     MarkdownModule.forRoot(),
-    PerfectScrollbarModule,
   ],
   entryComponents: [
     LoginComponent,

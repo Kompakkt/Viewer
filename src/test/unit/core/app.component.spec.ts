@@ -36,7 +36,6 @@ import { ObjectFeaturesComponent } from '../../../app/components/object-features
 import { ContentComponent } from '../../../app/components/content/content.component';
 import { AnnotationComponentForEditorComponent } from '../../../app/components/object-feature-annotations/annotation/annotation-for-editor.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
-import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
 import { MarkdownModule } from 'ngx-markdown';
 import { ObjectFeatureSettingsComponent } from '../../../app/components/object-feature-settings/object-feature-settings.component';
 import { ObjectFeatureMetadataComponent } from '../../../app/components/object-feature-metadata/object-feature-metadata.component';
@@ -88,7 +87,6 @@ describe('AppComponent', () => {
         MatStepperModule,
         MatProgressSpinnerModule,
         DragDropModule,
-        PerfectScrollbarModule,
         MarkdownModule,
         MatChipsModule,
         SocketIoModule.forRoot({
