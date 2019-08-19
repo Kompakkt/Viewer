@@ -5,11 +5,13 @@ import { PerfectScrollbarConfigInterface } from 'ngx-perfect-scrollbar';
 
 import { IAnnotation } from '../../../interfaces/interfaces';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
+// tslint:disable-next-line:max-line-length
 import { AnnotationmarkerService } from '../../../services/annotationmarker/annotationmarker.service';
 import { BabylonService } from '../../../services/babylon/babylon.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
 import { SocketService } from '../../../services/socket/socket.service';
 import { UserdataService } from '../../../services/userdata/userdata.service';
+// tslint:disable-next-line:max-line-length
 import { DialogAnnotationEditorComponent } from '../../dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
 
 @Component({
@@ -199,15 +201,15 @@ export class AnnotationComponent implements OnInit {
       this.positionTop =
         top < 0
           ? 0
-          : top + this.cardHeight > height
-          ? height - this.cardHeight
+          : top + this.el.nativeElement.offsetHeight > height
+          ? height - this.el.nativeElement.offsetHeight
           : top;
       this.positionLeft =
         left < 0
           ? 0
-          : left + this.cardWidth > width
-          ? width - this.cardWidth
-          : left;
+          : left + this.el.nativeElement.offsetWidth > width
+          ? width - this.el.nativeElement.offsetWidth
+            : left;
     }
   }
 
