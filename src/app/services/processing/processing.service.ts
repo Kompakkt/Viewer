@@ -1,5 +1,4 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
-import {MatDialog, MatDialogConfig} from '@angular/material';
 import {Mesh} from 'babylonjs';
 import {BehaviorSubject} from 'rxjs';
 import {ReplaySubject} from 'rxjs/internal/ReplaySubject';
@@ -7,7 +6,6 @@ import {ReplaySubject} from 'rxjs/internal/ReplaySubject';
 import {baseEntity} from '../../../assets/defaults';
 import {defaultEntity} from '../../../assets/entities/entities';
 import {environment} from '../../../environments/environment';
-import {LoginComponent} from '../../components/dialogs/dialog-login/login.component';
 import {ICompilation, IEntity} from '../../interfaces/interfaces';
 import {BabylonService} from '../babylon/babylon.service';
 import {LoadingscreenhandlerService} from '../babylon/loadingscreen';
@@ -38,7 +36,6 @@ export class ProcessingService {
         actualMediaType: this.Subjects.actualMediaType.asObservable(),
     };
 
-    private firstAttempt = true;
     // private isLoaded = false;
     public isCollectionLoaded = false;
     public isDefaultEntityLoaded = false;
@@ -48,7 +45,6 @@ export class ProcessingService {
     public isShowCatalogue = false;
     public isShowMetadata = false;
 
-    @Output() firstLoad: EventEmitter<boolean> = new EventEmitter();
     @Output() loaded: EventEmitter<boolean> = new EventEmitter();
     @Output() collectionLoaded: EventEmitter<boolean> = new EventEmitter();
     @Output() defaultEntityLoaded: EventEmitter<boolean> = new EventEmitter();
@@ -68,7 +64,6 @@ export class ProcessingService {
         public babylonService: BabylonService,
         private loadingScreenHandler: LoadingscreenhandlerService,
         private metadataService: MetadataService,
-        private dialog: MatDialog,
     ) {
     }
 
@@ -293,13 +288,74 @@ export class ProcessingService {
         // values = dragdrop, explore, edit, annotation, ilias, full
         const mode = queryParams.get('mode');
 
+        const loadingCase = entityParam !== null || undefined ? 'entity' :
+            (compParam !== null || undefined ? 'collection' : 'default');
+
         if (mode === 'dragdrop') {
             this.setupDragAndDrop();
             return;
         }
 
-        // case default Model
-        if (!entityParam && !compParam) {
+        if (loadingCase === 'entity') {
+            this.fetchAndLoad(entityParam ? entityParam : undefined,
+                              compParam ? compParam : undefined, !!compParam);
+            if (mode === 'explore') {
+                this.isLightMode = false;
+                this.lightMode.emit(false);
+                this.overlayService.activateSettingsTab();
+            }
+            if (mode === 'annotation') {
+                this.mongoHandlerService
+                    .isAuthorized()
+                    .then(result => {
+                        if (result.status === 'ok') {
+                            this.isLightMode = false;
+                            this.lightMode.emit(false);
+                            this.overlayService.activateAnnotationsTab();
+                            this.isLoggedIn = true;
+                            this.loggedIn.emit(true);
+                        } else {
+                                this.isLoggedIn = false;
+                                this.loggedIn.emit(false);
+                                this.isLightMode = true;
+                                this.lightMode.emit(true);
+                            }
+                        })
+                    .catch(error => {
+                        console.error(error);
+                        this.isLoggedIn = false;
+                        this.loggedIn.emit(false);
+                        this.message.error('Can not check if you are logged in.');
+                    });
+            }
+            if (mode === 'edit') {
+
+                    this.mongoHandlerService
+                        .isAuthorized()
+                        .then(result => {
+                            if (result.status === 'ok') {
+                                this.isLightMode = false;
+                                this.lightMode.emit(false);
+                                this.overlayService.activateSettingsTab();
+                                this.isLoggedIn = true;
+                                this.loggedIn.emit(true);
+                            } else {
+                                    this.isLoggedIn = false;
+                                    this.loggedIn.emit(false);
+                                    this.isLightMode = true;
+                                    this.lightMode.emit(true);
+                            }
+                        })
+                        .catch(error => {
+                            console.error(error);
+                            this.isLoggedIn = false;
+                            this.loggedIn.emit(false);
+                            this.message.error('Can not check if you are logged in.');
+                        });
+            }
+        }
+
+        if (loadingCase === 'default') {
             this.loadDefaultEntityData();
             if (mode === 'annotation') {
                 this.isLightMode = false;
@@ -313,110 +369,57 @@ export class ProcessingService {
                 this.showCatalogue.emit(true);
                 this.isShowMetadata = true;
                 this.showMetadata.emit(true);
-                if (this.isLoggedIn) {
-                    this.fetchCollectionsData();
-                    this.fetchEntitiesData();
-                } else {
-                    // TODO: case logout -> clear collection & Entities
-                    // this.Subjects.collections.next([]);
-                    // this.Subjects.entities.next([]);
-                    this.loginAttempt();
-                }
 
+                this.mongoHandlerService
+                    .isAuthorized()
+                    .then(result => {
+                        if (result.status === 'ok') {
+                            this.fetchCollectionsData();
+                            this.fetchEntitiesData();
+                            this.isLoggedIn = true;
+                            this.loggedIn.emit(true);
+                        } else {
+                                this.isLoggedIn = false;
+                                this.loggedIn.emit(false);
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        this.isLoggedIn = false;
+                        this.loggedIn.emit(false);
+                        this.message.error('Can not check if you are logged in.');
+                    });
             }
         }
 
-        // case whole compilation, only for external (not repo) usage
-        if (!entityParam && compParam) {
-            this.fetchAndLoad(undefined, compParam, undefined);
+        if (loadingCase === 'collection') {
+            this.fetchAndLoad(undefined, compParam ? compParam : undefined, undefined);
             this.overlayService.toggleCollectionsOverview();
             if (mode === 'ilias') {
                 this.isShowMetadata = true;
                 this.showMetadata.emit(true);
-                if (this.isLoggedIn) {
-                    this.isLightMode = false;
-                    this.lightMode.emit(false);
-                } else {
-                    this.isLightMode = true;
-                    this.lightMode.emit(true);
-                    this.loginAttempt();
-                }
-            }
-        }
-
-        // case single model || case Entity from collection
-        if (entityParam && !compParam || entityParam && compParam) {
-            this.fetchAndLoad(entityParam, compParam ? compParam : undefined, !!compParam);
-            if (mode === 'explore') {
-                this.isLightMode = false;
-                this.lightMode.emit(false);
-                this.overlayService.activateSettingsTab();
-            }
-            if (mode === 'annotation') {
-                if (this.isLoggedIn) {
-                    this.isLightMode = false;
-                    this.lightMode.emit(false);
-                    this.overlayService.activateAnnotationsTab();
-                } else {
-                    this.isLightMode = true;
-                    this.lightMode.emit(true);
-                    this.loginAttempt();
-                }
-            }
-            if (mode === 'edit') {
-                if (this.isLoggedIn) {
-                    // TODO check if user is entity owner
-                    this.isLightMode = false;
-                    this.lightMode.emit(false);
-                    this.overlayService.activateSettingsTab();
-                } else {
-                    this.isLightMode = true;
-                    this.lightMode.emit(true);
-                    this.loginAttempt();
-                }
-            }
-        }
-    }
-
-    private loginAttempt() {
-        this.mongoHandlerService
-            .isAuthorized()
-            .then(result => {
-                if (result.status === 'ok') {
-                    this.isLoggedIn = true;
-                    this.loggedIn.emit(true);
-                    this.bootstrap();
-                } else {
-                    if (this.firstAttempt) {
-                        this.openLoginDialog();
-                    } else {
-                        // Assume user is not interested in logging in
+                this.mongoHandlerService
+                    .isAuthorized()
+                    .then(result => {
+                        if (result.status === 'ok') {
+                            this.isLightMode = false;
+                            this.lightMode.emit(false);
+                            this.isLoggedIn = true;
+                            this.loggedIn.emit(true);
+                        } else {
+                                this.isLightMode = true;
+                                this.lightMode.emit(true);
+                                this.isLoggedIn = false;
+                                this.loggedIn.emit(false);
+                    }})
+                    .catch(error => {
+                        console.error(error);
                         this.isLoggedIn = false;
                         this.loggedIn.emit(false);
-                    }
-                }
-            })
-            .catch(e => {
-                // Server might not be reachable, skip login
-                console.error(e);
-                this.message.error('Sorry, I can not check if you are logged in.');
-            });
-    }
-
-    private openLoginDialog() {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.disableClose = true;
-        dialogConfig.autoFocus = true;
-        this.firstAttempt = false;
-        this.dialog
-            .open(LoginComponent, dialogConfig)
-            .afterClosed()
-            .toPromise()
-            .then(() => this.loginAttempt())
-            .catch(e => {
-                console.error(e);
-                this.loginAttempt();
-            });
+                        this.message.error('Can not check if you are logged in.');
+                    });
+            }
+        }
     }
 
     public fetchCollectionsData() {
