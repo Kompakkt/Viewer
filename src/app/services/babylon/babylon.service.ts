@@ -445,7 +445,7 @@ export class BabylonService {
                     async screenshot => {
                         await fetch(screenshot)
                             .then(res => res.blob())
-                            .then(blob => Tools.Download(blob, `Kompakkt-${Date.now()}`))
+                            .then(blob => Tools.Download(blob, `Kompakkt-${Date.now()}.png`))
                             .then(() => resolve(screenshot))
                             .catch(e => {
                                 console.error(e);
