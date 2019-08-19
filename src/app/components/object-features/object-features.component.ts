@@ -2,6 +2,7 @@ import { Component, HostBinding, OnInit, ViewChild } from '@angular/core';
 
 import { AnnotationService } from '../../services/annotation/annotation.service';
 import { OverlayService } from '../../services/overlay/overlay.service';
+import {ProcessingService} from "../../services/processing/processing.service";
 
 @Component({
   selector: 'app-entity-features',
@@ -17,10 +18,12 @@ export class EntityFeaturesComponent implements OnInit {
 
   // internal
   public selectedTab;
+  public showMetadata = false;
 
   constructor(
     public overlayService: OverlayService,
     public annotationService: AnnotationService,
+    public processingService: ProcessingService,
   ) {}
 
   ngOnInit() {
@@ -45,6 +48,10 @@ export class EntityFeaturesComponent implements OnInit {
 
     this.overlayService.editor.subscribe(editor => {
       this.isOpen = editor;
+    });
+
+    this.processingService.showMetadata.subscribe(metadata => {
+      this.showMetadata = metadata;
     });
   }
 

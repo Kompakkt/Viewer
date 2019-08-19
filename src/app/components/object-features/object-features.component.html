@@ -27,7 +27,7 @@
       </perfect-scrollbar>
     </mat-tab>
 
-    <mat-tab>
+    <mat-tab *ngIf="showMetadata">
       <ng-template mat-tab-label>
         <mat-icon class="tab-icon">description</mat-icon>
       </ng-template>
