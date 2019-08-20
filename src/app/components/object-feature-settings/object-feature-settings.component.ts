@@ -395,24 +395,24 @@ export class EntityFeatureSettingsComponent implements OnInit {
         return upload;
     }
 
-  private async initialiseUpload() {
+    private async initialiseUpload() {
         const searchParams = location.search;
         const queryParams = new URLSearchParams(searchParams);
-        const isDragDrop = queryParams.get('dragdrop');
+        const isDragDrop = queryParams.get('mode');
 
-        if ((isDragDrop || this.isEntityOwner) && !this.isFinished) {
-      await this.setLightBackground();
-      this.initialSettingsMode = true;
-      await this.entitySettingsService.createVisualSettings(this.mediaType === 'entity' || this.mediaType === 'model');
-      this.cameraPositionInitial = this.babylonService.cameraManager.getActualDefaultPosition();
-      const cameraSettings = this.cameraPositionInitial;
+        if ((isDragDrop === 'dragdrop' || this.isEntityOwner) && !this.isFinished) {
+            await this.setLightBackground();
+            this.initialSettingsMode = true;
+            await this.entitySettingsService.createVisualSettings(this.mediaType === 'entity' || this.mediaType === 'model');
+            this.cameraPositionInitial = this.babylonService.cameraManager.getActualDefaultPosition();
+            const cameraSettings = this.cameraPositionInitial;
 
-      if (this.activeEntity && this.activeEntity.settings) {
-        this.activeEntity.settings.cameraPositionInitial = cameraSettings;
-      }
-      this.overlayService.activateSettingsTab();
+            if (this.activeEntity && this.activeEntity.settings) {
+                this.activeEntity.settings.cameraPositionInitial = cameraSettings;
+            }
+            this.overlayService.activateSettingsTab();
+        }
     }
-  }
 
   async backToDefault() {
     this.babylonService.cameraManager.resetCamera();
