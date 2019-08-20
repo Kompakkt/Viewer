@@ -3,7 +3,6 @@ import { MatDialog } from '@angular/material';
 import { Vector3 } from 'babylonjs';
 import { ColorEvent } from 'ngx-color';
 
-// tslint:disable-next-line:max-line-length
 import {
   settings2D,
   settingsAudio,
@@ -91,7 +90,20 @@ export class EntityFeatureSettingsComponent implements OnInit {
           return;
         }
         this.isFinished = this.activeEntity.finished;
-        this.setSettings();
+        this.setSettings()
+            .then(() => {})
+            .catch(error => {
+              console.error(error);
+              this.processingService.loadFallbackEntity()
+                  .then(() => {
+                    // TODO add annotation
+                  })
+                  .catch(e => {
+                    console.error(e);
+                    // tslint:disable-next-line:max-line-length
+                    this.message.error('Loading of Objects does not work. Please tell us about it!');
+                  });
+            });
       }
     });
 
@@ -328,7 +340,6 @@ export class EntityFeatureSettingsComponent implements OnInit {
       this.activeEntity.settings.rotation === undefined ||
       this.activeEntity.settings.scale === undefined
     ) {
-      // Settings missing? => Cases: Upload || Default, Fallback
       upload = await this.createSettings();
       if (upload) {
         await this.initialiseUpload();
@@ -362,29 +373,25 @@ export class EntityFeatureSettingsComponent implements OnInit {
         case 'entity':
         case 'model': {
           settings = settingsEntity;
-          upload = true;
           break;
         }
         case 'audio': {
           settings = settingsAudio;
-          this.saveActualSettings();
           break;
         }
         case 'video': {
           settings = settings2D;
-          this.saveActualSettings();
           break;
         }
         case 'image': {
           settings = settings2D;
-          upload = true;
           break;
         }
         default: {
           settings = settingsEntity;
-          upload = true;
         }
       }
+      upload = true;
     }
     if (this.activeEntity) {
       this.activeEntity['settings'] = settings;
@@ -399,6 +406,9 @@ export class EntityFeatureSettingsComponent implements OnInit {
 
     if ((isDragDrop || this.isEntityOwner) && !this.isFinished) {
       await this.setLightBackground();
+      if (this.mediaType === 'audio') {
+        await this.entitySettingsService.loadSettings(1, 315, 0, 0, true);
+      }
       this.initialSettingsMode = true;
       await this.entitySettingsService.createVisualSettings(
         this.mediaType === 'entity' || this.mediaType === 'model',
@@ -580,7 +590,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
         },
       ],
       rotation: {
-        x: this.entitySettingsService.rotationX,
+        x: this.mediaType === 'audio' ? 315 : this.entitySettingsService.rotationX,
         y: this.entitySettingsService.rotationY,
         z: this.entitySettingsService.rotationZ,
       },

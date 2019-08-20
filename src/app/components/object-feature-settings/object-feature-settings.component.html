@@ -4,7 +4,7 @@
 
     <mat-vertical-stepper [linear]=true #stepper>
 
-      <mat-step>
+      <mat-step *ngIf="mediaType !== 'audio' && mediaType !== 'video'">
         <ng-template matStepLabel>Set Mesh Settings</ng-template>
 
         <h5>Information & Helpers
@@ -256,6 +256,7 @@
                       (input)="pointlightPosZ($event)" vertical></mat-slider>
         </div>
 
+        <div *ngIf="mediaType !== 'audio'">
         <h5> Preview & Initial Perspective
           <button mat-icon-button (click)="togglePreview()"
                   matTooltip="Toggle" matTooltipPosition="above"
@@ -268,6 +269,7 @@
           Please select a nice and fitting camera perspective before you go on to the next step.
           By clicking on the next button the actual view will be set as initial perspective.
           And I will automatically produce a preview - smile!
+        </div>
         </div>
 
         <div>
