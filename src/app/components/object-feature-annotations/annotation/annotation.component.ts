@@ -1,7 +1,6 @@
 import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Matrix, Vector3 } from 'babylonjs';
-import { PerfectScrollbarConfigInterface } from 'ngx-perfect-scrollbar';
 
 import { IAnnotation } from '../../../interfaces/interfaces';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
@@ -38,7 +37,6 @@ export class AnnotationComponent implements OnInit {
   public selectedAnnotation: string | undefined;
   // --- JAN ----
   public showMediaBrowser = false;
-  public config: PerfectScrollbarConfigInterface = {};
   // ---
 
   // external
