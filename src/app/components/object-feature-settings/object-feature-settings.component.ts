@@ -380,7 +380,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
                 }
                 case 'image': {
                     settings = settings2D;
-                    upload = true;
+                    this.saveActualSettings();
                     break;
                 }
                 default: {
@@ -403,7 +403,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
         if ((isDragDrop || this.isEntityOwner) && !this.isFinished) {
       await this.setLightBackground();
       this.initialSettingsMode = true;
-      await this.entitySettingsService.createVisualSettings(true);
+      await this.entitySettingsService.createVisualSettings(this.mediaType === 'entity' || this.mediaType === 'model');
       this.cameraPositionInitial = this.babylonService.cameraManager.getActualDefaultPosition();
       const cameraSettings = this.cameraPositionInitial;
 

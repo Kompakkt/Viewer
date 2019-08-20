@@ -98,7 +98,7 @@ export const loadImage = (
                 ];
                 const ground = MeshBuilder
                     .CreatePlane('gnd',
-                                 { height: _height, width: _width }, scene);
+                                 { height: _height * 0.05, width: _width * 0.05 }, scene);
                 Tags.AddTagsTo(ground, 'mediaGround');
                 const gndmat = new StandardMaterial('gmat', scene);
                 ground.material = gndmat;

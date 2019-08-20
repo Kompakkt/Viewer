@@ -292,6 +292,8 @@ export class ProcessingService {
             (compParam !== null || undefined ? 'collection' : 'default');
 
         if (mode === 'dragdrop') {
+            this.isLightMode = false;
+            this.lightMode.emit(false);
             this.setupDragAndDrop();
             return;
         }
@@ -422,39 +424,6 @@ export class ProcessingService {
         }
     }
 
-    public fetchCollectionsData() {
-        this.mongoHandlerService
-            .getAllCompilations()
-            .then(compilation => {
-                this.Subjects.collections.next(compilation);
-            })
-            .catch(error => {
-                console.error(error);
-                this.message.error('Connection to entity server refused.');
-            });
-    }
-
-    public fetchEntitiesData() {
-        this.mongoHandlerService
-            .getAllEntities()
-            .then(entities => {
-                const entitiesforBrowser: IEntity[] = [];
-
-                entities
-                    .filter(entity => entity)
-                    .forEach((entity: IEntity) => {
-                        if (entity.finished) {
-                            entitiesforBrowser.push(entity);
-                        }
-                    });
-                this.Subjects.entities.next(entitiesforBrowser);
-            })
-            .catch(error => {
-                console.error(error);
-                this.message.error('Connection to entity server refused.');
-            });
-    }
-
     public loadDefaultEntityData() {
         this.loaded.emit(false);
         this.quality = 'low';
@@ -467,6 +436,21 @@ export class ProcessingService {
             .catch(error => {
                 console.error(error);
                 this.message.error('Loading of default entity not possible');
+            });
+    }
+
+    public async loadFallbackEntity() {
+        await this.babylonService
+            .loadEntity(true, 'assets/models/sketch_cat/scene.gltf', 'entity', '.gltf')
+            .then(() => {
+                this.updateActiveEntityMeshes(this.babylonService.entityContainer
+                    .meshes as Mesh[]);
+                this.isFallbackEntityLoaded = true;
+                this.fallbackEntityLoaded.emit(true);
+                this.Subjects.actualMediaType.next('entity');})
+            .catch(error => {
+                console.error(error);
+                this.message.error('Loading of fallback entity not possible');
             });
     }
 
@@ -574,6 +558,7 @@ export class ProcessingService {
                             .then(() => {
                                 const plane = this.babylonService.imageContainer.plane;
                                 if (plane) {
+                                    console.log('plane', plane);
                                     this.Subjects.actualMediaType.next('image');
                                     this.updateActiveEntity(newEntity);
                                     this.updateActiveEntityMeshes([plane as Mesh]);
@@ -628,15 +613,36 @@ export class ProcessingService {
         }
     }
 
-    public async loadFallbackEntity() {
-        await this.babylonService
-            .loadEntity(true, 'assets/models/sketch_cat/scene.gltf', 'entity', '.gltf')
-            .then(() => {
-                this.updateActiveEntityMeshes(this.babylonService.entityContainer
-                    .meshes as Mesh[]);
-                this.isFallbackEntityLoaded = true;
-                this.fallbackEntityLoaded.emit(true);
-                this.Subjects.actualMediaType.next('entity');
+    public fetchCollectionsData() {
+        this.mongoHandlerService
+            .getAllCompilations()
+            .then(compilation => {
+                this.Subjects.collections.next(compilation);
+            })
+            .catch(error => {
+                console.error(error);
+                this.message.error('Connection to entity server refused.');
+            });
+    }
+
+    public fetchEntitiesData() {
+        this.mongoHandlerService
+            .getAllEntities()
+            .then(entities => {
+                const entitiesforBrowser: IEntity[] = [];
+
+                entities
+                    .filter(entity => entity)
+                    .forEach((entity: IEntity) => {
+                        if (entity.finished) {
+                            entitiesforBrowser.push(entity);
+                        }
+                    });
+                this.Subjects.entities.next(entitiesforBrowser);
+            })
+            .catch(error => {
+                console.error(error);
+                this.message.error('Connection to entity server refused.');
             });
     }
 

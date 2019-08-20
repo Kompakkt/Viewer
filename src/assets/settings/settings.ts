@@ -137,7 +137,7 @@ export const settings2D: IEntitySettings = {
     position: {
       x: 0,
       y: (Math.PI / 180) * 90,
-      z: 150,
+      z: 80,
     },
     target: {
       x: 0,
