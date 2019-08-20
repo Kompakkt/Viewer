@@ -29,6 +29,11 @@
     }
   ],
   "private": true,
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
+  },
   "dependencies": {
     "@angular/animations": "^8.1.1",
     "@angular/cdk": "^8.0.2",
@@ -82,8 +87,8 @@
     "karma-coverage-istanbul-reporter": "~2.0.5",
     "karma-jasmine": "~2.0.1",
     "karma-jasmine-html-reporter": "^1.4.2",
-    "precise-commits": "^1.0.2",
     "prettier": "^1.18.2",
+    "pretty-quick": "^1.11.1",
     "protractor": "~5.4.2",
     "ts-node": "~8.2.0",
     "tslint": "~5.16.0",
