@@ -127,12 +127,12 @@ export const setUpCamera = (
   } else {
     camera.lowerAlphaLimit = camera.upperAlphaLimit = halfPi * -90;
     camera.lowerBetaLimit = camera.upperBetaLimit = halfPi * 90;
-  }
   if (mediaType !== 'audio') {
     camera.lowerRadiusLimit = 0;
     camera.upperRadiusLimit = radius;
   } else {
    camera.lowerRadiusLimit = camera.upperRadiusLimit = maxSize * 3;
+  }
   }
   return camera;
 };
