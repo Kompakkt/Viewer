@@ -252,7 +252,10 @@ export class AnnotationService {
         this.annotations.push(annotationFallback);
       }
       if (this.processingService.isDefaultEntityLoaded) {
-        if (annotationLogo.length) {
+        const searchParams = location.search;
+        const queryParams = new URLSearchParams(searchParams);
+        const annotationMode = queryParams.get('mode') === 'annotation';
+        if (annotationMode && annotationLogo.length) {
           annotationLogo.forEach((annotation: IAnnotation) =>
             this.annotations.push(annotation),
           );
