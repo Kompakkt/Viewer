@@ -120,9 +120,11 @@ export class AnnotationService {
     this.processingService.Observables.actualEntityMeshes.subscribe(
       actualEntityMeshes => {
         this.actualEntityMeshes = actualEntityMeshes;
-        if (this.mediaType === 'model' ||
-            this.mediaType === 'entity' ||
-            this.mediaType === 'image') {
+        if (
+          this.mediaType === 'model' ||
+          this.mediaType === 'entity' ||
+          this.mediaType === 'image'
+        ) {
           this.loadAnnotations();
         }
       },
@@ -229,8 +231,8 @@ export class AnnotationService {
 
     if (!this.isDemoMode) {
       // Filter null/undefined annotations
-      const serverAnnotations = this.getAnnotationsfromServerDB()
-          .filter(annotation =>
+      const serverAnnotations = this.getAnnotationsfromServerDB().filter(
+        annotation =>
           annotation && annotation._id && annotation.lastModificationDate,
       );
       const pouchAnnotations = (await this.getAnnotationsfromLocalDB()).filter(
@@ -251,14 +253,13 @@ export class AnnotationService {
       }
       if (this.processingService.isDefaultEntityLoaded) {
         if (annotationLogo.length) {
-         annotationLogo.forEach((annotation: IAnnotation) =>
+          annotationLogo.forEach((annotation: IAnnotation) =>
             this.annotations.push(annotation),
-         ); }
+          );
+        }
       }
       if (this.annotations.length) {
-      this.selectedAnnotation.next(
-        this.annotations[0]._id,
-      );
+        this.selectedAnnotation.next(this.annotations[0]._id);
       }
     }
     this.initializeAnnotationMode();
@@ -410,16 +411,16 @@ export class AnnotationService {
   }
 
   private async sortAnnotations() {
-    const sortedDefault = this.getDefaultAnnotations()
-        .sort((leftSide, rightSide): number =>
+    const sortedDefault = this.getDefaultAnnotations().sort(
+      (leftSide, rightSide): number =>
         +leftSide.ranking === +rightSide.ranking
           ? 0
           : +leftSide.ranking < +rightSide.ranking
           ? -1
           : 1,
     );
-    const sortedCompilation = this.getCompilationAnnotations()
-        .sort((leftSide, rightSide): number =>
+    const sortedCompilation = this.getCompilationAnnotations().sort(
+      (leftSide, rightSide): number =>
         +leftSide.ranking === +rightSide.ranking
           ? 0
           : +leftSide.ranking < +rightSide.ranking
@@ -457,6 +458,7 @@ export class AnnotationService {
   // Die Annotationsfunktionalität wird zum aktuellen Entityl hinzugefügt
   public initializeAnnotationMode() {
     this.actualEntityMeshes.forEach(mesh => {
+      console.log('mesh: ', mesh);
       this.actionService.createActionManager(
         mesh,
         ActionManager.OnDoublePickTrigger,
@@ -469,8 +471,7 @@ export class AnnotationService {
   public async createNewAnnotation(result: any) {
     const camera = this.babylon.cameraManager.getInitialPosition();
 
-    this.babylon.createPreviewScreenshot(400)
-        .then(detailScreenshot => {
+    this.babylon.createPreviewScreenshot(400).then(detailScreenshot => {
       if (!this.actualEntity) {
         throw new Error(`this.actualEntity not defined: ${this.actualEntity}`);
         console.error('AnnotationService:', this);
@@ -658,8 +659,7 @@ export class AnnotationService {
       DialogGetUserDataComponent,
       dialogConfig,
     );
-    dialogRef.afterClosed()
-        .subscribe(data => {
+    dialogRef.afterClosed().subscribe(data => {
       if (data === true) {
         this.message.info('Deleted from Server');
       } else {
@@ -816,8 +816,11 @@ export class AnnotationService {
 
   public setAnnotatingAllowance() {
     let emitBool = false;
-    emitBool = this.isEntityFeaturesOpen && (!this.isMeshSettingsMode ?
-         true : (this.isDefaultEntityLoaded || this.isDemoMode));
+    emitBool =
+      this.isEntityFeaturesOpen &&
+      (!this.isMeshSettingsMode
+        ? true
+        : this.isDefaultEntityLoaded || this.isDemoMode);
     if (emitBool && !this.isCollectionInputSelected) {
       emitBool =
         (this.userdataService.isEntityOwner &&

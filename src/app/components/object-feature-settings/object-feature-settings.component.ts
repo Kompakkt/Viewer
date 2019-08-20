@@ -144,130 +144,127 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   public toggleHelpers() {
-        this.showHelpers = this.showHelpers ? false : true;
-        if (this.showHelpers) {
-            this.showOrientation = false;
-            this.showScaling = false;
-        }
+    this.showHelpers = this.showHelpers ? false : true;
+    if (this.showHelpers) {
+      this.showOrientation = false;
+      this.showScaling = false;
     }
+  }
 
   public toggleHelperBackground() {
-        this.showHelperBackground = this.showHelperBackground ? false : true;
-    }
+    this.showHelperBackground = this.showHelperBackground ? false : true;
+  }
 
   public toggleScaling() {
-        this.showScaling = this.showScaling ? false : true;
-        if (this.showScaling) {
-            this.showOrientation = false;
-            this.showHelpers = false;
-        }
+    this.showScaling = this.showScaling ? false : true;
+    if (this.showScaling) {
+      this.showOrientation = false;
+      this.showHelpers = false;
     }
+  }
 
   public toggleOrientation() {
-        this.showOrientation = this.showOrientation ? false : true;
-        if (this.showOrientation) {
-            this.showScaling = false;
-            this.showHelpers = false;
-        }
+    this.showOrientation = this.showOrientation ? false : true;
+    if (this.showOrientation) {
+      this.showScaling = false;
+      this.showHelpers = false;
     }
+  }
 
   public togglePreview() {
-        this.showPreview = this.showPreview ? false : true;
-        if (this.showPreview) {
-            this.showBackground = false;
-            this.showLights = false;
-        }
+    this.showPreview = this.showPreview ? false : true;
+    if (this.showPreview) {
+      this.showBackground = false;
+      this.showLights = false;
     }
+  }
 
   public toggleBackground() {
-        this.showBackground = this.showBackground ? false : true;
-        if (this.showBackground) {
-            this.showPreview = false;
-            this.showLights = false;
-        }
+    this.showBackground = this.showBackground ? false : true;
+    if (this.showBackground) {
+      this.showPreview = false;
+      this.showLights = false;
     }
+  }
 
   public toggleLights() {
-        this.showLights = this.showLights ? false : true;
-        if (this.showLights) {
-            this.showPreview = false;
-            this.showBackground = false;
-        }
+    this.showLights = this.showLights ? false : true;
+    if (this.showLights) {
+      this.showPreview = false;
+      this.showBackground = false;
     }
+  }
 
   public resetHelpers() {
-        if (!this.activeEntity || !this.activeEntity.settings) {
-            console.warn('No this.activeEntity', this);
-            return;
-        }
-        this.entitySettingsService.resetVisualSettingsHelper();
-        this.babylonService.setBackgroundColor(
-            this.activeEntity.settings.background.color,
-        );
-        this.setEffect = this.activeEntity.settings.background.effect;
-        this.babylonService.setBackgroundImage(this.setEffect);
-        this.showHelpers = false;
-
-        this.babylonService.cameraManager.resetCamera();
+    if (!this.activeEntity || !this.activeEntity.settings) {
+      console.warn('No this.activeEntity', this);
+      return;
     }
+    this.entitySettingsService.resetVisualSettingsHelper();
+    this.babylonService.setBackgroundColor(
+      this.activeEntity.settings.background.color,
+    );
+    this.setEffect = this.activeEntity.settings.background.effect;
+    this.babylonService.setBackgroundImage(this.setEffect);
+    this.showHelpers = false;
+
+    this.babylonService.cameraManager.resetCamera();
+  }
 
   public resetMeshSize() {
-        this.entitySettingsService.resetMeshSize();
-        this.babylonService.cameraManager.resetCamera();
-    }
+    this.entitySettingsService.resetMeshSize();
+    this.babylonService.cameraManager.resetCamera();
+  }
 
   public resetMeshRotation() {
-        this.entitySettingsService.resetMeshRotation();
-        this.babylonService.cameraManager.resetCamera();
-    }
+    this.entitySettingsService.resetMeshRotation();
+    this.babylonService.cameraManager.resetCamera();
+  }
 
-    /*
-     * Light Settings
-     */
+  /*
+   * Light Settings
+   */
 
-    // Ambientlights
+  // Ambientlights
 
   setAmbientlightIntensityUp(event: any) {
-        this.lightService.setLightIntensity('ambientlightUp', event.value);
-        this.ambientlightUpintensity = event.value;
-    }
+    this.lightService.setLightIntensity('ambientlightUp', event.value);
+    this.ambientlightUpintensity = event.value;
+  }
 
   setAmbientlightIntensityDown(event: any) {
-        this.lightService.setLightIntensity('ambientlightDown', event.value);
-        this.ambientlightDownintensity = event.value;
-    }
+    this.lightService.setLightIntensity('ambientlightDown', event.value);
+    this.ambientlightDownintensity = event.value;
+  }
 
-    // Pointlight
+  // Pointlight
 
   setPointlightIntensity(event: any) {
-        this.lightService.setLightIntensity('pointlight', event.value);
-    }
+    this.lightService.setLightIntensity('pointlight', event.value);
+  }
 
   pointlightPosX(event: any) {
-        this.lightService.setLightPosition('x', event.value);
-    }
+    this.lightService.setLightPosition('x', event.value);
+  }
 
   pointlightPosY(event: any) {
-        this.lightService.setLightPosition('y', event.value);
-    }
+    this.lightService.setLightPosition('y', event.value);
+  }
 
   pointlightPosZ(event: any) {
-        this.lightService.setLightPosition('z', event.value);
-    }
+    this.lightService.setLightPosition('z', event.value);
+  }
 
-    /*
-     * Initial Perspective & Preview Settings
-     */
+  /*
+   * Initial Perspective & Preview Settings
+   */
 
   public async setInitialView() {
     const {
-
       position,
-      target ,
+      target,
     } = this.babylonService.cameraManager.getInitialPosition();
-    this.cameraPositionInitial = {  position,
-                                    target,
-     };
+    this.cameraPositionInitial = { position, target };
     console.log(this.cameraPositionInitial);
     return new Promise<string>((resolve, reject) =>
       this.babylonService.createPreviewScreenshot(400).then(
@@ -317,102 +314,104 @@ export class EntityFeatureSettingsComponent implements OnInit {
    */
 
   private async setSettings() {
-        // Settings available?
-        let upload = false;
-        if (
-            !this.activeEntity ||
-            !this.activeEntity.settings ||
-            this.activeEntity.settings.preview === undefined ||
-            // TODO: how to check if settings need to be set? atm next line
-            this.activeEntity.settings.preview === '' ||
-            this.activeEntity.settings.cameraPositionInitial === undefined ||
-            this.activeEntity.settings.background === undefined ||
-            this.activeEntity.settings.lights === undefined ||
-            this.activeEntity.settings.rotation === undefined ||
-            this.activeEntity.settings.scale === undefined
-        ) {
-            // Settings missing? => Cases: Upload || Default, Fallback
-            upload = await this.createSettings();
-            if (upload) {
-                await this.initialiseUpload();
-            }
-        }
-        if (this.activeEntity && this.activeEntity.settings && !upload) {
-            console.log('SETTINGS', this.activeEntity.settings);
-            await this.entitySettingsService.loadSettings(
-                this.activeEntity.settings.scale,
-                this.activeEntity.settings.rotation.x,
-                this.activeEntity.settings.rotation.y,
-                this.activeEntity.settings.rotation.z,
-                this.isDefault,
-            );
-            await this.setCamera();
-            await this.setLightBackground();
-            await this.setPreview();
-        }
+    // Settings available?
+    let upload = false;
+    if (
+      !this.activeEntity ||
+      !this.activeEntity.settings ||
+      this.activeEntity.settings.preview === undefined ||
+      // TODO: how to check if settings need to be set? atm next line
+      this.activeEntity.settings.preview === '' ||
+      this.activeEntity.settings.cameraPositionInitial === undefined ||
+      this.activeEntity.settings.background === undefined ||
+      this.activeEntity.settings.lights === undefined ||
+      this.activeEntity.settings.rotation === undefined ||
+      this.activeEntity.settings.scale === undefined
+    ) {
+      // Settings missing? => Cases: Upload || Default, Fallback
+      upload = await this.createSettings();
+      if (upload) {
+        await this.initialiseUpload();
+      }
     }
+    if (this.activeEntity && this.activeEntity.settings && !upload) {
+      console.log('SETTINGS', this.activeEntity.settings);
+      await this.entitySettingsService.loadSettings(
+        this.activeEntity.settings.scale,
+        this.activeEntity.settings.rotation.x,
+        this.activeEntity.settings.rotation.y,
+        this.activeEntity.settings.rotation.z,
+        this.isDefault,
+      );
+      await this.setCamera();
+      await this.setLightBackground();
+      await this.setPreview();
+    }
+  }
 
   private createSettings(): boolean {
-        let settings;
-        let upload = false;
+    let settings;
+    let upload = false;
 
-        if (this.isDefault) {
-            settings = settingsKompakktLogo;
-        } else if (this.isFallbackEntityLoaded) {
-            settings = settingsFallback;
-        } else {
-            switch (this.mediaType) {
-                case 'entity':
-                case 'model': {
-                    settings = settingsEntity;
-                    upload = true;
-                    break;
-                }
-                case 'audio': {
-                    settings = settingsAudio;
-                    this.saveActualSettings();
-                    break;
-                }
-                case 'video': {
-                    settings = settings2D;
-                    this.saveActualSettings();
-                    break;
-                }
-                case 'image': {
-                    settings = settings2D;
-                    this.saveActualSettings();
-                    break;
-                }
-                default: {
-                    settings = settingsEntity;
-                    upload = true;
-                }
-            }
+    if (this.isDefault) {
+      settings = settingsKompakktLogo;
+    } else if (this.isFallbackEntityLoaded) {
+      settings = settingsFallback;
+    } else {
+      switch (this.mediaType) {
+        case 'entity':
+        case 'model': {
+          settings = settingsEntity;
+          upload = true;
+          break;
         }
-        if (this.activeEntity) {
-            this.activeEntity['settings'] = settings;
+        case 'audio': {
+          settings = settingsAudio;
+          this.saveActualSettings();
+          break;
         }
-        return upload;
+        case 'video': {
+          settings = settings2D;
+          this.saveActualSettings();
+          break;
+        }
+        case 'image': {
+          settings = settings2D;
+          upload = true;
+          break;
+        }
+        default: {
+          settings = settingsEntity;
+          upload = true;
+        }
+      }
     }
-
-    private async initialiseUpload() {
-        const searchParams = location.search;
-        const queryParams = new URLSearchParams(searchParams);
-        const isDragDrop = queryParams.get('mode') === 'dragdrop';
-
-        if ((isDragDrop || this.isEntityOwner) && !this.isFinished) {
-            await this.setLightBackground();
-            this.initialSettingsMode = true;
-            await this.entitySettingsService.createVisualSettings(this.mediaType === 'entity' || this.mediaType === 'model');
-            this.cameraPositionInitial = this.babylonService.cameraManager.getActualDefaultPosition();
-            const cameraSettings = this.cameraPositionInitial;
-
-            if (this.activeEntity && this.activeEntity.settings) {
-                this.activeEntity.settings.cameraPositionInitial = cameraSettings;
-            }
-            this.overlayService.activateSettingsTab();
-        }
+    if (this.activeEntity) {
+      this.activeEntity['settings'] = settings;
     }
+    return upload;
+  }
+
+  private async initialiseUpload() {
+    const searchParams = location.search;
+    const queryParams = new URLSearchParams(searchParams);
+    const isDragDrop = queryParams.get('mode') === 'dragdrop';
+
+    if ((isDragDrop || this.isEntityOwner) && !this.isFinished) {
+      await this.setLightBackground();
+      this.initialSettingsMode = true;
+      await this.entitySettingsService.createVisualSettings(
+        this.mediaType === 'entity' || this.mediaType === 'model',
+      );
+      this.cameraPositionInitial = this.babylonService.cameraManager.getActualDefaultPosition();
+      const cameraSettings = this.cameraPositionInitial;
+
+      if (this.activeEntity && this.activeEntity.settings) {
+        this.activeEntity.settings.cameraPositionInitial = cameraSettings;
+      }
+      this.overlayService.activateSettingsTab();
+    }
+  }
 
   async backToDefault() {
     this.babylonService.cameraManager.resetCamera();
@@ -424,125 +423,125 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   private async setCamera() {
-        if (!this.activeEntity || !this.activeEntity.settings) {
-            console.warn('No this.activeEntity', this);
-            return;
-        }
-        const camera = Array.isArray(
-            this.activeEntity.settings.cameraPositionInitial,
-        )
-            ? (this.activeEntity.settings.cameraPositionInitial as any[]).find(
-                obj => obj.cameraType === 'arcRotateCam',
-            )
-            : this.activeEntity.settings.cameraPositionInitial;
-
-        const positionVector = new Vector3(
-            camera.position.x,
-            camera.position.y,
-            camera.position.z,
-        );
-        const targetVector = new Vector3(
-            camera.target.x,
-            camera.target.y,
-            camera.target.z,
-        );
-
-        this.babylonService.cameraManager.updateDefaults(
-            positionVector,
-            targetVector,
-        );
-        this.babylonService.cameraManager.moveActiveCameraToPosition(
-            positionVector,
-        );
-        this.babylonService.cameraManager.setActiveCameraTarget(targetVector);
-        this.cameraPositionInitial = this.babylonService.cameraManager.getInitialPosition();
+    if (!this.activeEntity || !this.activeEntity.settings) {
+      console.warn('No this.activeEntity', this);
+      return;
     }
+    const camera = Array.isArray(
+      this.activeEntity.settings.cameraPositionInitial,
+    )
+      ? (this.activeEntity.settings.cameraPositionInitial as any[]).find(
+          obj => obj.cameraType === 'arcRotateCam',
+        )
+      : this.activeEntity.settings.cameraPositionInitial;
+
+    const positionVector = new Vector3(
+      camera.position.x,
+      camera.position.y,
+      camera.position.z,
+    );
+    const targetVector = new Vector3(
+      camera.target.x,
+      camera.target.y,
+      camera.target.z,
+    );
+
+    this.babylonService.cameraManager.updateDefaults(
+      positionVector,
+      targetVector,
+    );
+    this.babylonService.cameraManager.moveActiveCameraToPosition(
+      positionVector,
+    );
+    this.babylonService.cameraManager.setActiveCameraTarget(targetVector);
+    this.cameraPositionInitial = this.babylonService.cameraManager.getInitialPosition();
+  }
 
   private async setLightBackground() {
-        if (!this.activeEntity || !this.activeEntity.settings) {
-            console.warn('No this.activeEntity', this);
-            return;
-        }
-        // Background
-        this.babylonService.setBackgroundColor(
-            this.activeEntity.settings.background.color,
-        );
-        this.setEffect = this.activeEntity.settings.background.effect;
-        this.babylonService.setBackgroundImage(this.setEffect);
-
-        // Lights
-        const pointLight = this.activeEntity.settings.lights.filter(
-            obj => obj.type === 'PointLight',
-        )[0];
-        this.lightService.createPointLight('pointlight', pointLight.position);
-        this.lightService.setLightIntensity('pointlight', pointLight.intensity);
-
-        const hemisphericLightUp = this.activeEntity.settings.lights.filter(
-            obj => obj.type === 'HemisphericLight' && obj.position.y === 1,
-        )[0];
-        this.lightService.createAmbientlightUp(
-            'ambientlightUp',
-            hemisphericLightUp.position,
-        );
-        this.lightService.setLightIntensity(
-            'ambientlightUp',
-            hemisphericLightUp.intensity,
-        );
-        this.ambientlightUpintensity = hemisphericLightUp.intensity;
-
-        const hemisphericLightDown = this.activeEntity.settings.lights.filter(
-            obj => obj.type === 'HemisphericLight' && obj.position.y === -1,
-        )[0];
-        this.lightService.createAmbientlightDown(
-            'ambientlightDown',
-            hemisphericLightDown.position,
-        );
-        this.lightService.setLightIntensity(
-            'ambientlightDown',
-            hemisphericLightDown.intensity,
-        );
-        this.ambientlightDownintensity = hemisphericLightDown.intensity;
+    if (!this.activeEntity || !this.activeEntity.settings) {
+      console.warn('No this.activeEntity', this);
+      return;
     }
+    // Background
+    this.babylonService.setBackgroundColor(
+      this.activeEntity.settings.background.color,
+    );
+    this.setEffect = this.activeEntity.settings.background.effect;
+    this.babylonService.setBackgroundImage(this.setEffect);
+
+    // Lights
+    const pointLight = this.activeEntity.settings.lights.filter(
+      obj => obj.type === 'PointLight',
+    )[0];
+    this.lightService.createPointLight('pointlight', pointLight.position);
+    this.lightService.setLightIntensity('pointlight', pointLight.intensity);
+
+    const hemisphericLightUp = this.activeEntity.settings.lights.filter(
+      obj => obj.type === 'HemisphericLight' && obj.position.y === 1,
+    )[0];
+    this.lightService.createAmbientlightUp(
+      'ambientlightUp',
+      hemisphericLightUp.position,
+    );
+    this.lightService.setLightIntensity(
+      'ambientlightUp',
+      hemisphericLightUp.intensity,
+    );
+    this.ambientlightUpintensity = hemisphericLightUp.intensity;
+
+    const hemisphericLightDown = this.activeEntity.settings.lights.filter(
+      obj => obj.type === 'HemisphericLight' && obj.position.y === -1,
+    )[0];
+    this.lightService.createAmbientlightDown(
+      'ambientlightDown',
+      hemisphericLightDown.position,
+    );
+    this.lightService.setLightIntensity(
+      'ambientlightDown',
+      hemisphericLightDown.intensity,
+    );
+    this.ambientlightDownintensity = hemisphericLightDown.intensity;
+  }
 
   private async setPreview() {
-        if (!this.activeEntity || !this.activeEntity.settings) {
-            console.warn('No this.activeEntity', this);
-            return;
-        }
-        if (
-            this.activeEntity.settings.preview !== undefined &&
-            this.activeEntity.settings.preview !== ''
-        ) {
-            this.preview = this.activeEntity.settings.preview;
-        } else {
-            this.babylonService.cameraManager.resetCamera();
-            await this.createMissingInitialDefaultScreenshot();
-        }
+    if (!this.activeEntity || !this.activeEntity.settings) {
+      console.warn('No this.activeEntity', this);
+      return;
     }
+    if (
+      this.activeEntity.settings.preview !== undefined &&
+      this.activeEntity.settings.preview !== ''
+    ) {
+      this.preview = this.activeEntity.settings.preview;
+    } else {
+      this.babylonService.cameraManager.resetCamera();
+      await this.createMissingInitialDefaultScreenshot();
+    }
+  }
 
   private async createMissingInitialDefaultScreenshot() {
-        await new Promise<string>((resolve, reject) =>
-            this.babylonService
-                .createPreviewScreenshot(400)
-                .then(screenshot => {
-                    if (!this.activeEntity || !this.activeEntity.settings) {
-                        console.warn('No this.activeEntity', this);
-                        return;
-                    }
-                    this.preview = screenshot;
-                    this.activeEntity.settings.preview = screenshot;
-                    resolve(screenshot);
-                })
-                .catch(error => {
-                    this.message.error(error);
-                    reject(error);
-                }),
-        );
-    }
+    await new Promise<string>((resolve, reject) =>
+      this.babylonService
+        .createPreviewScreenshot(400)
+        .then(screenshot => {
+          if (!this.activeEntity || !this.activeEntity.settings) {
+            console.warn('No this.activeEntity', this);
+            return;
+          }
+          this.preview = screenshot;
+          this.activeEntity.settings.preview = screenshot;
+          resolve(screenshot);
+        })
+        .catch(error => {
+          this.message.error(error);
+          reject(error);
+        }),
+    );
+  }
 
-    /*
-     * Save Settings
-     */
+  /*
+   * Save Settings
+   */
   public async saveActualSettings() {
     if (!this.cameraPositionInitial) {
       console.warn('No initial camera position', this);

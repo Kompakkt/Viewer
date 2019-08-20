@@ -68,7 +68,7 @@ export class AnnotationmarkerService {
     if (plane1.material) {
       plane1.material.alpha = 1;
     }
-    plane1.renderingGroupId = 0;
+    plane1.renderingGroupId = 2;
 
     const plane2 = this.createPlane(
       annotation._id + '_pick',
@@ -96,7 +96,7 @@ export class AnnotationmarkerService {
       plane2.material.alpha = 0.5;
     }
     // TODO: click is not working if renderingGroup == 1 and Entity is behind another entity
-    plane2.renderingGroupId = 1;
+    plane2.renderingGroupId = 3;
   }
 
   private createPlane(
