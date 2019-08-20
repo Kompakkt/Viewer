@@ -183,33 +183,11 @@ export class ProcessingService {
     const fileList: File[] = [];
     let mediaType = '';
     let ext = '.babylon';
-
-    const fileReader = new FileReader();
-    fileReader.onload = evt => {
-      const base64 = (evt.currentTarget as FileReader).result as string;
-      this.loadEntity(
-        {
-          ...baseEntity(),
-          _id: 'dragdrop',
-          name: 'dragdrop',
-          mediaType,
-          dataSource: {
-            isExternal: false,
-            service: '',
-          },
-          processed: {
-            low: base64,
-            medium: base64,
-            high: base64,
-            raw: base64,
-          },
-        },
-        '',
-        ext,
-      )
-          .then(() => this.loaded.emit(true));
-    };
-
+    let largest: any;
+    let blobList: Array<{
+      name: string;
+      blob: string;
+    }> = [];
     const getMediaType = () => {
       const _countMedia = {
         model: 0,
@@ -262,19 +240,63 @@ export class ProcessingService {
           return;
           // Too many files
         }
-        fileReader.readAsDataURL(fileList[0]);
+        loadFile(fileList[0]);
       } else {
-        const largest = fileList
+        largest = fileList
           .filter(file =>
             modelExts.includes(file.name.substr(file.name.lastIndexOf('.'))),
           )
           .sort((a, b) => b.size - a.size)[0];
+        blobList = fileList
+          .filter(
+            file =>
+              !modelExts.includes(file.name.substr(file.name.lastIndexOf('.'))),
+          )
+          .map(file => {
+            const item = { name: file.name, blob: URL.createObjectURL(file) };
+            item.blob = item.blob.slice(item.blob.lastIndexOf('/') + 1);
+            return item;
+          });
         this.loadingScreenHandler.updateLoadingText(
           `Loading ${largest.name}. Please wait...`,
         );
         ext = largest.name.substr(largest.name.lastIndexOf('.'));
-        fileReader.readAsDataURL(largest);
+        loadFile(largest);
       }
+    };
+
+    const loadFile = async (file: File) => {
+      console.log(file);
+      const fileAsText = await (file['text']() as Promise<string>).then(
+        result => {
+          for (const item of blobList) {
+            result = result.replace(item.name, item.blob);
+          }
+          return result;
+        },
+      );
+      const newFile = new File([fileAsText], file.name);
+      console.log(newFile);
+      const blob = URL.createObjectURL(file);
+
+      // TODO: Replace filenames in entity File && blobList files with
+      // corresponding blob URL
+      console.log('Entity URL:', blob, blobList);
+      this.loadEntity(
+        {
+          ...baseEntity(),
+          _id: 'dragdrop',
+          name: 'dragdrop',
+          mediaType,
+          dataSource: {
+            isExternal: false,
+            service: '',
+          },
+          processed: { low: blob, medium: blob, high: blob, raw: blob },
+        },
+        '',
+        ext,
+      ).then(() => this.loaded.emit(true));
     };
 
     this.babylonService.getEngine().loadingUIText =
