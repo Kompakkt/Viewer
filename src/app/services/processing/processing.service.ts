@@ -376,7 +376,7 @@ export class ProcessingService {
     }
 
     if (loadingCase === 'default') {
-      this.loadFallbackEntity();
+      this.loadDefaultEntityData();
       if (mode === 'annotation') {
         this.isLightMode = false;
         this.lightMode.emit(false);
