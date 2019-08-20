@@ -322,6 +322,9 @@ export class ProcessingService {
               this.isLoggedIn = true;
               this.loggedIn.emit(true);
             } else {
+              // tslint:disable-next-line:max-line-length
+              this.message.error('You are not logged in and this would be necessary to annotate this object.' +
+                  'Please reload the page if you want to log in.');
               this.isLoggedIn = false;
               this.loggedIn.emit(false);
               this.isLightMode = true;
@@ -332,7 +335,9 @@ export class ProcessingService {
             console.error(error);
             this.isLoggedIn = false;
             this.loggedIn.emit(false);
-            this.message.error('Can not check if you are logged in.');
+            // tslint:disable-next-line:max-line-length
+            this.message.error('I can not check if you are logged in. The server is not responding.' +
+                'That means I can not initialise the annotation mode.');
           });
       }
       if (mode === 'edit') {
@@ -346,6 +351,9 @@ export class ProcessingService {
               this.isLoggedIn = true;
               this.loggedIn.emit(true);
             } else {
+              // tslint:disable-next-line:max-line-length
+              this.message.error('You are not logged in and this would be necessary to edit this object.' +
+                  'Please reload the page if you want to log in.');
               this.isLoggedIn = false;
               this.loggedIn.emit(false);
               this.isLightMode = true;
@@ -356,7 +364,9 @@ export class ProcessingService {
             console.error(error);
             this.isLoggedIn = false;
             this.loggedIn.emit(false);
-            this.message.error('Can not check if you are logged in.');
+            // tslint:disable-next-line:max-line-length
+            this.message.error('I can not check if you are logged in. The server is not responding.' +
+                'That means I can not initialise the edit mode.');
           });
       }
     }
@@ -385,6 +395,9 @@ export class ProcessingService {
               this.isLoggedIn = true;
               this.loggedIn.emit(true);
             } else {
+              // tslint:disable-next-line:max-line-length
+              this.message.error('You are not logged in and this would be necessary to initialise the catalogue.' +
+                  'Please log in if you want to use this functionality.');
               this.isLoggedIn = false;
               this.loggedIn.emit(false);
             }
@@ -393,7 +406,9 @@ export class ProcessingService {
             console.error(error);
             this.isLoggedIn = false;
             this.loggedIn.emit(false);
-            this.message.error('Can not check if you are logged in.');
+            // tslint:disable-next-line:max-line-length
+            this.message.error('I can not check if you are logged in. The server is not responding.' +
+                'That means I can not initialise the catalogue. ');
           });
       }
     }
@@ -417,6 +432,9 @@ export class ProcessingService {
               this.isLoggedIn = true;
               this.loggedIn.emit(true);
             } else {
+              // tslint:disable-next-line:max-line-length
+              this.message.error('You are not logged in and this would be necessary to initialise the full functionality.' +
+                  'Please reload the page if you want to log in');
               this.isLightMode = true;
               this.lightMode.emit(true);
               this.isLoggedIn = false;
@@ -427,12 +445,15 @@ export class ProcessingService {
             console.error(error);
             this.isLoggedIn = false;
             this.loggedIn.emit(false);
-            this.message.error('Can not check if you are logged in.');
+            // tslint:disable-next-line:max-line-length
+            this.message.error('I can not check if you are logged in. The server is not responding.' +
+                'That means I can not initialise the full functionality.');
           });
       }
     }
   }
 
+  // TODO message
   public loadDefaultEntityData() {
     this.loaded.emit(false);
     this.quality = 'low';
@@ -469,6 +490,7 @@ export class ProcessingService {
       });
   }
 
+  // TODO message
   public fetchAndLoad(
     entityId?: string,
     collectionId?: string,
@@ -510,6 +532,7 @@ export class ProcessingService {
     }
   }
 
+  // TODO message
   public fetchEntityData(query: string) {
     this.mongoHandlerService
       .getEntity(query)
@@ -532,6 +555,7 @@ export class ProcessingService {
       });
   }
 
+  // TODO message
   public async loadEntity(
     newEntity: IEntity,
     overrideUrl?: string,
@@ -629,6 +653,43 @@ export class ProcessingService {
     }
   }
 
+  // TODO message
+  public updateEntityQuality(quality: string) {
+    if (this.quality !== quality) {
+      this.quality = quality;
+      const entity = this.getCurrentEntity();
+
+      if (!entity || !entity.processed) {
+        throw new Error('Entity or Entity.processed');
+        console.error(this);
+        return;
+      }
+      if (entity && entity.processed[this.quality] !== undefined) {
+        this.loaded.emit(false);
+        this.loadEntity(
+            entity._id === 'Cube' ? defaultEntity : entity,
+            entity._id === 'Cube' ? '' : undefined,
+        )
+            .then(() => {
+              this.loaded.emit(true);
+            })
+            .catch(error => {
+              console.error(error);
+              this.message.error('Loading not possible');
+            });
+      } else {
+        this.message.error('Entity quality is not available.');
+      }
+    } else {
+      return;
+    }
+  }
+
+  /*
+   * Down here only relevant for full load / catalogue
+   */
+
+  // TODO message
   public fetchCollectionsData() {
     this.mongoHandlerService
       .getAllCompilations()
@@ -641,6 +702,7 @@ export class ProcessingService {
       });
   }
 
+  // TODO message
   public fetchEntitiesData() {
     this.mongoHandlerService
       .getAllEntities()
@@ -662,37 +724,7 @@ export class ProcessingService {
       });
   }
 
-  public updateEntityQuality(quality: string) {
-    if (this.quality !== quality) {
-      this.quality = quality;
-      const entity = this.getCurrentEntity();
-
-      if (!entity || !entity.processed) {
-        throw new Error('Entity or Entity.processed');
-        console.error(this);
-        return;
-      }
-      if (entity && entity.processed[this.quality] !== undefined) {
-        this.loaded.emit(false);
-        this.loadEntity(
-          entity._id === 'Cube' ? defaultEntity : entity,
-          entity._id === 'Cube' ? '' : undefined,
-        )
-          .then(() => {
-            this.loaded.emit(true);
-          })
-          .catch(error => {
-            console.error(error);
-            this.message.error('Loading not possible');
-          });
-      } else {
-        this.message.error('Entity quality is not available.');
-      }
-    } else {
-      return;
-    }
-  }
-
+  // TODO message
   public async selectCollectionByID(
     identifierCollection: string,
   ): Promise<string> {
@@ -737,6 +769,7 @@ export class ProcessingService {
     });
   }
 
+  // TODO message
   public selectEntityByID(identifierEntity: string): boolean {
     // TODO: check if this correctly returns
     const entity = this.Observables.entities.source['value'].find(
