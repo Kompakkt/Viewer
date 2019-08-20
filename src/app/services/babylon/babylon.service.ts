@@ -415,8 +415,8 @@ export class BabylonService {
                 'assets/img/logo-background.png',
                 this.scene,
                 this.imageContainer,
-                isDefault,
-              ).then(img => {
+                isDefault)
+                  .then(img => {
                 if (img) {
                   this.imageContainer = img;
                 } else {

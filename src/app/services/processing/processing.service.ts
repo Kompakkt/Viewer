@@ -4,7 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { ReplaySubject } from 'rxjs/internal/ReplaySubject';
 
 import { baseEntity } from '../../../assets/defaults';
-import { defaultEntity } from '../../../assets/entities/entities';
+import { defaultEntity, fallbackEntity } from '../../../assets/entities/entities';
 import { environment } from '../../../environments/environment';
 import { ICompilation, IEntity } from '../../interfaces/interfaces';
 import { BabylonService } from '../babylon/babylon.service';
@@ -82,9 +82,12 @@ export class ProcessingService {
 
   public updateActiveEntity(entity: IEntity) {
     this.Subjects.actualEntity.next(entity);
-    if (entity && entity._id === 'default') {
-      this.isDefaultEntityLoaded = true;
-      this.defaultEntityLoaded.emit(true);
+    if (entity && entity._id === 'default' || entity && entity._id === 'fallback') {
+      this.isDefaultEntityLoaded = entity._id === 'default';
+      this.defaultEntityLoaded.emit(entity._id === 'default');
+
+      this.isFallbackEntityLoaded = entity._id === 'fallback';
+      this.fallbackEntityLoaded.emit(entity._id === 'fallback');
     } else {
       this.isDefaultEntityLoaded = false;
       this.defaultEntityLoaded.emit(false);
@@ -203,7 +206,8 @@ export class ProcessingService {
         },
         '',
         ext,
-      ).then(() => this.loaded.emit(true));
+      )
+          .then(() => this.loaded.emit(true));
     };
 
     const getMediaType = () => {
@@ -372,7 +376,7 @@ export class ProcessingService {
     }
 
     if (loadingCase === 'default') {
-      this.loadDefaultEntityData();
+      this.loadFallbackEntity();
       if (mode === 'annotation') {
         this.isLightMode = false;
         this.lightMode.emit(false);
@@ -453,7 +457,6 @@ export class ProcessingService {
     }
   }
 
-  // TODO message
   public loadDefaultEntityData() {
     this.loaded.emit(false);
     this.quality = 'low';
@@ -465,32 +468,33 @@ export class ProcessingService {
       })
       .catch(error => {
         console.error(error);
-        this.message.error('Loading of default entity not possible');
+        this.loadFallbackEntity()
+            .then(() => {
+              // TODO add annotation
+            })
+            .catch(e => {
+              console.error(e);
+              this.message.error('Loading of Objects does not work. Please tell us about it!');
+            });
       });
   }
 
+  // 1. default lädt nicht
   public async loadFallbackEntity() {
-    await this.babylonService
-      .loadEntity(
-        true,
-        'assets/models/sketch_cat/scene.gltf',
-        'entity',
-        '.gltf',
-      )
+    this.loaded.emit(false);
+    this.quality = 'low';
+    this.Subjects.actualMediaType.next('entity');
+    await this.loadEntity(fallbackEntity, '', '.gltf')
       .then(() => {
-        this.updateActiveEntityMeshes(this.babylonService.entityContainer
-          .meshes as Mesh[]);
-        this.isFallbackEntityLoaded = true;
-        this.fallbackEntityLoaded.emit(true);
-        this.Subjects.actualMediaType.next('entity');
+        this.loaded.emit(true);
+        // TODO this.metadataService.addFallbackMetadata();
       })
       .catch(error => {
         console.error(error);
-        this.message.error('Loading of fallback entity not possible');
+        this.message.error('Loading of Objects does not work. Please tell us about it!');
       });
   }
 
-  // TODO message
   public fetchAndLoad(
     entityId?: string,
     collectionId?: string,
@@ -525,14 +529,21 @@ export class ProcessingService {
         })
         .catch(error => {
           console.error(error);
-          this.message.error(
-            'Connection to entity server to load collection refused.',
-          );
+          /*this.message.error(
+'Connection to entity server to load compilation refused.',
+);*/
+          this.loadFallbackEntity()
+              .then(() => {
+                // TODO add annotation
+              })
+              .catch(e => {
+                console.error(e);
+                this.message.error('Loading of Objects does not work. Please tell us about it!');
+              });
         });
     }
   }
 
-  // TODO message
   public fetchEntityData(query: string) {
     this.mongoHandlerService
       .getEntity(query)
@@ -544,27 +555,42 @@ export class ProcessingService {
           })
           .catch(error => {
             console.error(error);
-            this.message.error('Loading of this Entity is not possible');
+            /*this.message.error(
+            'Connection to entity server to load entity refused.',
+            );*/
+            this.loadFallbackEntity()
+                .then(() => {
+                  // TODO add annotation
+                })
+                .catch(e => {
+                  console.error(e);
+                  // tslint:disable-next-line:max-line-length
+                  this.message.error('Loading of this Objects does not work. Please tell us about it!');
+                });
           });
       })
-      .catch(error => {
-        console.error(error);
-        this.message.error(
+        .catch(error => {
+          console.error(error);
+          /*this.message.error(
           'Connection to entity server to load entity refused.',
-        );
+          );*/
+          this.loadFallbackEntity()
+              .then(() => {
+                // TODO add annotation
+            })
+            .catch(e => {
+              console.error(e);
+              this.message.error('Loading of Objects does not work. Please tell us about it!');
+            });
       });
   }
 
-  // TODO message
   public async loadEntity(
     newEntity: IEntity,
     overrideUrl?: string,
     extension = '.babylon',
   ) {
     const URL = overrideUrl !== undefined ? overrideUrl : this.baseUrl;
-    this.isFallbackEntityLoaded = false;
-    this.fallbackEntityLoaded.emit(false);
-
     if (
       !this.loadingScreenHandler.isLoading &&
       newEntity.processed &&
@@ -578,19 +604,34 @@ export class ProcessingService {
           case 'model':
           case 'entity':
             await this.babylonService
-              .loadEntity(
-                true,
-                _url,
-                mediaType,
-                extension,
-                newEntity._id === 'default',
-              )
-              .then(() => {
-                this.Subjects.actualMediaType.next('entity');
-                this.updateActiveEntity(newEntity);
-                this.updateActiveEntityMeshes(this.babylonService
-                  .entityContainer.meshes as Mesh[]);
-              });
+                .loadEntity(
+                    true,
+                    _url,
+                    mediaType,
+                    extension,
+                    newEntity._id === 'default',
+                )
+                .then(() => {
+                  this.Subjects.actualMediaType.next('entity');
+                  this.updateActiveEntity(newEntity);
+                  this.updateActiveEntityMeshes(this.babylonService
+                      .entityContainer.meshes as Mesh[]);
+                })
+                .catch(error => {
+                  console.error(error);
+                  /*this.message.error(
+                  'Connection to entity server to load entity refused.',
+                  );*/
+                  this.loadFallbackEntity()
+                      .then(() => {
+                        // TODO add annotation
+                      })
+                      .catch(e => {
+                        console.error(e);
+                        // tslint:disable-next-line:max-line-length
+                        this.message.error('Loading of Objects does not work. Please tell us about it!');
+                      });
+                });
             break;
           case 'image':
             await this.babylonService
@@ -603,7 +644,22 @@ export class ProcessingService {
                   this.updateActiveEntity(newEntity);
                   this.updateActiveEntityMeshes([plane as Mesh]);
                 }
-              });
+              })
+                .catch(error => {
+                  console.error(error);
+                  /*this.message.error(
+                  'Connection to entity server to load entity refused.',
+                  );*/
+                  this.loadFallbackEntity()
+                      .then(() => {
+                        // TODO add annotation
+                      })
+                      .catch(e => {
+                        console.error(e);
+                        // tslint:disable-next-line:max-line-length
+                        this.message.error('Loading of Objects does not work. Please tell us about it!');
+                      });
+                });
             break;
           case 'audio':
             await this.babylonService
@@ -623,8 +679,22 @@ export class ProcessingService {
                 this.babylonService
                   .loadEntity(false, _url, mediaType)
                   .then(() => {});
-              });
-
+              })
+                .catch(error => {
+                  console.error(error);
+                  /*this.message.error(
+                  'Connection to entity server to load entity refused.',
+                  );*/
+                  this.loadFallbackEntity()
+                      .then(() => {
+                        // TODO add annotation
+                      })
+                      .catch(e => {
+                        console.error(e);
+                        // tslint:disable-next-line:max-line-length
+                        this.message.error('Loading of Objects does not work. Please tell us about it!');
+                      });
+                });
             break;
           case 'video':
             await this.babylonService
@@ -636,46 +706,72 @@ export class ProcessingService {
                   this.updateActiveEntity(newEntity);
                   this.updateActiveEntityMeshes([plane as Mesh]);
                 }
-              });
-            break;
-          case 'text':
-            this.Subjects.actualEntity.next(newEntity);
-            await this.loadFallbackEntity();
-            this.Subjects.actualMediaType.next('text');
+              })
+                .catch(error => {
+                  console.error(error);
+                  /*this.message.error(
+                  'Connection to entity server to load entity refused.',
+                  );*/
+                  this.loadFallbackEntity()
+                      .then(() => {
+                        // TODO add annotation
+                      })
+                      .catch(e => {
+                        console.error(e);
+                        // tslint:disable-next-line:max-line-length
+                        this.message.error('Loading of Objects does not work. Please tell us about it!');
+                      });
+                });
             break;
           default:
+            this.loadFallbackEntity()
+                .then(() => {
+                  // TODO add annotation
+                })
+                .catch(e => {
+                  console.error(e);
+                  // tslint:disable-next-line:max-line-length
+                  this.message.error('Loading of Objects does not work. Please tell us about it!');
+                });
         }
       } else {
         this.Subjects.actualEntity.next(newEntity);
-        await this.loadFallbackEntity();
+        this.loadFallbackEntity()
+            .then(() => {
+              // TODO add annotation
+            })
+            .catch(e => {
+              console.error(e);
+              // tslint:disable-next-line:max-line-length
+              this.message.error('Loading of Objects does not work. Please tell us about it!');
+            });
         return;
       }
     }
   }
 
-  // TODO message
   public updateEntityQuality(quality: string) {
     if (this.quality !== quality) {
       this.quality = quality;
       const entity = this.getCurrentEntity();
 
       if (!entity || !entity.processed) {
-        throw new Error('Entity or Entity.processed');
-        console.error(this);
+        // tslint:disable-next-line:max-line-length
+        this.message.error('The object is not available and unfortunately I can not update the quality.');
         return;
       }
       if (entity && entity.processed[this.quality] !== undefined) {
+        if (entity._id === 'Cube' || entity._id === 'fallback') {
+          return;
+        }
         this.loaded.emit(false);
-        this.loadEntity(
-            entity._id === 'Cube' ? defaultEntity : entity,
-            entity._id === 'Cube' ? '' : undefined,
-        )
+        this.loadEntity(entity)
             .then(() => {
               this.loaded.emit(true);
             })
             .catch(error => {
               console.error(error);
-              this.message.error('Loading not possible');
+              this.message.error('Loading of this Quality is not possible');
             });
       } else {
         this.message.error('Entity quality is not available.');
