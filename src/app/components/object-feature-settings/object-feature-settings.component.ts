@@ -398,9 +398,9 @@ export class EntityFeatureSettingsComponent implements OnInit {
     private async initialiseUpload() {
         const searchParams = location.search;
         const queryParams = new URLSearchParams(searchParams);
-        const isDragDrop = queryParams.get('mode');
+        const isDragDrop = queryParams.get('mode') === 'dragdrop';
 
-        if ((isDragDrop === 'dragdrop' || this.isEntityOwner) && !this.isFinished) {
+        if ((isDragDrop || this.isEntityOwner) && !this.isFinished) {
             await this.setLightBackground();
             this.initialSettingsMode = true;
             await this.entitySettingsService.createVisualSettings(this.mediaType === 'entity' || this.mediaType === 'model');
@@ -598,7 +598,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
 
     const searchParams = location.search;
     const queryParams = new URLSearchParams(searchParams);
-    const isDragDrop = queryParams.get('dragdrop');
+    const isDragDrop = queryParams.get('mode') === 'dragdrop';
 
     if (isDragDrop) {
       console.log(this.activeEntity, settings);
