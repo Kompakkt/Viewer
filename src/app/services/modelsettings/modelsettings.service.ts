@@ -131,6 +131,10 @@ export class EntitySettingsService {
       ? Math.max(this.height, this.width, this.depth)
       : 87.5;
     this.actualEntityMeshes.forEach(mesh => (mesh.renderingGroupId = 2));
+    scene.getMeshesByTags(
+        'videoPlane',
+        mesh => (mesh.renderingGroupId = 3),
+    );
     this.babylonService.cameraManager.setUpActiveCamera(max);
 
     if (upload) {
