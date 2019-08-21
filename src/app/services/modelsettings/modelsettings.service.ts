@@ -245,10 +245,11 @@ export class EntitySettingsService {
    * Set Settings during Upload
    */
 
-  public async createVisualSettings(isModel: boolean) {
+  public async createVisualSettings(isModel: boolean, isImage: boolean) {
     this.initializeVariablesforSettings();
     await this.generateHelpers(true, undefined, isModel);
 
+    if (isModel || isImage) {
     this.createBoundingBox();
     this.showBoundingBoxEntity = false;
     if (this.boundingBox) this.boundingBox.visibility = 0;
@@ -270,6 +271,7 @@ export class EntitySettingsService {
       .getScene()
       .getMeshesByTags('ground')
       .map(mesh => (mesh.visibility = 0));
+    }
   }
 
   public resetVisualSettingsHelper() {

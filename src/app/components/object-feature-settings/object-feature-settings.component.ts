@@ -412,6 +412,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
       this.initialSettingsMode = true;
       await this.entitySettingsService.createVisualSettings(
         this.mediaType === 'entity' || this.mediaType === 'model',
+          this.mediaType === 'image'
       );
       this.cameraPositionInitial = this.babylonService.cameraManager.getActualDefaultPosition();
       const cameraSettings = this.cameraPositionInitial;
