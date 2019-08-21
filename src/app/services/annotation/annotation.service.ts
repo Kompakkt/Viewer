@@ -103,12 +103,16 @@ export class AnnotationService {
     this.isMeshSettingsMode = this.overlayService.editorIsOpen;
 
     this.processingService.fallbackEntityLoaded.subscribe(isFallback => {
-      this.isDemoMode = isFallback;
+      if (!this.isDefaultEntityLoaded) {
+        this.isDemoMode = isFallback;
+      }
     });
 
     this.processingService.defaultEntityLoaded.subscribe(isDefault => {
       this.isDefaultEntityLoaded = isDefault;
-      this.isDemoMode = isDefault;
+      if (isDefault) {
+        this.isDemoMode = true;
+      }
     });
 
     this.isCollectionInputSelected = false;
@@ -151,15 +155,6 @@ export class AnnotationService {
     this.overlayService.editorSetting.subscribe(meshSettingsMode => {
       this.isMeshSettingsMode = meshSettingsMode;
       this.setAnnotatingAllowance();
-    });
-
-    this.processingService.defaultEntityLoaded.subscribe(defaultLoad => {
-      this.isDemoMode = defaultLoad;
-      this.isDefaultEntityLoaded = defaultLoad;
-    });
-
-    this.processingService.fallbackEntityLoaded.subscribe(fallback => {
-      this.isDemoMode = fallback;
     });
 
     this.annotationmarkerService.isSelectedAnnotation.subscribe(
@@ -251,7 +246,7 @@ export class AnnotationService {
       if (this.processingService.isFallbackEntityLoaded) {
         this.annotations.push(annotationFallback);
       }
-      if (this.processingService.isDefaultEntityLoaded) {
+      if (this.isDefaultEntityLoaded) {
         const searchParams = location.search;
         const queryParams = new URLSearchParams(searchParams);
         const annotationMode = queryParams.get('mode') === 'annotation';

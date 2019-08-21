@@ -82,7 +82,7 @@ export class ProcessingService {
 
   public updateActiveEntity(entity: IEntity) {
     this.Subjects.actualEntity.next(entity);
-    if (entity && entity._id === 'default' || entity && entity._id === 'fallback') {
+    if (entity && (entity._id === 'default' || entity._id === 'fallback')) {
       this.isDefaultEntityLoaded = entity._id === 'default';
       this.defaultEntityLoaded.emit(entity._id === 'default');
 
