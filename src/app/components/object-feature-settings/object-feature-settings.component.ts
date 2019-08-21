@@ -410,10 +410,10 @@ export class EntityFeatureSettingsComponent implements OnInit {
         await this.entitySettingsService.loadSettings(1, 315, 0, 0, true);
       }
       this.initialSettingsMode = true;
-      await this.entitySettingsService.createVisualSettings(
-        this.mediaType === 'entity' || this.mediaType === 'model',
-          this.mediaType === 'image'
-      );
+      await this.entitySettingsService.createVisualSettings(this.mediaType ? this.mediaType : '');
+      if (this.mediaType === 'audio' || this.mediaType === 'video') {
+        this.entitySettingsService.decomposeAfterSetting();
+      }
       this.cameraPositionInitial = this.babylonService.cameraManager.getActualDefaultPosition();
       const cameraSettings = this.cameraPositionInitial;
 
@@ -637,6 +637,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
               this.activeEntity.settings.rotation.x,
               this.activeEntity.settings.rotation.y,
               this.activeEntity.settings.rotation.z,
+              this.mediaType,
             );
           }
         });

@@ -84,11 +84,12 @@ export class EntitySettingsService {
     rotX,
     rotY,
     rotZ,
+    mediaType,
     isDefault?: boolean,
   ) {
     this.scalingFactor = scalingFactor;
     await this.initializeVariablesforLoading();
-    await this.generateHelpers(false, isDefault);
+    await this.generateHelpers(mediaType, false, isDefault);
     await this.setSettings(scalingFactor, rotX, rotY, rotZ);
   }
 
@@ -112,11 +113,12 @@ export class EntitySettingsService {
   }
 
   private async generateHelpers(
-    upload?: boolean,
-    isDefault?: boolean,
-    isModel?: boolean,
+      mediaType?: string,
+      upload?: boolean,
+      isDefault?: boolean,
   ) {
     await this.createCenter();
+
     this.initialSize = await this.max.subtract(this.min);
     this.height = this.initialSize.y.toFixed(2);
     this.width = this.initialSize.x.toFixed(2);
@@ -125,25 +127,22 @@ export class EntitySettingsService {
     console.log('Meine Breite ist:', this.width);
     console.log('Meine Höhe ist:', this.height);
 
-    // TODO: Check
-    // this.babylonService.cameraManager.getActiveCamera.zoomOn(this.actualEntityMeshes, false);
     const max = !isDefault
       ? Math.max(this.height, this.width, this.depth)
       : 87.5;
     this.actualEntityMeshes.forEach(mesh => (mesh.renderingGroupId = 2));
-
     this.babylonService.cameraManager.setUpActiveCamera(max);
 
     if (upload) {
       const pos = new Vector3(
-        isModel ? Math.PI / 4 : -Math.PI / 2,
-        isModel ? Math.PI / 4 : Math.PI / 2,
+        mediaType === 'model' || mediaType === 'model' ? Math.PI / 4 : -Math.PI / 2,
+        mediaType === 'model' || mediaType === 'model'  ? Math.PI / 4 : Math.PI / 2,
         Math.max(this.height, this.width, this.depth) * 1.7,
       );
       const target = new Vector3(
-        isModel ? this.max.x - this.initialSize.x / 2 : 0,
-        isModel ? this.max.y - this.initialSize.y / 2 : 0,
-        isModel ? this.max.z - this.initialSize.z / 2 : 0,
+          mediaType === 'model' || mediaType === 'model' ? this.max.x - this.initialSize.x / 2 : 0,
+          mediaType === 'model' || mediaType === 'model' ? this.max.y - this.initialSize.y / 2 : 0,
+          mediaType === 'model' || mediaType === 'model' ? this.max.z - this.initialSize.z / 2 : 0,
       );
       this.babylonService.cameraManager.updateDefaults(pos, target);
       this.babylonService.cameraManager.setActiveCameraTarget(target);
@@ -245,11 +244,11 @@ export class EntitySettingsService {
    * Set Settings during Upload
    */
 
-  public async createVisualSettings(isModel: boolean, isImage: boolean) {
+  public async createVisualSettings(mediaType: string) {
     this.initializeVariablesforSettings();
-    await this.generateHelpers(true, undefined, isModel);
+    await this.generateHelpers(mediaType, true);
 
-    if (isModel || isImage) {
+    if (mediaType === 'model' || mediaType === 'entity') {
     this.createBoundingBox();
     this.showBoundingBoxEntity = false;
     if (this.boundingBox) this.boundingBox.visibility = 0;

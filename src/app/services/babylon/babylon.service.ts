@@ -145,48 +145,6 @@ export class BabylonService {
     fxaa.forceFullscreenViewport = true;
     fxaa.samples = 16;
 
-    // Create SSAO and configure all properties (for the example)
-    /*
-        const ssaoRatio = {
-            ssaoRatio: 0.5, // Ratio of the SSAO post-process, in a lower resolution
-            combineRatio: 1, // Ratio of the combine post-process (combines the SSAO and the scene)
-        };
-
-        const ssao = new SSAORenderingPipeline('ssao', this.scene, ssaoRatio);
-        ssao.fallOff = 0.000001;
-        ssao.area = 1;
-        ssao.radius = 0.0001;
-        ssao.totalStrength = 1;
-        ssao.base = 0.5;
-
-        // Attach camera to the SSAO render pipeline
-        this.scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline('ssao', this.scene.activeCamera);
-        // this.scene.postProcessRenderPipelineManager.enableEffectInPipeline('ssao', ssao.SSAOCombineRenderEffect, this.scene.activeCamera);
-
-        // Manage SSAO
-        let isAttached = true;
-        window.addEventListener('keydown', (evt => {
-            // draw SSAO with scene when pressed "1"
-            if (evt.keyCode === 49) {
-                if (!isAttached) {
-                    isAttached = true;
-                    console.log('pressed 1 - active');
-                    this.scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline('ssao', this.scene.activeCamera);
-                }
-                this.scene.postProcessRenderPipelineManager.enableEffectInPipeline('ssao', ssao.SSAOCombineRenderEffect, this.scene.activeCamera);
-            } else if (evt.keyCode === 50) {
-                isAttached = false;
-                console.log('pressed 2 - not active');
-                this.scene.postProcessRenderPipelineManager.detachCamerasFromRenderPipeline('ssao', this.scene.activeCamera);
-            } else if (evt.keyCode === 51) {
-                if (!isAttached) {
-                    isAttached = true;
-                    this.scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline('ssao', this.scene.activeCamera);
-                }
-                this.scene.postProcessRenderPipelineManager.disableEffectInPipeline('ssao', ssao.SSAOCombineRenderEffect, this.scene.activeCamera);
-            }
-        }));*/
-
     // Initialize empty, otherwise we would need to check against
     // undefined in strict mode
     this.audioContainer = {
@@ -385,7 +343,7 @@ export class BabylonService {
             if (result) {
               this.videoContainer = result;
               // Define as function so we can unregister by variable name
-              const renderVideo = () => beforeVideoRender(this.videoContainer);
+              const renderVideo = () => beforeVideoRender(this.scene, this.videoContainer);
               this.scene.registerBeforeRender(renderVideo);
             } else {
               throw new Error('No video result');

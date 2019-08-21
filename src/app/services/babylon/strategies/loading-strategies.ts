@@ -202,14 +202,15 @@ const createVideoScene = (
     scene,
   );
   Tags.AddTagsTo(groundVideo, 'mediaGround');
+  Tags.AddTagsTo(groundVideo, 'videoPlane');
   const videoMat = new StandardMaterial('textVid', scene);
+
   groundVideo.material = videoMat;
   videoMat.diffuseTexture = videoTexture;
 
   // Click on plane -> start/ stop sound
   groundVideo.isPickable = true;
   groundVideo.actionManager = new ActionManager(scene);
-  groundVideo.renderingGroupId = 1;
   groundVideo.actionManager.registerAction(
     new ExecuteCodeAction(ActionManager.OnPickTrigger, () => {
       video.paused ? video.play() : video.pause();
@@ -225,7 +226,6 @@ const createVideoScene = (
     undefined,
   );
   const plane = groundVideo;
-
   return { plane, timeSlider };
 };
 
