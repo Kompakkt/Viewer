@@ -1,31 +1,36 @@
-<h2 mat-dialog-title>Kompakkt Login</h2>
-<div>
-  <form novalidate (ngSubmit)="login()">
-    <mat-dialog-content class="mat-typography">
-      <h3>Login to view entities from the repository</h3>
-      <p>With your university account you can login to see entities available in the repository.</p>
-      <h3>Username and password</h3>
-      <mat-form-field>
-        <input matInput
-               name="username"
-               type="text"
-               placeholder="username"
-               autocomplete="username"
-               [(ngModel)]="username"
-               cdkFocusInitial>
-      </mat-form-field>
-      <mat-form-field>
-        <input matInput
-               name="password"
-               type="password"
-               autocomplete="current-password"
-               placeholder="password"
-               [(ngModel)]="password">
-      </mat-form-field>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button type="submit">Login</button>
-      <button mat-button mat-dialog-close (click)="withoutlogin()">Cancel</button>
-    </mat-dialog-actions>
-  </form>
-</div>
+<form action="auth-dialog_submit" method="get" accept-charset="utf-8">
+  <h1 mat-dialog-title>{{ concern && concern !== '' ? concern : 'Login'}}</h1>
+  <div mat-dialog-content>
+    <mat-form-field>
+      <input autocomplete="username"
+             placeholder="Username"
+             type="username"
+             matInput
+             [(ngModel)]="username" [ngModelOptions]="{standalone: true}">
+    </mat-form-field>
+  </div>
+  <div mat-dialog-content>
+    <mat-form-field><input autocomplete="password"
+                           placeholder="Password"
+                           type="password"
+                           matInput
+                           [(ngModel)]="password"
+                           [ngModelOptions]="{standalone: true}">
+    </mat-form-field>
+  </div>
+  <div mat-dialog-content *ngIf="loginFailed">
+    <span style="color: red">Login failed</span>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button
+            type="button"
+            (click)="dialogRef.close(false)"
+            [disabled]="waitingForResponse">Cancel
+    </button>
+    <button mat-button
+            type=submit
+            (click)="clickedLogin()"
+            [disabled]="username.length === 0 || password.length === 0 || waitingForResponse">Login
+    </button>
+  </div>
+</form>

@@ -4,7 +4,7 @@ import {
     HostListener,
     ViewContainerRef,
 } from '@angular/core';
-import {MatDialog, MatDialogConfig} from '@angular/material';
+import {MatDialog} from '@angular/material';
 
 import {AnnotationService} from '../../services/annotation/annotation.service';
 import {BabylonService} from '../../services/babylon/babylon.service';
@@ -19,7 +19,7 @@ import {LoginComponent} from '../dialogs/dialog-login/login.component';
 })
 export class SceneComponent implements AfterViewInit {
     // show or not show menu
-    public isLightMode: boolean;
+    public isLightMode = true;
     private firstAttempt = true;
 
     @HostListener('window:resize', ['$event'])
@@ -32,10 +32,9 @@ export class SceneComponent implements AfterViewInit {
         private processingService: ProcessingService,
         public annotationService: AnnotationService,
         private viewContainerRef: ViewContainerRef,
-        private mongo: MongohandlerService,
         private dialog: MatDialog,
+        private mongo: MongohandlerService,
     ) {
-        this.isLightMode = this.processingService.isLightMode;
     }
 
     private loginAttempt() {
@@ -62,12 +61,9 @@ export class SceneComponent implements AfterViewInit {
     }
 
     private openLoginDialog() {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.disableClose = true;
-        dialogConfig.autoFocus = true;
         this.firstAttempt = false;
         this.dialog
-            .open(LoginComponent, dialogConfig)
+            .open(LoginComponent)
             .afterClosed()
             .toPromise()
             .then(() => this.loginAttempt())
@@ -99,12 +95,13 @@ export class SceneComponent implements AfterViewInit {
             (compParam !== null || undefined ? 'collection' : 'default');
 
         if (loadingCase === 'collection' && mode === 'ilias' ||
-            loadingCase === 'default' && mode === 'fullLoad' ||
+            mode === 'fullLoad' ||
+            loadingCase === 'entity' && mode === 'annotation' ||
+            loadingCase === 'collection' && mode === 'annotation' ||
             loadingCase === 'entity' && mode === 'edit') {
             this.loginAttempt();
         } else {
             this.setupCanvas();
-
         }
     }
 }

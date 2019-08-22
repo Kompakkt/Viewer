@@ -16,7 +16,7 @@ import { DialogPasswordComponent } from '../dialogs/dialog-password/dialog-passw
 })
 export class ContentBrowserComponent implements OnInit {
   // external
-  public isLoggedIn = false;
+  public isAuthenticated = false;
   public isEntityCategory = false;
   public isCollectionLoaded = false;
 
@@ -41,12 +41,12 @@ export class ContentBrowserComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.isLoggedIn = this.processingService.isLoggedIn;
+    this.isAuthenticated = false;
     this.isCollectionLoaded = this.processingService.isCollectionLoaded;
     this.isEntityCategory = true;
 
-    this.processingService.loggedIn.subscribe(loggedIn => {
-      this.isLoggedIn = loggedIn;
+    this.userdataService.isUserAuthenticatedObservable.subscribe(loggedIn => {
+      this.isAuthenticated = loggedIn;
     });
 
     this.processingService.collectionLoaded.subscribe(loadedCol => {

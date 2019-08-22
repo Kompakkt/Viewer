@@ -3,9 +3,9 @@ import { MatDialog, MatDialogConfig, MatIconRegistry } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
 
 import { BabylonService } from '../../services/babylon/babylon.service';
-import { MongohandlerService } from '../../services/mongohandler/mongohandler.service';
 import { OverlayService } from '../../services/overlay/overlay.service';
 import { ProcessingService } from '../../services/processing/processing.service';
+import {UserdataService} from '../../services/userdata/userdata.service';
 import { LoginComponent } from '../dialogs/dialog-login/login.component';
 
 @Component({
@@ -15,7 +15,8 @@ import { LoginComponent } from '../dialogs/dialog-login/login.component';
 })
 export class MenuComponent implements OnInit {
   // external
-  public isLoggedIn = false;
+  public isAuthenticated = false;
+  private firstAttempt = true;
   // available quality of entity
   public high = '';
   public medium = '';
@@ -29,8 +30,8 @@ export class MenuComponent implements OnInit {
     public overlayService: OverlayService,
     public processingService: ProcessingService,
     public babylonService: BabylonService,
-    private mongohandlerService: MongohandlerService,
     public dialog: MatDialog,
+    public userDataService: UserdataService,
   ) {
     iconRegistry.addSvgIcon(
       'cardboard',
@@ -39,8 +40,12 @@ export class MenuComponent implements OnInit {
       ),
     );
 
-    this.processingService.loggedIn.subscribe(isLoggedIn => {
-      this.isLoggedIn = isLoggedIn;
+    this.userDataService.isUserAuthenticatedObservable.subscribe(
+        state => (this.isAuthenticated = state),
+    );
+
+    this.userDataService.isUserAuthenticatedObservable.subscribe(isLoggedIn => {
+      this.isAuthenticated = isLoggedIn;
     });
 
     this.processingService.Observables.actualEntity.subscribe(entity => {
@@ -84,18 +89,24 @@ export class MenuComponent implements OnInit {
     }
   }
 
-  loginDialog() {
-    const dialogConfig = new MatDialogConfig();
-
-    dialogConfig.disableClose = true;
-    dialogConfig.autoFocus = true;
-
-    this.dialog.open(LoginComponent, dialogConfig);
+  public loginAttempt() {
+    this.isAuthenticated ? this.processingService.bootstrap() :
+        (this.firstAttempt ? this.openLoginDialog() : this.processingService.bootstrap());
   }
 
-  logout() {
-    this.mongohandlerService.logout().then(() => {
-      this.processingService.bootstrap();
-    });
+  private openLoginDialog() {
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.disableClose = true;
+    dialogConfig.autoFocus = true;
+    this.firstAttempt = false;
+    this.dialog
+        .open(LoginComponent, dialogConfig)
+        .afterClosed()
+        .toPromise()
+        .then(() => this.loginAttempt())
+        .catch(e => {
+          console.error(e);
+          this.loginAttempt();
+        });
   }
 }

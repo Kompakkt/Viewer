@@ -1,10 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material';
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
-import { MessageService } from '../../../services/message/message.service';
-import { MongohandlerService } from '../../../services/mongohandler/mongohandler.service';
-import { ProcessingService } from '../../../services/processing/processing.service';
-import { UserdataService } from '../../../services/userdata/userdata.service';
+import {UserdataService} from '../../../services/userdata/userdata.service';
 
 @Component({
   selector: 'app-login',
@@ -15,34 +12,35 @@ export class LoginComponent implements OnInit {
   public username = '';
   public password = '';
 
+  public waitingForResponse = false;
+  public loginFailed = false;
+
   constructor(
-    private mongohandlerService: MongohandlerService,
-    private message: MessageService,
-    private userDataService: UserdataService,
-    private processingService: ProcessingService,
-    private dialog: MatDialog,
+      public dialogRef: MatDialogRef<LoginComponent>,
+      public account: UserdataService,
+      @Inject(MAT_DIALOG_DATA) public concern: string,
   ) {}
 
   ngOnInit() {}
 
-  public login() {
-    this.mongohandlerService
-      .login(this.username, this.password)
-      .then(result => {
-        if (result.status === 'ok') {
-          this.userDataService.setcachedLoginData(this.password, this.username);
-          this.processingService.bootstrap();
-          this.dialog.closeAll();
-        }
-      })
-      .catch(error => {
-        console.error(error);
-        this.message.error('Connection to entity server refused.');
-        this.userDataService.setcachedLoginData('', '');
-      });
-  }
-
-  public withoutlogin() {
-    console.log('username:' + this.username);
+  public clickedLogin() {
+    this.waitingForResponse = true;
+    this.dialogRef.disableClose = true;
+    this.account
+        .attemptLogin(this.username, this.password)
+        .then(result => {
+          this.waitingForResponse = false;
+          this.loginFailed = !result;
+          this.dialogRef.disableClose = false;
+          if (result) {
+            this.dialogRef.close(true);
+          }
+        })
+        .catch(error => {
+          console.error(error);
+          this.dialogRef.disableClose = false;
+          this.waitingForResponse = false;
+          this.loginFailed = true;
+        });
   }
 }

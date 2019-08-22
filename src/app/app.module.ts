@@ -58,9 +58,9 @@ import { AnnotationwalkthroughComponent } from './components/object-feature-anno
 import { EntityFeatureMetadataComponent } from './components/object-feature-metadata/object-feature-metadata.component';
 import { EntityFeatureSettingsComponent } from './components/object-feature-settings/object-feature-settings.component';
 import { EntityFeaturesComponent } from './components/object-features/object-features.component';
+import { RenderCanvasComponent } from './components/render-canvas/render-canvas.component';
 import { SceneComponent } from './components/scene/scene.component';
 import { MediaTypePipe } from './pipes/media-type.pipe';
-import { RenderCanvasComponent } from './components/render-canvas/render-canvas.component';
 
 @NgModule({
   declarations: [

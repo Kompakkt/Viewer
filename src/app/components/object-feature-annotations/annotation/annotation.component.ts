@@ -7,7 +7,6 @@ import { AnnotationService } from '../../../services/annotation/annotation.servi
 // tslint:disable-next-line:max-line-length
 import { AnnotationmarkerService } from '../../../services/annotationmarker/annotationmarker.service';
 import { BabylonService } from '../../../services/babylon/babylon.service';
-import { ProcessingService } from '../../../services/processing/processing.service';
 import { SocketService } from '../../../services/socket/socket.service';
 import { UserdataService } from '../../../services/userdata/userdata.service';
 // tslint:disable-next-line:max-line-length
@@ -53,7 +52,6 @@ export class AnnotationComponent implements OnInit {
     public socketService: SocketService,
     public dialog: MatDialog,
     private userdataService: UserdataService,
-    private processingService: ProcessingService,
   ) {}
 
   ngOnInit() {
@@ -70,7 +68,7 @@ export class AnnotationComponent implements OnInit {
     );
     this.isCollectionOwner = this.userdataService.isCollectionOwner;
 
-    this.processingService.loggedIn.subscribe(_ => {
+    this.userdataService.isUserAuthenticatedObservable.subscribe(_ => {
       if (!this.annotation) {
         console.error('AnnotationComponent without annotation', this);
         throw new Error('AnnotationComponent without annotation');

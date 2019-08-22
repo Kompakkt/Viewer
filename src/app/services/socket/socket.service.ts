@@ -13,7 +13,6 @@ import {
 import { AnnotationService } from '../annotation/annotation.service';
 import { AnnotationmarkerService } from '../annotationmarker/annotationmarker.service';
 import { ProcessingService } from '../processing/processing.service';
-import { UserdataService } from '../userdata/userdata.service';
 
 @Injectable({
   providedIn: 'root',
@@ -40,7 +39,7 @@ export class SocketService {
   constructor(
     public socket: Socket,
     private processingService: ProcessingService,
-    private userdataService: UserdataService,
+    // private userdataService: UserdataService,
     private annotationmarkerService: AnnotationmarkerService,
     private annotationService: AnnotationService,
   ) {
@@ -154,8 +153,10 @@ export class SocketService {
           annotation => !this.knownAnnotations.includes(annotation),
         );
         if (!changedAnnotation || !changedAnnotation._id) {
+          // TODO
+          /*
           throw new Error('ChangedAnnotation incorrect');
-          console.error(this);
+          console.error(this);*/
           return;
         }
         const indexOfChanged = this.knownAnnotations.findIndex(
@@ -267,13 +268,13 @@ export class SocketService {
 
   // -- Basic functionality
 
+  // TODO
   private getOwnSocketData(): ISocketUserInfo {
-    const userData = this.userdataService.getUserDataForSocket();
     return {
       user: {
-        _id: userData._id,
-        fullname: userData.fullname,
-        username: userData.username,
+        _id: '',
+        fullname: '',
+        username: '',
         room: this.socketRoom,
         socketId: 'self',
       },

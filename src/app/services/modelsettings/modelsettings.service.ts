@@ -139,14 +139,14 @@ export class EntitySettingsService {
 
     if (upload) {
       const pos = new Vector3(
-        mediaType === 'model' || mediaType === 'model' ? Math.PI / 4 : -Math.PI / 2,
-        mediaType === 'model' || mediaType === 'model'  ? Math.PI / 4 : Math.PI / 2,
+        mediaType === 'model' || mediaType === 'entity' ? Math.PI / 4 : -Math.PI / 2,
+        mediaType === 'model' || mediaType === 'entity'  ? Math.PI / 4 : Math.PI / 2,
         Math.max(this.height, this.width, this.depth) * 1.7,
       );
       const target = new Vector3(
-          mediaType === 'model' || mediaType === 'model' ? this.max.x - this.initialSize.x / 2 : 0,
-          mediaType === 'model' || mediaType === 'model' ? this.max.y - this.initialSize.y / 2 : 0,
-          mediaType === 'model' || mediaType === 'model' ? this.max.z - this.initialSize.z / 2 : 0,
+          mediaType === 'model' || mediaType === 'entity' ? this.max.x - this.initialSize.x / 2 : 0,
+          mediaType === 'model' || mediaType === 'entity' ? this.max.y - this.initialSize.y / 2 : 0,
+          mediaType === 'model' || mediaType === 'entity' ? this.max.z - this.initialSize.z / 2 : 0,
       );
       this.babylonService.cameraManager.updateDefaults(pos, target);
       this.babylonService.cameraManager.setActiveCameraTarget(target);

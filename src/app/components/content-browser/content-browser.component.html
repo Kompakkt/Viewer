@@ -1,6 +1,6 @@
 <div id="content-browser">
 
-  <mat-card *ngIf="!isLoggedIn">
+  <mat-card *ngIf="!isAuthenticated">
     <mat-card-content>
       <p>Please Login with your university account to see data from the repository.</p>
       <button class="fullwidth-button"
@@ -12,7 +12,7 @@
     </mat-card-content>
   </mat-card>
 
-  <div *ngIf="isLoggedIn">
+  <div *ngIf="isAuthenticated">
 
     <mat-card>
       <mat-card-content>
@@ -33,7 +33,7 @@
 
         <mat-card-content>
 
-          <mat-checkbox *ngIf="this.userdataService.personalCollections.length > 0"
+          <mat-checkbox *ngIf="this.userdataService.userOnWhitelistCollections.length > 0"
                         [checked]="filterPersonalCollections"
                         (change)="filterPersonalCollections = !filterPersonalCollections">Show only my Collections
           </mat-checkbox>
@@ -43,7 +43,7 @@
             <mat-select (selectionChange)="processingService.fetchAndLoad(undefined, $event.value._id, undefined)"
                         placeholder="Choose Collection">
               <mat-option *ngFor="let collection of filterPersonalCollections ?
-              userdataService.personalCollections :
+              userdataService.userOnWhitelistCollections :
               processingService.Observables.collections | async"
                           [value]="collection">
                 {{collection.name}}

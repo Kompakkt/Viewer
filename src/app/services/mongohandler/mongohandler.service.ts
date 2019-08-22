@@ -105,8 +105,16 @@ export class MongohandlerService {
     return this.get(`logout`);
   }
 
-  public async isAuthorized(): Promise<IServerResponse> {
+  public async isAuthorized(): Promise<ILDAPData & IServerResponse> {
     return this.get(`auth`);
+  }
+
+  public async findUserInCompilations(): Promise<
+      IServerResponse & {
+    compilations: ICompilation[];
+  }
+      > {
+    return this.get(`utility/finduserincompilations`);
   }
 
   // TODO: check return type

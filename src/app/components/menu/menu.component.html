@@ -35,9 +35,9 @@
       <span>Screenshot</span>
     </button>
 
-    <button mat-menu-item (click)="isLoggedIn ? logout() : loginDialog()">
+    <button mat-menu-item (click)="isAuthenticated ? userDataService.logout() : loginAttempt()">
       <mat-icon>account_circle</mat-icon>
-      <span>{{isLoggedIn ? 'Logout' : 'Login'}}</span>
+      <span>{{isAuthenticated ? 'Logout' : 'Login'}}</span>
     </button>
 
   </mat-menu>

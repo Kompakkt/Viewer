@@ -17,7 +17,7 @@ import { DialogShareAnnotationComponent } from '../../components/dialogs/dialog-
 import {
   IAnnotation,
   ICompilation,
-  IEntity,
+  IEntity, ILDAPData,
 } from '../../interfaces/interfaces';
 import { ActionService } from '../action/action.service';
 import { AnnotationmarkerService } from '../annotationmarker/annotationmarker.service';
@@ -45,6 +45,8 @@ export class AnnotationService {
   public isCollectionInputSelected: boolean;
   private isCollectionLoaded: boolean;
   private isEntityFeaturesOpen = false;
+
+  private userData: ILDAPData | undefined;
 
   private _annotations: IAnnotation[] = [];
   public readonly annotations = new Proxy(this._annotations, {
@@ -95,6 +97,11 @@ export class AnnotationService {
     private userdataService: UserdataService,
     private overlayService: OverlayService,
   ) {
+
+    this.userdataService.userDataObservable.subscribe(data => {
+      this.userData = data;
+    });
+
     this.processingService.Observables.actualMediaType.subscribe(type => {
       this.mediaType = type;
     });
@@ -333,11 +340,10 @@ export class AnnotationService {
     const unsorted: IAnnotation[] = [];
     // Durch alle Annotationen der lokalen DB
     for (const annotation of localAnnotations) {
-      const isLastModifiedByMe =
+      const isLastModifiedByMe = this.userData ?
         annotation.lastModifiedBy._id ===
-        this.userdataService.currentUserData._id;
-      const isCreatedByMe =
-        annotation.creator._id === this.userdataService.currentUserData._id;
+          this.userData._id : false;
+      const isCreatedByMe = this.userData ? annotation.creator._id === this.userData._id : false;
 
       // Finde die Annotaion in den Server Annotationen
       const serverAnnotation = serverAnnotations.find(
@@ -477,8 +483,8 @@ export class AnnotationService {
       }
       const generatedId = this.mongo.generateEntityId();
 
-      const personName = this.userdataService.currentUserData.fullname;
-      const personID = this.userdataService.currentUserData._id;
+      const personName = this.userData ? this.userData.fullname : 'guest';
+      const personID = this.userData ? this.userData._id : 'guest';
 
       const newAnnotation: IAnnotation = {
         validated: !this.isCollectionLoaded,
@@ -623,8 +629,8 @@ export class AnnotationService {
   }
 
   public deleteAnnotationFromServer(annotationId: string) {
-    const username = this.userdataService.cachedLoginData.username;
-    const password = this.userdataService.cachedLoginData.password;
+    const username = this.userdataService.loginData.username;
+    const password = this.userdataService.loginData.password;
 
     if (username === '' || password === '') {
       this.passwordDialog(annotationId);
@@ -798,8 +804,8 @@ export class AnnotationService {
       motivation: annotation.motivation,
       lastModifiedBy: {
         type: 'person',
-        name: this.userdataService.currentUserData.fullname,
-        _id: this.userdataService.currentUserData._id,
+        name: this.userData ? this.userData.fullname : 'guest',
+        _id: this.userData ? this.userData._id : 'guest',
       },
       body: annotation.body,
       target: {
