@@ -70,6 +70,7 @@ export class SocketService {
     });
 
     this.annotationService.annnotatingAllowed.subscribe(allowed => {
+      // TODO set allowance
       if (!allowed && this.isDefaultEntityLoaded) {
         this.isBroadcastingAllowed = true;
         this.broadcastingAllowed.emit(true);

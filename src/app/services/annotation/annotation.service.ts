@@ -838,6 +838,9 @@ export class AnnotationService {
 
   // Das aktuelle Entityl wird anklickbar und damit annotierbar
   public annotationMode(value: boolean) {
+    if (this.mediaType === 'video' || this.mediaType === 'audio') {
+      return;
+    }
     this.actualEntityMeshes.forEach(mesh => {
       this.actionService.pickableEntity(mesh, value);
     });

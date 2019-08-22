@@ -38,14 +38,9 @@ export const afterAudioRender = (audioContainer: IAudioContainer) => {
 };
 
 export const beforeVideoRender = (
-    scene: Scene,
+   // scene: Scene,
     videoContainer: IVideoContainer) => {
   if (!videoContainer.video.paused) {
     videoContainer.timeSlider.value = videoContainer.video.currentTime;
   }
-  // TODO das sollte nicht ständig gesetzt werden, siehe loading strategies Z212
-  scene.getMeshesByTags(
-      'videoPlane',
-      mesh => (mesh.isPickable = true),
-  );
 };

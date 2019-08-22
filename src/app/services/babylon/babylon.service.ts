@@ -343,7 +343,7 @@ export class BabylonService {
             if (result) {
               this.videoContainer = result;
               // Define as function so we can unregister by variable name
-              const renderVideo = () => beforeVideoRender(this.scene, this.videoContainer);
+              const renderVideo = () => beforeVideoRender(this.videoContainer);
               this.scene.registerBeforeRender(renderVideo);
             } else {
               throw new Error('No video result');
