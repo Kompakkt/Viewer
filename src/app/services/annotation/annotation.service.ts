@@ -47,6 +47,13 @@ export class AnnotationService {
   private isEntityFeaturesOpen = false;
 
   private userData: ILDAPData | undefined;
+  private isAuthenticated = false;
+  private isEntityOwner = false;
+  private isCollectionOwner = false;
+  private isWhitelistMember = false;
+
+  private annotatableMediaType = false;
+
 
   private _annotations: IAnnotation[] = [];
   public readonly annotations = new Proxy(this._annotations, {
@@ -71,9 +78,7 @@ export class AnnotationService {
   private mediaType: string | undefined;
 
   private isannotationSourceCollection = false;
-  @Output() annotationSourceCollection: EventEmitter<
-    boolean
-  > = new EventEmitter();
+  @Output() annotationSourceCollection: EventEmitter<boolean> = new EventEmitter();
 
   private selectedAnnotation = new BehaviorSubject('');
   public isSelectedAnnotation = this.selectedAnnotation.asObservable();
@@ -102,8 +107,25 @@ export class AnnotationService {
       this.userData = data;
     });
 
+    this.userdataService.isUserAuthenticatedObservable.subscribe(auth => {
+      this.isAuthenticated = auth;
+    });
+
+    this.userdataService.entityOwner.subscribe(owner => {
+      this.isEntityOwner = owner;
+    });
+
+    this.userdataService.collectionOwner.subscribe(owner => {
+      this.isCollectionOwner = owner;
+    });
+
+    this.userdataService.whitelistMember.subscribe(member => {
+      this.isWhitelistMember = member;
+    });
+
     this.processingService.Observables.actualMediaType.subscribe(type => {
       this.mediaType = type;
+      this.annotatableMediaType = (type === 'model' || type === 'entity' || type === 'image');
     });
 
     this.isCollectionLoaded = this.processingService.isCollectionLoaded;
@@ -131,12 +153,12 @@ export class AnnotationService {
     this.processingService.Observables.actualEntityMeshes.subscribe(
       actualEntityMeshes => {
         this.actualEntityMeshes = actualEntityMeshes;
-        if (
-          this.mediaType === 'model' ||
-          this.mediaType === 'entity' ||
-          this.mediaType === 'image'
-        ) {
-          this.loadAnnotations();
+        this.loadAnnotations();
+        if (this.annotatableMediaType) {
+        this.initializeAnnotationMode();
+        // TODO
+        this.toggleAnnotationSource(false);
+        this.setAnnotatingAllowance();
         }
       },
     );
@@ -225,7 +247,6 @@ export class AnnotationService {
       return;
     }
     Tags.AddTagsTo(this.actualEntityMeshes, this.actualEntity._id);
-    // this.annotations = [];
     this.selectedAnnotation.next('');
     this.editModeAnnotation.next('');
     await this.annotationmarkerService.deleteAllMarker();
@@ -267,9 +288,6 @@ export class AnnotationService {
         this.selectedAnnotation.next(this.annotations[0]._id);
       }
     }
-    this.initializeAnnotationMode();
-    this.toggleAnnotationSource(false);
-    this.setAnnotatingAllowance();
   }
 
   private getAnnotationsfromServerDB() {
@@ -820,16 +838,22 @@ export class AnnotationService {
 
   public setAnnotatingAllowance() {
     let emitBool = false;
-    emitBool =
-      this.isEntityFeaturesOpen &&
-      (!this.isMeshSettingsMode
-        ? true
-        : this.isDefaultEntityLoaded || this.isDemoMode);
+    if (!this.annotatableMediaType) {
+      this.isAnnotatingAllowed = false;
+      this.annnotatingAllowed.emit(false);
+      return;
+    }
+    emitBool = this.isEntityFeaturesOpen && (!this.isMeshSettingsMode ? true :
+        this.isDefaultEntityLoaded || this.isDemoMode);
     if (emitBool && !this.isCollectionInputSelected) {
       emitBool =
-        (this.userdataService.isEntityOwner &&
-          !this.processingService.isCollectionLoaded) ||
+        (this.isAuthenticated && this.isEntityOwner && !this.isCollectionLoaded) ||
         this.isDefaultEntityLoaded;
+    }
+    if (emitBool && this.isCollectionLoaded) {
+      emitBool = this.actualCompilation && this.isAuthenticated ?
+          (!this.actualCompilation.whitelist.enabled || this.isCollectionOwner ||
+              this.isWhitelistMember) : false;
     }
     this.isAnnotatingAllowed = emitBool;
     this.annotationMode(emitBool);
