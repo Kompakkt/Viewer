@@ -1,23 +1,11 @@
-import { EventEmitter, Injectable, Output } from '@angular/core';
-import { Socket } from 'ngx-socket-io';
-
-import {
-  IAnnotation,
-  ISocketAnnotation,
-  ISocketChangeRoom,
-  ISocketMessage,
-  ISocketRoomData,
-  ISocketUser,
-  ISocketUserInfo,
-} from '../../interfaces/interfaces';
-import { AnnotationService } from '../annotation/annotation.service';
-import { AnnotationmarkerService } from '../annotationmarker/annotationmarker.service';
-import { ProcessingService } from '../processing/processing.service';
+import { Injectable } from '@angular/core';
 
 @Injectable({
   providedIn: 'root',
 })
+// tslint:disable-next-line:no-unnecessary-class
 export class SocketService {
+  /*
   public collaborators: ISocketUser[] = [];
   // TODO this array is not needed -> first users (0-maxColoredUsersMinusOne) of collab can be used
   public coloredUsers: ISocketUser[] = [];
@@ -32,36 +20,58 @@ export class SocketService {
   public isBroadcastingAllowed = false;
   @Output() broadcastingAllowed: EventEmitter<boolean> = new EventEmitter();
 
-  private isDefaultEntityLoaded: boolean;
+  private isBroadcastingInput = false;
+  private isAuthenticated = false;
 
-  private knownAnnotations: IAnnotation[] = [];
+  private actualCompilation: ICompilation | undefined;
+  private userData: ILDAPData | undefined;
+
+  private knownAnnotations: IAnnotation[] = [];*/
 
   constructor(
-    public socket: Socket,
-    private processingService: ProcessingService,
-    // private userdataService: UserdataService,
-    private annotationmarkerService: AnnotationmarkerService,
-    private annotationService: AnnotationService,
+    //public socket: Socket,
+    //private processingService: ProcessingService,
+    //private userdataService: UserdataService,
+    //private annotationmarkerService: AnnotationmarkerService,
+    //private annotationService: AnnotationService,
   ) {
+    /*
     this.isInSocket = false;
     this.inSocket.emit(false);
-    this.annotationService.isBroadcasting = false;
-    this.isDefaultEntityLoaded = this.processingService.isDefaultEntityLoaded;
+    this.annotationService.setBroadcastingStatus(false);
+    this.userData = undefined;
+
+    this.userdataService.userDataObservable.subscribe(data => {
+      this.userData = data;
+    });
+
+    this.userdataService.isUserAuthenticatedObservable.subscribe(auth => {
+      this.isAuthenticated = auth;
+    });
+
+    this.processingService.defaultEntityLoaded.subscribe(loaded => {
+      this.isBroadcastingInput = !loaded;
+    });
+
+    this.processingService.collectionLoaded.subscribe(loaded => {
+      this.isBroadcastingInput = loaded;
+    });
+
+    this.processingService.Observables.actualCollection.subscribe(collection => {
+      this.actualCompilation = collection;
+    });
 
     this.processingService.Observables.actualEntity.subscribe(_ => {
       const currentCompilation = this.processingService.getCurrentCompilation();
       const currentEntity = this.processingService.getCurrentEntity();
 
       // We always need a entity loaded
-      if (!currentEntity) {
-        throw new Error('Center missing');
-        console.error(this);
+      if (!currentEntity || !currentCompilation) {
         return;
       }
-
-      this.socketRoom = currentCompilation
-        ? `${currentCompilation._id}_${currentEntity._id}`
-        : `${currentEntity._id}`;
+      if (currentEntity && currentCompilation) {
+        this.socketRoom = `${currentCompilation._id}_${currentEntity._id}`;
+      }
 
       if (this.isInSocket) {
         this.changeSocketRoom();
@@ -69,34 +79,40 @@ export class SocketService {
     });
 
     this.annotationService.annnotatingAllowed.subscribe(allowed => {
-      // TODO set allowance
-      if (!allowed && this.isDefaultEntityLoaded) {
-        this.isBroadcastingAllowed = true;
-        this.broadcastingAllowed.emit(true);
+      // annotating allowed && collection loaded && (!whitelist ||
+      // whitlist users > 0 also mehr Personen als Owner && mode !== edit
+      const searchParams = location.search;
+      const queryParams = new URLSearchParams(searchParams);
+      const mode = queryParams.get('mode') === 'edit';
+      let allowance = false;
+      if (!this.isAuthenticated || !allowed || !this.isBroadcastingInput || mode) {
+        allowance = false;
       } else {
-        this.isBroadcastingAllowed = allowed;
-        this.broadcastingAllowed.emit(allowed);
+        if (this.actualCompilation && !this.actualCompilation.whitelist.enabled ||
+            this.actualCompilation && this.actualCompilation.whitelist.groups ||
+            this.actualCompilation && this.actualCompilation.whitelist.persons.length) {
+          allowance = true;
+        }
       }
-    });
-
-    this.processingService.defaultEntityLoaded.subscribe(loaded => {
-      this.isDefaultEntityLoaded = loaded;
+      this.isBroadcastingAllowed = allowance;
+      this.broadcastingAllowed.emit(allowance);
     });
 
     this.knownAnnotations = [];
 
     this.annotationService.currentAnnotations.subscribe(newList => {
-      const prevLength = this.knownAnnotations.length;
-      const newLength = newList.length;
+      const prevLength = this.knownAnnotations.length ? this.knownAnnotations.length : 0;
+      const newLength = newList.length ? newList.length : 0;
 
       // Beim Start der Anwendung, noch bevor man mit Socket verbunden ist
       // sollte dieses Array dem aus dem AnnotationService entsprechen
-      if (this.knownAnnotations.length === 0) {
+      if (prevLength === 0) {
         this.knownAnnotations = newList;
         return;
       }
 
       if (prevLength < newLength) {
+
         // Annotation hinzugefügt, also suche in neuen Annotationen
         // nach unbekannter Annotation
         const newAnnotation = newList.find(
@@ -145,8 +161,9 @@ export class SocketService {
         }
       } else {
         // Ignoriere DefaultAnnotation
-        if (newList.length === 1 && newList[0]._id === 'DefaultAnnotation')
+        if (newList.length === 1 && newList[0]._id === 'DefaultAnnotation') {
           return;
+        }
         // Annotation geändert, also suche in neuen Annotationen
         // nach unbekannter Annotation und ersetze diese in Bekannten
         const changedAnnotation = newList.find(
@@ -156,7 +173,7 @@ export class SocketService {
           // TODO
           /*
           throw new Error('ChangedAnnotation incorrect');
-          console.error(this);*/
+          console.error(this);
           return;
         }
         const indexOfChanged = this.knownAnnotations.findIndex(
@@ -168,6 +185,7 @@ export class SocketService {
           changedAnnotation.lastModifiedBy._id ===
             this.getOwnSocketData().user._id
         ) {
+          this.redrawMarker();
           socket.emit('editAnnotation', {
             annotation: changedAnnotation,
             user: this.getOwnSocketData().user,
@@ -200,18 +218,14 @@ export class SocketService {
       console.log(
         `COLLABORATOR '${result.user.username}' CREATED AN ANNOTATION - SOCKET.IO`,
       );
-      if (result.user._id !== this.getOwnSocketData().user._id) {
-        this.annotationService.handleReceivedAnnotation(result.annotation);
-      }
+      this.annotationService.handleReceivedAnnotation(result.annotation);
     });
 
     this.socket.on('editAnnotation', (result: ISocketAnnotation) => {
       console.log(
         `COLLABORATOR '${result.user.username}' EDITED AN ANNOTATION - SOCKET.IO`,
       );
-      if (result.user._id !== this.getOwnSocketData().user._id) {
-        this.annotationService.handleReceivedAnnotation(result.annotation);
-      }
+      this.annotationService.handleReceivedAnnotation(result.annotation);
     });
 
     this.socket.on('deleteAnnotation', (result: ISocketAnnotation) => {
@@ -219,9 +233,7 @@ export class SocketService {
       console.log(
         `COLLABORATOR '${result.user.username}' DELETED AN ANNOTATION- SOCKET.IO`,
       );
-      if (result.user._id !== this.getOwnSocketData().user._id) {
-        this.annotationService.deleteRequestAnnotation(result.annotation);
-      }
+      this.annotationService.deleteRequestAnnotation(result.annotation);
     });
 
     // TODO
@@ -258,23 +270,22 @@ export class SocketService {
     this.socket.on('disconnect', () => {
       this.isInSocket = false;
       this.inSocket.emit(false);
-      this.annotationService.isBroadcasting = false;
       this.collaborators = [];
       this.sortUser();
       // this.collaboratorsAnnotations = [];
       this.socket.disconnect();
-    });
+    });*/
   }
 
   // -- Basic functionality
-
+/*
   // TODO
   private getOwnSocketData(): ISocketUserInfo {
     return {
       user: {
-        _id: '',
-        fullname: '',
-        username: '',
+        _id: this.userData ? this.userData._id : '',
+        fullname: this.userData ? this.userData.fullname : '',
+        username: this.userData ? this.userData.username : '',
         room: this.socketRoom,
         socketId: 'self',
       },
@@ -285,7 +296,7 @@ export class SocketService {
   public loginToSocket() {
     this.isInSocket = true;
     this.inSocket.emit(true);
-    this.annotationService.isBroadcasting = true;
+    this.annotationService.setBroadcastingStatus(true);
     this.socket.connect();
     console.log(`LOGGING IN TO SOCKET.IO \n ROOM: '${this.socketRoom}'`);
     // emit "you" as newUser to other online members of your current room
@@ -304,7 +315,7 @@ export class SocketService {
   public disconnectSocket() {
     this.isInSocket = false;
     this.inSocket.emit(false);
-    this.annotationService.isBroadcasting = false;
+    this.annotationService.setBroadcastingStatus(false);
     this.collaborators = [];
     this.sortUser();
     // send info to other Room members,
@@ -433,5 +444,5 @@ export class SocketService {
     } else {
       return '$cardbgr';
     }
-  }
+  }*/
 }

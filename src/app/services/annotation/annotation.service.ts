@@ -17,7 +17,14 @@ import { DialogShareAnnotationComponent } from '../../components/dialogs/dialog-
 import {
   IAnnotation,
   ICompilation,
-  IEntity, ILDAPData,
+  IEntity,
+  ILDAPData,
+  ISocketAnnotation,
+  ISocketChangeRoom,
+  ISocketMessage,
+  ISocketRoomData,
+  ISocketUser,
+  ISocketUserInfo,
 } from '../../interfaces/interfaces';
 import { ActionService } from '../action/action.service';
 import { AnnotationmarkerService } from '../annotationmarker/annotationmarker.service';
@@ -28,32 +35,38 @@ import { MongohandlerService } from '../mongohandler/mongohandler.service';
 import { OverlayService } from '../overlay/overlay.service';
 import { ProcessingService } from '../processing/processing.service';
 import { UserdataService } from '../userdata/userdata.service';
+import {EntitySettingsService} from "../modelsettings/modelsettings.service";
 
 @Injectable({
   providedIn: 'root',
 })
 export class AnnotationService {
-  private isDemoMode = false;
-  private isDefaultEntityLoaded = false;
 
-  public isBroadcasting = false;
-
-  private isMeshSettingsMode: boolean;
-  public isAnnotatingAllowed = false;
-  @Output() annnotatingAllowed: EventEmitter<boolean> = new EventEmitter();
-
-  public isCollectionInputSelected: boolean;
+  // What is actually going on and what is loaded? external Infos
+  private actualEntity: IEntity | undefined;
+  private actualEntityMeshes: Mesh[] = [];
+  public actualCompilation: ICompilation | undefined;
   private isCollectionLoaded: boolean;
+  private loadedMode = '';
+  private mediaType = '';
+  public isDefaultEntityLoaded = false;
+  public isFallbackEntityLoaded = false;
+  private isMeshSettingsMode = false;
+  public isCollectionInputSelected = false;
   private isEntityFeaturesOpen = false;
 
-  private userData: ILDAPData | undefined;
-  private isAuthenticated = false;
-  private isEntityOwner = false;
-  private isCollectionOwner = false;
-  private isWhitelistMember = false;
-
-  private annotatableMediaType = false;
-
+  // All about annotations
+  public isAnnotatingAllowed = false;
+  @Output() annnotatingAllowed: EventEmitter<boolean> = new EventEmitter();
+  private annotatableTypeAndMode = false;
+  private isannotationSourceCollection = false;
+  @Output() annotationSourceCollection: EventEmitter<boolean> = new EventEmitter();
+  private selectedAnnotation = new BehaviorSubject('');
+  public isSelectedAnnotation = this.selectedAnnotation.asObservable();
+  private editModeAnnotation = new BehaviorSubject('');
+  public isEditModeAnnotation = this.editModeAnnotation.asObservable();
+  private currentAnnotationSubject = new BehaviorSubject([] as IAnnotation[]);
+  public currentAnnotations = this.currentAnnotationSubject.asObservable();
 
   private _annotations: IAnnotation[] = [];
   public readonly annotations = new Proxy(this._annotations, {
@@ -72,22 +85,25 @@ export class AnnotationService {
     },
   });
 
-  private actualEntity: IEntity | undefined;
-  public actualCompilation: ICompilation | undefined;
-  private actualEntityMeshes: Mesh[] = [];
-  private mediaType: string | undefined;
+  // User info
+  private userData: ILDAPData | undefined;
+  private isAuthenticated = false;
+  private isEntityOwner = false;
+  private isCollectionOwner = false;
+  private isWhitelistMember = false;
 
-  private isannotationSourceCollection = false;
-  @Output() annotationSourceCollection: EventEmitter<boolean> = new EventEmitter();
-
-  private selectedAnnotation = new BehaviorSubject('');
-  public isSelectedAnnotation = this.selectedAnnotation.asObservable();
-
-  private editModeAnnotation = new BehaviorSubject('');
-  public isEditModeAnnotation = this.editModeAnnotation.asObservable();
-
-  private currentAnnotationSubject = new BehaviorSubject([] as IAnnotation[]);
-  public currentAnnotations = this.currentAnnotationSubject.asObservable();
+  // Broadcasting
+  public collaborators: ISocketUser[] = [];
+    // TODO this array is not needed
+  //  -> first users (0-maxColoredUsersMinusOne) of collab can be used
+  public coloredUsers: ISocketUser[] = [];
+  public color = ['pink', 'red', 'blue', 'yellow', 'purple', 'gold'];
+  public maxColoredUsersMinusOne = this.color.length - 1;
+  private socketRoom = '';
+  public isBroadcastingAllowed = false;
+  @Output() broadcastingAllowed: EventEmitter<boolean> = new EventEmitter();
+  private isBroadcasting = false;
+  @Output() broadcasting: EventEmitter<boolean> = new EventEmitter();
 
   constructor(
     private dataService: DataService,
@@ -101,8 +117,82 @@ export class AnnotationService {
     private dialog: MatDialog,
     private userdataService: UserdataService,
     private overlayService: OverlayService,
+    private modelSettingsService: EntitySettingsService,
   ) {
 
+    // What is actually going on and what is loaded? external Infos
+    this.processingService.Observables.actualEntity.subscribe(actualEntity => {
+      this.actualEntity = actualEntity;
+    });
+
+    this.processingService.Observables.actualEntityMeshes.subscribe(
+        actualEntityMeshes => {
+          this.actualEntityMeshes = actualEntityMeshes;
+          this.loadAnnotations();
+          if (this.annotatableTypeAndMode) {
+            this.initializeAnnotationMode();
+            // TODO
+            this.toggleAnnotationSource(false);
+            this.setAnnotatingAllowance();
+          }
+          if (this.isBroadcasting) {
+            this.changeSocketRoom();
+          }
+        },
+    );
+
+    this.isCollectionLoaded = this.processingService.isCollectionLoaded;
+    this.processingService.Observables.actualCollection.subscribe(
+        actualCompilation => {
+          if (!actualCompilation) {
+            this.isCollectionLoaded = false;
+            return;
+          }
+          if (actualCompilation._id && this.actualEntity) {
+            this.socketRoom = `${actualCompilation._id}_${this.actualEntity._id}`;
+
+          actualCompilation._id
+              ? (this.isCollectionLoaded = true)
+              : (this.isCollectionLoaded = false);
+            this.actualCompilation = actualCompilation;
+          }
+        },
+    );
+
+    this.processingService.Observables.actualMediaType.subscribe(type => {
+      this.mediaType = type;
+      const searchParams = location.search;
+      const queryParams = new URLSearchParams(searchParams);
+      const mode = queryParams.get('mode');
+      this.loadedMode = mode ? mode : '';
+      this.annotatableTypeAndMode = (type === 'model' || type === 'entity' || type === 'image') &&
+          (mode  === 'annotation' || mode === 'edit' || mode === 'ilias' || mode === 'fullLoad');
+    });
+
+    this.processingService.defaultEntityLoaded.subscribe(isDefault => {
+      this.isDefaultEntityLoaded = isDefault;
+    });
+
+    this.processingService.fallbackEntityLoaded.subscribe(isFallback => {
+      this.isFallbackEntityLoaded = isFallback;
+    });
+
+    this.modelSettingsService.initialSettingsMode.subscribe(meshSettingsMode => {
+      this.isMeshSettingsMode = meshSettingsMode;
+      this.setAnnotatingAllowance();
+    });
+
+    this.overlayService.editor.subscribe(open => {
+      this.isEntityFeaturesOpen = open;
+      this.setAnnotatingAllowance();
+    });
+
+    this.annotationmarkerService.isSelectedAnnotation.subscribe(
+        selectedAnno => {
+          this.selectedAnnotation.next(selectedAnno);
+        },
+    );
+    // Userdata
     this.userdataService.userDataObservable.subscribe(data => {
       this.userData = data;
     });
@@ -123,74 +213,88 @@ export class AnnotationService {
       this.isWhitelistMember = member;
     });
 
-    this.processingService.Observables.actualMediaType.subscribe(type => {
-      this.mediaType = type;
-      this.annotatableMediaType = (type === 'model' || type === 'entity' || type === 'image');
+    // Socket
+    this.socket.on('message', (result: ISocketMessage) => {
+      console.log(`${result.user.username}: ${result.message}`);
     });
 
-    this.isCollectionLoaded = this.processingService.isCollectionLoaded;
-    this.isMeshSettingsMode = this.overlayService.editorIsOpen;
-
-    this.processingService.fallbackEntityLoaded.subscribe(isFallback => {
-      if (!this.isDefaultEntityLoaded) {
-        this.isDemoMode = isFallback;
-      }
+    this.socket.on('newUser', (result: ISocketUserInfo) => {
+      console.log(`GET ONLINE USERS OF YOUR ROOM - SOCKET.IO`);
+      this.updateCollaboratorInfo(result);
     });
 
-    this.processingService.defaultEntityLoaded.subscribe(isDefault => {
-      this.isDefaultEntityLoaded = isDefault;
-      if (isDefault) {
-        this.isDemoMode = true;
-      }
+    // Our data is requested
+    this.socket.on('roomDataRequest', (result: ISocketRoomData) => {
+      result.info = this.getOwnSocketData();
+      this.socket.emit('roomDataAnswer', result);
     });
 
-    this.isCollectionInputSelected = false;
-
-    this.processingService.Observables.actualEntity.subscribe(actualEntity => {
-      this.actualEntity = actualEntity;
+    // We recieved data from someone
+    this.socket.on('roomDataAnswer', (result: ISocketRoomData) => {
+      this.updateCollaboratorInfo(result.info);
     });
 
-    this.processingService.Observables.actualEntityMeshes.subscribe(
-      actualEntityMeshes => {
-        this.actualEntityMeshes = actualEntityMeshes;
-        this.loadAnnotations();
-        if (this.annotatableMediaType) {
-        this.initializeAnnotationMode();
-        // TODO
-        this.toggleAnnotationSource(false);
-        this.setAnnotatingAllowance();
-        }
-      },
-    );
-
-    this.processingService.Observables.actualCollection.subscribe(
-      actualCompilation => {
-        if (!actualCompilation) {
-          this.isCollectionLoaded = false;
-          return;
-        }
-        actualCompilation._id
-          ? (this.isCollectionLoaded = true)
-          : (this.isCollectionLoaded = false);
-        this.actualCompilation = actualCompilation;
-      },
-    );
-
-    this.overlayService.editor.subscribe(open => {
-      this.isEntityFeaturesOpen = open;
-      this.setAnnotatingAllowance();
+    this.socket.on('createAnnotation', (result: ISocketAnnotation) => {
+      console.log(
+          `COLLABORATOR '${result.user.username}' CREATED AN ANNOTATION - SOCKET.IO`,
+      );
+      this.handleReceivedAnnotation(result.annotation);
     });
 
-    this.overlayService.editorSetting.subscribe(meshSettingsMode => {
-      this.isMeshSettingsMode = meshSettingsMode;
-      this.setAnnotatingAllowance();
+    this.socket.on('editAnnotation', (result: ISocketAnnotation) => {
+      console.log(
+          `COLLABORATOR '${result.user.username}' EDITED AN ANNOTATION - SOCKET.IO`,
+      );
+      this.handleReceivedAnnotation(result.annotation);
     });
 
-    this.annotationmarkerService.isSelectedAnnotation.subscribe(
-      selectedAnno => {
-        this.selectedAnnotation.next(selectedAnno);
-      },
-    );
+    this.socket.on('deleteAnnotation', (result: ISocketAnnotation) => {
+      // [socket.id, annotation]
+      console.log(
+          `COLLABORATOR '${result.user.username}' DELETED AN ANNOTATION- SOCKET.IO`,
+      );
+      this.deleteRequestAnnotation(result.annotation);
+    });
+
+    // TODO
+    this.socket.on('changeRanking', result => {
+      //  [socket.id, IdArray, RankingArray]
+      console.log(
+          `COLLABORATOR '${result[0]}' CHANGED ANNOTATION-RANKING - SOCKET.IO`,
+      );
+    });
+
+    // A user lost connection, so we remove knowledge about this user
+    this.socket.on('lostConnection', (result: ISocketUserInfo) => {
+      // [user, annotations]);
+      console.log(
+          `COLLABORATOR '${result.user.username}' LOGGED OUT - SOCKET.IO`,
+      );
+      this.removeKnowledgeAboutUser(result);
+    });
+
+    this.socket.on('logout', _ => {
+      // socket.id
+      console.log(`logging out of Socket.io...`);
+    });
+
+    // A user left the room, so we remove knowledge about this user
+    this.socket.on('changeRoom', (result: ISocketUserInfo) => {
+      console.log(
+          `COLLABORATOR '${result.user.username}' CHANGED ROOM - SOCKET.IO`,
+      );
+      this.removeKnowledgeAboutUser(result);
+    });
+
+    // Lost connection to server
+    this.socket.on('disconnect', () => {
+      this.isBroadcasting = false;
+      this.broadcasting.emit(false);
+      this.collaborators = [];
+      this.sortUser();
+      // this.collaboratorsAnnotations = [];
+      this.socket.disconnect();
+    });
   }
 
   private getDefaultAnnotations() {
@@ -252,10 +356,10 @@ export class AnnotationService {
     await this.annotationmarkerService.deleteAllMarker();
     this.annotations.splice(0, this.annotations.length);
 
-    if (!this.isDemoMode) {
+    if (!this.isDefaultEntityLoaded && !this.isFallbackEntityLoaded) {
       // Filter null/undefined annotations
-      const serverAnnotations = this.getAnnotationsfromServerDB().filter(
-        annotation =>
+      const serverAnnotations = this.getAnnotationsfromServerDB()
+          .filter(annotation =>
           annotation && annotation._id && annotation.lastModificationDate,
       );
       const pouchAnnotations = (await this.getAnnotationsfromLocalDB()).filter(
@@ -275,9 +379,7 @@ export class AnnotationService {
         this.annotations.push(annotationFallback);
       }
       if (this.isDefaultEntityLoaded) {
-        const searchParams = location.search;
-        const queryParams = new URLSearchParams(searchParams);
-        const annotationMode = queryParams.get('mode') === 'annotation';
+        const annotationMode = this.loadedMode === 'annotation';
         if (annotationMode && annotationLogo.length) {
           annotationLogo.forEach((annotation: IAnnotation) =>
             this.annotations.push(annotation),
@@ -433,16 +535,16 @@ export class AnnotationService {
   }
 
   private async sortAnnotations() {
-    const sortedDefault = this.getDefaultAnnotations().sort(
-      (leftSide, rightSide): number =>
+    const sortedDefault = this.getDefaultAnnotations()
+        .sort((leftSide, rightSide): number =>
         +leftSide.ranking === +rightSide.ranking
           ? 0
           : +leftSide.ranking < +rightSide.ranking
           ? -1
           : 1,
     );
-    const sortedCompilation = this.getCompilationAnnotations().sort(
-      (leftSide, rightSide): number =>
+    const sortedCompilation = this.getCompilationAnnotations()
+        .sort((leftSide, rightSide): number =>
         +leftSide.ranking === +rightSide.ranking
           ? 0
           : +leftSide.ranking < +rightSide.ranking
@@ -493,7 +595,8 @@ export class AnnotationService {
   public async createNewAnnotation(result: any) {
     const camera = this.babylon.cameraManager.getInitialPosition();
 
-    this.babylon.createPreviewScreenshot(400).then(detailScreenshot => {
+    this.babylon.createPreviewScreenshot(400)
+        .then(detailScreenshot => {
       if (!this.actualEntity) {
         throw new Error(`this.actualEntity not defined: ${this.actualEntity}`);
         console.error('AnnotationService:', this);
@@ -576,12 +679,18 @@ export class AnnotationService {
     });
   }
 
-  private add(annotation: IAnnotation): void {
-    let newAnnotation = annotation;
+  private add(_annotation: IAnnotation): void {
+    let newAnnotation = _annotation;
     newAnnotation.lastModificationDate = new Date().toISOString();
-    if (!this.isDemoMode) {
+    if (!this.isDefaultEntityLoaded && !this.isFallbackEntityLoaded) {
+      if (this.isBroadcasting) {
+        this.socket.emit('createAnnotation', {
+          annotation: _annotation,
+          user: this.getOwnSocketData().user,
+        });
+      }
       this.mongo
-        .updateAnnotation(annotation)
+        .updateAnnotation(_annotation)
         .then((resultAnnotation: IAnnotation) => {
           newAnnotation = resultAnnotation;
         })
@@ -596,16 +705,22 @@ export class AnnotationService {
     this.editModeAnnotation.next(newAnnotation._id);
   }
 
-  public updateAnnotation(annotation: IAnnotation) {
-    let newAnnotation = annotation;
+  public updateAnnotation(_annotation: IAnnotation) {
+    let newAnnotation = _annotation;
     newAnnotation.lastModificationDate = new Date().toISOString();
-    if (!this.isDemoMode) {
+    if (!this.isFallbackEntityLoaded && !this.isDefaultEntityLoaded) {
       if (
-        this.userdataService.isAnnotationOwner(annotation) ||
+        this.userdataService.isAnnotationOwner(_annotation) ||
         (this.isCollectionLoaded && this.userdataService.isCollectionOwner)
       ) {
+        if (this.isBroadcasting) {
+          this.socket.emit('editAnnotation', {
+            annotation: _annotation,
+            user: this.getOwnSocketData().user,
+          });
+        }
         this.mongo
-          .updateAnnotation(annotation)
+          .updateAnnotation(_annotation)
           .then((resultAnnotation: IAnnotation) => {
             newAnnotation = resultAnnotation;
           })
@@ -616,29 +731,35 @@ export class AnnotationService {
       this.dataService.updateAnnotation(newAnnotation);
     }
     this.annotations.splice(
-      this.annotations.findIndex(ann => ann._id === annotation._id),
+      this.annotations.findIndex(ann => ann._id === _annotation._id),
       1,
       newAnnotation,
     );
   }
 
-  public deleteAnnotation(annotation: IAnnotation) {
-    if (this.userdataService.isAnnotationOwner(annotation)) {
+  public deleteAnnotation(_annotation: IAnnotation) {
+    if (this.userdataService.isAnnotationOwner(_annotation)) {
       this.setSelectedAnnotation('');
       this.setEditModeAnnotation('');
       const index: number = this.annotations.findIndex(
-        ann => ann._id === annotation._id,
+        ann => ann._id === _annotation._id,
       );
       if (index !== -1) {
         this.annotations.splice(
-          this.annotations.findIndex(ann => ann._id === annotation._id),
+          this.annotations.findIndex(ann => ann._id === _annotation._id),
           1,
         );
+        if (this.isBroadcasting) {
+          this.socket.emit('deleteAnnotation', {
+            annotation: _annotation,
+            user: this.getOwnSocketData().user,
+          });
+        }
         this.changedRankingPositions();
         this.redrawMarker();
-        if (!this.isDemoMode) {
-          this.dataService.deleteAnnotation(annotation._id);
-          this.deleteAnnotationFromServer(annotation._id);
+        if (!this.isFallbackEntityLoaded && !this.isDefaultEntityLoaded) {
+          this.dataService.deleteAnnotation(_annotation._id);
+          this.deleteAnnotationFromServer(_annotation._id);
         }
       }
     } else {
@@ -681,7 +802,8 @@ export class AnnotationService {
       DialogGetUserDataComponent,
       dialogConfig,
     );
-    dialogRef.afterClosed().subscribe(data => {
+    dialogRef.afterClosed()
+        .subscribe(data => {
       if (data === true) {
         this.message.info('Deleted from Server');
       } else {
@@ -720,16 +842,14 @@ export class AnnotationService {
     });
   }
 
-  public async redrawMarker() {
-    if (!this.isBroadcasting) {
-      await this.annotationmarkerService.deleteAllMarker();
-      for (const annotation of this.getCurrentAnnotations()) {
-        const color = 'black';
-        this.annotationmarkerService.createAnnotationMarker(annotation, color);
-      }
-    } else {
-      return;
-    }
+  public redrawMarker() {
+    this.annotationmarkerService
+        .deleteAllMarker()
+        .then(() => {
+          for (const annotation of this.getCurrentAnnotations()) {
+            this.drawMarker(annotation);
+        }})
+        .catch(e => console.error(e));
   }
 
   public drawMarker(newAnnotation: IAnnotation) {
@@ -737,7 +857,16 @@ export class AnnotationService {
       const color = 'black';
       this.annotationmarkerService.createAnnotationMarker(newAnnotation, color);
     } else {
-      return;
+      let color = 'black';
+      if (this.coloredUsers.length) {
+        const cUserIndex = this.coloredUsers.findIndex(
+            x => x._id === newAnnotation.creator._id,
+        );
+        if (cUserIndex !== -1 && cUserIndex < this.maxColoredUsersMinusOne) {
+          color = this.color[cUserIndex];
+        }
+      }
+      this.annotationmarkerService.createAnnotationMarker(newAnnotation, color);
     }
   }
 
@@ -801,7 +930,6 @@ export class AnnotationService {
     collectionId: string,
     annotationLength: number,
   ): any {
-    console.log('Erstelle die Kopie');
 
     const generatedId = this.mongo.generateEntityId();
 
@@ -838,13 +966,13 @@ export class AnnotationService {
 
   public setAnnotatingAllowance() {
     let emitBool = false;
-    if (!this.annotatableMediaType) {
+    if (!this.annotatableTypeAndMode) {
       this.isAnnotatingAllowed = false;
       this.annnotatingAllowed.emit(false);
       return;
     }
     emitBool = this.isEntityFeaturesOpen && (!this.isMeshSettingsMode ? true :
-        this.isDefaultEntityLoaded || this.isDemoMode);
+        this.isDefaultEntityLoaded || this.isFallbackEntityLoaded);
     if (emitBool && !this.isCollectionInputSelected) {
       emitBool =
         (this.isAuthenticated && this.isEntityOwner && !this.isCollectionLoaded) ||
@@ -858,6 +986,8 @@ export class AnnotationService {
     this.isAnnotatingAllowed = emitBool;
     this.annotationMode(emitBool);
     this.annnotatingAllowed.emit(emitBool);
+    console.log('set allowance: ', emitBool);
+    this.setBroadcastingAllowance();
   }
 
   public setCollectionInput(selected: boolean) {
@@ -876,10 +1006,161 @@ export class AnnotationService {
     });
   }
 
+  private setBroadcastingAllowance() {
+      // annotating allowed && collection loaded && (!whitelist ||
+      // whitlist users > 0 also mehr Personen als Owner && mode !== edit
+      const mode = this.loadedMode === 'edit';
+      const isBroadcastingInput = (this.mediaType !== 'audio' && this.mediaType !== 'video');
+      let allowance = false;
+      if (!this.isAuthenticated || !this.isAnnotatingAllowed ||
+          !isBroadcastingInput || mode || !this.isCollectionLoaded) {
+          allowance = false;
+      } else {
+          if ((this.actualCompilation && !this.actualCompilation.whitelist.enabled) ||
+              (this.actualCompilation && this.actualCompilation.whitelist.groups.length > 0) ||
+              (this.actualCompilation && this.actualCompilation.whitelist.persons.length > 0)) {
+              allowance = true;
+          }
+      }
+
+    this.isBroadcastingAllowed = allowance;
+    this.broadcastingAllowed.emit(allowance);
+  }
+
   public toggleAnnotationSource(sourceCol: boolean) {
     if (sourceCol !== this.isannotationSourceCollection) {
       this.isannotationSourceCollection = sourceCol;
       this.updateCurrentAnnotationsSubject();
     }
+  }
+
+  // Broadcasting
+  // -- Basic functionality
+
+  // TODO
+  private getOwnSocketData(): ISocketUserInfo {
+    return {
+      user: {
+        _id: this.userData ? this.userData._id : '',
+        fullname: this.userData ? this.userData.fullname : '',
+        username: this.userData ? this.userData.username : '',
+        room: this.socketRoom,
+        socketId: 'self',
+      },
+      annotations: this.getCompilationAnnotations(),
+    };
+  }
+
+  public loginToSocket() {
+    this.isBroadcasting = true;
+    this.broadcasting.emit(true);
+    this.socket.connect();
+    console.log(`LOGGING IN TO SOCKET.IO \n ROOM: '${this.socketRoom}'`);
+    // emit "you" as newUser to other online members of your current room
+    const emitData: ISocketUserInfo = this.getOwnSocketData();
+    this.socket.emit('newUser', emitData);
+    // Request Roomdata from every person in the room
+    const emitRequest: ISocketRoomData = {
+      info: emitData,
+      requester: emitData,
+      recipient: this.socketRoom,
+    };
+    this.socket.emit('roomDataRequest', emitRequest);
+    this.redrawMarker();
+  }
+
+  public disconnectSocket() {
+    this.isBroadcasting = false;
+    this.broadcasting.emit(false);
+    this.collaborators = [];
+    this.sortUser();
+    // send info to other Room members,
+    // then emit 'logout' from Socket.id for this User
+    // TODO sollen die Annotationen "mitgenommen" werden?
+    this.socket.emit('logout', { annotations: [] });
+    this.socket.disconnect();
+    this.redrawMarker();
+  }
+
+  public changeSocketRoom() {
+    this.collaborators = [];
+    this.sortUser();
+    // TODO sollen die Annotationen "mitgenommen" werden?
+    // this.collaboratorsAnnotations = [];
+    const emitData: ISocketChangeRoom = {
+      newRoom: this.socketRoom,
+      annotations: [],
+    };
+    this.socket.emit('changeRoom', emitData);
+  }
+
+  private updateCollaboratorInfo(data: ISocketUserInfo) {
+    if (
+        !this.collaborators.find(_user => data.user.socketId === _user.socketId)
+    ) {
+      this.collaborators.push(data.user);
+      this.sortUser();
+
+      data.annotations.forEach(annotation => {
+        console.log('Bekomme in Socket von Collab: ', annotation);
+        this.handleReceivedAnnotation(annotation);
+      });
+    }
+  }
+
+  private removeKnowledgeAboutUser(userInfo: ISocketUserInfo) {
+    this.collaborators = this.collaborators.filter(
+        _user => _user._id !== userInfo.user._id,
+    );
+    this.sortUser();
+  }
+
+  // -- colored Users and colored Annotations and colored Marker
+
+  public sortUser(priorityUser?: ISocketUser) {
+    const selfIndex = this.collaborators.findIndex(
+        user => user.socketId === this.socket.ioSocket.id,
+    );
+
+    const self = this.collaborators.splice(selfIndex, 1)[0];
+    if (!self) {
+      throw new Error('Sortuser Self missing');
+      console.error(this);
+      return;
+    }
+
+    if (priorityUser) {
+      const pUserIndex = this.collaborators.findIndex(
+          x => x.socketId === priorityUser.socketId,
+      );
+      const pUser =
+          pUserIndex !== -1
+              ? this.collaborators.splice(pUserIndex, 1)[0]
+              : priorityUser;
+      this.collaborators.unshift(pUser);
+    }
+
+    this.collaborators.unshift(self);
+
+    this.coloredUsers = this.collaborators;
+
+    this.redrawMarker();
+  }
+
+  public getColor(annotationCreatorId: string): string {
+    if (this.isBroadcasting) {
+      if (this.coloredUsers.length) {
+        const cUserIndex = this.coloredUsers.findIndex(
+            x => x._id === annotationCreatorId,
+        );
+        if (cUserIndex !== -1 && cUserIndex < this.maxColoredUsersMinusOne) {
+          return this.color[cUserIndex];
+        }
+        return '$cardbgr';
+      }
+      return '$cardbgr';
+
+    }
+    return '$cardbgr';
   }
 }

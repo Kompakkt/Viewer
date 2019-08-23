@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
 
-import { SocketService } from '../../services/socket/socket.service';
+import {AnnotationService} from "../../services/annotation/annotation.service";
+// tslint:disable-next-line:max-line-length
 import { DialogInviteBroadcastingComponent } from '../dialogs/dialog-invite-broadcasting/dialog-invite-broadcasting.component';
-// import {DialogMeshsettingsComponent} from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
 
 @Component({
   selector: 'app-broadcast',
@@ -13,19 +13,19 @@ import { DialogInviteBroadcastingComponent } from '../dialogs/dialog-invite-broa
 export class BroadcastComponent implements OnInit {
   public toggleChecked = false;
 
-  constructor(public socketService: SocketService, public dialog: MatDialog) {}
+  constructor(public annotationService: AnnotationService, public dialog: MatDialog) {}
 
   ngOnInit() {}
 
   public selectedUser(selected: any) {
-    this.socketService.sortUser(selected);
+    this.annotationService.sortUser(selected);
   }
 
   public onSocketToggleChange() {
     if (this.toggleChecked) {
-      this.socketService.loginToSocket();
+      this.annotationService.loginToSocket();
     } else {
-      this.socketService.disconnectSocket();
+      this.annotationService.disconnectSocket();
     }
   }
 

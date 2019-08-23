@@ -5,7 +5,6 @@ import { saveAs } from 'file-saver';
 
 import { AnnotationService } from '../../../services/annotation/annotation.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
-import { SocketService } from '../../../services/socket/socket.service';
 import { UserdataService } from '../../../services/userdata/userdata.service';
 import { AnnotationComponent } from '../annotation/annotation.component';
 
@@ -31,7 +30,6 @@ export class AnnotationsEditorComponent implements OnInit {
 
   constructor(
     public annotationService: AnnotationService,
-    private socketService: SocketService,
     public processingService: ProcessingService,
     private userDataService: UserdataService,
   ) {}
@@ -59,11 +57,11 @@ export class AnnotationsEditorComponent implements OnInit {
       this.isAnnotatingAllowed = allowed;
     });
 
-    this.socketService.inSocket.subscribe(broadcast => {
+    this.annotationService.broadcasting.subscribe(broadcast => {
       this.isBroadcasting = broadcast;
     });
 
-    this.socketService.broadcastingAllowed.subscribe(broadcast => {
+    this.annotationService.broadcastingAllowed.subscribe(broadcast => {
       this.isBroadcastingAllowed = broadcast;
     });
   }

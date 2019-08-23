@@ -1,15 +1,15 @@
-<div *ngIf="this.socketService.collaborators" id="collaborators">
+<div *ngIf="this.annotationService.collaborators" id="collaborators">
   <mat-chip-list>
-    <mat-chip *ngFor="let collaborator of this.socketService.collaborators |
+    <mat-chip *ngFor="let collaborator of this.annotationService.collaborators |
     slice:0:
-    this.socketService.maxColoredUsersMinusOne < this.socketService.collaborators.length ?
-    this.socketService.maxColoredUsersMinusOne : this.socketService.collaborators.length;
+    this.annotationService.maxColoredUsersMinusOne < this.annotationService.collaborators.length ?
+    this.annotationService.maxColoredUsersMinusOne : this.annotationService.collaborators.length;
     let i=index"
-              [style.background-color]="this.socketService.color[i]"
+              [style.background-color]="this.annotationService.color[i]"
               matTooltip="{{collaborator.fullname}}">
       {{collaborator.username.substring(0,2)}}
     </mat-chip>
-    <div *ngIf="this.socketService.collaborators.length > this.socketService.maxColoredUsersMinusOne">
+    <div *ngIf="this.annotationService.collaborators.length > this.annotationService.maxColoredUsersMinusOne">
       <button
         mat-icon-button (click)="select.open()"
         matTooltip="See all" matTooltipPosition="above"
@@ -18,8 +18,8 @@
       </button>
       <mat-form-field [style.visibility]="'hidden'">
         <mat-select #select [style.visibility]="'hidden'" (selectionChange)="selectedUser($event.value)">
-          <mat-option *ngFor="let collaborator of this.socketService.collaborators |
-      slice:this.socketService.maxColoredUsersMinusOne;
+          <mat-option *ngFor="let collaborator of this.annotationService.collaborators |
+      slice:this.annotationService.maxColoredUsersMinusOne;
      let i=index" [value]="collaborator">
             {{collaborator.fullname}}
           </mat-option>

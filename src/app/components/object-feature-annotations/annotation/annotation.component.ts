@@ -7,7 +7,6 @@ import { AnnotationService } from '../../../services/annotation/annotation.servi
 // tslint:disable-next-line:max-line-length
 import { AnnotationmarkerService } from '../../../services/annotationmarker/annotationmarker.service';
 import { BabylonService } from '../../../services/babylon/babylon.service';
-import { SocketService } from '../../../services/socket/socket.service';
 import { UserdataService } from '../../../services/userdata/userdata.service';
 // tslint:disable-next-line:max-line-length
 import { DialogAnnotationEditorComponent } from '../../dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
@@ -49,7 +48,6 @@ export class AnnotationComponent implements OnInit {
     public annotationService: AnnotationService,
     public babylonService: BabylonService,
     public annotationmarkerService: AnnotationmarkerService,
-    public socketService: SocketService,
     public dialog: MatDialog,
     private userdataService: UserdataService,
   ) {}
@@ -99,8 +97,9 @@ export class AnnotationComponent implements OnInit {
       this.isAnnotatingAllowed = allowed;
     });
 
-    this.socketService.inSocket.subscribe(inSocket => {
+    this.annotationService.broadcasting.subscribe(inSocket => {
       this.isInSocket = inSocket;
+      console.log('inSocket');
     });
 
     this.annotationService.isEditModeAnnotation.subscribe(selectedEditAnno => {
@@ -229,7 +228,8 @@ export class AnnotationComponent implements OnInit {
       },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed()
+        .subscribe(result => {
       if (result && this.annotation) {
         this.annotation.body.content.title = result.title;
         this.annotation.body.content.description = result.content;
