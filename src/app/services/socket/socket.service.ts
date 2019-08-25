@@ -28,13 +28,12 @@ export class SocketService {
 
   private knownAnnotations: IAnnotation[] = [];*/
 
-  constructor(
-    //public socket: Socket,
-    //private processingService: ProcessingService,
-    //private userdataService: UserdataService,
-    //private annotationmarkerService: AnnotationmarkerService,
-    //private annotationService: AnnotationService,
-  ) {
+  constructor() //public socket: Socket,
+  //private processingService: ProcessingService,
+  //private userdataService: UserdataService,
+  //private annotationmarkerService: AnnotationmarkerService,
+  //private annotationService: AnnotationService,
+  {
     /*
     this.isInSocket = false;
     this.inSocket.emit(false);
@@ -278,7 +277,7 @@ export class SocketService {
   }
 
   // -- Basic functionality
-/*
+  /*
   // TODO
   private getOwnSocketData(): ISocketUserInfo {
     return {

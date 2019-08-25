@@ -59,8 +59,7 @@ export class AnnotationwalkthroughComponent implements OnInit {
       this.babylonService.cameraManager.moveActiveCameraToPosition(
         positionVector,
       );
-      this.babylonService.cameraManager
-        .setActiveCameraTarget(targetVector);
+      this.babylonService.cameraManager.setActiveCameraTarget(targetVector);
     }
 
     this.annotationService.setSelectedAnnotation(

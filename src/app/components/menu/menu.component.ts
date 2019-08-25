@@ -5,7 +5,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { BabylonService } from '../../services/babylon/babylon.service';
 import { OverlayService } from '../../services/overlay/overlay.service';
 import { ProcessingService } from '../../services/processing/processing.service';
-import {UserdataService} from '../../services/userdata/userdata.service';
+import { UserdataService } from '../../services/userdata/userdata.service';
 import { LoginComponent } from '../dialogs/dialog-login/login.component';
 
 @Component({
@@ -41,7 +41,7 @@ export class MenuComponent implements OnInit {
     );
 
     this.userDataService.isUserAuthenticatedObservable.subscribe(
-        state => (this.isAuthenticated = state),
+      state => (this.isAuthenticated = state),
     );
 
     this.userDataService.isUserAuthenticatedObservable.subscribe(isLoggedIn => {
@@ -90,8 +90,11 @@ export class MenuComponent implements OnInit {
   }
 
   public loginAttempt() {
-    this.isAuthenticated ? this.processingService.bootstrap() :
-        (this.firstAttempt ? this.openLoginDialog() : this.processingService.bootstrap());
+    this.isAuthenticated
+      ? this.processingService.bootstrap()
+      : this.firstAttempt
+      ? this.openLoginDialog()
+      : this.processingService.bootstrap();
   }
 
   private openLoginDialog() {
@@ -100,13 +103,13 @@ export class MenuComponent implements OnInit {
     dialogConfig.autoFocus = true;
     this.firstAttempt = false;
     this.dialog
-        .open(LoginComponent, dialogConfig)
-        .afterClosed()
-        .toPromise()
-        .then(() => this.loginAttempt())
-        .catch(e => {
-          console.error(e);
-          this.loginAttempt();
-        });
+      .open(LoginComponent, dialogConfig)
+      .afterClosed()
+      .toPromise()
+      .then(() => this.loginAttempt())
+      .catch(e => {
+        console.error(e);
+        this.loginAttempt();
+      });
   }
 }

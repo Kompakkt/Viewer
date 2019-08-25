@@ -1,4 +1,4 @@
-import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Matrix, Vector3 } from 'babylonjs';
 
@@ -176,7 +176,10 @@ export class AnnotationComponent implements OnInit {
     const getMesh = scene.getMeshByName(annotation._id + '_pick');
 
     if (getMesh && scene.activeCamera) {
-      if (!this.annotationForm || !this.annotationForm.nativeElement.parentElement) {
+      if (
+        !this.annotationForm ||
+        !this.annotationForm.nativeElement.parentElement
+      ) {
         return;
       }
 
@@ -199,17 +202,9 @@ export class AnnotationComponent implements OnInit {
       const [elHeight, elWidth] = [parent.clientHeight, parent.clientWidth];
 
       this.positionTop =
-        top < 0
-          ? 0
-          : top + elHeight > height
-          ? height - elHeight
-          : top;
+        top < 0 ? 0 : top + elHeight > height ? height - elHeight : top;
       this.positionLeft =
-        left < 0
-          ? 0
-          : left + elWidth > width
-          ? width - elWidth
-            : left;
+        left < 0 ? 0 : left + elWidth > width ? width - elWidth : left;
     }
   }
 
@@ -228,8 +223,7 @@ export class AnnotationComponent implements OnInit {
       },
     });
 
-    dialogRef.afterClosed()
-        .subscribe(result => {
+    dialogRef.afterClosed().subscribe(result => {
       if (result && this.annotation) {
         this.annotation.body.content.title = result.title;
         this.annotation.body.content.description = result.content;

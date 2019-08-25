@@ -91,19 +91,22 @@ export class EntityFeatureSettingsComponent implements OnInit {
         }
         this.isFinished = this.activeEntity.finished;
         this.setSettings()
-            .then(() => {})
-            .catch(error => {
-              console.error(error);
-              this.processingService.loadFallbackEntity()
-                  .then(() => {
-                    // TODO add annotation
-                  })
-                  .catch(e => {
-                    console.error(e);
-                    // tslint:disable-next-line:max-line-length
-                    this.message.error('Loading of Objects does not work. Please tell us about it!');
-                  });
-            });
+          .then(() => {})
+          .catch(error => {
+            console.error(error);
+            this.processingService
+              .loadFallbackEntity()
+              .then(() => {
+                // TODO add annotation
+              })
+              .catch(e => {
+                console.error(e);
+                // tslint:disable-next-line:max-line-length
+                this.message.error(
+                  'Loading of Objects does not work. Please tell us about it!',
+                );
+              });
+          });
       }
     });
 
@@ -410,7 +413,9 @@ export class EntityFeatureSettingsComponent implements OnInit {
         await this.entitySettingsService.loadSettings(1, 315, 0, 0, true);
       }
       this.initialSettingsMode = true;
-      await this.entitySettingsService.createVisualSettings(this.mediaType ? this.mediaType : '');
+      await this.entitySettingsService.createVisualSettings(
+        this.mediaType ? this.mediaType : '',
+      );
       if (this.mediaType === 'audio' || this.mediaType === 'video') {
         this.entitySettingsService.decomposeAfterSetting();
       }
@@ -591,7 +596,10 @@ export class EntityFeatureSettingsComponent implements OnInit {
         },
       ],
       rotation: {
-        x: this.mediaType === 'audio' ? 315 : this.entitySettingsService.rotationX,
+        x:
+          this.mediaType === 'audio'
+            ? 315
+            : this.entitySettingsService.rotationX,
         y: this.entitySettingsService.rotationY,
         z: this.entitySettingsService.rotationZ,
       },
