@@ -323,12 +323,18 @@ export class ProcessingService {
     // values = dragdrop, explore, edit, annotation, ilias, full
     const mode = queryParams.get('mode');
 
-    const loadingCase =
-      entityParam !== null || undefined
-        ? 'entity'
-        : compParam !== null || undefined
-        ? 'collection'
-        : 'default';
+    const loadingCase = entityParam
+      ? 'entity'
+      : compParam
+      ? 'collection'
+      : 'default';
+
+    console.log({
+      entityParam,
+      compParam,
+      mode,
+      loadingCase,
+    });
 
     if (mode === 'dragdrop') {
       this.isLightMode = false;
