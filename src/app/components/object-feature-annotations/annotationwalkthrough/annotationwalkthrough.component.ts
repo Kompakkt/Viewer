@@ -21,18 +21,19 @@ export class AnnotationwalkthroughComponent implements OnInit {
   ngOnInit() {}
 
   public previousAnnotation() {
-    this.actualRanking === 0
-      ? (this.actualRanking =
-          this.annotationService.getCurrentAnnotations().length - 1)
+    const isFirst = this.actualRanking === 0;
+    this.actualRanking = isFirst
+      ? this.annotationService.getCurrentAnnotations().length - 1
       : (this.actualRanking = this.actualRanking - 1);
     this.getAction(this.actualRanking);
   }
 
   public nextAnnotation() {
-    this.actualRanking ===
-    this.annotationService.getCurrentAnnotations().length - 1
-      ? (this.actualRanking = 0)
-      : (this.actualRanking = this.actualRanking + 1);
+    const isLast =
+      this.actualRanking ===
+      this.annotationService.getCurrentAnnotations().length - 1;
+
+    this.actualRanking = isLast ? 0 : this.actualRanking + 1;
     this.getAction(this.actualRanking);
   }
 

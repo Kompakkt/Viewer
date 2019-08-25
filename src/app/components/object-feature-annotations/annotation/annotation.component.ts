@@ -87,9 +87,7 @@ export class AnnotationComponent implements OnInit {
         throw new Error('AnnotationComponent without annotation');
         return;
       }
-      selectedAnno === this.annotation._id
-        ? (this.visibility = true)
-        : (this.visibility = false);
+      this.visibility = selectedAnno === this.annotation._id;
       this.selectedAnnotation = selectedAnno;
     });
 
@@ -143,9 +141,9 @@ export class AnnotationComponent implements OnInit {
       throw new Error('AnnotationComponent without annotation');
       return;
     }
-    this.isEditMode
-      ? this.annotationService.setEditModeAnnotation('')
-      : this.annotationService.setEditModeAnnotation(this.annotation._id);
+    this.annotationService.setEditModeAnnotation(
+      this.isEditMode ? '' : this.annotation._id,
+    );
   }
 
   public shareAnnotation() {

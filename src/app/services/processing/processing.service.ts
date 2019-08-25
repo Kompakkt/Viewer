@@ -344,11 +344,7 @@ export class ProcessingService {
     }
 
     if (loadingCase === 'entity') {
-      this.fetchAndLoad(
-        entityParam ? entityParam : undefined,
-        compParam ? compParam : undefined,
-        !!compParam,
-      );
+      this.fetchAndLoad(entityParam, compParam, !!compParam);
       if (mode === 'explore') {
         this.isLightMode = false;
         this.lightMode.emit(false);
@@ -451,11 +447,7 @@ export class ProcessingService {
     }
 
     if (loadingCase === 'collection') {
-      this.fetchAndLoad(
-        undefined,
-        compParam ? compParam : undefined,
-        undefined,
-      );
+      this.fetchAndLoad(undefined, compParam, undefined);
       this.overlayService.toggleCollectionsOverview();
       if (mode === 'ilias') {
         this.isShowMetadata = true;
@@ -531,8 +523,8 @@ export class ProcessingService {
   }
 
   public fetchAndLoad(
-    entityId?: string,
-    collectionId?: string,
+    entityId?: string | null,
+    collectionId?: string | null,
     isfromCollection?: boolean,
   ) {
     this.loaded.emit(false);

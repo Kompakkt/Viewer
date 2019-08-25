@@ -90,12 +90,11 @@ export class SceneComponent implements AfterViewInit {
     // values = dragdrop, explore, edit, annotation, ilias, full
     const mode = queryParams.get('mode');
 
-    const loadingCase =
-      entityParam !== null || undefined
-        ? 'entity'
-        : compParam !== null || undefined
-        ? 'collection'
-        : 'default';
+    const loadingCase = entityParam
+      ? 'entity'
+      : compParam
+      ? 'collection'
+      : 'default';
 
     if (
       (loadingCase === 'collection' && mode === 'ilias') ||

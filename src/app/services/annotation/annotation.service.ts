@@ -151,9 +151,7 @@ export class AnnotationService {
         if (actualCompilation._id && this.actualEntity) {
           this.socketRoom = `${actualCompilation._id}_${this.actualEntity._id}`;
 
-          actualCompilation._id
-            ? (this.isCollectionLoaded = true)
-            : (this.isCollectionLoaded = false);
+          this.isCollectionLoaded = actualCompilation._id !== undefined;
           this.actualCompilation = actualCompilation;
         }
       },

@@ -139,25 +139,16 @@ export class EntitySettingsService {
     this.babylonService.cameraManager.setUpActiveCamera(max);
 
     if (upload) {
+      const isModel = mediaType === 'model' || mediaType === 'entity';
       const pos = new Vector3(
-        mediaType === 'model' || mediaType === 'entity'
-          ? Math.PI / 4
-          : -Math.PI / 2,
-        mediaType === 'model' || mediaType === 'entity'
-          ? Math.PI / 4
-          : Math.PI / 2,
+        isModel ? Math.PI / 4 : -Math.PI / 2,
+        isModel ? Math.PI / 4 : Math.PI / 2,
         Math.max(this.height, this.width, this.depth) * 1.7,
       );
       const target = new Vector3(
-        mediaType === 'model' || mediaType === 'entity'
-          ? this.max.x - this.initialSize.x / 2
-          : 0,
-        mediaType === 'model' || mediaType === 'entity'
-          ? this.max.y - this.initialSize.y / 2
-          : 0,
-        mediaType === 'model' || mediaType === 'entity'
-          ? this.max.z - this.initialSize.z / 2
-          : 0,
+        isModel ? this.max.x - this.initialSize.x / 2 : 0,
+        isModel ? this.max.y - this.initialSize.y / 2 : 0,
+        isModel ? this.max.z - this.initialSize.z / 2 : 0,
       );
       this.babylonService.cameraManager.updateDefaults(pos, target);
       this.babylonService.cameraManager.setActiveCameraTarget(target);
@@ -556,7 +547,7 @@ export class EntitySettingsService {
   }
 
   public handleChangeBoundingBoxEntity() {
-    this.showBoundingBoxEntity = this.showBoundingBoxEntity ? false : true;
+    this.showBoundingBoxEntity = !this.showBoundingBoxEntity;
     if (!this.boundingBox) {
       throw new Error('BoundingBox missing');
       console.error(this);
@@ -574,7 +565,7 @@ export class EntitySettingsService {
   }
 
   public handleChangeBoundingBoxMeshes() {
-    this.showBoundingBoxMeshes = this.showBoundingBoxMeshes ? false : true;
+    this.showBoundingBoxMeshes = !this.showBoundingBoxMeshes;
     for (let _i = 0; _i < this.actualEntityMeshes.length; _i++) {
       const mesh = this.actualEntityMeshes[_i];
       mesh.showBoundingBox = this.showBoundingBoxMeshes;
@@ -627,7 +618,7 @@ export class EntitySettingsService {
   }
 
   public handleChangeGround() {
-    this.showGround = this.showGround ? false : true;
+    this.showGround = !this.showGround;
     if (this.showGround) {
       this.babylonService
         .getScene()
@@ -784,7 +775,7 @@ export class EntitySettingsService {
   }
 
   public handleChangeWorldAxis() {
-    this.showWorldAxis = this.showWorldAxis ? false : true;
+    this.showWorldAxis = !this.showWorldAxis;
     if (this.showWorldAxis) {
       this.babylonService
         .getScene()
@@ -914,7 +905,7 @@ export class EntitySettingsService {
   }
 
   public handleChangeLocalAxis() {
-    this.showLocalAxis = this.showLocalAxis ? false : true;
+    this.showLocalAxis = !this.showLocalAxis;
     if (this.showLocalAxis) {
       this.babylonService
         .getScene()

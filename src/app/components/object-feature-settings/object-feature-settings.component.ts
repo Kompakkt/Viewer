@@ -159,7 +159,8 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   public toggleHelpers() {
-    this.showHelpers = this.showHelpers ? false : true;
+    this.showHelpers = !this.showHelpers;
+
     if (this.showHelpers) {
       this.showOrientation = false;
       this.showScaling = false;
@@ -167,11 +168,11 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   public toggleHelperBackground() {
-    this.showHelperBackground = this.showHelperBackground ? false : true;
+    this.showHelperBackground = !this.showHelperBackground;
   }
 
   public toggleScaling() {
-    this.showScaling = this.showScaling ? false : true;
+    this.showScaling = !this.showScaling;
     if (this.showScaling) {
       this.showOrientation = false;
       this.showHelpers = false;
@@ -179,7 +180,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   public toggleOrientation() {
-    this.showOrientation = this.showOrientation ? false : true;
+    this.showOrientation = !this.showOrientation;
     if (this.showOrientation) {
       this.showScaling = false;
       this.showHelpers = false;
@@ -187,7 +188,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   public togglePreview() {
-    this.showPreview = this.showPreview ? false : true;
+    this.showPreview = !this.showPreview;
     if (this.showPreview) {
       this.showBackground = false;
       this.showLights = false;
@@ -195,7 +196,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   public toggleBackground() {
-    this.showBackground = this.showBackground ? false : true;
+    this.showBackground = !this.showBackground;
     if (this.showBackground) {
       this.showPreview = false;
       this.showLights = false;
@@ -203,7 +204,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   public toggleLights() {
-    this.showLights = this.showLights ? false : true;
+    this.showLights = !this.showLights;
     if (this.showLights) {
       this.showPreview = false;
       this.showBackground = false;
@@ -320,7 +321,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   handleChangeEffekt() {
-    this.setEffect = this.setEffect ? false : true;
+    this.setEffect = !this.setEffect;
     this.babylonService.setBackgroundImage(this.setEffect);
   }
 
