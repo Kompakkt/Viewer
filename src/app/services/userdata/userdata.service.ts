@@ -131,16 +131,9 @@ export class UserdataService {
   }
 
   public checkEntityOwnerState(entity: IEntity) {
-    let isOwner = false;
-    if (entity.relatedEntityOwners.length) {
-      entity.relatedEntityOwners.forEach(owner => {
-        if (this.userData) {
-          if (owner._id === this.userData._id) {
-            isOwner = true;
-          }
-        }
-      });
-    }
+    const isOwner = (this.userData && this.userData.data
+        && this.userData.data.entity && this.userData.data.entity[entity._id]) != undefined;
+
     this.isEntityOwner = ['dragdrop'].includes(entity._id) ? true : isOwner;
     this.entityOwner.emit(['dragdrop'].includes(entity._id) ? true : isOwner);
   }
