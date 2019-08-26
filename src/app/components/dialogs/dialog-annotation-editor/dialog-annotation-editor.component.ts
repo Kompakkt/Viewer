@@ -2,6 +2,7 @@ import { Component, Inject, ViewChild } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 
 import { environment } from '../../../../environments/environment';
+import { IEntity } from '../../../interfaces/interfaces';
 
 export interface IDialogData {
   title: string;
@@ -20,7 +21,6 @@ export class DialogAnnotationEditorComponent {
   public labelMode = 'edit';
   public labelModeText = 'Edit';
 
-  private repository = `${environment.repository}/`;
   private serverUrl = `${environment.express_server_url}:${environment.express_server_port}`;
 
   constructor(
@@ -28,32 +28,20 @@ export class DialogAnnotationEditorComponent {
     @Inject(MAT_DIALOG_DATA) public data: IDialogData,
   ) {}
 
-  public addEntitySwitch(entity) {
+  public addEntitySwitch(entity: IEntity) {
     switch (entity.mediaType) {
       case 'externalImage':
         this.addExternalImage(entity);
         break;
 
+      case 'video':
+      case 'audio':
       case 'image':
-        this.addImage(entity);
-        break;
-
       case 'text':
-        this.addText(entity);
-        break;
-
       case 'entity':
+      case 'model':
         this.addEntity(entity);
         break;
-
-      case 'video':
-        this.addVideo(entity);
-        break;
-
-      case 'audio':
-        this.addAudio(entity);
-        break;
-
       default:
         console.log(`Unknown media type ${entity.mediaType}`);
     }
@@ -85,58 +73,38 @@ export class DialogAnnotationEditorComponent {
     );
   }
 
-  // ToDo: Reduce doubled / redundant code in addImage vs. addText or unify functions
-  private addImage(image) {
-    const target =
-      image.relatedDigitalEntity.digobj_externalLink[0].externalLink_value;
-
-    let mdImage = `<a href="${target}" target="_blank">`;
-    mdImage += `<img src="${image.settings.preview}" alt="${image.name}"></a>`;
-
-    this.data.content = this.createMarkdown(mdImage);
-  }
-
-  private addText(text) {
-    const target =
-      text.relatedDigitalEntity.digobj_externalLink[0].externalLink_value;
-
-    let mdText = `<a href="${target}" target="_blank">`;
-    mdText += `<img src="${text.settings.preview}" alt="${text.name}"></a>`;
-
-    this.data.content = this.createMarkdown(mdText);
-  }
-
-  private addEntity(entity) {
-    let mdEntity = `<a href="${this.repository}entity-overview?entity=${entity._id}" target="_blank">`;
-    mdEntity += `<img src="${entity.settings.preview}" alt="${entity.name}"></a>`;
-
-    this.data.content = this.createMarkdown(mdEntity);
-  }
-
-  private addVideo(video) {
-    let mdVideo = `<video class="video" controls poster="">`;
-
+  private addEntity(entity: IEntity) {
+    const target = `${environment.repository}/entity/${entity._id}`;
     let url = '';
-    if (!video.dataSource.isExternal) url += `${this.serverUrl}/`;
 
-    mdVideo += `<source src="${url}/${video.processed.medium}" `;
-    mdVideo += `type="video/mp4">`;
-    mdVideo += `</video>`;
+    let markdown = '';
+    switch (entity.mediaType) {
+      case 'video':
+        if (!entity.dataSource.isExternal) url += `${this.serverUrl}/`;
+        markdown += `
+        <video class="video" controls poster="">
+          <source src="${url}/${entity.processed.medium}" type="video/mp4">
+        </video>`;
+        break;
+      case 'audio':
+        if (!entity.dataSource.isExternal) url += `${this.serverUrl}/`;
+        markdown += `
+        <audio controls>
+          <source src="${url}${entity.processed.medium}" type="audio/mpeg">
+        </audio>`;
+        break;
+      case 'image':
+      case 'text':
+      case 'model':
+      case 'entity':
+      default:
+        markdown += `
+        <a href="${target}" target="_blank">
+          <img src="${entity.settings.preview}" alt="${entity.name}">
+        </a>`;
+    }
 
-    this.data.content = this.createMarkdown(mdVideo);
-  }
-
-  private addAudio(audio) {
-    let mdAudio = `<audio controls>`;
-
-    let url = '';
-    if (!audio.dataSource.isExternal) url += `${this.serverUrl}/`;
-
-    mdAudio += `<source src="${url}${audio.processed.medium}" `;
-    mdAudio += `type="audio/mpeg">`;
-    mdAudio += `</audio>`;
-
-    this.data.content = this.createMarkdown(mdAudio);
+    this.data.content = this.createMarkdown(markdown);
   }
 
   public toggleEditViewMode() {
