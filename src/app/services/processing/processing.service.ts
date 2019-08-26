@@ -363,9 +363,8 @@ export class ProcessingService {
               this.lightMode.emit(false);
               this.overlayService.activateAnnotationsTab();
               // tslint:disable-next-line:max-line-length
-            } else {
               this.message.error(
-                  'You are not logged in and this would be necessary to annotate this object.' +
+                'You are not logged in and this would be necessary to annotate this object.' +
                   'Please reload the page if you want to log in.',
               );
               this.isLightMode = true;
@@ -451,7 +450,7 @@ export class ProcessingService {
       }
     }
 
-    if (loadingCase === 'collection' && !entityParam) {
+    if (loadingCase === 'collection') {
       this.fetchAndLoad(
         undefined,
         compParam ? compParam : undefined,
