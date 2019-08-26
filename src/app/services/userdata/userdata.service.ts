@@ -139,15 +139,10 @@ export class UserdataService {
   }
 
   public checkCollectionOwnerState(collection: ICompilation) {
-    this.isCollectionOwner =
-      this.userData && collection.relatedOwner
-        ? collection.relatedOwner._id === this.userData._id
-        : false;
-    this.collectionOwner.emit(
-      this.userData && collection.relatedOwner && collection.relatedOwner
-        ? collection.relatedOwner._id === this.userData._id
-        : false,
-    );
+    const isOwner = (this.userData && this.userData.data && this.userData.data.compilation
+        && this.userData.data.compilation[collection._id]) != undefined;
+    this.isCollectionOwner = isOwner;
+    this.collectionOwner.emit(isOwner);
   }
 
   public checkOccurenceOnWhitelist(collection: ICompilation) {
