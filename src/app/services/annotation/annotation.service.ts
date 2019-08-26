@@ -1022,13 +1022,10 @@ export class AnnotationService {
     // annotating allowed && collection loaded && (!whitelist ||
     // whitlist users > 0 also mehr Personen als Owner && mode !== edit
     const mode = this.loadedMode === 'edit';
-    const isBroadcastingInput =
-      this.mediaType !== 'audio' && this.mediaType !== 'video';
     let allowance = false;
     if (
       !this.isAuthenticated ||
       !this.isAnnotatingAllowed ||
-      !isBroadcastingInput ||
       mode ||
       !this.isCollectionLoaded
     ) {
