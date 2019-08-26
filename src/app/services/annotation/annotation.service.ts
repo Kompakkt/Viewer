@@ -35,13 +35,12 @@ import { MongohandlerService } from '../mongohandler/mongohandler.service';
 import { OverlayService } from '../overlay/overlay.service';
 import { ProcessingService } from '../processing/processing.service';
 import { UserdataService } from '../userdata/userdata.service';
-import {EntitySettingsService} from "../modelsettings/modelsettings.service";
+import { EntitySettingsService } from '../modelsettings/modelsettings.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AnnotationService {
-
   // What is actually going on and what is loaded? external Infos
   private actualEntity: IEntity | undefined;
   private actualEntityMeshes: Mesh[] = [];
@@ -60,7 +59,9 @@ export class AnnotationService {
   @Output() annnotatingAllowed: EventEmitter<boolean> = new EventEmitter();
   private annotatableTypeAndMode = false;
   private isannotationSourceCollection = false;
-  @Output() annotationSourceCollection: EventEmitter<boolean> = new EventEmitter();
+  @Output() annotationSourceCollection: EventEmitter<
+    boolean
+  > = new EventEmitter();
   private selectedAnnotation = new BehaviorSubject('');
   public isSelectedAnnotation = this.selectedAnnotation.asObservable();
   private editModeAnnotation = new BehaviorSubject('');
@@ -94,7 +95,7 @@ export class AnnotationService {
 
   // Broadcasting
   public collaborators: ISocketUser[] = [];
-    // TODO this array is not needed
+  // TODO this array is not needed
   //  -> first users (0-maxColoredUsersMinusOne) of collab can be used
   public coloredUsers: ISocketUser[] = [];
   public color = ['pink', 'red', 'blue', 'yellow', 'purple', 'gold'];
@@ -119,44 +120,41 @@ export class AnnotationService {
     private overlayService: OverlayService,
     private modelSettingsService: EntitySettingsService,
   ) {
-
     // What is actually going on and what is loaded? external Infos
     this.processingService.Observables.actualEntity.subscribe(actualEntity => {
       this.actualEntity = actualEntity;
     });
 
     this.processingService.Observables.actualEntityMeshes.subscribe(
-        actualEntityMeshes => {
-          this.actualEntityMeshes = actualEntityMeshes;
-          this.loadAnnotations();
-          if (this.annotatableTypeAndMode) {
-            this.initializeAnnotationMode();
-            // TODO
-            this.toggleAnnotationSource(false);
-            this.setAnnotatingAllowance();
-          }
-          if (this.isBroadcasting) {
-            this.changeSocketRoom();
-          }
-        },
+      actualEntityMeshes => {
+        this.actualEntityMeshes = actualEntityMeshes;
+        this.loadAnnotations();
+        if (this.annotatableTypeAndMode) {
+          this.initializeAnnotationMode();
+          // TODO
+          this.toggleAnnotationSource(false);
+          this.setAnnotatingAllowance();
+        }
+        if (this.isBroadcasting) {
+          this.changeSocketRoom();
+        }
+      },
     );
 
     this.isCollectionLoaded = this.processingService.isCollectionLoaded;
     this.processingService.Observables.actualCollection.subscribe(
-        actualCompilation => {
-          if (!actualCompilation) {
-            this.isCollectionLoaded = false;
-            return;
-          }
-          if (actualCompilation._id && this.actualEntity) {
-            this.socketRoom = `${actualCompilation._id}_${this.actualEntity._id}`;
+      actualCompilation => {
+        if (!actualCompilation) {
+          this.isCollectionLoaded = false;
+          return;
+        }
+        if (actualCompilation._id && this.actualEntity) {
+          this.socketRoom = `${actualCompilation._id}_${this.actualEntity._id}`;
 
-          actualCompilation._id
-              ? (this.isCollectionLoaded = true)
-              : (this.isCollectionLoaded = false);
-            this.actualCompilation = actualCompilation;
-          }
-        },
+          this.isCollectionLoaded = actualCompilation._id !== undefined;
+          this.actualCompilation = actualCompilation;
+        }
+      },
     );
 
     this.processingService.Observables.actualMediaType.subscribe(type => {
@@ -165,8 +163,12 @@ export class AnnotationService {
       const queryParams = new URLSearchParams(searchParams);
       const mode = queryParams.get('mode');
       this.loadedMode = mode ? mode : '';
-      this.annotatableTypeAndMode = (type === 'model' || type === 'entity' || type === 'image') &&
-          (mode  === 'annotation' || mode === 'edit' || mode === 'ilias' || mode === 'fullLoad');
+      this.annotatableTypeAndMode =
+        (type === 'model' || type === 'entity' || type === 'image') &&
+        (mode === 'annotation' ||
+          mode === 'edit' ||
+          mode === 'ilias' ||
+          mode === 'fullLoad');
     });
 
     this.processingService.defaultEntityLoaded.subscribe(isDefault => {
@@ -177,10 +179,12 @@ export class AnnotationService {
       this.isFallbackEntityLoaded = isFallback;
     });
 
-    this.modelSettingsService.initialSettingsMode.subscribe(meshSettingsMode => {
-      this.isMeshSettingsMode = meshSettingsMode;
-      this.setAnnotatingAllowance();
-    });
+    this.modelSettingsService.initialSettingsMode.subscribe(
+      meshSettingsMode => {
+        this.isMeshSettingsMode = meshSettingsMode;
+        this.setAnnotatingAllowance();
+      },
+    );
 
     this.overlayService.editor.subscribe(open => {
       this.isEntityFeaturesOpen = open;
@@ -188,9 +192,9 @@ export class AnnotationService {
     });
 
     this.annotationmarkerService.isSelectedAnnotation.subscribe(
-        selectedAnno => {
-          this.selectedAnnotation.next(selectedAnno);
-        },
+      selectedAnno => {
+        this.selectedAnnotation.next(selectedAnno);
+      },
     );
     // Userdata
     this.userdataService.userDataObservable.subscribe(data => {
@@ -236,14 +240,14 @@ export class AnnotationService {
 
     this.socket.on('createAnnotation', (result: ISocketAnnotation) => {
       console.log(
-          `COLLABORATOR '${result.user.username}' CREATED AN ANNOTATION - SOCKET.IO`,
+        `COLLABORATOR '${result.user.username}' CREATED AN ANNOTATION - SOCKET.IO`,
       );
       this.handleReceivedAnnotation(result.annotation);
     });
 
     this.socket.on('editAnnotation', (result: ISocketAnnotation) => {
       console.log(
-          `COLLABORATOR '${result.user.username}' EDITED AN ANNOTATION - SOCKET.IO`,
+        `COLLABORATOR '${result.user.username}' EDITED AN ANNOTATION - SOCKET.IO`,
       );
       this.handleReceivedAnnotation(result.annotation);
     });
@@ -251,7 +255,7 @@ export class AnnotationService {
     this.socket.on('deleteAnnotation', (result: ISocketAnnotation) => {
       // [socket.id, annotation]
       console.log(
-          `COLLABORATOR '${result.user.username}' DELETED AN ANNOTATION- SOCKET.IO`,
+        `COLLABORATOR '${result.user.username}' DELETED AN ANNOTATION- SOCKET.IO`,
       );
       this.deleteRequestAnnotation(result.annotation);
     });
@@ -260,7 +264,7 @@ export class AnnotationService {
     this.socket.on('changeRanking', result => {
       //  [socket.id, IdArray, RankingArray]
       console.log(
-          `COLLABORATOR '${result[0]}' CHANGED ANNOTATION-RANKING - SOCKET.IO`,
+        `COLLABORATOR '${result[0]}' CHANGED ANNOTATION-RANKING - SOCKET.IO`,
       );
     });
 
@@ -268,7 +272,7 @@ export class AnnotationService {
     this.socket.on('lostConnection', (result: ISocketUserInfo) => {
       // [user, annotations]);
       console.log(
-          `COLLABORATOR '${result.user.username}' LOGGED OUT - SOCKET.IO`,
+        `COLLABORATOR '${result.user.username}' LOGGED OUT - SOCKET.IO`,
       );
       this.removeKnowledgeAboutUser(result);
     });
@@ -281,7 +285,7 @@ export class AnnotationService {
     // A user left the room, so we remove knowledge about this user
     this.socket.on('changeRoom', (result: ISocketUserInfo) => {
       console.log(
-          `COLLABORATOR '${result.user.username}' CHANGED ROOM - SOCKET.IO`,
+        `COLLABORATOR '${result.user.username}' CHANGED ROOM - SOCKET.IO`,
       );
       this.removeKnowledgeAboutUser(result);
     });
@@ -358,8 +362,8 @@ export class AnnotationService {
 
     if (!this.isDefaultEntityLoaded && !this.isFallbackEntityLoaded) {
       // Filter null/undefined annotations
-      const serverAnnotations = this.getAnnotationsfromServerDB()
-          .filter(annotation =>
+      const serverAnnotations = this.getAnnotationsfromServerDB().filter(
+        annotation =>
           annotation && annotation._id && annotation.lastModificationDate,
       );
       const pouchAnnotations = (await this.getAnnotationsfromLocalDB()).filter(
@@ -460,10 +464,12 @@ export class AnnotationService {
     const unsorted: IAnnotation[] = [];
     // Durch alle Annotationen der lokalen DB
     for (const annotation of localAnnotations) {
-      const isLastModifiedByMe = this.userData ?
-        annotation.lastModifiedBy._id ===
-          this.userData._id : false;
-      const isCreatedByMe = this.userData ? annotation.creator._id === this.userData._id : false;
+      const isLastModifiedByMe = this.userData
+        ? annotation.lastModifiedBy._id === this.userData._id
+        : false;
+      const isCreatedByMe = this.userData
+        ? annotation.creator._id === this.userData._id
+        : false;
 
       // Finde die Annotaion in den Server Annotationen
       const serverAnnotation = serverAnnotations.find(
@@ -535,16 +541,16 @@ export class AnnotationService {
   }
 
   private async sortAnnotations() {
-    const sortedDefault = this.getDefaultAnnotations()
-        .sort((leftSide, rightSide): number =>
+    const sortedDefault = this.getDefaultAnnotations().sort(
+      (leftSide, rightSide): number =>
         +leftSide.ranking === +rightSide.ranking
           ? 0
           : +leftSide.ranking < +rightSide.ranking
           ? -1
           : 1,
     );
-    const sortedCompilation = this.getCompilationAnnotations()
-        .sort((leftSide, rightSide): number =>
+    const sortedCompilation = this.getCompilationAnnotations().sort(
+      (leftSide, rightSide): number =>
         +leftSide.ranking === +rightSide.ranking
           ? 0
           : +leftSide.ranking < +rightSide.ranking
@@ -595,8 +601,7 @@ export class AnnotationService {
   public async createNewAnnotation(result: any) {
     const camera = this.babylon.cameraManager.getInitialPosition();
 
-    this.babylon.createPreviewScreenshot(400)
-        .then(detailScreenshot => {
+    this.babylon.createPreviewScreenshot(400).then(detailScreenshot => {
       if (!this.actualEntity) {
         throw new Error(`this.actualEntity not defined: ${this.actualEntity}`);
         console.error('AnnotationService:', this);
@@ -802,8 +807,7 @@ export class AnnotationService {
       DialogGetUserDataComponent,
       dialogConfig,
     );
-    dialogRef.afterClosed()
-        .subscribe(data => {
+    dialogRef.afterClosed().subscribe(data => {
       if (data === true) {
         this.message.info('Deleted from Server');
       } else {
@@ -844,12 +848,13 @@ export class AnnotationService {
 
   public redrawMarker() {
     this.annotationmarkerService
-        .deleteAllMarker()
-        .then(() => {
-          for (const annotation of this.getCurrentAnnotations()) {
-            this.drawMarker(annotation);
-        }})
-        .catch(e => console.error(e));
+      .deleteAllMarker()
+      .then(() => {
+        for (const annotation of this.getCurrentAnnotations()) {
+          this.drawMarker(annotation);
+        }
+      })
+      .catch(e => console.error(e));
   }
 
   public drawMarker(newAnnotation: IAnnotation) {
@@ -860,7 +865,7 @@ export class AnnotationService {
       let color = 'black';
       if (this.coloredUsers.length) {
         const cUserIndex = this.coloredUsers.findIndex(
-            x => x._id === newAnnotation.creator._id,
+          x => x._id === newAnnotation.creator._id,
         );
         if (cUserIndex !== -1 && cUserIndex < this.maxColoredUsersMinusOne) {
           color = this.color[cUserIndex];
@@ -930,7 +935,6 @@ export class AnnotationService {
     collectionId: string,
     annotationLength: number,
   ): any {
-
     const generatedId = this.mongo.generateEntityId();
 
     if (!this.actualEntity) {
@@ -971,17 +975,25 @@ export class AnnotationService {
       this.annnotatingAllowed.emit(false);
       return;
     }
-    emitBool = this.isEntityFeaturesOpen && (!this.isMeshSettingsMode ? true :
-        this.isDefaultEntityLoaded || this.isFallbackEntityLoaded);
+    emitBool =
+      this.isEntityFeaturesOpen &&
+      (!this.isMeshSettingsMode
+        ? true
+        : this.isDefaultEntityLoaded || this.isFallbackEntityLoaded);
     if (emitBool && !this.isCollectionInputSelected) {
       emitBool =
-        (this.isAuthenticated && this.isEntityOwner && !this.isCollectionLoaded) ||
+        (this.isAuthenticated &&
+          this.isEntityOwner &&
+          !this.isCollectionLoaded) ||
         this.isDefaultEntityLoaded;
     }
     if (emitBool && this.isCollectionLoaded) {
-      emitBool = this.actualCompilation && this.isAuthenticated ?
-          (!this.actualCompilation.whitelist.enabled || this.isCollectionOwner ||
-              this.isWhitelistMember) : false;
+      emitBool =
+        this.actualCompilation && this.isAuthenticated
+          ? !this.actualCompilation.whitelist.enabled ||
+            this.isCollectionOwner ||
+            this.isWhitelistMember
+          : false;
     }
     this.isAnnotatingAllowed = emitBool;
     this.annotationMode(emitBool);
@@ -1007,21 +1019,31 @@ export class AnnotationService {
   }
 
   private setBroadcastingAllowance() {
-      // annotating allowed && collection loaded && (!whitelist ||
-      // whitlist users > 0 also mehr Personen als Owner && mode !== edit
-      const mode = this.loadedMode === 'edit';
-      const isBroadcastingInput = (this.mediaType !== 'audio' && this.mediaType !== 'video');
-      let allowance = false;
-      if (!this.isAuthenticated || !this.isAnnotatingAllowed ||
-          !isBroadcastingInput || mode || !this.isCollectionLoaded) {
-          allowance = false;
-      } else {
-          if ((this.actualCompilation && !this.actualCompilation.whitelist.enabled) ||
-              (this.actualCompilation && this.actualCompilation.whitelist.groups.length > 0) ||
-              (this.actualCompilation && this.actualCompilation.whitelist.persons.length > 0)) {
-              allowance = true;
-          }
+    // annotating allowed && collection loaded && (!whitelist ||
+    // whitlist users > 0 also mehr Personen als Owner && mode !== edit
+    const mode = this.loadedMode === 'edit';
+    const isBroadcastingInput =
+      this.mediaType !== 'audio' && this.mediaType !== 'video';
+    let allowance = false;
+    if (
+      !this.isAuthenticated ||
+      !this.isAnnotatingAllowed ||
+      !isBroadcastingInput ||
+      mode ||
+      !this.isCollectionLoaded
+    ) {
+      allowance = false;
+    } else {
+      if (
+        (this.actualCompilation && !this.actualCompilation.whitelist.enabled) ||
+        (this.actualCompilation &&
+          this.actualCompilation.whitelist.groups.length > 0) ||
+        (this.actualCompilation &&
+          this.actualCompilation.whitelist.persons.length > 0)
+      ) {
+        allowance = true;
       }
+    }
 
     this.isBroadcastingAllowed = allowance;
     this.broadcastingAllowed.emit(allowance);
@@ -1096,7 +1118,7 @@ export class AnnotationService {
 
   private updateCollaboratorInfo(data: ISocketUserInfo) {
     if (
-        !this.collaborators.find(_user => data.user.socketId === _user.socketId)
+      !this.collaborators.find(_user => data.user.socketId === _user.socketId)
     ) {
       this.collaborators.push(data.user);
       this.sortUser();
@@ -1110,7 +1132,7 @@ export class AnnotationService {
 
   private removeKnowledgeAboutUser(userInfo: ISocketUserInfo) {
     this.collaborators = this.collaborators.filter(
-        _user => _user._id !== userInfo.user._id,
+      _user => _user._id !== userInfo.user._id,
     );
     this.sortUser();
   }
@@ -1119,7 +1141,7 @@ export class AnnotationService {
 
   public sortUser(priorityUser?: ISocketUser) {
     const selfIndex = this.collaborators.findIndex(
-        user => user.socketId === this.socket.ioSocket.id,
+      user => user.socketId === this.socket.ioSocket.id,
     );
 
     const self = this.collaborators.splice(selfIndex, 1)[0];
@@ -1131,12 +1153,12 @@ export class AnnotationService {
 
     if (priorityUser) {
       const pUserIndex = this.collaborators.findIndex(
-          x => x.socketId === priorityUser.socketId,
+        x => x.socketId === priorityUser.socketId,
       );
       const pUser =
-          pUserIndex !== -1
-              ? this.collaborators.splice(pUserIndex, 1)[0]
-              : priorityUser;
+        pUserIndex !== -1
+          ? this.collaborators.splice(pUserIndex, 1)[0]
+          : priorityUser;
       this.collaborators.unshift(pUser);
     }
 
@@ -1151,7 +1173,7 @@ export class AnnotationService {
     if (this.isBroadcasting) {
       if (this.coloredUsers.length) {
         const cUserIndex = this.coloredUsers.findIndex(
-            x => x._id === annotationCreatorId,
+          x => x._id === annotationCreatorId,
         );
         if (cUserIndex !== -1 && cUserIndex < this.maxColoredUsersMinusOne) {
           return this.color[cUserIndex];
@@ -1159,7 +1181,6 @@ export class AnnotationService {
         return '$cardbgr';
       }
       return '$cardbgr';
-
     }
     return '$cardbgr';
   }

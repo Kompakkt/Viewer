@@ -13,7 +13,6 @@ import { MongohandlerService } from '../mongohandler/mongohandler.service';
   providedIn: 'root',
 })
 export class UserdataService {
-
   public loginData: {
     username: string;
     password: string;
@@ -41,72 +40,70 @@ export class UserdataService {
   public userOnWhitelistCollections: ICompilation[] = [];
   public userOwnedFinishedEntities: IEntity[] = [];
 
-  constructor(
-    private mongoService: MongohandlerService,
-  ) {
+  constructor(private mongoService: MongohandlerService) {
     this.isAuthorized();
   }
 
   private isAuthorized() {
     this.mongoService
-        .isAuthorized()
+      .isAuthorized()
+      .then(result => {
+        console.log(result);
+        if (result.status === 'ok') {
+          this.userData = result;
+          this.userDataSubject.next(result);
+          this.isUserAuthenticatedSubject.next(true);
+          this.findUserInCompilations();
+          this.getUserOwnedFinishedEntities();
+        } else {
+          this.clearUserData();
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        this.clearUserData();
+      });
+  }
+
+  public async attemptLogin(
+    username: string,
+    password: string,
+  ): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      this.mongoService
+        .login(username, password)
         .then(result => {
-          console.log(result);
           if (result.status === 'ok') {
-            this.userData = result;
             this.userDataSubject.next(result);
+            this.loginData = {
+              username,
+              password,
+              isCached: true,
+            };
             this.isUserAuthenticatedSubject.next(true);
             this.findUserInCompilations();
             this.getUserOwnedFinishedEntities();
+            resolve(true);
           } else {
+            this.isUserAuthenticatedSubject.next(false);
             this.clearUserData();
+            resolve(false);
           }
         })
         .catch(err => {
           console.error(err);
+          this.isUserAuthenticatedSubject.next(false);
           this.clearUserData();
+          reject(false);
         });
-  }
-
-  public async attemptLogin(
-      username: string,
-      password: string,
-  ): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
-      this.mongoService
-          .login(username, password)
-          .then(result => {
-            if (result.status === 'ok') {
-              this.userDataSubject.next(result);
-              this.loginData = {
-                username,
-                password,
-                isCached: true,
-              };
-              this.isUserAuthenticatedSubject.next(true);
-              this.findUserInCompilations();
-              this.getUserOwnedFinishedEntities();
-              resolve(true);
-            } else {
-              this.isUserAuthenticatedSubject.next(false);
-              this.clearUserData();
-              resolve(false);
-            }
-          })
-          .catch(err => {
-            console.error(err);
-            this.isUserAuthenticatedSubject.next(false);
-            this.clearUserData();
-            reject(false);
-          });
     });
   }
 
   public logout() {
     this.mongoService
-        .logout()
-        .then(() => {})
-        .catch(err => console.error(err));
+      .logout()
+      .then(() => {})
+      .catch(err => console.error(err));
     this.loginData = {
       username: '',
       password: '',
@@ -136,28 +133,36 @@ export class UserdataService {
   public checkEntityOwnerState(entity: IEntity) {
     let isOwner = false;
     if (entity.relatedEntityOwners.length) {
-    entity.relatedEntityOwners.forEach(owner => {
-      if (this.userData) {
-        if (owner._id === this.userData._id) {
-          isOwner = true;
+      entity.relatedEntityOwners.forEach(owner => {
+        if (this.userData) {
+          if (owner._id === this.userData._id) {
+            isOwner = true;
+          }
         }
-      }
-    }); }
-    this.isEntityOwner = ['dragdrop'].includes(entity._id) ? true :  isOwner;
-    this.entityOwner.emit(['dragdrop'].includes(entity._id) ? true :  isOwner);
+      });
+    }
+    this.isEntityOwner = ['dragdrop'].includes(entity._id) ? true : isOwner;
+    this.entityOwner.emit(['dragdrop'].includes(entity._id) ? true : isOwner);
   }
 
   public checkCollectionOwnerState(collection: ICompilation) {
-    this.isCollectionOwner = this.userData && collection.relatedOwner ?
-        collection.relatedOwner._id === this.userData._id : false;
-    this.collectionOwner.emit(this.userData && collection.relatedOwner && collection.relatedOwner ?
-        collection.relatedOwner._id === this.userData._id : false);
-
+    this.isCollectionOwner =
+      this.userData && collection.relatedOwner
+        ? collection.relatedOwner._id === this.userData._id
+        : false;
+    this.collectionOwner.emit(
+      this.userData && collection.relatedOwner && collection.relatedOwner
+        ? collection.relatedOwner._id === this.userData._id
+        : false,
+    );
   }
 
   public checkOccurenceOnWhitelist(collection: ICompilation) {
     let isOccuring = false;
-    if (collection.whitelist.enabled && this.userOnWhitelistCollections.length) {
+    if (
+      collection.whitelist.enabled &&
+      this.userOnWhitelistCollections.length
+    ) {
       this.userOnWhitelistCollections.forEach(userCollection => {
         if (userCollection._id === collection._id) {
           isOccuring = true;
@@ -170,26 +175,26 @@ export class UserdataService {
 
   private findUserInCompilations() {
     this.mongoService
-        .findUserInCompilations()
-        .then(result => {
-          if (result.status === 'ok') {
-            this.userOnWhitelistCollections = result.compilations;
-          } else {
-            throw new Error(result.message);
-          }
-        })
-        .catch(e => console.error(e));
+      .findUserInCompilations()
+      .then(result => {
+        if (result.status === 'ok') {
+          this.userOnWhitelistCollections = result.compilations;
+        } else {
+          throw new Error(result.message);
+        }
+      })
+      .catch(e => console.error(e));
   }
 
   private getUserOwnedFinishedEntities() {
     if (this.userData && this.userData.data.entity) {
-        (this.userData.data.entity.filter(
-            entity => entity,
-        ) as IEntity[]).forEach(entity => {
-            if (entity.finished) {
-              this.userOwnedFinishedEntities.push(entity);
-            }
-        });
+      (this.userData.data.entity.filter(entity => entity) as IEntity[]).forEach(
+        entity => {
+          if (entity.finished) {
+            this.userOwnedFinishedEntities.push(entity);
+          }
+        },
+      );
     }
   }
 
@@ -200,5 +205,4 @@ export class UserdataService {
       isCached: true,
     };
   }
-
 }

@@ -73,8 +73,7 @@ export class ContentBrowserComponent implements OnInit {
   }
 
   searchCollectionByID(event?) {
-    let id = '';
-    event ? (id = event.value._id) : (id = this.identifierCollection);
+    const id = event ? event.value._id : this.identifierCollection;
     this.processingService
       .selectCollectionByID(id)
       .then(result => {
@@ -129,8 +128,7 @@ export class ContentBrowserComponent implements OnInit {
   }
 
   searchEntityByID(event?) {
-    let id = '';
-    event ? (id = event.value._id) : (id = this.identifierEntity);
+    const id = event ? event.value._id : this.identifierEntity;
     const isloadable = this.processingService.selectEntityByID(id);
     if (isloadable) {
     } else {

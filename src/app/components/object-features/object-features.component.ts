@@ -2,7 +2,7 @@ import { Component, HostBinding, OnInit, ViewChild } from '@angular/core';
 
 import { AnnotationService } from '../../services/annotation/annotation.service';
 import { OverlayService } from '../../services/overlay/overlay.service';
-import {ProcessingService} from "../../services/processing/processing.service";
+import { ProcessingService } from '../../services/processing/processing.service';
 
 @Component({
   selector: 'app-entity-features',

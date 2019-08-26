@@ -1,4 +1,4 @@
-import {EventEmitter, Injectable, Output} from '@angular/core';
+import { EventEmitter, Injectable, Output } from '@angular/core';
 // tslint:disable-next-line:max-line-length
 import {
   Animation,
@@ -115,9 +115,9 @@ export class EntitySettingsService {
   }
 
   private async generateHelpers(
-      mediaType?: string,
-      upload?: boolean,
-      isDefault?: boolean,
+    mediaType?: string,
+    upload?: boolean,
+    isDefault?: boolean,
   ) {
     await this.createCenter();
 
@@ -133,22 +133,22 @@ export class EntitySettingsService {
       ? Math.max(this.height, this.width, this.depth)
       : 87.5;
     this.actualEntityMeshes.forEach(mesh => (mesh.renderingGroupId = 2));
-    this.babylonService.getScene().getMeshesByTags(
-        'videoPlane',
-        mesh => (mesh.renderingGroupId = 3),
-    );
+    this.babylonService
+      .getScene()
+      .getMeshesByTags('videoPlane', mesh => (mesh.renderingGroupId = 3));
     this.babylonService.cameraManager.setUpActiveCamera(max);
 
     if (upload) {
+      const isModel = mediaType === 'model' || mediaType === 'entity';
       const pos = new Vector3(
-        mediaType === 'model' || mediaType === 'entity' ? Math.PI / 4 : -Math.PI / 2,
-        mediaType === 'model' || mediaType === 'entity'  ? Math.PI / 4 : Math.PI / 2,
+        isModel ? Math.PI / 4 : -Math.PI / 2,
+        isModel ? Math.PI / 4 : Math.PI / 2,
         Math.max(this.height, this.width, this.depth) * 1.7,
       );
       const target = new Vector3(
-          mediaType === 'model' || mediaType === 'entity' ? this.max.x - this.initialSize.x / 2 : 0,
-          mediaType === 'model' || mediaType === 'entity' ? this.max.y - this.initialSize.y / 2 : 0,
-          mediaType === 'model' || mediaType === 'entity' ? this.max.z - this.initialSize.z / 2 : 0,
+        isModel ? this.max.x - this.initialSize.x / 2 : 0,
+        isModel ? this.max.y - this.initialSize.y / 2 : 0,
+        isModel ? this.max.z - this.initialSize.z / 2 : 0,
       );
       this.babylonService.cameraManager.updateDefaults(pos, target);
       this.babylonService.cameraManager.setActiveCameraTarget(target);
@@ -256,27 +256,27 @@ export class EntitySettingsService {
     await this.generateHelpers(mediaType, true);
 
     if (mediaType === 'model' || mediaType === 'entity') {
-    this.createBoundingBox();
-    this.showBoundingBoxEntity = false;
-    if (this.boundingBox) this.boundingBox.visibility = 0;
-    this.createWorldAxis(18);
-    this.showWorldAxis = false;
-    this.babylonService
-      .getScene()
-      .getMeshesByTags('worldAxis')
-      .map(mesh => (mesh.visibility = 0));
-    this.createlocalAxes(12);
-    this.showLocalAxis = false;
-    this.babylonService
-      .getScene()
-      .getMeshesByTags('localAxis')
-      .map(mesh => (mesh.visibility = 0));
-    this.createGround(20);
-    this.showGround = false;
-    this.babylonService
-      .getScene()
-      .getMeshesByTags('ground')
-      .map(mesh => (mesh.visibility = 0));
+      this.createBoundingBox();
+      this.showBoundingBoxEntity = false;
+      if (this.boundingBox) this.boundingBox.visibility = 0;
+      this.createWorldAxis(18);
+      this.showWorldAxis = false;
+      this.babylonService
+        .getScene()
+        .getMeshesByTags('worldAxis')
+        .map(mesh => (mesh.visibility = 0));
+      this.createlocalAxes(12);
+      this.showLocalAxis = false;
+      this.babylonService
+        .getScene()
+        .getMeshesByTags('localAxis')
+        .map(mesh => (mesh.visibility = 0));
+      this.createGround(20);
+      this.showGround = false;
+      this.babylonService
+        .getScene()
+        .getMeshesByTags('ground')
+        .map(mesh => (mesh.visibility = 0));
     }
   }
 
@@ -547,7 +547,7 @@ export class EntitySettingsService {
   }
 
   public handleChangeBoundingBoxEntity() {
-    this.showBoundingBoxEntity = this.showBoundingBoxEntity ? false : true;
+    this.showBoundingBoxEntity = !this.showBoundingBoxEntity;
     if (!this.boundingBox) {
       throw new Error('BoundingBox missing');
       console.error(this);
@@ -565,7 +565,7 @@ export class EntitySettingsService {
   }
 
   public handleChangeBoundingBoxMeshes() {
-    this.showBoundingBoxMeshes = this.showBoundingBoxMeshes ? false : true;
+    this.showBoundingBoxMeshes = !this.showBoundingBoxMeshes;
     for (let _i = 0; _i < this.actualEntityMeshes.length; _i++) {
       const mesh = this.actualEntityMeshes[_i];
       mesh.showBoundingBox = this.showBoundingBoxMeshes;
@@ -618,7 +618,7 @@ export class EntitySettingsService {
   }
 
   public handleChangeGround() {
-    this.showGround = this.showGround ? false : true;
+    this.showGround = !this.showGround;
     if (this.showGround) {
       this.babylonService
         .getScene()
@@ -775,7 +775,7 @@ export class EntitySettingsService {
   }
 
   public handleChangeWorldAxis() {
-    this.showWorldAxis = this.showWorldAxis ? false : true;
+    this.showWorldAxis = !this.showWorldAxis;
     if (this.showWorldAxis) {
       this.babylonService
         .getScene()
@@ -905,7 +905,7 @@ export class EntitySettingsService {
   }
 
   public handleChangeLocalAxis() {
-    this.showLocalAxis = this.showLocalAxis ? false : true;
+    this.showLocalAxis = !this.showLocalAxis;
     if (this.showLocalAxis) {
       this.babylonService
         .getScene()

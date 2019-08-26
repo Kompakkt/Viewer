@@ -110,10 +110,10 @@ export class MongohandlerService {
   }
 
   public async findUserInCompilations(): Promise<
-      IServerResponse & {
-    compilations: ICompilation[];
-  }
-      > {
+    IServerResponse & {
+      compilations: ICompilation[];
+    }
+  > {
     return this.get(`utility/finduserincompilations`);
   }
 

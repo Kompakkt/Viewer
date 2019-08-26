@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
 
-import {AnnotationService} from "../../services/annotation/annotation.service";
+import { AnnotationService } from '../../services/annotation/annotation.service';
 // tslint:disable-next-line:max-line-length
 import { DialogInviteBroadcastingComponent } from '../dialogs/dialog-invite-broadcasting/dialog-invite-broadcasting.component';
 
@@ -13,7 +13,10 @@ import { DialogInviteBroadcastingComponent } from '../dialogs/dialog-invite-broa
 export class BroadcastComponent implements OnInit {
   public toggleChecked = false;
 
-  constructor(public annotationService: AnnotationService, public dialog: MatDialog) {}
+  constructor(
+    public annotationService: AnnotationService,
+    public dialog: MatDialog,
+  ) {}
 
   ngOnInit() {}
 

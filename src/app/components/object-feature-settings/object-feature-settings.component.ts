@@ -91,19 +91,22 @@ export class EntityFeatureSettingsComponent implements OnInit {
         }
         this.isFinished = this.activeEntity.finished;
         this.setSettings()
-            .then(() => {})
-            .catch(error => {
-              console.error(error);
-              this.processingService.loadFallbackEntity()
-                  .then(() => {
-                    // TODO add annotation
-                  })
-                  .catch(e => {
-                    console.error(e);
-                    // tslint:disable-next-line:max-line-length
-                    this.message.error('Loading of Objects does not work. Please tell us about it!');
-                  });
-            });
+          .then(() => {})
+          .catch(error => {
+            console.error(error);
+            this.processingService
+              .loadFallbackEntity()
+              .then(() => {
+                // TODO add annotation
+              })
+              .catch(e => {
+                console.error(e);
+                // tslint:disable-next-line:max-line-length
+                this.message.error(
+                  'Loading of Objects does not work. Please tell us about it!',
+                );
+              });
+          });
       }
     });
 
@@ -156,7 +159,8 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   public toggleHelpers() {
-    this.showHelpers = this.showHelpers ? false : true;
+    this.showHelpers = !this.showHelpers;
+
     if (this.showHelpers) {
       this.showOrientation = false;
       this.showScaling = false;
@@ -164,11 +168,11 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   public toggleHelperBackground() {
-    this.showHelperBackground = this.showHelperBackground ? false : true;
+    this.showHelperBackground = !this.showHelperBackground;
   }
 
   public toggleScaling() {
-    this.showScaling = this.showScaling ? false : true;
+    this.showScaling = !this.showScaling;
     if (this.showScaling) {
       this.showOrientation = false;
       this.showHelpers = false;
@@ -176,7 +180,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   public toggleOrientation() {
-    this.showOrientation = this.showOrientation ? false : true;
+    this.showOrientation = !this.showOrientation;
     if (this.showOrientation) {
       this.showScaling = false;
       this.showHelpers = false;
@@ -184,7 +188,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   public togglePreview() {
-    this.showPreview = this.showPreview ? false : true;
+    this.showPreview = !this.showPreview;
     if (this.showPreview) {
       this.showBackground = false;
       this.showLights = false;
@@ -192,7 +196,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   public toggleBackground() {
-    this.showBackground = this.showBackground ? false : true;
+    this.showBackground = !this.showBackground;
     if (this.showBackground) {
       this.showPreview = false;
       this.showLights = false;
@@ -200,7 +204,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   public toggleLights() {
-    this.showLights = this.showLights ? false : true;
+    this.showLights = !this.showLights;
     if (this.showLights) {
       this.showPreview = false;
       this.showBackground = false;
@@ -317,7 +321,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
   }
 
   handleChangeEffekt() {
-    this.setEffect = this.setEffect ? false : true;
+    this.setEffect = !this.setEffect;
     this.babylonService.setBackgroundImage(this.setEffect);
   }
 
@@ -410,7 +414,9 @@ export class EntityFeatureSettingsComponent implements OnInit {
         await this.entitySettingsService.loadSettings(1, 315, 0, 0, true);
       }
       this.initialSettingsMode = true;
-      await this.entitySettingsService.createVisualSettings(this.mediaType ? this.mediaType : '');
+      await this.entitySettingsService.createVisualSettings(
+        this.mediaType ? this.mediaType : '',
+      );
       if (this.mediaType === 'audio' || this.mediaType === 'video') {
         this.entitySettingsService.decomposeAfterSetting();
       }
@@ -591,7 +597,10 @@ export class EntityFeatureSettingsComponent implements OnInit {
         },
       ],
       rotation: {
-        x: this.mediaType === 'audio' ? 315 : this.entitySettingsService.rotationX,
+        x:
+          this.mediaType === 'audio'
+            ? 315
+            : this.entitySettingsService.rotationX,
         y: this.entitySettingsService.rotationY,
         z: this.entitySettingsService.rotationZ,
       },

@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
-import {UserdataService} from '../../../services/userdata/userdata.service';
+import { UserdataService } from '../../../services/userdata/userdata.service';
 
 @Component({
   selector: 'app-login',
@@ -16,9 +16,9 @@ export class LoginComponent implements OnInit {
   public loginFailed = false;
 
   constructor(
-      public dialogRef: MatDialogRef<LoginComponent>,
-      public account: UserdataService,
-      @Inject(MAT_DIALOG_DATA) public concern: string,
+    public dialogRef: MatDialogRef<LoginComponent>,
+    public account: UserdataService,
+    @Inject(MAT_DIALOG_DATA) public concern: string,
   ) {}
 
   ngOnInit() {}
@@ -27,20 +27,20 @@ export class LoginComponent implements OnInit {
     this.waitingForResponse = true;
     this.dialogRef.disableClose = true;
     this.account
-        .attemptLogin(this.username, this.password)
-        .then(result => {
-          this.waitingForResponse = false;
-          this.loginFailed = !result;
-          this.dialogRef.disableClose = false;
-          if (result) {
-            this.dialogRef.close(true);
-          }
-        })
-        .catch(error => {
-          console.error(error);
-          this.dialogRef.disableClose = false;
-          this.waitingForResponse = false;
-          this.loginFailed = true;
-        });
+      .attemptLogin(this.username, this.password)
+      .then(result => {
+        this.waitingForResponse = false;
+        this.loginFailed = !result;
+        this.dialogRef.disableClose = false;
+        if (result) {
+          this.dialogRef.close(true);
+        }
+      })
+      .catch(error => {
+        console.error(error);
+        this.dialogRef.disableClose = false;
+        this.waitingForResponse = false;
+        this.loginFailed = true;
+      });
   }
 }
