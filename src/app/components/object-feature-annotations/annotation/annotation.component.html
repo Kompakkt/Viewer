@@ -3,7 +3,7 @@
           [style.top.px]="positionTop"
           [style.left.px]="positionLeft"
           *ngIf="visibility"
-          [style.background-color]="isInSocket? socketService.getColor(annotation.creator._id) : '$cardbgr'"
+          [style.background-color]="isInSocket? annotationService.getColor(annotation.creator._id) : '$cardbgr'"
           [id]="annotation._id">
 
   <form class="annotation-form" #annotationForm>
