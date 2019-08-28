@@ -18,8 +18,8 @@
         <mat-icon>videocam</mat-icon>
     </button>
 
-    <button mat-icon-button *ngIf="showLogin" (click)="isAuthenticated ? userDataService.logout() : loginAttempt()"
-            matTooltip="{{isAuthenticated ? 'Logout' : 'Login'}}" matTooltipPosition="above">
+    <button mat-icon-button *ngIf="!isAuthenticated && loginRequired" (click)="loginAttempt()"
+            matTooltip="Login" matTooltipPosition="above">
         <mat-icon>account_circle</mat-icon>
     </button>
 

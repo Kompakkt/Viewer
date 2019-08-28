@@ -15,11 +15,12 @@ import { LoginComponent } from '../dialogs/dialog-login/login.component';
 export class MenuComponent implements OnInit {
   // external
   public isAuthenticated = false;
+  public loginRequired = true;
+
   // available quality of entity
   public high = '';
   public medium = '';
   public low = '';
-  public showLogin = true;
   public fullscreen = false;
 
   public fullscreenCapable = document.fullscreenEnabled;
@@ -33,7 +34,11 @@ export class MenuComponent implements OnInit {
   ) {
 
     this.userDataService.isUserAuthenticatedObservable.subscribe(
-      state => (this.isAuthenticated = state),
+        state => (this.isAuthenticated = state),
+    );
+
+    this.processingService.loginRequired.subscribe(
+      state => (this.loginRequired = state),
     );
 
     this.processingService.Observables.actualEntity.subscribe(entity => {

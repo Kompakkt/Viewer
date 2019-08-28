@@ -46,6 +46,7 @@ export class ProcessingService {
   public isFallbackEntityLoaded = false;
   public isLightMode = true;
   public isAuthenticated = false;
+  public isLoginRequired = true;
 
   public isShowCatalogue = false;
   public isShowMetadata = false;
@@ -57,6 +58,7 @@ export class ProcessingService {
   @Output() lightMode: EventEmitter<boolean> = new EventEmitter();
   @Output() showCatalogue: EventEmitter<boolean> = new EventEmitter();
   @Output() showMetadata: EventEmitter<boolean> = new EventEmitter();
+  @Output() loginRequired: EventEmitter<boolean> = new EventEmitter();
 
   private baseUrl = `${environment.express_server_url}:${environment.express_server_port}/`;
   public quality = 'low';
