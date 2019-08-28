@@ -809,9 +809,6 @@ export class ProcessingService {
         return;
       }
       if (entity && entity.processed[this.quality] !== undefined) {
-        if (entity._id === 'Cube' || entity._id === 'fallback') {
-          return;
-        }
         this.loaded.emit(false);
         this.loadEntity(entity)
           .then(() => {
