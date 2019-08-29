@@ -44,12 +44,14 @@ export class ProcessingService {
   public isCollectionLoaded = false;
   public isDefaultEntityLoaded = false;
   public isFallbackEntityLoaded = false;
-  public isLightMode = true;
   public isAuthenticated = false;
   public isLoginRequired = true;
 
-  public isShowCatalogue = false;
+  public isShowAnnotate = false;
+  public isShowSettings = false;
   public isShowMetadata = false;
+  public isShowCollectionBrowser = false;
+  public isShowBrowser = false;
 
   @Output() loaded: EventEmitter<boolean> = new EventEmitter();
   @Output() collectionLoaded: EventEmitter<boolean> = new EventEmitter();
@@ -57,8 +59,13 @@ export class ProcessingService {
   @Output() fallbackEntityLoaded: EventEmitter<boolean> = new EventEmitter();
   @Output() lightMode: EventEmitter<boolean> = new EventEmitter();
   @Output() showCatalogue: EventEmitter<boolean> = new EventEmitter();
-  @Output() showMetadata: EventEmitter<boolean> = new EventEmitter();
   @Output() loginRequired: EventEmitter<boolean> = new EventEmitter();
+  @Output() showAnnotate: EventEmitter<boolean> = new EventEmitter();
+  @Output() showSettings: EventEmitter<boolean> = new EventEmitter();
+  @Output() showMetadata: EventEmitter<boolean> = new EventEmitter();
+  @Output() showCollectionBrowser: EventEmitter<boolean> = new EventEmitter();
+  @Output() showBrowser: EventEmitter<boolean> = new EventEmitter();
+  @Output() showSidenav: EventEmitter<boolean> = new EventEmitter();
 
   private baseUrl = `${environment.express_server_url}:${environment.express_server_port}/`;
   public quality = 'low';
@@ -309,7 +316,8 @@ export class ProcessingService {
         },
         '',
         ext,
-      ).then(() => this.loaded.emit(true));
+      )
+          .then(() => this.loaded.emit(true));
     };
 
     this.babylonService.getEngine().loadingUIText =
@@ -318,167 +326,107 @@ export class ProcessingService {
   }
 
   public bootstrap(): void {
-    const searchParams = location.search;
-    const queryParams = new URLSearchParams(searchParams);
-    const entityParam = queryParams.get('model') || queryParams.get('entity');
-    const compParam = queryParams.get('compilation');
-    // values = dragdrop, explore, edit, annotation, ilias, full
-    const mode = queryParams.get('mode');
 
-    const loadingCase = entityParam
-      ? 'entity'
-      : compParam
-      ? 'collection'
-      : 'default';
+  const searchParams = location.search;
+  const queryParams = new URLSearchParams(searchParams);
+  const entityParam = queryParams.get('model') || queryParams.get('entity');
+  const compParam = queryParams.get('compilation');
+    // values = dragdrop, explore, edit, annotation, ilias, fullLoad
+  const mode = queryParams.get('mode');
 
-    console.log({
-      entityParam,
-      compParam,
-      mode,
-      loadingCase,
-    });
-
-    if (mode === 'dragdrop') {
+  if (mode === 'dragdrop') {
+      this.isShowAnnotate = true;
+      this.showAnnotate.emit(true);
+      this.isShowSettings = true;
+      this.showSettings.emit(true);
       this.isLightMode = false;
       this.lightMode.emit(false);
       this.fetchAndLoad(entityParam, compParam, !!compParam);
       return;
     }
 
-    if (loadingCase === 'entity') {
-      this.fetchAndLoad(entityParam, compParam, !!compParam);
-      if (mode === 'explore') {
-        this.isLightMode = false;
-        this.lightMode.emit(false);
-        this.overlayService.activateSettingsTab();
+  console.log('MODE', mode, 'comp', compParam, 'entity', entityParam);
+
+  if (compParam) {
+      this.fetchAndLoad(entityParam ? entityParam : undefined, compParam, true);
+      this.isShowCollectionBrowser = true;
+      this.showCollectionBrowser.emit(true);
+      if (!mode || mode === 'explore') {
+        this.overlayService.toggleSidenav('collectionBrowser', true);
       }
-      if (mode === 'annotation') {
-        this.mongoHandlerService
-          .isAuthorized()
-          .then(result => {
-            if (result.status === 'ok') {
-              this.isLightMode = false;
-              this.lightMode.emit(false);
-              this.overlayService.activateAnnotationsTab();
-            } else {
-              // tslint:disable-next-line:max-line-length
-              this.message.error(
-                  'You are not logged in and this would be necessary to annotate this object.' +
-                  'Please reload the page if you want to log in.',
-              );
-              this.isLightMode = true;
-              this.lightMode.emit(true);
-            }
-          })
-          .catch(error => {
-            console.error(error);
-            // tslint:disable-next-line:max-line-length
-            this.message.error(
-              'I can not check if you are logged in. The server is not responding.' +
-                'That means I can not initialise the annotation mode.',
-            );
-          });
+      if (mode === 'annotate') {
+        // this.isLoginRequired
+        // TODO: whitelist? => Login?
+      } else {
+        this.isLoginRequired = false;
+        this.loginRequired.emit(false);
       }
-      if (mode === 'edit') {
-        this.mongoHandlerService
-          .isAuthorized()
-          .then(result => {
-            if (result.status === 'ok') {
-              this.isLightMode = false;
-              this.lightMode.emit(false);
-              this.overlayService.activateSettingsTab();
-            } else {
-              // tslint:disable-next-line:max-line-length
-              this.message.error(
-                'You are not logged in and this would be necessary to edit this object.' +
-                  'Please reload the page if you want to log in.',
-              );
-              this.isLightMode = true;
-              this.lightMode.emit(true);
-            }
-          })
-          .catch(error => {
-            console.error(error);
-            // tslint:disable-next-line:max-line-length
-            this.message.error(
-              'I can not check if you are logged in. The server is not responding.' +
-                'That means I can not initialise the edit mode.',
-            );
-          });
+    } else {
+      if (entityParam) {
+        this.fetchAndLoad(entityParam, undefined, false);
+        if (mode !== 'edit' && mode !== 'annotate') {
+          this.isLoginRequired = false;
+          this.loginRequired.emit(false);
+        }
+        if (!mode) {
+          this.showSidenav.emit(false);
+        }
+      } else {
+        this.loadDefaultEntityData();
+        this.isLoginRequired = false;
+        this.loginRequired.emit(false);
+        if (!mode) {
+          this.lightMode.emit(true);
+          this.showSidenav.emit(false);
+        }
       }
     }
 
-    if (loadingCase === 'default') {
-      this.loadDefaultEntityData();
-      if (mode === 'annotation') {
-        this.isLightMode = false;
-        this.lightMode.emit(false);
-        this.overlayService.activateAnnotationsTab();
-      }
+  if (mode === 'annotation') {
+      this.isShowAnnotate = true;
+      this.showAnnotate.emit(true);
+      this.isShowSettings = true;
+      this.showSettings.emit(true);
+      this.overlayService.toggleSidenav('annotate', true);
+    }
+
+  if (mode === 'explore' || mode === 'edit') {
+      this.isShowSettings = true;
+      this.showSettings.emit(true);
+      this.overlayService.toggleSidenav('settings', true);
+    }
+
+  if (mode === 'fullLoad' || mode === 'ilias') {
+      this.isShowAnnotate = true;
+      this.showAnnotate.emit(true);
+      this.isShowSettings = true;
+      this.showSettings.emit(true);
+      this.isShowMetadata = true;
+      this.showMetadata.emit(true);
       if (mode === 'fullLoad') {
-        this.isLightMode = false;
-        this.lightMode.emit(false);
-        this.isShowCatalogue = true;
-        this.showCatalogue.emit(true);
-        this.isShowMetadata = true;
-        this.showMetadata.emit(true);
-
+        this.isShowBrowser = true;
+        this.showBrowser.emit(true);
         this.mongoHandlerService
-          .isAuthorized()
-          .then(result => {
-            if (result.status === 'ok') {
-              this.fetchCollectionsData();
-              this.fetchEntitiesData();
-            } else {
-              // tslint:disable-next-line:max-line-length
-              this.message.error(
-                'You are not logged in and this would be necessary to initialise the catalogue.' +
-                  'Please log in if you want to use this functionality.',
-              );
-            }
-          })
-          .catch(error => {
-            console.error(error);
-
-            // tslint:disable-next-line:max-line-length
-            this.message.error(
-              'I can not check if you are logged in. The server is not responding.' +
-                'That means I can not initialise the catalogue. ',
-            );
-          });
-      }
-    }
-
-    if (loadingCase === 'collection' && !entityParam) {
-      this.fetchAndLoad(undefined, compParam, undefined);
-      this.overlayService.toggleCollectionsOverview();
-      if (mode === 'ilias') {
-        this.isShowMetadata = true;
-        this.showMetadata.emit(true);
-        this.mongoHandlerService
-          .isAuthorized()
-          .then(result => {
-            if (result.status === 'ok') {
-              this.isLightMode = false;
-              this.lightMode.emit(false);
-            } else {
-              // tslint:disable-next-line:max-line-length
-              this.message.error(
-                'You are not logged in and this would be necessary to initialise the full functionality.' +
-                  'Please reload the page if you want to log in',
-              );
-              this.isLightMode = true;
-              this.lightMode.emit(true);
-            }
-          })
-          .catch(error => {
-            console.error(error);
-            // tslint:disable-next-line:max-line-length
-            this.message.error(
-              'I can not check if you are logged in. The server is not responding.' +
-                'That means I can not initialise the full functionality.',
-            );
-          });
+              .isAuthorized()
+              .then(result => {
+                if (result.status === 'ok') {
+                  this.fetchCollectionsData();
+                  this.fetchEntitiesData();
+                } else {
+                  this.message.error(
+                      'You are not logged in and this would be necessary ' +
+                      'to initialise the catalogue.' +
+                      'Please log in if you want to use this functionality.',
+                  );
+                }
+              })
+              .catch(error => {
+                console.error(error);
+                this.message.error(
+                    'I can not check if you are logged in. The server is not responding.' +
+                    'That means I can not initialise the catalogue. ',
+                );
+              });
       }
     }
   }
@@ -507,7 +455,6 @@ export class ProcessingService {
       });
   }
 
-  // 1. default lädt nicht
   public async loadFallbackEntity() {
     this.loaded.emit(false);
     this.quality = 'low';
@@ -532,7 +479,7 @@ export class ProcessingService {
   ) {
     this.loaded.emit(false);
     this.quality = 'low';
-    if (entityId) {
+    if (entityId && !collectionId) {
       this.fetchEntityData(entityId);
       if (!isfromCollection) {
         this.updateActiveCollection(undefined);
@@ -542,6 +489,18 @@ export class ProcessingService {
       this.mongoHandlerService
         .getCompilation(collectionId)
         .then(compilation => {
+          if (!compilation['_id']) {
+            this.message.error(
+                'Can not find Collection with ID ' +
+                collectionId +
+                '.',
+            );
+          } else if (
+              compilation['status'] === 'ok' &&
+              compilation['message'] === 'Password protected compilation'
+          ) {
+            // TODO this.passwordDialog();
+          } else {
           // TODO: Put Typeguards in its own service?
           const isEntity = (obj: any): obj is IEntity => {
             const _entity = obj as IEntity;
@@ -555,7 +514,17 @@ export class ProcessingService {
           };
           this.updateActiveCollection(compilation);
           const entity = compilation.entities[0];
-          if (isEntity(entity)) this.fetchEntityData(entity._id);
+          if (isEntity(entity) && !isfromCollection) {
+            this.fetchEntityData(entity._id);
+          }
+          if (isfromCollection && entityId) {
+            const loadEntity = compilation.entities.find(e => e && e._id === entityId);
+            if (loadEntity) {
+              this.fetchEntityData(loadEntity._id);
+            } else {
+          if (isEntity(entity) && !isfromCollection) {
+            this.fetchEntityData(entity._id);
+          }}}}
         })
         .catch(error => {
           console.error(error);

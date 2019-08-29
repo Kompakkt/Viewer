@@ -31,11 +31,11 @@ import { AnnotationmarkerService } from '../annotationmarker/annotationmarker.se
 import { BabylonService } from '../babylon/babylon.service';
 import { DataService } from '../data/data.service';
 import { MessageService } from '../message/message.service';
+import { EntitySettingsService } from '../modelsettings/modelsettings.service';
 import { MongohandlerService } from '../mongohandler/mongohandler.service';
 import { OverlayService } from '../overlay/overlay.service';
 import { ProcessingService } from '../processing/processing.service';
 import { UserdataService } from '../userdata/userdata.service';
-import { EntitySettingsService } from '../modelsettings/modelsettings.service';
 
 @Injectable({
   providedIn: 'root',
@@ -50,6 +50,7 @@ export class AnnotationService {
   private mediaType = '';
   public isDefaultEntityLoaded = false;
   public isFallbackEntityLoaded = false;
+  // TODO
   private isMeshSettingsMode = false;
   public isCollectionInputSelected = false;
   private isEntityFeaturesOpen = false;
@@ -186,7 +187,8 @@ export class AnnotationService {
       },
     );
 
-    this.overlayService.editor.subscribe(open => {
+    this.overlayService.sidenav.subscribe(open => {
+      // TODO add mode
       this.isEntityFeaturesOpen = open;
       this.setAnnotatingAllowance();
     });
@@ -362,7 +364,8 @@ export class AnnotationService {
 
     if (!this.isDefaultEntityLoaded && !this.isFallbackEntityLoaded) {
       // Filter null/undefined annotations
-      const serverAnnotations = this.getAnnotationsfromServerDB().filter(
+      const serverAnnotations = this.getAnnotationsfromServerDB()
+          .filter(
         annotation =>
           annotation && annotation._id && annotation.lastModificationDate,
       );
@@ -541,7 +544,8 @@ export class AnnotationService {
   }
 
   private async sortAnnotations() {
-    const sortedDefault = this.getDefaultAnnotations().sort(
+    const sortedDefault = this.getDefaultAnnotations()
+        .sort(
       (leftSide, rightSide): number =>
         +leftSide.ranking === +rightSide.ranking
           ? 0
@@ -549,7 +553,8 @@ export class AnnotationService {
           ? -1
           : 1,
     );
-    const sortedCompilation = this.getCompilationAnnotations().sort(
+    const sortedCompilation = this.getCompilationAnnotations()
+        .sort(
       (leftSide, rightSide): number =>
         +leftSide.ranking === +rightSide.ranking
           ? 0
@@ -601,7 +606,8 @@ export class AnnotationService {
   public async createNewAnnotation(result: any) {
     const camera = this.babylon.cameraManager.getInitialPosition();
 
-    this.babylon.createPreviewScreenshot(400).then(detailScreenshot => {
+    this.babylon.createPreviewScreenshot(400)
+        .then(detailScreenshot => {
       if (!this.actualEntity) {
         throw new Error(`this.actualEntity not defined: ${this.actualEntity}`);
         console.error('AnnotationService:', this);
@@ -807,7 +813,8 @@ export class AnnotationService {
       DialogGetUserDataComponent,
       dialogConfig,
     );
-    dialogRef.afterClosed().subscribe(data => {
+    dialogRef.afterClosed()
+        .subscribe(data => {
       if (data === true) {
         this.message.info('Deleted from Server');
       } else {

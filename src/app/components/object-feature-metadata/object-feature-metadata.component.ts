@@ -32,7 +32,7 @@ export class EntityFeatureMetadataComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.overlayService.editor.subscribe(async editorIsOpen => {
+    this.overlayService.sidenav.subscribe(async editorIsOpen => {
       this.isOpen = editorIsOpen;
       const currentEntity = this.processingService.getCurrentEntity();
       if (this.isOpen && currentEntity && currentEntity.relatedDigitalEntity) {

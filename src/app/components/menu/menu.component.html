@@ -1,23 +1,9 @@
-<div>
-    <button mat-icon-button (click)="overlayService.toggleCollectionsOverview()"
-            [class.active]="overlayService.collectionsOverview | async"
-            matTooltip="Catalogue"
-            matTooltipPosition="above">
-        <mat-icon aria-label="Toggle Collections Overview">collections</mat-icon>
-    </button>
+<button mat-icon-button [ngClass]="'top'" (click)="babylonService.cameraManager.resetCamera(); "
+        matTooltip="Reset Cameraperspective" matTooltipPosition="below">
+    <mat-icon>videocam</mat-icon>
+</button>
 
-    <button mat-icon-button (click)="overlayService.toggleEditor()"
-            [class.active]="overlayService.editor | async"
-            matTooltip="Entity Features" matTooltipPosition="above">
-        <mat-icon aria-label="Edit scene and annotations">edit</mat-icon>
-    </button>
-
-
-    <button mat-icon-button (click)="babylonService.cameraManager.resetCamera();"
-            matTooltip="Reset Cameraperspective" matTooltipPosition="below">
-        <mat-icon>videocam</mat-icon>
-    </button>
-
+<div [ngClass]="'bottom'">
     <button mat-icon-button *ngIf="!isAuthenticated && loginRequired" (click)="loginAttempt()"
             matTooltip="Login" matTooltipPosition="above">
         <mat-icon>account_circle</mat-icon>
@@ -29,7 +15,8 @@
     </button>
     <!-- Quality Submenu -->
     <mat-menu #quality="matMenu">
-        <button mat-menu-item *ngIf="high !== ''" (click)="processingService.updateEntityQuality('high')">High</button>
+        <button mat-menu-item *ngIf="high !== ''" (click)="processingService.updateEntityQuality('high')">High
+        </button>
         <button mat-menu-item *ngIf="medium !== ''" (click)="processingService.updateEntityQuality('medium')">Medium
         </button>
         <button mat-menu-item *ngIf="low !== ''" (click)="processingService.updateEntityQuality('low')">Low</button>
@@ -46,3 +33,4 @@
         <mat-icon aria-label="Exit fullscreen mode">{{fullscreen ? 'fullscreen_exit' : 'fullscreen'}}</mat-icon>
     </button>
 </div>
+

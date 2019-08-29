@@ -1,11 +1,12 @@
 :host {
   position: absolute;
-  bottom: 8px;
   right: 15px;
   display: inline;
   color: #fff;
   text-align: right;
   z-index: 51;
+  height: 100%;
+  width: auto;
 }
 
 :host a {
@@ -15,4 +16,14 @@
 
 .mat-icon-button.active {
   background-color: rgba(255, 255, 255, 0.2);
+}
+
+.top {
+  top: 25px;
+}
+
+.bottom {
+  position: absolute;
+  bottom: 8px;
+  width: auto;
 }

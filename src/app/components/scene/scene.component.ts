@@ -19,7 +19,9 @@ import { LoginComponent } from '../dialogs/dialog-login/login.component';
 })
 export class SceneComponent implements AfterViewInit {
   // show or not show menu
-  public isLightMode = true;
+  public showMenu = true;
+  public showSidenav = true;
+  // TODO Keine sidenav, wenn nichts gebraucht wird
   private firstAttempt = true;
 
   @HostListener('window:resize', ['$event'])
@@ -80,7 +82,11 @@ export class SceneComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     this.processingService.lightMode.subscribe(isLightMode => {
-      this.isLightMode = isLightMode;
+      this.showMenu = !isLightMode;
+    });
+
+    this.processingService.showSidenav.subscribe(showSidenav => {
+      this.showSidenav = showSidenav;
     });
 
     const searchParams = location.search;
@@ -90,19 +96,8 @@ export class SceneComponent implements AfterViewInit {
     // values = dragdrop, explore, edit, annotation, ilias, full
     const mode = queryParams.get('mode');
 
-    const loadingCase = entityParam
-      ? 'entity'
-      : compParam
-      ? 'collection'
-      : 'default';
-
-    if (
-      (loadingCase === 'collection' && mode === 'ilias') ||
-      mode === 'fullLoad' ||
-      (loadingCase === 'entity' && mode === 'annotation') ||
-      (loadingCase === 'collection' && mode === 'annotation') ||
-      (loadingCase === 'entity' && mode === 'edit')
-    ) {
+    if (mode === 'ilias' || mode === 'fullLoad' ||
+        !compParam && entityParam && mode === 'annotation' || mode === 'edit') {
       this.loginAttempt();
     } else {
       this.setupCanvas();

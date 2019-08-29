@@ -19,6 +19,7 @@ import {
   MatProgressSpinnerModule,
   MatRadioModule,
   MatSelectModule,
+  MatSidenavModule,
   MatSliderModule,
   MatSlideToggleModule,
   MatSnackBarModule,
@@ -57,9 +58,10 @@ import { AnnotationsEditorComponent } from './components/object-feature-annotati
 import { AnnotationwalkthroughComponent } from './components/object-feature-annotations/annotationwalkthrough/annotationwalkthrough.component';
 import { EntityFeatureMetadataComponent } from './components/object-feature-metadata/object-feature-metadata.component';
 import { EntityFeatureSettingsComponent } from './components/object-feature-settings/object-feature-settings.component';
-import { EntityFeaturesComponent } from './components/object-features/object-features.component';
 import { RenderCanvasComponent } from './components/render-canvas/render-canvas.component';
 import { SceneComponent } from './components/scene/scene.component';
+import { SidenavMenuComponent } from './components/sidenav-menu/sidenav-menu.component';
+import { SidenavComponent } from './components/sidenav/sidenav.component';
 import { MediaTypePipe } from './pipes/media-type.pipe';
 
 @NgModule({
@@ -67,7 +69,6 @@ import { MediaTypePipe } from './pipes/media-type.pipe';
     AppComponent,
     SceneComponent,
     MenuComponent,
-    EntityFeaturesComponent,
     AnnotationsEditorComponent,
     AnnotationComponent,
     AnnotationComponentForEditorComponent,
@@ -91,6 +92,8 @@ import { MediaTypePipe } from './pipes/media-type.pipe';
     DialogShareAnnotationComponent,
     DialogInviteBroadcastingComponent,
     RenderCanvasComponent,
+    SidenavMenuComponent,
+    SidenavComponent,
   ],
   imports: [
     BrowserModule,
@@ -124,6 +127,7 @@ import { MediaTypePipe } from './pipes/media-type.pipe';
       url: `${environment.express_server_url}:${environment.express_server_port}`,
     }),
     MarkdownModule.forRoot(),
+    MatSidenavModule,
   ],
   entryComponents: [
     LoginComponent,

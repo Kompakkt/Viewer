@@ -38,7 +38,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
   private isEntityOwner = false;
   public isSingleEntity = false;
   private isFinished = false;
-  private initialSettingsMode = false;
+  public initialSettingsMode = false;
   public showHelpers = false;
   public showHelperBackground = false;
   public showScaling = false;
@@ -134,7 +134,8 @@ export class EntityFeatureSettingsComponent implements OnInit {
   public showNextAlertFirstStep() {
     const dialogRef = this.dialog.open(DialogMeshsettingsComponent);
 
-    dialogRef.afterClosed().subscribe(finish => {
+    dialogRef.afterClosed()
+        .subscribe(finish => {
       if (finish) {
         this.resetHelpers();
         this.stepper.selected.completed = true;
@@ -283,7 +284,8 @@ export class EntityFeatureSettingsComponent implements OnInit {
     this.cameraPositionInitial = { position, target };
     console.log(this.cameraPositionInitial);
     return new Promise<string>((resolve, reject) =>
-      this.babylonService.createPreviewScreenshot(400).then(
+      this.babylonService.createPreviewScreenshot(400)
+          .then(
         screenshot => {
           this.preview = screenshot;
           resolve(screenshot);
@@ -426,7 +428,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
       if (this.activeEntity && this.activeEntity.settings) {
         this.activeEntity.settings.cameraPositionInitial = cameraSettings;
       }
-      this.overlayService.activateSettingsTab();
+      this.overlayService.toggleSidenav('settings', true);
     }
   }
 
@@ -645,7 +647,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
             this.initialSettingsMode = false;
             this.entitySettingsService.decomposeAfterSetting();
             // allow Annotations
-            this.overlayService.deactivateMeshSettings();
+            this.overlayService.toggleSidenav('annotation', true);
 
             this.entitySettingsService.loadSettings(
               this.activeEntity.settings.scale,

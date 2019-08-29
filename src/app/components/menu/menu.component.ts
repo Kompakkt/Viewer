@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material';
 
 import { BabylonService } from '../../services/babylon/babylon.service';
-import { OverlayService } from '../../services/overlay/overlay.service';
 import { ProcessingService } from '../../services/processing/processing.service';
 import { UserdataService } from '../../services/userdata/userdata.service';
 import { LoginComponent } from '../dialogs/dialog-login/login.component';
@@ -26,7 +25,6 @@ export class MenuComponent implements OnInit {
   public fullscreenCapable = document.fullscreenEnabled;
 
   constructor(
-    public overlayService: OverlayService,
     public processingService: ProcessingService,
     public babylonService: BabylonService,
     public dialog: MatDialog,
