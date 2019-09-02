@@ -1,15 +1,34 @@
 import { EventEmitter, Injectable, Output } from '@angular/core';
+import { ReplaySubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class OverlayService {
   public sidenavIsOpen = false;
+  public isInitialSettingsMode = false;
   public actualSidenavMode = '';
+  private Subjects = {
+    mode: new ReplaySubject<string>(),
+  };
+  public Observables = {
+    mode: this.Subjects.mode.asObservable(),
+  };
 
   @Output() sidenav: EventEmitter<boolean> = new EventEmitter();
+  @Output() initialSettingsmode: EventEmitter<boolean> = new EventEmitter();
 
-  public toggleSidenav(mode: string, open?: boolean): boolean {
+  public toggleSidenav(
+    mode: string,
+    open?: boolean,
+    initial?: boolean,
+  ): boolean {
+    if (initial === true) {
+      this.isInitialSettingsMode = true;
+    }
+    if (initial === false || initial === undefined) {
+      this.isInitialSettingsMode = false;
+    }
     if (this.actualSidenavMode === mode && this.sidenavIsOpen) {
       if (open) {
         return true;
@@ -27,14 +46,16 @@ export class OverlayService {
       this.sidenavIsOpen = false;
       this.sidenav.emit(false);
       this.actualSidenavMode = mode;
+      this.Subjects.mode.next(mode);
       setTimeout(() => {
         this.sidenavIsOpen = true;
         this.sidenav.emit(true);
-      },         300);
+      }, 300);
       return true;
     }
     if (this.actualSidenavMode !== mode && !this.sidenavIsOpen) {
       this.actualSidenavMode = mode;
+      this.Subjects.mode.next(mode);
       this.sidenavIsOpen = true;
       this.sidenav.emit(true);
       return true;

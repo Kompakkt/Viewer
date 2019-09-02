@@ -14,7 +14,7 @@ import { LoginComponent } from '../dialogs/dialog-login/login.component';
 export class MenuComponent implements OnInit {
   // external
   public isAuthenticated = false;
-  public loginRequired = true;
+  public loginRequired = false;
 
   // available quality of entity
   public high = '';
@@ -30,9 +30,8 @@ export class MenuComponent implements OnInit {
     public dialog: MatDialog,
     public userDataService: UserdataService,
   ) {
-
     this.userDataService.isUserAuthenticatedObservable.subscribe(
-        state => (this.isAuthenticated = state),
+      state => (this.isAuthenticated = state),
     );
 
     this.processingService.loginRequired.subscribe(
@@ -58,8 +57,7 @@ export class MenuComponent implements OnInit {
         !document.fullscreen &&
         this.babylonService.getEngine().isFullscreen
       ) {
-        this.babylonService.getEngine()
-            .switchFullscreen(false);
+        this.babylonService.getEngine().switchFullscreen(false);
       }
     });
   }
@@ -79,8 +77,7 @@ export class MenuComponent implements OnInit {
     // TODO: not working if user exit fullscreen with esc
     this.fullscreen = !isFullscreen;
     if (isFullscreen) {
-      this.babylonService.getEngine()
-          .switchFullscreen(false);
+      this.babylonService.getEngine().switchFullscreen(false);
     } else {
       _tf()
         .then(() => {})

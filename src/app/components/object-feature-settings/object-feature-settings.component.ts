@@ -134,8 +134,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
   public showNextAlertFirstStep() {
     const dialogRef = this.dialog.open(DialogMeshsettingsComponent);
 
-    dialogRef.afterClosed()
-        .subscribe(finish => {
+    dialogRef.afterClosed().subscribe(finish => {
       if (finish) {
         this.resetHelpers();
         this.stepper.selected.completed = true;
@@ -284,8 +283,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
     this.cameraPositionInitial = { position, target };
     console.log(this.cameraPositionInitial);
     return new Promise<string>((resolve, reject) =>
-      this.babylonService.createPreviewScreenshot(400)
-          .then(
+      this.babylonService.createPreviewScreenshot(400).then(
         screenshot => {
           this.preview = screenshot;
           resolve(screenshot);
@@ -333,6 +331,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
 
   private async setSettings() {
     // Settings available?
+    console.log('initialMode: ', this.initialSettingsMode);
     let upload = false;
     if (
       !this.activeEntity ||
@@ -428,7 +427,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
       if (this.activeEntity && this.activeEntity.settings) {
         this.activeEntity.settings.cameraPositionInitial = cameraSettings;
       }
-      this.overlayService.toggleSidenav('settings', true);
+      this.overlayService.toggleSidenav('settings', true, true);
     }
   }
 
@@ -647,7 +646,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
             this.initialSettingsMode = false;
             this.entitySettingsService.decomposeAfterSetting();
             // allow Annotations
-            this.overlayService.toggleSidenav('annotation', true);
+            this.overlayService.toggleSidenav('annotation', true, false);
 
             this.entitySettingsService.loadSettings(
               this.activeEntity.settings.scale,

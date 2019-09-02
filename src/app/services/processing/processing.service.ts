@@ -57,7 +57,6 @@ export class ProcessingService {
   @Output() collectionLoaded: EventEmitter<boolean> = new EventEmitter();
   @Output() defaultEntityLoaded: EventEmitter<boolean> = new EventEmitter();
   @Output() fallbackEntityLoaded: EventEmitter<boolean> = new EventEmitter();
-  @Output() lightMode: EventEmitter<boolean> = new EventEmitter();
   @Output() showCatalogue: EventEmitter<boolean> = new EventEmitter();
   @Output() loginRequired: EventEmitter<boolean> = new EventEmitter();
   @Output() showAnnotate: EventEmitter<boolean> = new EventEmitter();
@@ -117,6 +116,8 @@ export class ProcessingService {
     if (collection && collection._id) {
       this.isCollectionLoaded = true;
       this.collectionLoaded.emit(true);
+      this.isShowCollectionBrowser = true;
+      this.showCollectionBrowser.emit(true);
       this.userDataService.checkCollectionOwnerState(collection);
       this.userDataService.checkOccurenceOnWhitelist(collection);
     } else {
@@ -316,8 +317,7 @@ export class ProcessingService {
         },
         '',
         ext,
-      )
-          .then(() => this.loaded.emit(true));
+      ).then(() => this.loaded.emit(true));
     };
 
     this.babylonService.getEngine().loadingUIText =
@@ -326,15 +326,14 @@ export class ProcessingService {
   }
 
   public bootstrap(): void {
-
-  const searchParams = location.search;
-  const queryParams = new URLSearchParams(searchParams);
-  const entityParam = queryParams.get('model') || queryParams.get('entity');
-  const compParam = queryParams.get('compilation');
+    const searchParams = location.search;
+    const queryParams = new URLSearchParams(searchParams);
+    const entityParam = queryParams.get('model') || queryParams.get('entity');
+    const compParam = queryParams.get('compilation');
     // values = dragdrop, explore, edit, annotation, ilias, fullLoad
-  const mode = queryParams.get('mode');
+    const mode = queryParams.get('mode');
 
-  if (mode === 'dragdrop') {
+    if (mode === 'dragdrop') {
       this.isShowAnnotate = true;
       this.showAnnotate.emit(true);
       this.isShowSettings = true;
@@ -345,12 +344,10 @@ export class ProcessingService {
       return;
     }
 
-  console.log('MODE', mode, 'comp', compParam, 'entity', entityParam);
+    console.log('MODE', mode, 'comp', compParam, 'entity', entityParam);
 
-  if (compParam) {
+    if (compParam) {
       this.fetchAndLoad(entityParam ? entityParam : undefined, compParam, true);
-      this.isShowCollectionBrowser = true;
-      this.showCollectionBrowser.emit(true);
       if (!mode || mode === 'explore') {
         this.overlayService.toggleSidenav('collectionBrowser', true);
       }
@@ -376,13 +373,12 @@ export class ProcessingService {
         this.isLoginRequired = false;
         this.loginRequired.emit(false);
         if (!mode) {
-          this.lightMode.emit(true);
           this.showSidenav.emit(false);
         }
       }
     }
 
-  if (mode === 'annotation') {
+    if (mode === 'annotation') {
       this.isShowAnnotate = true;
       this.showAnnotate.emit(true);
       this.isShowSettings = true;
@@ -390,13 +386,13 @@ export class ProcessingService {
       this.overlayService.toggleSidenav('annotate', true);
     }
 
-  if (mode === 'explore' || mode === 'edit') {
+    if (mode === 'explore' || mode === 'edit') {
       this.isShowSettings = true;
       this.showSettings.emit(true);
       this.overlayService.toggleSidenav('settings', true);
     }
 
-  if (mode === 'fullLoad' || mode === 'ilias') {
+    if (mode === 'fullLoad' || mode === 'ilias') {
       this.isShowAnnotate = true;
       this.showAnnotate.emit(true);
       this.isShowSettings = true;
@@ -407,26 +403,26 @@ export class ProcessingService {
         this.isShowBrowser = true;
         this.showBrowser.emit(true);
         this.mongoHandlerService
-              .isAuthorized()
-              .then(result => {
-                if (result.status === 'ok') {
-                  this.fetchCollectionsData();
-                  this.fetchEntitiesData();
-                } else {
-                  this.message.error(
-                      'You are not logged in and this would be necessary ' +
-                      'to initialise the catalogue.' +
-                      'Please log in if you want to use this functionality.',
-                  );
-                }
-              })
-              .catch(error => {
-                console.error(error);
-                this.message.error(
-                    'I can not check if you are logged in. The server is not responding.' +
-                    'That means I can not initialise the catalogue. ',
-                );
-              });
+          .isAuthorized()
+          .then(result => {
+            if (result.status === 'ok') {
+              this.fetchCollectionsData();
+              this.fetchEntitiesData();
+            } else {
+              this.message.error(
+                'You are not logged in and this would be necessary ' +
+                  'to initialise the catalogue.' +
+                  'Please log in if you want to use this functionality.',
+              );
+            }
+          })
+          .catch(error => {
+            console.error(error);
+            this.message.error(
+              'I can not check if you are logged in. The server is not responding.' +
+                'That means I can not initialise the catalogue. ',
+            );
+          });
       }
     }
   }
@@ -491,40 +487,43 @@ export class ProcessingService {
         .then(compilation => {
           if (!compilation['_id']) {
             this.message.error(
-                'Can not find Collection with ID ' +
-                collectionId +
-                '.',
+              'Can not find Collection with ID ' + collectionId + '.',
             );
           } else if (
-              compilation['status'] === 'ok' &&
-              compilation['message'] === 'Password protected compilation'
+            compilation['status'] === 'ok' &&
+            compilation['message'] === 'Password protected compilation'
           ) {
             // TODO this.passwordDialog();
           } else {
-          // TODO: Put Typeguards in its own service?
-          const isEntity = (obj: any): obj is IEntity => {
-            const _entity = obj as IEntity;
-            return (
-              _entity &&
-              _entity.name !== undefined &&
-              _entity.mediaType !== undefined &&
-              _entity.online !== undefined &&
-              _entity.finished !== undefined
-            );
-          };
-          this.updateActiveCollection(compilation);
-          const entity = compilation.entities[0];
-          if (isEntity(entity) && !isfromCollection) {
-            this.fetchEntityData(entity._id);
+            // TODO: Put Typeguards in its own service?
+            const isEntity = (obj: any): obj is IEntity => {
+              const _entity = obj as IEntity;
+              return (
+                _entity &&
+                _entity.name !== undefined &&
+                _entity.mediaType !== undefined &&
+                _entity.online !== undefined &&
+                _entity.finished !== undefined
+              );
+            };
+            this.updateActiveCollection(compilation);
+            const entity = compilation.entities[0];
+            if (isEntity(entity) && !isfromCollection) {
+              this.fetchEntityData(entity._id);
+            }
+            if (isfromCollection && entityId) {
+              const loadEntity = compilation.entities.find(
+                e => e && e._id === entityId,
+              );
+              if (loadEntity) {
+                this.fetchEntityData(loadEntity._id);
+              } else {
+                if (isEntity(entity) && !isfromCollection) {
+                  this.fetchEntityData(entity._id);
+                }
+              }
+            }
           }
-          if (isfromCollection && entityId) {
-            const loadEntity = compilation.entities.find(e => e && e._id === entityId);
-            if (loadEntity) {
-              this.fetchEntityData(loadEntity._id);
-            } else {
-          if (isEntity(entity) && !isfromCollection) {
-            this.fetchEntityData(entity._id);
-          }}}}
         })
         .catch(error => {
           console.error(error);

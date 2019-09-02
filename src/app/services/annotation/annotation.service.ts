@@ -31,7 +31,6 @@ import { AnnotationmarkerService } from '../annotationmarker/annotationmarker.se
 import { BabylonService } from '../babylon/babylon.service';
 import { DataService } from '../data/data.service';
 import { MessageService } from '../message/message.service';
-import { EntitySettingsService } from '../modelsettings/modelsettings.service';
 import { MongohandlerService } from '../mongohandler/mongohandler.service';
 import { OverlayService } from '../overlay/overlay.service';
 import { ProcessingService } from '../processing/processing.service';
@@ -54,6 +53,7 @@ export class AnnotationService {
   private isMeshSettingsMode = false;
   public isCollectionInputSelected = false;
   private isEntityFeaturesOpen = false;
+  private mode = '';
 
   // All about annotations
   public isAnnotatingAllowed = false;
@@ -119,7 +119,6 @@ export class AnnotationService {
     private dialog: MatDialog,
     private userdataService: UserdataService,
     private overlayService: OverlayService,
-    private modelSettingsService: EntitySettingsService,
   ) {
     // What is actually going on and what is loaded? external Infos
     this.processingService.Observables.actualEntity.subscribe(actualEntity => {
@@ -159,6 +158,7 @@ export class AnnotationService {
     );
 
     this.processingService.Observables.actualMediaType.subscribe(type => {
+      //TODO is show annotate
       this.mediaType = type;
       const searchParams = location.search;
       const queryParams = new URLSearchParams(searchParams);
@@ -180,12 +180,14 @@ export class AnnotationService {
       this.isFallbackEntityLoaded = isFallback;
     });
 
-    this.modelSettingsService.initialSettingsMode.subscribe(
-      meshSettingsMode => {
-        this.isMeshSettingsMode = meshSettingsMode;
-        this.setAnnotatingAllowance();
-      },
-    );
+    this.overlayService.initialSettingsmode.subscribe(meshSettingsMode => {
+      this.isMeshSettingsMode = meshSettingsMode;
+      this.setAnnotatingAllowance();
+    });
+
+    this.overlayService.Observables.mode.subscribe(mode => {
+      this.mode = mode;
+    });
 
     this.overlayService.sidenav.subscribe(open => {
       // TODO add mode
@@ -364,8 +366,7 @@ export class AnnotationService {
 
     if (!this.isDefaultEntityLoaded && !this.isFallbackEntityLoaded) {
       // Filter null/undefined annotations
-      const serverAnnotations = this.getAnnotationsfromServerDB()
-          .filter(
+      const serverAnnotations = this.getAnnotationsfromServerDB().filter(
         annotation =>
           annotation && annotation._id && annotation.lastModificationDate,
       );
@@ -544,8 +545,7 @@ export class AnnotationService {
   }
 
   private async sortAnnotations() {
-    const sortedDefault = this.getDefaultAnnotations()
-        .sort(
+    const sortedDefault = this.getDefaultAnnotations().sort(
       (leftSide, rightSide): number =>
         +leftSide.ranking === +rightSide.ranking
           ? 0
@@ -553,8 +553,7 @@ export class AnnotationService {
           ? -1
           : 1,
     );
-    const sortedCompilation = this.getCompilationAnnotations()
-        .sort(
+    const sortedCompilation = this.getCompilationAnnotations().sort(
       (leftSide, rightSide): number =>
         +leftSide.ranking === +rightSide.ranking
           ? 0
@@ -606,8 +605,7 @@ export class AnnotationService {
   public async createNewAnnotation(result: any) {
     const camera = this.babylon.cameraManager.getInitialPosition();
 
-    this.babylon.createPreviewScreenshot(400)
-        .then(detailScreenshot => {
+    this.babylon.createPreviewScreenshot(400).then(detailScreenshot => {
       if (!this.actualEntity) {
         throw new Error(`this.actualEntity not defined: ${this.actualEntity}`);
         console.error('AnnotationService:', this);
@@ -813,8 +811,7 @@ export class AnnotationService {
       DialogGetUserDataComponent,
       dialogConfig,
     );
-    dialogRef.afterClosed()
-        .subscribe(data => {
+    dialogRef.afterClosed().subscribe(data => {
       if (data === true) {
         this.message.info('Deleted from Server');
       } else {
@@ -976,37 +973,42 @@ export class AnnotationService {
   }
 
   public setAnnotatingAllowance() {
-    let emitBool = false;
-    if (!this.annotatableTypeAndMode) {
+    if (this.mode !== 'annotation') {
       this.isAnnotatingAllowed = false;
       this.annnotatingAllowed.emit(false);
-      return;
-    }
-    emitBool =
-      this.isEntityFeaturesOpen &&
-      (!this.isMeshSettingsMode
-        ? true
-        : this.isDefaultEntityLoaded || this.isFallbackEntityLoaded);
-    if (emitBool && !this.isCollectionInputSelected) {
+    } else {
+      let emitBool = false;
+      if (!this.annotatableTypeAndMode) {
+        this.isAnnotatingAllowed = false;
+        this.annnotatingAllowed.emit(false);
+        return;
+      }
       emitBool =
-        (this.isAuthenticated &&
-          this.isEntityOwner &&
-          !this.isCollectionLoaded) ||
-        this.isDefaultEntityLoaded;
+        this.isEntityFeaturesOpen &&
+        (!this.isMeshSettingsMode
+          ? true
+          : this.isDefaultEntityLoaded || this.isFallbackEntityLoaded);
+      if (emitBool && !this.isCollectionInputSelected) {
+        emitBool =
+          (this.isAuthenticated &&
+            this.isEntityOwner &&
+            !this.isCollectionLoaded) ||
+          this.isDefaultEntityLoaded;
+      }
+      if (emitBool && this.isCollectionLoaded) {
+        emitBool =
+          this.actualCompilation && this.isAuthenticated
+            ? !this.actualCompilation.whitelist.enabled ||
+              this.isCollectionOwner ||
+              this.isWhitelistMember
+            : false;
+      }
+      this.isAnnotatingAllowed = emitBool;
+      this.annotationMode(emitBool);
+      this.annnotatingAllowed.emit(emitBool);
+      console.log('set allowance: ', emitBool);
+      this.setBroadcastingAllowance();
     }
-    if (emitBool && this.isCollectionLoaded) {
-      emitBool =
-        this.actualCompilation && this.isAuthenticated
-          ? !this.actualCompilation.whitelist.enabled ||
-            this.isCollectionOwner ||
-            this.isWhitelistMember
-          : false;
-    }
-    this.isAnnotatingAllowed = emitBool;
-    this.annotationMode(emitBool);
-    this.annnotatingAllowed.emit(emitBool);
-    console.log('set allowance: ', emitBool);
-    this.setBroadcastingAllowance();
   }
 
   public setCollectionInput(selected: boolean) {

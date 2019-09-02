@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable, Output } from '@angular/core';
+import { Injectable } from '@angular/core';
 // tslint:disable-next-line:max-line-length
 import {
   Animation,
@@ -21,8 +21,6 @@ import { ProcessingService } from '../processing/processing.service';
   providedIn: 'root',
 })
 export class EntitySettingsService {
-  @Output() initialSettingsMode: EventEmitter<boolean> = new EventEmitter();
-
   public actualEntityMeshes: Mesh[] = [];
   public showBoundingBoxMeshes = false;
   private min = new Vector3(
@@ -251,7 +249,6 @@ export class EntitySettingsService {
    */
 
   public async createVisualSettings(mediaType: string) {
-    this.initialSettingsMode.emit(true);
     this.initializeVariablesforSettings();
     await this.generateHelpers(mediaType, true);
 
@@ -426,7 +423,6 @@ export class EntitySettingsService {
       await this.destroyWorldAxis();
       await this.destroyLocalAxis();
       await this.destroyGround();
-      this.initialSettingsMode.emit(false);
     }
   }
 
