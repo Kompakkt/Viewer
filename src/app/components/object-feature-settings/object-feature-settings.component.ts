@@ -487,37 +487,43 @@ export class EntityFeatureSettingsComponent implements OnInit {
     this.babylonService.setBackgroundImage(this.setEffect);
 
     // Lights
-    const pointLight = this.activeEntity.settings.lights.filter(
+    const pointLight = this.activeEntity.settings.lights.find(
       obj => obj.type === 'PointLight',
-    )[0];
-    this.lightService.createPointLight('pointlight', pointLight.position);
-    this.lightService.setLightIntensity('pointlight', pointLight.intensity);
+    );
+    if (pointLight) {
+      this.lightService.createPointLight('pointlight', pointLight.position);
+      this.lightService.setLightIntensity('pointlight', pointLight.intensity);
+    }
 
-    const hemisphericLightUp = this.activeEntity.settings.lights.filter(
+    const hemisphericLightUp = this.activeEntity.settings.lights.find(
       obj => obj.type === 'HemisphericLight' && obj.position.y === 1,
-    )[0];
-    this.lightService.createAmbientlightUp(
-      'ambientlightUp',
-      hemisphericLightUp.position,
     );
-    this.lightService.setLightIntensity(
-      'ambientlightUp',
-      hemisphericLightUp.intensity,
-    );
-    this.ambientlightUpintensity = hemisphericLightUp.intensity;
+    if (hemisphericLightUp) {
+      this.lightService.createAmbientlightUp(
+        'ambientlightUp',
+        hemisphericLightUp.position,
+      );
+      this.lightService.setLightIntensity(
+        'ambientlightUp',
+        hemisphericLightUp.intensity,
+      );
+      this.ambientlightUpintensity = hemisphericLightUp.intensity;
+    }
 
-    const hemisphericLightDown = this.activeEntity.settings.lights.filter(
+    const hemisphericLightDown = this.activeEntity.settings.lights.find(
       obj => obj.type === 'HemisphericLight' && obj.position.y === -1,
-    )[0];
-    this.lightService.createAmbientlightDown(
-      'ambientlightDown',
-      hemisphericLightDown.position,
     );
-    this.lightService.setLightIntensity(
-      'ambientlightDown',
-      hemisphericLightDown.intensity,
-    );
-    this.ambientlightDownintensity = hemisphericLightDown.intensity;
+    if (hemisphericLightDown) {
+      this.lightService.createAmbientlightDown(
+        'ambientlightDown',
+        hemisphericLightDown.position,
+      );
+      this.lightService.setLightIntensity(
+        'ambientlightDown',
+        hemisphericLightDown.intensity,
+      );
+      this.ambientlightDownintensity = hemisphericLightDown.intensity;
+    }
   }
 
   private async setPreview() {

@@ -341,7 +341,7 @@ export class ProcessingService {
     if (mode === 'dragdrop') {
       this.isLightMode = false;
       this.lightMode.emit(false);
-      this.setupDragAndDrop();
+      this.fetchAndLoad(entityParam, compParam, !!compParam);
       return;
     }
 
