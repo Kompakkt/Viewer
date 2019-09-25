@@ -1,12 +1,7 @@
 :host {
-  position: absolute;
-  right: 15px;
-  display: inline;
   color: #fff;
   text-align: right;
   z-index: 51;
-  height: 100%;
-  width: auto;
 }
 
 :host a {
@@ -19,11 +14,19 @@
 }
 
 .top {
-  top: 25px;
+  position: absolute;
+  right: 15px;
+  display: inline;
+  height: auto;
+  width: auto;
+  top: 15px;
 }
 
 .bottom {
   position: absolute;
-  bottom: 8px;
+  right: 15px;
+  display: inline;
+  height: auto;
   width: auto;
+  bottom: 8px;
 }
