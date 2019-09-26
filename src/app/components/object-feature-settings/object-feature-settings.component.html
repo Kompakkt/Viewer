@@ -304,7 +304,7 @@
         </button>
         <button class="fullwidth-button"
                 mat-raised-button
-                *ngIf="!isDefault && isEntityOwner && isSingleEntity"
+                *ngIf="!isDefault && isEntityOwner && isSingleEntity && editMode"
                 (click)="saveActualSettings()">Save as default
         </button>
       </mat-card-content>

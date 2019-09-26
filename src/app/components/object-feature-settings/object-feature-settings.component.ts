@@ -48,6 +48,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
   public showLights = false;
   public isFallbackEntityLoaded = false;
   public mediaType: string | undefined;
+  public editMode = false;
 
   private cameraPositionInitial:
     | {
@@ -80,6 +81,10 @@ export class EntityFeatureSettingsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    const searchParams = location.search;
+    const queryParams = new URLSearchParams(searchParams);
+    this.editMode = queryParams.get('mode') === 'edit';
+
     this.mediaType = this.processingService.getCurrentMediaType();
 
     this.processingService.loaded.subscribe(isLoaded => {
@@ -419,7 +424,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
         this.mediaType ? this.mediaType : '',
       );
       if (this.mediaType === 'audio' || this.mediaType === 'video') {
-        this.entitySettingsService.decomposeAfterSetting();
+        await this.entitySettingsService.decomposeAfterSetting();
       }
       this.cameraPositionInitial = this.babylonService.cameraManager.getActualDefaultPosition();
       const cameraSettings = this.cameraPositionInitial;
@@ -603,15 +608,21 @@ export class EntityFeatureSettingsComponent implements OnInit {
             : 1,
         },
       ],
-      rotation: {
-        x:
-          this.mediaType === 'audio'
-            ? 315
-            : this.entitySettingsService.rotationX,
-        y: this.entitySettingsService.rotationY,
-        z: this.entitySettingsService.rotationZ,
-      },
-      scale: this.entitySettingsService.scalingFactor,
+      rotation:
+        this.initialSettingsMode && this.activeEntity
+          ? this.activeEntity.settings.rotation
+          : {
+              x:
+                this.mediaType === 'audio'
+                  ? 315
+                  : this.entitySettingsService.rotationX,
+              y: this.entitySettingsService.rotationY,
+              z: this.entitySettingsService.rotationZ,
+            },
+      scale:
+        this.initialSettingsMode && this.activeEntity
+          ? this.activeEntity.settings.scale
+          : this.entitySettingsService.scalingFactor,
     };
     settings.lights.push(this.lightService.getPointlightData());
 
