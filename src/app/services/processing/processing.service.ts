@@ -385,9 +385,9 @@ export class ProcessingService {
     }
 
     if (mode === 'explore' || mode === 'edit') {
+      this.isShowSettings = true;
+      this.showSettings.emit(true);
       if (!compParam) {
-        this.isShowSettings = true;
-        this.showSettings.emit(true);
         this.overlayService.toggleSidenav('settings', true);
       }
     }
