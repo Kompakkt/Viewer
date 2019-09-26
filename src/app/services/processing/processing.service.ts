@@ -385,9 +385,11 @@ export class ProcessingService {
     }
 
     if (mode === 'explore' || mode === 'edit') {
-      this.isShowSettings = true;
-      this.showSettings.emit(true);
-      this.overlayService.toggleSidenav('settings', true);
+      if (!compParam) {
+        this.isShowSettings = true;
+        this.showSettings.emit(true);
+        this.overlayService.toggleSidenav('settings', true);
+      }
     }
 
     if (mode === 'annotation') {
@@ -395,6 +397,7 @@ export class ProcessingService {
       this.showAnnotate.emit(true);
       this.isShowSettings = true;
       this.showSettings.emit(true);
+      // TODO: Annotationen noch nicht geladen
       this.overlayService.toggleSidenav('annotate', true);
     }
 
@@ -479,14 +482,17 @@ export class ProcessingService {
     collectionId?: string | null,
     isfromCollection?: boolean,
   ) {
+    console.log('CollectionID:', collectionId);
     this.loaded.emit(false);
     this.quality = 'low';
+
     if (entityId && !collectionId) {
       this.fetchEntityData(entityId);
       if (!isfromCollection) {
         this.updateActiveCollection(undefined);
       }
     }
+
     if (collectionId) {
       this.mongoHandlerService
         .getCompilation(collectionId)
@@ -495,13 +501,15 @@ export class ProcessingService {
             this.message.error(
               'Can not find Collection with ID ' + collectionId + '.',
             );
-          } else if (
-            compilation['status'] === 'ok' &&
-            compilation['message'] === 'Password protected compilation'
+            return;
+          }
+          if (
+            compilation['status'] === 'ok' // &&
+            // compilation['message'] === 'Password protected compilation'
           ) {
-            // TODO this.passwordDialog();
-          } else {
-            // TODO: Put Typeguards in its own service?
+            /*{
+                // TODO this.passwordDialog();
+              } else*/ // TODO: Put Typeguards in its own service?
             const isEntity = (obj: any): obj is IEntity => {
               const _entity = obj as IEntity;
               return (
@@ -513,29 +521,28 @@ export class ProcessingService {
               );
             };
             this.updateActiveCollection(compilation);
-            const entity = compilation.entities[0];
-            if (isEntity(entity) && !isfromCollection) {
-              this.fetchEntityData(entity._id);
-            }
-            if (isfromCollection && entityId) {
+
+            if (entityId) {
               const loadEntity = compilation.entities.find(
                 e => e && e._id === entityId,
               );
-              if (loadEntity) {
+              if (loadEntity && isEntity(loadEntity)) {
                 this.fetchEntityData(loadEntity._id);
               } else {
-                if (isEntity(entity) && !isfromCollection) {
-                  this.fetchEntityData(entity._id);
-                }
+                const entity = compilation.entities[0];
+                if (isEntity(entity)) this.fetchEntityData(entity._id);
               }
+            } else {
+              const entity = compilation.entities[0];
+              if (isEntity(entity)) this.fetchEntityData(entity._id);
             }
           }
         })
         .catch(error => {
           console.error(error);
           /*this.message.error(
-          'Connection to entity server to load compilation refused.',
-          );*/
+            'Connection to entity server to load compilation refused.',
+            );*/
           this.loadFallbackEntity()
             .then(() => {
               // TODO add annotation
