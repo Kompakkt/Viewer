@@ -40,7 +40,6 @@ export class ProcessingService {
     actualMediaType: this.Subjects.actualMediaType.asObservable(),
   };
 
-  // private isLoaded = false;
   public isCollectionLoaded = false;
   public isDefaultEntityLoaded = false;
   public isFallbackEntityLoaded = false;
@@ -51,7 +50,7 @@ export class ProcessingService {
   public isShowSettings = false;
   public isShowMetadata = false;
   public isShowCollectionBrowser = false;
-  public isShowBrowser = false;
+  public isShowContentBrowser = false;
 
   @Output() loaded: EventEmitter<boolean> = new EventEmitter();
   @Output() collectionLoaded: EventEmitter<boolean> = new EventEmitter();
@@ -131,6 +130,7 @@ export class ProcessingService {
     this.Subjects.actualEntityMeshes.next(meshes);
   }
 
+  // Start Drag and Drop
   public setupDragAndDrop() {
     const readDir = async dir => {
       const dirReader = dir.createReader();
@@ -324,13 +324,14 @@ export class ProcessingService {
       // tslint:disable-next-line:max-line-length
       `Drop a single file (model, image, audio, video) or a folder containing a 3d model here`;
   }
+  // End Drag and Drop
 
   public bootstrap(): void {
     const searchParams = location.search;
     const queryParams = new URLSearchParams(searchParams);
     const entityParam = queryParams.get('model') || queryParams.get('entity');
     const compParam = queryParams.get('compilation');
-    // values = dragdrop, explore, edit, annotation, ilias, fullLoad
+    // values = upload, explore, edit, annotation, open, ilias, fullLoad, dragdrop
     const mode = queryParams.get('mode');
 
     if (mode === 'dragdrop') {
@@ -338,44 +339,55 @@ export class ProcessingService {
       this.showAnnotate.emit(true);
       this.isShowSettings = true;
       this.showSettings.emit(true);
-      this.isLightMode = false;
-      this.lightMode.emit(false);
-      this.fetchAndLoad(entityParam, compParam, !!compParam);
+      this.setupDragAndDrop();
+      // this.fetchAndLoad(entityParam, compParam, !!compParam);
       return;
     }
 
-    console.log('MODE', mode, 'comp', compParam, 'entity', entityParam);
-
     if (compParam) {
       this.fetchAndLoad(entityParam ? entityParam : undefined, compParam, true);
-      if (!mode || mode === 'explore') {
+      if (!mode || mode === 'explore' || mode === 'open') {
         this.overlayService.toggleSidenav('collectionBrowser', true);
       }
-      if (mode === 'annotate') {
-        // this.isLoginRequired
-        // TODO: whitelist? => Login?
-      } else {
+      if (mode !== 'annotation' && mode !== 'fullLoad' && mode !== 'ilias') {
         this.isLoginRequired = false;
         this.loginRequired.emit(false);
       }
     } else {
-      if (entityParam) {
+      if (!mode || mode === 'open') {
+        this.showSidenav.emit(false);
+      }
+      if (entityParam && !compParam) {
         this.fetchAndLoad(entityParam, undefined, false);
-        if (mode !== 'edit' && mode !== 'annotate') {
+        if (
+          mode !== 'edit' &&
+          mode !== 'annotation' &&
+          mode !== 'upload' &&
+          mode !== 'fullLoad' &&
+          mode !== 'ilias'
+        ) {
           this.isLoginRequired = false;
           this.loginRequired.emit(false);
-        }
-        if (!mode) {
-          this.showSidenav.emit(false);
         }
       } else {
         this.loadDefaultEntityData();
         this.isLoginRequired = false;
         this.loginRequired.emit(false);
-        if (!mode) {
-          this.showSidenav.emit(false);
-        }
       }
+    }
+
+    if (mode === 'upload') {
+      this.isShowAnnotate = true;
+      this.showAnnotate.emit(true);
+      this.isShowSettings = true;
+      this.showSettings.emit(true);
+      this.overlayService.toggleSidenav('settings', true);
+    }
+
+    if (mode === 'explore' || mode === 'edit') {
+      this.isShowSettings = true;
+      this.showSettings.emit(true);
+      this.overlayService.toggleSidenav('settings', true);
     }
 
     if (mode === 'annotation') {
@@ -386,12 +398,6 @@ export class ProcessingService {
       this.overlayService.toggleSidenav('annotate', true);
     }
 
-    if (mode === 'explore' || mode === 'edit') {
-      this.isShowSettings = true;
-      this.showSettings.emit(true);
-      this.overlayService.toggleSidenav('settings', true);
-    }
-
     if (mode === 'fullLoad' || mode === 'ilias') {
       this.isShowAnnotate = true;
       this.showAnnotate.emit(true);
@@ -400,7 +406,7 @@ export class ProcessingService {
       this.isShowMetadata = true;
       this.showMetadata.emit(true);
       if (mode === 'fullLoad') {
-        this.isShowBrowser = true;
+        this.isShowContentBrowser = true;
         this.showBrowser.emit(true);
         this.mongoHandlerService
           .isAuthorized()

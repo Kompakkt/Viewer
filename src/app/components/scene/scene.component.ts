@@ -91,15 +91,17 @@ export class SceneComponent implements AfterViewInit {
     // values = dragdrop, explore, edit, annotation, ilias, full
     const mode = queryParams.get('mode');
 
-    if (!entityParam && !compParam && !mode) {
+    if (!mode) {
       this.showMenu = false;
     }
 
     if (
       mode === 'ilias' ||
       mode === 'fullLoad' ||
-      (!compParam && entityParam && mode === 'annotation') ||
-      mode === 'edit'
+      ((compParam && mode === 'annotation') ||
+        (entityParam && mode === 'annotation')) ||
+      mode === 'edit' ||
+      mode === 'upload'
     ) {
       this.loginAttempt();
     } else {
