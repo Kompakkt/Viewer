@@ -23,11 +23,14 @@ export class OverlayService {
     open?: boolean,
     initial?: boolean,
   ): boolean {
+    console.log('MODE INITIAL SETTINGS: ', initial, this.isInitialSettingsMode);
     if (initial === true) {
       this.isInitialSettingsMode = true;
+      this.initialSettingsmode.emit(true);
     }
-    if (initial === false || initial === undefined) {
+    if (initial === false) {
       this.isInitialSettingsMode = false;
+      this.initialSettingsmode.emit(false);
     }
     if (this.actualSidenavMode === mode && this.sidenavIsOpen) {
       if (open) {

@@ -10,8 +10,7 @@ import { OverlayService } from '../../services/overlay/overlay.service';
 export class SidenavComponent implements OnInit {
   @HostBinding('class.is-open')
   public isOpen = false;
-  public mode = 'settings';
-  public isMeshSettingsMode = false;
+  public mode = '';
 
   constructor(public overlayService: OverlayService) {}
 
@@ -22,10 +21,6 @@ export class SidenavComponent implements OnInit {
 
     this.overlayService.Observables.mode.subscribe(state => {
       this.mode = state;
-    });
-
-    this.overlayService.initialSettingsmode.subscribe(meshSettingsMode => {
-      this.isMeshSettingsMode = meshSettingsMode;
     });
   }
 }
