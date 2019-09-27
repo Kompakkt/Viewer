@@ -412,12 +412,16 @@ export class AnnotationService {
     }
     // ...und der aktuellen Compilation (if existing)
     if (
+      this.actualEntity &&
+      this.actualEntity._id &&
       this.isCollectionLoaded &&
       this.actualCompilation &&
       this.actualCompilation.annotationList
     ) {
+      const entityID = this.actualEntity._id;
       (this.actualCompilation.annotationList.filter(
-        annotation => annotation && annotation._id,
+        annotation => annotation && annotation._id &&
+            annotation.target.source.relatedEntity === entityID,
       ) as IAnnotation[]).forEach((annotation: IAnnotation) =>
         serverAnnotations.push(annotation),
       );
