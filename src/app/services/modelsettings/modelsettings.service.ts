@@ -255,7 +255,7 @@ export class EntitySettingsService {
     this.initializeVariablesforSettings();
     await this.generateHelpers(mediaType, true);
 
-    if (mediaType === 'model' || mediaType === 'entity') {
+    if (mediaType === 'model' || mediaType === 'entity' || mediaType === 'image') {
       this.createBoundingBox();
       this.showBoundingBoxEntity = false;
       if (this.boundingBox) this.boundingBox.visibility = 0;
