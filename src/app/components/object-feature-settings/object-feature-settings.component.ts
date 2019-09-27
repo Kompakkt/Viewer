@@ -608,7 +608,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
         },
       ],
       rotation:
-        this.initialSettingsMode && this.activeEntity
+        !this.initialSettingsMode && this.activeEntity
           ? this.activeEntity.settings.rotation
           : {
               x:
@@ -619,7 +619,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
               z: this.entitySettingsService.rotationZ,
             },
       scale:
-        this.initialSettingsMode && this.activeEntity
+        !this.initialSettingsMode && this.activeEntity
           ? this.activeEntity.settings.scale
           : this.entitySettingsService.scalingFactor,
     };
