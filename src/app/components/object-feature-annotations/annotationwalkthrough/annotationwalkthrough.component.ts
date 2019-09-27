@@ -11,19 +11,26 @@ import { BabylonService } from '../../../services/babylon/babylon.service';
 })
 export class AnnotationwalkthroughComponent implements OnInit {
   public title = 'Annotation Walkthrough';
-  private actualRanking = 0;
+  private actualRanking = -1;
+  private annotations;
 
   constructor(
     public annotationService: AnnotationService,
     private babylonService: BabylonService,
   ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+
+    this.annotationService.currentAnnotations.subscribe(currentAnnotations => {
+      this.annotations = currentAnnotations;
+      this.title = 'Annotation Walkthrough';
+    });
+  }
 
   public previousAnnotation() {
     const isFirst = this.actualRanking === 0;
     this.actualRanking = isFirst
-      ? this.annotationService.getCurrentAnnotations().length - 1
+      ? this.annotations.length - 1
       : (this.actualRanking = this.actualRanking - 1);
     this.getAction(this.actualRanking);
   }
@@ -31,18 +38,18 @@ export class AnnotationwalkthroughComponent implements OnInit {
   public nextAnnotation() {
     const isLast =
       this.actualRanking ===
-      this.annotationService.getCurrentAnnotations().length - 1;
+      this.annotations.length - 1;
 
     this.actualRanking = isLast ? 0 : this.actualRanking + 1;
     this.getAction(this.actualRanking);
   }
 
   private getAction(index: number) {
-    this.title = this.annotationService.getCurrentAnnotations()[
+    this.title = this.annotations[
       index
     ].body.content.title;
 
-    const perspective = this.annotationService.getCurrentAnnotations()[index]
+    const perspective = this.annotations[index]
       .body.content.relatedPerspective;
 
     if (perspective !== undefined) {
@@ -64,10 +71,10 @@ export class AnnotationwalkthroughComponent implements OnInit {
     }
 
     this.annotationService.setSelectedAnnotation(
-      this.annotationService.getCurrentAnnotations()[index]._id,
+      this.annotations[index]._id,
     );
     this.babylonService.hideMesh(
-      this.annotationService.getCurrentAnnotations()[index]._id,
+      this.annotations[index]._id,
       true,
     );
   }
