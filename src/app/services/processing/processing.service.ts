@@ -359,6 +359,7 @@ export class ProcessingService {
       }
       if (entityParam && !compParam) {
         this.fetchAndLoad(entityParam, undefined, false);
+        // TODO: !finsished, !online, whitelist.enabled -> login required!
         if (
           mode !== 'edit' &&
           mode !== 'annotation' &&
@@ -482,7 +483,6 @@ export class ProcessingService {
     collectionId?: string | null,
     isfromCollection?: boolean,
   ) {
-    console.log('CollectionID:', collectionId);
     this.loaded.emit(false);
     this.quality = 'low';
 

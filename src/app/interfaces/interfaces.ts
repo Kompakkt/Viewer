@@ -136,6 +136,12 @@ export interface IUserData {
   _id: string;
 }
 
+export interface IStrippedUserData {
+  fullname: string;
+  username: string;
+  _id: string;
+}
+
 export interface ILoginData {
   username: string;
   password: string;

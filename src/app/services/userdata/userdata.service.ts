@@ -5,7 +5,7 @@ import {
   IAnnotation,
   ICompilation,
   IEntity,
-  ILDAPData,
+  ILDAPData, IStrippedUserData,
 } from '../../interfaces/interfaces';
 import { isCompilation, isEntity } from '../../typeguards/typeguards';
 import { MongohandlerService } from '../mongohandler/mongohandler.service';
@@ -162,33 +162,25 @@ export class UserdataService {
     return false;
   }
 
-  /*
-  get isUserWhitelisted() {
-    if (!this.element) return false;
+  private isUserWhitelisted(element: ICompilation | IEntity | undefined): boolean {
+    if (!element) return false;
     if (!this.userData) return false;
     const id = this.userData._id;
 
-    const persons = this.element.whitelist.groups
-    // Flatten group members and owners
-        .map(group => group.members.concat(...group.owners))
-        .reduce((acc, val) => acc.concat(val), [] as IStrippedUserData[])
-        // Combine with whitelisted persons
-        .concat(...this.element.whitelist.persons);
+    const persons = element.whitelist.groups
+      // Flatten group members and owners
+      .map(group => group.members.concat(...group.owners))
+      .reduce((acc, val) => acc.concat(val), [] as IStrippedUserData[])
+      // Combine with whitelisted persons
+      .concat(...element.whitelist.persons);
 
-    return persons.find(_p => _p._id === id);
-  }*/
+    return !!persons.find(_p => _p._id === id);
+  }
 
   public checkOccurenceOnWhitelist(collection: ICompilation) {
     let isOccuring = false;
-    if (
-      collection.whitelist.enabled &&
-      this.userOnWhitelistCollections.length
-    ) {
-      this.userOnWhitelistCollections.forEach(userCollection => {
-        if (userCollection._id === collection._id) {
-          isOccuring = true;
-        }
-      });
+    if (collection.whitelist.enabled) {
+      isOccuring = this.isUserWhitelisted(collection);
     }
     this.isWhitelistMember = isOccuring;
     this.whitelistMember.emit(isOccuring);
