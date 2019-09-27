@@ -125,6 +125,7 @@ export class ProcessingService {
     } else {
       this.isCollectionLoaded = false;
       this.collectionLoaded.emit(false);
+      this.isShowCollectionBrowser = false;
     }
   }
 
