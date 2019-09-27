@@ -132,7 +132,7 @@ export class AnnotationService {
         if (this.annotatableTypeAndMode) {
           this.initializeAnnotationMode();
           // TODO
-          this.toggleAnnotationSource(false);
+          this.toggleAnnotationSource(this.isCollectionLoaded);
           this.setAnnotatingAllowance();
         }
         if (this.isBroadcasting) {
@@ -1013,12 +1013,6 @@ export class AnnotationService {
       console.log('set allowance: ', emitBool);
       this.setBroadcastingAllowance();
     }
-  }
-
-  public setCollectionInput(selected: boolean) {
-    this.isCollectionInputSelected = selected;
-    this.toggleAnnotationSource(selected);
-    this.setAnnotatingAllowance();
   }
 
   // Das aktuelle Entityl wird anklickbar und damit annotierbar

@@ -37,17 +37,4 @@
     <mat-icon aria-label="Export Annotations to JSON">save</mat-icon>
   </button>
   <!--app-broadcast [style.visibility]="isBroadcastingAllowed ? 'visible' : 'hidden'"></app-broadcast-->
-  <div *ngIf="isCollectionLoaded">
-
-    Mode:
-    <mat-radio-group [disabled]="!isCollectionLoaded || isBroadcasting || isDefaultEntityLoaded"
-                     aria-label="Select Annotation Category"
-                     (change)="changeCategory($event)">
-      <mat-radio-button value="def"
-                        [checked]="!isCollectionLoaded || isDefaultEntityLoaded || isDefaultAnnotationsSource"> Default
-      </mat-radio-button>
-      <mat-radio-button value="col"> Collection</mat-radio-button>
-    </mat-radio-group>
-
-  </div>
 </div>

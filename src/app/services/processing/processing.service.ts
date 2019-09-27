@@ -348,14 +348,13 @@ export class ProcessingService {
     }
 
     if (compParam) {
-
+      // TODO: refactor
       this.mongoHandlerService
           .getCompilation(compParam)
           .then(compilation => {
             if (
                 compilation.password && compilation.password !== ''
             ) {
-              // TODO: refactor
               this.Subjects.passwordCheckCollection.next(compParam);
             } else {
               this.fetchAndLoad(entityParam ? entityParam : undefined, compParam, true);

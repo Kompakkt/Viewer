@@ -1,6 +1,5 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
-import { MatRadioChange } from '@angular/material';
 import { saveAs } from 'file-saver';
 
 import { AnnotationService } from '../../../services/annotation/annotation.service';
@@ -90,18 +89,5 @@ export class AnnotationsEditorComponent implements OnInit {
       ),
       'annotations.json',
     );
-  }
-
-  changeCategory(mrChange: MatRadioChange) {
-    // for other values check:
-    // const mrButton: MatRadioButton = mrChange.source;
-    if (mrChange.value === 'col') {
-      this.isDefaultAnnotationsSource = false;
-      this.annotationService.setCollectionInput(true);
-    }
-    if (mrChange.value === 'def') {
-      this.isDefaultAnnotationsSource = true;
-      this.annotationService.setCollectionInput(false);
-    }
   }
 }
