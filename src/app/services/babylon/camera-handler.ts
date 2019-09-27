@@ -115,25 +115,28 @@ export const setUpCamera = (
   maxSize: number,
   mediaType: string,
 ) => {
-  const radius = maxSize * 4;
-  camera.minZ = radius * 0.01;
-  camera.maxZ = radius + maxSize;
-  camera.speed = radius * 0.8;
+  // camera for model, audio, video, image
+  const radius = maxSize * 7;
+  camera.minZ = maxSize * 0.01;
+  camera.maxZ = radius + maxSize * 0.5;
+
   if (mediaType === 'entity' || mediaType === 'model') {
     camera.lowerAlphaLimit = null;
     camera.upperAlphaLimit = null;
-    camera.lowerBetaLimit = 0.1;
+    camera.lowerBetaLimit = 0.01;
     camera.upperBetaLimit = Math.PI;
   } else {
     camera.lowerAlphaLimit = camera.upperAlphaLimit = halfPi * -90;
     camera.lowerBetaLimit = camera.upperBetaLimit = halfPi * 90;
-    if (mediaType !== 'audio') {
-      camera.lowerRadiusLimit = 0;
+  }
+  if (mediaType !== 'audio') {
+      camera.lowerRadiusLimit = maxSize * 0.011;
       camera.upperRadiusLimit = radius;
     } else {
-      camera.lowerRadiusLimit = camera.upperRadiusLimit = maxSize * 3;
-    }
+      camera.lowerRadiusLimit = camera.upperRadiusLimit = radius / 2.5;
+      camera.speed = maxSize * 0.8;
   }
+
   return camera;
 };
 
