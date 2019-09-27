@@ -89,7 +89,7 @@ export class EntitySettingsService {
   ) {
     this.scalingFactor = scalingFactor;
     await this.initializeVariablesforLoading();
-    await this.generateHelpers(mediaType, false, isDefault);
+    await this.generateHelpers(mediaType, false, isDefault, scalingFactor);
     await this.setSettings(scalingFactor, rotX, rotY, rotZ);
   }
 
@@ -116,6 +116,7 @@ export class EntitySettingsService {
     mediaType?: string,
     upload?: boolean,
     isDefault?: boolean,
+    scalingFactor?,
   ) {
     await this.createCenter();
 
@@ -123,13 +124,15 @@ export class EntitySettingsService {
     this.height = this.initialSize.y.toFixed(2);
     this.width = this.initialSize.x.toFixed(2);
     this.depth = this.initialSize.z.toFixed(2);
-    console.log('Meine Tiefe ist:', this.depth);
-    console.log('Meine Breite ist:', this.width);
-    console.log('Meine Höhe ist:', this.height);
+
+    console.log('SCALING MAX', this.height, this.width, this.depth);
+    console.log('SCALING', scalingFactor);
 
     const max = !isDefault
-      ? Math.max(this.height, this.width, this.depth)
+      ? Math.max(this.height, this.width, this.depth) * (scalingFactor ? scalingFactor : 1)
       : 87.5;
+    console.log('MAX', max);
+
     this.actualEntityMeshes.forEach(mesh => (mesh.renderingGroupId = 2));
     this.babylonService
       .getScene()

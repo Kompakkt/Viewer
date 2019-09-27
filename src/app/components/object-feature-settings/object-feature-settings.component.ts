@@ -336,7 +336,6 @@ export class EntityFeatureSettingsComponent implements OnInit {
 
   private async setSettings() {
     // Settings available?
-    console.log('initialMode: ', this.initialSettingsMode);
     let upload = false;
     if (
       !this.activeEntity ||
