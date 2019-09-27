@@ -398,7 +398,7 @@ export class ProcessingService {
       this.isShowSettings = true;
       this.showSettings.emit(true);
       // TODO: Annotationen noch nicht geladen
-      this.overlayService.toggleSidenav('annotate', true);
+      this.overlayService.toggleSidenav('annotation', true);
     }
 
     if (mode === 'fullLoad' || mode === 'ilias') {

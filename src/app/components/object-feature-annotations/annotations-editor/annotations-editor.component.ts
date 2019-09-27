@@ -4,10 +4,10 @@ import { MatRadioChange } from '@angular/material';
 import { saveAs } from 'file-saver';
 
 import { AnnotationService } from '../../../services/annotation/annotation.service';
+import { OverlayService } from '../../../services/overlay/overlay.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
 import { UserdataService } from '../../../services/userdata/userdata.service';
 import { AnnotationComponent } from '../annotation/annotation.component';
-import { OverlayService } from '../../../services/overlay/overlay.service';
 
 @Component({
   selector: 'app-annotations-editor',
@@ -70,7 +70,6 @@ export class AnnotationsEditorComponent implements OnInit {
 
     this.overlayService.initialSettingsmode.subscribe(meshSettingsMode => {
       this.isMeshSettingsMode = meshSettingsMode;
-      console.log('settingsmode', meshSettingsMode);
     });
   }
 

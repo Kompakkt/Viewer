@@ -25,14 +25,17 @@ export class SidenavMenuComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.overlayService.sidenav.subscribe(sidenav => {
-      this.mode = this.overlayService.actualSidenavMode;
-      this.isOpen = sidenav;
+
+    this.overlayService.sidenav.subscribe(state => {
+      this.isOpen = this.mode !== '' ? state : false;
+    });
+
+    this.overlayService.Observables.mode.subscribe(state => {
+      this.mode = state;
     });
 
     this.processingService.showAnnotate.subscribe(anno => {
       this.isShowAnnotate = anno;
-      console.log('SHOWANNO', anno);
     });
 
     this.processingService.showSettings.subscribe(settings => {
