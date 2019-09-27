@@ -31,7 +31,7 @@ export class DialogPasswordComponent implements OnInit {
       this.mongohandlerService
         .getCompilation(this.identifierCollection, this.password)
         .then(compilation => {
-          if (compilation['_id']) {
+          if (compilation['_id'] && compilation.password === this.password) {
             this.processingService.fetchAndLoad(
               undefined,
               compilation._id,
@@ -41,7 +41,7 @@ export class DialogPasswordComponent implements OnInit {
             this.dialogRef.close(true);
           } else {
             this.message.error(
-              'Password is wrong.' + this.identifierCollection + '.',
+              'Password is wrong.',
             );
           }
         })

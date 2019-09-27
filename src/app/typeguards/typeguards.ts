@@ -13,3 +13,14 @@ export const isCompilation = (obj: any): obj is ICompilation => {
     obj !== undefined && obj.entities !== undefined && obj.name !== undefined
   );
 };
+
+export const isEntityForCollection = (obj: any): obj is IEntity => {
+  const _entity = obj as IEntity;
+  return (
+      _entity &&
+      _entity.name !== undefined &&
+      _entity.mediaType !== undefined &&
+      _entity.online !== undefined &&
+      _entity.finished !== undefined
+  );
+};

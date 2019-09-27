@@ -52,6 +52,10 @@ export class ContentBrowserComponent implements OnInit {
     this.processingService.collectionLoaded.subscribe(loadedCol => {
       this.isCollectionLoaded = loadedCol;
     });
+
+    this.processingService.Observables.passwordCheckCollection.subscribe(id => {
+      this.passwordDialog(id);
+    });
   }
 
   public loginDialog() {
@@ -108,14 +112,14 @@ export class ContentBrowserComponent implements OnInit {
       });
   }
 
-  public passwordDialog() {
+  public passwordDialog(identifier?) {
     const dialogConfig = new MatDialogConfig();
 
     dialogConfig.disableClose = true;
     dialogConfig.autoFocus = true;
 
     dialogConfig.data = {
-      id: this.identifierCollection,
+      id: identifier ? identifier : this.identifierCollection,
     };
     console.log('password');
 

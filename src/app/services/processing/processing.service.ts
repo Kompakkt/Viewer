@@ -10,6 +10,7 @@ import {
 } from '../../../assets/entities/entities';
 import { environment } from '../../../environments/environment';
 import { ICompilation, IEntity } from '../../interfaces/interfaces';
+import { isEntityForCollection } from '../../typeguards/typeguards';
 import { BabylonService } from '../babylon/babylon.service';
 import { LoadingscreenhandlerService } from '../babylon/loadingscreen';
 import { MessageService } from '../message/message.service';
@@ -29,6 +30,7 @@ export class ProcessingService {
     actualEntityMeshes: new ReplaySubject<Mesh[]>(),
     actualCollection: new ReplaySubject<ICompilation | undefined>(),
     actualMediaType: new ReplaySubject<string>(),
+    passwordCheckCollection: new ReplaySubject<string>(),
   };
 
   public Observables = {
@@ -38,6 +40,7 @@ export class ProcessingService {
     actualEntityMeshes: this.Subjects.actualEntityMeshes.asObservable(),
     actualCollection: this.Subjects.actualCollection.asObservable(),
     actualMediaType: this.Subjects.actualMediaType.asObservable(),
+    passwordCheckCollection: this.Subjects.passwordCheckCollection.asObservable(),
   };
 
   public isCollectionLoaded = false;
@@ -345,13 +348,30 @@ export class ProcessingService {
     }
 
     if (compParam) {
-      this.fetchAndLoad(entityParam ? entityParam : undefined, compParam, true);
+
+      this.mongoHandlerService
+          .getCompilation(compParam)
+          .then(compilation => {
+            if (
+                compilation.password && compilation.password !== ''
+            ) {
+              // TODO: refactor
+              this.Subjects.passwordCheckCollection.next(compParam);
+            } else {
+              this.fetchAndLoad(entityParam ? entityParam : undefined, compParam, true);
+              if (mode !== 'annotation' && mode !== 'fullLoad' && mode !== 'ilias') {
+                this.isLoginRequired = false;
+                this.loginRequired.emit(false);
+              }
+            }
+          })
+          .catch(error => {
+            console.error(error);
+            this.message.error('Connection to entity server refused.');
+          });
+
       if (!mode || mode === 'explore' || mode === 'open') {
         this.overlayService.toggleSidenav('collectionBrowser', true);
-      }
-      if (mode !== 'annotation' && mode !== 'fullLoad' && mode !== 'ilias') {
-        this.isLoginRequired = false;
-        this.loginRequired.emit(false);
       }
     } else {
       if (!mode || mode === 'open') {
@@ -483,6 +503,7 @@ export class ProcessingService {
     collectionId?: string | null,
     isfromCollection?: boolean,
   ) {
+    console.log('ID COMP', collectionId);
     this.loaded.emit(false);
     this.quality = 'low';
 
@@ -492,51 +513,25 @@ export class ProcessingService {
         this.updateActiveCollection(undefined);
       }
     }
-
     if (collectionId) {
       this.mongoHandlerService
         .getCompilation(collectionId)
         .then(compilation => {
-          if (!compilation['_id']) {
-            this.message.error(
-              'Can not find Collection with ID ' + collectionId + '.',
-            );
-            return;
-          }
-          if (
-            compilation['status'] === 'ok' // &&
-            // compilation['message'] === 'Password protected compilation'
-          ) {
-            /*{
-                // TODO this.passwordDialog();
-              } else*/ // TODO: Put Typeguards in its own service?
-            const isEntity = (obj: any): obj is IEntity => {
-              const _entity = obj as IEntity;
-              return (
-                _entity &&
-                _entity.name !== undefined &&
-                _entity.mediaType !== undefined &&
-                _entity.online !== undefined &&
-                _entity.finished !== undefined
-              );
-            };
             this.updateActiveCollection(compilation);
-
             if (entityId) {
               const loadEntity = compilation.entities.find(
                 e => e && e._id === entityId,
               );
-              if (loadEntity && isEntity(loadEntity)) {
+              if (loadEntity && isEntityForCollection(loadEntity)) {
                 this.fetchEntityData(loadEntity._id);
               } else {
                 const entity = compilation.entities[0];
-                if (isEntity(entity)) this.fetchEntityData(entity._id);
+                if (isEntityForCollection(entity)) this.fetchEntityData(entity._id);
               }
             } else {
               const entity = compilation.entities[0];
-              if (isEntity(entity)) this.fetchEntityData(entity._id);
+              if (isEntityForCollection(entity)) this.fetchEntityData(entity._id);
             }
-          }
         })
         .catch(error => {
           console.error(error);
