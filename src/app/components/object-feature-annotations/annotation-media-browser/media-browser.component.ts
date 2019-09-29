@@ -1,6 +1,6 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 
-import { ProcessingService } from '../../services/processing/processing.service';
+import { ProcessingService } from '../../../services/processing/processing.service';
 
 @Component({
   selector: 'app-media-browser',
