@@ -67,26 +67,25 @@ export class ProcessingService {
         return this.Observables.actualEntity.source['_events'].slice(-1)[0];
     }
 
-    private setAnnotatingFeatured(entity: IEntity) {
+    private async setAnnotatingFeatured(entity: IEntity) {
         // mode = '' || upload || explore || edit || annotation || open &&
         // compilation (whitelist || entity => showAnnotationEditor
         // mediatype = 'model' || 'entity' || 'image' || 'audio' || 'video
         // entity: default || fallback || owner
         const mediatype = entity.mediaType;
-        let allowance = false;
 
         if (this.showAnnotationEditor &&
             mediatype === 'image' || mediatype === 'entity' || mediatype === 'model') {
             if (!this.compilationLoaded &&
                 !this.defaultEntityLoaded && !this.fallbackEntityLoaded) {
                 if (this.userDataService.userOwnsEntity) {
-                    allowance = true;
+                    this.annotatingFeatured = true;
                 } else {
                     if (this.userDataService.authenticatedUser) {
                         this.userDataService.checkOwnerState(entity)
                             .then(owned => {
                                 if (owned) {
-                                    allowance = true;
+                                    this.annotatingFeatured = true;
                                 } else {
                                     this.message.error(
                                         'Sorry, you are not authorized to annotate this Object.');
@@ -95,10 +94,9 @@ export class ProcessingService {
                     }
                 }
             } else {
-                allowance = true;
+                this.annotatingFeatured = true;
             }
         }
-        this.annotatingFeatured = allowance;
     }
 
     public updateActiveEntity(entity: IEntity) {
@@ -135,8 +133,8 @@ export class ProcessingService {
         }
     }
 
-    public updateActiveEntityMeshes(meshes: Mesh[], entity: IEntity) {
-        this.setAnnotatingFeatured(entity);
+    public async updateActiveEntityMeshes(meshes: Mesh[], entity: IEntity) {
+        await this.setAnnotatingFeatured(entity);
         this.Subjects.actualEntityMeshes.next(meshes);
     }
 
