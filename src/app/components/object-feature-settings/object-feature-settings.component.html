@@ -4,7 +4,8 @@
 
     <mat-vertical-stepper [linear]=true #stepper>
 
-      <mat-step *ngIf="mediaType !== 'audio' && mediaType !== 'video'">
+      <mat-step *ngIf="processingService.actualEntityMediaType !== 'audio' &&
+      processingService.actualEntityMediaType !== 'video'">
         <ng-template matStepLabel>Set Mesh Settings</ng-template>
 
         <h5>Information & Helpers
@@ -256,7 +257,7 @@
                       (input)="pointlightPosZ($event)" vertical></mat-slider>
         </div>
 
-        <div *ngIf="mediaType !== 'audio'">
+        <div *ngIf="processingService.actualEntityMediaType !== 'audio'">
         <h5> Preview & Initial Perspective
           <button mat-icon-button (click)="togglePreview()"
                   matTooltip="Toggle" matTooltipPosition="above"
@@ -304,7 +305,8 @@
         </button>
         <button class="fullwidth-button"
                 mat-raised-button
-                *ngIf="!isDefault && isEntityOwner && isSingleEntity && editMode"
+                *ngIf="!processingService.defaultEntityLoaded && isEntityOwner &&
+                !processingService.compilationLoaded && editMode"
                 (click)="saveActualSettings()">Save as default
         </button>
       </mat-card-content>
@@ -373,7 +375,7 @@
         </button>
         <button class="fullwidth-button"
                 mat-raised-button
-                *ngIf="!isDefault && isEntityOwner && isSingleEntity"
+                *ngIf="!processingService.defaultEntityLoaded && isEntityOwner && !processingService.compilationLoaded"
                 (click)="saveActualSettings()">Save as default
         </button>
       </mat-card-content>

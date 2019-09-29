@@ -12,7 +12,7 @@ import { BabylonService } from '../../../services/babylon/babylon.service';
 export class AnnotationwalkthroughComponent implements OnInit {
   public title = 'Annotation Walkthrough';
   private actualRanking = -1;
-  private annotations;
+  public annotations;
 
   constructor(
     public annotationService: AnnotationService,

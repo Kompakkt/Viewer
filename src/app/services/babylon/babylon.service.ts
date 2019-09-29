@@ -199,6 +199,7 @@ export class BabylonService {
     this.engine.runRenderLoop(() => {
       this.scene.render();
     });
+
   }
 
   public getScene(): Scene {

@@ -18,13 +18,6 @@ import {
   IAnnotation,
   ICompilation,
   IEntity,
-  ILDAPData,
-  ISocketAnnotation,
-  ISocketChangeRoom,
-  ISocketMessage,
-  ISocketRoomData,
-  ISocketUser,
-  ISocketUserInfo,
 } from '../../interfaces/interfaces';
 import { ActionService } from '../action/action.service';
 import { AnnotationmarkerService } from '../annotationmarker/annotationmarker.service';
@@ -44,25 +37,15 @@ export class AnnotationService {
   private actualEntity: IEntity | undefined;
   private actualEntityMeshes: Mesh[] = [];
   public actualCompilation: ICompilation | undefined;
-  private isCollectionLoaded: boolean;
-  private loadedMode = '';
-  private mediaType = '';
-  public isDefaultEntityLoaded = false;
-  public isFallbackEntityLoaded = false;
-  // TODO
+
   private isMeshSettingsMode = false;
-  public isCollectionInputSelected = false;
   private isEntityFeaturesOpen = false;
-  private mode = '';
+  private annotationModeSidenav = false;
 
   // All about annotations
   public isAnnotatingAllowed = false;
   @Output() annnotatingAllowed: EventEmitter<boolean> = new EventEmitter();
-  private annotatableTypeAndMode = false;
-  private isannotationSourceCollection = false;
-  @Output() annotationSourceCollection: EventEmitter<
-    boolean
-  > = new EventEmitter();
+
   private selectedAnnotation = new BehaviorSubject('');
   public isSelectedAnnotation = this.selectedAnnotation.asObservable();
   private editModeAnnotation = new BehaviorSubject('');
@@ -87,26 +70,6 @@ export class AnnotationService {
     },
   });
 
-  // User info
-  private userData: ILDAPData | undefined;
-  private isAuthenticated = false;
-  private isEntityOwner = false;
-  private isCollectionOwner = false;
-  private isWhitelistMember = false;
-
-  // Broadcasting
-  public collaborators: ISocketUser[] = [];
-  // TODO this array is not needed
-  //  -> first users (0-maxColoredUsersMinusOne) of collab can be used
-  public coloredUsers: ISocketUser[] = [];
-  public color = ['pink', 'red', 'blue', 'yellow', 'purple', 'gold'];
-  public maxColoredUsersMinusOne = this.color.length - 1;
-  private socketRoom = '';
-  public isBroadcastingAllowed = false;
-  @Output() broadcastingAllowed: EventEmitter<boolean> = new EventEmitter();
-  private isBroadcasting = false;
-  @Output() broadcasting: EventEmitter<boolean> = new EventEmitter();
-
   constructor(
     private dataService: DataService,
     private actionService: ActionService,
@@ -123,62 +86,23 @@ export class AnnotationService {
     // What is actually going on and what is loaded? external Infos
     this.processingService.Observables.actualEntity.subscribe(actualEntity => {
       this.actualEntity = actualEntity;
+      this.loadAnnotations();
     });
 
     this.processingService.Observables.actualEntityMeshes.subscribe(
       actualEntityMeshes => {
         this.actualEntityMeshes = actualEntityMeshes;
-        this.loadAnnotations();
-        if (this.annotatableTypeAndMode) {
+        if (this.processingService.annotatingFeatured) {
           this.initializeAnnotationMode();
-          // TODO
-          this.toggleAnnotationSource(this.isCollectionLoaded);
           this.setAnnotatingAllowance();
         }
-        if (this.isBroadcasting) {
-          this.changeSocketRoom();
-        }
       },
     );
 
-    this.isCollectionLoaded = this.processingService.isCollectionLoaded;
-    this.processingService.Observables.actualCollection.subscribe(
+    this.processingService.Observables.actualCompilation.subscribe(
       actualCompilation => {
-        if (!actualCompilation) {
-          this.isCollectionLoaded = false;
-          return;
-        }
-        if (actualCompilation._id && this.actualEntity) {
-          this.socketRoom = `${actualCompilation._id}_${this.actualEntity._id}`;
-
-          this.isCollectionLoaded = actualCompilation._id !== undefined;
           this.actualCompilation = actualCompilation;
-        }
-      },
-    );
-
-    this.processingService.Observables.actualMediaType.subscribe(type => {
-      //TODO is show annotate
-      this.mediaType = type;
-      const searchParams = location.search;
-      const queryParams = new URLSearchParams(searchParams);
-      const mode = queryParams.get('mode');
-      this.loadedMode = mode ? mode : '';
-      this.annotatableTypeAndMode =
-        (type === 'model' || type === 'entity' || type === 'image') &&
-        (mode === 'annotation' ||
-          mode === 'edit' ||
-          mode === 'ilias' ||
-          mode === 'fullLoad');
-    });
-
-    this.processingService.defaultEntityLoaded.subscribe(isDefault => {
-      this.isDefaultEntityLoaded = isDefault;
-    });
-
-    this.processingService.fallbackEntityLoaded.subscribe(isFallback => {
-      this.isFallbackEntityLoaded = isFallback;
-    });
+      });
 
     this.overlayService.initialSettingsmode.subscribe(meshSettingsMode => {
       this.isMeshSettingsMode = meshSettingsMode;
@@ -186,11 +110,11 @@ export class AnnotationService {
     });
 
     this.overlayService.Observables.mode.subscribe(mode => {
-      this.mode = mode;
+      this.annotationModeSidenav = mode === 'annotation';
+      this.setAnnotatingAllowance();
     });
 
     this.overlayService.sidenav.subscribe(open => {
-      // TODO add mode
       this.isEntityFeaturesOpen = open;
       this.setAnnotatingAllowance();
     });
@@ -200,109 +124,6 @@ export class AnnotationService {
         this.selectedAnnotation.next(selectedAnno);
       },
     );
-    // Userdata
-    this.userdataService.userDataObservable.subscribe(data => {
-      this.userData = data;
-    });
-
-    this.userdataService.isUserAuthenticatedObservable.subscribe(auth => {
-      this.isAuthenticated = auth;
-    });
-
-    this.userdataService.entityOwner.subscribe(owner => {
-      this.isEntityOwner = owner;
-    });
-
-    this.userdataService.collectionOwner.subscribe(owner => {
-      this.isCollectionOwner = owner;
-    });
-
-    this.userdataService.whitelistMember.subscribe(member => {
-      this.isWhitelistMember = member;
-    });
-
-    // Socket
-    this.socket.on('message', (result: ISocketMessage) => {
-      console.log(`${result.user.username}: ${result.message}`);
-    });
-
-    this.socket.on('newUser', (result: ISocketUserInfo) => {
-      console.log(`GET ONLINE USERS OF YOUR ROOM - SOCKET.IO`);
-      this.updateCollaboratorInfo(result);
-    });
-
-    // Our data is requested
-    this.socket.on('roomDataRequest', (result: ISocketRoomData) => {
-      result.info = this.getOwnSocketData();
-      this.socket.emit('roomDataAnswer', result);
-    });
-
-    // We recieved data from someone
-    this.socket.on('roomDataAnswer', (result: ISocketRoomData) => {
-      this.updateCollaboratorInfo(result.info);
-    });
-
-    this.socket.on('createAnnotation', (result: ISocketAnnotation) => {
-      console.log(
-        `COLLABORATOR '${result.user.username}' CREATED AN ANNOTATION - SOCKET.IO`,
-      );
-      this.handleReceivedAnnotation(result.annotation);
-    });
-
-    this.socket.on('editAnnotation', (result: ISocketAnnotation) => {
-      console.log(
-        `COLLABORATOR '${result.user.username}' EDITED AN ANNOTATION - SOCKET.IO`,
-      );
-      this.handleReceivedAnnotation(result.annotation);
-    });
-
-    this.socket.on('deleteAnnotation', (result: ISocketAnnotation) => {
-      // [socket.id, annotation]
-      console.log(
-        `COLLABORATOR '${result.user.username}' DELETED AN ANNOTATION- SOCKET.IO`,
-      );
-      this.deleteRequestAnnotation(result.annotation);
-    });
-
-    // TODO
-    this.socket.on('changeRanking', result => {
-      //  [socket.id, IdArray, RankingArray]
-      console.log(
-        `COLLABORATOR '${result[0]}' CHANGED ANNOTATION-RANKING - SOCKET.IO`,
-      );
-    });
-
-    // A user lost connection, so we remove knowledge about this user
-    this.socket.on('lostConnection', (result: ISocketUserInfo) => {
-      // [user, annotations]);
-      console.log(
-        `COLLABORATOR '${result.user.username}' LOGGED OUT - SOCKET.IO`,
-      );
-      this.removeKnowledgeAboutUser(result);
-    });
-
-    this.socket.on('logout', _ => {
-      // socket.id
-      console.log(`logging out of Socket.io...`);
-    });
-
-    // A user left the room, so we remove knowledge about this user
-    this.socket.on('changeRoom', (result: ISocketUserInfo) => {
-      console.log(
-        `COLLABORATOR '${result.user.username}' CHANGED ROOM - SOCKET.IO`,
-      );
-      this.removeKnowledgeAboutUser(result);
-    });
-
-    // Lost connection to server
-    this.socket.on('disconnect', () => {
-      this.isBroadcasting = false;
-      this.broadcasting.emit(false);
-      this.collaborators = [];
-      this.sortUser();
-      // this.collaboratorsAnnotations = [];
-      this.socket.disconnect();
-    });
   }
 
   private getDefaultAnnotations() {
@@ -322,9 +143,9 @@ export class AnnotationService {
   }
 
   private updateCurrentAnnotationsSubject() {
-    const next = this.isannotationSourceCollection
-      ? this.getCompilationAnnotations()
-      : this.getDefaultAnnotations();
+    const next = this.processingService.compilationLoaded
+        ? this.getCompilationAnnotations()
+        : this.getDefaultAnnotations();
     this.currentAnnotationSubject.next(next);
     // After the observable updates we want to redraw markers
     setTimeout(() => this.redrawMarker(), 0);
@@ -335,7 +156,7 @@ export class AnnotationService {
     // If you need current annotations in DOM, subscribe to the
     // currentAnnotations Observable using the async pipe
     // e.g. (annotationService.currentAnnotations | async)
-    return this.isannotationSourceCollection
+    return this.processingService.compilationLoaded
       ? this.getCompilationAnnotations()
       : this.getDefaultAnnotations();
   }
@@ -345,7 +166,7 @@ export class AnnotationService {
     // Since all annotations are in the same array but sorted
     // with defaults first and compilation following
     // we can calculate the offset if needed
-    const offset = this.isannotationSourceCollection
+    const offset = this.processingService.compilationLoaded
       ? this.getDefaultAnnotations().length
       : 0;
     moveItemInArray(this.annotations, from_index + offset, to_index + offset);
@@ -364,9 +185,11 @@ export class AnnotationService {
     await this.annotationmarkerService.deleteAllMarker();
     this.annotations.splice(0, this.annotations.length);
 
-    if (!this.isDefaultEntityLoaded && !this.isFallbackEntityLoaded) {
+    if (!this.processingService.defaultEntityLoaded &&
+        !this.processingService.fallbackEntityLoaded) {
       // Filter null/undefined annotations
-      const serverAnnotations = this.getAnnotationsfromServerDB().filter(
+      const serverAnnotations = this.getAnnotationsfromServerDB()
+          .filter(
         annotation =>
           annotation && annotation._id && annotation.lastModificationDate,
       );
@@ -383,12 +206,11 @@ export class AnnotationService {
       this.annotations.push(...updated);
       await this.sortAnnotations();
     } else {
-      if (this.processingService.isFallbackEntityLoaded) {
+      if (this.processingService.fallbackEntityLoaded) {
         this.annotations.push(annotationFallback);
       }
-      if (this.isDefaultEntityLoaded) {
-        const annotationMode = this.loadedMode === 'annotation';
-        if (annotationMode && annotationLogo.length) {
+      if (this.processingService.defaultEntityLoaded) {
+        if (this.annotationModeSidenav && annotationLogo.length) {
           annotationLogo.forEach((annotation: IAnnotation) =>
             this.annotations.push(annotation),
           );
@@ -414,7 +236,7 @@ export class AnnotationService {
     if (
       this.actualEntity &&
       this.actualEntity._id &&
-      this.isCollectionLoaded &&
+      this.processingService.compilationLoaded &&
       this.actualCompilation &&
       this.actualCompilation.annotationList
     ) {
@@ -436,7 +258,7 @@ export class AnnotationService {
       : [];
     // Annotationen aus PouchDB des aktuellen Entityls und der aktuellen Compilation (if existing)
 
-    if (this.isCollectionLoaded) {
+    if (this.processingService.compilationLoaded) {
       const _compilationAnnotations =
         this.actualEntity && this.actualCompilation
           ? await this.fetchAnnotations(
@@ -472,11 +294,11 @@ export class AnnotationService {
     const unsorted: IAnnotation[] = [];
     // Durch alle Annotationen der lokalen DB
     for (const annotation of localAnnotations) {
-      const isLastModifiedByMe = this.userData
-        ? annotation.lastModifiedBy._id === this.userData._id
+      const isLastModifiedByMe = this.userdataService.userData
+        ? annotation.lastModifiedBy._id === this.userdataService.userData._id
         : false;
-      const isCreatedByMe = this.userData
-        ? annotation.creator._id === this.userData._id
+      const isCreatedByMe = this.userdataService.userData
+        ? annotation.creator._id === this.userdataService.userData._id
         : false;
 
       // Finde die Annotaion in den Server Annotationen
@@ -549,7 +371,8 @@ export class AnnotationService {
   }
 
   private async sortAnnotations() {
-    const sortedDefault = this.getDefaultAnnotations().sort(
+    const sortedDefault = this.getDefaultAnnotations()
+        .sort(
       (leftSide, rightSide): number =>
         +leftSide.ranking === +rightSide.ranking
           ? 0
@@ -557,7 +380,8 @@ export class AnnotationService {
           ? -1
           : 1,
     );
-    const sortedCompilation = this.getCompilationAnnotations().sort(
+    const sortedCompilation = this.getCompilationAnnotations()
+        .sort(
       (leftSide, rightSide): number =>
         +leftSide.ranking === +rightSide.ranking
           ? 0
@@ -572,31 +396,9 @@ export class AnnotationService {
     await this.changedRankingPositions();
   }
 
-  // For Broadcasting
-  public handleReceivedAnnotation(newAnnotation: IAnnotation) {
-    const foundIndex = this.annotations.findIndex(
-      annotation => newAnnotation._id === annotation._id,
-    );
-    if (foundIndex === -1) {
-      this.annotations.push(newAnnotation);
-    } else {
-      this.annotations.splice(foundIndex, 1, newAnnotation);
-    }
-  }
-
-  public deleteRequestAnnotation(newAnnotation: IAnnotation) {
-    const foundIndex = this.annotations.findIndex(
-      annotation => newAnnotation._id === annotation._id,
-    );
-    if (foundIndex !== -1) {
-      this.annotations.splice(foundIndex, 1);
-    }
-  }
-
-  // Die Annotationsfunktionalität wird zum aktuellen Entityl hinzugefügt
+  // Die Annotationsfunktionalität wird zue aktuellen Entity hinzugefügt
   public initializeAnnotationMode() {
     this.actualEntityMeshes.forEach(mesh => {
-      console.log('mesh: ', mesh);
       this.actionService.createActionManager(
         mesh,
         ActionManager.OnDoublePickTrigger,
@@ -606,10 +408,22 @@ export class AnnotationService {
     this.annotationMode(false);
   }
 
+  // Das aktuelle Entityl wird anklickbar und damit annotierbar
+  public annotationMode(value: boolean) {
+    if (this.processingService.actualEntityMediaType === 'video' ||
+        this.processingService.actualEntityMediaType === 'audio') {
+      return;
+    }
+    this.actualEntityMeshes.forEach(mesh => {
+      this.actionService.pickableEntity(mesh, value);
+    });
+  }
+
   public async createNewAnnotation(result: any) {
     const camera = this.babylon.cameraManager.getInitialPosition();
 
-    this.babylon.createPreviewScreenshot(400).then(detailScreenshot => {
+    this.babylon.createPreviewScreenshot(400)
+        .then(detailScreenshot => {
       if (!this.actualEntity) {
         throw new Error(`this.actualEntity not defined: ${this.actualEntity}`);
         console.error('AnnotationService:', this);
@@ -617,11 +431,12 @@ export class AnnotationService {
       }
       const generatedId = this.mongo.generateEntityId();
 
-      const personName = this.userData ? this.userData.fullname : 'guest';
-      const personID = this.userData ? this.userData._id : 'guest';
+      const personName = this.userdataService.userData ? this.userdataService.userData.fullname :
+          'guest';
+      const personID = this.userdataService.userData ? this.userdataService.userData._id : 'guest';
 
       const newAnnotation: IAnnotation = {
-        validated: !this.isCollectionLoaded,
+        validated: !this.processingService.compilationLoaded,
         _id: generatedId,
         identifier: generatedId,
         ranking: this.getCurrentAnnotations().length + 1,
@@ -669,7 +484,7 @@ export class AnnotationService {
           source: {
             relatedEntity: this.actualEntity._id,
             relatedCompilation:
-              this.isCollectionLoaded && this.actualCompilation
+              this.processingService.compilationLoaded && this.actualCompilation
                 ? this.actualCompilation._id
                 : '',
           },
@@ -687,7 +502,6 @@ export class AnnotationService {
           },
         },
       };
-      console.log(newAnnotation);
       this.add(newAnnotation);
     });
   }
@@ -695,13 +509,8 @@ export class AnnotationService {
   private add(_annotation: IAnnotation): void {
     let newAnnotation = _annotation;
     newAnnotation.lastModificationDate = new Date().toISOString();
-    if (!this.isDefaultEntityLoaded && !this.isFallbackEntityLoaded) {
-      if (this.isBroadcasting) {
-        this.socket.emit('createAnnotation', {
-          annotation: _annotation,
-          user: this.getOwnSocketData().user,
-        });
-      }
+    if (!this.processingService.defaultEntityLoaded &&
+        !this.processingService.fallbackEntityLoaded) {
       this.mongo
         .updateAnnotation(_annotation)
         .then((resultAnnotation: IAnnotation) => {
@@ -721,17 +530,12 @@ export class AnnotationService {
   public updateAnnotation(_annotation: IAnnotation) {
     let newAnnotation = _annotation;
     newAnnotation.lastModificationDate = new Date().toISOString();
-    if (!this.isFallbackEntityLoaded && !this.isDefaultEntityLoaded) {
+    if (!this.processingService.fallbackEntityLoaded &&
+        !this.processingService.defaultEntityLoaded) {
       if (
         this.userdataService.isAnnotationOwner(_annotation) ||
-        (this.isCollectionLoaded && this.userdataService.isCollectionOwner)
+        (this.processingService.compilationLoaded && this.userdataService.userOwnsCompilation)
       ) {
-        if (this.isBroadcasting) {
-          this.socket.emit('editAnnotation', {
-            annotation: _annotation,
-            user: this.getOwnSocketData().user,
-          });
-        }
         this.mongo
           .updateAnnotation(_annotation)
           .then((resultAnnotation: IAnnotation) => {
@@ -762,15 +566,10 @@ export class AnnotationService {
           this.annotations.findIndex(ann => ann._id === _annotation._id),
           1,
         );
-        if (this.isBroadcasting) {
-          this.socket.emit('deleteAnnotation', {
-            annotation: _annotation,
-            user: this.getOwnSocketData().user,
-          });
-        }
         this.changedRankingPositions();
         this.redrawMarker();
-        if (!this.isFallbackEntityLoaded && !this.isDefaultEntityLoaded) {
+        if (!this.processingService.fallbackEntityLoaded &&
+            !this.processingService.defaultEntityLoaded) {
           this.dataService.deleteAnnotation(_annotation._id);
           this.deleteAnnotationFromServer(_annotation._id);
         }
@@ -815,7 +614,8 @@ export class AnnotationService {
       DialogGetUserDataComponent,
       dialogConfig,
     );
-    dialogRef.afterClosed().subscribe(data => {
+    dialogRef.afterClosed()
+        .subscribe(data => {
       if (data === true) {
         this.message.info('Deleted from Server');
       } else {
@@ -828,10 +628,10 @@ export class AnnotationService {
     // Decide whether we iterate over the first part of this.annotations
     // containing all the default annotations or to iterate over the second part
     // containing all of the compilation annotations
-    const offset = this.isannotationSourceCollection
+    const offset = this.processingService.compilationLoaded
       ? this.getDefaultAnnotations().length
       : 0;
-    const length = this.isannotationSourceCollection
+    const length = this.processingService.compilationLoaded
       ? this.annotations.length
       : this.getDefaultAnnotations().length;
     for (let i = offset; i < length; i++) {
@@ -854,6 +654,23 @@ export class AnnotationService {
     });
   }
 
+  public setAnnotatingAllowance() {
+    if (this.processingService.annotatingFeatured &&
+        this.isEntityFeaturesOpen &&
+        !this.isMeshSettingsMode &&
+        this.annotationModeSidenav) {
+      this.isAnnotatingAllowed = true;
+      this.annotationMode(true);
+      this.annnotatingAllowed.emit(true);
+      console.log('set allowance: ', true);
+    } else {
+      this.isAnnotatingAllowed = false;
+      this.annotationMode(false);
+      this.annnotatingAllowed.emit(false);
+      console.log('set allowance: ', false);
+    }
+  }
+
   public redrawMarker() {
     this.annotationmarkerService
       .deleteAllMarker()
@@ -866,21 +683,8 @@ export class AnnotationService {
   }
 
   public drawMarker(newAnnotation: IAnnotation) {
-    if (!this.isBroadcasting) {
       const color = 'black';
       this.annotationmarkerService.createAnnotationMarker(newAnnotation, color);
-    } else {
-      let color = 'black';
-      if (this.coloredUsers.length) {
-        const cUserIndex = this.coloredUsers.findIndex(
-          x => x._id === newAnnotation.creator._id,
-        );
-        if (cUserIndex !== -1 && cUserIndex < this.maxColoredUsersMinusOne) {
-          color = this.color[cUserIndex];
-        }
-      }
-      this.annotationmarkerService.createAnnotationMarker(newAnnotation, color);
-    }
   }
 
   public setSelectedAnnotation(id: string) {
@@ -947,8 +751,6 @@ export class AnnotationService {
 
     if (!this.actualEntity) {
       throw new Error('ActualEntity missing');
-      console.error(this);
-      return;
     }
 
     return {
@@ -962,8 +764,8 @@ export class AnnotationService {
       motivation: annotation.motivation,
       lastModifiedBy: {
         type: 'person',
-        name: this.userData ? this.userData.fullname : 'guest',
-        _id: this.userData ? this.userData._id : 'guest',
+        name: this.userdataService.userData ? this.userdataService.userData.fullname : 'guest',
+        _id: this.userdataService.userData ? this.userdataService.userData._id : 'guest',
       },
       body: annotation.body,
       target: {
@@ -976,216 +778,4 @@ export class AnnotationService {
     };
   }
 
-  public setAnnotatingAllowance() {
-    if (this.mode !== 'annotation') {
-      this.isAnnotatingAllowed = false;
-      this.annnotatingAllowed.emit(false);
-    } else {
-      let emitBool = false;
-      if (!this.annotatableTypeAndMode) {
-        this.isAnnotatingAllowed = false;
-        this.annnotatingAllowed.emit(false);
-        return;
-      }
-      emitBool =
-        this.isEntityFeaturesOpen &&
-        (!this.isMeshSettingsMode
-          ? true
-          : this.isDefaultEntityLoaded || this.isFallbackEntityLoaded);
-      if (emitBool && !this.isCollectionInputSelected) {
-        emitBool =
-          (this.isAuthenticated &&
-            this.isEntityOwner &&
-            !this.isCollectionLoaded) ||
-          this.isDefaultEntityLoaded;
-      }
-      if (emitBool && this.isCollectionLoaded) {
-        emitBool =
-          this.actualCompilation && this.isAuthenticated
-            ? !this.actualCompilation.whitelist.enabled ||
-              this.isCollectionOwner ||
-              this.isWhitelistMember
-            : false;
-      }
-      this.isAnnotatingAllowed = emitBool;
-      this.annotationMode(emitBool);
-      this.annnotatingAllowed.emit(emitBool);
-      console.log('set allowance: ', emitBool);
-      this.setBroadcastingAllowance();
-    }
-  }
-
-  // Das aktuelle Entityl wird anklickbar und damit annotierbar
-  public annotationMode(value: boolean) {
-    if (this.mediaType === 'video' || this.mediaType === 'audio') {
-      return;
-    }
-    this.actualEntityMeshes.forEach(mesh => {
-      this.actionService.pickableEntity(mesh, value);
-    });
-  }
-
-  private setBroadcastingAllowance() {
-    // annotating allowed && collection loaded && (!whitelist ||
-    // whitlist users > 0 also mehr Personen als Owner && mode !== edit
-    const mode = this.loadedMode === 'edit';
-    let allowance = false;
-    if (
-      !this.isAuthenticated ||
-      !this.isAnnotatingAllowed ||
-      mode ||
-      !this.isCollectionLoaded
-    ) {
-      allowance = false;
-    } else {
-      if (
-        (this.actualCompilation && !this.actualCompilation.whitelist.enabled) ||
-        (this.actualCompilation &&
-          this.actualCompilation.whitelist.groups.length > 0) ||
-        (this.actualCompilation &&
-          this.actualCompilation.whitelist.persons.length > 0)
-      ) {
-        allowance = true;
-      }
-    }
-
-    this.isBroadcastingAllowed = allowance;
-    this.broadcastingAllowed.emit(allowance);
-  }
-
-  public toggleAnnotationSource(sourceCol: boolean) {
-    if (sourceCol !== this.isannotationSourceCollection) {
-      this.isannotationSourceCollection = sourceCol;
-      this.updateCurrentAnnotationsSubject();
-    }
-  }
-
-  // Broadcasting
-  // -- Basic functionality
-
-  // TODO
-  private getOwnSocketData(): ISocketUserInfo {
-    return {
-      user: {
-        _id: this.userData ? this.userData._id : '',
-        fullname: this.userData ? this.userData.fullname : '',
-        username: this.userData ? this.userData.username : '',
-        room: this.socketRoom,
-        socketId: 'self',
-      },
-      annotations: this.getCompilationAnnotations(),
-    };
-  }
-
-  public loginToSocket() {
-    this.isBroadcasting = true;
-    this.broadcasting.emit(true);
-    this.socket.connect();
-    console.log(`LOGGING IN TO SOCKET.IO \n ROOM: '${this.socketRoom}'`);
-    // emit "you" as newUser to other online members of your current room
-    const emitData: ISocketUserInfo = this.getOwnSocketData();
-    this.socket.emit('newUser', emitData);
-    // Request Roomdata from every person in the room
-    const emitRequest: ISocketRoomData = {
-      info: emitData,
-      requester: emitData,
-      recipient: this.socketRoom,
-    };
-    this.socket.emit('roomDataRequest', emitRequest);
-    this.redrawMarker();
-  }
-
-  public disconnectSocket() {
-    this.isBroadcasting = false;
-    this.broadcasting.emit(false);
-    this.collaborators = [];
-    this.sortUser();
-    // send info to other Room members,
-    // then emit 'logout' from Socket.id for this User
-    // TODO sollen die Annotationen "mitgenommen" werden?
-    this.socket.emit('logout', { annotations: [] });
-    this.socket.disconnect();
-    this.redrawMarker();
-  }
-
-  public changeSocketRoom() {
-    this.collaborators = [];
-    this.sortUser();
-    // TODO sollen die Annotationen "mitgenommen" werden?
-    // this.collaboratorsAnnotations = [];
-    const emitData: ISocketChangeRoom = {
-      newRoom: this.socketRoom,
-      annotations: [],
-    };
-    this.socket.emit('changeRoom', emitData);
-  }
-
-  private updateCollaboratorInfo(data: ISocketUserInfo) {
-    if (
-      !this.collaborators.find(_user => data.user.socketId === _user.socketId)
-    ) {
-      this.collaborators.push(data.user);
-      this.sortUser();
-
-      data.annotations.forEach(annotation => {
-        console.log('Bekomme in Socket von Collab: ', annotation);
-        this.handleReceivedAnnotation(annotation);
-      });
-    }
-  }
-
-  private removeKnowledgeAboutUser(userInfo: ISocketUserInfo) {
-    this.collaborators = this.collaborators.filter(
-      _user => _user._id !== userInfo.user._id,
-    );
-    this.sortUser();
-  }
-
-  // -- colored Users and colored Annotations and colored Marker
-
-  public sortUser(priorityUser?: ISocketUser) {
-    const selfIndex = this.collaborators.findIndex(
-      user => user.socketId === this.socket.ioSocket.id,
-    );
-
-    const self = this.collaborators.splice(selfIndex, 1)[0];
-    if (!self) {
-      throw new Error('Sortuser Self missing');
-      console.error(this);
-      return;
-    }
-
-    if (priorityUser) {
-      const pUserIndex = this.collaborators.findIndex(
-        x => x.socketId === priorityUser.socketId,
-      );
-      const pUser =
-        pUserIndex !== -1
-          ? this.collaborators.splice(pUserIndex, 1)[0]
-          : priorityUser;
-      this.collaborators.unshift(pUser);
-    }
-
-    this.collaborators.unshift(self);
-
-    this.coloredUsers = this.collaborators;
-
-    this.redrawMarker();
-  }
-
-  public getColor(annotationCreatorId: string): string {
-    if (this.isBroadcasting) {
-      if (this.coloredUsers.length) {
-        const cUserIndex = this.coloredUsers.findIndex(
-          x => x._id === annotationCreatorId,
-        );
-        if (cUserIndex !== -1 && cUserIndex < this.maxColoredUsersMinusOne) {
-          return this.color[cUserIndex];
-        }
-        return '$cardbgr';
-      }
-      return '$cardbgr';
-    }
-    return '$cardbgr';
-  }
 }

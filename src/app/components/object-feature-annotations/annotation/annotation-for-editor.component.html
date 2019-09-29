@@ -37,7 +37,7 @@
       </mat-form-field>
 
       <mat-checkbox class="validation"
-                    *ngIf="isEditMode && isCollectionOwner"
+                    *ngIf="isEditMode && this.userdataService.userOwnsCompilation"
                     [checked]="annotation.validated"
                     (change)="annotation.validated = !annotation.validated">Validated
       </mat-checkbox>
@@ -63,11 +63,11 @@
 
       <button mat-icon-button
               (click)= toggleEditViewMode();
-              [matTooltip]="isEditMode ? 'View Annotation' : 'Edit Annotation'"
+              [matTooltip]="isEditMode ? 'Save Annotation' : 'Edit Annotation'"
               *ngIf="isAnnotatingAllowed && isAnnotationOwner"
               matTooltipPosition="above"
               type="button">
-        <mat-icon [attr.aria-label]= "isEditMode ? 'View Annotation' : 'Edit Annotation'">{{isEditMode ? 'remove_red_eye' : 'edit'}}</mat-icon>
+        <mat-icon [attr.aria-label]= "isEditMode ? 'Save Annotation' : 'Edit Annotation'">{{isEditMode ? 'save' : 'edit'}}</mat-icon>
       </button>
 
       <button mat-icon-button

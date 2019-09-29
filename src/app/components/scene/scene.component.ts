@@ -4,13 +4,10 @@ import {
   HostListener,
   ViewContainerRef,
 } from '@angular/core';
-import { MatDialog } from '@angular/material';
 
 import { AnnotationService } from '../../services/annotation/annotation.service';
 import { BabylonService } from '../../services/babylon/babylon.service';
-import { MongohandlerService } from '../../services/mongohandler/mongohandler.service';
 import { ProcessingService } from '../../services/processing/processing.service';
-import { LoginComponent } from '../dialogs/dialog-login/login.component';
 
 @Component({
   selector: 'app-scene',
@@ -18,10 +15,6 @@ import { LoginComponent } from '../dialogs/dialog-login/login.component';
   styleUrls: ['./scene.component.scss'],
 })
 export class SceneComponent implements AfterViewInit {
-  // show or not show menu
-  public showMenu = true;
-  public showSidenav = true;
-  private firstAttempt = true;
 
   @HostListener('window:resize', ['$event'])
   public onResize() {
@@ -33,45 +26,7 @@ export class SceneComponent implements AfterViewInit {
     private processingService: ProcessingService,
     public annotationService: AnnotationService,
     private viewContainerRef: ViewContainerRef,
-    private dialog: MatDialog,
-    private mongo: MongohandlerService,
   ) {}
-
-  private loginAttempt() {
-    this.mongo
-      .isAuthorized()
-      .then(result => {
-        if (result.status === 'ok') {
-          this.setupCanvas();
-        } else {
-          if (this.firstAttempt) {
-            // Show Login Screen before loading Babylon
-            this.openLoginDialog();
-          } else {
-            // Assume user is not interested in logging in
-            this.setupCanvas();
-          }
-        }
-      })
-      .catch(e => {
-        // Server might not be reachable, skip login
-        console.error(e);
-        this.setupCanvas();
-      });
-  }
-
-  private openLoginDialog() {
-    this.firstAttempt = false;
-    this.dialog
-      .open(LoginComponent)
-      .afterClosed()
-      .toPromise()
-      .then(() => this.loginAttempt())
-      .catch(e => {
-        console.error(e);
-        this.loginAttempt();
-      });
-  }
 
   private setupCanvas() {
     this.babylonService.attachCanvas(this.viewContainerRef);
@@ -80,32 +35,6 @@ export class SceneComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.processingService.showSidenav.subscribe(showSidenav => {
-      this.showSidenav = showSidenav;
-    });
-
-    const searchParams = location.search;
-    const queryParams = new URLSearchParams(searchParams);
-    const entityParam = queryParams.get('model') || queryParams.get('entity');
-    const compParam = queryParams.get('compilation');
-    // values = dragdrop, explore, edit, annotation, ilias, full
-    const mode = queryParams.get('mode');
-
-    if (!mode) {
-      this.showMenu = false;
-    }
-
-    if (
-      mode === 'ilias' ||
-      mode === 'fullLoad' ||
-      ((compParam && mode === 'annotation') ||
-        (entityParam && mode === 'annotation')) ||
-      mode === 'edit' ||
-      mode === 'upload'
-    ) {
-      this.loginAttempt();
-    } else {
-      this.setupCanvas();
-    }
+    this.setupCanvas();
   }
 }

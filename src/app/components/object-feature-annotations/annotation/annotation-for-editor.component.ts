@@ -17,7 +17,6 @@ export class AnnotationComponentForEditorComponent extends AnnotationComponent {
       throw new Error(
         'AnnotationComponentForEditorComponent without Annotation',
       );
-      return;
     }
     if (this.showAnnotation) {
       this.showAnnotation = false;

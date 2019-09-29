@@ -30,13 +30,11 @@ export class MenuComponent implements OnInit {
     public dialog: MatDialog,
     public userDataService: UserdataService,
   ) {
-    this.userDataService.isUserAuthenticatedObservable.subscribe(
-      state => (this.isAuthenticated = state),
-    );
 
+    /*
     this.processingService.loginRequired.subscribe(
       state => (this.loginRequired = state),
-    );
+    );*/
 
     this.processingService.Observables.actualEntity.subscribe(entity => {
       if (entity.processed.low !== entity.processed.medium) {
@@ -57,7 +55,8 @@ export class MenuComponent implements OnInit {
         !document.fullscreen &&
         this.babylonService.getEngine().isFullscreen
       ) {
-        this.babylonService.getEngine().switchFullscreen(false);
+        this.babylonService.getEngine()
+            .switchFullscreen(false);
       }
     });
   }
@@ -77,7 +76,8 @@ export class MenuComponent implements OnInit {
     // TODO: not working if user exit fullscreen with esc
     this.fullscreen = !isFullscreen;
     if (isFullscreen) {
-      this.babylonService.getEngine().switchFullscreen(false);
+      this.babylonService.getEngine()
+          .switchFullscreen(false);
     } else {
       _tf()
         .then(() => {})

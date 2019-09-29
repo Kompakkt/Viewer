@@ -4,7 +4,9 @@
 </button>
 
 <div [ngClass]="'bottom'">
-    <button mat-icon-button *ngIf="!isAuthenticated && loginRequired" (click)="loginAttempt()"
+    <button mat-icon-button
+            *ngIf="userDataService.loginRequired && !userDataService.authenticatedUser"
+            (click)="userDataService.openLoginDialog()"
             matTooltip="Login" matTooltipPosition="above">
         <mat-icon>account_circle</mat-icon>
     </button>

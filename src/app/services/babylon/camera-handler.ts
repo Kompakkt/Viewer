@@ -57,6 +57,7 @@ export const createDefaultCamera = (
   scene: Scene,
   canvas: HTMLCanvasElement,
 ) => {
+  console.log('create Cam');
   // Dispose existing camera
   if (scene.activeCamera) {
     (scene.activeCamera as ArcRotateCamera).dispose();
@@ -115,6 +116,8 @@ export const setUpCamera = (
   maxSize: number,
   mediaType: string,
 ) => {
+  console.log('setup Cam');
+
   // camera for model, audio, video, image
   const radius = maxSize * 7;
   camera.minZ = maxSize * 0.01;

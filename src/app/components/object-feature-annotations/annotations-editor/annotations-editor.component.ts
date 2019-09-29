@@ -18,53 +18,21 @@ export class AnnotationsEditorComponent implements OnInit {
   annotationsList: QueryList<AnnotationComponent> | undefined;
 
   // external
-  public isCollectionLoaded = false;
-  public isDefaultEntityLoaded = false;
   public isAnnotatingAllowed = false;
-  public isBroadcastingAllowed = false;
-  public isBroadcasting = false;
-  public isCollectionOwner = false;
   public isMeshSettingsMode = false;
-
-  // internal
-  public isDefaultAnnotationsSource = false;
 
   constructor(
     public annotationService: AnnotationService,
     public processingService: ProcessingService,
-    private userDataService: UserdataService,
+    public userDataService: UserdataService,
     private overlayService: OverlayService,
   ) {}
 
   ngOnInit() {
-    this.isDefaultAnnotationsSource = true;
-    this.isCollectionLoaded = this.processingService.isCollectionLoaded;
-    this.isDefaultEntityLoaded = this.processingService.isDefaultEntityLoaded;
     this.isAnnotatingAllowed = this.annotationService.isAnnotatingAllowed;
-    this.isCollectionOwner = this.userDataService.isCollectionOwner;
-
-    this.userDataService.collectionOwner.subscribe(isOwner => {
-      this.isCollectionOwner = isOwner;
-    });
-
-    this.processingService.collectionLoaded.subscribe(isLoaded => {
-      this.isCollectionLoaded = isLoaded;
-    });
-
-    this.processingService.defaultEntityLoaded.subscribe(isLoaded => {
-      this.isDefaultEntityLoaded = isLoaded;
-    });
 
     this.annotationService.annnotatingAllowed.subscribe(allowed => {
       this.isAnnotatingAllowed = allowed;
-    });
-
-    this.annotationService.broadcasting.subscribe(broadcast => {
-      this.isBroadcasting = broadcast;
-    });
-
-    this.annotationService.broadcastingAllowed.subscribe(broadcast => {
-      this.isBroadcastingAllowed = broadcast;
     });
 
     this.overlayService.initialSettingsmode.subscribe(meshSettingsMode => {

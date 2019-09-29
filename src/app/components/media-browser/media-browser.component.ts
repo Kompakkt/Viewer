@@ -15,20 +15,20 @@ export class MediaBrowserComponent implements OnInit {
   public description = '';
 
   public addExternalImage = false;
-  public addCollectionEntity = false;
+  public addCompilationEntity = false;
 
   constructor(public processingService: ProcessingService) {}
 
   ngOnInit() {
-    this.processingService.Observables.actualCollection.subscribe(
-      actualCollection => {
-        this.entities = actualCollection;
+    this.processingService.Observables.actualCompilation.subscribe(
+      actualCompilation => {
+        this.entities = actualCompilation;
       },
     );
   }
 
   private hideBrowser() {
-    this.addExternalImage = this.addCollectionEntity = false;
+    this.addExternalImage = this.addCompilationEntity = false;
   }
 
   addImage(address, text) {

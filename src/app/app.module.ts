@@ -36,9 +36,6 @@ import { SocketIoModule } from 'ngx-socket-io';
 import { environment } from '../environments/environment';
 
 import { AppComponent } from './app.component';
-import { BroadcastComponent } from './components/broadcast/broadcast.component';
-import { BroadcastingUsersComponent } from './components/broadcast/broadcasting-users.component';
-import { ContentBrowserComponent } from './components/content-browser/content-browser.component';
 import { ContentComponent } from './components/content/content.component';
 import { DialogAnnotationEditorComponent } from './components/dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
 import { DialogDeleteAnnotationsComponent } from './components/dialogs/dialog-delete-annotations/dialog-delete-annotations.component';
@@ -56,7 +53,6 @@ import { AnnotationComponentForEditorComponent } from './components/object-featu
 import { AnnotationComponent } from './components/object-feature-annotations/annotation/annotation.component';
 import { AnnotationsEditorComponent } from './components/object-feature-annotations/annotations-editor/annotations-editor.component';
 import { AnnotationwalkthroughComponent } from './components/object-feature-annotations/annotationwalkthrough/annotationwalkthrough.component';
-import { EntityFeatureMetadataComponent } from './components/object-feature-metadata/object-feature-metadata.component';
 import { EntityFeatureSettingsComponent } from './components/object-feature-settings/object-feature-settings.component';
 import { RenderCanvasComponent } from './components/render-canvas/render-canvas.component';
 import { SceneComponent } from './components/scene/scene.component';
@@ -74,9 +70,7 @@ import { MediaTypePipe } from './pipes/media-type.pipe';
     AnnotationComponentForEditorComponent,
     AnnotationwalkthroughComponent,
     ContentComponent,
-    ContentBrowserComponent,
     LoadingscreenComponent,
-    EntityFeatureMetadataComponent,
     EntityFeatureSettingsComponent,
     LoginComponent,
     DialogPasswordComponent,
@@ -84,8 +78,6 @@ import { MediaTypePipe } from './pipes/media-type.pipe';
     DialogMeshsettingsComponent,
     DialogAnnotationEditorComponent,
     MediaTypePipe,
-    BroadcastComponent,
-    BroadcastingUsersComponent,
     DialogDeleteSingleAnnotationComponent,
     DialogGetUserDataComponent,
     MediaBrowserComponent,

@@ -12,7 +12,7 @@
     </button>
     <button *ngIf="entities"
             mat-icon-button
-            (click)="addCollectionEntity = !addCollectionEntity"
+            (click)="addCompilationEntity = !addCompilationEntity"
             matTooltip="Add Entity From Collection"
             matTooltipPosition="above"
             type="mat-icon-button"
@@ -54,7 +54,7 @@
 
   </div>
 
-  <div *ngIf="addCollectionEntity"
+  <div *ngIf="addCompilationEntity"
        id="collection-entities">
 
     <h3>Or embed an entity of your collection:</h3>
@@ -62,7 +62,7 @@
     <ng-container *ngFor="let entity of entities.entities; let i = index">
 
       <mat-card (click)="addEntity(i)"
-                class="collection-entity">
+                class="compilation-entity">
         <img mat-card-image src="{{entity.settings.preview}}" alt="{{entity.name}}">
         <mat-card-footer>{{entity.name}}</mat-card-footer>
       </mat-card>

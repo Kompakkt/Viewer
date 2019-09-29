@@ -1,9 +1,9 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 
+import {ICompilation} from '../../../interfaces/interfaces';
 import { MessageService } from '../../../services/message/message.service';
 import { MongohandlerService } from '../../../services/mongohandler/mongohandler.service';
-import { ProcessingService } from '../../../services/processing/processing.service';
 
 @Component({
   selector: 'app-password',
@@ -14,9 +14,10 @@ export class DialogPasswordComponent implements OnInit {
   public password = '';
   public identifierCollection: string;
 
+  private compilation: ICompilation | undefined;
+
   constructor(
     private mongohandlerService: MongohandlerService,
-    private processingService: ProcessingService,
     private message: MessageService,
     private dialogRef: MatDialogRef<DialogPasswordComponent>,
     @Inject(MAT_DIALOG_DATA) data,
@@ -27,18 +28,14 @@ export class DialogPasswordComponent implements OnInit {
   ngOnInit() {}
 
   public check() {
+    this.dialogRef.disableClose = true;
     if (this.identifierCollection && this.password !== '') {
       this.mongohandlerService
         .getCompilation(this.identifierCollection, this.password)
         .then(compilation => {
           if (compilation['_id'] && compilation.password === this.password) {
-            this.processingService.fetchAndLoad(
-              undefined,
-              compilation._id,
-              undefined,
-            );
-
-            this.dialogRef.close(true);
+            this.compilation = compilation;
+            this.dialogRef.close({result: true, data: this.compilation});
           } else {
             this.message.error(
               'Password is wrong.',
@@ -47,14 +44,9 @@ export class DialogPasswordComponent implements OnInit {
         })
         .catch(error => {
           console.error(error);
-          this.message.error('Connection to entity server refused.');
+          this.message.error('Connection to server refused.');
           this.dialogRef.close();
         });
     }
-  }
-
-  public withoutPassword() {
-    console.log('canceled');
-    this.dialogRef.close();
   }
 }

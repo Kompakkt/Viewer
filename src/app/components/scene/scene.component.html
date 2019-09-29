@@ -2,8 +2,7 @@
   <app-annotation [annotation]="annotation"></app-annotation>
 </div>
 <app-annotationwalkthrough></app-annotationwalkthrough>
-<!--app-broadcasting-users></app-broadcasting-users-->
-<app-menu *ngIf="showMenu"></app-menu>
-<app-sidenav-menu *ngIf="showSidenav"></app-sidenav-menu>
+<app-menu *ngIf="processingService.showMenu"></app-menu>
+<app-sidenav-menu *ngIf="processingService.showSidenav"></app-sidenav-menu>
 <app-sidenav></app-sidenav>
 <!-- app-render-canvas will be dynamically added to this -->

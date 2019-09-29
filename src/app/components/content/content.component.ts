@@ -3,6 +3,7 @@ import {
   OnInit,
 } from '@angular/core';
 
+import {ICompilation, IEntity} from '../../interfaces/interfaces';
 import { ProcessingService } from '../../services/processing/processing.service';
 
 @Component({
@@ -11,16 +12,21 @@ import { ProcessingService } from '../../services/processing/processing.service'
   styleUrls: ['./content.component.scss'],
 })
 export class ContentComponent implements OnInit {
-  public isCollectionLoaded = false;
+
+  public compilation: ICompilation | undefined;
+  public entity: IEntity | undefined;
 
   constructor(
     public processingService: ProcessingService,
   ) {}
 
   ngOnInit() {
-    this.isCollectionLoaded = this.processingService.isCollectionLoaded;
-    this.processingService.collectionLoaded.subscribe(isCollectionLoaded => {
-      this.isCollectionLoaded = isCollectionLoaded;
+    this.processingService.Observables.actualCompilation.subscribe(compilation => {
+      this.compilation = compilation;
+    });
+
+    this.processingService.Observables.actualEntity.subscribe(entity => {
+      this.entity = entity;
     });
   }
 }

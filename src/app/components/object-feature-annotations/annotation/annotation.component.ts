@@ -4,8 +4,6 @@ import { Matrix, Vector3 } from 'babylonjs';
 
 import { IAnnotation } from '../../../interfaces/interfaces';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
-// tslint:disable-next-line:max-line-length
-import { AnnotationmarkerService } from '../../../services/annotationmarker/annotationmarker.service';
 import { BabylonService } from '../../../services/babylon/babylon.service';
 import { UserdataService } from '../../../services/userdata/userdata.service';
 // tslint:disable-next-line:max-line-length
@@ -41,13 +39,11 @@ export class AnnotationComponent implements OnInit {
   public visibility = false;
   public isAnnotatingAllowed = false;
   public isAnnotationOwner = false;
-  public isCollectionOwner = false;
   public isInSocket = false;
 
   constructor(
     public annotationService: AnnotationService,
     public babylonService: BabylonService,
-    public annotationmarkerService: AnnotationmarkerService,
     public dialog: MatDialog,
     private userdataService: UserdataService,
   ) {}
@@ -64,22 +60,8 @@ export class AnnotationComponent implements OnInit {
     this.isAnnotationOwner = this.userdataService.isAnnotationOwner(
       this.annotation,
     );
-    this.isCollectionOwner = this.userdataService.isCollectionOwner;
 
-    this.userdataService.isUserAuthenticatedObservable.subscribe(_ => {
-      if (!this.annotation) {
-        console.error('AnnotationComponent without annotation', this);
-        throw new Error('AnnotationComponent without annotation');
-        return;
-      }
-      this.isAnnotationOwner = this.userdataService.isAnnotationOwner(
-        this.annotation,
-      );
-    });
-
-    this.userdataService.collectionOwner.subscribe(colOwner => {
-      this.isCollectionOwner = colOwner;
-    });
+    this.isAnnotationOwner = this.userdataService.isAnnotationOwner(this.annotation);
 
     this.annotationService.isSelectedAnnotation.subscribe(selectedAnno => {
       if (!this.annotation) {
@@ -93,11 +75,6 @@ export class AnnotationComponent implements OnInit {
 
     this.annotationService.annnotatingAllowed.subscribe(allowed => {
       this.isAnnotatingAllowed = allowed;
-    });
-
-    this.annotationService.broadcasting.subscribe(inSocket => {
-      this.isInSocket = inSocket;
-      console.log('inSocket');
     });
 
     this.annotationService.isEditModeAnnotation.subscribe(selectedEditAnno => {

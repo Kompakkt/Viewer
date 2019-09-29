@@ -14,7 +14,7 @@ export const isCompilation = (obj: any): obj is ICompilation => {
   );
 };
 
-export const isEntityForCollection = (obj: any): obj is IEntity => {
+export const isEntityForCompilation = (obj: any): obj is IEntity => {
   const _entity = obj as IEntity;
   return (
       _entity &&

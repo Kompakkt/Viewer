@@ -34,9 +34,6 @@ export class EntityFeatureSettingsComponent implements OnInit {
   public activeEntity: IEntity | undefined;
   private preview = '';
   public setEffect = false;
-  private isDefault = false;
-  private isEntityOwner = false;
-  public isSingleEntity = false;
   private isFinished = false;
   public initialSettingsMode = false;
   public showHelpers = false;
@@ -46,8 +43,6 @@ export class EntityFeatureSettingsComponent implements OnInit {
   public showPreview = false;
   public showBackground = false;
   public showLights = false;
-  public isFallbackEntityLoaded = false;
-  public mediaType: string | undefined;
   public editMode = false;
 
   private cameraPositionInitial:
@@ -85,61 +80,23 @@ export class EntityFeatureSettingsComponent implements OnInit {
     const queryParams = new URLSearchParams(searchParams);
     this.editMode = queryParams.get('mode') === 'edit';
 
-    this.mediaType = this.processingService.getCurrentMediaType();
-
-    this.processingService.loaded.subscribe(isLoaded => {
-      if (isLoaded) {
-        this.activeEntity = this.processingService.getCurrentEntity();
-        if (!this.activeEntity) {
-          console.warn('No this.activeEntity', this);
-          return;
-        }
+    this.processingService.Observables.actualEntity.subscribe(entity => {
+        this.activeEntity = entity;
         this.isFinished = this.activeEntity.finished;
-        this.setSettings()
-          .then(() => {})
-          .catch(error => {
-            console.error(error);
-            this.processingService
-              .loadFallbackEntity()
-              .then(() => {
-                // TODO add annotation
-              })
-              .catch(e => {
-                console.error(e);
-                // tslint:disable-next-line:max-line-length
-                this.message.error(
-                  'Loading of Objects does not work. Please tell us about it!',
-                );
-              });
-          });
-      }
     });
 
-    this.processingService.defaultEntityLoaded.subscribe(isDefaultLoad => {
-      this.isDefault = isDefaultLoad;
+    this.processingService.Observables.actualEntityMeshes.subscribe(meshes => {
+      console.log(meshes);
+      this.setSettings();
     });
 
-    this.userdataService.entityOwner.subscribe(isEntityOwner => {
-      this.isEntityOwner = isEntityOwner;
-    });
-
-    this.processingService.collectionLoaded.subscribe(collection => {
-      this.isSingleEntity = !collection;
-    });
-
-    this.processingService.fallbackEntityLoaded.subscribe(fallback => {
-      this.isFallbackEntityLoaded = fallback;
-    });
-
-    this.processingService.Observables.actualMediaType.subscribe(mediaType => {
-      this.mediaType = mediaType;
-    });
   }
 
   public showNextAlertFirstStep() {
     const dialogRef = this.dialog.open(DialogMeshsettingsComponent);
 
-    dialogRef.afterClosed().subscribe(finish => {
+    dialogRef.afterClosed()
+        .subscribe(finish => {
       if (finish) {
         this.resetHelpers();
         this.stepper.selected.completed = true;
@@ -288,12 +245,12 @@ export class EntityFeatureSettingsComponent implements OnInit {
     this.cameraPositionInitial = { position, target };
     console.log(this.cameraPositionInitial);
     return new Promise<string>((resolve, reject) =>
-      this.babylonService.createPreviewScreenshot(400).then(
-        screenshot => {
+      this.babylonService.createPreviewScreenshot(400)
+          .then(screenshot => {
           this.preview = screenshot;
           resolve(screenshot);
         },
-        error => {
+                error => {
           this.message.error(error);
           reject(error);
         },
@@ -361,7 +318,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
         this.activeEntity.settings.rotation.x,
         this.activeEntity.settings.rotation.y,
         this.activeEntity.settings.rotation.z,
-        this.isDefault,
+        this.processingService.defaultEntityLoaded,
       );
       await this.setCamera();
       await this.setLightBackground();
@@ -373,12 +330,12 @@ export class EntityFeatureSettingsComponent implements OnInit {
     let settings;
     let upload = false;
 
-    if (this.isDefault) {
+    if (this.processingService.defaultEntityLoaded) {
       settings = settingsKompakktLogo;
-    } else if (this.isFallbackEntityLoaded) {
+    } else if (this.processingService.fallbackEntityLoaded) {
       settings = settingsFallback;
     } else {
-      switch (this.mediaType) {
+      switch (this.processingService.actualEntityMediaType) {
         case 'entity':
         case 'model': {
           settings = settingsEntity;
@@ -413,16 +370,18 @@ export class EntityFeatureSettingsComponent implements OnInit {
     const queryParams = new URLSearchParams(searchParams);
     const isDragDrop = queryParams.get('mode') === 'dragdrop';
 
-    if ((isDragDrop || this.isEntityOwner) && !this.isFinished) {
+    if ((isDragDrop || this.userdataService.userOwnsEntity) && !this.isFinished) {
       await this.setLightBackground();
-      if (this.mediaType === 'audio') {
+      if (this.processingService.actualEntityMediaType === 'audio') {
         await this.entitySettingsService.loadSettings(1, 315, 0, 0, true);
       }
       this.initialSettingsMode = true;
       await this.entitySettingsService.createVisualSettings(
-        this.mediaType ? this.mediaType : '',
+          this.processingService.actualEntityMediaType ?
+              this.processingService.actualEntityMediaType : '',
       );
-      if (this.mediaType === 'audio' || this.mediaType === 'video') {
+      if (this.processingService.actualEntityMediaType === 'audio' ||
+          this.processingService.actualEntityMediaType === 'video') {
         await this.entitySettingsService.decomposeAfterSetting();
       }
       this.cameraPositionInitial = this.babylonService.cameraManager.getActualDefaultPosition();
@@ -612,7 +571,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
           ? this.activeEntity.settings.rotation
           : {
               x:
-                this.mediaType === 'audio'
+                  this.processingService.actualEntityMediaType === 'audio'
                   ? 315
                   : this.entitySettingsService.rotationX,
               y: this.entitySettingsService.rotationY,
@@ -642,7 +601,8 @@ export class EntityFeatureSettingsComponent implements OnInit {
         { type: 'settings', settings },
         environment.repository,
       );
-    } else if (!this.isDefault && !this.isFallbackEntityLoaded) {
+    } else if (!this.processingService.defaultEntityLoaded &&
+        !this.processingService.fallbackEntityLoaded) {
       this.mongohandlerService
         .updateSettings(this.activeEntity._id, settings)
         .then(result => {
@@ -663,7 +623,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
               this.activeEntity.settings.rotation.x,
               this.activeEntity.settings.rotation.y,
               this.activeEntity.settings.rotation.z,
-              this.mediaType,
+              this.processingService.actualEntityMediaType,
             );
           }
         });

@@ -1,16 +1,16 @@
-<div id="collections">
-    <div *ngIf="isCollectionLoaded">
+<div id="compilationBrowser">
+    <div *ngIf="processingService.compilationLoaded">
 
         <div class="category">
-            Selected Collection: {{processingService.getCurrentCompilation().name}}
+            Selected Collection: {{compilation.name}}
         </div>
 
         <div id="entity-overview"
-             *ngIf="processingService.Observables.actualEntity | async; let entity">
+             *ngIf="entity">
             <mat-card class="entity-card">
                 <mat-card-header>
                     <mat-card-title>
-                        Selected Entity: {{entity.name}}
+                        Selected Object: {{entity.name}}
                     </mat-card-title>
                 </mat-card-header>
                 <img
@@ -20,11 +20,11 @@
         </div>
 
         <div class="category">
-            Entities in {{processingService.getCurrentCompilation().name}}
+            Object(s) in {{compilation.name}}
         </div>
 
         <mat-card class="entity-card"
-                  *ngFor="let entity of processingService.getCurrentCompilation().entities">
+                  *ngFor="let entity of compilation.entities">
             <mat-card-header>
                 <mat-card-title>
                     {{entity.name}}
