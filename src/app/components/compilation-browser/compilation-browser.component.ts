@@ -7,11 +7,11 @@ import {ICompilation, IEntity} from '../../interfaces/interfaces';
 import { ProcessingService } from '../../services/processing/processing.service';
 
 @Component({
-  selector: 'app-content',
-  templateUrl: './content.component.html',
-  styleUrls: ['./content.component.scss'],
+  selector: 'compilation-browser',
+  templateUrl: './compilation-browser.component.html',
+  styleUrls: ['./compilation-browser.component.scss'],
 })
-export class ContentComponent implements OnInit {
+export class CompilationBrowserComponent implements OnInit {
 
   public compilation: ICompilation | undefined;
   public entity: IEntity | undefined;

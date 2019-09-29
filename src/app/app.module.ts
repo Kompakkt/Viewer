@@ -36,7 +36,7 @@ import { SocketIoModule } from 'ngx-socket-io';
 import { environment } from '../environments/environment';
 
 import { AppComponent } from './app.component';
-import { ContentComponent } from './components/content/content.component';
+import { CompilationBrowserComponent } from './components/compilation-browser/compilation-browser.component';
 import { DialogAnnotationEditorComponent } from './components/dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
 import { DialogDeleteAnnotationsComponent } from './components/dialogs/dialog-delete-annotations/dialog-delete-annotations.component';
 import { DialogDeleteSingleAnnotationComponent } from './components/dialogs/dialog-delete-single-annotation/dialog-delete-single-annotation.component';
@@ -47,8 +47,8 @@ import { DialogMeshsettingsComponent } from './components/dialogs/dialog-meshset
 import { DialogPasswordComponent } from './components/dialogs/dialog-password/dialog-password.component';
 import { DialogShareAnnotationComponent } from './components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
 import { LoadingscreenComponent } from './components/loadingscreen/loadingscreen.component';
-import { MediaBrowserComponent } from './components/object-feature-annotations/annotation-media-browser/media-browser.component';
 import { MenuComponent } from './components/menu/menu.component';
+import { MediaBrowserComponent } from './components/object-feature-annotations/annotation-media-browser/media-browser.component';
 import { AnnotationComponentForEditorComponent } from './components/object-feature-annotations/annotation/annotation-for-editor.component';
 import { AnnotationComponent } from './components/object-feature-annotations/annotation/annotation.component';
 import { AnnotationsEditorComponent } from './components/object-feature-annotations/annotations-editor/annotations-editor.component';
@@ -69,7 +69,7 @@ import { MediaTypePipe } from './pipes/media-type.pipe';
     AnnotationComponent,
     AnnotationComponentForEditorComponent,
     AnnotationwalkthroughComponent,
-    ContentComponent,
+    CompilationBrowserComponent,
     LoadingscreenComponent,
     EntityFeatureSettingsComponent,
     LoginComponent,

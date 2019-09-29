@@ -33,7 +33,7 @@ import { environment } from '../../../environments/environment';
 import { BroadcastComponent } from '../../../app/components/broadcast/broadcast.component';
 import { BroadcastingUsersComponent } from '../../../app/components/broadcast/broadcasting-users.component';
 import { ObjectFeaturesComponent } from '../../../app/components/object-features/object-features.component';
-import { ContentComponent } from '../../../app/components/content/content.component';
+import { CompilationBrowserComponent } from '../../../app/components/compilation-browser/content.component';
 import { AnnotationComponentForEditorComponent } from '../../../app/components/object-feature-annotations/annotation/annotation-for-editor.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MarkdownModule } from 'ngx-markdown';
@@ -58,7 +58,7 @@ describe('AppComponent', () => {
         BroadcastComponent,
         BroadcastingUsersComponent,
         ObjectFeaturesComponent,
-        ContentComponent,
+        CompilationBrowserComponent,
         AnnotationComponentForEditorComponent,
         ObjectFeatureSettingsComponent,
         ObjectFeatureMetadataComponent,
