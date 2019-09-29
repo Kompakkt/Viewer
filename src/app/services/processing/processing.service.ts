@@ -102,6 +102,7 @@ export class ProcessingService {
     }
 
     public updateActiveEntity(entity: IEntity) {
+        console.log('New loaded Entity:', entity);
         this.Subjects.actualEntity.next(entity);
         if (entity && (entity._id === 'default' || entity._id === 'fallback')) {
             this.defaultEntityLoaded = entity._id === 'default';
@@ -309,14 +310,16 @@ export class ProcessingService {
     this.mongoHandlerService
         .getEntity(query)
         .then(resultEntity => {
-          if (!resultEntity.finished || !resultEntity.online ||
+            console.log('Received this Entity:', resultEntity);
+
+            if (!resultEntity.finished || !resultEntity.online ||
               resultEntity.whitelist.enabled) {
             this.userDataService.userAuthentication(true)
                 .then(auth => {
                   if (auth) {
                     this.userDataService.checkOwnerState(resultEntity)
                         .then(owned => {
-                          if (owned) {
+                          if (!owned) {
                             if (resultEntity.whitelist.enabled) {
                               this.userDataService.isUserWhitelisted(resultEntity)
                                   .then(whitelisted => {
@@ -330,12 +333,12 @@ export class ProcessingService {
                                     }
                                   });
                             } else {
-                              this.loadEntity(resultEntity);
+                                    this.loadFallbackEntity();
+                                    this.message.error(
+                                        'Sorry, you are not allowed to load this Object.');
                             }
                           } else {
-                            this.loadFallbackEntity();
-                            this.message.error(
-                                'Sorry, you are not allowed to load this Object.');
+                              this.loadEntity(resultEntity);
                           }
                         });
                   } else {
@@ -417,7 +420,6 @@ export class ProcessingService {
                             .then(() => {
                                 const plane = this.babylonService.imageContainer.plane;
                                 if (plane) {
-                                    console.log('plane', plane);
                                     this.actualEntityMediaType = 'image';
                                     this.updateActiveEntity(newEntity);
                                     this.updateActiveEntityMeshes([plane as Mesh], newEntity);
