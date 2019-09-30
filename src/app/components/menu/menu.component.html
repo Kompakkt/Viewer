@@ -11,17 +11,23 @@
         <mat-icon>account_circle</mat-icon>
     </button>
 
-    <button mat-icon-button *ngIf="high !== '' && medium !== ''" [matMenuTriggerFor]="quality"
+    <button mat-icon-button
+            *ngIf="processingService.getAvailableQuality('high') && processingService.getAvailableQuality('medium')"
+            [matMenuTriggerFor]="quality"
             matTooltip="Quality" matTooltipPosition="above">
         <mat-icon>high_quality</mat-icon>
     </button>
     <!-- Quality Submenu -->
     <mat-menu #quality="matMenu">
-        <button mat-menu-item *ngIf="high !== ''" (click)="processingService.updateEntityQuality('high')">High
+        <button mat-menu-item *ngIf="processingService.getAvailableQuality('high')"
+                (click)="processingService.updateEntityQuality('high')">High
         </button>
-        <button mat-menu-item *ngIf="medium !== ''" (click)="processingService.updateEntityQuality('medium')">Medium
+        <button mat-menu-item *ngIf="processingService.getAvailableQuality('medium')"
+                (click)="processingService.updateEntityQuality('medium')">Medium
         </button>
-        <button mat-menu-item *ngIf="low !== ''" (click)="processingService.updateEntityQuality('low')">Low</button>
+        <button mat-menu-item *ngIf="processingService.getAvailableQuality('low')"
+                (click)="processingService.updateEntityQuality('low')">Low
+        </button>
     </mat-menu>
     <!-- / Quality Submenu -->
 
@@ -35,4 +41,3 @@
         <mat-icon aria-label="Exit fullscreen mode">{{fullscreen ? 'fullscreen_exit' : 'fullscreen'}}</mat-icon>
     </button>
 </div>
-

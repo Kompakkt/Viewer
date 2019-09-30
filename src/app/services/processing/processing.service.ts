@@ -62,8 +62,27 @@ export class ProcessingService {
     private dialog: MatDialog,
   ) {}
 
-  private getCurrentEntity(): IEntity | undefined {
+  public getCurrentEntity(): IEntity | undefined {
     return this.Observables.actualEntity.source['_events'].slice(-1)[0];
+  }
+
+  public getCurrentCompilation(): ICompilation | undefined {
+    return this.Observables.actualCompilation.source['_events'].slice(-1)[0];
+  }
+
+  public getAvailableQuality(quality: string) {
+    const entity = this.getCurrentEntity();
+    if (!entity) return false;
+    switch (quality) {
+      case 'low':
+        return entity.processed.low !== entity.processed.medium;
+      case 'medium':
+        return entity.processed.medium !== entity.processed.low;
+      case 'high':
+        return entity.processed.high !== entity.processed.medium;
+      default:
+        return false;
+    }
   }
 
   private async setAnnotatingFeatured(entity: IEntity) {
@@ -153,7 +172,9 @@ export class ProcessingService {
     const mode = queryParams.get('mode');
     this.mode = mode ? mode : '';
 
-    if (!this.mode) this.showMenu = false;
+    if (!this.mode) {
+      this.showMenu = false;
+    }
     if (this.mode === 'annotation') {
       if (compParam || entityParam) {
         this.userDataService.userAuthentication(true).then(result => {
@@ -176,6 +197,7 @@ export class ProcessingService {
 
       if (!mode || mode === 'explore' || mode === 'open') {
         this.showAnnotationEditor = false;
+        if (mode !== 'explore') this.showSettingsEditor = false;
         this.overlayService.toggleSidenav('compilationBrowser', true);
       }
     } else {

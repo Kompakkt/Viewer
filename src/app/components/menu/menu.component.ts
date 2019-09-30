@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { MatDialog, MatDialogConfig } from '@angular/material';
 
 import { BabylonService } from '../../services/babylon/babylon.service';
 import { ProcessingService } from '../../services/processing/processing.service';
 import { UserdataService } from '../../services/userdata/userdata.service';
-import { LoginComponent } from '../dialogs/dialog-login/login.component';
 
 @Component({
   selector: 'app-menu',
@@ -12,42 +10,14 @@ import { LoginComponent } from '../dialogs/dialog-login/login.component';
   styleUrls: ['./menu.component.scss'],
 })
 export class MenuComponent implements OnInit {
-  // external
-  public isAuthenticated = false;
-  public loginRequired = false;
-
-  // available quality of entity
-  public high = '';
-  public medium = '';
-  public low = '';
   public fullscreen = false;
-
   public fullscreenCapable = document.fullscreenEnabled;
 
   constructor(
     public processingService: ProcessingService,
     public babylonService: BabylonService,
-    public dialog: MatDialog,
     public userDataService: UserdataService,
-  ) {
-
-    /*
-    this.processingService.loginRequired.subscribe(
-      state => (this.loginRequired = state),
-    );*/
-
-    this.processingService.Observables.actualEntity.subscribe(entity => {
-      if (entity.processed.low !== entity.processed.medium) {
-        this.low = entity.processed.low;
-      }
-      if (entity.processed.medium !== entity.processed.low) {
-        this.medium = entity.processed.medium;
-      }
-      if (entity.processed.high !== entity.processed.medium) {
-        this.high = entity.processed.high;
-      }
-    });
-  }
+  ) {}
 
   ngOnInit() {
     document.addEventListener('fullscreenchange', _ => {
@@ -55,8 +25,7 @@ export class MenuComponent implements OnInit {
         !document.fullscreen &&
         this.babylonService.getEngine().isFullscreen
       ) {
-        this.babylonService.getEngine()
-            .switchFullscreen(false);
+        this.babylonService.getEngine().switchFullscreen(false);
       }
     });
   }
@@ -76,27 +45,11 @@ export class MenuComponent implements OnInit {
     // TODO: not working if user exit fullscreen with esc
     this.fullscreen = !isFullscreen;
     if (isFullscreen) {
-      this.babylonService.getEngine()
-          .switchFullscreen(false);
+      this.babylonService.getEngine().switchFullscreen(false);
     } else {
       _tf()
         .then(() => {})
         .catch(e => console.error(e));
     }
-  }
-
-  private loginAttempt() {
-    const dialogConfig = new MatDialogConfig();
-    dialogConfig.disableClose = true;
-    dialogConfig.autoFocus = true;
-    this.dialog
-      .open(LoginComponent, dialogConfig)
-      .afterClosed()
-      .toPromise()
-      .then(() => this.isAuthenticated && this.processingService.bootstrap())
-      .catch(e => {
-        console.error(e);
-        this.loginAttempt();
-      });
   }
 }
