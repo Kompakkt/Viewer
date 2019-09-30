@@ -375,7 +375,7 @@
         </button>
         <button class="fullwidth-button"
                 mat-raised-button
-                *ngIf="!processingService.defaultEntityLoaded && isEntityOwner && !processingService.compilationLoaded"
+                *ngIf="!processingService.defaultEntityLoaded && userdataService.userOwnsEntity && !processingService.compilationLoaded"
                 (click)="saveActualSettings()">Save as default
         </button>
       </mat-card-content>
