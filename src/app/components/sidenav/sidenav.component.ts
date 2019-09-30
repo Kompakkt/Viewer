@@ -10,18 +10,13 @@ import { OverlayService } from '../../services/overlay/overlay.service';
 export class SidenavComponent implements OnInit {
   @HostBinding('class.is-open')
   public isOpen = false;
-  public mode = '';
 
   constructor(public overlayService: OverlayService) {}
 
   ngOnInit() {
-
     this.overlayService.sidenav.subscribe(state => {
-      this.isOpen = this.mode !== '' ? state : false;
-    });
-
-    this.overlayService.Observables.mode.subscribe(state => {
-      this.mode = state;
+      this.isOpen =
+        this.overlayService.actualSidenavMode !== '' ? state : false;
     });
   }
 }

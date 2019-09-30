@@ -1,5 +1,5 @@
 <div id="sidenav">
-    <app-annotations-editor [hidden]="mode !== 'annotation'"></app-annotations-editor>
-    <app-entity-feature-settings [hidden]="mode !== 'settings'"></app-entity-feature-settings>
-    <compilation-browser [hidden]="mode !== 'compilationBrowser'"></compilation-browser>
+    <app-annotations-editor [hidden]="this.overlayService.actualSidenavMode !== 'annotation'"></app-annotations-editor>
+    <app-entity-feature-settings [hidden]="this.overlayService.actualSidenavMode !== 'settings'"></app-entity-feature-settings>
+    <compilation-browser [hidden]="this.overlayService.actualSidenavMode !== 'compilationBrowser'"></compilation-browser>
 </div>
