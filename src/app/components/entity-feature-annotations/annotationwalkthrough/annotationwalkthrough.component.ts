@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Vector3 } from 'babylonjs';
 
+import {IAnnotation} from '../../../interfaces/interfaces';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
+import {AnnotationmarkerService} from '../../../services/annotationmarker/annotationmarker.service';
 import { BabylonService } from '../../../services/babylon/babylon.service';
-import {AnnotationmarkerService} from "../../../services/annotationmarker/annotationmarker.service";
-import {IAnnotation, IEntity} from "../../../interfaces/interfaces";
 
 @Component({
   selector: 'app-annotationwalkthrough',
