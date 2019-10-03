@@ -165,9 +165,6 @@ export class ProcessingService {
     }
   }
    */
-
-  // TODO initial settings mode
-
   public updateActiveEntity(entity: IEntity) {
     console.log('New loaded Entity:', entity);
     this.Subjects.actualEntity.next(entity);

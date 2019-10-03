@@ -3,7 +3,7 @@ import { AppComponent } from '../../../app/app.component';
 import { LoadingscreenComponent } from '../../../app/components/loadingscreen/loadingscreen.component';
 import { SceneComponent } from '../../../app/components/scene/scene.component';
 import { MenuComponent } from '../../../app/components/menu/menu.component';
-import { AnnotationwalkthroughComponent } from '../../../app/components/object-feature-annotations/annotationwalkthrough/annotationwalkthrough.component';
+import { AnnotationwalkthroughComponent } from '../../../app/components/entity-feature-annotations/annotationwalkthrough/annotationwalkthrough.component';
 import {
   MatCardModule,
   MatCheckboxModule,
@@ -24,8 +24,8 @@ import {
   MatChipsModule,
 } from '@angular/material';
 import { FormsModule } from '@angular/forms';
-import { AnnotationsEditorComponent } from '../../../app/components/object-feature-annotations/annotations-editor/annotations-editor.component';
-import { AnnotationComponent } from '../../../app/components/object-feature-annotations/annotation/annotation.component';
+import { AnnotationsEditorComponent } from '../../../app/components/entity-feature-annotations/annotations-editor/annotations-editor.component';
+import { AnnotationComponent } from '../../../app/components/entity-feature-annotations/annotation/annotation.component';
 import { ColorChromeModule } from 'ngx-color/chrome';
 import { HttpClientModule } from '@angular/common/http';
 import { SocketIoModule } from 'ngx-socket-io';
@@ -34,7 +34,7 @@ import { BroadcastComponent } from '../../../app/components/broadcast/broadcast.
 import { BroadcastingUsersComponent } from '../../../app/components/broadcast/broadcasting-users.component';
 import { ObjectFeaturesComponent } from '../../../app/components/object-features/object-features.component';
 import { CompilationBrowserComponent } from '../../../app/components/compilation-browser/content.component';
-import { AnnotationComponentForEditorComponent } from '../../../app/components/object-feature-annotations/annotation/annotation-for-editor.component';
+import { AnnotationComponentForEditorComponent } from '../../../app/components/entity-feature-annotations/annotation/annotation-for-editor.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MarkdownModule } from 'ngx-markdown';
 import { ObjectFeatureSettingsComponent } from '../../../app/components/entity-feature-settings/object-feature-settings.component';

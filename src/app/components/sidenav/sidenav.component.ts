@@ -14,9 +14,7 @@ export class SidenavComponent implements OnInit {
   constructor(public overlayService: OverlayService) {}
 
   ngOnInit() {
-    this.overlayService.sidenav.subscribe(state => {
-      this.isOpen =
-        this.overlayService.actualSidenavMode !== '' ? state : false;
-    });
+    this.overlayService.sidenav.subscribe(state =>
+        this.isOpen = this.overlayService.actualSidenavMode !== '' ? state : false);
   }
 }
