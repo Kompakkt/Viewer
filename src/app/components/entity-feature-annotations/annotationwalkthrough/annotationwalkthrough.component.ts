@@ -3,6 +3,8 @@ import { Vector3 } from 'babylonjs';
 
 import { AnnotationService } from '../../../services/annotation/annotation.service';
 import { BabylonService } from '../../../services/babylon/babylon.service';
+import {AnnotationmarkerService} from "../../../services/annotationmarker/annotationmarker.service";
+import {IAnnotation, IEntity} from "../../../interfaces/interfaces";
 
 @Component({
   selector: 'app-annotationwalkthrough',
@@ -17,6 +19,7 @@ export class AnnotationwalkthroughComponent implements OnInit {
   constructor(
     public annotationService: AnnotationService,
     private babylonService: BabylonService,
+    private annotationMarkerService: AnnotationmarkerService,
   ) {}
 
   ngOnInit() {
@@ -24,6 +27,12 @@ export class AnnotationwalkthroughComponent implements OnInit {
     this.annotationService.currentAnnotations.subscribe(currentAnnotations => {
       this.annotations = currentAnnotations;
       this.title = 'Annotation Walkthrough';
+    });
+
+    this.annotationMarkerService.isSelectedAnnotation.subscribe(currentAnnotation => {
+      const selectedAnnotation = this.annotations
+          .find((anno: IAnnotation) => anno._id === currentAnnotation);
+      if (selectedAnnotation) this.title = selectedAnnotation.body.content.title;
     });
   }
 
