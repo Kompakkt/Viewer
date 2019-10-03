@@ -35,11 +35,10 @@ export class UserdataService {
   }
 
   public userAuthentication(loginRequired: boolean): Promise<boolean> {
+    this.loginRequired = loginRequired;
+
     return new Promise<boolean>((resolve, reject) => {
-      if (loginRequired && this.loginRequired && this.authenticatedUser &&
-          this.userData) resolve(true);
-      if (!loginRequired && this.authenticatedUser && this.userData) resolve(true);
-      this.loginRequired = loginRequired;
+      if (this.authenticatedUser && this.userData) resolve(true);
       this.mongoService
           .isAuthorized()
           .then(result => {
@@ -161,11 +160,19 @@ export class UserdataService {
 
     if (isEntity(element) && this.userData.data.entity) {
       this.userOwnsEntity = !!this.userData.data.entity.find((el: IEntity) => el._id === id);
-      resolve(!!this.userData.data.entity.find((el: IEntity) => el._id === id));
+      if (this.userOwnsEntity) {
+        resolve (true);
+      } else {
+        const idFromUser = this.userData._id;
+        this.userOwnsEntity = !!element.relatedEntityOwners
+            .find(owner => owner._id === idFromUser);
+        resolve (!!element.relatedEntityOwners.find(owner => owner._id === idFromUser));
+      }
     }
     if (isCompilation(element) && this.userData.data.compilation) {
-      this.userOwnsCompilation = !!this.userData.data.entity.find((el: IEntity) => el._id === id);
-      resolve(!!this.userData.data.entity.find((el: IEntity) => el._id === id));
+      this.userOwnsCompilation = !!this.userData.data.compilation
+          .find((el: ICompilation) => el._id === id);
+      resolve(!!this.userData.data.compilation.find((el: ICompilation) => el._id === id));
     }
     });
   }

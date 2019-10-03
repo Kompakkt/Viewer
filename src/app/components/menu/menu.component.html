@@ -12,21 +12,21 @@
     </button>
 
     <button mat-icon-button
-            *ngIf="processingService.getAvailableQuality('high') && processingService.getAvailableQuality('medium')"
+            *ngIf="getAvailableQuality('high') && getAvailableQuality('medium')"
             [matMenuTriggerFor]="quality"
             matTooltip="Quality" matTooltipPosition="above">
         <mat-icon>high_quality</mat-icon>
     </button>
     <!-- Quality Submenu -->
     <mat-menu #quality="matMenu">
-        <button mat-menu-item *ngIf="processingService.getAvailableQuality('high')"
-                (click)="processingService.updateEntityQuality('high')">High
+        <button mat-menu-item *ngIf="getAvailableQuality('high')"
+                (click)="updateEntityQuality('high')">High
         </button>
-        <button mat-menu-item *ngIf="processingService.getAvailableQuality('medium')"
-                (click)="processingService.updateEntityQuality('medium')">Medium
+        <button mat-menu-item *ngIf="getAvailableQuality('medium')"
+                (click)="updateEntityQuality('medium')">Medium
         </button>
-        <button mat-menu-item *ngIf="processingService.getAvailableQuality('low')"
-                (click)="processingService.updateEntityQuality('low')">Low
+        <button mat-menu-item *ngIf="getAvailableQuality('low')"
+                (click)="updateEntityQuality('low')">Low
         </button>
     </mat-menu>
     <!-- / Quality Submenu -->

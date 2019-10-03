@@ -30,6 +30,43 @@ export class MenuComponent implements OnInit {
     });
   }
 
+  getAvailableQuality(quality: string) {
+    const entity = this.processingService.getCurrentEntity();
+    if (!entity) return false;
+    switch (quality) {
+      case 'low':
+        return entity.processed.low !== entity.processed.medium;
+      case 'medium':
+        return entity.processed.medium !== entity.processed.low;
+      case 'high':
+        return entity.processed.high !== entity.processed.medium;
+      default:
+        return false;
+    }
+  }
+
+  updateEntityQuality(quality: string) {
+    if (this.processingService.actualEntityQuality !== quality) {
+      this.processingService.actualEntityQuality = quality;
+      const entity = this.processingService.getCurrentEntity();
+      if (!entity || !entity.processed) {
+        throw new Error(
+            'The object is not available and unfortunately ' +
+            'I can not update the actualEntityQuality.',
+        );
+        console.error(this);
+        return;
+      }
+      if (entity && entity.processed[this.processingService.actualEntityQuality] !== undefined) {
+        this.processingService.loadEntity(entity);
+      } else {
+        throw new Error('Entity actualEntityQuality is not available.');
+        console.error(this);
+        return;
+      }
+    }
+  }
+
   toggleFullscreen() {
     // BabylonJS' this.engine.switchFullscreen(false); creates a fullscreen without our menu.
     // To display the menu, we have to switch to fullscreen on our own.
