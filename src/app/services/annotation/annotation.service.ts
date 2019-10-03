@@ -38,7 +38,6 @@ export class AnnotationService {
   private actualEntityMeshes: Mesh[] = [];
   public actualCompilation: ICompilation | undefined;
 
-  private isMeshSettingsMode = false;
   private isEntityFeaturesOpen = false;
   private annotationModeSidenav = false;
 
@@ -103,11 +102,6 @@ export class AnnotationService {
       actualCompilation => {
           this.actualCompilation = actualCompilation;
       });
-
-    this.overlayService.initialSettingsmode.subscribe(meshSettingsMode => {
-      this.isMeshSettingsMode = meshSettingsMode;
-      this.setAnnotatingAllowance();
-    });
 
     this.overlayService.Observables.mode.subscribe(mode => {
       this.annotationModeSidenav = mode === 'annotation';
@@ -657,7 +651,7 @@ export class AnnotationService {
   public setAnnotatingAllowance() {
     if (this.processingService.annotatingFeatured &&
         this.isEntityFeaturesOpen &&
-        !this.isMeshSettingsMode &&
+        !this.processingService.upload &&
         this.annotationModeSidenav) {
       this.isAnnotatingAllowed = true;
       this.annotationMode(true);

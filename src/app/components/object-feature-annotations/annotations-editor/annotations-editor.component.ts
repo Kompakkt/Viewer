@@ -3,7 +3,6 @@ import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { saveAs } from 'file-saver';
 
 import { AnnotationService } from '../../../services/annotation/annotation.service';
-import { OverlayService } from '../../../services/overlay/overlay.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
 import { UserdataService } from '../../../services/userdata/userdata.service';
 import { AnnotationComponent } from '../annotation/annotation.component';
@@ -19,13 +18,11 @@ export class AnnotationsEditorComponent implements OnInit {
 
   // external
   public isAnnotatingAllowed = false;
-  public isMeshSettingsMode = false;
 
   constructor(
     public annotationService: AnnotationService,
     public processingService: ProcessingService,
     public userDataService: UserdataService,
-    private overlayService: OverlayService,
   ) {}
 
   ngOnInit() {
@@ -33,10 +30,6 @@ export class AnnotationsEditorComponent implements OnInit {
 
     this.annotationService.annnotatingAllowed.subscribe(allowed => {
       this.isAnnotatingAllowed = allowed;
-    });
-
-    this.overlayService.initialSettingsmode.subscribe(meshSettingsMode => {
-      this.isMeshSettingsMode = meshSettingsMode;
     });
   }
 

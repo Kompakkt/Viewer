@@ -225,61 +225,61 @@ export class ProcessingService {
     const mode = queryParams.get('mode');
     this.mode = mode ? mode : '';
 
-    if (!this.mode) {
-      this.showMenu = false;
-    }
-    if (this.mode === 'annotation') {
-      if (compParam || entityParam) {
-        this.userDataService.userAuthentication(true)
-            .then(result => {
-          if (result) {
-            this.overlayService.toggleSidenav('annotation', true);
-          } else {
-            this.message.error(
-              'Sorry, you are not allowed to annotate this Object' +
-                'if you are not logged in.',
-            );
-            this.showAnnotationEditor = false;
-            this.showSidenav = false;
-          }
-        });
-      }
-      this.overlayService.toggleSidenav('annotation', true);
-    }
+    // loading         // modes
+    // default        '', explore, annotation, open
+    // compilation    '', explore, annotation, open
+    // entity         '', explore, annotation, open, upload, edit
+
+    // Setzen: Login required, menu, sidenav: annotation, settings
+
+    // !menu -> mode = ''
+    // !sidenav -> !compilation && mode = '' || mode = open
+    // sidenav: !settings -> !sidenav
+    // sidenav: !annotation -> !sidenav, mode != annotation && mode != upload
+    // login required: mode = upload, mode = edit, mode = annotation && !default
+
+    // 1) Load Entity and compilation
     if (compParam) {
       this.fetchAndLoad(entityParam ? entityParam : undefined, compParam, true);
-
-      if (!mode || mode === 'explore' || mode === 'open') {
-        this.showAnnotationEditor = false;
-        if (mode !== 'explore') this.showSettingsEditor = false;
-        this.overlayService.toggleSidenav('compilationBrowser', true);
-      }
-    } else {
-      if (!mode || mode === 'open') this.showSidenav = false;
-      if (!entityParam) {
-        // TODO keine modes richtig geladen
-        this.loadDefaultEntityData();
-      } else {
-        this.fetchAndLoad(entityParam, undefined, false);
-        // tslint:disable-next-line:prefer-switch
-        if (mode === 'upload' || mode === 'explore' || mode === 'edit') {
-          this.overlayService.toggleSidenav('settings', true);
-          if (mode !== 'upload') this.showAnnotationEditor = false;
-          if (mode !== 'explore') {
-            this.userDataService.userAuthentication(true)
-                .then(result => {
-              if (!result) {
-                this.message.error(
-                  'Sorry, you are not allowed to edit this Object' +
-                    'if you are not logged in.',
-                );
-                this.showSidenav = false;
-              }
-            });
-          }
-        }
-      }
     }
+    if (!compParam && entityParam) {
+      this.fetchAndLoad(entityParam, undefined, false);
+    }
+    if (!compParam && !entityParam) {
+      this.loadDefaultEntityData();
+    }
+
+    // 2) check modes
+    if (!mode) {
+      this.showMenu = false;
+    }
+
+    if (!mode && !compParam || mode === 'open') {
+      this.showSidenav = false;
+      this.showSettingsEditor = false;
+      this.showAnnotationEditor = false;
+    }
+
+    if (mode !== 'annotation' && mode !== 'upload') {
+      this.showAnnotationEditor = false;
+    }
+
+    // 3) set login required
+    if (mode === 'upload' || mode === 'edit' || mode === 'annotation' && (entityParam || compParam)) {
+      this.userDataService.userAuthentication(true);
+    }
+
+    // 4) toggle sidenav
+    if (!mode && compParam) {
+      this.overlayService.toggleSidenav('compilationBrowser', true);
+    }
+    if (mode === 'annotation') {
+      this.overlayService.toggleSidenav('annotation', true);
+    }
+    if (mode === 'edit' || mode === 'explore' || mode === 'upload') {
+      this.overlayService.toggleSidenav('settings', true);
+    }
+    // TODO: error handling: wrong mode for loading
   }
 
   public loadDefaultEntityData() {

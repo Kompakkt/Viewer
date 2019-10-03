@@ -56,7 +56,6 @@ export const createGround = (
 };
 
 // Axis (world and local)
-// TODO set size depending on mesh size
 export const createWorldAxis = (
     scene: Scene,
     size: number,

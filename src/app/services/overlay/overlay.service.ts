@@ -6,7 +6,6 @@ import { ReplaySubject } from 'rxjs';
 })
 export class OverlayService {
   public sidenavIsOpen = false;
-  public isInitialSettingsMode = false;
   public actualSidenavMode = '';
   private Subjects = {
     mode: new ReplaySubject<string>(),
@@ -16,22 +15,11 @@ export class OverlayService {
   };
 
   @Output() sidenav: EventEmitter<boolean> = new EventEmitter();
-  @Output() initialSettingsmode: EventEmitter<boolean> = new EventEmitter();
 
   public toggleSidenav(
     mode: string,
     open?: boolean,
-    initial?: boolean,
   ): boolean {
-    console.log('MODE INITIAL SETTINGS: ', initial, this.isInitialSettingsMode);
-    if (initial === true) {
-      this.isInitialSettingsMode = true;
-      this.initialSettingsmode.emit(true);
-    }
-    if (initial === false) {
-      this.isInitialSettingsMode = false;
-      this.initialSettingsmode.emit(false);
-    }
     if (this.actualSidenavMode === mode && this.sidenavIsOpen) {
       if (open) {
         return true;

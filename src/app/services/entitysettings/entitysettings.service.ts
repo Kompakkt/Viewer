@@ -346,9 +346,9 @@ export class EntitySettingsService {
         const size = Math.max(+this.processingService.actualEntityHeight,
                               +this.processingService.actualEntityWidth,
                               +this.processingService.actualEntityDepth);
-        this.worldAxisInitialSize = size * 1.4;
-        this.localAxisInitialSize = size * 1.2;
-        this.groundInitialSize = size * 1.4;
+        this.worldAxisInitialSize = size * 1.2;
+        this.localAxisInitialSize = size * 1.1;
+        this.groundInitialSize = size * 1.2;
 
         this.boundingBox = createBoundingBox(scene, this.center, this.initialSize, this.max);
         this.boundingBox.renderingGroupId = 2;
