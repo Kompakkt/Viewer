@@ -37,7 +37,7 @@ import { CompilationBrowserComponent } from '../../../app/components/compilation
 import { AnnotationComponentForEditorComponent } from '../../../app/components/object-feature-annotations/annotation/annotation-for-editor.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MarkdownModule } from 'ngx-markdown';
-import { ObjectFeatureSettingsComponent } from '../../../app/components/object-feature-settings/object-feature-settings.component';
+import { ObjectFeatureSettingsComponent } from '../../../app/components/entity-feature-settings/object-feature-settings.component';
 import { ObjectFeatureMetadataComponent } from '../../../app/components/object-feature-metadata/object-feature-metadata.component';
 import { ContentBrowserComponent } from '../../../app/components/content-browser/content-browser.component';
 import { MediaTypePipe } from '../../../app/pipes/media-type.pipe';

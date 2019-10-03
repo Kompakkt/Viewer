@@ -263,13 +263,15 @@ export interface IEntitySettings {
     color: { r: number; b: number; g: number; a: number };
     effect: boolean;
   };
-  lights: Array<{
+  lights: IEntityLight[];
+  rotation: { x: number; y: number; z: number };
+  scale: number;
+}
+
+export interface IEntityLight {
     type: string;
     position: { x: number; y: number; z: number };
     intensity: number;
-  }>;
-  rotation: { x: number; y: number; z: number };
-  scale: number;
 }
 
 export interface IEntity extends IWhitelist {

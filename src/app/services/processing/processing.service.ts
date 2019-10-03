@@ -1,16 +1,23 @@
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable, Output } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { Mesh } from 'babylonjs';
+import { Mesh, Quaternion } from 'babylonjs';
 import { ReplaySubject } from 'rxjs/internal/ReplaySubject';
 
 import {
   defaultEntity,
   fallbackEntity,
 } from '../../../assets/entities/entities';
+import {
+  settings2D,
+  settingsAudio,
+  settingsEntity,
+  settingsFallback,
+  settingsKompakktLogo,
+} from '../../../assets/settings/settings';
 import { environment } from '../../../environments/environment';
 // tslint:disable-next-line:max-line-length
 import { DialogPasswordComponent } from '../../components/dialogs/dialog-password/dialog-password.component';
-import { ICompilation, IEntity } from '../../interfaces/interfaces';
+import {ICompilation, IEntity, IEntitySettings} from '../../interfaces/interfaces';
 import { isEntityForCompilation } from '../../typeguards/typeguards';
 import { BabylonService } from '../babylon/babylon.service';
 import { LoadingscreenhandlerService } from '../babylon/loadingscreen';
@@ -34,14 +41,25 @@ export class ProcessingService {
     actualEntityMeshes: this.Subjects.actualEntityMeshes.asObservable(),
     actualCompilation: this.Subjects.actualCompilation.asObservable(),
   };
+  @Output() setSettings: EventEmitter<boolean> = new EventEmitter();
 
   public compilationLoaded = false;
   public defaultEntityLoaded = false;
   public fallbackEntityLoaded = false;
+  // mediatype = 'model' || 'entity' || 'image' || 'audio' || 'video
   public actualEntityMediaType = '';
+  public actualEntitySettings: IEntitySettings | undefined;
+  public actualEntitySettingsOnServer: IEntitySettings | undefined;
+  public upload = false;
+  public meshSettings = false;
+  public actualRotationQuaternion = Quaternion.RotationYawPitchRoll(0, 0, 0);
+  public actualEntityHeight = (0).toFixed(2);
+  public actualEntityWidth = (0).toFixed(2);
+  public actualEntityDepth = (0).toFixed(2);
   private actualEntityQuality = 'low';
   private baseUrl = `${environment.express_server_url}:${environment.express_server_port}/`;
 
+  // TODO event emmiter initialise Settings
   // manage general features depending on mode
   // mode = '' || upload || explore || edit || annotation || open
   public mode = '';
@@ -70,6 +88,10 @@ export class ProcessingService {
     return this.Observables.actualCompilation.source['_events'].slice(-1)[0];
   }
 
+  public getCurrentEntityMeshes(): Mesh[] | undefined {
+    return this.Observables.actualEntityMeshes.source['_events'].slice(-1)[0];
+  }
+
   public getAvailableQuality(quality: string) {
     const entity = this.getCurrentEntity();
     if (!entity) return false;
@@ -85,6 +107,7 @@ export class ProcessingService {
     }
   }
 
+  // inititalize Annotation Mode
   private async setAnnotatingFeatured(entity: IEntity) {
     // mode = '' || upload || explore || edit || annotation || open &&
     // compilation (whitelist || entity => showAnnotationEditor
@@ -106,7 +129,8 @@ export class ProcessingService {
           this.annotatingFeatured = true;
         } else {
           if (this.userDataService.authenticatedUser) {
-            this.userDataService.checkOwnerState(entity).then(owned => {
+            this.userDataService.checkOwnerState(entity)
+                .then(owned => {
               if (owned) {
                 this.annotatingFeatured = true;
               } else {
@@ -122,6 +146,27 @@ export class ProcessingService {
       }
     }
   }
+  // TODO set annotation allowance
+  /*
+    public setAnnotatingAllowance() {
+    if (this.processingService.annotatingFeatured &&
+        this.isEntityFeaturesOpen &&
+        !this.isMeshSettingsMode &&
+        this.annotationModeSidenav) {
+      this.isAnnotatingAllowed = true;
+      this.annotationMode(true);
+      this.annnotatingAllowed.emit(true);
+      console.log('set allowance: ', true);
+    } else {
+      this.isAnnotatingAllowed = false;
+      this.annotationMode(false);
+      this.annnotatingAllowed.emit(false);
+      console.log('set allowance: ', false);
+    }
+  }
+   */
+
+  // TODO initial settings mode
 
   public updateActiveEntity(entity: IEntity) {
     console.log('New loaded Entity:', entity);
@@ -142,7 +187,8 @@ export class ProcessingService {
       if (this.showAnnotationEditor) {
         await this.userDataService.checkOwnerState(compilation);
         if (compilation.whitelist.enabled) {
-          this.userDataService.isUserWhitelisted(compilation).then(listed => {
+          this.userDataService.isUserWhitelisted(compilation)
+              .then(listed => {
             if (!listed) {
               this.showAnnotationEditor = false;
               this.message.error(
@@ -160,7 +206,14 @@ export class ProcessingService {
 
   public async updateActiveEntityMeshes(meshes: Mesh[], entity: IEntity) {
     await this.setAnnotatingFeatured(entity);
+    // TODO - move to babylon load: rendering groups
+    meshes.forEach(mesh => (mesh.renderingGroupId = 2));
+    this.babylonService
+        .getScene()
+        .getMeshesByTags('videoPlane', mesh => (mesh.renderingGroupId = 3));
+    // End of TODO
     this.Subjects.actualEntityMeshes.next(meshes);
+    this.initialiseActualEntitySettingsData(entity);
   }
 
   public bootstrap(): void {
@@ -177,7 +230,8 @@ export class ProcessingService {
     }
     if (this.mode === 'annotation') {
       if (compParam || entityParam) {
-        this.userDataService.userAuthentication(true).then(result => {
+        this.userDataService.userAuthentication(true)
+            .then(result => {
           if (result) {
             this.overlayService.toggleSidenav('annotation', true);
           } else {
@@ -203,6 +257,7 @@ export class ProcessingService {
     } else {
       if (!mode || mode === 'open') this.showSidenav = false;
       if (!entityParam) {
+        // TODO keine modes richtig geladen
         this.loadDefaultEntityData();
       } else {
         this.fetchAndLoad(entityParam, undefined, false);
@@ -211,7 +266,8 @@ export class ProcessingService {
           this.overlayService.toggleSidenav('settings', true);
           if (mode !== 'upload') this.showAnnotationEditor = false;
           if (mode !== 'explore') {
-            this.userDataService.userAuthentication(true).then(result => {
+            this.userDataService.userAuthentication(true)
+                .then(result => {
               if (!result) {
                 this.message.error(
                   'Sorry, you are not allowed to edit this Object' +
@@ -284,7 +340,8 @@ export class ProcessingService {
             DialogPasswordComponent,
             dialogConfig,
           );
-          dialogRef.afterClosed().subscribe(result => {
+          dialogRef.afterClosed()
+              .subscribe(result => {
             if (result) {
               const newData = result.data;
               this.updateActiveCompilation(newData);
@@ -296,13 +353,11 @@ export class ProcessingService {
                   this.fetchEntityData(loadEntity._id);
                 } else {
                   const entity = newData.entities[0];
-                  if (isEntityForCompilation(entity))
-                    this.fetchEntityData(entity._id);
+                  if (isEntityForCompilation(entity)) this.fetchEntityData(entity._id);
                 }
               } else {
                 const entity = newData.entities[0];
-                if (isEntityForCompilation(entity))
-                  this.fetchEntityData(entity._id);
+                if (isEntityForCompilation(entity)) this.fetchEntityData(entity._id);
               }
             } else {
               this.loadFallbackEntity();
@@ -323,13 +378,11 @@ export class ProcessingService {
                 this.fetchEntityData(loadEntity._id);
               } else {
                 const entity = compilation.entities[0];
-                if (isEntityForCompilation(entity))
-                  this.fetchEntityData(entity._id);
+                if (isEntityForCompilation(entity)) this.fetchEntityData(entity._id);
               }
             } else {
               const entity = compilation.entities[0];
-              if (isEntityForCompilation(entity))
-                this.fetchEntityData(entity._id);
+              if (isEntityForCompilation(entity)) this.fetchEntityData(entity._id);
             }
           }
         }
@@ -351,42 +404,40 @@ export class ProcessingService {
           !resultEntity.online ||
           resultEntity.whitelist.enabled
         ) {
-          this.userDataService.userAuthentication(true).then(auth => {
+          this.userDataService.userAuthentication(true)
+              .then(auth => {
             if (auth) {
-              this.userDataService.checkOwnerState(resultEntity).then(owned => {
-                if (!owned) {
-                  if (resultEntity.whitelist.enabled) {
-                    this.userDataService
-                      .isUserWhitelisted(resultEntity)
-                      .then(whitelisted => {
-                        if (whitelisted) {
-                          this.loadEntity(resultEntity);
-                        } else {
-                          this.loadFallbackEntity();
-                          this.message.error(
-                            'Sorry, you are not ' +
-                              'allowed to load this Object.',
-                          );
-                        }
-                      });
-                  } else {
+              this.userDataService.checkOwnerState(resultEntity)
+                  .then(owned => {
+                    console.log('isOwned', owned);
+                    if (!owned) {
+                      if (resultEntity.whitelist.enabled) {
+                        this.userDataService
+                            .isUserWhitelisted(resultEntity)
+                            .then(whitelisted => {
+                              if (whitelisted) {
+                                this.loadEntity(resultEntity);
+                              } else {
+                                this.loadFallbackEntity();
+                                this.message.error(
+                                    'Sorry, you are not ' +
+                                    'allowed to load this Object.',
+                                );
+                              }
+                            });
+                      }
+                    } else {
+                      this.loadEntity(resultEntity);
+                    }
+                  });
+            } else {
                     this.loadFallbackEntity();
                     this.message.error(
                       'Sorry, you are not allowed to load this Object.',
                     );
                   }
-                } else {
-                  this.loadEntity(resultEntity);
-                }
-              });
+                });
             } else {
-              this.loadFallbackEntity();
-              this.message.error(
-                'Sorry, you are not allowed to load this Object.',
-              );
-            }
-          });
-        } else {
           this.loadEntity(resultEntity);
         }
       })
@@ -534,4 +585,75 @@ export class ProcessingService {
       }
     }
   }
+
+  private async initialiseActualEntitySettingsData(entity: IEntity) {
+    if (this.actualEntityMediaType === 'model' ||
+        this.actualEntityMediaType === 'entity' ||
+        this.actualEntityMediaType === 'image') {
+      this.meshSettings = true;
+    }
+    let upload = false;
+    if (!entity.settings ||
+        entity.settings.preview === undefined ||
+        // TODO: how to check if settings need to be set? atm next line
+        entity.settings.preview === '' ||
+        entity.settings.cameraPositionInitial === undefined ||
+        entity.settings.background === undefined ||
+        entity.settings.lights === undefined ||
+        entity.settings.rotation === undefined ||
+        entity.settings.scale === undefined
+    ) {
+      upload = await this.createSettings();
+      if (upload && this.mode === 'upload' && !entity.finished) {
+        this.upload = true;
+      } else {
+        // TODO reset all and this.loadFallbackEntity();
+        this.message.error(
+            'Sorry, this Entity has no Settings and is not loaded during upload.',
+        );
+      }
+    } else {
+      this.actualEntitySettings = entity.settings;
+      this.actualEntitySettingsOnServer = JSON.parse(JSON.stringify(entity.settings));
+    }
+    this.setSettings.emit(true);
+  }
+
+  private createSettings(): boolean {
+    let settings;
+    let upload = false;
+
+    if (this.defaultEntityLoaded) {
+      settings = settingsKompakktLogo;
+    } else if (this.fallbackEntityLoaded) {
+      settings = settingsFallback;
+    } else {
+      switch (this.actualEntityMediaType) {
+        case 'entity':
+        case 'model': {
+          settings = settingsEntity;
+          break;
+        }
+        case 'audio': {
+          settings = settingsAudio;
+          break;
+        }
+        case 'video': {
+          settings = settings2D;
+          break;
+        }
+        case 'image': {
+          settings = settings2D;
+          break;
+        }
+        default: {
+          settings = settingsEntity;
+        }
+      }
+      upload = true;
+    }
+    this.actualEntitySettings = settings;
+    return upload;
+  }
+
 }
