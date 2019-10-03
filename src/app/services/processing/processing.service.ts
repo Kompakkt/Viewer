@@ -170,7 +170,12 @@ export class ProcessingService {
       this.showMenu = false;
     }
 
-    if (!mode && !compParam || mode === 'open') {
+    if (!mode && compParam || mode === 'open' && compParam) {
+      this.showSettingsEditor = false;
+      this.showAnnotationEditor = false;
+    }
+
+    if (!mode && !compParam || !compParam && mode === 'open') {
       this.showSidenav = false;
       this.showSettingsEditor = false;
       this.showAnnotationEditor = false;
@@ -186,7 +191,7 @@ export class ProcessingService {
     }
 
     // 4) toggle sidenav
-    if (!mode && compParam) {
+    if (!mode && compParam || mode === 'open' && compParam) {
       this.overlayService.toggleSidenav('compilationBrowser', true);
     }
     if (mode === 'annotation') {
