@@ -126,6 +126,8 @@ export class ProcessingService {
 
   public async updateActiveCompilation(compilation: ICompilation | undefined) {
     this.Subjects.actualCompilation.next(compilation);
+    if (this.userDataService.userData)
+      this.userDataService.checkOwnerState(compilation);
     this.compilationLoaded = !!(compilation && compilation._id);
     this.showCompilationBrowser = this.compilationLoaded;
     // TODO load annotations emit
