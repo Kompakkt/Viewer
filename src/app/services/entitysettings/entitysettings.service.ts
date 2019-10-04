@@ -53,15 +53,26 @@ export class EntitySettingsService {
     this.max = Vector3.Zero();
     this.processingService.setSettings.subscribe(setSettings => {
       if (setSettings) {
-        this.min = Vector3.Zero();
-        this.max = Vector3.Zero();
-        this.initialSize = Vector3.Zero();
-        this.groundInitialSize = 0;
-        this.localAxisInitialSize = 0;
-        this.worldAxisInitialSize = 0;
         this.setUpSettings();
       }
     });
+  }
+
+  private async resetInitialValues() {
+    this.min = Vector3.Zero();
+    this.max = Vector3.Zero();
+    this.initialSize = Vector3.Zero();
+    this.groundInitialSize = 0;
+    this.localAxisInitialSize = 0;
+    this.worldAxisInitialSize = 0;
+    this.processingService.actualRotationQuaternion = Quaternion.RotationYawPitchRoll(
+      0,
+      0,
+      0,
+    );
+    this.processingService.actualEntityHeight = (0).toFixed(2);
+    this.processingService.actualEntityWidth = (0).toFixed(2);
+    this.processingService.actualEntityDepth = (0).toFixed(2);
   }
 
   private async setUpSettings() {
@@ -75,6 +86,7 @@ export class EntitySettingsService {
       console.error(this);
       return;
     }
+    await this.resetInitialValues();
     await this.initialiseSizeValues();
     if (this.processingService.meshSettings) {
       await this.setUpMeshSettingsHelper();

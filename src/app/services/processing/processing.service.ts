@@ -584,6 +584,7 @@ export class ProcessingService {
       upload = true;
     }
     this.actualEntitySettings = settings;
+    this.actualEntitySettingsOnServer = JSON.parse(JSON.stringify(settings));
     return upload;
   }
 
