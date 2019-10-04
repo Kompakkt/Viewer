@@ -116,10 +116,8 @@ export class ProcessingService {
     if (entity && (entity._id === 'default' || entity._id === 'fallback')) {
       this.defaultEntityLoaded = entity._id === 'default';
       this.fallbackEntityLoaded = entity._id === 'fallback';
-    } else {
-      this.defaultEntityLoaded = false;
-      this.defaultEntityLoaded = false;
     }
+    if (this.userDataService.userData) this.userDataService.checkOwnerState(entity);
     // TODO load Annotations emit (Frage: nur, wenn !collection loaded?)
     this.loadAnnotations.emit(true);
   }

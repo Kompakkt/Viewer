@@ -201,46 +201,30 @@ export class EntityFeatureSettingsComponent implements OnInit {
           this.processingService.actualEntitySettingsOnServer = JSON.parse(
             JSON.stringify(this.processingService.actualEntitySettings),
           );
-          if (this.processingService.upload)
+          if (this.processingService.upload) {
             this.processingService.upload = false;
+          }
         });
     }
   }
 
   public backToDefaultSettings() {
-    if (
-      !this.processingService.actualEntitySettings ||
-      !this.processingService.actualEntitySettingsOnServer
-    ) {
+    if (!this.processingService.actualEntitySettings ||
+        !this.processingService.actualEntitySettingsOnServer) {
       throw new Error('Settings missing');
       console.error(this);
       return;
     }
-    this.processingService.actualEntitySettings.preview = JSON.parse(
-      JSON.stringify(
-        this.processingService.actualEntitySettingsOnServer.preview,
-      ),
-    );
-    this.processingService.actualEntitySettings.cameraPositionInitial = JSON.parse(
-      JSON.stringify(
-        this.processingService.actualEntitySettingsOnServer
-          .cameraPositionInitial,
-      ),
-    );
-    this.processingService.actualEntitySettings.background = JSON.parse(
-      JSON.stringify(
-        this.processingService.actualEntitySettingsOnServer.background,
-      ),
-    );
-    this.processingService.actualEntitySettings.lights = JSON.parse(
-      JSON.stringify(
-        this.processingService.actualEntitySettingsOnServer.lights,
-      ),
-    );
+    this.processingService.actualEntitySettings.preview =
+        JSON.parse(JSON.stringify(this.processingService.actualEntitySettingsOnServer.preview));
+    this.processingService.actualEntitySettings.cameraPositionInitial =
+        JSON.parse(JSON.stringify(
+            this.processingService.actualEntitySettingsOnServer.cameraPositionInitial));
+    this.processingService.actualEntitySettings.background =
+        JSON.parse(JSON.stringify(this.processingService.actualEntitySettingsOnServer.background));
+    this.processingService.actualEntitySettings.lights =
+        JSON.parse(JSON.stringify(this.processingService.actualEntitySettingsOnServer.lights));
 
-    JSON.parse(
-      JSON.stringify(this.processingService.actualEntitySettingsOnServer),
-    );
     this.entitySettingsService.restoreSettings();
   }
 
