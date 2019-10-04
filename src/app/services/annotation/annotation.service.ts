@@ -506,8 +506,7 @@ export class AnnotationService {
     newAnnotation.lastModificationDate = new Date().toISOString();
     if (
       !this.processingService.defaultEntityLoaded &&
-      !this.processingService.fallbackEntityLoaded &&
-      this.userdataService.userData
+      !this.processingService.fallbackEntityLoaded
     ) {
       this.mongo
         .updateAnnotation(_annotation)
