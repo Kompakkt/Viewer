@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Vector3 } from 'babylonjs';
 
-import {IAnnotation} from '../../../interfaces/interfaces';
+import { IAnnotation } from '../../../interfaces/interfaces';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
-import {AnnotationmarkerService} from '../../../services/annotationmarker/annotationmarker.service';
+import { AnnotationmarkerService } from '../../../services/annotationmarker/annotationmarker.service';
 import { BabylonService } from '../../../services/babylon/babylon.service';
 
 @Component({
@@ -23,17 +23,21 @@ export class AnnotationwalkthroughComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-
     this.annotationService.currentAnnotations.subscribe(currentAnnotations => {
       this.annotations = currentAnnotations;
       this.title = 'Annotation Walkthrough';
+      this.actualRanking = -1;
     });
 
-    this.annotationMarkerService.isSelectedAnnotation.subscribe(currentAnnotation => {
-      const selectedAnnotation = this.annotations
-          .find((anno: IAnnotation) => anno._id === currentAnnotation);
-      if (selectedAnnotation) this.title = selectedAnnotation.body.content.title;
-    });
+    this.annotationMarkerService.isSelectedAnnotation.subscribe(
+      currentAnnotation => {
+        const selectedAnnotation = this.annotations.find(
+          (anno: IAnnotation) => anno._id === currentAnnotation,
+        );
+        if (selectedAnnotation)
+          this.title = selectedAnnotation.body.content.title;
+      },
+    );
   }
 
   public previousAnnotation() {
@@ -45,21 +49,16 @@ export class AnnotationwalkthroughComponent implements OnInit {
   }
 
   public nextAnnotation() {
-    const isLast =
-      this.actualRanking ===
-      this.annotations.length - 1;
+    const isLast = this.actualRanking === this.annotations.length - 1;
 
     this.actualRanking = isLast ? 0 : this.actualRanking + 1;
     this.getAction(this.actualRanking);
   }
 
   private getAction(index: number) {
-    this.title = this.annotations[
-      index
-    ].body.content.title;
+    this.title = this.annotations[index].body.content.title;
 
-    const perspective = this.annotations[index]
-      .body.content.relatedPerspective;
+    const perspective = this.annotations[index].body.content.relatedPerspective;
 
     if (perspective !== undefined) {
       const positionVector = new Vector3(
@@ -79,12 +78,7 @@ export class AnnotationwalkthroughComponent implements OnInit {
       this.babylonService.cameraManager.setActiveCameraTarget(targetVector);
     }
 
-    this.annotationService.setSelectedAnnotation(
-      this.annotations[index]._id,
-    );
-    this.babylonService.hideMesh(
-      this.annotations[index]._id,
-      true,
-    );
+    this.annotationService.setSelectedAnnotation(this.annotations[index]._id);
+    this.babylonService.hideMesh(this.annotations[index]._id, true);
   }
 }
