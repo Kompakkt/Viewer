@@ -521,9 +521,9 @@ export class ProcessingService {
 
   private async initialiseActualEntitySettingsData(entity: IEntity) {
     if (
-      this.actualEntityMediaType === 'model' ||
-      this.actualEntityMediaType === 'entity' ||
-      this.actualEntityMediaType === 'image'
+      entity.mediaType === 'model' ||
+      entity.mediaType === 'entity' ||
+      entity.mediaType === 'image'
     ) {
       this.meshSettings = true;
     }
