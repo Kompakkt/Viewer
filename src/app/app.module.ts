@@ -51,6 +51,8 @@ import { AnnotationComponentForEditorComponent } from './components/entity-featu
 import { AnnotationComponent } from './components/entity-feature-annotations/annotation/annotation.component';
 import { AnnotationsEditorComponent } from './components/entity-feature-annotations/annotations-editor/annotations-editor.component';
 import { AnnotationwalkthroughComponent } from './components/entity-feature-annotations/annotationwalkthrough/annotationwalkthrough.component';
+import { EntityFeatureSettingsLightsComponent } from './components/entity-feature-settings/entity-feature-settings-lights/entity-feature-settings-lights.component';
+import { EntityFeatureSettingsMeshComponent } from './components/entity-feature-settings/entity-feature-settings-mesh/entity-feature-settings-mesh.component';
 import { EntityFeatureSettingsComponent } from './components/entity-feature-settings/entity-feature-settings.component';
 import { LoadingscreenComponent } from './components/loadingscreen/loadingscreen.component';
 import { MenuComponent } from './components/menu/menu.component';
@@ -86,6 +88,8 @@ import { MediaTypePipe } from './pipes/media-type.pipe';
     RenderCanvasComponent,
     SidenavMenuComponent,
     SidenavComponent,
+    EntityFeatureSettingsLightsComponent,
+    EntityFeatureSettingsMeshComponent,
   ],
   imports: [
     BrowserModule,

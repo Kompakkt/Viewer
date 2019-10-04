@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable, Output } from '@angular/core';
 import {
   Animation,
   Axis,
@@ -39,6 +39,7 @@ export class EntitySettingsService {
   private center: Mesh | undefined;
   public boundingBox: Mesh | undefined;
 
+  @Output() meshSettingsCompleted: EventEmitter<boolean> = new EventEmitter();
   public ground: Mesh | undefined;
   private groundInitialSize = 0;
   public localAxisInitialSize = 0;
