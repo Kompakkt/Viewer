@@ -55,6 +55,10 @@ export class EntitySettingsService {
       if (setSettings) {
         this.min = Vector3.Zero();
         this.max = Vector3.Zero();
+        this.initialSize = Vector3.Zero();
+        this.groundInitialSize = 0;
+        this.localAxisInitialSize = 0;
+        this.worldAxisInitialSize = 0;
         this.setUpSettings();
       }
     });
