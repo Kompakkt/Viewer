@@ -600,7 +600,8 @@ export class ProcessingService {
     ) {
       if (
         (!annotatableMediaType || this.fallbackEntityLoaded) &&
-        this.showAnnotationEditor
+        this.showAnnotationEditor &&
+        !this.compilationLoaded
       ) {
         this.showAnnotationEditor = false;
       }
@@ -617,8 +618,9 @@ export class ProcessingService {
       }
       this.userDataService.checkOwnerState(entity).then(owned => {
         this.annotatingFeatured = owned;
-        if (!owned && this.showAnnotationEditor)
+        if (!owned && this.showAnnotationEditor) {
           this.showAnnotationEditor = false;
+        }
         return;
       });
     } else {
@@ -642,8 +644,9 @@ export class ProcessingService {
         }
         this.userDataService.isUserWhitelisted(compilation).then(listed => {
           this.annotatingFeatured = listed;
-          if (!listed && this.showAnnotationEditor)
+          if (!listed && this.showAnnotationEditor) {
             this.showAnnotationEditor = false;
+          }
           return;
         });
       }
@@ -653,14 +656,11 @@ export class ProcessingService {
   private checkAnnotationAllowance() {
     const open = this.overlayService.sidenavIsOpen;
     if (!this.annotatingFeatured || this.upload) {
-      console.log('Ich returne und mache nichts');
       return;
     }
     if (!open) {
-      console.log('allowance emittet als false', this.annotationAllowance);
       this.annotationAllowance = false;
       this.setAnnotationAllowance.emit(false);
-      console.log('Ich setze die allowance zu false');
     } else {
       if (
         this.overlayService.actualSidenavMode === 'annotation' &&
@@ -669,7 +669,6 @@ export class ProcessingService {
       ) {
         this.annotationAllowance = true;
         this.setAnnotationAllowance.emit(true);
-        console.log('Ich setze die allowance zu true');
       }
     }
   }

@@ -57,7 +57,6 @@ export const createDefaultCamera = (
   scene: Scene,
   canvas: HTMLCanvasElement,
 ) => {
-  console.log('create Cam');
   // Dispose existing camera
   if (scene.activeCamera) {
     (scene.activeCamera as ArcRotateCamera).dispose();
