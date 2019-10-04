@@ -5,6 +5,7 @@ import { Matrix, Vector3 } from 'babylonjs';
 import { IAnnotation } from '../../../interfaces/interfaces';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
 import { BabylonService } from '../../../services/babylon/babylon.service';
+import { ProcessingService } from '../../../services/processing/processing.service';
 import { UserdataService } from '../../../services/userdata/userdata.service';
 // tslint:disable-next-line:max-line-length
 import { DialogAnnotationEditorComponent } from '../../dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
@@ -46,6 +47,7 @@ export class AnnotationComponent implements OnInit {
     public babylonService: BabylonService,
     public dialog: MatDialog,
     private userdataService: UserdataService,
+    public processingService: ProcessingService,
   ) {}
 
   ngOnInit() {
@@ -56,12 +58,10 @@ export class AnnotationComponent implements OnInit {
     }
     this.showAnnotation = true;
     this.collapsed = false;
-    this.isAnnotatingAllowed = this.annotationService.isAnnotatingAllowed;
+    this.isAnnotatingAllowed = this.processingService.annotationAllowance;
     this.isAnnotationOwner = this.userdataService.isAnnotationOwner(
       this.annotation,
     );
-
-    this.isAnnotationOwner = this.userdataService.isAnnotationOwner(this.annotation);
 
     this.annotationService.isSelectedAnnotation.subscribe(selectedAnno => {
       if (!this.annotation) {
@@ -73,7 +73,7 @@ export class AnnotationComponent implements OnInit {
       this.selectedAnnotation = selectedAnno;
     });
 
-    this.annotationService.annnotatingAllowed.subscribe(allowed => {
+    this.processingService.setAnnotationAllowance.subscribe(allowed => {
       this.isAnnotatingAllowed = allowed;
     });
 
@@ -93,6 +93,7 @@ export class AnnotationComponent implements OnInit {
         this.isEditMode = true;
         console.log(this.isEditMode);
         console.log(this.isAnnotatingAllowed);
+        console.log(this.isAnnotationOwner);
 
         // this.annotationService.setSelectedAnnotation(this.annotation._id);
       }

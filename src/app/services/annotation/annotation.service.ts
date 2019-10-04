@@ -1,5 +1,5 @@
 import { moveItemInArray } from '@angular/cdk/drag-drop';
-import { EventEmitter, Injectable, Output } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material';
 import { ActionManager, Mesh, Tags } from 'babylonjs';
 import { Socket } from 'ngx-socket-io';
@@ -25,7 +25,6 @@ import { BabylonService } from '../babylon/babylon.service';
 import { DataService } from '../data/data.service';
 import { MessageService } from '../message/message.service';
 import { MongohandlerService } from '../mongohandler/mongohandler.service';
-import { OverlayService } from '../overlay/overlay.service';
 import { ProcessingService } from '../processing/processing.service';
 import { UserdataService } from '../userdata/userdata.service';
 
@@ -38,13 +37,7 @@ export class AnnotationService {
   private actualEntityMeshes: Mesh[] = [];
   public actualCompilation: ICompilation | undefined;
 
-  private isEntityFeaturesOpen = false;
-  private annotationModeSidenav = false;
-
   // All about annotations
-  public isAnnotatingAllowed = false;
-  @Output() annnotatingAllowed: EventEmitter<boolean> = new EventEmitter();
-
   private selectedAnnotation = new BehaviorSubject('');
   public isSelectedAnnotation = this.selectedAnnotation.asObservable();
   private editModeAnnotation = new BehaviorSubject('');
@@ -80,37 +73,35 @@ export class AnnotationService {
     private processingService: ProcessingService,
     private dialog: MatDialog,
     private userdataService: UserdataService,
-    private overlayService: OverlayService,
   ) {
     // What is actually going on and what is loaded? external Infos
     this.processingService.Observables.actualEntity.subscribe(actualEntity => {
       this.actualEntity = actualEntity;
-      this.loadAnnotations();
     });
 
     this.processingService.Observables.actualEntityMeshes.subscribe(
       actualEntityMeshes => {
         this.actualEntityMeshes = actualEntityMeshes;
-        if (this.processingService.annotatingFeatured) {
-          this.initializeAnnotationMode();
-          this.setAnnotatingAllowance();
-        }
       },
     );
 
     this.processingService.Observables.actualCompilation.subscribe(
       actualCompilation => {
-          this.actualCompilation = actualCompilation;
-      });
+        this.actualCompilation = actualCompilation;
+      },
+    );
 
-    this.overlayService.Observables.mode.subscribe(mode => {
-      this.annotationModeSidenav = mode === 'annotation';
-      this.setAnnotatingAllowance();
+    this.processingService.loadAnnotations.subscribe(load => {
+      if (load) this.loadAnnotations();
     });
 
-    this.overlayService.sidenav.subscribe(open => {
-      this.isEntityFeaturesOpen = open;
-      this.setAnnotatingAllowance();
+    this.processingService.initialiseEntityForAnnotating.subscribe(init => {
+      if (init) this.initializeAnnotationMode();
+    });
+
+    this.processingService.setAnnotationAllowance.subscribe(allowance => {
+      console.log('ich setze das mesh als', allowance);
+      this.annotationMode(allowance);
     });
 
     this.annotationmarkerService.isSelectedAnnotation.subscribe(
@@ -138,8 +129,8 @@ export class AnnotationService {
 
   private updateCurrentAnnotationsSubject() {
     const next = this.processingService.compilationLoaded
-        ? this.getCompilationAnnotations()
-        : this.getDefaultAnnotations();
+      ? this.getCompilationAnnotations()
+      : this.getDefaultAnnotations();
     this.currentAnnotationSubject.next(next);
     // After the observable updates we want to redraw markers
     setTimeout(() => this.redrawMarker(), 0);
@@ -179,11 +170,12 @@ export class AnnotationService {
     await this.annotationmarkerService.deleteAllMarker();
     this.annotations.splice(0, this.annotations.length);
 
-    if (!this.processingService.defaultEntityLoaded &&
-        !this.processingService.fallbackEntityLoaded) {
+    if (
+      !this.processingService.defaultEntityLoaded &&
+      !this.processingService.fallbackEntityLoaded
+    ) {
       // Filter null/undefined annotations
-      const serverAnnotations = this.getAnnotationsfromServerDB()
-          .filter(
+      const serverAnnotations = this.getAnnotationsfromServerDB().filter(
         annotation =>
           annotation && annotation._id && annotation.lastModificationDate,
       );
@@ -204,7 +196,10 @@ export class AnnotationService {
         this.annotations.push(annotationFallback);
       }
       if (this.processingService.defaultEntityLoaded) {
-        if (this.annotationModeSidenav && annotationLogo.length) {
+        if (
+          this.processingService.annotatingFeatured &&
+          annotationLogo.length
+        ) {
           annotationLogo.forEach((annotation: IAnnotation) =>
             this.annotations.push(annotation),
           );
@@ -236,8 +231,10 @@ export class AnnotationService {
     ) {
       const entityID = this.actualEntity._id;
       (this.actualCompilation.annotationList.filter(
-        annotation => annotation && annotation._id &&
-            annotation.target.source.relatedEntity === entityID,
+        annotation =>
+          annotation &&
+          annotation._id &&
+          annotation.target.source.relatedEntity === entityID,
       ) as IAnnotation[]).forEach((annotation: IAnnotation) =>
         serverAnnotations.push(annotation),
       );
@@ -365,8 +362,7 @@ export class AnnotationService {
   }
 
   private async sortAnnotations() {
-    const sortedDefault = this.getDefaultAnnotations()
-        .sort(
+    const sortedDefault = this.getDefaultAnnotations().sort(
       (leftSide, rightSide): number =>
         +leftSide.ranking === +rightSide.ranking
           ? 0
@@ -374,8 +370,7 @@ export class AnnotationService {
           ? -1
           : 1,
     );
-    const sortedCompilation = this.getCompilationAnnotations()
-        .sort(
+    const sortedCompilation = this.getCompilationAnnotations().sort(
       (leftSide, rightSide): number =>
         +leftSide.ranking === +rightSide.ranking
           ? 0
@@ -404,8 +399,10 @@ export class AnnotationService {
 
   // Das aktuelle Entityl wird anklickbar und damit annotierbar
   public annotationMode(value: boolean) {
-    if (this.processingService.actualEntityMediaType === 'video' ||
-        this.processingService.actualEntityMediaType === 'audio') {
+    if (
+      this.processingService.actualEntityMediaType === 'video' ||
+      this.processingService.actualEntityMediaType === 'audio'
+    ) {
       return;
     }
     this.actualEntityMeshes.forEach(mesh => {
@@ -416,8 +413,7 @@ export class AnnotationService {
   public async createNewAnnotation(result: any) {
     const camera = this.babylon.cameraManager.getInitialPosition();
 
-    this.babylon.createPreviewScreenshot(400)
-        .then(detailScreenshot => {
+    this.babylon.createPreviewScreenshot(400).then(detailScreenshot => {
       if (!this.actualEntity) {
         throw new Error(`this.actualEntity not defined: ${this.actualEntity}`);
         console.error('AnnotationService:', this);
@@ -425,9 +421,14 @@ export class AnnotationService {
       }
       const generatedId = this.mongo.generateEntityId();
 
-      const personName = this.userdataService.userData ? this.userdataService.userData.fullname :
-          'guest';
-      const personID = this.userdataService.userData ? this.userdataService.userData._id : 'guest';
+      const personName = this.userdataService.userData
+        ? this.userdataService.userData.fullname
+        : 'guest';
+      const personID = this.userdataService.userData
+        ? this.userdataService.userData._id
+        : this.userdataService.guestUserData
+        ? this.userdataService.guestUserData._id
+        : 'guest';
 
       const newAnnotation: IAnnotation = {
         validated: !this.processingService.compilationLoaded,
@@ -503,8 +504,11 @@ export class AnnotationService {
   private add(_annotation: IAnnotation): void {
     let newAnnotation = _annotation;
     newAnnotation.lastModificationDate = new Date().toISOString();
-    if (!this.processingService.defaultEntityLoaded &&
-        !this.processingService.fallbackEntityLoaded) {
+    if (
+      !this.processingService.defaultEntityLoaded &&
+      !this.processingService.fallbackEntityLoaded &&
+      this.userdataService.userData
+    ) {
       this.mongo
         .updateAnnotation(_annotation)
         .then((resultAnnotation: IAnnotation) => {
@@ -524,11 +528,14 @@ export class AnnotationService {
   public updateAnnotation(_annotation: IAnnotation) {
     let newAnnotation = _annotation;
     newAnnotation.lastModificationDate = new Date().toISOString();
-    if (!this.processingService.fallbackEntityLoaded &&
-        !this.processingService.defaultEntityLoaded) {
+    if (
+      !this.processingService.fallbackEntityLoaded &&
+      !this.processingService.defaultEntityLoaded
+    ) {
       if (
         this.userdataService.isAnnotationOwner(_annotation) ||
-        (this.processingService.compilationLoaded && this.userdataService.userOwnsCompilation)
+        (this.processingService.compilationLoaded &&
+          this.userdataService.userOwnsCompilation)
       ) {
         this.mongo
           .updateAnnotation(_annotation)
@@ -562,8 +569,10 @@ export class AnnotationService {
         );
         this.changedRankingPositions();
         this.redrawMarker();
-        if (!this.processingService.fallbackEntityLoaded &&
-            !this.processingService.defaultEntityLoaded) {
+        if (
+          !this.processingService.fallbackEntityLoaded &&
+          !this.processingService.defaultEntityLoaded
+        ) {
           this.dataService.deleteAnnotation(_annotation._id);
           this.deleteAnnotationFromServer(_annotation._id);
         }
@@ -608,8 +617,7 @@ export class AnnotationService {
       DialogGetUserDataComponent,
       dialogConfig,
     );
-    dialogRef.afterClosed()
-        .subscribe(data => {
+    dialogRef.afterClosed().subscribe(data => {
       if (data === true) {
         this.message.info('Deleted from Server');
       } else {
@@ -648,23 +656,6 @@ export class AnnotationService {
     });
   }
 
-  public setAnnotatingAllowance() {
-    if (this.processingService.annotatingFeatured &&
-        this.isEntityFeaturesOpen &&
-        !this.processingService.upload &&
-        this.annotationModeSidenav) {
-      this.isAnnotatingAllowed = true;
-      this.annotationMode(true);
-      this.annnotatingAllowed.emit(true);
-      console.log('set allowance: ', true);
-    } else {
-      this.isAnnotatingAllowed = false;
-      this.annotationMode(false);
-      this.annnotatingAllowed.emit(false);
-      console.log('set allowance: ', false);
-    }
-  }
-
   public redrawMarker() {
     this.annotationmarkerService
       .deleteAllMarker()
@@ -677,8 +668,8 @@ export class AnnotationService {
   }
 
   public drawMarker(newAnnotation: IAnnotation) {
-      const color = 'black';
-      this.annotationmarkerService.createAnnotationMarker(newAnnotation, color);
+    const color = 'black';
+    this.annotationmarkerService.createAnnotationMarker(newAnnotation, color);
   }
 
   public setSelectedAnnotation(id: string) {
@@ -758,8 +749,12 @@ export class AnnotationService {
       motivation: annotation.motivation,
       lastModifiedBy: {
         type: 'person',
-        name: this.userdataService.userData ? this.userdataService.userData.fullname : 'guest',
-        _id: this.userdataService.userData ? this.userdataService.userData._id : 'guest',
+        name: this.userdataService.userData
+          ? this.userdataService.userData.fullname
+          : 'guest',
+        _id: this.userdataService.userData
+          ? this.userdataService.userData._id
+          : 'guest',
       },
       body: annotation.body,
       target: {
@@ -771,5 +766,4 @@ export class AnnotationService {
       },
     };
   }
-
 }

@@ -17,7 +17,11 @@ import {
 import { environment } from '../../../environments/environment';
 // tslint:disable-next-line:max-line-length
 import { DialogPasswordComponent } from '../../components/dialogs/dialog-password/dialog-password.component';
-import {ICompilation, IEntity, IEntitySettings} from '../../interfaces/interfaces';
+import {
+  ICompilation,
+  IEntity,
+  IEntitySettings,
+} from '../../interfaces/interfaces';
 import { isEntityForCompilation } from '../../typeguards/typeguards';
 import { BabylonService } from '../babylon/babylon.service';
 import { LoadingscreenhandlerService } from '../babylon/loadingscreen';
@@ -43,6 +47,12 @@ export class ProcessingService {
   };
 
   @Output() setSettings: EventEmitter<boolean> = new EventEmitter();
+  @Output() loadAnnotations: EventEmitter<boolean> = new EventEmitter();
+  @Output() initialiseEntityForAnnotating: EventEmitter<
+    boolean
+  > = new EventEmitter();
+  public annotationAllowance = false;
+  @Output() setAnnotationAllowance: EventEmitter<boolean> = new EventEmitter();
 
   // mediatype = 'model' || 'entity' || 'image' || 'audio' || 'video
   public actualEntityMediaType = '';
@@ -82,7 +92,11 @@ export class ProcessingService {
     private loadingScreenHandler: LoadingscreenhandlerService,
     private userDataService: UserdataService,
     private dialog: MatDialog,
-  ) {}
+  ) {
+    this.overlayService.sidenav.subscribe(() => {
+      this.checkAnnotationAllowance();
+    });
+  }
 
   public getCurrentEntity(): IEntity | undefined {
     return this.Observables.actualEntity.source['_events'].slice(-1)[0];
@@ -106,33 +120,33 @@ export class ProcessingService {
       this.defaultEntityLoaded = false;
       this.defaultEntityLoaded = false;
     }
+    // TODO load Annotations emit (Frage: nur, wenn !collection loaded?)
+    this.loadAnnotations.emit(true);
   }
 
   public async updateActiveCompilation(compilation: ICompilation | undefined) {
     this.Subjects.actualCompilation.next(compilation);
-    if (compilation && compilation._id) {
-      this.compilationLoaded = true;
-      this.showCompilationBrowser = true;
-    } else {
-      this.compilationLoaded = false;
-    }
+    this.compilationLoaded = !!(compilation && compilation._id);
+    this.showCompilationBrowser = this.compilationLoaded;
+    // TODO load annotations emit
   }
 
   public async updateActiveEntityMeshes(meshes: Mesh[], entity: IEntity) {
-    this.initialiseActualEntitySettingsData(entity);
+    this.annotatingFeatured = false;
     await this.setAnnotatingFeatured(entity);
-
     // TODO - move to babylon load: rendering groups
     meshes.forEach(mesh => (mesh.renderingGroupId = 2));
     this.babylonService
-        .getScene()
-        .getMeshesByTags('videoPlane', mesh => (mesh.renderingGroupId = 3));
+      .getScene()
+      .getMeshesByTags('videoPlane', mesh => (mesh.renderingGroupId = 3));
     // End of TODO
     this.Subjects.actualEntityMeshes.next(meshes);
     this.setSettings.emit(true);
+    if (this.annotatingFeatured) this.initialiseEntityForAnnotating.emit(true);
+    this.checkAnnotationAllowance();
   }
 
-  public bootstrap(): void {
+  public async bootstrap() {
     const searchParams = location.search;
     const queryParams = new URLSearchParams(searchParams);
     const entityParam = queryParams.get('model') || queryParams.get('entity');
@@ -154,7 +168,24 @@ export class ProcessingService {
     // sidenav: !annotation -> !sidenav, mode != annotation && mode != upload
     // login required: mode = upload, mode = edit, mode = annotation && !default
 
-    // 1) Load Entity and compilation
+    // 1) set login required
+    if (
+      mode === 'upload' ||
+      mode === 'edit' ||
+      (mode === 'annotation' && (entityParam || compParam))
+    ) {
+      await this.userDataService.userAuthentication(true);
+    }
+
+    if (mode === 'annotation' && !entityParam && !compParam) {
+      await this.userDataService.userAuthentication(false).then(result => {
+        if (!result) {
+          this.userDataService.createTemporalUserData();
+        }
+      });
+    }
+
+    // 3) Load Entity and compilation
     if (compParam) {
       this.fetchAndLoad(entityParam ? entityParam : undefined, compParam, true);
     }
@@ -170,12 +201,12 @@ export class ProcessingService {
       this.showMenu = false;
     }
 
-    if (!mode && compParam || mode === 'open' && compParam) {
+    if ((!mode && compParam) || (mode === 'open' && compParam)) {
       this.showSettingsEditor = false;
       this.showAnnotationEditor = false;
     }
 
-    if (!mode && !compParam || !compParam && mode === 'open') {
+    if ((!mode && !compParam) || (!compParam && mode === 'open')) {
       this.showSidenav = false;
       this.showSettingsEditor = false;
       this.showAnnotationEditor = false;
@@ -185,13 +216,8 @@ export class ProcessingService {
       this.showAnnotationEditor = false;
     }
 
-    // 3) set login required
-    if (mode === 'upload' || mode === 'edit' || mode === 'annotation' && (entityParam || compParam)) {
-      this.userDataService.userAuthentication(true);
-    }
-
     // 4) toggle sidenav
-    if (!mode && compParam || mode === 'open' && compParam) {
+    if ((!mode && compParam) || (mode === 'open' && compParam)) {
       this.overlayService.toggleSidenav('compilationBrowser', true);
     }
     if (mode === 'annotation') {
@@ -234,57 +260,60 @@ export class ProcessingService {
   }
 
   private fetchCompilationData(
-      query: string,
-      specifiedEntity?: string,
-      password?: string,
+    query: string,
+    specifiedEntity?: string,
+    password?: string,
   ) {
     this.mongoHandlerService
-        .getCompilation(query, password ? password : undefined)
-        .then(compilation => {
-          if (compilation['_id']) {
-            this.updateActiveCompilation(compilation);
-            this.loadEntityAfterCollection(compilation,
-                                           specifiedEntity ? specifiedEntity : undefined);
-          } else if (
-              (compilation['status'] === 'ok' &&
-                  compilation['message'] === 'Password protected compilation')
-          ) {
-            const dialogConfig = new MatDialogConfig();
-            dialogConfig.disableClose = true;
-            dialogConfig.autoFocus = true;
-            dialogConfig.data = {
-              id: query,
-            };
-            const dialogRef = this.dialog.open(
-                DialogPasswordComponent,
-                dialogConfig,
-            );
-            dialogRef.afterClosed()
-                .subscribe(result => {
-                  if (result) {
-                    const newData = result.data;
-                    this.updateActiveCompilation(newData);
-                    this.loadEntityAfterCollection(newData,
-                                                   specifiedEntity ? specifiedEntity : undefined);
-                  } else {
-                    this.loadFallbackEntity();
-                    this.message.error(
-                        'Sorry, you are not allowed to load this Collection.',
-                    );
-                  }
-                });
-          }
-        })
-        .catch(error => {
-          console.error(error);
-          this.loadFallbackEntity();
-        });
+      .getCompilation(query, password ? password : undefined)
+      .then(compilation => {
+        if (compilation['_id']) {
+          this.updateActiveCompilation(compilation);
+          this.loadEntityAfterCollection(
+            compilation,
+            specifiedEntity ? specifiedEntity : undefined,
+          );
+        } else if (
+          compilation['status'] === 'ok' &&
+          compilation['message'] === 'Password protected compilation'
+        ) {
+          const dialogConfig = new MatDialogConfig();
+          dialogConfig.disableClose = true;
+          dialogConfig.autoFocus = true;
+          dialogConfig.data = {
+            id: query,
+          };
+          const dialogRef = this.dialog.open(
+            DialogPasswordComponent,
+            dialogConfig,
+          );
+          dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+              const newData = result.data;
+              this.updateActiveCompilation(newData);
+              this.loadEntityAfterCollection(
+                newData,
+                specifiedEntity ? specifiedEntity : undefined,
+              );
+            } else {
+              this.loadFallbackEntity();
+              this.message.error(
+                'Sorry, you are not allowed to load this Collection.',
+              );
+            }
+          });
+        }
+      })
+      .catch(error => {
+        console.error(error);
+        this.loadFallbackEntity();
+      });
   }
 
   private loadEntityAfterCollection(compilation, specifiedEntity?) {
     if (specifiedEntity) {
       const loadEntity = compilation.entities.find(
-          e => e && e._id === specifiedEntity,
+        e => e && e._id === specifiedEntity,
       );
       if (loadEntity && isEntityForCompilation(loadEntity)) {
         this.fetchEntityData(loadEntity._id);
@@ -310,7 +339,7 @@ export class ProcessingService {
           resultEntity.whitelist.enabled
         ) {
           this.loadRestrictedEntity(resultEntity);
-            } else {
+        } else {
           this.loadEntity(resultEntity);
         }
       })
@@ -321,40 +350,44 @@ export class ProcessingService {
   }
 
   private loadRestrictedEntity(resultEntity) {
-    this.userDataService.userAuthentication(true)
-        .then(auth => {
-          if (auth) {
-            this.userDataService.checkOwnerState(resultEntity)
-                .then(owned => {
-                  if (owned) {
-                    this.loadEntity(resultEntity);
-                  } else {
-                    if (resultEntity.whitelist.enabled) {
-                      this.userDataService
-                          .isUserWhitelisted(resultEntity)
-                          .then(whitelisted => {
-                            if (whitelisted) {
-                              this.loadEntity(resultEntity);
-                            } else {
-                              this.message.error('Sorry you are not allowed to load this object.');
-                              this.loadFallbackEntity();
-                            }
-                          });
+    this.userDataService.userAuthentication(true).then(auth => {
+      if (auth) {
+        this.userDataService
+          .checkOwnerState(resultEntity)
+          .then(owned => {
+            if (owned) {
+              this.loadEntity(resultEntity);
+            } else {
+              if (resultEntity.whitelist.enabled) {
+                this.userDataService
+                  .isUserWhitelisted(resultEntity)
+                  .then(whitelisted => {
+                    if (whitelisted) {
+                      this.loadEntity(resultEntity);
                     } else {
-                      this.message.error('Sorry you are not allowed to load this object.');
+                      this.message.error(
+                        'Sorry you are not allowed to load this object.',
+                      );
                       this.loadFallbackEntity();
                     }
-                  }
-                })
-                .catch(error => {
-                  console.error(error);
-                  this.loadFallbackEntity();
-                });
-          } else {
-            this.message.error('Sorry you are not allowed to load this object.');
+                  });
+              } else {
+                this.message.error(
+                  'Sorry you are not allowed to load this object.',
+                );
+                this.loadFallbackEntity();
+              }
+            }
+          })
+          .catch(error => {
+            console.error(error);
             this.loadFallbackEntity();
-          }
-        });
+          });
+      } else {
+        this.message.error('Sorry you are not allowed to load this object.');
+        this.loadFallbackEntity();
+      }
+    });
   }
 
   public async loadEntity(
@@ -374,7 +407,9 @@ export class ProcessingService {
           this.actualEntitySettingsOnServer = undefined;
           this.actualEntitySettings = undefined;
           this.loadFallbackEntity();
-          this.message.error('I can not load this Object without Settings and not during upload.');
+          this.message.error(
+            'I can not load this Object without Settings and not during upload.',
+          );
         }
         // cases: entity, image, audio, video, text
         const _url = URL + newEntity.processed[this.actualEntityQuality];
@@ -485,32 +520,33 @@ export class ProcessingService {
   }
 
   private async initialiseActualEntitySettingsData(entity: IEntity) {
-    if (this.actualEntityMediaType === 'model' ||
-        this.actualEntityMediaType === 'entity' ||
-        this.actualEntityMediaType === 'image') {
+    if (
+      this.actualEntityMediaType === 'model' ||
+      this.actualEntityMediaType === 'entity' ||
+      this.actualEntityMediaType === 'image'
+    ) {
       this.meshSettings = true;
     }
     let upload = false;
-    if (!entity.settings ||
-        entity.settings.preview === undefined ||
-        // TODO: how to check if settings need to be set? atm next line
-        entity.settings.preview === '' ||
-        entity.settings.cameraPositionInitial === undefined ||
-        entity.settings.background === undefined ||
-        entity.settings.lights === undefined ||
-        entity.settings.rotation === undefined ||
-        entity.settings.scale === undefined
+    if (
+      !entity.settings ||
+      entity.settings.preview === undefined ||
+      // TODO: how to check if settings need to be set? atm next line
+      entity.settings.preview === '' ||
+      entity.settings.cameraPositionInitial === undefined ||
+      entity.settings.background === undefined ||
+      entity.settings.lights === undefined ||
+      entity.settings.rotation === undefined ||
+      entity.settings.scale === undefined
     ) {
       upload = await this.createSettings();
-      if (upload) {
-        this.upload = true;
-      } else {
-        this.upload = false;
-      }
+      this.upload = upload;
     } else {
       this.upload = false;
       this.actualEntitySettings = entity.settings;
-      this.actualEntitySettingsOnServer = JSON.parse(JSON.stringify(entity.settings));
+      this.actualEntitySettingsOnServer = JSON.parse(
+        JSON.stringify(entity.settings),
+      );
     }
   }
 
@@ -553,9 +589,23 @@ export class ProcessingService {
 
   // inititalize Annotation Mode
   private async setAnnotatingFeatured(entity: IEntity) {
-    const annotatableMediaType = (entity.mediaType === 'image' ||
-        entity.mediaType === 'entity' || entity.mediaType === 'model');
-    if (!this.showAnnotationEditor || !annotatableMediaType) return;
+    const annotatableMediaType =
+      entity.mediaType === 'image' ||
+      entity.mediaType === 'entity' ||
+      entity.mediaType === 'model';
+    if (
+      !this.showAnnotationEditor ||
+      !annotatableMediaType ||
+      this.fallbackEntityLoaded
+    ) {
+      if (
+        (!annotatableMediaType || this.fallbackEntityLoaded) &&
+        this.showAnnotationEditor
+      ) {
+        this.showAnnotationEditor = false;
+      }
+      return;
+    }
     if (!this.compilationLoaded) {
       if (this.defaultEntityLoaded || this.fallbackEntityLoaded) {
         this.annotatingFeatured = true;
@@ -565,15 +615,22 @@ export class ProcessingService {
         this.annotatingFeatured = true;
         return;
       }
-      this.userDataService.checkOwnerState(entity)
-          .then(owned => {
-            this.annotatingFeatured = owned;
-            return;
-          });
+      this.userDataService.checkOwnerState(entity).then(owned => {
+        this.annotatingFeatured = owned;
+        if (!owned && this.showAnnotationEditor)
+          this.showAnnotationEditor = false;
+        return;
+      });
     } else {
       const compilation = this.getCurrentCompilation();
-      if (!compilation) return;
-      if (!compilation.whitelist.enabled && this.userDataService.authenticatedUser) {
+      if (!compilation) {
+        if (this.showAnnotationEditor) this.showAnnotationEditor = false;
+        return;
+      }
+      if (
+        !compilation.whitelist.enabled &&
+        this.userDataService.authenticatedUser
+      ) {
         this.annotatingFeatured = true;
         return;
       }
@@ -583,33 +640,37 @@ export class ProcessingService {
           this.annotatingFeatured = true;
           return;
         }
-        this.userDataService.isUserWhitelisted(compilation)
-            .then(listed => {
-              this.annotatingFeatured = listed;
-              return;
-            });
+        this.userDataService.isUserWhitelisted(compilation).then(listed => {
+          this.annotatingFeatured = listed;
+          if (!listed && this.showAnnotationEditor)
+            this.showAnnotationEditor = false;
+          return;
+        });
       }
     }
   }
 
-  // TODO set annotation allowance
-  /*
-  public setAnnotatingAllowance() {
-    if (this.processingService.annotatingFeatured &&
-        this.isEntityFeaturesOpen &&
-        !this.processingService.upload &&
-        this.annotationModeSidenav) {
-      this.isAnnotatingAllowed = true;
-      this.annotationMode(true);
-      this.annnotatingAllowed.emit(true);
-      console.log('set allowance: ', true);
+  private checkAnnotationAllowance() {
+    const open = this.overlayService.sidenavIsOpen;
+    if (!this.annotatingFeatured || this.upload) {
+      console.log('Ich returne und mache nichts');
+      return;
+    }
+    if (!open) {
+      console.log('allowance emittet als false', this.annotationAllowance);
+      this.annotationAllowance = false;
+      this.setAnnotationAllowance.emit(false);
+      console.log('Ich setze die allowance zu false');
     } else {
-      this.isAnnotatingAllowed = false;
-      this.annotationMode(false);
-      this.annnotatingAllowed.emit(false);
-      console.log('set allowance: ', false);
+      if (
+        this.overlayService.actualSidenavMode === 'annotation' &&
+        (this.userDataService.userData || this.userDataService.guestUserData) &&
+        !this.annotationAllowance
+      ) {
+        this.annotationAllowance = true;
+        this.setAnnotationAllowance.emit(true);
+        console.log('Ich setze die allowance zu true');
+      }
     }
   }
-   */
-
 }

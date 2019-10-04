@@ -26,9 +26,9 @@ export class AnnotationsEditorComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.isAnnotatingAllowed = this.annotationService.isAnnotatingAllowed;
+    this.isAnnotatingAllowed = this.processingService.annotationAllowance;
 
-    this.annotationService.annnotatingAllowed.subscribe(allowed => {
+    this.processingService.setAnnotationAllowance.subscribe(allowed => {
       this.isAnnotatingAllowed = allowed;
     });
   }
