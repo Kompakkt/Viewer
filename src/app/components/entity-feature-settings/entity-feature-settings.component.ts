@@ -4,10 +4,10 @@ import { Color3, StandardMaterial, Vector3 } from 'babylonjs';
 
 import { BabylonService } from '../../services/babylon/babylon.service';
 import { EntitySettingsService } from '../../services/entitysettings/entitysettings.service';
-import {LightService} from '../../services/light/light.service';
-import {MongohandlerService} from '../../services/mongohandler/mongohandler.service';
+import { LightService } from '../../services/light/light.service';
+import { MongohandlerService } from '../../services/mongohandler/mongohandler.service';
 import { ProcessingService } from '../../services/processing/processing.service';
-import {UserdataService} from '../../services/userdata/userdata.service';
+import { UserdataService } from '../../services/userdata/userdata.service';
 // tslint:disable-next-line:max-line-length
 import { DialogMeshsettingsComponent } from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
 
@@ -43,7 +43,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
     public dialog: MatDialog,
     private mongoHandler: MongohandlerService,
     public userdataService: UserdataService,
-    public  lightService: LightService,
+    public lightService: LightService,
   ) {}
 
   ngOnInit() {}
@@ -55,20 +55,20 @@ export class EntityFeatureSettingsComponent implements OnInit {
 
   private async setPreview() {
     this.babylonService
-        .createPreviewScreenshot(400)
-        .then(screenshot => {
-          if (!this.processingService.actualEntitySettings) {
-            throw new Error('Settings missing');
-            console.error(this);
-            return;
-          }
-          this.processingService.actualEntitySettings.preview = screenshot;
-        })
-        .catch(error => {
-          throw new Error('Can not create Screenshot.');
-          console.error(error);
+      .createPreviewScreenshot(400)
+      .then(screenshot => {
+        if (!this.processingService.actualEntitySettings) {
+          throw new Error('Settings missing');
+          console.error(this);
           return;
-        });
+        }
+        this.processingService.actualEntitySettings.preview = screenshot;
+      })
+      .catch(error => {
+        throw new Error('Can not create Screenshot.');
+        console.error(error);
+        return;
+      });
   }
 
   private async setActualViewAsInitialView() {
@@ -77,8 +77,14 @@ export class EntityFeatureSettingsComponent implements OnInit {
       console.error(this);
       return;
     }
-    const {position, target} = await this.babylonService.cameraManager.getInitialPosition();
-    this.processingService.actualEntitySettings.cameraPositionInitial = { position, target };
+    const {
+      position,
+      target,
+    } = await this.babylonService.cameraManager.getInitialPosition();
+    this.processingService.actualEntitySettings.cameraPositionInitial = {
+      position,
+      target,
+    };
     this.entitySettingsService.loadCameraInititalPosition();
   }
 
@@ -92,6 +98,17 @@ export class EntityFeatureSettingsComponent implements OnInit {
     this.entitySettingsService.loadBackgroundColor();
   }
 
+  public resetBackgroundColor() {
+    if (!this.processingService.actualEntitySettingsOnServer) {
+      throw new Error('Settings from Server missing');
+      console.error(this);
+      return;
+    }
+    const color = this.processingService.actualEntitySettingsOnServer
+      .background;
+    this.setGroundColor(color);
+  }
+
   // Lights
   setLightIntensity(intensity: number, lightType: string) {
     if (!this.processingService.actualEntitySettings) {
@@ -101,7 +118,9 @@ export class EntityFeatureSettingsComponent implements OnInit {
     }
     const indexOfLight = this.lightService.getLightIndexByType(lightType);
     if (indexOfLight !== undefined) {
-      this.processingService.actualEntitySettings.lights[indexOfLight].intensity = intensity;
+      this.processingService.actualEntitySettings.lights[
+        indexOfLight
+      ].intensity = intensity;
       this.entitySettingsService.loadLightIntensity(lightType);
     } else {
       // tslint:disable-next-line:prefer-template
@@ -135,13 +154,19 @@ export class EntityFeatureSettingsComponent implements OnInit {
     if (indexOfLight) {
       switch (dimension) {
         case 'x':
-        this.processingService.actualEntitySettings.lights[indexOfLight].position.x = value;
-        break;
+          this.processingService.actualEntitySettings.lights[
+            indexOfLight
+          ].position.x = value;
+          break;
         case 'y':
-          this.processingService.actualEntitySettings.lights[indexOfLight].position.y = value;
+          this.processingService.actualEntitySettings.lights[
+            indexOfLight
+          ].position.y = value;
           break;
         case 'z':
-          this.processingService.actualEntitySettings.lights[indexOfLight].position.z = value;
+          this.processingService.actualEntitySettings.lights[
+            indexOfLight
+          ].position.z = value;
           break;
         default:
           // tslint:disable-next-line:prefer-template
@@ -151,7 +176,6 @@ export class EntityFeatureSettingsComponent implements OnInit {
       }
     }
     this.entitySettingsService.loadPointLightPosition();
-
   }
 
   public async saveActualSettings() {
@@ -166,37 +190,57 @@ export class EntityFeatureSettingsComponent implements OnInit {
       console.error(this);
       return;
     }
-    if (!this.processingService.defaultEntityLoaded &&
-        !this.processingService.fallbackEntityLoaded) {
+    if (
+      !this.processingService.defaultEntityLoaded &&
+      !this.processingService.fallbackEntityLoaded
+    ) {
       this.mongoHandler
-          .updateSettings(entity._id, this.processingService.actualEntitySettings)
-          .then(result => {
-            console.log('Settings gespeichert', result);
-            this.processingService.actualEntitySettingsOnServer =
-                JSON.parse(JSON.stringify(this.processingService.actualEntitySettings));
-            if (this.processingService.upload) this.processingService.upload = false;
-          });
+        .updateSettings(entity._id, this.processingService.actualEntitySettings)
+        .then(result => {
+          console.log('Settings gespeichert', result);
+          this.processingService.actualEntitySettingsOnServer = JSON.parse(
+            JSON.stringify(this.processingService.actualEntitySettings),
+          );
+          if (this.processingService.upload)
+            this.processingService.upload = false;
+        });
     }
   }
 
   public backToDefaultSettings() {
-    if (!this.processingService.actualEntitySettings ||
-        !this.processingService.actualEntitySettingsOnServer) {
+    if (
+      !this.processingService.actualEntitySettings ||
+      !this.processingService.actualEntitySettingsOnServer
+    ) {
       throw new Error('Settings missing');
       console.error(this);
       return;
     }
-    this.processingService.actualEntitySettings.preview =
-        JSON.parse(JSON.stringify(this.processingService.actualEntitySettingsOnServer.preview));
-    this.processingService.actualEntitySettings.cameraPositionInitial =
-        JSON.parse(JSON.stringify(
-            this.processingService.actualEntitySettingsOnServer.cameraPositionInitial));
-    this.processingService.actualEntitySettings.background =
-        JSON.parse(JSON.stringify(this.processingService.actualEntitySettingsOnServer.background));
-    this.processingService.actualEntitySettings.lights =
-        JSON.parse(JSON.stringify(this.processingService.actualEntitySettingsOnServer.lights));
+    this.processingService.actualEntitySettings.preview = JSON.parse(
+      JSON.stringify(
+        this.processingService.actualEntitySettingsOnServer.preview,
+      ),
+    );
+    this.processingService.actualEntitySettings.cameraPositionInitial = JSON.parse(
+      JSON.stringify(
+        this.processingService.actualEntitySettingsOnServer
+          .cameraPositionInitial,
+      ),
+    );
+    this.processingService.actualEntitySettings.background = JSON.parse(
+      JSON.stringify(
+        this.processingService.actualEntitySettingsOnServer.background,
+      ),
+    );
+    this.processingService.actualEntitySettings.lights = JSON.parse(
+      JSON.stringify(
+        this.processingService.actualEntitySettingsOnServer.lights,
+      ),
+    );
 
-    JSON.parse(JSON.stringify(this.processingService.actualEntitySettingsOnServer));
+    JSON.parse(
+      JSON.stringify(this.processingService.actualEntitySettingsOnServer),
+    );
     this.entitySettingsService.restoreSettings();
   }
 
@@ -205,19 +249,17 @@ export class EntityFeatureSettingsComponent implements OnInit {
   // ___________ Stepper for initial Setting during upload ___________
   public showNextAlertFirstStep() {
     const dialogRef = this.dialog.open(DialogMeshsettingsComponent);
-    dialogRef.afterClosed()
-        .subscribe(finish => {
-          if (finish) {
-            this.resetVisualUIMeshSettingsHelper()
-                .then(() => {
-                  this.entitySettingsService.destroyVisualUIMeshSettingsHelper();
-                  this.entitySettingsService.decomposeMeshSettingsHelper();
-                });
-            this.stepper.selected.completed = true;
-            this.stepper.selected.editable = false;
-            this.stepper.next();
-          }
+    dialogRef.afterClosed().subscribe(finish => {
+      if (finish) {
+        this.resetVisualUIMeshSettingsHelper().then(() => {
+          this.entitySettingsService.destroyVisualUIMeshSettingsHelper();
+          this.entitySettingsService.decomposeMeshSettingsHelper();
         });
+        this.stepper.selected.completed = true;
+        this.stepper.selected.editable = false;
+        this.stepper.next();
+      }
+    });
   }
 
   public nextSecondStep() {
@@ -239,21 +281,30 @@ export class EntityFeatureSettingsComponent implements OnInit {
     let factor;
     switch (dimension) {
       case 'height':
-        factor = +this.processingService.actualEntityHeight /
-            this.entitySettingsService.initialSize.y;
-        this.processingService.actualEntitySettings.scale = parseFloat(factor.toFixed(2));
+        factor =
+          +this.processingService.actualEntityHeight /
+          this.entitySettingsService.initialSize.y;
+        this.processingService.actualEntitySettings.scale = parseFloat(
+          factor.toFixed(2),
+        );
         this.entitySettingsService.loadScaling();
         break;
       case 'width':
-        factor = +this.processingService.actualEntityWidth /
-            this.entitySettingsService.initialSize.x;
-        this.processingService.actualEntitySettings.scale = parseFloat(factor.toFixed(2));
+        factor =
+          +this.processingService.actualEntityWidth /
+          this.entitySettingsService.initialSize.x;
+        this.processingService.actualEntitySettings.scale = parseFloat(
+          factor.toFixed(2),
+        );
         this.entitySettingsService.loadScaling();
         break;
       case 'depth':
-        factor = +this.processingService.actualEntityDepth /
-            this.entitySettingsService.initialSize.z;
-        this.processingService.actualEntitySettings.scale = parseFloat(factor.toFixed(2));
+        factor =
+          +this.processingService.actualEntityDepth /
+          this.entitySettingsService.initialSize.z;
+        this.processingService.actualEntitySettings.scale = parseFloat(
+          factor.toFixed(2),
+        );
         this.entitySettingsService.loadScaling();
         break;
       case 'scale':
@@ -275,17 +326,17 @@ export class EntityFeatureSettingsComponent implements OnInit {
     switch (axis) {
       case 'x':
         this.processingService.actualEntitySettings.rotation.x =
-            this.processingService.actualEntitySettings.rotation.x + degree;
+          this.processingService.actualEntitySettings.rotation.x + degree;
         this.entitySettingsService.loadRotation();
         break;
       case 'y':
         this.processingService.actualEntitySettings.rotation.y =
-            this.processingService.actualEntitySettings.rotation.y + degree;
+          this.processingService.actualEntitySettings.rotation.y + degree;
         this.entitySettingsService.loadRotation();
         break;
       case 'z':
         this.processingService.actualEntitySettings.rotation.z =
-            this.processingService.actualEntitySettings.rotation.z + degree;
+          this.processingService.actualEntitySettings.rotation.z + degree;
         this.entitySettingsService.loadRotation();
         break;
       case 'xyz_reset':
@@ -314,53 +365,50 @@ export class EntityFeatureSettingsComponent implements OnInit {
     this.setScalingFactorAxis(1, false);
     this.toggleGroundVisibility(false);
     this.setScalingFactorGround(1);
-    // TODO refactor
-    const color = {
-      r: 255,
-      g: 255,
-      b: 255,
-    };
-    this.setGroundColor(color);
-    this.setBackgroundColor(color);
+    this.setGroundColor();
+    this.resetBackgroundColor();
   }
 
-  public setGroundColor(color) {
+  public setGroundColor(color?) {
     const material = new StandardMaterial(
-        'GroundPlaneMaterial',
-        this.babylonService.getScene(),
+      'GroundPlaneMaterial',
+      this.babylonService.getScene(),
     );
     material.diffuseColor = new Color3(
-        color.r / 255,
-        color.g / 255,
-        color.b / 255,
+      (color ? color.r : 255) / 255,
+      (color ? color.g : 255) / 255,
+      (color ? color.b : 255) / 255,
     );
-    if (this.entitySettingsService.ground) this.entitySettingsService.ground.material = material;
+    if (this.entitySettingsService.ground)
+      this.entitySettingsService.ground.material = material;
   }
 
   public setScalingFactorAxis(factor: number, world: boolean) {
-    world ? this.worldAxisScalingFactor = factor : this.localAxisScalingFactor = factor;
-    const pos = (factor * 0.9) *
-        (world ? this.entitySettingsService.worldAxisInitialSize :
-            this.entitySettingsService.localAxisInitialSize);
+    world
+      ? (this.worldAxisScalingFactor = factor)
+      : (this.localAxisScalingFactor = factor);
+    const pos =
+      factor *
+      0.9 *
+      (world
+        ? this.entitySettingsService.worldAxisInitialSize
+        : this.entitySettingsService.localAxisInitialSize);
     this.babylonService
-        .getScene()
-        .getMeshesByTags(world ? 'worldAxis' : 'localAxis')
-        .map(
-            mesh =>
-                (mesh.scaling = new Vector3(factor, factor, factor)),
-        );
+      .getScene()
+      .getMeshesByTags(world ? 'worldAxis' : 'localAxis')
+      .map(mesh => (mesh.scaling = new Vector3(factor, factor, factor)));
     this.babylonService
-        .getScene()
-        .getMeshesByTags(world ? 'worldAxisX' : 'localAxisX')
-        .map(mesh => (mesh.position = new Vector3(pos * 0.9, pos * -0.05, 0)));
+      .getScene()
+      .getMeshesByTags(world ? 'worldAxisX' : 'localAxisX')
+      .map(mesh => (mesh.position = new Vector3(pos * 0.9, pos * -0.05, 0)));
     this.babylonService
-        .getScene()
-        .getMeshesByTags(world ? 'worldAxisY' : 'localAxisY')
-        .map(mesh => (mesh.position = new Vector3(0, pos * 0.9, pos * -0.05)));
+      .getScene()
+      .getMeshesByTags(world ? 'worldAxisY' : 'localAxisY')
+      .map(mesh => (mesh.position = new Vector3(0, pos * 0.9, pos * -0.05)));
     this.babylonService
-        .getScene()
-        .getMeshesByTags(world ? 'worldAxisZ' : 'localAxisZ')
-        .map(mesh => (mesh.position = new Vector3(0, pos * 0.05, pos * 0.9)));
+      .getScene()
+      .getMeshesByTags(world ? 'worldAxisZ' : 'localAxisZ')
+      .map(mesh => (mesh.position = new Vector3(0, pos * 0.05, pos * 0.9)));
   }
 
   public setScalingFactorGround(factor: number) {
@@ -370,7 +418,11 @@ export class EntityFeatureSettingsComponent implements OnInit {
       return;
     }
     this.groundScalingFactor = factor;
-    this.entitySettingsService.ground.scaling = new Vector3(factor, factor, factor);
+    this.entitySettingsService.ground.scaling = new Vector3(
+      factor,
+      factor,
+      factor,
+    );
   }
 
   public toggleBoundingBoxEntityVisibility(value?: boolean) {
@@ -379,8 +431,12 @@ export class EntityFeatureSettingsComponent implements OnInit {
       console.error(this);
       return;
     }
-    this.boundingBoxVisibility = (value !== undefined) ? value : !this.boundingBoxVisibility;
-    this.entitySettingsService.boundingBox.visibility = this.boundingBoxVisibility ? 1 : 0;
+    this.boundingBoxVisibility =
+      value !== undefined ? value : !this.boundingBoxVisibility;
+    this.entitySettingsService.boundingBox.visibility = this
+      .boundingBoxVisibility
+      ? 1
+      : 0;
   }
 
   public toggleBoundingBoxMeshesVisibility(value?: boolean) {
@@ -390,34 +446,37 @@ export class EntityFeatureSettingsComponent implements OnInit {
       console.error(this);
       return;
     }
-    this.boundingBoxMeshesVisibility = (value !== undefined) ? value :
-        !this.boundingBoxMeshesVisibility;
-    meshes.forEach(mesh => mesh.showBoundingBox = this.boundingBoxMeshesVisibility);
+    this.boundingBoxMeshesVisibility =
+      value !== undefined ? value : !this.boundingBoxMeshesVisibility;
+    meshes.forEach(
+      mesh => (mesh.showBoundingBox = this.boundingBoxMeshesVisibility),
+    );
   }
 
   public toggleAxesVisibility(axis: string, value?: boolean) {
     let axisVisibility = false;
     if (axis === 'localAxis') {
-      axisVisibility = (value !== undefined) ? value : !this.localAxisVisibility;
+      axisVisibility = value !== undefined ? value : !this.localAxisVisibility;
       this.localAxisVisibility = axisVisibility;
     }
     if (axis === 'worldAxis') {
-      axisVisibility = (value !== undefined) ? value : !this.worldAxisVisibility;
+      axisVisibility = value !== undefined ? value : !this.worldAxisVisibility;
       this.worldAxisVisibility = axisVisibility;
     }
     this.visibilityMesh(axis, axisVisibility);
   }
 
   public toggleGroundVisibility(value?: boolean) {
-    this.groundVisibility = (value !== undefined) ? value : !this.groundVisibility;
+    this.groundVisibility =
+      value !== undefined ? value : !this.groundVisibility;
     this.visibilityMesh('ground', this.groundVisibility);
   }
 
   private visibilityMesh(tag: string, visibility: boolean) {
     const setVisibility = visibility ? 1 : 0;
     this.babylonService
-        .getScene()
-        .getMeshesByTags(tag)
-        .map(mesh => (mesh.visibility = setVisibility));
+      .getScene()
+      .getMeshesByTags(tag)
+      .map(mesh => (mesh.visibility = setVisibility));
   }
 }

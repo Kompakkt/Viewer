@@ -93,7 +93,6 @@ export class AnnotationService {
 
     this.processingService.loadAnnotations.subscribe(load => {
       if (load) this.loadAnnotations();
-      this.updateCurrentAnnotationsSubject();
     });
 
     this.processingService.initialiseEntityForAnnotating.subscribe(init => {

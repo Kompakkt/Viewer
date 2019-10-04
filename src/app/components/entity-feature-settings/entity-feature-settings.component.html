@@ -128,7 +128,7 @@
             </button>
           </h5>
           <div *ngIf="backgroundColorPickerToggle">
-            <color-chrome (onChange)="setGroundColor($event.color.rgb)"></color-chrome>
+            <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
           </div>
 
           <mat-checkbox [checked]="worldAxisVisibility"
@@ -157,7 +157,7 @@
             <mat-slider min="0" max="10" step="1" [value]="groundScalingFactor" #matslider
                         (input)="setScalingFactorGround($event.value)"></mat-slider>
             <h6>Color</h6>
-            <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
+            <color-chrome (onChange)="setGroundColor($event.color.rgb)"></color-chrome>
           </div>
           <button class="fullwidth-button" mat-raised-button
                   (click)="resetVisualUIMeshSettingsHelper()">Reset Helper

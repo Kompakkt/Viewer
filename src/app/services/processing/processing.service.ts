@@ -51,6 +51,7 @@ export class ProcessingService {
   @Output() initialiseEntityForAnnotating: EventEmitter<
     boolean
   > = new EventEmitter();
+  public annotatingFeatured = false;
   public annotationAllowance = false;
   @Output() setAnnotationAllowance: EventEmitter<boolean> = new EventEmitter();
 
@@ -82,7 +83,6 @@ export class ProcessingService {
   public showAnnotationEditor = true;
   public showSettingsEditor = true;
   public showCompilationBrowser = false;
-  public annotatingFeatured = false;
 
   constructor(
     private mongoHandlerService: MongohandlerService,
@@ -126,10 +126,11 @@ export class ProcessingService {
 
   public async updateActiveCompilation(compilation: ICompilation | undefined) {
     this.Subjects.actualCompilation.next(compilation);
-    if (this.userDataService.userData)
-      this.userDataService.checkOwnerState(compilation);
     this.compilationLoaded = !!(compilation && compilation._id);
     this.showCompilationBrowser = this.compilationLoaded;
+    if (this.userDataService.userData && this.compilationLoaded) {
+      this.userDataService.checkOwnerState(compilation);
+    }
     // TODO load annotations emit
   }
 
@@ -271,7 +272,7 @@ export class ProcessingService {
       .then(compilation => {
         if (compilation['_id']) {
           this.updateActiveCompilation(compilation);
-          this.loadEntityAfterCollection(
+          this.fetchEntityDataAfterCollection(
             compilation,
             specifiedEntity ? specifiedEntity : undefined,
           );
@@ -293,7 +294,7 @@ export class ProcessingService {
             if (result) {
               const newData = result.data;
               this.updateActiveCompilation(newData);
-              this.loadEntityAfterCollection(
+              this.fetchEntityDataAfterCollection(
                 newData,
                 specifiedEntity ? specifiedEntity : undefined,
               );
@@ -312,7 +313,7 @@ export class ProcessingService {
       });
   }
 
-  private loadEntityAfterCollection(compilation, specifiedEntity?) {
+  private fetchEntityDataAfterCollection(compilation, specifiedEntity?) {
     if (specifiedEntity) {
       const loadEntity = compilation.entities.find(
         e => e && e._id === specifiedEntity,
@@ -340,7 +341,7 @@ export class ProcessingService {
           !resultEntity.online ||
           resultEntity.whitelist.enabled
         ) {
-          this.loadRestrictedEntity(resultEntity);
+          this.fetchRestrictedEntityData(resultEntity);
         } else {
           this.loadEntity(resultEntity);
         }
@@ -351,7 +352,7 @@ export class ProcessingService {
       });
   }
 
-  private loadRestrictedEntity(resultEntity) {
+  private fetchRestrictedEntityData(resultEntity) {
     this.userDataService.userAuthentication(true).then(auth => {
       if (auth) {
         this.userDataService

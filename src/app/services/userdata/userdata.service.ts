@@ -155,7 +155,11 @@ export class UserdataService {
         reject(false);
         return;
       }
-      if (!this.userData || !this.userData.data) {
+      if (
+        !this.userData ||
+        !this.userData.data ||
+        !isEntity(element || isCompilation(element))
+      ) {
         this.userOwnsEntity = false;
         this.userOwnsCompilation = false;
         resolve(false);
