@@ -24,7 +24,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
 
   constructor(
     private babylonService: BabylonService,
-    private processingService: ProcessingService,
+    public processingService: ProcessingService,
     public entitySettingsService: EntitySettingsService,
     public dialog: MatDialog,
     private mongoHandler: MongohandlerService,

@@ -29,7 +29,7 @@
     </button>
     <button mat-button
             type=submit
-            (click)="clickedLogin()"
+            (click)="login()"
             [disabled]="data.username.length === 0 || data.password.length === 0 || waitingForResponse">Login
     </button>
   </div>

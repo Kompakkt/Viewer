@@ -22,7 +22,7 @@ export class SceneComponent implements AfterViewInit {
 
   constructor(
     private babylonService: BabylonService,
-    private processingService: ProcessingService,
+    public processingService: ProcessingService,
     public annotationService: AnnotationService,
     private viewContainerRef: ViewContainerRef,
   ) {}

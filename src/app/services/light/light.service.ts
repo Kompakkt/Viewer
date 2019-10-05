@@ -74,11 +74,10 @@ export class LightService {
     this.pointlight.position = position;
   }
 
-  public getLightByType(lightType: string): IEntityLight | undefined {
+  public getLightByType(lightType: string): IEntityLight {
     if (!this.processingService.actualEntitySettings) {
       throw new Error('Settings missing');
       console.error(this);
-      return undefined;
     }
     let light;
     if (lightType === 'ambientlightUp' || lightType === 'ambientlightDown') {
