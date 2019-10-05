@@ -89,10 +89,10 @@ export const settingsKompakktLogo: IEntitySettings = {
   },
   background: {
     color: {
-      r: 183,
-      g: 43,
-      b: 86,
-      a: 1,
+      r: 0,
+      g: 0,
+      b: 0,
+      a: 0,
     },
     effect: false,
   },
