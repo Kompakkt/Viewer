@@ -117,7 +117,8 @@ export class ProcessingService {
       this.defaultEntityLoaded = entity._id === 'default';
       this.fallbackEntityLoaded = entity._id === 'fallback';
     }
-    if (this.userDataService.userData) this.userDataService.checkOwnerState(entity);
+    if (this.userDataService.userData)
+      this.userDataService.checkOwnerState(entity);
     // TODO load Annotations emit (Frage: nur, wenn !collection loaded?)
     this.loadAnnotations.emit(true);
   }
@@ -628,7 +629,9 @@ export class ProcessingService {
     } else {
       const compilation = this.getCurrentCompilation();
       if (!compilation) {
-        if (this.showAnnotationEditor) this.showAnnotationEditor = false;
+        if (this.showAnnotationEditor) {
+          this.showAnnotationEditor = false;
+        }
         return;
       }
       if (
@@ -639,17 +642,19 @@ export class ProcessingService {
         return;
       }
       if (compilation.whitelist.enabled) {
-        await this.userDataService.checkOwnerState(compilation);
-        if (this.userDataService.userOwnsCompilation) {
-          this.annotatingFeatured = true;
-          return;
-        }
-        this.userDataService.isUserWhitelisted(compilation).then(listed => {
-          this.annotatingFeatured = listed;
-          if (!listed && this.showAnnotationEditor) {
-            this.showAnnotationEditor = false;
+        this.userDataService.checkOwnerState(compilation).then(owner => {
+          if (owner) {
+            this.annotatingFeatured = true;
+            return;
+          } else {
+            this.userDataService.isUserWhitelisted(compilation).then(listed => {
+              this.annotatingFeatured = listed;
+              if (!listed && this.showAnnotationEditor) {
+                this.showAnnotationEditor = false;
+              }
+              return;
+            });
           }
-          return;
         });
       }
     }

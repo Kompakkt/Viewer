@@ -158,7 +158,7 @@ export class UserdataService {
       if (
         !this.userData ||
         !this.userData.data ||
-        !isEntity(element || isCompilation(element))
+        (!isEntity(element) && !isCompilation(element))
       ) {
         this.userOwnsEntity = false;
         this.userOwnsCompilation = false;
@@ -167,33 +167,48 @@ export class UserdataService {
       }
       const id = element._id;
 
-      if (isEntity(element) && this.userData.data.entity) {
-        this.userOwnsEntity = !!this.userData.data.entity.find(
-          (el: IEntity) => el._id === id,
+      if (isCompilation(element)) {
+        const idFromUser = this.userData._id;
+        this.userOwnsCompilation = element.relatedOwner
+          ? element.relatedOwner._id === idFromUser
+          : false;
+        if (this.userOwnsCompilation) {
+          resolve(this.userOwnsCompilation);
+          return;
+        } else {
+          if (this.userData.data.compilation) {
+            this.userOwnsCompilation = !!this.userData.data.compilation.find(
+              (el: ICompilation) => el._id === id,
+            );
+            resolve(this.userOwnsCompilation);
+            return;
+          } else {
+            resolve(false);
+            return;
+          }
+        }
+      }
+
+      if (isEntity(element)) {
+        const idFromUser = this.userData._id;
+        this.userOwnsEntity = !!element.relatedEntityOwners.find(
+          owner => owner._id === idFromUser,
         );
         if (this.userOwnsEntity) {
           resolve(true);
+          return;
         } else {
-          const idFromUser = this.userData._id;
-          this.userOwnsEntity = !!element.relatedEntityOwners.find(
-            owner => owner._id === idFromUser,
-          );
-          resolve(
-            !!element.relatedEntityOwners.find(
-              owner => owner._id === idFromUser,
-            ),
-          );
+          if (this.userData.data.entity) {
+            this.userOwnsEntity = !!this.userData.data.entity.find(
+              (el: IEntity) => el._id === id,
+            );
+            resolve(this.userOwnsEntity);
+            return;
+          } else {
+            this.userOwnsEntity = false;
+            resolve(this.userOwnsEntity);
+          }
         }
-      }
-      if (isCompilation(element) && this.userData.data.compilation) {
-        this.userOwnsCompilation = !!this.userData.data.compilation.find(
-          (el: ICompilation) => el._id === id,
-        );
-        resolve(
-          !!this.userData.data.compilation.find(
-            (el: ICompilation) => el._id === id,
-          ),
-        );
       }
     });
   }
