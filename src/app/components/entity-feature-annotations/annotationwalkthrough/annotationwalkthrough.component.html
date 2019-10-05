@@ -1,0 +1,14 @@
+<div id="annotationwalkthrough"
+     *ngIf="annotations.length > 1">
+  <button id="btn-previous" mat-icon-button (click)="previousAnnotation()"
+          matTooltip="Back" matTooltipPosition="above">
+    <mat-icon aria-label="Back">keyboard_arrow_left</mat-icon>
+  </button>
+
+  <div id="walktertitle">{{ title }}</div>
+
+  <button id="btn-next" mat-icon-button (click)="nextAnnotation()"
+          matTooltip="Next" matTooltipPosition="above">
+    <mat-icon aria-label="Save Scene">keyboard_arrow_right</mat-icon>
+  </button>
+</div>

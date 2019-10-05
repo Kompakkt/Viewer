@@ -1,0 +1,22 @@
+:host {
+  position: absolute;
+  top: 25px;
+  left: 5px;
+  transition: 280ms;
+  z-index: 99;
+  color: #fff;
+}
+
+:host a {
+  text-decoration: none;
+  color: #fff;
+}
+
+:host.is-open {
+  transition: 280ms;
+  left: 305px;
+}
+
+.mat-icon-button.active {
+  background-color: rgba(255, 255, 255, 0.2);
+}

@@ -18,11 +18,12 @@ export const beforeAudioRender = (
       });
     }
     if (Engine.audioEngine.audioContext) {
-      audioContainer.currentTime = Engine.audioEngine.audioContext['currentTime'] -
-          audioContainer.currentTime;
+      audioContainer.currentTime =
+        Engine.audioEngine.audioContext['currentTime'] -
+        audioContainer.currentTime;
       if (audioContainer.timeSlider) {
-        audioContainer.timeSlider.value = (audioContainer.timeSlider.value +
-            audioContainer.currentTime);
+        audioContainer.timeSlider.value =
+          audioContainer.timeSlider.value + audioContainer.currentTime;
       }
     }
   }
@@ -38,8 +39,9 @@ export const afterAudioRender = (audioContainer: IAudioContainer) => {
 };
 
 export const beforeVideoRender = (
-   // scene: Scene,
-    videoContainer: IVideoContainer) => {
+  // scene: Scene,
+  videoContainer: IVideoContainer,
+) => {
   if (!videoContainer.video.paused) {
     videoContainer.timeSlider.value = videoContainer.video.currentTime;
   }

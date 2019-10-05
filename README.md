@@ -1,8 +1,12 @@
-# Kompakkt
+# Kompakkt.Viewer
 
 ![Kompakkt](src/assets/img/kompakkt-logo.png)
 
-Web Based 3D Viewer and 3D Annotation System
+Web Based 3D Viewer and 3D Annotation System.
+
+## Development setup
+
+Run `npm i` after cloning this repository in order to install needed libraries.
 
 ## Development server
 

@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HemisphericLight, PointLight, Scene, Vector3 } from 'babylonjs';
+
+import { IEntityLight } from '../../interfaces/interfaces';
 import { BabylonService } from '../babylon/babylon.service';
+import { ProcessingService } from '../processing/processing.service';
 
 @Injectable({
   providedIn: 'root',
@@ -12,19 +15,47 @@ export class LightService {
   private ambientlightUp: HemisphericLight | undefined;
   private ambientlightDown: HemisphericLight | undefined;
 
-  private pointlightPosX: number | undefined;
-  private pointlightPosY: number | undefined;
-  private pointlightPosZ: number | undefined;
-  public pointlightIntensity: number | undefined;
-
-  constructor(private babylonService: BabylonService) {
+  constructor(
+    private babylonService: BabylonService,
+    private processingService: ProcessingService,
+  ) {
     this.scene = this.babylonService.getScene();
   }
 
+  public initialiseAmbientLight(type: string, intensity: number) {
+    if (type !== 'up' && type !== 'down') {
+      throw new Error('Can not create this light');
+      console.error(this);
+      return;
+    }
+    const position = new Vector3(0, type === 'up' ? 1 : -1, 0);
+    const light = new HemisphericLight(
+      type === 'up' ? 'ambientlightUp' : 'ambientlightDown',
+      position,
+      this.scene,
+    );
+    light.intensity = intensity;
+    light.specular = new BABYLON.Color3(0, 0, 0);
+    if (type === 'up') {
+      if (this.ambientlightUp) this.ambientlightUp.dispose();
+      this.ambientlightUp = light;
+    } else {
+      if (this.ambientlightDown) this.ambientlightDown.dispose();
+      this.ambientlightDown = light;
+    }
+  }
+
+  public initialisePointLight(intensity: number, position: Vector3) {
+    if (this.pointlight) this.pointlight.dispose();
+    this.pointlight = new PointLight('pointLight', position, this.scene);
+    this.pointlight.specular = new BABYLON.Color3(0, 0, 0);
+    this.pointlight.intensity = intensity;
+    this.pointlight.parent = this.babylonService.getActiveCamera();
+  }
+
   public setLightIntensity(light: string, intensity: number) {
-    if (light === 'pointlight' && this.pointlight) {
+    if (light === 'pointLight' && this.pointlight) {
       this.pointlight.intensity = intensity;
-      this.pointlightIntensity = intensity;
     }
     if (light === 'ambientlightUp' && this.ambientlightUp) {
       this.ambientlightUp.intensity = intensity;
@@ -34,74 +65,61 @@ export class LightService {
     }
   }
 
-  public createPointLight(name: string, position: any) {
-    if (this.pointlight) this.pointlight.dispose();
-    this.pointlight = new PointLight(
-      name,
-      new Vector3(position.x, position.y, position.z),
-      this.scene,
-    );
-    this.pointlightPosX = position.x;
-    this.pointlightPosY = position.y;
-    this.pointlightPosZ = position.z;
-
-    this.pointlight.intensity = this.pointlightIntensity
-      ? this.pointlightIntensity
-      : 1;
-
-    this.pointlight.specular = new BABYLON.Color3(0, 0, 0);
-  }
-
-  public createAmbientlightDown(name: string, position: any) {
-    if (this.ambientlightDown) this.ambientlightDown.dispose();
-    this.ambientlightDown = new HemisphericLight(
-      name,
-      new Vector3(position.x, position.y, position.z),
-      this.scene,
-    );
-    this.ambientlightDown.specular = new BABYLON.Color3(0, 0, 0);
-  }
-
-  public createAmbientlightUp(name: string, position: any) {
-    if (this.ambientlightUp) this.ambientlightUp.dispose();
-    this.ambientlightUp = new HemisphericLight(
-      name,
-      new Vector3(position.x, position.y, position.z),
-      this.scene,
-    );
-    this.ambientlightUp.specular = new BABYLON.Color3(0, 0, 0);
-  }
-
-  public setLightPosition(dimension: string, pos: number) {
-    switch (dimension) {
-      case 'x':
-        this.pointlightPosX = pos;
-        break;
-      case 'y':
-        this.pointlightPosY = pos;
-        break;
-      case 'z':
-        this.pointlightPosZ = pos;
-        break;
-      default:
+  public setPointLightPosition(position: Vector3) {
+    if (!this.pointlight) {
+      throw new Error('No pointlight in scene');
+      console.error(this);
+      return;
     }
-
-    this.createPointLight('pointlight', {
-      x: this.pointlightPosX,
-      y: this.pointlightPosY,
-      z: this.pointlightPosZ,
-    });
+    this.pointlight.position = position;
   }
 
-  public getPointlightData(): any {
-    return {
-      type: 'PointLight',
-      position: {
-        x: this.pointlightPosX,
-        y: this.pointlightPosY,
-        z: this.pointlightPosZ,
-      },
-      intensity: this.pointlightIntensity ? this.pointlightIntensity : 1,
-    };
+  public getLightByType(lightType: string): IEntityLight | undefined {
+    if (!this.processingService.actualEntitySettings) {
+      throw new Error('Settings missing');
+      console.error(this);
+      return undefined;
+    }
+    let light;
+    if (lightType === 'ambientlightUp' || lightType === 'ambientlightDown') {
+      let direction;
+      if (lightType === 'ambientlightUp') direction = 1;
+      if (lightType === 'ambientlightDown') direction = -1;
+      light = this.processingService.actualEntitySettings.lights.find(
+        obj => obj.type === 'HemisphericLight' && obj.position.y === direction,
+      );
+    }
+    if (lightType === 'pointLight') {
+      light = this.processingService.actualEntitySettings.lights.find(
+        obj => obj.type === 'PointLight',
+      );
+    }
+    return light ? light : undefined;
+  }
+
+  public getLightIndexByType(lightType: string): number | undefined {
+    if (!this.processingService.actualEntitySettings) {
+      throw new Error('Settings missing');
+      console.error(this);
+      return;
+    }
+    console.log('get Index of', lightType);
+    let indexOfLight;
+    if (lightType === 'ambientlightUp' || lightType === 'ambientlightDown') {
+      let direction;
+      if (lightType === 'ambientlightUp') direction = 1;
+      if (lightType === 'ambientlightDown') direction = -1;
+      console.log('diection:', direction);
+      indexOfLight = this.processingService.actualEntitySettings.lights.findIndex(
+        obj => obj.type === 'HemisphericLight' && obj.position.y === direction,
+      );
+      console.log('index ist', indexOfLight);
+    }
+    if (lightType === 'pointLight') {
+      indexOfLight = this.processingService.actualEntitySettings.lights.findIndex(
+        obj => obj.type === 'PointLight',
+      );
+    }
+    return indexOfLight !== undefined ? indexOfLight : undefined;
   }
 }

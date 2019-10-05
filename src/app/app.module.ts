@@ -19,6 +19,7 @@ import {
   MatProgressSpinnerModule,
   MatRadioModule,
   MatSelectModule,
+  MatSidenavModule,
   MatSliderModule,
   MatSlideToggleModule,
   MatSnackBarModule,
@@ -35,10 +36,7 @@ import { SocketIoModule } from 'ngx-socket-io';
 import { environment } from '../environments/environment';
 
 import { AppComponent } from './app.component';
-import { BroadcastComponent } from './components/broadcast/broadcast.component';
-import { BroadcastingUsersComponent } from './components/broadcast/broadcasting-users.component';
-import { ContentBrowserComponent } from './components/content-browser/content-browser.component';
-import { ContentComponent } from './components/content/content.component';
+import { CompilationBrowserComponent } from './components/compilation-browser/compilation-browser.component';
 import { DialogAnnotationEditorComponent } from './components/dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
 import { DialogDeleteAnnotationsComponent } from './components/dialogs/dialog-delete-annotations/dialog-delete-annotations.component';
 import { DialogDeleteSingleAnnotationComponent } from './components/dialogs/dialog-delete-single-annotation/dialog-delete-single-annotation.component';
@@ -48,18 +46,20 @@ import { LoginComponent } from './components/dialogs/dialog-login/login.componen
 import { DialogMeshsettingsComponent } from './components/dialogs/dialog-meshsettings/dialog-meshsettings.component';
 import { DialogPasswordComponent } from './components/dialogs/dialog-password/dialog-password.component';
 import { DialogShareAnnotationComponent } from './components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
+import { MediaBrowserComponent } from './components/entity-feature-annotations/annotation-media-browser/media-browser.component';
+import { AnnotationComponentForEditorComponent } from './components/entity-feature-annotations/annotation/annotation-for-editor.component';
+import { AnnotationComponent } from './components/entity-feature-annotations/annotation/annotation.component';
+import { AnnotationsEditorComponent } from './components/entity-feature-annotations/annotations-editor/annotations-editor.component';
+import { AnnotationwalkthroughComponent } from './components/entity-feature-annotations/annotationwalkthrough/annotationwalkthrough.component';
+import { EntityFeatureSettingsLightsComponent } from './components/entity-feature-settings/entity-feature-settings-lights/entity-feature-settings-lights.component';
+import { EntityFeatureSettingsMeshComponent } from './components/entity-feature-settings/entity-feature-settings-mesh/entity-feature-settings-mesh.component';
+import { EntityFeatureSettingsComponent } from './components/entity-feature-settings/entity-feature-settings.component';
 import { LoadingscreenComponent } from './components/loadingscreen/loadingscreen.component';
-import { MediaBrowserComponent } from './components/media-browser/media-browser.component';
 import { MenuComponent } from './components/menu/menu.component';
-import { AnnotationComponentForEditorComponent } from './components/object-feature-annotations/annotation/annotation-for-editor.component';
-import { AnnotationComponent } from './components/object-feature-annotations/annotation/annotation.component';
-import { AnnotationsEditorComponent } from './components/object-feature-annotations/annotations-editor/annotations-editor.component';
-import { AnnotationwalkthroughComponent } from './components/object-feature-annotations/annotationwalkthrough/annotationwalkthrough.component';
-import { EntityFeatureMetadataComponent } from './components/object-feature-metadata/object-feature-metadata.component';
-import { EntityFeatureSettingsComponent } from './components/object-feature-settings/object-feature-settings.component';
-import { EntityFeaturesComponent } from './components/object-features/object-features.component';
 import { RenderCanvasComponent } from './components/render-canvas/render-canvas.component';
 import { SceneComponent } from './components/scene/scene.component';
+import { SidenavMenuComponent } from './components/sidenav-menu/sidenav-menu.component';
+import { SidenavComponent } from './components/sidenav/sidenav.component';
 import { MediaTypePipe } from './pipes/media-type.pipe';
 
 @NgModule({
@@ -67,15 +67,12 @@ import { MediaTypePipe } from './pipes/media-type.pipe';
     AppComponent,
     SceneComponent,
     MenuComponent,
-    EntityFeaturesComponent,
     AnnotationsEditorComponent,
     AnnotationComponent,
     AnnotationComponentForEditorComponent,
     AnnotationwalkthroughComponent,
-    ContentComponent,
-    ContentBrowserComponent,
+    CompilationBrowserComponent,
     LoadingscreenComponent,
-    EntityFeatureMetadataComponent,
     EntityFeatureSettingsComponent,
     LoginComponent,
     DialogPasswordComponent,
@@ -83,14 +80,16 @@ import { MediaTypePipe } from './pipes/media-type.pipe';
     DialogMeshsettingsComponent,
     DialogAnnotationEditorComponent,
     MediaTypePipe,
-    BroadcastComponent,
-    BroadcastingUsersComponent,
     DialogDeleteSingleAnnotationComponent,
     DialogGetUserDataComponent,
     MediaBrowserComponent,
     DialogShareAnnotationComponent,
     DialogInviteBroadcastingComponent,
     RenderCanvasComponent,
+    SidenavMenuComponent,
+    SidenavComponent,
+    EntityFeatureSettingsLightsComponent,
+    EntityFeatureSettingsMeshComponent,
   ],
   imports: [
     BrowserModule,
@@ -124,6 +123,7 @@ import { MediaTypePipe } from './pipes/media-type.pipe';
       url: `${environment.express_server_url}:${environment.express_server_port}`,
     }),
     MarkdownModule.forRoot(),
+    MatSidenavModule,
   ],
   entryComponents: [
     LoginComponent,

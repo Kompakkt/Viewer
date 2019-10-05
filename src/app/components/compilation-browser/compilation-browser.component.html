@@ -1,0 +1,36 @@
+<div id="compilationBrowser">
+    <div *ngIf="processingService.compilationLoaded">
+
+        <div id="entity-overview"
+             *ngIf="processingService.Observables.actualEntity | async; let entity">
+            <mat-card class="entity-card">
+                <mat-card-header>
+                    <mat-card-title>
+                        Actual selected Object: {{entity.name}}
+                    </mat-card-title>
+                </mat-card-header>
+                <img
+                        *ngIf="entity.settings && entity.settings.preview"
+                        src={{entity.settings.preview}}>
+            </mat-card>
+        </div>
+
+        <div class="category">
+            Object{{(processingService.getCurrentCompilation().entities.length > 1) ? 's' : ''}}
+            in {{processingService.getCurrentCompilation().name}}:
+        </div>
+
+        <mat-card class="entity-card"
+                  *ngFor="let entity of processingService.getCurrentCompilation().entities">
+            <mat-card-header>
+                <mat-card-title>
+                    {{entity.name}}
+                </mat-card-title>
+            </mat-card-header>
+            <img *ngIf="entity.settings.preview"
+                 src={{entity.settings.preview}}
+                 (click)="processingService.fetchAndLoad(entity._id, undefined, true)">
+        </mat-card>
+
+    </div>
+</div>

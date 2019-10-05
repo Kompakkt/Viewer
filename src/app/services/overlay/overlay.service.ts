@@ -1,68 +1,53 @@
 import { EventEmitter, Injectable, Output } from '@angular/core';
+import { ReplaySubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class OverlayService {
-  public editorIsOpen = false;
-  public collectionsOverviewIsOpen = false;
-  public editorSettingIsOpen = false;
-  public editorAnnotationsIsOpen = false;
+  public sidenavIsOpen = false;
+  public actualSidenavMode = '';
+  private Subjects = {
+    mode: new ReplaySubject<string>(),
+  };
+  public Observables = {
+    mode: this.Subjects.mode.asObservable(),
+  };
 
-  @Output() editor: EventEmitter<boolean> = new EventEmitter();
-  @Output() collectionsOverview: EventEmitter<boolean> = new EventEmitter();
-  @Output() editorSetting: EventEmitter<boolean> = new EventEmitter();
-  @Output() editorAnnotations: EventEmitter<boolean> = new EventEmitter();
-  @Output() defaultAnnotations: EventEmitter<boolean> = new EventEmitter();
+  @Output() sidenav: EventEmitter<boolean> = new EventEmitter();
 
-  public toggleEditor(): boolean {
-    this.editorIsOpen = !this.editorIsOpen;
-    this.editor.emit(this.editorIsOpen);
-
-    if (this.editorIsOpen) {
-      this.collectionsOverviewIsOpen = !this.editorIsOpen;
-      this.collectionsOverview.emit(this.collectionsOverviewIsOpen);
+  public toggleSidenav(mode: string, open?: boolean): boolean {
+    if (this.actualSidenavMode === mode && this.sidenavIsOpen) {
+      if (open) {
+        return true;
+      }
+      this.sidenavIsOpen = false;
+      this.sidenav.emit(false);
+      return false;
     }
-
-    return this.editorIsOpen;
-  }
-
-  public toggleCollectionsOverview(): boolean {
-    this.collectionsOverviewIsOpen = !this.collectionsOverviewIsOpen;
-    this.collectionsOverview.emit(this.collectionsOverviewIsOpen);
-
-    if (this.collectionsOverviewIsOpen) {
-      this.editorIsOpen = !this.collectionsOverviewIsOpen;
-      this.editor.emit(this.editorIsOpen);
+    if (this.actualSidenavMode === mode && !this.sidenavIsOpen) {
+      this.sidenavIsOpen = true;
+      this.sidenav.emit(true);
+      return true;
     }
-
-    return this.collectionsOverviewIsOpen;
-  }
-
-  public activateSettingsTab(): boolean {
-    this.editorIsOpen = !this.editorIsOpen;
-    this.editor.emit(this.editorIsOpen);
-    this.editorSettingIsOpen = true;
-    this.editorSetting.emit(true);
-
-    return this.editorIsOpen;
-  }
-
-  public deactivateMeshSettings(): boolean {
-    this.editorSettingIsOpen = false;
-    this.editorSetting.emit(false);
-
-    this.defaultAnnotations.emit(true);
-
+    if (this.actualSidenavMode !== mode && this.sidenavIsOpen) {
+      this.sidenavIsOpen = false;
+      this.sidenav.emit(false);
+      this.actualSidenavMode = mode;
+      this.Subjects.mode.next(mode);
+      setTimeout(() => {
+        this.sidenavIsOpen = true;
+        this.sidenav.emit(true);
+      }, 300);
+      return true;
+    }
+    if (this.actualSidenavMode !== mode && !this.sidenavIsOpen) {
+      this.actualSidenavMode = mode;
+      this.Subjects.mode.next(mode);
+      this.sidenavIsOpen = true;
+      this.sidenav.emit(true);
+      return true;
+    }
     return false;
-  }
-
-  public activateAnnotationsTab(): boolean {
-    this.editorIsOpen = !this.editorIsOpen;
-    this.editor.emit(this.editorIsOpen);
-    this.editorAnnotationsIsOpen = true;
-    this.editorAnnotations.emit(true);
-
-    return this.editorIsOpen;
   }
 }

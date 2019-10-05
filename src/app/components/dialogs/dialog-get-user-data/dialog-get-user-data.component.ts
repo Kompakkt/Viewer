@@ -34,10 +34,11 @@ export class DialogGetUserDataComponent implements OnInit {
         .deleteRequest(this.id, 'annotation', this.username, this.password)
         .then((result: any) => {
           if (result.status === 'ok') {
-            this.userdataService.setcachedLoginData(
-              this.password,
-              this.username,
-            );
+            this.userdataService.loginData = {
+              username: this.username,
+              password: this.password,
+              isCached: true,
+            };
             this.dialogRef.close(true);
             this.message.info('Deleted from Server');
           } else {

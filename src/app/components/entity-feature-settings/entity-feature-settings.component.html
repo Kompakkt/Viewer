@@ -1,0 +1,152 @@
+<div *ngIf="processingService.showSettingsEditor && processingService.getCurrentEntity()" id="editor-entitysettings">
+
+    <div *ngIf="processingService.upload === false">
+        <mat-card>
+            <mat-card-content>
+                <button class="fullwidth-button"
+                        mat-raised-button
+                        (click)="backToDefaultSettings()">Back to Default
+                </button>
+                <button class="fullwidth-button"
+                        mat-raised-button
+                        *ngIf="!processingService.defaultEntityLoaded && !processingService.fallbackEntityLoaded &&
+                this.userdataService.userOwnsEntity &&!processingService.compilationLoaded &&
+                this.processingService.mode === 'edit'"
+                        (click)="saveActualSettings()">Save as default
+                </button>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card>
+            <mat-card-header>
+                <mat-card-title>
+                    Background
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
+                <br>
+                <mat-slide-toggle [(ngModel)]="this.processingService.actualEntitySettings.background.effect"
+                                  (change)="entitySettingsService.loadBackgroundEffect()">
+                    Gradient-Brightness Effect
+                </mat-slide-toggle>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card>
+            <mat-card-header>
+                <mat-card-title>
+                    Lights
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <app-entity-feature-settings-lights></app-entity-feature-settings-lights>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card>
+            <mat-card-header>
+                <mat-card-title>
+                    Preview & Initial Perspective
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                Click on this image to set actual view as initial perspective.
+                <img class="previewimage" src={{this.processingService.actualEntitySettings.preview}}
+                     (click)="setInitialPerspectivePreview()">
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card>
+            <mat-card-content>
+                <button class="fullwidth-button"
+                        mat-raised-button
+                        (click)="backToDefaultSettings()">Back to Default
+                </button>
+                <button class="fullwidth-button"
+                        mat-raised-button
+                        *ngIf="!processingService.defaultEntityLoaded &&
+                userdataService.userOwnsEntity &&
+                !processingService.compilationLoaded && processingService.mode==='edit'"
+                        (click)="saveActualSettings()">Save as default
+                </button>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <div *ngIf="processingService.upload">
+        <mat-vertical-stepper [linear]=true #stepper>
+
+            <mat-step *ngIf="processingService.meshSettings">
+                <app-entity-feature-settings-mesh></app-entity-feature-settings-mesh>
+                <div>
+                    <button mat-button (click)="showNextAlertFirstStep()">Next</button>
+                </div>
+            </mat-step>
+
+            <mat-step>
+                <ng-template matStepLabel>Set Initial Settings</ng-template>
+                <h5>Background
+                    <button mat-icon-button (click)="backgroundToggle = !backgroundToggle"
+                            matTooltip="Toggle" matTooltipPosition="above"
+                            type="button">
+                        <mat-icon>
+                            {{backgroundToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}}
+                        </mat-icon>
+                    </button>
+                </h5>
+                <div *ngIf="backgroundToggle">
+                    <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
+                    <br>
+                    <mat-slide-toggle [(ngModel)]="this.processingService.actualEntitySettings.background.effect"
+                                      (change)="entitySettingsService.loadBackgroundEffect()">
+                        Gradient-Brightness Effect
+                    </mat-slide-toggle>
+                </div>
+                <h5>Lights
+                    <button mat-icon-button (click)="lightsToggle = !lightsToggle"
+                            matTooltip="Toggle" matTooltipPosition="above"
+                            type="button">
+                        <mat-icon>
+                            {{lightsToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}}
+                        </mat-icon>
+                    </button>
+                </h5>
+                <div *ngIf="lightsToggle">
+                    <app-entity-feature-settings-lights></app-entity-feature-settings-lights>
+                </div>
+                <div *ngIf="processingService.actualEntityMediaType !== 'audio'">
+                    <h5> Preview & Initial Perspective
+                        <button mat-icon-button (click)="previewToggle = !previewToggle"
+                                matTooltip="Toggle" matTooltipPosition="above"
+                                type="button">
+                            <mat-icon>
+                                {{previewToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}}
+                            </mat-icon>
+                        </button>
+                    </h5>
+                    <div *ngIf="previewToggle">
+                        Please select a nice and fitting camera perspective before you go on to the next step.
+                        By clicking on the next button the actual view will be set as initial perspective.
+                        And I will automatically produce a preview - smile!
+                    </div>
+                </div>
+                <div>
+                    <button mat-button (click)="nextSecondStep()">Next</button>
+                </div>
+            </mat-step>
+
+            <mat-step>
+                <ng-template matStepLabel>Done</ng-template>
+                <img class="previewimage" src={{this.processingService.actualEntitySettings.preview}}>
+                You set all settings and I celebrate it with this preview.
+                <br> Please save them if you are done. Afterwards you may add annotations.
+                <div>
+                    <button mat-button matStepperPrevious>Back</button>
+                    <button mat-button (click)="saveActualSettings()">Save</button>
+                </div>
+            </mat-step>
+
+        </mat-vertical-stepper>
+    </div>
+</div>

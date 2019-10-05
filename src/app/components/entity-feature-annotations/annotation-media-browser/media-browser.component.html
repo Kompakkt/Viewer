@@ -1,0 +1,74 @@
+<div id="media-browser">
+
+  <div id="menu">
+
+    <button mat-icon-button
+            (click)="addExternalImage = !addExternalImage"
+            matTooltip="Add External Image"
+            matTooltipPosition="above"
+            type="mat-icon-button"
+            class="btn-add-medium">
+      <mat-icon aria-label="Add External Image">image</mat-icon>
+    </button>
+    <button *ngIf="entities"
+            mat-icon-button
+            (click)="addCompilationEntity = !addCompilationEntity"
+            matTooltip="Add Entity From Collection"
+            matTooltipPosition="above"
+            type="mat-icon-button"
+            class="btn-add-medium">
+      <mat-icon aria-label="Add Entity From Collection">folder_open</mat-icon>
+    </button>
+
+  </div>
+
+  <div *ngIf="addExternalImage"
+       id="external-image">
+
+    <h3>Embed an external image at cursor position:</h3>
+
+    <mat-form-field>
+      <input matInput
+             #url
+             placeholder="URL"
+             name="URL"
+             type="text">
+    </mat-form-field>
+
+    <mat-form-field>
+      <input matInput
+             #description
+             placeholder="Image Description"
+             name="Image Description"
+             type="text">
+    </mat-form-field>
+
+    <button mat-icon-button
+            (click)="addImage(url.value, description.value)"
+            matTooltip="Add Image at Cursor Position"
+            matTooltipPosition="above"
+            type="button">
+      <mat-icon aria-label="Add Image">add</mat-icon>
+      Add Image
+    </button>
+
+  </div>
+
+  <div *ngIf="addCompilationEntity"
+       id="collection-entities">
+
+    <h3>Or embed an entity of your collection:</h3>
+
+    <ng-container *ngFor="let entity of entities.entities; let i = index">
+
+      <mat-card (click)="addEntity(i)"
+                class="compilation-entity">
+        <img mat-card-image src="{{entity.settings.preview}}" alt="{{entity.name}}">
+        <mat-card-footer>{{entity.name}}</mat-card-footer>
+      </mat-card>
+
+    </ng-container>
+
+  </div>
+
+</div>

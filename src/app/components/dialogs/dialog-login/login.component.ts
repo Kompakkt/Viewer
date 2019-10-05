@@ -1,7 +1,8 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
-import {UserdataService} from '../../../services/userdata/userdata.service';
+import { ILDAPData } from '../../../interfaces/interfaces';
+import { MongohandlerService } from '../../../services/mongohandler/mongohandler.service';
 
 @Component({
   selector: 'app-login',
@@ -9,38 +10,50 @@ import {UserdataService} from '../../../services/userdata/userdata.service';
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit {
-  public username = '';
-  public password = '';
+  public data: {
+    username: string;
+    password: string;
+    userData: ILDAPData | undefined;
+  } = {
+    username: '',
+    password: '',
+    userData: undefined,
+  };
 
   public waitingForResponse = false;
   public loginFailed = false;
 
   constructor(
-      public dialogRef: MatDialogRef<LoginComponent>,
-      public account: UserdataService,
-      @Inject(MAT_DIALOG_DATA) public concern: string,
+    public dialogRef: MatDialogRef<LoginComponent>,
+    public mongoService: MongohandlerService,
+    @Inject(MAT_DIALOG_DATA) public concern: string,
   ) {}
 
   ngOnInit() {}
 
-  public clickedLogin() {
+  public login() {
     this.waitingForResponse = true;
     this.dialogRef.disableClose = true;
-    this.account
-        .attemptLogin(this.username, this.password)
-        .then(result => {
+    this.mongoService
+      .login(this.data.username, this.data.password)
+      .then(result => {
+        if (result.status === 'ok') {
           this.waitingForResponse = false;
-          this.loginFailed = !result;
+          this.loginFailed = false;
           this.dialogRef.disableClose = false;
-          if (result) {
-            this.dialogRef.close(true);
-          }
-        })
-        .catch(error => {
-          console.error(error);
+          this.data.userData = result;
+          this.dialogRef.close({ result: true, data: this.data });
+        } else {
           this.dialogRef.disableClose = false;
           this.waitingForResponse = false;
           this.loginFailed = true;
-        });
+        }
+      })
+      .catch(error => {
+        console.error(error);
+        this.dialogRef.disableClose = false;
+        this.waitingForResponse = false;
+        this.loginFailed = true;
+      });
   }
 }

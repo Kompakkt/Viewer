@@ -139,6 +139,7 @@ export interface IUserData {
 export interface ILoginData {
   username: string;
   password: string;
+  isCached: boolean;
 }
 
 export interface ILDAPData {
@@ -153,7 +154,7 @@ export interface ILDAPData {
   role: string;
 
   data: {
-    [key: string]: Array<string | null | IEntity | IAnnotation | ICompilation>;
+    [key: string]: Array<string | null | any>;
   };
 }
 
@@ -262,13 +263,15 @@ export interface IEntitySettings {
     color: { r: number; b: number; g: number; a: number };
     effect: boolean;
   };
-  lights: Array<{
-    type: string;
-    position: { x: number; y: number; z: number };
-    intensity: number;
-  }>;
+  lights: IEntityLight[];
   rotation: { x: number; y: number; z: number };
   scale: number;
+}
+
+export interface IEntityLight {
+  type: string;
+  position: { x: number; y: number; z: number };
+  intensity: number;
 }
 
 export interface IEntity extends IWhitelist {

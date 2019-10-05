@@ -1,0 +1,106 @@
+<mat-card class="annotation-card">
+  <form class="annotation-form" *ngIf="annotation">
+
+    <mat-card-header (click)="changeOpenPopup()">
+
+      <div mat-card-avatar class="annotation-header-image"><span>{{annotation.ranking}}</span></div>
+
+      <mat-card-title>
+        <span *ngIf="!isEditMode">{{annotation.body.content.title | uppercase}}</span>
+        <mat-form-field *ngIf="isEditMode">
+          <input matInput name="title" #title="ngModel" type="text" placeholder="Title"
+                 [(ngModel)]="annotation.body.content.title">
+        </mat-form-field>
+      </mat-card-title>
+
+      <mat-card-subtitle>{{(annotation.validated) ? 'validated' : 'unvalidated'}}</mat-card-subtitle>
+
+    </mat-card-header>
+
+    <img mat-card-image src={{annotation.body.content.relatedPerspective.preview}} *ngIf="!collapsed">
+
+    <mat-card-content *ngIf="!collapsed">
+
+      <markdown id="annotation-content"
+                *ngIf="!isEditMode"
+                [data]="annotation.body.content.description"></markdown>
+
+      <mat-form-field *ngIf="isEditMode" class="description">
+        <textarea matInput
+                  #annotationContent
+                  cdkTextareaAutosize
+                  cdkAutosizeMinRows="1"
+                  name="description"
+                  type="text"
+                  placeholder="Description"
+                  [(ngModel)]="annotation.body.content.description"></textarea>
+      </mat-form-field>
+
+      <mat-checkbox class="validation"
+                    *ngIf="isEditMode && this.userdataService.userOwnsCompilation"
+                    [checked]="annotation.validated"
+                    (change)="annotation.validated = !annotation.validated">Validated
+      </mat-checkbox>
+
+      <button mat-icon-button (click)="selectPerspective()"
+              matTooltip="Select Perspective"
+              matTooltipPosition="right"
+              *ngIf="isEditMode"
+              type="button"
+              class="perspective">
+        <mat-icon aria-label="Select Perspective">camera</mat-icon>
+        Select Perspective
+      </button>
+
+    </mat-card-content>
+
+    <mat-card-actions>
+      <mat-slide-toggle
+        [checked]="showAnnotation"
+        (change)="toggleVisibility()">
+        {{this.showAnnotation ? 'Hide' : 'Show'}}
+      </mat-slide-toggle>
+
+      <button mat-icon-button
+              (click)= toggleEditViewMode();
+              [matTooltip]="isEditMode ? 'Save Annotation' : 'Edit Annotation'"
+              *ngIf="isAnnotatingAllowed && isAnnotationOwner"
+              matTooltipPosition="above"
+              type="button">
+        <mat-icon [attr.aria-label]= "isEditMode ? 'Save Annotation' : 'Edit Annotation'">{{isEditMode ? 'save' : 'edit'}}</mat-icon>
+      </button>
+
+      <button mat-icon-button
+              (click)="editFullscreen()"
+              matTooltip="Edit in Fullscreen Mode"
+              matTooltipPosition="above"
+              type="button"
+              *ngIf="isAnnotatingAllowed && isAnnotationOwner">
+        <mat-icon aria-label="Fullscreen">select_all</mat-icon>
+      </button>
+
+      <button mat-icon-button
+              *ngIf="annotation._id !== 'DefaultAnnotation'"
+              (click)="shareAnnotation()"
+              matTooltip="Copy to collection"
+              matTooltipPosition="above"
+              type="button">
+        <mat-icon aria-label="Copy to collection">file_copy</mat-icon>
+      </button>
+
+      <button *ngIf="isAnnotatingAllowed && isAnnotationOwner"
+              mat-icon-button (click)="deleteAnnotation()"
+              matTooltip="Delete" matTooltipPosition="above"
+              type="button">
+        <mat-icon aria-label="Delete">delete</mat-icon>
+      </button>
+    </mat-card-actions>
+
+  </form>
+  <div *ngIf="!annotation">
+    <h2>Annotation not defined</h2>
+    <p>Open the devloper console for more information on this error</p>
+    <br>
+    <p>If you're a user, please report this bug to a developer</p>
+  </div>
+</mat-card>

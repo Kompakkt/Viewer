@@ -6,7 +6,7 @@
              placeholder="Username"
              type="username"
              matInput
-             [(ngModel)]="username" [ngModelOptions]="{standalone: true}">
+             [(ngModel)]="data.username" [ngModelOptions]="{standalone: true}">
     </mat-form-field>
   </div>
   <div mat-dialog-content>
@@ -14,7 +14,7 @@
                            placeholder="Password"
                            type="password"
                            matInput
-                           [(ngModel)]="password"
+                           [(ngModel)]="data.password"
                            [ngModelOptions]="{standalone: true}">
     </mat-form-field>
   </div>
@@ -30,7 +30,7 @@
     <button mat-button
             type=submit
             (click)="clickedLogin()"
-            [disabled]="username.length === 0 || password.length === 0 || waitingForResponse">Login
+            [disabled]="data.username.length === 0 || data.password.length === 0 || waitingForResponse">Login
     </button>
   </div>
 </form>

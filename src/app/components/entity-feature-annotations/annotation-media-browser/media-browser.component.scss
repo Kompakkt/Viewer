@@ -1,0 +1,26 @@
+#media-browser {
+  display: block;
+}
+
+#media-browser mat-form-field {
+  margin-right: 5px;
+}
+
+.compilation-entity {
+  cursor: pointer;
+  width: 250px;
+  display: inline-block;
+}
+
+#menu {
+  position: absolute;
+  margin-top: -40px;
+  margin-left: -10px;
+  cursor: pointer;
+}
+
+#external-image h3,
+#collection-entities h3 {
+  font-size: 1rem;
+  font-weight: lighter;
+}

@@ -70,8 +70,9 @@ a {
   width: 100% !important;
 }
 
+#sidenav,
 #editor,
-#collections {
+#compilationBrowser {
   color: #fff;
   width: 300px;
   height: 100%;
@@ -88,12 +89,12 @@ a {
 }
 
 #editor .mat-card,
-#collections .mat-card {
+#compilationBrowser .mat-card {
   background-color: rgba(0, 0, 0, 0);
 }
 
 #editor .mat-card:not(:last-child),
-#collections .mat-card:not(:last-child) {
+#compilationBrowser .mat-card:not(:last-child) {
   border-bottom: 1px solid #333;
 }
 
@@ -102,7 +103,7 @@ a {
 }
 
 #editor .mat-raised-button:not([disabled]),
-#collections .mat-raised-button:not([disabled]) {
+#compilationBrowser .mat-raised-button:not([disabled]) {
   background-color: #333;
 }
 
@@ -124,21 +125,21 @@ a {
 #editor-metadata .mat-card-header-text,
 #editor-modelsettings .mat-card-header-text,
 #editor-about .mat-card-header-text,
-#collections .mat-card-header-text {
+#compilationBrowser .mat-card-header-text {
   margin: 0;
 }
 
 #editor-metadata .mat-card,
 #editor-modelsettings .mat-card,
 #editor-about .mat-card,
-#collections .mat-card {
+#compilationBrowser .mat-card {
   margin-bottom: 1px;
 }
 
 #editor-metadata .mat-card-content,
 #editor-modelsettings .mat-card-content,
 #editor-about .mat-card-content,
-#collections .mat-card-content {
+#compilationBrowser .mat-card-content {
   line-height: 23px;
 }
 
@@ -146,7 +147,7 @@ a {
   width: 100%;
 }
 
-#collections .mat-raised-button:not([disabled]) .mat-icon {
+#compilationBrowser .mat-raised-button:not([disabled]) .mat-icon {
   margin-right: 10px;
 }
 

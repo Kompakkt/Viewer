@@ -1,204 +1,276 @@
-import { EventEmitter, Injectable, Output } from '@angular/core';
-import { ReplaySubject } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 
+import { LoginComponent } from '../../components/dialogs/dialog-login/login.component';
 import {
   IAnnotation,
   ICompilation,
   IEntity,
   ILDAPData,
+  ILoginData,
+  IUserData,
 } from '../../interfaces/interfaces';
+import { isCompilation, isEntity } from '../../typeguards/typeguards';
 import { MongohandlerService } from '../mongohandler/mongohandler.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserdataService {
-
-  public loginData: {
-    username: string;
-    password: string;
-    isCached: boolean;
-  } = {
+  public loginRequired = false;
+  public authenticatedUser = false;
+  public loginData: ILoginData = {
     username: '',
     password: '',
     isCached: false,
   };
+  public userData: ILDAPData | undefined = undefined;
+  public guestUserData: IUserData | undefined;
 
-  private userData: ILDAPData | undefined;
-  private userDataSubject = new ReplaySubject<ILDAPData>();
-  public userDataObservable = this.userDataSubject.asObservable();
-
-  private isUserAuthenticatedSubject = new ReplaySubject<boolean>();
-  public isUserAuthenticatedObservable = this.isUserAuthenticatedSubject.asObservable();
-
-  public isEntityOwner = false;
-  public isCollectionOwner = false;
-  public isWhitelistMember = false;
-  @Output() entityOwner: EventEmitter<boolean> = new EventEmitter();
-  @Output() collectionOwner: EventEmitter<boolean> = new EventEmitter();
-  @Output() whitelistMember: EventEmitter<boolean> = new EventEmitter();
-
-  public userOnWhitelistCollections: ICompilation[] = [];
-  public userOwnedFinishedEntities: IEntity[] = [];
+  public userOwnsEntity = false;
+  public userOwnsCompilation = false;
+  public userWhitlistedEntity = false;
+  public userWhitlistedCompilation = false;
 
   constructor(
     private mongoService: MongohandlerService,
-  ) {
-    this.isAuthorized();
-  }
+    private dialog: MatDialog,
+  ) {}
 
-  private isAuthorized() {
-    this.mongoService
+  public userAuthentication(loginRequired: boolean): Promise<boolean> {
+    this.loginRequired = loginRequired;
+
+    return new Promise<boolean>((resolve, reject) => {
+      if (this.authenticatedUser && this.userData) resolve(true);
+      this.mongoService
         .isAuthorized()
         .then(result => {
-          console.log(result);
           if (result.status === 'ok') {
-            this.userData = result;
-            this.userDataSubject.next(result);
-            this.isUserAuthenticatedSubject.next(true);
-            this.findUserInCompilations();
-            this.getUserOwnedFinishedEntities();
+            this.setUserData(result);
+            this.authenticatedUser = true;
+            resolve(true);
           } else {
-            this.clearUserData();
-          }
-        })
-        .catch(err => {
-          console.error(err);
-          this.clearUserData();
-        });
-  }
-
-  public async attemptLogin(
-      username: string,
-      password: string,
-  ): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
-      this.mongoService
-          .login(username, password)
-          .then(result => {
-            if (result.status === 'ok') {
-              this.userDataSubject.next(result);
-              this.loginData = {
-                username,
-                password,
-                isCached: true,
-              };
-              this.isUserAuthenticatedSubject.next(true);
-              this.findUserInCompilations();
-              this.getUserOwnedFinishedEntities();
-              resolve(true);
+            if (loginRequired) {
+              this.attemptLogin().then(authorized => {
+                resolve(authorized);
+              });
             } else {
-              this.isUserAuthenticatedSubject.next(false);
               this.clearUserData();
               resolve(false);
+            }
+          }
+        })
+        .catch(e => {
+          // Server might not be reachable, skip login
+          console.error(e);
+          this.clearUserData();
+          reject(false);
+        });
+    });
+  }
+
+  private async attemptLogin(): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      if (this.loginData.isCached) {
+        this.mongoService
+          .login(this.loginData.username, this.loginData.password)
+          .then(result => {
+            if (result.status === 'ok') {
+              this.setUserData(result);
+              this.authenticatedUser = true;
+              resolve(true);
+            } else {
+              this.openLoginDialog().then(loggedIn => {
+                resolve(loggedIn);
+              });
             }
           })
           .catch(err => {
             console.error(err);
-            this.isUserAuthenticatedSubject.next(false);
             this.clearUserData();
             reject(false);
           });
+      } else {
+        this.openLoginDialog().then(loggedIn => {
+          resolve(loggedIn);
+        });
+      }
+    });
+  }
+
+  public openLoginDialog(): Promise<boolean> {
+    return new Promise<boolean>(resolve => {
+      const dialogRef = this.dialog.open(LoginComponent);
+      dialogRef.afterClosed().subscribe(result => {
+        if (result !== false) {
+          const data = result.data;
+          this.setUserData(data.userData);
+          this.authenticatedUser = true;
+          this.loginData = {
+            username: data.username,
+            password: data.password,
+            isCached: true,
+          };
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      });
     });
   }
 
   public logout() {
     this.mongoService
-        .logout()
-        .then(() => {})
-        .catch(err => console.error(err));
+      .logout()
+      .then(() => {})
+      .catch(err => console.error(err));
+    this.clearUserData();
+  }
+
+  private clearUserData() {
+    this.authenticatedUser = false;
     this.loginData = {
       username: '',
       password: '',
       isCached: false,
     };
-    this.clearUserData();
+    this.userData = undefined;
+    this.guestUserData = undefined;
+    this.userOwnsEntity = false;
+    this.userOwnsCompilation = false;
+    this.userWhitlistedEntity = false;
+    this.userWhitlistedCompilation = false;
   }
 
-  private clearUserData() {
-    this.userData = undefined;
-    this.userDataSubject.next(undefined);
-    this.isUserAuthenticatedSubject.next(false);
-    this.isEntityOwner = false;
-    this.entityOwner.emit(false);
-    this.isCollectionOwner = false;
-    this.collectionOwner.emit(false);
-    this.isWhitelistMember = false;
-    this.whitelistMember.emit(false);
-    this.userOnWhitelistCollections.length = 0;
-    this.userOwnedFinishedEntities.length = 0;
+  private setUserData(userData: ILDAPData) {
+    if (this.guestUserData) this.guestUserData = undefined;
+    this.userData = userData;
+  }
+
+  public checkOwnerState(
+    element: ICompilation | IEntity | undefined,
+  ): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      if (!element) {
+        reject(false);
+        return;
+      }
+      if (
+        !this.userData ||
+        !this.userData.data ||
+        (!isEntity(element) && !isCompilation(element))
+      ) {
+        this.userOwnsEntity = false;
+        this.userOwnsCompilation = false;
+        resolve(false);
+        return;
+      }
+      const id = element._id;
+
+      if (isCompilation(element)) {
+        const idFromUser = this.userData._id;
+        this.userOwnsCompilation = element.relatedOwner
+          ? element.relatedOwner._id === idFromUser
+          : false;
+        if (this.userOwnsCompilation) {
+          resolve(this.userOwnsCompilation);
+          return;
+        } else {
+          if (this.userData.data.compilation) {
+            this.userOwnsCompilation = !!this.userData.data.compilation.find(
+              (el: ICompilation) => el._id === id,
+            );
+            resolve(this.userOwnsCompilation);
+            return;
+          } else {
+            resolve(false);
+            return;
+          }
+        }
+      }
+
+      if (isEntity(element)) {
+        const idFromUser = this.userData._id;
+        this.userOwnsEntity = !!element.relatedEntityOwners.find(
+          owner => owner._id === idFromUser,
+        );
+        if (this.userOwnsEntity) {
+          resolve(true);
+          return;
+        } else {
+          if (this.userData.data.entity) {
+            this.userOwnsEntity = !!this.userData.data.entity.find(
+              (el: IEntity) => el._id === id,
+            );
+            resolve(this.userOwnsEntity);
+            return;
+          } else {
+            this.userOwnsEntity = false;
+            resolve(this.userOwnsEntity);
+          }
+        }
+      }
+    });
+  }
+
+  public isUserWhitelisted(
+    element: ICompilation | IEntity | undefined,
+  ): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      if (!element) {
+        reject(false);
+        return;
+      }
+      if (!this.userData || !this.userData.data) {
+        this.userWhitlistedEntity = false;
+        this.userWhitlistedCompilation = false;
+        resolve(false);
+        return;
+      }
+      const id = this.userData._id;
+
+      const persons = element.whitelist.groups
+        // Flatten group members and owners
+        .map(group => group.members.concat(...group.owners))
+        .reduce((acc, val) => acc.concat(val), [] as IUserData[])
+        // Combine with whitelisted persons
+        .concat(...element.whitelist.persons);
+
+      if (isEntity(element)) {
+        this.userWhitlistedEntity = !!persons.find(_p => _p._id === id);
+        resolve(!!persons.find(_p => _p._id === id));
+      }
+      // tslint:disable-next-line:max-line-length
+      if (isCompilation(element)) {
+        this.userWhitlistedCompilation = !!persons.find(_p => _p._id === id);
+        resolve(!!persons.find(_p => _p._id === id));
+      }
+    });
   }
 
   public isAnnotationOwner(annotation: IAnnotation): boolean {
-    return this.userData ? this.userData._id === annotation.creator._id : false;
+    const idFromUser = this.userData
+      ? this.userData._id
+      : this.guestUserData
+      ? this.guestUserData._id
+      : 0;
+    console.log(
+      'Der Owner',
+      idFromUser,
+      'of',
+      annotation,
+      'ist',
+      idFromUser === annotation.creator._id,
+    );
+    return idFromUser === annotation.creator._id;
   }
 
-  public checkEntityOwnerState(entity: IEntity) {
-    let isOwner = false;
-    if (entity.relatedEntityOwners.length) {
-    entity.relatedEntityOwners.forEach(owner => {
-      if (this.userData) {
-        if (owner._id === this.userData._id) {
-          isOwner = true;
-        }
-      }
-    }); }
-    this.isEntityOwner = ['dragdrop'].includes(entity._id) ? true :  isOwner;
-    this.entityOwner.emit(['dragdrop'].includes(entity._id) ? true :  isOwner);
-  }
-
-  public checkCollectionOwnerState(collection: ICompilation) {
-    this.isCollectionOwner = this.userData && collection.relatedOwner ?
-        collection.relatedOwner._id === this.userData._id : false;
-    this.collectionOwner.emit(this.userData && collection.relatedOwner && collection.relatedOwner ?
-        collection.relatedOwner._id === this.userData._id : false);
-
-  }
-
-  public checkOccurenceOnWhitelist(collection: ICompilation) {
-    let isOccuring = false;
-    if (collection.whitelist.enabled && this.userOnWhitelistCollections.length) {
-      this.userOnWhitelistCollections.forEach(userCollection => {
-        if (userCollection._id === collection._id) {
-          isOccuring = true;
-        }
-      });
-    }
-    this.isWhitelistMember = isOccuring;
-    this.whitelistMember.emit(isOccuring);
-  }
-
-  private findUserInCompilations() {
-    this.mongoService
-        .findUserInCompilations()
-        .then(result => {
-          if (result.status === 'ok') {
-            this.userOnWhitelistCollections = result.compilations;
-          } else {
-            throw new Error(result.message);
-          }
-        })
-        .catch(e => console.error(e));
-  }
-
-  private getUserOwnedFinishedEntities() {
-    if (this.userData && this.userData.data.entity) {
-        (this.userData.data.entity.filter(
-            entity => entity,
-        ) as IEntity[]).forEach(entity => {
-            if (entity.finished) {
-              this.userOwnedFinishedEntities.push(entity);
-            }
-        });
-    }
-  }
-
-  public setcachedLoginData(password: string, username: string) {
-    this.loginData = {
-      username,
-      password,
-      isCached: true,
+  public createTemporalUserData() {
+    if (this.userData) return;
+    this.guestUserData = {
+      fullname: 'guest',
+      username: 'guest',
+      _id: this.mongoService.generateEntityId(),
     };
   }
-
 }
