@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material';
 
+import { environment } from '../../../environments/environment';
 import { BabylonService } from '../../services/babylon/babylon.service';
 import { EntitySettingsService } from '../../services/entitysettings/entitysettings.service';
 import { MongohandlerService } from '../../services/mongohandler/mongohandler.service';
@@ -99,17 +100,20 @@ export class EntityFeatureSettingsComponent implements OnInit {
       !this.processingService.defaultEntityLoaded &&
       !this.processingService.fallbackEntityLoaded
     ) {
-      this.mongoHandler
-        .updateSettings(entity._id, this.processingService.actualEntitySettings)
-        .then(result => {
-          console.log('Settings gespeichert', result);
-          this.processingService.actualEntitySettingsOnServer = JSON.parse(
-            JSON.stringify(this.processingService.actualEntitySettings),
+      const settings = this.processingService.actualEntitySettings;
+      this.mongoHandler.updateSettings(entity._id, settings).then(result => {
+        console.log('Settings gespeichert', result);
+        this.processingService.actualEntitySettingsOnServer = JSON.parse(
+          JSON.stringify(this.processingService.actualEntitySettings),
+        );
+        if (this.processingService.upload) {
+          window.top.postMessage(
+            { type: 'settings', settings },
+            environment.repository,
           );
-          if (this.processingService.upload) {
-            this.processingService.upload = false;
-          }
-        });
+          this.processingService.upload = false;
+        }
+      });
     }
   }
 
