@@ -239,7 +239,7 @@ export class UserdataService {
       ? this.userData._id
       : this.guestUserData
       ? this.guestUserData._id
-      : 0;
+      : '';
     console.log(
       'Der Owner',
       idFromUser,
