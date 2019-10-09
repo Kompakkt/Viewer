@@ -147,105 +147,91 @@ export class UserdataService {
     this.userData = userData;
   }
 
-  public checkOwnerState(
-    element: ICompilation | IEntity | undefined,
-  ): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
-      if (!element) {
-        reject(false);
-        return;
+  public checkOwnerState(element: ICompilation | IEntity | undefined): boolean {
+    if (!element) {
+      return false;
+    }
+    if (
+      !this.userData ||
+      !this.userData.data ||
+      (!isEntity(element) && !isCompilation(element))
+    ) {
+      this.userOwnsEntity = false;
+      this.userOwnsCompilation = false;
+      return false;
+    }
+    const id = element._id;
+
+    if (isCompilation(element)) {
+      const idFromUser = this.userData._id;
+      this.userOwnsCompilation = element.relatedOwner
+        ? element.relatedOwner._id === idFromUser
+        : false;
+      if (this.userOwnsCompilation) {
+        return this.userOwnsCompilation;
       }
-      if (
-        !this.userData ||
-        !this.userData.data ||
-        (!isEntity(element) && !isCompilation(element))
-      ) {
+      if (this.userData.data.compilation) {
+        this.userOwnsCompilation =
+          this.userData.data.compilation.find(
+            (_compilation: ICompilation) => _compilation._id === id,
+          ) !== undefined;
+      }
+      return this.userOwnsCompilation;
+    }
+
+    if (isEntity(element)) {
+      const idFromUser = this.userData._id;
+      this.userOwnsEntity =
+        element.relatedEntityOwners.find(owner => owner._id === idFromUser) !==
+        undefined;
+      if (this.userOwnsEntity) {
+        return this.userOwnsEntity;
+      }
+      if (this.userData.data.entity) {
+        this.userOwnsEntity =
+          this.userData.data.entity.find(
+            (_entity: IEntity) => _entity._id === id,
+          ) !== undefined;
+      } else {
         this.userOwnsEntity = false;
-        this.userOwnsCompilation = false;
-        resolve(false);
-        return;
       }
-      const id = element._id;
-
-      if (isCompilation(element)) {
-        const idFromUser = this.userData._id;
-        this.userOwnsCompilation = element.relatedOwner
-          ? element.relatedOwner._id === idFromUser
-          : false;
-        if (this.userOwnsCompilation) {
-          resolve(this.userOwnsCompilation);
-          return;
-        } else {
-          if (this.userData.data.compilation) {
-            this.userOwnsCompilation = !!this.userData.data.compilation.find(
-              (el: ICompilation) => el._id === id,
-            );
-            resolve(this.userOwnsCompilation);
-            return;
-          } else {
-            resolve(false);
-            return;
-          }
-        }
-      }
-
-      if (isEntity(element)) {
-        const idFromUser = this.userData._id;
-        this.userOwnsEntity = !!element.relatedEntityOwners.find(
-          owner => owner._id === idFromUser,
-        );
-        if (this.userOwnsEntity) {
-          resolve(true);
-          return;
-        } else {
-          if (this.userData.data.entity) {
-            this.userOwnsEntity = !!this.userData.data.entity.find(
-              (el: IEntity) => el._id === id,
-            );
-            resolve(this.userOwnsEntity);
-            return;
-          } else {
-            this.userOwnsEntity = false;
-            resolve(this.userOwnsEntity);
-          }
-        }
-      }
-    });
+      return this.userOwnsEntity;
+    }
+    return false;
   }
 
   public isUserWhitelisted(
     element: ICompilation | IEntity | undefined,
-  ): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
-      if (!element) {
-        reject(false);
-        return;
-      }
-      if (!this.userData || !this.userData.data) {
-        this.userWhitlistedEntity = false;
-        this.userWhitlistedCompilation = false;
-        resolve(false);
-        return;
-      }
-      const id = this.userData._id;
+  ): boolean {
+    if (!element) {
+      return false;
+    }
+    if (!this.userData || !this.userData.data) {
+      this.userWhitlistedEntity = false;
+      this.userWhitlistedCompilation = false;
+      return false;
+    }
+    const id = this.userData._id;
 
-      const persons = element.whitelist.groups
-        // Flatten group members and owners
-        .map(group => group.members.concat(...group.owners))
-        .reduce((acc, val) => acc.concat(val), [] as IUserData[])
-        // Combine with whitelisted persons
-        .concat(...element.whitelist.persons);
+    const persons = element.whitelist.groups
+      // Flatten group members and owners
+      .map(group => group.members.concat(...group.owners))
+      .reduce((acc, val) => acc.concat(val), [] as IUserData[])
+      // Combine with whitelisted persons
+      .concat(...element.whitelist.persons);
 
-      if (isEntity(element)) {
-        this.userWhitlistedEntity = !!persons.find(_p => _p._id === id);
-        resolve(!!persons.find(_p => _p._id === id));
-      }
-      // tslint:disable-next-line:max-line-length
-      if (isCompilation(element)) {
-        this.userWhitlistedCompilation = !!persons.find(_p => _p._id === id);
-        resolve(!!persons.find(_p => _p._id === id));
-      }
-    });
+    const whitelistContainsUser =
+      persons.find(person => person._id === id) !== undefined;
+
+    if (isEntity(element)) {
+      this.userWhitlistedEntity = whitelistContainsUser;
+    }
+    // tslint:disable-next-line:max-line-length
+    if (isCompilation(element)) {
+      this.userWhitlistedCompilation = whitelistContainsUser;
+    }
+
+    return whitelistContainsUser;
   }
 
   public isAnnotationOwner(annotation: IAnnotation): boolean {

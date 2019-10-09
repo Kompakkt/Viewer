@@ -354,37 +354,21 @@ export class ProcessingService {
   private fetchRestrictedEntityData(resultEntity) {
     this.userDataService.userAuthentication(true).then(auth => {
       if (auth) {
-        this.userDataService
-          .checkOwnerState(resultEntity)
-          .then(owned => {
-            if (owned) {
-              this.loadEntity(resultEntity);
-            } else {
-              if (resultEntity.whitelist.enabled) {
-                this.userDataService
-                  .isUserWhitelisted(resultEntity)
-                  .then(whitelisted => {
-                    if (whitelisted) {
-                      this.loadEntity(resultEntity);
-                    } else {
-                      this.message.error(
-                        'Sorry you are not allowed to load this object.',
-                      );
-                      this.loadFallbackEntity();
-                    }
-                  });
-              } else {
-                this.message.error(
-                  'Sorry you are not allowed to load this object.',
-                );
-                this.loadFallbackEntity();
-              }
-            }
-          })
-          .catch(error => {
-            console.error(error);
+        if (this.userDataService.checkOwnerState(resultEntity)) {
+          this.loadEntity(resultEntity);
+        } else {
+          if (
+            resultEntity.whitelist.enabled &&
+            this.userDataService.isUserWhitelisted(resultEntity)
+          ) {
+            this.loadEntity(resultEntity);
+          } else {
+            this.message.error(
+              'Sorry you are not allowed to load this object.',
+            );
             this.loadFallbackEntity();
-          });
+          }
+        }
       } else {
         this.message.error('Sorry you are not allowed to load this object.');
         this.loadFallbackEntity();
@@ -619,13 +603,12 @@ export class ProcessingService {
         this.annotatingFeatured = true;
         return;
       }
-      this.userDataService.checkOwnerState(entity).then(owned => {
-        this.annotatingFeatured = owned;
-        if (!owned && this.showAnnotationEditor) {
-          this.showAnnotationEditor = false;
-        }
-        return;
-      });
+      const _userOwned = this.userDataService.checkOwnerState(entity);
+      this.annotatingFeatured = _userOwned;
+      if (!_userOwned && this.showAnnotationEditor) {
+        this.showAnnotationEditor = false;
+      }
+      return;
     } else {
       const compilation = this.getCurrentCompilation();
       if (!compilation) {
@@ -642,20 +625,18 @@ export class ProcessingService {
         return;
       }
       if (compilation.whitelist.enabled) {
-        this.userDataService.checkOwnerState(compilation).then(owner => {
-          if (owner) {
-            this.annotatingFeatured = true;
-            return;
-          } else {
-            this.userDataService.isUserWhitelisted(compilation).then(listed => {
-              this.annotatingFeatured = listed;
-              if (!listed && this.showAnnotationEditor) {
-                this.showAnnotationEditor = false;
-              }
-              return;
-            });
-          }
-        });
+        if (this.userDataService.checkOwnerState(compilation)) {
+          this.annotatingFeatured = true;
+          return;
+        }
+        const _isUserWhitelisted = this.userDataService.isUserWhitelisted(
+          compilation,
+        );
+        this.annotatingFeatured = _isUserWhitelisted;
+        if (!_isUserWhitelisted && this.showAnnotationEditor) {
+          this.showAnnotationEditor = false;
+        }
+        return;
       }
     }
   }
