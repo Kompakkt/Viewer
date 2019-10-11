@@ -151,11 +151,12 @@ export class ProcessingService {
   public async bootstrap() {
     const searchParams = location.search;
     const queryParams = new URLSearchParams(searchParams);
-    const entityParam = queryParams.get('model') || queryParams.get('entity');
-    const compParam = queryParams.get('compilation');
+    const entityParam =
+      queryParams.get('model') || queryParams.get('entity') || undefined;
+    const compParam = queryParams.get('compilation') || undefined;
     // values = upload, explore, edit, annotation, open
-    const mode = queryParams.get('mode');
-    this.mode = mode ? mode : '';
+    const mode = queryParams.get('mode') || '';
+    this.mode = mode;
 
     // loading         // modes
     // default        '', explore, annotation, open
@@ -188,13 +189,9 @@ export class ProcessingService {
     }
 
     // 3) Load Entity and compilation
-    if (compParam) {
-      this.fetchAndLoad(entityParam ? entityParam : undefined, compParam, true);
-    }
-    if (!compParam && entityParam) {
-      this.fetchAndLoad(entityParam, undefined, false);
-    }
-    if (!compParam && !entityParam) {
+    if (compParam || entityParam) {
+      this.fetchAndLoad(entityParam, compParam, compParam !== undefined);
+    } else {
       this.loadDefaultEntityData();
     }
 
@@ -203,15 +200,12 @@ export class ProcessingService {
       this.showMenu = false;
     }
 
-    if ((!mode && compParam) || (mode === 'open' && compParam)) {
+    if (!mode || mode === 'open') {
       this.showSettingsEditor = false;
       this.showAnnotationEditor = false;
-    }
-
-    if ((!mode && !compParam) || (!compParam && mode === 'open')) {
-      this.showSidenav = false;
-      this.showSettingsEditor = false;
-      this.showAnnotationEditor = false;
+      if (!compParam) {
+        this.showSidenav = false;
+      }
     }
 
     if (mode !== 'annotation' && mode !== 'upload') {
@@ -219,13 +213,13 @@ export class ProcessingService {
     }
 
     // 4) toggle sidenav
-    if ((!mode && compParam) || (mode === 'open' && compParam)) {
+    if (compParam && (!mode || mode === 'open')) {
       this.overlayService.toggleSidenav('compilationBrowser', true);
     }
     if (mode === 'annotation') {
       this.overlayService.toggleSidenav('annotation', true);
     }
-    if (mode === 'edit' || mode === 'explore' || mode === 'upload') {
+    if (['edit', 'explore', 'upload'].includes(mode)) {
       this.overlayService.toggleSidenav('settings', true);
     }
     // TODO: error handling: wrong mode for loading
