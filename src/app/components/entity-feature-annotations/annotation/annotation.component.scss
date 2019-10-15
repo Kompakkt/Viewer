@@ -24,7 +24,10 @@ $max-width: 500px;
   overflow: hidden;
   resize: both;
   width: 350px;
-  max-width: 100% !important;
+  @media (max-width: 400px) {
+    width: 80vw;
+  }
+  max-width: 95vw !important;
 
   padding: 15px 35px 20px 20px !important;
   min-height: 175px;

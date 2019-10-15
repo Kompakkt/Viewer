@@ -2,8 +2,8 @@
   position: absolute;
   bottom: 5px;
   left: 50%;
-  width: 300px;
-  margin-left: -150px;
+  max-width: 300px;
+  transform: translateX(-50%);
   background-color: rgba(0, 0, 0, 0.7);
   border-radius: 5px;
   color: #fff;
@@ -25,6 +25,9 @@
   white-space: nowrap;
   overflow: hidden;
   width: 230px;
+  @media (max-width: 600px) {
+    width: 0px;
+  }
 }
 
 #annotationwalkthrough #btn-next,
