@@ -92,6 +92,7 @@ export class AnnotationmarkerService {
     label2.addControl(
       this.createRankingNumber(annotation._id, annotation.ranking),
     );
+
     if (plane2.material) {
       plane2.material.alpha = 0.5;
     }
@@ -134,8 +135,11 @@ export class AnnotationmarkerService {
     label.color = color;
     label.thickness = 1;
     label.background = backgroundColor;
+    label.adaptHeightToChildren = true;
+    label.adaptWidthToChildren = true;
 
     label.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
+    label.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
     Tags.AddTagsTo(label, tag + ' label');
 
     label.onPointerDownObservable.add(() => {
@@ -167,7 +171,7 @@ export class AnnotationmarkerService {
     const number = new TextBlock();
     number.text = rankingNumber.toString();
     number.color = 'white';
-    number.fontSize = 1000;
+    number.fontSize = '50%';
     Tags.AddTagsTo(number, annotationID + ' number');
 
     return number;
