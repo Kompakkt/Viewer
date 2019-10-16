@@ -393,6 +393,7 @@ export class ProcessingService {
         }
         // cases: entity, image, audio, video, text
         const _url = URL + newEntity.processed[this.actualEntityQuality];
+        extension = _url.slice(_url.lastIndexOf('.'));
         const mediaType = newEntity.mediaType;
         switch (newEntity.mediaType) {
           case 'model':

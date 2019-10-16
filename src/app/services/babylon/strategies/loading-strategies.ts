@@ -23,6 +23,7 @@ import {
   StackPanel,
   TextBlock,
 } from 'babylonjs-gui';
+import 'babylonjs-loaders';
 
 import {
   I3DEntityContainer,
