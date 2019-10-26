@@ -8,13 +8,13 @@ import { LoadingscreenhandlerService } from '../../services/babylon/loadingscree
   styleUrls: ['./loadingscreen.component.scss'],
 })
 export class LoadingscreenComponent implements OnInit {
-  public logo = '';
+  public logo;
   public loadingText = 'Loading...';
   public opacity = '1';
-  public backgroundColor = '#111111';
+  public backgroundColor;
   public style = {
-    left: '0px',
-    top: '0px',
+    left: '0',
+    top: '0',
     width: '100%',
     height: '100%',
   };
