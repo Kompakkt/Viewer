@@ -311,6 +311,7 @@ export class BabylonService {
     isDefault?: boolean,
   ) {
     this.engine.displayLoadingUI();
+    this.resize();
     if (clearScene) {
       this.clearScene();
     }

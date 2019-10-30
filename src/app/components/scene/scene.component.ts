@@ -29,8 +29,8 @@ export class SceneComponent implements AfterViewInit {
 
   private setupCanvas() {
     this.babylonService.attachCanvas(this.viewContainerRef);
-    this.babylonService.resize();
     this.processingService.bootstrap();
+    this.babylonService.resize();
   }
 
   ngAfterViewInit() {
