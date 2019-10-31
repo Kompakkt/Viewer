@@ -505,24 +505,28 @@ export class ProcessingService {
   }
 
   private async initialiseActualEntitySettingsData(entity: IEntity) {
+    const mediaType = entity.mediaType;
     if (
-      entity.mediaType === 'model' ||
-      entity.mediaType === 'entity' ||
-      entity.mediaType === 'image'
+      mediaType === 'model' ||
+      mediaType === 'entity' ||
+      mediaType === 'image'
     ) {
       this.meshSettings = true;
     }
+
     let upload = false;
+    const settings = entity.settings;
+
     if (
-      !entity.settings ||
-      entity.settings.preview === undefined ||
+      !settings ||
+      settings.preview === undefined ||
       // TODO: how to check if settings need to be set? atm next line
-      entity.settings.preview === '' ||
-      entity.settings.cameraPositionInitial === undefined ||
-      entity.settings.background === undefined ||
-      entity.settings.lights === undefined ||
-      entity.settings.rotation === undefined ||
-      entity.settings.scale === undefined
+      settings.preview === '' ||
+      settings.cameraPositionInitial === undefined ||
+      settings.background === undefined ||
+      settings.lights === undefined ||
+      settings.rotation === undefined ||
+      settings.scale === undefined
     ) {
       upload = await this.createSettings();
       this.upload = upload;
