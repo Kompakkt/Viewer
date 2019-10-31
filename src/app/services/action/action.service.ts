@@ -16,8 +16,6 @@ export class ActionService {
   ) {
     if (!mesh) {
       throw new Error('Mesh missing');
-      console.error(this);
-      return;
     }
 
     const scene = this.babylonService.getScene();

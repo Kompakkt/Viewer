@@ -161,8 +161,6 @@ export class AnnotationService {
   public async loadAnnotations() {
     if (!this.actualEntity) {
       throw new Error('ActualEntity missing');
-      console.error(this);
-      return;
     }
     Tags.AddTagsTo(this.actualEntityMeshes, this.actualEntity._id);
     this.selectedAnnotation.next('');
@@ -416,8 +414,6 @@ export class AnnotationService {
     this.babylon.createPreviewScreenshot(400).then(detailScreenshot => {
       if (!this.actualEntity) {
         throw new Error(`this.actualEntity not defined: ${this.actualEntity}`);
-        console.error('AnnotationService:', this);
-        return;
       }
       const generatedId = this.mongo.generateEntityId();
 
@@ -686,8 +682,6 @@ export class AnnotationService {
 
     if (!this.actualEntity) {
       throw new Error('ActualEntity missing');
-      console.error(this);
-      return;
     }
 
     dialogConfig.data = {

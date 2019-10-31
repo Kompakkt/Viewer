@@ -79,13 +79,9 @@ export class EntitySettingsService {
   private async setUpSettings() {
     if (!this.processingService.actualEntitySettings) {
       throw new Error('No settings available.');
-      console.error(this);
-      return;
     }
     if (!this.processingService.getCurrentEntityMeshes()) {
       throw new Error('No meshes available.');
-      console.error(this);
-      return;
     }
     await this.resetInitialValues();
     await this.initialiseSizeValues();
@@ -104,8 +100,6 @@ export class EntitySettingsService {
     const meshes = this.processingService.getCurrentEntityMeshes();
     if (!meshes) {
       throw new Error('No meshes available.');
-      console.error(this);
-      return;
     }
     this.center = MeshBuilder.CreateBox(
       'center',
@@ -130,8 +124,6 @@ export class EntitySettingsService {
     const meshes = this.processingService.getCurrentEntityMeshes();
     if (!meshes) {
       throw new Error('Center missing');
-      console.error(this);
-      return;
     }
     meshes.forEach(mesh => {
       mesh.computeWorldMatrix(true);
@@ -282,18 +274,12 @@ export class EntitySettingsService {
   public async loadRotation() {
     if (!this.center) {
       throw new Error('Center missing');
-      console.error(this);
-      return;
     }
     if (!this.processingService.actualEntitySettings) {
       throw new Error('Settings missing');
-      console.error(this);
-      return;
     }
     if (!this.center.rotationQuaternion) {
       throw new Error('RotationQuaternion for center missing');
-      console.error(this);
-      return;
     }
 
     this.processingService.actualEntitySettings.rotation.x = isDegreeSpectrum(
@@ -331,8 +317,6 @@ export class EntitySettingsService {
   private async animatedMovement(start, end) {
     if (!this.center) {
       throw new Error('Center missing');
-      console.error(this);
-      return;
     }
     const anim = new Animation(
       'anim',
@@ -363,13 +347,9 @@ export class EntitySettingsService {
   public loadScaling() {
     if (!this.center) {
       throw new Error('Center missing');
-      console.error(this);
-      return;
     }
     if (!this.processingService.actualEntitySettings) {
       throw new Error('Settings missing');
-      console.error(this);
-      return;
     }
     const factor = this.processingService.actualEntitySettings.scale;
     this.center.scaling = new Vector3(factor, factor, factor);
@@ -388,8 +368,6 @@ export class EntitySettingsService {
   public async createVisualUIMeshSettingsHelper() {
     if (!this.center) {
       throw new Error('Center missing');
-      console.error(this);
-      return;
     }
     const scene = this.babylonService.getScene();
     const size = Math.max(
@@ -417,8 +395,6 @@ export class EntitySettingsService {
   public async loadCameraInititalPosition() {
     if (!this.processingService.actualEntitySettings) {
       throw new Error('Settings missing');
-      console.error(this);
-      return;
     }
     const camera = Array.isArray(
       this.processingService.actualEntitySettings.cameraPositionInitial,
@@ -453,8 +429,6 @@ export class EntitySettingsService {
   loadBackgroundColor() {
     if (!this.processingService.actualEntitySettings) {
       throw new Error('Settings missing');
-      console.error(this);
-      return;
     }
     const color = this.processingService.actualEntitySettings.background.color;
     this.babylonService.setBackgroundColor(color);
@@ -463,8 +437,6 @@ export class EntitySettingsService {
   loadBackgroundEffect() {
     if (!this.processingService.actualEntitySettings) {
       throw new Error('Settings missing');
-      console.error(this);
-      return;
     }
     this.babylonService.setBackgroundImage(
       this.processingService.actualEntitySettings.background.effect,
@@ -477,8 +449,6 @@ export class EntitySettingsService {
   private initialiseLights() {
     if (!this.processingService.actualEntitySettings) {
       throw new Error('Settings missing');
-      console.error(this);
-      return;
     }
     const pointLight = this.lightService.getLightByType('pointLight');
     if (pointLight) {
@@ -512,8 +482,6 @@ export class EntitySettingsService {
   public loadLightIntensityAllLights() {
     if (!this.processingService.actualEntitySettings) {
       throw new Error('Settings missing');
-      console.error(this);
-      return;
     }
     const ambientlightUp = this.lightService.getLightByType('ambientlightUp');
     if (ambientlightUp) {
@@ -540,8 +508,6 @@ export class EntitySettingsService {
   public loadLightIntensity(lightType: string) {
     if (!this.processingService.actualEntitySettings) {
       throw new Error('Settings missing');
-      console.error(this);
-      return;
     }
     const light = this.lightService.getLightByType(lightType);
     if (light) {
@@ -552,8 +518,6 @@ export class EntitySettingsService {
   public loadPointLightPosition() {
     if (!this.processingService.actualEntitySettings) {
       throw new Error('Settings missing');
-      console.error(this);
-      return;
     }
     const pointLight = this.lightService.getLightByType('pointLight');
     if (pointLight) {

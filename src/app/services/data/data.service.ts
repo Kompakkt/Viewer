@@ -37,8 +37,6 @@ export class DataService {
 
         if (!correctEntity || !correctCompilation) {
           throw new Error('Entity or Compilation undefined');
-          console.error(this, annotation);
-          return;
         }
 
         annotationList.push(annotation);
