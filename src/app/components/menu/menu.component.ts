@@ -54,8 +54,6 @@ export class MenuComponent implements OnInit {
           'The object is not available and unfortunately ' +
             'I can not update the actualEntityQuality.',
         );
-        console.error(this);
-        return;
       }
       if (
         entity &&
@@ -65,8 +63,6 @@ export class MenuComponent implements OnInit {
         this.processingService.loadEntity(entity);
       } else {
         throw new Error('Entity actualEntityQuality is not available.');
-        console.error(this);
-        return;
       }
     }
   }
