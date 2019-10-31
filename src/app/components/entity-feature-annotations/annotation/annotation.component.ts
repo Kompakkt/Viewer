@@ -19,9 +19,6 @@ export class AnnotationComponent implements OnInit {
   @Input() entityFileName: string | undefined;
   @Input() annotation: IAnnotation | undefined;
 
-  @ViewChild('annotationContent', { static: false })
-  private annotationContent;
-
   @ViewChild('annotationForm', { static: false })
   private annotationForm: ElementRef<HTMLFormElement> | undefined;
 
@@ -32,15 +29,11 @@ export class AnnotationComponent implements OnInit {
   public positionLeft = 0;
   public collapsed = false;
   public selectedAnnotation: string | undefined;
-  // --- JAN ----
-  public showMediaBrowser = false;
-  // ---
 
   // external
   public visibility = false;
   public isAnnotatingAllowed = false;
   public isAnnotationOwner = false;
-  public isInSocket = false;
 
   constructor(
     public annotationService: AnnotationService,
@@ -54,7 +47,6 @@ export class AnnotationComponent implements OnInit {
     if (!this.annotation) {
       console.error('AnnotationComponent without annotation', this);
       throw new Error('AnnotationComponent without annotation');
-      return;
     }
     this.showAnnotation = true;
     this.collapsed = false;
@@ -67,7 +59,6 @@ export class AnnotationComponent implements OnInit {
       if (!this.annotation) {
         console.error('AnnotationComponent without annotation', this);
         throw new Error('AnnotationComponent without annotation');
-        return;
       }
       this.visibility = selectedAnno === this.annotation._id;
       this.selectedAnnotation = selectedAnno;
@@ -81,7 +72,6 @@ export class AnnotationComponent implements OnInit {
       if (!this.annotation) {
         console.error('AnnotationComponent without annotation', this);
         throw new Error('AnnotationComponent without annotation');
-        return;
       }
       const isEditAnno = selectedEditAnno === this.annotation._id;
       if (!isEditAnno && this.isEditMode) {
@@ -103,7 +93,6 @@ export class AnnotationComponent implements OnInit {
       if (!this.annotation) {
         console.error('AnnotationComponent without annotation', this);
         throw new Error('AnnotationComponent without annotation');
-        return;
       }
       this.setPosition(this.annotation);
     }, 15);
@@ -117,7 +106,6 @@ export class AnnotationComponent implements OnInit {
     if (!this.annotation) {
       console.error('AnnotationComponent without annotation', this);
       throw new Error('AnnotationComponent without annotation');
-      return;
     }
     this.annotationService.setEditModeAnnotation(
       this.isEditMode ? '' : this.annotation._id,
@@ -128,7 +116,6 @@ export class AnnotationComponent implements OnInit {
     if (!this.annotation) {
       console.error('AnnotationComponent without annotation', this);
       throw new Error('AnnotationComponent without annotation');
-      return;
     }
     this.annotationService.shareAnnotation(this.annotation);
   }
@@ -137,7 +124,6 @@ export class AnnotationComponent implements OnInit {
     if (!this.annotation) {
       console.error('AnnotationComponent without annotation', this);
       throw new Error('AnnotationComponent without annotation');
-      return;
     }
     this.annotationService.deleteAnnotation(this.annotation);
   }
@@ -184,12 +170,10 @@ export class AnnotationComponent implements OnInit {
     }
   }
 
-  // --- JAN ----
   public editFullscreen(): void {
     if (!this.annotation) {
       console.error('AnnotationComponent without annotation', this);
       throw new Error('AnnotationComponent without annotation');
-      return;
     }
     const dialogRef = this.dialog.open(DialogAnnotationEditorComponent, {
       width: '75%',
@@ -207,25 +191,4 @@ export class AnnotationComponent implements OnInit {
       console.log(result);
     });
   }
-
-  public addMedium(medium) {
-    if (!this.annotation) {
-      console.error('AnnotationComponent without annotation', this);
-      throw new Error('AnnotationComponent without annotation');
-      return;
-    }
-    const mdImage = `![alt ${medium.description}](${medium.url})`;
-
-    this.annotationContent.nativeElement.focus();
-
-    const start = this.annotationContent.nativeElement.selectionStart;
-    const value = this.annotationContent.nativeElement.value;
-
-    this.annotation.body.content.description = `${value.substring(
-      0,
-      start,
-    )}${mdImage}${value.substring(start, value.length)}`;
-  }
-
-  // ---
 }
