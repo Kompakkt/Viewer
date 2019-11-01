@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { ProcessingService } from '../../services/processing/processing.service';
 
 @Component({
-  selector: 'compilation-browser',
+  selector: 'app-compilation-browser',
   templateUrl: './compilation-browser.component.html',
   styleUrls: ['./compilation-browser.component.scss'],
 })
