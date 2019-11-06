@@ -15,7 +15,7 @@ export interface IDialogData {
   styleUrls: ['./dialog-annotation-editor.component.scss'],
 })
 export class DialogAnnotationEditorComponent {
-  @ViewChild('annotationContent', { static: false }) private annotationContent;
+  @ViewChild('annotationContent') private annotationContent;
 
   public editMode = false;
   public labelMode = 'edit';

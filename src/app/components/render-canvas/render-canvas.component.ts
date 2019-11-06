@@ -6,7 +6,7 @@ import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
   styleUrls: ['./render-canvas.component.scss'],
 })
 export class RenderCanvasComponent implements AfterViewInit {
-  @ViewChild('renderCanvas', { read: ElementRef, static: false })
+  @ViewChild('renderCanvas', { read: ElementRef })
   public canvasRef: ElementRef<HTMLCanvasElement> = new ElementRef<
     HTMLCanvasElement
   >(document.createElement('canvas'));

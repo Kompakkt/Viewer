@@ -19,7 +19,7 @@ export class AnnotationComponent implements OnInit {
   @Input() entityFileName: string | undefined;
   @Input() annotation: IAnnotation | undefined;
 
-  @ViewChild('annotationForm', { static: false })
+  @ViewChild('annotationForm')
   private annotationForm: ElementRef<HTMLFormElement> | undefined;
 
   // internal

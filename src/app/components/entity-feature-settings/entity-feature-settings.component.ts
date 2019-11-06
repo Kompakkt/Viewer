@@ -16,7 +16,7 @@ import { DialogMeshsettingsComponent } from '../dialogs/dialog-meshsettings/dial
   styleUrls: ['./entity-feature-settings.component.scss'],
 })
 export class EntityFeatureSettingsComponent implements OnInit {
-  @ViewChild('stepper', { static: false }) stepper;
+  @ViewChild('stepper') stepper;
 
   // used during upload while setting initial settings
   public backgroundToggle = false;

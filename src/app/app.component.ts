@@ -6,5 +6,5 @@ import { Component, ViewChild } from '@angular/core';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  @ViewChild('sidenav', { static: false }) public sidenav;
+  @ViewChild('sidenav') public sidenav;
 }
