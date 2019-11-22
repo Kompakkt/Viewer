@@ -1,7 +1,7 @@
 import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material';
-import { ActionManager, Mesh, Tags } from 'babylonjs';
+import { Mesh, Tags } from 'babylonjs';
 import { Socket } from 'ngx-socket-io';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 
@@ -19,7 +19,6 @@ import {
   ICompilation,
   IEntity,
 } from '../../interfaces/interfaces';
-import { ActionService } from '../action/action.service';
 import { AnnotationmarkerService } from '../annotationmarker/annotationmarker.service';
 import { BabylonService } from '../babylon/babylon.service';
 import { DataService } from '../data/data.service';
@@ -64,7 +63,6 @@ export class AnnotationService {
 
   constructor(
     private dataService: DataService,
-    private actionService: ActionService,
     private annotationmarkerService: AnnotationmarkerService,
     private babylon: BabylonService,
     private mongo: MongohandlerService,
@@ -385,13 +383,14 @@ export class AnnotationService {
 
   // Die Annotationsfunktionalität wird zue aktuellen Entity hinzugefügt
   public initializeAnnotationMode() {
-    this.actualEntityMeshes.forEach(mesh => {
-      this.actionService.createActionManager(
-        mesh,
-        ActionManager.OnDoublePickTrigger,
-        this.createNewAnnotation.bind(this),
-      );
-    });
+    this.babylon.getCanvas().ondblclick = () => {
+      const scene = this.babylon.getScene();
+      const result = scene.pick(scene.pointerX, scene.pointerY);
+      if (result && result.pickedMesh && result.pickedMesh.isPickable) {
+        console.log('Picked', result);
+        this.createNewAnnotation(result);
+      }
+    };
     this.annotationMode(false);
   }
 
@@ -403,9 +402,12 @@ export class AnnotationService {
     ) {
       return;
     }
-    this.actualEntityMeshes.forEach(mesh => {
-      this.actionService.pickableEntity(mesh, value);
-    });
+    if (value) {
+      this.babylon.getCanvas().classList.add('annotation-mode');
+    } else {
+      this.babylon.getCanvas().classList.remove('annotation-mode');
+    }
+    this.actualEntityMeshes.forEach(mesh => (mesh.isPickable = value));
   }
 
   public async createNewAnnotation(result: any) {
