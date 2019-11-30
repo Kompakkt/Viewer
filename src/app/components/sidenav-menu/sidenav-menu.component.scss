@@ -1,10 +1,20 @@
 :host {
   position: absolute;
   top: 25px;
-  left: 5px;
+  left: 0;
   transition: 280ms;
   z-index: 99;
   color: #fff;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 10px;
+  box-shadow: 1px 1px #333;
+}
+
+:host .mat-icon-button {
+  padding: 5px !important;
+  width: auto;
+  height: auto;
 }
 
 :host a {
@@ -14,7 +24,7 @@
 
 :host.is-open {
   transition: 280ms;
-  left: 305px;
+  left: 300px;
 }
 
 .mat-icon-button.active {
