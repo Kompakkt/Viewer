@@ -1,10 +1,12 @@
-<button mat-icon-button [ngClass]="'top'" (click)="babylonService.cameraManager.resetCamera();"
-        matTooltip="Reset Cameraperspective" matTooltipPosition="below"
-        *ngIf="processingService.actualEntityMediaType !== 'audio'">
-    <mat-icon>videocam</mat-icon>
-</button>
-
 <div [ngClass]="'bottom'">
+
+    <button mat-icon-button
+            *ngIf="processingService.actualEntityMediaType !== 'audio'"
+            (click)="babylonService.cameraManager.resetCamera();"
+            matTooltip="Reset Camera Perspective" matTooltipPosition="below">
+        <mat-icon>videocam</mat-icon>
+    </button>
+
     <button mat-icon-button
             *ngIf="userDataService.loginRequired && !userDataService.authenticatedUser"
             (click)="userDataService.openLoginDialog()"
