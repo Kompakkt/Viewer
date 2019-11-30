@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 
 import { environment } from '../../../environments/environment';
 import { BabylonService } from '../../services/babylon/babylon.service';

@@ -4,25 +4,23 @@ import { LoadingscreenComponent } from '../../../app/components/loadingscreen/lo
 import { SceneComponent } from '../../../app/components/scene/scene.component';
 import { MenuComponent } from '../../../app/components/menu/menu.component';
 import { AnnotationwalkthroughComponent } from '../../../app/components/entity-feature-annotations/annotationwalkthrough/annotationwalkthrough.component';
-import {
-  MatCardModule,
-  MatCheckboxModule,
-  MatDialogModule,
-  MatFormFieldModule,
-  MatIconModule,
-  MatMenuModule,
-  MatOptionModule,
-  MatRadioModule,
-  MatSelectModule,
-  MatSliderModule,
-  MatSlideToggleModule,
-  MatSnackBarModule,
-  MatTabsModule,
-  MatTooltipModule,
-  MatStepperModule,
-  MatProgressSpinnerModule,
-  MatChipsModule,
-} from '@angular/material';
+import { MatCardModule } from '@angular/material/card';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatOptionModule } from '@angular/material/core';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSliderModule } from '@angular/material/slider';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatStepperModule } from '@angular/material/stepper';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
 import { AnnotationsEditorComponent } from '../../../app/components/entity-feature-annotations/annotations-editor/annotations-editor.component';
 import { AnnotationComponent } from '../../../app/components/entity-feature-annotations/annotation/annotation.component';

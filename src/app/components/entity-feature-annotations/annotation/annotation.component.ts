@@ -1,5 +1,5 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { Matrix, Vector3 } from 'babylonjs';
 
 import { IAnnotation } from '../../../interfaces/interfaces';

@@ -1,6 +1,6 @@
 import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { Injectable } from '@angular/core';
-import { MatDialog, MatDialogConfig } from '@angular/material';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { Mesh, Tags } from 'babylonjs';
 import { Socket } from 'ngx-socket-io';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
