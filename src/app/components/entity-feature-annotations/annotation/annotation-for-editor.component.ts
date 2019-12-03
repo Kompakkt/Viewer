@@ -34,7 +34,7 @@ export class AnnotationComponentForEditorComponent extends AnnotationComponent {
   // TODO set perspective in annotation Service and make it not async and public and save!
   public async selectPerspective() {
     await this.babylonService
-      .createPreviewScreenshot(400)
+      .createPreviewScreenshot()
       .then(detailScreenshot => {
         if (!this.annotation) {
           console.error(
