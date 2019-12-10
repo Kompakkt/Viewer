@@ -159,11 +159,13 @@ export class EntityFeatureSettingsComponent implements OnInit {
     dialogRef.afterClosed().subscribe(finish => {
       if (finish) {
         this.entitySettingsService.meshSettingsCompleted.emit(true);
+        this.stepper.selected.completed = true;
+        this.stepper.selected.editable = false;
+        this.stepper.next();
+      } else {
+        return;
       }
     });
-    this.stepper.selected.completed = true;
-    this.stepper.selected.editable = false;
-    this.stepper.next();
   }
 
   public nextSecondStep() {
