@@ -121,6 +121,7 @@ export class ProcessingService {
       this.userDataService.checkOwnerState(entity);
     }
     this.babylonService.getEngine().hideLoadingUI();
+    this.babylonService.resize();
 
     // TODO load Annotations emit (Frage: nur, wenn !collection loaded?)
     this.loadAnnotations.emit(true);
