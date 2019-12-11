@@ -23,13 +23,16 @@
     <!-- Quality Submenu -->
     <mat-menu #quality="matMenu">
         <button mat-menu-item *ngIf="getAvailableQuality('high')"
-                (click)="updateEntityQuality('high')">High
+                (click)="updateEntityQuality('high')"
+                [ngClass]="this.processingService.actualEntityQuality === 'high' ? 'is-active' : '' ">High
         </button>
         <button mat-menu-item *ngIf="getAvailableQuality('medium')"
-                (click)="updateEntityQuality('medium')">Medium
+                (click)="updateEntityQuality('medium')"
+                [ngClass]="this.processingService.actualEntityQuality === 'medium' ? 'is-active' : '' ">Medium
         </button>
         <button mat-menu-item *ngIf="getAvailableQuality('low')"
-                (click)="updateEntityQuality('low')">Low
+                (click)="updateEntityQuality('low')"
+                [ngClass]="this.processingService.actualEntityQuality === 'low' ? 'is-active' : '' ">Low
         </button>
     </mat-menu>
     <!-- / Quality Submenu -->
