@@ -10,8 +10,16 @@
     <button mat-icon-button
             *ngIf="userDataService.loginRequired && !userDataService.authenticatedUser"
             (click)="userDataService.openLoginDialog()"
-            matTooltip="Login" matTooltipPosition="above">
-        <mat-icon>account_circle</mat-icon>
+            matTooltip="Login required" matTooltipPosition="above"
+            [ngClass]="'alert'">
+        <mat-icon>sentiment_very_dissatisfied</mat-icon>
+    </button>
+
+    <button mat-icon-button
+            *ngIf="userDataService.loginRequired && userDataService.authenticatedUser"
+            (click)="openLoginExplanation()"
+            matTooltip="Authenticated" matTooltipPosition="above">
+        <mat-icon>sentiment_very_satisfied</mat-icon>
     </button>
 
     <button mat-icon-button

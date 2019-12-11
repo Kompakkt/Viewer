@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { BabylonService } from '../../services/babylon/babylon.service';
+import { MessageService } from '../../services/message/message.service';
 import { ProcessingService } from '../../services/processing/processing.service';
 import { UserdataService } from '../../services/userdata/userdata.service';
 
@@ -17,6 +18,7 @@ export class MenuComponent implements OnInit {
     public processingService: ProcessingService,
     public babylonService: BabylonService,
     public userDataService: UserdataService,
+    private message: MessageService,
   ) {}
 
   ngOnInit() {
@@ -88,5 +90,9 @@ export class MenuComponent implements OnInit {
         .then(() => {})
         .catch(e => console.error(e));
     }
+  }
+
+  openLoginExplanation() {
+    this.message.info('You are logged in, that is required here.');
   }
 }
