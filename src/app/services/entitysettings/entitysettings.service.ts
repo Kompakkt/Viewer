@@ -87,8 +87,9 @@ export class EntitySettingsService {
     await this.initialiseSizeValues();
     if (this.processingService.meshSettings) {
       await this.setUpMeshSettingsHelper();
-      if (this.processingService.upload)
+      if (this.processingService.upload) {
         await this.createVisualUIMeshSettingsHelper();
+      }
     }
     await this.loadSettings();
     if (!this.processingService.upload) {
@@ -179,15 +180,8 @@ export class EntitySettingsService {
       console.error(this);
       return;
     }
-    const scale = this.processingService.actualEntitySettings.scale;
-    const max = !this.processingService.defaultEntityLoaded
-      ? Math.max(
-          +this.processingService.actualEntityHeight,
-          +this.processingService.actualEntityWidth,
-          +this.processingService.actualEntityDepth,
-        ) * scale
-      : 87.5;
-    await this.babylonService.cameraManager.setUpActiveCamera(max);
+
+    await this.setUpCamera();
 
     if (this.processingService.upload) {
       const isModel =
@@ -215,18 +209,29 @@ export class EntitySettingsService {
     }
   }
 
+  private async setUpCamera() {
+    if (!this.processingService.actualEntitySettings) {
+      throw new Error('Settings missing');
+    }
+    const scale = this.processingService.actualEntitySettings.scale;
+    const max = !this.processingService.defaultEntityLoaded
+      ? Math.max(
+          +this.processingService.actualEntityHeight,
+          +this.processingService.actualEntityWidth,
+          +this.processingService.actualEntityDepth,
+        ) * scale
+      : 87.5;
+    await this.babylonService.cameraManager.setUpActiveCamera(max);
+  }
+
   public async decomposeMeshSettingsHelper() {
     const center = this.center;
     if (!center) {
       throw new Error('Center missing');
-      console.error(this);
-      return;
     }
     const meshes = this.processingService.getCurrentEntityMeshes();
     if (!meshes) {
       throw new Error('Meshes missing');
-      console.error(this);
-      return;
     }
     await meshes.forEach(mesh => {
       mesh.computeWorldMatrix();
@@ -257,6 +262,7 @@ export class EntitySettingsService {
     await this.destroyMesh('worldAxis');
     await this.destroyMesh('localAxis');
     await this.destroyMesh('ground');
+    await this.setUpCamera();
   }
 
   private destroyMesh(tag: string) {
