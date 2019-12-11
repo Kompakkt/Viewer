@@ -117,8 +117,11 @@ export class ProcessingService {
       this.defaultEntityLoaded = entity._id === 'default';
       this.fallbackEntityLoaded = entity._id === 'fallback';
     }
-    if (this.userDataService.userData)
+    if (this.userDataService.userData) {
       this.userDataService.checkOwnerState(entity);
+    }
+    this.babylonService.getEngine().hideLoadingUI();
+
     // TODO load Annotations emit (Frage: nur, wenn !collection loaded?)
     this.loadAnnotations.emit(true);
   }

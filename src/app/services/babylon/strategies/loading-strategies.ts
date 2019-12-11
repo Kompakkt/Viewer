@@ -63,7 +63,6 @@ export const load3DEntity = (
   )
     .then(result => {
       console.log(result);
-      engine.hideLoadingUI();
       return result;
     })
     .catch(e => {
@@ -133,7 +132,6 @@ export const loadImage = (
     );
   })
     .then(image => {
-      engine.hideLoadingUI();
       return image;
     })
     .catch(e => {
@@ -177,7 +175,6 @@ export const loadVideo = (
     });
   })
     .then(resultContainer => {
-      engine.hideLoadingUI();
       return resultContainer;
     })
     .catch(e => {
@@ -247,7 +244,6 @@ export const loadAudio = (
             arrayBuffer,
             scene,
             () => {
-              engine.hideLoadingUI();
               resolveSound();
             },
           );
