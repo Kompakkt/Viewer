@@ -56,9 +56,11 @@ export class AnnotationwalkthroughComponent implements OnInit {
   }
 
   private getAction(index: number) {
-    this.title = this.annotations[index].body.content.title;
+    const annotation = this.annotations[index];
 
-    const perspective = this.annotations[index].body.content.relatedPerspective;
+    this.title = annotation.body.content.title;
+
+    const perspective = annotation.body.content.relatedPerspective;
 
     if (perspective !== undefined) {
       const positionVector = new Vector3(
@@ -78,7 +80,7 @@ export class AnnotationwalkthroughComponent implements OnInit {
       this.babylonService.cameraManager.setActiveCameraTarget(targetVector);
     }
 
-    this.annotationService.setSelectedAnnotation(this.annotations[index]._id);
-    this.babylonService.hideMesh(this.annotations[index]._id, true);
+    this.annotationService.setSelectedAnnotation(annotation._id);
+    this.babylonService.hideMesh(annotation._id, true);
   }
 }
