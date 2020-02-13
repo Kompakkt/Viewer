@@ -3,11 +3,13 @@
     <div *ngIf="processingService.upload === false">
         <mat-card>
             <mat-card-content>
-                <button class="fullwidth-button"
+                <button id="resetDefaultSettings"
+                        class="fullwidth-button"
                         mat-raised-button
                         (click)="backToDefaultSettings()">Back to Default
                 </button>
-                <button class="fullwidth-button"
+                <button id="saveDefaultSettings"
+                        class="fullwidth-button"
                         mat-raised-button
                         *ngIf="!processingService.defaultEntityLoaded && !processingService.fallbackEntityLoaded &&
                 this.userdataService.userOwnsEntity &&!processingService.compilationLoaded &&

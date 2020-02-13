@@ -399,7 +399,7 @@ export class BabylonService {
     const result = await new Promise<string>((resolve, reject) => {
       const _activeCamera = this.getScene().activeCamera;
       if (_activeCamera instanceof Camera) {
-        Tools.CreateScreenshot(
+        Tools.CreateScreenshotUsingRenderTarget(
           this.getEngine(),
           _activeCamera,
           { precision: 2 },
@@ -421,22 +421,26 @@ export class BabylonService {
     return result;
   }
 
-  public async createPreviewScreenshot(width?: number): Promise<string> {
+  public async createPreviewScreenshot(): Promise<string> {
     this.hideMesh('plane', false);
     this.hideMesh('label', false);
-    await new Promise<any>((resolve, _) =>
-      this.getEngine().onEndFrameObservable.add(resolve),
-    );
+
+    const clearColor = this.getScene().clearColor;
+    this.getScene().clearColor = new Color4(0, 0, 0, 0);
+
+    await new Promise<any>((resolve, _) => {
+      this.getEngine().onEndFrameObservable.add(resolve);
+    });
     const result = await new Promise<string>((resolve, _) => {
       const _activeCamera = this.getScene().activeCamera;
+
       if (_activeCamera instanceof Camera) {
-        Tools.CreateScreenshot(
+        Tools.CreateScreenshotUsingRenderTarget(
           this.getEngine(),
           _activeCamera,
-          width
-            ? { width, height: Math.round((width / 16) * 9) }
-            : { width: 400, height: 225 },
+          { width: 360, height: 225 }, // 16:10
           screenshot => {
+            this.getScene().clearColor = clearColor;
             resolve(screenshot);
           },
         );
@@ -444,6 +448,7 @@ export class BabylonService {
     });
     this.hideMesh('plane', true);
     this.hideMesh('label', true);
+
     return result;
   }
 }

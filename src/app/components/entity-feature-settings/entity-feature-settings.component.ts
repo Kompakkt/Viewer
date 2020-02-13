@@ -41,7 +41,7 @@ export class EntityFeatureSettingsComponent implements OnInit {
 
   private async setPreview() {
     this.babylonService
-      .createPreviewScreenshot(400)
+      .createPreviewScreenshot()
       .then(screenshot => {
         if (!this.processingService.actualEntitySettings) {
           throw new Error('Settings missing');
