@@ -80,14 +80,14 @@ export class DialogAnnotationEditorComponent {
     let markdown = '';
     switch (entity.mediaType) {
       case 'video':
-        if (!entity.dataSource.isExternal) url += `${this.serverUrl}/`;
+        if (!entity.dataSource.isExternal) url += `${this.serverUrl}`;
         markdown += `
         <video class="video" controls poster="">
           <source src="${url}/${entity.processed.medium}" type="video/mp4">
         </video>`;
         break;
       case 'audio':
-        if (!entity.dataSource.isExternal) url += `${this.serverUrl}/`;
+        if (!entity.dataSource.isExternal) url += `${this.serverUrl}`;
         markdown += `
         <audio controls>
           <source src="${url}${entity.processed.medium}" type="audio/mpeg">
