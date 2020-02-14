@@ -108,10 +108,10 @@ export const loadImage = (
         const gndmat = new StandardMaterial('gmat', scene);
         ground.material = gndmat;
         gndmat.diffuseTexture = texture;
+        gndmat.diffuseTexture.hasAlpha = true;
 
         if (isDefault) {
           ground.billboardMode = Mesh.BILLBOARDMODE_ALL;
-          gndmat.diffuseTexture.hasAlpha = true;
           ground.renderingGroupId = 0;
           ground.scaling = new Vector3(0.09, 0.09, 0.09);
           ground.position.y = 1;
