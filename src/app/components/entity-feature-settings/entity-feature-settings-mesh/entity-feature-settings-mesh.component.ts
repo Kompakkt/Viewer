@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Color3, StandardMaterial, Vector3 } from 'babylonjs';
+import { Vector3 } from 'babylonjs';
 
 import { BabylonService } from '../../../services/babylon/babylon.service';
 import { EntitySettingsService } from '../../../services/entitysettings/entitysettings.service';
@@ -146,7 +146,7 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
     this.setScalingFactorAxis(1, false);
     this.toggleGroundVisibility(false);
     this.setScalingFactorGround(1);
-    this.setGroundColor();
+    this.entitySettingsService.setGroundMaterial();
     this.resetBackgroundColor();
   }
 
@@ -158,22 +158,7 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
     }
     const color = this.processingService.actualEntitySettingsOnServer
       .background;
-    this.setGroundColor(color);
-  }
-
-  public setGroundColor(color?) {
-    const material = new StandardMaterial(
-      'GroundPlaneMaterial',
-      this.babylonService.getScene(),
-    );
-    material.diffuseColor = new Color3(
-      (color ? color.r : 255) / 255,
-      (color ? color.g : 255) / 255,
-      (color ? color.b : 255) / 255,
-    );
-    if (this.entitySettingsService.ground) {
-      this.entitySettingsService.ground.material = material;
-    }
+    this.entitySettingsService.setGroundMaterial(color);
   }
 
   public setScalingFactorAxis(factor: number, world: boolean) {

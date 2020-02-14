@@ -41,7 +41,7 @@ export const createBoundingBox = (
 export const createGround = (scene: Scene, size: number) => {
   const ground = MeshBuilder.CreateGround(
     'ground',
-    { height: size, width: size, subdivisions: 1 },
+    { height: size, width: size, subdivisions: 20 },
     scene,
   );
   Tags.AddTagsTo(ground, 'ground');

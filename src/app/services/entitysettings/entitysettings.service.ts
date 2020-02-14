@@ -2,9 +2,11 @@ import { EventEmitter, Injectable, Output } from '@angular/core';
 import {
   Animation,
   Axis,
+  Color3,
   Mesh,
   MeshBuilder,
   Quaternion,
+  StandardMaterial,
   Tags,
   Vector3,
 } from 'babylonjs';
@@ -395,6 +397,29 @@ export class EntitySettingsService {
     createWorldAxis(scene, this.worldAxisInitialSize);
     createlocalAxes(scene, this.localAxisInitialSize, this.center);
     this.ground = createGround(scene, this.groundInitialSize);
+    this.setGroundMaterial();
+  }
+
+  // Set the color for the helper grid
+  public setGroundMaterial(color?) {
+      const scene = this.babylonService.getScene();
+      const oldMat = scene.getMaterialByName('GroundPlaneMaterial');
+      const material = new StandardMaterial(
+          'GroundPlaneMaterial',
+          scene,
+      );
+      material.diffuseColor = new Color3(
+          (color ? color.r : 255) / 255,
+          (color ? color.g : 255) / 255,
+          (color ? color.b : 255) / 255,
+      );
+      material.wireframe = true;
+      if (this.ground) {
+        this.ground.material = material;
+      }
+      if (oldMat) {
+        oldMat.dispose();
+      }
   }
 
   // Load cameraPosition
