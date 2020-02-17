@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 import { ProcessingService } from '../../services/processing/processing.service';
 
@@ -7,8 +7,6 @@ import { ProcessingService } from '../../services/processing/processing.service'
   templateUrl: './compilation-browser.component.html',
   styleUrls: ['./compilation-browser.component.scss'],
 })
-export class CompilationBrowserComponent implements OnInit {
+export class CompilationBrowserComponent {
   constructor(public processingService: ProcessingService) {}
-
-  ngOnInit() {}
 }
