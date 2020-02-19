@@ -112,7 +112,11 @@ export class EntitySettingsService {
     Tags.AddTagsTo(this.center, 'center');
     this.center.isVisible = false;
     this.center.rotationQuaternion = this.processingService.actualRotationQuaternion;
-    meshes.forEach(mesh => (mesh.parent = this.center as Mesh));
+    meshes.forEach(mesh => {
+      if (!mesh.parent) {
+        mesh.parent = this.center as Mesh;
+      }
+    });
   }
 
   private async initialiseSizeValues() {
@@ -333,7 +337,10 @@ export class EntitySettingsService {
       Animation.ANIMATIONTYPE_QUATERNION,
       Animation.ANIMATIONLOOPMODE_RELATIVE,
     );
-    const frame = [{ frame: 0, value: start }, { frame: 100, value: end }];
+    const frame = [
+      { frame: 0, value: start },
+      { frame: 100, value: end },
+    ];
     anim.setKeys(frame);
     this.center.animations = [];
     this.center.animations.push(anim);
@@ -402,24 +409,21 @@ export class EntitySettingsService {
 
   // Set the color for the helper grid
   public setGroundMaterial(color?) {
-      const scene = this.babylonService.getScene();
-      const oldMat = scene.getMaterialByName('GroundPlaneMaterial');
-      const material = new StandardMaterial(
-          'GroundPlaneMaterial',
-          scene,
-      );
-      material.diffuseColor = new Color3(
-          (color ? color.r : 255) / 255,
-          (color ? color.g : 255) / 255,
-          (color ? color.b : 255) / 255,
-      );
-      material.wireframe = true;
-      if (this.ground) {
-        this.ground.material = material;
-      }
-      if (oldMat) {
-        oldMat.dispose();
-      }
+    const scene = this.babylonService.getScene();
+    const oldMat = scene.getMaterialByName('GroundPlaneMaterial');
+    const material = new StandardMaterial('GroundPlaneMaterial', scene);
+    material.diffuseColor = new Color3(
+      (color ? color.r : 255) / 255,
+      (color ? color.g : 255) / 255,
+      (color ? color.b : 255) / 255,
+    );
+    material.wireframe = true;
+    if (this.ground) {
+      this.ground.material = material;
+    }
+    if (oldMat) {
+      oldMat.dispose();
+    }
   }
 
   // Load cameraPosition
