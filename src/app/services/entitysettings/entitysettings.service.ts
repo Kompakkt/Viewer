@@ -112,11 +112,15 @@ export class EntitySettingsService {
     Tags.AddTagsTo(this.center, 'center');
     this.center.isVisible = false;
     this.center.rotationQuaternion = this.processingService.actualRotationQuaternion;
+    /*
     meshes.forEach(mesh => {
       if (!mesh.parent) {
         mesh.parent = this.center as Mesh;
       }
-    });
+    });*/
+    
+    meshes.forEach(mesh => (mesh.parent = this.center as Mesh));
+
   }
 
   private async initialiseSizeValues() {
