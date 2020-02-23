@@ -52,8 +52,6 @@ export class EntitySettingsService {
     private processingService: ProcessingService,
     private lightService: LightService,
   ) {
-    this.min = Vector3.Zero();
-    this.max = Vector3.Zero();
     this.processingService.setSettings.subscribe(setSettings => {
       if (setSettings) {
         this.setUpSettings();
@@ -62,8 +60,16 @@ export class EntitySettingsService {
   }
 
   private async resetInitialValues() {
-    this.min = Vector3.Zero();
-    this.max = Vector3.Zero();
+    this.min = new Vector3(
+        Number.MAX_VALUE,
+        Number.MAX_VALUE,
+        Number.MAX_VALUE,
+    );
+    this.max = new Vector3(
+        Number.MAX_VALUE * -1,
+        Number.MAX_VALUE * -1,
+        Number.MAX_VALUE * -1,
+    );
     this.initialSize = Vector3.Zero();
     this.groundInitialSize = 0;
     this.localAxisInitialSize = 0;
