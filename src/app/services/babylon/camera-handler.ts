@@ -34,7 +34,11 @@ export const updateDefaults = (
     beta: positionVector.y,
     radius: positionVector.z,
   };
-  DEFAULTS.target = targetVector;
+  DEFAULTS.target = {
+    x: targetVector.x,
+    y: targetVector.y,
+    z: targetVector.z,
+  };
 };
 
 export const resetCamera = (camera: ArcRotateCamera, scene: Scene) => {
