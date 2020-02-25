@@ -38,6 +38,8 @@ export class EntitySettingsService {
     Number.MAX_VALUE * -1,
   );
   public initialSize = Vector3.Zero();
+  private initialCenterPoint = Vector3.Zero();
+  private actualCenterPoint = Vector3.Zero();
   private center: Mesh | undefined;
   public boundingBox: Mesh | undefined;
 
@@ -71,6 +73,7 @@ export class EntitySettingsService {
         Number.MAX_VALUE * -1,
     );
     this.initialSize = Vector3.Zero();
+    this.initialCenterPoint = this.actualCenterPoint = Vector3.Zero();
     this.groundInitialSize = 0;
     this.localAxisInitialSize = 0;
     this.worldAxisInitialSize = 0;
@@ -124,13 +127,17 @@ export class EntitySettingsService {
       }
     });
   }
-
   private async initialiseSizeValues() {
     await this.calculateMinMax();
     this.initialSize = await this.max.subtract(this.min);
     this.processingService.actualEntityHeight = this.initialSize.y.toFixed(2);
     this.processingService.actualEntityWidth = this.initialSize.x.toFixed(2);
     this.processingService.actualEntityDepth = this.initialSize.z.toFixed(2);
+    this.initialCenterPoint = this.actualCenterPoint = new Vector3(
+        this.max.x - this.initialSize.x / 2,
+        this.max.y - this.initialSize.y / 2,
+        this.max.z - this.initialSize.z / 2,
+    );
   }
 
   private async calculateMinMax() {
