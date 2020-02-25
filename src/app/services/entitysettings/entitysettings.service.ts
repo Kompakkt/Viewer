@@ -396,15 +396,11 @@ export class EntitySettingsService {
       +this.processingService.actualEntityWidth,
       +this.processingService.actualEntityDepth,
     );
-    this.worldAxisInitialSize = size * 1.2;
-    this.localAxisInitialSize = size * 1.1;
-    this.groundInitialSize = size * 1.2;
-
     this.boundingBox = createBoundingBox(
-      scene,
-      this.center,
-      this.initialSize,
-      this.max,
+        scene,
+        this.center,
+        this.initialSize,
+        this.initialCenterPoint,
     );
     this.boundingBox.renderingGroupId = 2;
     createWorldAxis(scene, this.worldAxisInitialSize);

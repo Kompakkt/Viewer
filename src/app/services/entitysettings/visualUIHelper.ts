@@ -13,7 +13,7 @@ export const createBoundingBox = (
   scene: Scene,
   center: Mesh,
   initialSize: Vector3,
-  max: Vector3,
+  centerPoint: Vector3,
 ) => {
   const boundingBox = MeshBuilder.CreateBox(
     'boundingBox',
@@ -25,14 +25,12 @@ export const createBoundingBox = (
     scene,
   );
   Tags.AddTagsTo(boundingBox, 'boundingBox');
-  boundingBox.parent = center;
 
   boundingBox.material = new StandardMaterial('boundingBoxMat', scene);
   boundingBox.material.wireframe = true;
-  boundingBox.position.x = max.x - initialSize.x / 2;
-  boundingBox.position.y = max.y - initialSize.y / 2;
-  boundingBox.position.z = max.z - initialSize.z / 2;
+  boundingBox.position = centerPoint;
   boundingBox.visibility = 0;
+  boundingBox.parent = center;
   return boundingBox;
 };
 
