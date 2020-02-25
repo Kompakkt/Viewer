@@ -315,7 +315,7 @@ const createMediaControls = (
     { height: _height, width: _width },
     scene,
   );
-  plane.position = new Vector3(0, -_height * 0.6, 0);
+  plane.position = new Vector3(video ? 0 : 10, -_height * 0.6, 0);
   plane.renderingGroupId = 2;
   const advancedTexture = AdvancedDynamicTexture.CreateForMesh(plane);
 
@@ -381,7 +381,7 @@ const createMediaControls = (
     { height: _height, width: _width * 0.5 },
     scene,
   );
-  planeVol.position = new Vector3(_width * 0.6, 0, 0);
+  planeVol.position = new Vector3(_width * 0.6 + (video ? + 0 : + 10), 0, 0);
   planeVol.renderingGroupId = 2;
 
   const advancedTextureVol = AdvancedDynamicTexture.CreateForMesh(planeVol);
