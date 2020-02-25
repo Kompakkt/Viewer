@@ -120,9 +120,9 @@ export const setUpCamera = (
   mediaType: string,
 ) => {
   // camera for model, audio, video, image
-  const radius = maxSize * 7;
-  camera.minZ = maxSize * 0.01;
-  camera.maxZ = radius + maxSize * 0.5;
+  const radius = maxSize * 2.5;
+  camera.minZ = maxSize * 0.0001;
+  camera.maxZ = radius + maxSize;
 
   if (mediaType === 'entity' || mediaType === 'model') {
     camera.lowerAlphaLimit = null;
@@ -134,13 +134,12 @@ export const setUpCamera = (
     camera.lowerBetaLimit = camera.upperBetaLimit = halfPi * 90;
   }
   if (mediaType !== 'audio') {
-    camera.lowerRadiusLimit = maxSize * 0.011;
+    camera.lowerRadiusLimit = camera.minZ * 2;
     camera.upperRadiusLimit = radius;
-  } else {
-    camera.lowerRadiusLimit = camera.upperRadiusLimit = radius / 2.5;
     camera.speed = maxSize * 0.8;
+  } else {
+    camera.lowerRadiusLimit = camera.upperRadiusLimit = radius;
   }
-
   return camera;
 };
 
