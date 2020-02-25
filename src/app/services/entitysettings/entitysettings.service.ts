@@ -96,14 +96,10 @@ export class EntitySettingsService {
     }
     await this.resetInitialValues();
     await this.initialiseSizeValues();
-    if (this.processingService.meshSettings) {
-      await this.setUpMeshSettingsHelper();
-      if (this.processingService.upload) {
-        await this.createVisualUIMeshSettingsHelper();
-      }
-    }
+    await this.setUpMeshSettingsHelper();
+    await this.createVisualUIMeshSettingsHelper();
     await this.loadSettings();
-    if (!this.processingService.upload) {
+    if (!this.processingService.upload || !this.processingService.meshSettings) {
       await this.decomposeMeshSettingsHelper();
     }
   }
