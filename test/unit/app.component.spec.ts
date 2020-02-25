@@ -1,9 +1,9 @@
 import { TestBed, async } from '@angular/core/testing';
-import { AppComponent } from '../../../app/app.component';
-import { LoadingscreenComponent } from '../../../app/components/loadingscreen/loadingscreen.component';
-import { SceneComponent } from '../../../app/components/scene/scene.component';
-import { MenuComponent } from '../../../app/components/menu/menu.component';
-import { AnnotationwalkthroughComponent } from '../../../app/components/entity-feature-annotations/annotationwalkthrough/annotationwalkthrough.component';
+import { AppComponent } from '../../src/app/app.component';
+import { LoadingscreenComponent } from '../../src/app/components/loadingscreen/loadingscreen.component';
+import { SceneComponent } from '../../src/app/components/scene/scene.component';
+import { MenuComponent } from '../../src/app/components/menu/menu.component';
+import { AnnotationwalkthroughComponent } from '../../src/app/components/entity-feature-annotations/annotationwalkthrough/annotationwalkthrough.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
@@ -22,25 +22,24 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
-import { AnnotationsEditorComponent } from '../../../app/components/entity-feature-annotations/annotations-editor/annotations-editor.component';
-import { AnnotationComponent } from '../../../app/components/entity-feature-annotations/annotation/annotation.component';
+import { AnnotationsEditorComponent } from '../../src/app/components/entity-feature-annotations/annotations-editor/annotations-editor.component';
+import { AnnotationComponent } from '../../src/app/components/entity-feature-annotations/annotation/annotation.component';
 import { ColorChromeModule } from 'ngx-color/chrome';
 import { HttpClientModule } from '@angular/common/http';
 import { SocketIoModule } from 'ngx-socket-io';
-import { environment } from '../../../environments/environment';
-import { BroadcastComponent } from '../../../app/components/broadcast/broadcast.component';
-import { BroadcastingUsersComponent } from '../../../app/components/broadcast/broadcasting-users.component';
-import { ObjectFeaturesComponent } from '../../../app/components/object-features/object-features.component';
-import { CompilationBrowserComponent } from '../../../app/components/compilation-browser/content.component';
-import { AnnotationComponentForEditorComponent } from '../../../app/components/entity-feature-annotations/annotation/annotation-for-editor.component';
+import { environment } from '../../src/environments/environment';
+import { AnnotationComponentForEditorComponent } from '../../src/app/components/entity-feature-annotations/annotation/annotation-for-editor.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MarkdownModule } from 'ngx-markdown';
-import { ObjectFeatureSettingsComponent } from '../../../app/components/entity-feature-settings/object-feature-settings.component';
-import { ObjectFeatureMetadataComponent } from '../../../app/components/object-feature-metadata/object-feature-metadata.component';
-import { ContentBrowserComponent } from '../../../app/components/content-browser/content-browser.component';
-import { MediaTypePipe } from '../../../app/pipes/media-type.pipe';
 import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
-import { RenderCanvasComponent } from '../../../app/components/render-canvas/render-canvas.component';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { SidenavComponent } from '../../src/app/components/sidenav/sidenav.component';
+import { SidenavMenuComponent } from '../../src/app/components/sidenav-menu/sidenav-menu.component';
+import { CompilationBrowserComponent } from '../../src/app/components/compilation-browser/compilation-browser.component';
+import { EntityFeatureSettingsComponent } from '../../src/app/components/entity-feature-settings/entity-feature-settings.component';
+import { EntityFeatureSettingsLightsComponent } from '../../src/app/components/entity-feature-settings/entity-feature-settings-lights/entity-feature-settings-lights.component';
+import { EntityFeatureSettingsMeshComponent } from '../../src/app/components/entity-feature-settings/entity-feature-settings-mesh/entity-feature-settings-mesh.component';
+import { RenderCanvasComponent } from '../../src/app/components/render-canvas/render-canvas.component';
 
 describe('AppComponent', () => {
   beforeEach(async(() => {
@@ -53,16 +52,14 @@ describe('AppComponent', () => {
         AnnotationwalkthroughComponent,
         AnnotationsEditorComponent,
         AnnotationComponent,
-        BroadcastComponent,
-        BroadcastingUsersComponent,
-        ObjectFeaturesComponent,
-        CompilationBrowserComponent,
         AnnotationComponentForEditorComponent,
-        ObjectFeatureSettingsComponent,
-        ObjectFeatureMetadataComponent,
-        ContentBrowserComponent,
+        SidenavComponent,
+        SidenavMenuComponent,
+        CompilationBrowserComponent,
+        EntityFeatureSettingsComponent,
+        EntityFeatureSettingsLightsComponent,
+        EntityFeatureSettingsMeshComponent,
         RenderCanvasComponent,
-        MediaTypePipe,
       ],
       imports: [
         FormsModule,
@@ -87,6 +84,7 @@ describe('AppComponent', () => {
         DragDropModule,
         MarkdownModule,
         MatChipsModule,
+        MatSidenavModule,
         SocketIoModule.forRoot({
           url: `${environment.express_server_url}:${environment.express_server_port}`,
           options: {},
