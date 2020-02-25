@@ -235,48 +235,39 @@ export class EntitySettingsService {
       console.error(this);
       return;
     }
-
-    await this.setUpCamera();
-
-    if (this.processingService.upload) {
-      const isModel =
+    const scale = this.processingService.actualEntitySettings.scale;
+    const isModel =
         this.processingService.actualEntityMediaType === 'model' ||
         this.processingService.actualEntityMediaType === 'entity';
+    let diagonalLength = 0;
+    if (this.boundingBox) {
+      const bi = this.boundingBox.getBoundingInfo();
+      diagonalLength = bi.diagonalLength;
+    } else {
+      diagonalLength =         Math.sqrt((
+          (this.initialSize.x * scale) * (this.initialSize.x * scale))
+          + ((this.initialSize.y * scale) * (this.initialSize.y * scale))
+          + ((this.initialSize.z * scale) * (this.initialSize.z * scale)));
+    }
+    const max = !this.processingService.defaultEntityLoaded
+        ? ((this.processingService.upload && isModel) ? diagonalLength * 2.5 : diagonalLength)
+  : 87.5;
+    await this.babylonService.cameraManager.setUpActiveCamera(max);
+
+    if (this.processingService.upload && this.processingService.actualEntityMediaType !== 'audio') {
       const position = new Vector3(
         isModel ? Math.PI / 4 : -Math.PI / 2,
         isModel ? Math.PI / 4 : Math.PI / 2,
-        Math.max(
-          +this.processingService.actualEntityHeight,
-          +this.processingService.actualEntityWidth,
-          +this.processingService.actualEntityDepth,
-        ) * 1.7,
+        diagonalLength * 1.25,
       );
-      const target = new Vector3(
-        isModel ? this.max.x - this.initialSize.x / 2 : 0,
-        isModel ? this.max.y - this.initialSize.y / 2 : 0,
-        isModel ? this.max.z - this.initialSize.z / 2 : 0,
-      );
-      // tslint:disable-next-line:max-line-length
+      const target = this.actualCenterPoint;
+      console.log('target', target);
+      console.log('position', position);
       this.processingService.actualEntitySettings.cameraPositionInitial = {
         position,
         target,
       };
     }
-  }
-
-  private async setUpCamera() {
-    if (!this.processingService.actualEntitySettings) {
-      throw new Error('Settings missing');
-    }
-    const scale = this.processingService.actualEntitySettings.scale;
-    const max = !this.processingService.defaultEntityLoaded
-      ? Math.max(
-          +this.processingService.actualEntityHeight,
-          +this.processingService.actualEntityWidth,
-          +this.processingService.actualEntityDepth,
-        ) * scale
-      : 87.5;
-    await this.babylonService.cameraManager.setUpActiveCamera(max);
   }
 
   public async decomposeMeshSettingsHelper() {
@@ -318,7 +309,7 @@ export class EntitySettingsService {
     await this.destroyMesh('worldAxis');
     await this.destroyMesh('localAxis');
     await this.destroyMesh('ground');
-    await this.setUpCamera();
+    await this.initialiseCamera();
   }
 
   private destroyMesh(tag: string) {
