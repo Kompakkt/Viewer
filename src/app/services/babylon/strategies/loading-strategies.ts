@@ -285,11 +285,8 @@ const createAudioScene = (
   const timeSlider = createMediaControls(30, 20, scene, undefined, audio);
 
   // Click on cube -> start/ stop sound
-  const center = MeshBuilder.CreateBox('audioCenter', { size: 1 }, scene);
-  Tags.AddTagsTo(center, 'audioCenter');
-  center.isVisible = false;
   cubeMeshes.meshes.forEach(mesh => {
-    mesh.parent = center;
+    Tags.AddTagsTo(mesh, 'audioCenter');
     mesh.isPickable = true;
     mesh.actionManager = new ActionManager(scene);
     mesh.actionManager.registerAction(
