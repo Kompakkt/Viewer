@@ -124,28 +124,35 @@ export class EntitySettingsService {
     }
     meshes.forEach(mesh => {
       mesh.computeWorldMatrix(true);
+      // see if mesh is visible or just a dummy
       const bi = mesh.getBoundingInfo();
-      const minimum = bi.boundingBox.minimumWorld;
-      const maximum = bi.boundingBox.maximumWorld;
+      if (bi.diagonalLength !== 0) {
+        // compare min max values
+        const minimum = bi.boundingBox.minimumWorld;
+        const maximum = bi.boundingBox.maximumWorld;
 
-      if (minimum.x < this.min.x) {
-        this.min.x = minimum.x;
+        if (minimum.x < this.min.x) {
+          this.min.x = minimum.x;
+        }
+        if (minimum.y < this.min.y) {
+          this.min.y = minimum.y;
+        }
+        if (minimum.z < this.min.z) {
+          this.min.z = minimum.z;
+        }
+        if (maximum.x > this.max.x) {
+          this.max.x = maximum.x;
+        }
+        if (maximum.y > this.max.y) {
+          this.max.y = maximum.y;
+        }
+        if (maximum.z > this.max.z) {
+          this.max.z = maximum.z;
+        }
       }
-      if (minimum.y < this.min.y) {
-        this.min.y = minimum.y;
-      }
-      if (minimum.z < this.min.z) {
-        this.min.z = minimum.z;
-      }
+    });
+  }
 
-      if (maximum.x > this.max.x) {
-        this.max.x = maximum.x;
-      }
-      if (maximum.y > this.max.y) {
-        this.max.y = maximum.y;
-      }
-      if (maximum.z > this.max.z) {
-        this.max.z = maximum.z;
   private async setUpMeshSettingsHelper() {
     const meshes = this.processingService.getCurrentEntityMeshes();
     if (!meshes) {
