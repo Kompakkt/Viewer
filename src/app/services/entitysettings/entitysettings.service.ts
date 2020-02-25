@@ -56,6 +56,7 @@ export class EntitySettingsService {
   ) {
     this.processingService.setSettings.subscribe(setSettings => {
       if (setSettings) {
+        console.log('actual settings', this.processingService.actualEntitySettings);
         this.setUpSettings();
       }
     });
@@ -213,9 +214,10 @@ export class EntitySettingsService {
     this.loadBackgroundEffect();
     this.loadBackgroundColor();
     this.initialiseLights();
-    if (this.processingService.meshSettings) {
-      await this.loadRotation();
-      await this.loadScaling();
+    if (this.processingService.meshSettings ||
+        this.processingService.actualEntityMediaType === 'audio') {
+    await this.loadRotation();
+    await this.loadScaling();
     }
   }
 
