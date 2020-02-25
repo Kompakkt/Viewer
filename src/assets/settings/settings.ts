@@ -126,11 +126,11 @@ export const settingsKompakktLogo: IEntitySettings = {
     },
   ],
   rotation: {
-    x: 315,
+    x: 0,
     y: 0,
     z: 0,
   },
-  scale: 1,
+  scale: 1.19,
 };
 
 export const settings2D: IEntitySettings = {
