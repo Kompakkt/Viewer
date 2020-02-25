@@ -104,25 +104,6 @@ export class EntitySettingsService {
     }
   }
 
-  private async setUpMeshSettingsHelper() {
-    const meshes = this.processingService.getCurrentEntityMeshes();
-    if (!meshes) {
-      throw new Error('No meshes available.');
-    }
-    this.center = MeshBuilder.CreateBox(
-      'center',
-      { size: 1 },
-      this.babylonService.getScene(),
-    );
-    Tags.AddTagsTo(this.center, 'center');
-    this.center.isVisible = false;
-    this.center.rotationQuaternion = this.processingService.actualRotationQuaternion;
-    meshes.forEach(mesh => {
-      if (!mesh.parent) {
-        mesh.parent = this.center as Mesh;
-      }
-    });
-  }
   private async initialiseSizeValues() {
     await this.calculateMinMax();
     this.initialSize = await this.max.subtract(this.min);
@@ -165,8 +146,58 @@ export class EntitySettingsService {
       }
       if (maximum.z > this.max.z) {
         this.max.z = maximum.z;
+  private async setUpMeshSettingsHelper() {
+    const meshes = this.processingService.getCurrentEntityMeshes();
+    if (!meshes) {
+      throw new Error('No meshes available.');
+    }
+    this.center = MeshBuilder.CreateBox(
+        'center',
+        {size: 0.01},
+        this.babylonService.getScene(),
+    );
+    Tags.AddTagsTo(this.center, 'center');
+    this.center.isVisible = false;
+
+    // rotation to zero
+    this.center.rotationQuaternion = this.processingService.actualRotationQuaternion;
+
+    // position model to origin of the world coordinate system
+    if (this.min.x > 0) {
+      this.center.position.x = -this.min.x;
+    }
+    if (this.min.x < 0) {
+      this.center.position.x = Math.abs(this.min.x);
+    }
+    if (this.min.y > 0) {
+      this.center.position.y = -this.min.y;
+    }
+    if (this.min.y < 0) {
+      this.center.position.y = Math.abs(this.min.y);
+    }
+    if (this.min.z > 0) {
+      this.center.position.z = -this.min.z;
+    }
+    if (this.min.z < 0) {
+      this.center.position.z = Math.abs(this.min.z);
+    }
+
+    this.actualCenterPoint = new Vector3(
+        this.initialSize.x / 2,
+        this.initialSize.y / 2,
+        this.initialSize.z / 2,
+    );
+
+    // pivot to the center of the (visible) model
+    this.center.setPivotPoint(this.initialCenterPoint);
+
+    meshes.forEach(mesh => {
+      if (!mesh.parent) {
+        mesh.parent = this.center as Mesh;
+        Tags.AddTagsTo(mesh, 'parentedMesh');
       }
     });
+
   }
 
   private async loadSettings() {
