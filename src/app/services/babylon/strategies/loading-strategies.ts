@@ -114,7 +114,9 @@ export const loadImage = (
           ground.billboardMode = Mesh.BILLBOARDMODE_ALL;
           ground.renderingGroupId = 0;
           ground.scaling = new Vector3(0.09, 0.09, 0.09);
-          ground.position.y = 1;
+          ground.position.y = 6.4;
+          ground.position.x = 9;
+          ground.position.z = 6.4;
         }
 
         const newImageContainer: IImageContainer = {
