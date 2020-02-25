@@ -154,7 +154,7 @@ export const createTextPlane = (
   return plane;
 };
 
-export const createlocalAxes = (scene: Scene, size: number, center) => {
+export const createlocalAxes = (scene: Scene, size: number, center, pivot: Vector3) => {
   const sizeLocalAxis = size;
 
   const vecOneX = new Vector3(sizeLocalAxis, 0, 0);
@@ -169,6 +169,8 @@ export const createlocalAxes = (scene: Scene, size: number, center) => {
   Tags.AddTagsTo(local_axisX, 'localAxis');
   local_axisX.color = new Color3(1, 0, 0);
   local_axisX.visibility = 0;
+  local_axisX.position = pivot;
+  local_axisX.renderingGroupId = 2;
   const xChar = createTextPlane(
     'X',
     'red',
@@ -179,6 +181,7 @@ export const createlocalAxes = (scene: Scene, size: number, center) => {
   );
   xChar.position = new Vector3(0.9 * sizeLocalAxis, -0.05 * sizeLocalAxis, 0);
   xChar.visibility = 0;
+  xChar.renderingGroupId = 2;
 
   const vecOneY = new Vector3(0, sizeLocalAxis, 0);
   const vecTwoY = new Vector3(-0.05 * sizeLocalAxis, sizeLocalAxis * 0.95, 0);
@@ -192,6 +195,8 @@ export const createlocalAxes = (scene: Scene, size: number, center) => {
   Tags.AddTagsTo(local_axisY, 'localAxis');
   local_axisY.color = new Color3(0, 1, 0);
   local_axisY.visibility = 0;
+  local_axisY.position = pivot;
+  local_axisY.renderingGroupId = 2;
   const yChar = createTextPlane(
     'Y',
     'green',
@@ -202,6 +207,7 @@ export const createlocalAxes = (scene: Scene, size: number, center) => {
   );
   yChar.position = new Vector3(0, 0.9 * sizeLocalAxis, -0.05 * sizeLocalAxis);
   yChar.visibility = 0;
+  yChar.renderingGroupId = 2;
 
   const vecOneZ = new Vector3(0, 0, sizeLocalAxis);
   const vecTwoZ = new Vector3(0, -0.05 * sizeLocalAxis, sizeLocalAxis * 0.95);
@@ -215,6 +221,8 @@ export const createlocalAxes = (scene: Scene, size: number, center) => {
   Tags.AddTagsTo(local_axisZ, 'localAxis');
   local_axisZ.color = new Color3(0, 0, 1);
   local_axisZ.visibility = 0;
+  local_axisZ.position = pivot;
+  local_axisZ.renderingGroupId = 2;
   const zChar = createTextPlane(
     'Z',
     'blue',
@@ -225,6 +233,7 @@ export const createlocalAxes = (scene: Scene, size: number, center) => {
   );
   zChar.position = new Vector3(0, 0.05 * sizeLocalAxis, 0.9 * sizeLocalAxis);
   zChar.visibility = 0;
+  zChar.renderingGroupId = 2;
 
   // TODO
   local_axisX.parent = center;

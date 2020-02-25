@@ -403,10 +403,15 @@ export class EntitySettingsService {
         this.initialCenterPoint,
     );
     this.boundingBox.renderingGroupId = 2;
-    createWorldAxis(scene, this.worldAxisInitialSize);
-    createlocalAxes(scene, this.localAxisInitialSize, this.center);
-    this.ground = createGround(scene, this.groundInitialSize);
-    this.setGroundMaterial();
+    if (this.processingService.upload && this.processingService.meshSettings) {
+      this.worldAxisInitialSize = size * 1.2;
+      this.localAxisInitialSize = size * 1.1;
+      this.groundInitialSize = size * 1.2;
+      createWorldAxis(scene, this.worldAxisInitialSize);
+      createlocalAxes(scene, this.localAxisInitialSize, this.center, this.initialCenterPoint);
+      this.ground = createGround(scene, this.groundInitialSize);
+      this.setGroundMaterial();
+    }
   }
 
   // Set the color for the helper grid
