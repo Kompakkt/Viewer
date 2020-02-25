@@ -386,9 +386,7 @@ export class ProcessingService {
             if (!newEntity.dataSource.isExternal) {
                 this.actualEntityMediaType = newEntity.mediaType;
                 await this.initialiseActualEntitySettingsData(newEntity);
-                // TODO WIP
-                if (this.upload && (this.mode !== 'upload')) {
-                    // if (this.upload && (this.mode !== 'upload' || newEntity.finished)) {
+                   if (this.upload && (this.mode !== 'upload' || newEntity.finished)) {
                     this.actualEntitySettingsOnServer = undefined;
                     this.actualEntitySettings = undefined;
                     this.loadFallbackEntity();
@@ -517,14 +515,6 @@ export class ProcessingService {
         }
 
         let upload = false;
-        // TODO WIP
-        entity.settings.rotation = {
-            x: 0,
-            y: 0,
-            z: 0,
-        };
-        entity.settings.scale = 1;
-        // TODO WIP END
         const settings = entity.settings;
 
         if (
@@ -541,9 +531,8 @@ export class ProcessingService {
             upload = await this.createSettings();
             this.upload = upload;
         } else {
-            // TODO WIP
-            this.upload = true;
-            // this.upload = false;
+
+            this.upload = false;
             this.actualEntitySettings = entity.settings;
             this.actualEntitySettingsOnServer = JSON.parse(
                 JSON.stringify(entity.settings),
