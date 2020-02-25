@@ -282,7 +282,8 @@ export class EntitySettingsService {
     if (!center) {
       throw new Error('Center missing');
     }
-    const meshes = this.processingService.getCurrentEntityMeshes();
+    const meshes = this.babylonService.getScene()
+        .getMeshesByTags('parentedMesh');
     if (!meshes) {
       throw new Error('Meshes missing');
     }
