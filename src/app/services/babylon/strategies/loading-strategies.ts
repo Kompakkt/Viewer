@@ -59,7 +59,7 @@ export const load3DEntity = (
     filename,
     scene,
     updateLoadingUI(engine),
-    extension,
+    extension.toLowerCase(),
   )
     .then(result => {
       console.log(result);
@@ -381,7 +381,7 @@ const createMediaControls = (
     { height: _height, width: _width * 0.5 },
     scene,
   );
-  planeVol.position = new Vector3(_width * 0.6 + (video ? + 0 : + 10), 0, 0);
+  planeVol.position = new Vector3(_width * 0.6 + (video ? +0 : +10), 0, 0);
   planeVol.renderingGroupId = 2;
 
   const advancedTextureVol = AdvancedDynamicTexture.CreateForMesh(planeVol);
