@@ -118,6 +118,8 @@ export class BabylonService {
   private background: Layer | undefined;
   private isBackground: boolean | undefined;
 
+  public objectScaling = 1;
+
   constructor(
     private loadingScreenHandler: LoadingscreenhandlerService,
     @Inject(DOCUMENT) private document: HTMLDocument,
@@ -173,17 +175,13 @@ export class BabylonService {
       const camera = this.getActiveCamera();
       if (!camera) return;
 
-      const maxPrecision = 45;
-      const minAngular = 2000;
+      // Calculate wheel precision using logarithmic scaling of camera radius
       camera.wheelPrecision =
-        maxPrecision - Math.min(...[camera.radius, maxPrecision - 5]);
-
-      camera.panningSensibility = camera.wheelPrecision * 50;
-
-      const angularPrecision = camera.wheelPrecision * 125;
-      camera.angularSensibilityX = camera.angularSensibilityY = Math.max(
-        ...[angularPrecision, minAngular],
-      );
+        10 / (Math.max(0.1, Math.log10(camera.radius)) * this.objectScaling);
+      // Calculate panning and orbiting using object scale
+      camera.panningSensibility = 500 / this.objectScaling;
+      camera.angularSensibilityX = camera.angularSensibilityY =
+        10000 / this.objectScaling;
 
       // Annotation_Marker -- Fixed_Size_On_Zoom
       this.scene.getMeshesByTags(
