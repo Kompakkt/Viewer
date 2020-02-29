@@ -538,10 +538,6 @@ export class ProcessingService {
         JSON.stringify(entity.settings),
       );
     }
-
-    if (this.actualEntitySettings) {
-      this.babylonService.objectScaling = this.actualEntitySettings.scale;
-    }
   }
 
   private createSettings(): boolean {
