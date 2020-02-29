@@ -101,6 +101,7 @@ export class EntitySettingsService {
     await this.createVisualUIMeshSettingsHelper();
     await this.loadSettings();
     if (!this.processingService.upload || !this.processingService.meshSettings) {
+      await this.destroyMesh('boundingBox');
       await this.decomposeMeshSettingsHelper();
     }
   }
