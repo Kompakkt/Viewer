@@ -173,18 +173,6 @@ export class BabylonService {
       const camera = this.getActiveCamera();
       if (!camera) return;
 
-      const maxPrecision = 45;
-      const minAngular = 2000;
-      camera.wheelPrecision =
-        maxPrecision - Math.min(...[camera.radius, maxPrecision - 5]);
-
-      camera.panningSensibility = camera.wheelPrecision * 50;
-
-      const angularPrecision = camera.wheelPrecision * 125;
-      camera.angularSensibilityX = camera.angularSensibilityY = Math.max(
-        ...[angularPrecision, minAngular],
-      );
-
       // Annotation_Marker -- Fixed_Size_On_Zoom
       this.scene.getMeshesByTags(
         'plane',
