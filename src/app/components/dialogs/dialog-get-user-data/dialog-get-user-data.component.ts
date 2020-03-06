@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { MessageService } from '../../../services/message/message.service';
@@ -10,7 +10,7 @@ import { UserdataService } from '../../../services/userdata/userdata.service';
   templateUrl: './dialog-get-user-data.component.html',
   styleUrls: ['./dialog-get-user-data.component.scss'],
 })
-export class DialogGetUserDataComponent implements OnInit {
+export class DialogGetUserDataComponent {
   public username = '';
   public password = '';
   public success = false;
@@ -25,8 +25,6 @@ export class DialogGetUserDataComponent implements OnInit {
   ) {
     this.id = data.id;
   }
-
-  ngOnInit() {}
 
   public send() {
     if (this.id && this.password !== '') {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 import { ProcessingService } from '../../../services/processing/processing.service';
 
@@ -7,7 +7,7 @@ import { ProcessingService } from '../../../services/processing/processing.servi
   templateUrl: './dialog-invite-broadcasting.component.html',
   styleUrls: ['./dialog-invite-broadcasting.component.scss'],
 })
-export class DialogInviteBroadcastingComponent implements OnInit {
+export class DialogInviteBroadcastingComponent {
   public text =
     'Hi! Do you like new innovative things? Come and join me on Kompakkt and ' +
     'let us use the collaborative Annotationmode! Join me on: ';
@@ -19,8 +19,6 @@ export class DialogInviteBroadcastingComponent implements OnInit {
   public collectionId: string | undefined;
 
   constructor(public processingService: ProcessingService) {}
-
-  ngOnInit() {}
 
   copyInputMessage(inputElement) {
     inputElement.select();

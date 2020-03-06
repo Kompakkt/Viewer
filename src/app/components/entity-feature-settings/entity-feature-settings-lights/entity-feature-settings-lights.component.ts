@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 import { EntitySettingsService } from '../../../services/entitysettings/entitysettings.service';
 import { LightService } from '../../../services/light/light.service';
@@ -9,14 +9,12 @@ import { ProcessingService } from '../../../services/processing/processing.servi
   templateUrl: './entity-feature-settings-lights.component.html',
   styleUrls: ['./entity-feature-settings-lights.component.scss'],
 })
-export class EntityFeatureSettingsLightsComponent implements OnInit {
+export class EntityFeatureSettingsLightsComponent {
   constructor(
     public entitySettingsService: EntitySettingsService,
     public lightService: LightService,
     private processingService: ProcessingService,
   ) {}
-
-  ngOnInit() {}
 
   // Lights
   setLightIntensity(intensity: number, lightType: string) {

@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { ICompilation } from '../../../interfaces/interfaces';
@@ -10,7 +10,7 @@ import { MongohandlerService } from '../../../services/mongohandler/mongohandler
   templateUrl: './dialog-password.component.html',
   styleUrls: ['./dialog-password.component.scss'],
 })
-export class DialogPasswordComponent implements OnInit {
+export class DialogPasswordComponent {
   public password = '';
   public identifierCollection: string;
 
@@ -24,8 +24,6 @@ export class DialogPasswordComponent implements OnInit {
   ) {
     this.identifierCollection = data.id;
   }
-
-  ngOnInit() {}
 
   public check() {
     this.dialogRef.disableClose = true;

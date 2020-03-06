@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 
 import { environment } from '../../../environments/environment';
@@ -15,7 +15,7 @@ import { DialogMeshsettingsComponent } from '../dialogs/dialog-meshsettings/dial
   templateUrl: './entity-feature-settings.component.html',
   styleUrls: ['./entity-feature-settings.component.scss'],
 })
-export class EntityFeatureSettingsComponent implements OnInit {
+export class EntityFeatureSettingsComponent {
   @ViewChild('stepper') stepper;
 
   // used during upload while setting initial settings
@@ -31,8 +31,6 @@ export class EntityFeatureSettingsComponent implements OnInit {
     private mongoHandler: MongohandlerService,
     public userdataService: UserdataService,
   ) {}
-
-  ngOnInit() {}
 
   public setInitialPerspectivePreview() {
     this.setPreview();

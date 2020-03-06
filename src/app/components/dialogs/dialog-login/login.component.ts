@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { ILDAPData } from '../../../interfaces/interfaces';
@@ -9,7 +9,7 @@ import { MongohandlerService } from '../../../services/mongohandler/mongohandler
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent {
   public data: {
     username: string;
     password: string;
@@ -28,8 +28,6 @@ export class LoginComponent implements OnInit {
     public mongoService: MongohandlerService,
     @Inject(MAT_DIALOG_DATA) public concern: string,
   ) {}
-
-  ngOnInit() {}
 
   public login() {
     this.waitingForResponse = true;

@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { MessageService } from '../../../services/message/message.service';
@@ -9,7 +9,7 @@ import { MongohandlerService } from '../../../services/mongohandler/mongohandler
   templateUrl: './dialog-share-annotation.component.html',
   styleUrls: ['./dialog-share-annotation.component.scss'],
 })
-export class DialogShareAnnotationComponent implements OnInit {
+export class DialogShareAnnotationComponent {
   public targetCollectionId = '';
   public checkPwdMode = false;
   private passwordCollection = '';
@@ -28,8 +28,6 @@ export class DialogShareAnnotationComponent implements OnInit {
   ) {
     this.entityId = data.entityId;
   }
-
-  ngOnInit() {}
 
   public share() {
     if (this.targetCollectionId !== '') {
