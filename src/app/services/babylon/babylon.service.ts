@@ -203,8 +203,7 @@ export class BabylonService {
 
   public getActiveCamera() {
     if (!this.scene.activeCamera) {
-      const cam = this.scene.cameras[0];
-      this.scene.activeCamera = cam;
+      this.scene.activeCamera = this.scene.cameras[0];
     }
     return this.scene.activeCamera as ArcRotateCamera;
   }

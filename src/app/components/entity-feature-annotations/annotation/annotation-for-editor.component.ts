@@ -44,7 +44,6 @@ export class AnnotationComponentForEditorComponent extends AnnotationComponent {
           throw new Error(
             'AnnotationComponentForEditorComponent without Annotation',
           );
-          return;
         }
         const camera = this.babylonService.getActiveCamera();
         if (!camera) {
@@ -55,7 +54,6 @@ export class AnnotationComponentForEditorComponent extends AnnotationComponent {
           throw new Error(
             'AnnotationComponentForEditorComponent cannot get ActiveCamera',
           );
-          return;
         }
 
         this.annotation.body.content.relatedPerspective = {
@@ -76,7 +74,6 @@ export class AnnotationComponentForEditorComponent extends AnnotationComponent {
       throw new Error(
         'AnnotationComponentForEditorComponent without Annotation',
       );
-      return;
     }
     if (!this.isEditMode) {
       this.collapsed = !this.collapsed;

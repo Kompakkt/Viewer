@@ -42,24 +42,21 @@ export class EntityFeatureSettingsComponent {
       .createPreviewScreenshot()
       .then(screenshot => {
         if (!this.processingService.actualEntitySettings) {
-          throw new Error('Settings missing');
           console.error(this);
-          return;
+          throw new Error('Settings missing');
         }
         this.processingService.actualEntitySettings.preview = screenshot;
       })
       .catch(error => {
-        throw new Error('Can not create Screenshot.');
         console.error(error);
-        return;
+        throw new Error('Can not create Screenshot.');
       });
   }
 
   private async setActualViewAsInitialView() {
     if (!this.processingService.actualEntitySettings) {
-      throw new Error('Settings missing');
       console.error(this);
-      return;
+      throw new Error('Settings missing');
     }
     const {
       position,
@@ -74,9 +71,8 @@ export class EntityFeatureSettingsComponent {
 
   public setBackgroundColor(color) {
     if (!this.processingService.actualEntitySettings) {
-      throw new Error('Settings missing');
       console.error(this);
-      return;
+      throw new Error('Settings missing');
     }
     this.processingService.actualEntitySettings.background.color = color;
     this.entitySettingsService.loadBackgroundColor();
@@ -84,15 +80,13 @@ export class EntityFeatureSettingsComponent {
 
   public async saveActualSettings() {
     if (!this.processingService.actualEntitySettings) {
-      throw new Error('Settings missing');
       console.error(this);
-      return;
+      throw new Error('Settings missing');
     }
     const entity = this.processingService.getCurrentEntity();
     if (!entity) {
-      throw new Error('Entity missing');
       console.error(this);
-      return;
+      throw new Error('Entity missing');
     }
     if (
       !this.processingService.defaultEntityLoaded &&
@@ -120,9 +114,8 @@ export class EntityFeatureSettingsComponent {
       !this.processingService.actualEntitySettings ||
       !this.processingService.actualEntitySettingsOnServer
     ) {
-      throw new Error('Settings missing');
       console.error(this);
-      return;
+      throw new Error('Settings missing');
     }
     this.processingService.actualEntitySettings.preview = JSON.parse(
       JSON.stringify(

@@ -24,9 +24,8 @@ export class LightService {
 
   public initialiseAmbientLight(type: string, intensity: number) {
     if (type !== 'up' && type !== 'down') {
-      throw new Error('Can not create this light');
       console.error(this);
-      return;
+      throw new Error('Can not create this light');
     }
     const position = new Vector3(0, type === 'up' ? 1 : -1, 0);
     const light = new HemisphericLight(
@@ -67,17 +66,16 @@ export class LightService {
 
   public setPointLightPosition(position: Vector3) {
     if (!this.pointlight) {
-      throw new Error('No pointlight in scene');
       console.error(this);
-      return;
+      throw new Error('No pointlight in scene');
     }
     this.pointlight.position = position;
   }
 
   public getLightByType(lightType: string): IEntityLight {
     if (!this.processingService.actualEntitySettings) {
-      throw new Error('Settings missing');
       console.error(this);
+      throw new Error('Settings missing');
     }
     let light;
     if (lightType === 'ambientlightUp' || lightType === 'ambientlightDown') {
@@ -98,9 +96,8 @@ export class LightService {
 
   public getLightIndexByType(lightType: string): number | undefined {
     if (!this.processingService.actualEntitySettings) {
-      throw new Error('Settings missing');
       console.error(this);
-      return;
+      throw new Error('Settings missing');
     }
     console.log('get Index of', lightType);
     let indexOfLight;

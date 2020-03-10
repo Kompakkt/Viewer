@@ -200,19 +200,13 @@ export const setCameraTarget = (camera: ArcRotateCamera, target: Vector3) => {
 };
 
 export const getDefaultPosition = () => {
-  const position = new Vector3(
+  return new Vector3(
     DEFAULTS.position.alpha,
     DEFAULTS.position.beta,
     DEFAULTS.position.radius,
   );
-  return position;
 };
 
 export const getDefaultTarget = () => {
-  const target = new Vector3(
-    DEFAULTS.target.x,
-    DEFAULTS.target.y,
-    DEFAULTS.target.z,
-  );
-  return target;
+  return new Vector3(DEFAULTS.target.x, DEFAULTS.target.y, DEFAULTS.target.z);
 };

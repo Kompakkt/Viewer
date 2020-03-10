@@ -34,8 +34,9 @@ export class AnnotationwalkthroughComponent implements OnInit {
         const selectedAnnotation = this.annotations.find(
           (anno: IAnnotation) => anno._id === currentAnnotation,
         );
-        if (selectedAnnotation)
+        if (selectedAnnotation) {
           this.title = selectedAnnotation.body.content.title;
+        }
       },
     );
   }
@@ -63,21 +64,20 @@ export class AnnotationwalkthroughComponent implements OnInit {
     const perspective = annotation.body.content.relatedPerspective;
 
     if (perspective !== undefined) {
-      const positionVector = new Vector3(
-        perspective.position.x,
-        perspective.position.y,
-        perspective.position.z,
-      );
-      const targetVector = new Vector3(
-        perspective.target.x,
-        perspective.target.y,
-        perspective.target.z,
-      );
-
       this.babylonService.cameraManager.moveActiveCameraToPosition(
-        positionVector,
+        new Vector3(
+          perspective.position.x,
+          perspective.position.y,
+          perspective.position.z,
+        ),
       );
-      this.babylonService.cameraManager.setActiveCameraTarget(targetVector);
+      this.babylonService.cameraManager.setActiveCameraTarget(
+        new Vector3(
+          perspective.target.x,
+          perspective.target.y,
+          perspective.target.z,
+        ),
+      );
     }
 
     this.annotationService.setSelectedAnnotation(annotation._id);

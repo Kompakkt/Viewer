@@ -56,7 +56,10 @@ export class EntitySettingsService {
   ) {
     this.processingService.setSettings.subscribe(setSettings => {
       if (setSettings) {
-        console.log('actual settings', this.processingService.actualEntitySettings);
+        console.log(
+          'actual settings',
+          this.processingService.actualEntitySettings,
+        );
         this.setUpSettings();
       }
     });
@@ -64,14 +67,14 @@ export class EntitySettingsService {
 
   private async resetInitialValues() {
     this.min = new Vector3(
-        Number.MAX_VALUE,
-        Number.MAX_VALUE,
-        Number.MAX_VALUE,
+      Number.MAX_VALUE,
+      Number.MAX_VALUE,
+      Number.MAX_VALUE,
     );
     this.max = new Vector3(
-        Number.MAX_VALUE * -1,
-        Number.MAX_VALUE * -1,
-        Number.MAX_VALUE * -1,
+      Number.MAX_VALUE * -1,
+      Number.MAX_VALUE * -1,
+      Number.MAX_VALUE * -1,
     );
     this.initialSize = Vector3.Zero();
     this.initialCenterPoint = this.actualCenterPoint = Vector3.Zero();
@@ -100,7 +103,10 @@ export class EntitySettingsService {
     await this.setUpMeshSettingsHelper();
     await this.createVisualUIMeshSettingsHelper();
     await this.loadSettings();
-    if (!this.processingService.upload || !this.processingService.meshSettings) {
+    if (
+      !this.processingService.upload ||
+      !this.processingService.meshSettings
+    ) {
       await this.destroyMesh('boundingBox');
       await this.decomposeMeshSettingsHelper();
     }
@@ -113,9 +119,9 @@ export class EntitySettingsService {
     this.processingService.actualEntityWidth = this.initialSize.x.toFixed(2);
     this.processingService.actualEntityDepth = this.initialSize.z.toFixed(2);
     this.initialCenterPoint = this.actualCenterPoint = new Vector3(
-        this.max.x - this.initialSize.x / 2,
-        this.max.y - this.initialSize.y / 2,
-        this.max.z - this.initialSize.z / 2,
+      this.max.x - this.initialSize.x / 2,
+      this.max.y - this.initialSize.y / 2,
+      this.max.z - this.initialSize.z / 2,
     );
   }
 
@@ -161,9 +167,9 @@ export class EntitySettingsService {
       throw new Error('No meshes available.');
     }
     this.center = MeshBuilder.CreateBox(
-        'center',
-        {size: 0.01},
-        this.babylonService.getScene(),
+      'center',
+      { size: 0.01 },
+      this.babylonService.getScene(),
     );
     Tags.AddTagsTo(this.center, 'center');
     this.center.isVisible = false;
@@ -192,9 +198,9 @@ export class EntitySettingsService {
     }
 
     this.actualCenterPoint = new Vector3(
-        this.initialSize.x / 2,
-        this.initialSize.y / 2,
-        this.initialSize.z / 2,
+      this.initialSize.x / 2,
+      this.initialSize.y / 2,
+      this.initialSize.z / 2,
     );
 
     // pivot to the center of the (visible) model
@@ -206,7 +212,6 @@ export class EntitySettingsService {
         Tags.AddTagsTo(mesh, 'parentedMesh');
       }
     });
-
   }
 
   private async loadSettings() {
@@ -215,10 +220,12 @@ export class EntitySettingsService {
     this.loadBackgroundEffect();
     this.loadBackgroundColor();
     this.initialiseLights();
-    if (this.processingService.meshSettings ||
-        this.processingService.actualEntityMediaType === 'audio') {
-    await this.loadRotation();
-    await this.loadScaling();
+    if (
+      this.processingService.meshSettings ||
+      this.processingService.actualEntityMediaType === 'audio'
+    ) {
+      await this.loadRotation();
+      await this.loadScaling();
     }
   }
 
@@ -232,30 +239,35 @@ export class EntitySettingsService {
 
   private async initialiseCamera() {
     if (!this.processingService.actualEntitySettings) {
-      throw new Error('Settings missing');
       console.error(this);
-      return;
+      throw new Error('Settings missing');
     }
     const scale = this.processingService.actualEntitySettings.scale;
     const isModel =
-        this.processingService.actualEntityMediaType === 'model' ||
-        this.processingService.actualEntityMediaType === 'entity';
+      this.processingService.actualEntityMediaType === 'model' ||
+      this.processingService.actualEntityMediaType === 'entity';
     let diagonalLength = 0;
     if (this.boundingBox) {
       const bi = this.boundingBox.getBoundingInfo();
       diagonalLength = bi.diagonalLength;
     } else {
-      diagonalLength =         Math.sqrt((
-          (this.initialSize.x * scale) * (this.initialSize.x * scale))
-          + ((this.initialSize.y * scale) * (this.initialSize.y * scale))
-          + ((this.initialSize.z * scale) * (this.initialSize.z * scale)));
+      diagonalLength = Math.sqrt(
+        this.initialSize.x * scale * (this.initialSize.x * scale) +
+          this.initialSize.y * scale * (this.initialSize.y * scale) +
+          this.initialSize.z * scale * (this.initialSize.z * scale),
+      );
     }
     const max = !this.processingService.defaultEntityLoaded
-        ? ((this.processingService.upload && isModel) ? diagonalLength * 2.5 : diagonalLength)
-  : 87.5;
+      ? this.processingService.upload && isModel
+        ? diagonalLength * 2.5
+        : diagonalLength
+      : 87.5;
     await this.babylonService.cameraManager.setUpActiveCamera(max);
 
-    if (this.processingService.upload && this.processingService.actualEntityMediaType !== 'audio') {
+    if (
+      this.processingService.upload &&
+      this.processingService.actualEntityMediaType !== 'audio'
+    ) {
       const position = new Vector3(
         isModel ? Math.PI / 4 : -Math.PI / 2,
         isModel ? Math.PI / 4 : Math.PI / 2,
@@ -276,8 +288,9 @@ export class EntitySettingsService {
     if (!center) {
       throw new Error('Center missing');
     }
-    const meshes = this.babylonService.getScene()
-        .getMeshesByTags('parentedMesh');
+    const meshes = this.babylonService
+      .getScene()
+      .getMeshesByTags('parentedMesh');
     if (!meshes) {
       throw new Error('Meshes missing');
     }
@@ -433,10 +446,10 @@ export class EntitySettingsService {
       +this.processingService.actualEntityDepth,
     );
     this.boundingBox = createBoundingBox(
-        scene,
-        this.center,
-        this.initialSize,
-        this.initialCenterPoint,
+      scene,
+      this.center,
+      this.initialSize,
+      this.initialCenterPoint,
     );
     this.boundingBox.renderingGroupId = 2;
     if (this.processingService.upload && this.processingService.meshSettings) {
@@ -444,7 +457,12 @@ export class EntitySettingsService {
       this.localAxisInitialSize = size * 1.1;
       this.groundInitialSize = size * 1.2;
       createWorldAxis(scene, this.worldAxisInitialSize);
-      createlocalAxes(scene, this.localAxisInitialSize, this.center, this.initialCenterPoint);
+      createlocalAxes(
+        scene,
+        this.localAxisInitialSize,
+        this.center,
+        this.initialCenterPoint,
+      );
       this.ground = createGround(scene, this.groundInitialSize);
       this.setGroundMaterial();
     }
