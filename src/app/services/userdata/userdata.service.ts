@@ -40,55 +40,48 @@ export class UserdataService {
   public userAuthentication(loginRequired: boolean): Promise<boolean> {
     this.loginRequired = loginRequired;
 
-    return new Promise<boolean>((resolve, reject) => {
+    return new Promise<boolean>((resolve, _) => {
       if (this.authenticatedUser && this.userData) resolve(true);
       this.mongoService
         .isAuthorized()
         .then(result => {
-          if (result.status === 'ok') {
-            this.setUserData(result);
-            this.authenticatedUser = true;
-            resolve(true);
-          } else {
-            if (loginRequired) {
-              this.attemptLogin().then(authorized => {
-                resolve(authorized);
-              });
-            } else {
-              this.clearUserData();
-              resolve(false);
-            }
-          }
+          this.setUserData(result);
+          this.authenticatedUser = true;
+          resolve(true);
         })
         .catch(e => {
-          // Server might not be reachable, skip login
-          console.error(e);
-          this.clearUserData();
-          reject(false);
+          if (loginRequired) {
+            this.attemptLogin().then(authorized => {
+              resolve(authorized);
+            });
+          } else {
+            // Server might not be reachable, skip login
+            console.error(e);
+            this.clearUserData();
+            resolve(false);
+          }
         });
     });
   }
 
   private async attemptLogin(): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
+    return new Promise<boolean>((resolve, _) => {
       if (this.loginData.isCached) {
         this.mongoService
           .login(this.loginData.username, this.loginData.password)
           .then(result => {
-            if (result.status === 'ok') {
-              this.setUserData(result);
-              this.authenticatedUser = true;
-              resolve(true);
-            } else {
-              this.openLoginDialog().then(loggedIn => {
-                resolve(loggedIn);
-              });
-            }
+            this.setUserData(result);
+            this.authenticatedUser = true;
+            resolve(true);
           })
-          .catch(err => {
-            console.error(err);
+          .catch(() => {
+            this.openLoginDialog().then(loggedIn => {
+              resolve(loggedIn);
+            });
+
+            /*console.error(err);
             this.clearUserData();
-            reject(false);
+            reject(false);*/
           });
       } else {
         this.openLoginDialog().then(loggedIn => {
@@ -152,8 +145,7 @@ export class UserdataService {
       return false;
     }
     if (
-      !this.userData ||
-      !this.userData.data ||
+      !this.userData?.data ||
       (!isEntity(element) && !isCompilation(element))
     ) {
       this.userOwnsEntity = false;
@@ -206,7 +198,7 @@ export class UserdataService {
     if (!element) {
       return false;
     }
-    if (!this.userData || !this.userData.data) {
+    if (!this.userData?.data) {
       this.userWhitlistedEntity = false;
       this.userWhitlistedCompilation = false;
       return false;

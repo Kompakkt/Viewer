@@ -8,7 +8,6 @@ import {
   ILDAPData,
   IMetaDataDigitalEntity,
   IEntity,
-  IServerResponse,
 } from '../../interfaces/interfaces';
 
 @Injectable({
@@ -57,16 +56,21 @@ export class MongohandlerService {
     return this.get(`api/v1/get/findall/entity`);
   }
 
-  public async getEntity(
-    identifier: string,
-  ): Promise<IEntity & IServerResponse> {
+  public async getEntity(identifier: string): Promise<IEntity> {
     return this.get(`api/v1/get/find/entity/${identifier}`);
   }
 
+  /**
+   * Fetch a resolved compilation by it's identifier
+   * @param  {string}  identifier Database _id of the compilation
+   * @param  {string}  password   (Optional) Password of the compilation
+   * @param  {[type]}             [description]
+   * @return {Promise}            Returns the compilation or null if it's password protected
+   */
   public async getCompilation(
     identifier: string,
     password?: string,
-  ): Promise<ICompilation & IServerResponse> {
+  ): Promise<ICompilation | null> {
     return password
       ? this.get(`api/v1/get/find/compilation/${identifier}/${password}`)
       : this.get(`api/v1/get/find/compilation/${identifier}`);
@@ -74,11 +78,11 @@ export class MongohandlerService {
 
   public async getEntityMetadata(
     identifier: string,
-  ): Promise<IMetaDataDigitalEntity & IServerResponse> {
+  ): Promise<IMetaDataDigitalEntity> {
     return this.get(`api/v1/get/find/digitalentity/${identifier}`);
   }
 
-  public async getCurrentUserData(): Promise<ILDAPData & IServerResponse> {
+  public async getCurrentUserData(): Promise<ILDAPData> {
     return this.get(`api/v1/get/ldata`);
   }
 
@@ -87,33 +91,24 @@ export class MongohandlerService {
     return this.post(`api/v1/post/settings/${identifier}`, settings);
   }
 
-  public updateAnnotation(
-    annotation: any,
-  ): Promise<IAnnotation & IServerResponse> {
+  public updateAnnotation(annotation: any): Promise<IAnnotation> {
     return this.post(`api/v1/post/push/annotation`, annotation);
   }
 
   // Auth
-  public login(
-    username: string,
-    password: string,
-  ): Promise<ILDAPData & IServerResponse> {
+  public login(username: string, password: string): Promise<ILDAPData> {
     return this.post(`login`, { username, password });
   }
 
-  public async logout(): Promise<IServerResponse> {
+  public async logout(): Promise<string> {
     return this.get(`logout`);
   }
 
-  public async isAuthorized(): Promise<ILDAPData & IServerResponse> {
+  public async isAuthorized(): Promise<ILDAPData> {
     return this.get(`auth`);
   }
 
-  public async findUserInCompilations(): Promise<
-    IServerResponse & {
-      compilations: ICompilation[];
-    }
-  > {
+  public async findUserInCompilations(): Promise<ICompilation[]> {
     return this.get(`utility/finduserincompilations`);
   }
 

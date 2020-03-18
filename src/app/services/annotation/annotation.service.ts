@@ -709,14 +709,10 @@ export class AnnotationService {
 
         this.mongo
           .updateAnnotation(copyAnnotation)
-          .then(result => {
-            if (result.status === 'ok') {
-              this.message.info(
-                `Annotation is shared to Collection with id: ${data.collectionId}`,
-              );
-            } else {
-              console.log('Status:', result);
-            }
+          .then(() => {
+            this.message.info(
+              `Annotation is shared to Collection with id: ${data.collectionId}`,
+            );
           })
           .catch(() => this.message.error('Annotation can not be shared.'));
       });

@@ -1,5 +1,5 @@
 import { EventEmitter, Injectable, Output } from '@angular/core';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { Mesh, Quaternion } from 'babylonjs';
 import { ReplaySubject } from 'rxjs/internal/ReplaySubject';
 
@@ -267,26 +267,14 @@ export class ProcessingService {
     this.mongoHandlerService
       .getCompilation(query, password ? password : undefined)
       .then(compilation => {
-        if (compilation['_id']) {
-          this.updateActiveCompilation(compilation);
-          this.fetchEntityDataAfterCollection(
-            compilation,
-            specifiedEntity ? specifiedEntity : undefined,
-          );
-        } else if (
-          compilation['status'] === 'ok' &&
-          compilation['message'] === 'Password protected compilation'
-        ) {
-          const dialogConfig = new MatDialogConfig();
-          dialogConfig.disableClose = true;
-          dialogConfig.autoFocus = true;
-          dialogConfig.data = {
-            id: query,
-          };
-          const dialogRef = this.dialog.open(
-            DialogPasswordComponent,
-            dialogConfig,
-          );
+        if (!compilation) {
+          const dialogRef = this.dialog.open(DialogPasswordComponent, {
+            disableClose: true,
+            autoFocus: true,
+            data: {
+              id: query,
+            },
+          });
           dialogRef.afterClosed().subscribe(result => {
             if (result) {
               const newData = result.data;
@@ -302,6 +290,12 @@ export class ProcessingService {
               );
             }
           });
+        } else {
+          this.updateActiveCompilation(compilation as ICompilation);
+          this.fetchEntityDataAfterCollection(
+            compilation,
+            specifiedEntity ? specifiedEntity : undefined,
+          );
         }
       })
       .catch(error => {

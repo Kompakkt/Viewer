@@ -31,11 +31,11 @@ export class DialogPasswordComponent {
       this.mongohandlerService
         .getCompilation(this.identifierCollection, this.password)
         .then(compilation => {
-          if (compilation['_id'] && compilation.password === this.password) {
-            this.compilation = compilation;
-            this.dialogRef.close({ result: true, data: this.compilation });
-          } else {
+          if (!compilation) {
             this.message.error('Password is wrong.');
+          } else {
+            this.compilation = compilation as ICompilation;
+            this.dialogRef.close({ result: true, data: this.compilation });
           }
         })
         .catch(error => {

@@ -367,8 +367,3 @@ export interface ISizedEvent {
   width: number;
   height: number;
 }
-
-export interface IServerResponse {
-  message?: string;
-  status?: string;
-}

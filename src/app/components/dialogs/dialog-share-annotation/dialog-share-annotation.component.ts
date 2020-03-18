@@ -4,6 +4,8 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MessageService } from '../../../services/message/message.service';
 import { MongohandlerService } from '../../../services/mongohandler/mongohandler.service';
 
+import { ICompilation } from '../../../interfaces/interfaces';
+
 @Component({
   selector: 'app-dialog-share-annotation',
   templateUrl: './dialog-share-annotation.component.html',
@@ -34,9 +36,13 @@ export class DialogShareAnnotationComponent {
       this.mongohandlerService
         .getCompilation(this.targetCollectionId)
         .then(compilation => {
-          // collection is available on server
-          if (compilation['_id']) {
+          if (!compilation) {
+            // 'password'
+            this.checkPwdMode = true;
+          } else {
+            // collection is available on server
             // loaded'
+            compilation = compilation as ICompilation;
 
             if (
               compilation.entities.filter(
@@ -54,20 +60,6 @@ export class DialogShareAnnotationComponent {
                 'The entity of this annotation is not part of the target collection.',
               );
             }
-          } else if (
-            compilation['status'] === 'ok' &&
-            compilation['message'] === 'Password protected compilation'
-          ) {
-            // 'password'
-            this.checkPwdMode = true;
-          } else {
-            // collection ist nicht erreichbar
-            // missing'
-            this.message.error(
-              'Can not find Collection with ID ' +
-                this.targetCollectionId +
-                '.',
-            );
           }
         })
         .catch(error => {
@@ -91,19 +83,18 @@ export class DialogShareAnnotationComponent {
       this.mongohandlerService
         .getCompilation(this.targetCollectionId, this.passwordCollection)
         .then(compilation => {
-          if (compilation['_id']) {
+          if (!compilation) {
+            this.message.error(
+              `Password is wrong for collection with ID ${this.targetCollectionId}`,
+            );
+          } else {
+            compilation = compilation as ICompilation;
             this.response.status = true;
             this.response.collectionId = this.targetCollectionId;
             this.response.annotationListLength = compilation.annotationList
               ? compilation.annotationList.length
               : 1;
             this.dialogRef.close(this.response);
-          } else {
-            this.message.error(
-              'Password is wrong. For Colelction with ID ' +
-                this.targetCollectionId +
-                '.',
-            );
           }
         })
         .catch(error => {

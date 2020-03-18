@@ -35,17 +35,11 @@ export class LoginComponent {
     this.mongoService
       .login(this.data.username, this.data.password)
       .then(result => {
-        if (result.status === 'ok') {
-          this.waitingForResponse = false;
-          this.loginFailed = false;
-          this.dialogRef.disableClose = false;
-          this.data.userData = result;
-          this.dialogRef.close({ result: true, data: this.data });
-        } else {
-          this.dialogRef.disableClose = false;
-          this.waitingForResponse = false;
-          this.loginFailed = true;
-        }
+        this.waitingForResponse = false;
+        this.loginFailed = false;
+        this.dialogRef.disableClose = false;
+        this.data.userData = result;
+        this.dialogRef.close({ result: true, data: this.data });
       })
       .catch(error => {
         console.error(error);
