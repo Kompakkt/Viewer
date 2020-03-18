@@ -3,7 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { ICompilation } from '../../../interfaces/interfaces';
 import { MessageService } from '../../../services/message/message.service';
-import { MongohandlerService } from '../../../services/mongohandler/mongohandler.service';
+import { BackendService } from '../../../services/backend/backend.service';
 
 @Component({
   selector: 'app-password',
@@ -17,7 +17,7 @@ export class DialogPasswordComponent {
   private compilation: ICompilation | undefined;
 
   constructor(
-    private mongohandlerService: MongohandlerService,
+    private backend: BackendService,
     private message: MessageService,
     private dialogRef: MatDialogRef<DialogPasswordComponent>,
     @Inject(MAT_DIALOG_DATA) data,
@@ -28,7 +28,7 @@ export class DialogPasswordComponent {
   public check() {
     this.dialogRef.disableClose = true;
     if (this.identifierCollection && this.password !== '') {
-      this.mongohandlerService
+      this.backend
         .getCompilation(this.identifierCollection, this.password)
         .then(compilation => {
           if (!compilation) {

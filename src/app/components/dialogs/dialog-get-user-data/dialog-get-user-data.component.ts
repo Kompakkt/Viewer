@@ -2,7 +2,7 @@ import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { MessageService } from '../../../services/message/message.service';
-import { MongohandlerService } from '../../../services/mongohandler/mongohandler.service';
+import { BackendService } from '../../../services/backend/backend.service';
 import { UserdataService } from '../../../services/userdata/userdata.service';
 
 @Component({
@@ -17,7 +17,7 @@ export class DialogGetUserDataComponent {
   private id = '';
 
   constructor(
-    private mongohandlerService: MongohandlerService,
+    private backend: BackendService,
     private userdataService: UserdataService,
     private message: MessageService,
     private dialogRef: MatDialogRef<DialogGetUserDataComponent>,
@@ -28,7 +28,7 @@ export class DialogGetUserDataComponent {
 
   public send() {
     if (this.id && this.password !== '') {
-      this.mongohandlerService
+      this.backend
         .deleteRequest(this.id, 'annotation', this.username, this.password)
         .then((result: any) => {
           if (result.status === 'ok') {

@@ -2,7 +2,7 @@ import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { MessageService } from '../../../services/message/message.service';
-import { MongohandlerService } from '../../../services/mongohandler/mongohandler.service';
+import { BackendService } from '../../../services/backend/backend.service';
 
 import { ICompilation } from '../../../interfaces/interfaces';
 
@@ -23,7 +23,7 @@ export class DialogShareAnnotationComponent {
   };
 
   constructor(
-    private mongohandlerService: MongohandlerService,
+    private backend: BackendService,
     private message: MessageService,
     private dialogRef: MatDialogRef<DialogShareAnnotationComponent>,
     @Inject(MAT_DIALOG_DATA) data,
@@ -33,7 +33,7 @@ export class DialogShareAnnotationComponent {
 
   public share() {
     if (this.targetCollectionId !== '') {
-      this.mongohandlerService
+      this.backend
         .getCompilation(this.targetCollectionId)
         .then(compilation => {
           if (!compilation) {
@@ -80,7 +80,7 @@ export class DialogShareAnnotationComponent {
 
   public checkPwd() {
     if (this.targetCollectionId !== '') {
-      this.mongohandlerService
+      this.backend
         .getCompilation(this.targetCollectionId, this.passwordCollection)
         .then(compilation => {
           if (!compilation) {

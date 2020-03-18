@@ -13,7 +13,7 @@ import {
 @Injectable({
   providedIn: 'root',
 })
-export class MongohandlerService {
+export class BackendService {
   // Needed for EntityId gen
   /* tslint:disable:no-magic-numbers */
   private genIndex = parseInt((Math.random() * 0xffffff).toString(), 10);

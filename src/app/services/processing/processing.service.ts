@@ -26,7 +26,7 @@ import { isEntityForCompilation } from '../../typeguards/typeguards';
 import { BabylonService } from '../babylon/babylon.service';
 import { LoadingscreenhandlerService } from '../babylon/loadingscreen';
 import { MessageService } from '../message/message.service';
-import { MongohandlerService } from '../mongohandler/mongohandler.service';
+import { BackendService } from '../backend/backend.service';
 import { OverlayService } from '../overlay/overlay.service';
 import { UserdataService } from '../userdata/userdata.service';
 
@@ -85,7 +85,7 @@ export class ProcessingService {
   public showCompilationBrowser = false;
 
   constructor(
-    private mongoHandlerService: MongohandlerService,
+    private backend: BackendService,
     private message: MessageService,
     private overlayService: OverlayService,
     public babylonService: BabylonService,
@@ -264,7 +264,7 @@ export class ProcessingService {
     specifiedEntity?: string,
     password?: string,
   ) {
-    this.mongoHandlerService
+    this.backend
       .getCompilation(query, password ? password : undefined)
       .then(compilation => {
         if (!compilation) {
@@ -322,7 +322,7 @@ export class ProcessingService {
   }
 
   public fetchEntityData(query: string) {
-    this.mongoHandlerService
+    this.backend
       .getEntity(query)
       .then(resultEntity => {
         console.log('Received this Entity:', resultEntity);

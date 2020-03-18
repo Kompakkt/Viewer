@@ -11,7 +11,7 @@ import {
   IUserData,
 } from '../../interfaces/interfaces';
 import { isCompilation, isEntity } from '../../typeguards/typeguards';
-import { MongohandlerService } from '../mongohandler/mongohandler.service';
+import { BackendService } from '../backend/backend.service';
 
 @Injectable({
   providedIn: 'root',
@@ -32,17 +32,14 @@ export class UserdataService {
   public userWhitlistedEntity = false;
   public userWhitlistedCompilation = false;
 
-  constructor(
-    private mongoService: MongohandlerService,
-    private dialog: MatDialog,
-  ) {}
+  constructor(private backend: BackendService, private dialog: MatDialog) {}
 
   public userAuthentication(loginRequired: boolean): Promise<boolean> {
     this.loginRequired = loginRequired;
 
     return new Promise<boolean>((resolve, _) => {
       if (this.authenticatedUser && this.userData) resolve(true);
-      this.mongoService
+      this.backend
         .isAuthorized()
         .then(result => {
           this.setUserData(result);
@@ -67,7 +64,7 @@ export class UserdataService {
   private async attemptLogin(): Promise<boolean> {
     return new Promise<boolean>((resolve, _) => {
       if (this.loginData.isCached) {
-        this.mongoService
+        this.backend
           .login(this.loginData.username, this.loginData.password)
           .then(result => {
             this.setUserData(result);
@@ -113,7 +110,7 @@ export class UserdataService {
   }
 
   public logout() {
-    this.mongoService
+    this.backend
       .logout()
       .then(() => {})
       .catch(err => console.error(err));
@@ -248,7 +245,7 @@ export class UserdataService {
     this.guestUserData = {
       fullname: 'guest',
       username: 'guest',
-      _id: this.mongoService.generateEntityId(),
+      _id: this.backend.generateEntityId(),
     };
   }
 }

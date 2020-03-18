@@ -23,7 +23,7 @@ import { AnnotationmarkerService } from '../annotationmarker/annotationmarker.se
 import { BabylonService } from '../babylon/babylon.service';
 import { DataService } from '../data/data.service';
 import { MessageService } from '../message/message.service';
-import { MongohandlerService } from '../mongohandler/mongohandler.service';
+import { BackendService } from '../backend/backend.service';
 import { ProcessingService } from '../processing/processing.service';
 import { UserdataService } from '../userdata/userdata.service';
 
@@ -65,7 +65,7 @@ export class AnnotationService {
     private dataService: DataService,
     private annotationmarkerService: AnnotationmarkerService,
     private babylon: BabylonService,
-    private mongo: MongohandlerService,
+    private backend: BackendService,
     private message: MessageService,
     public socket: Socket,
     private processingService: ProcessingService,
@@ -311,7 +311,7 @@ export class AnnotationService {
         if (isLocalNewer || isSame) {
           if (!isSame) {
             // Update Server
-            this.mongo.updateAnnotation(annotation);
+            this.backend.updateAnnotation(annotation);
             serverAnnotations.splice(
               localAnnotations.findIndex(
                 ann => ann._id === serverAnnotation._id,
@@ -341,7 +341,7 @@ export class AnnotationService {
         if (isLastModifiedByMe && isCreatedByMe) {
           // Annotation auf Server speichern
           // Update Server
-          this.mongo.updateAnnotation(annotation);
+          this.backend.updateAnnotation(annotation);
           serverAnnotations.push(annotation);
           unsorted.push(annotation);
         } else {
@@ -417,7 +417,7 @@ export class AnnotationService {
       if (!this.actualEntity) {
         throw new Error(`this.actualEntity not defined: ${this.actualEntity}`);
       }
-      const generatedId = this.mongo.generateEntityId();
+      const generatedId = this.backend.generateEntityId();
 
       const personName = this.userdataService.userData
         ? this.userdataService.userData.fullname
@@ -506,7 +506,7 @@ export class AnnotationService {
       !this.processingService.defaultEntityLoaded &&
       !this.processingService.fallbackEntityLoaded
     ) {
-      this.mongo
+      this.backend
         .updateAnnotation(_annotation)
         .then((resultAnnotation: IAnnotation) => {
           newAnnotation = resultAnnotation;
@@ -534,7 +534,7 @@ export class AnnotationService {
         (this.processingService.compilationLoaded &&
           this.userdataService.userOwnsCompilation)
       ) {
-        this.mongo
+        this.backend
           .updateAnnotation(_annotation)
           .then((resultAnnotation: IAnnotation) => {
             newAnnotation = resultAnnotation;
@@ -586,7 +586,7 @@ export class AnnotationService {
     if (username === '' || password === '') {
       this.passwordDialog(annotationId);
     } else {
-      this.mongo
+      this.backend
         .deleteRequest(annotationId, 'annotation', username, password)
         .then((result: any) => {
           if (result.status === 'ok') {
@@ -707,7 +707,7 @@ export class AnnotationService {
           data.annotationListLength,
         );
 
-        this.mongo
+        this.backend
           .updateAnnotation(copyAnnotation)
           .then(() => {
             this.message.info(
@@ -723,7 +723,7 @@ export class AnnotationService {
     collectionId: string,
     annotationLength: number,
   ): any {
-    const generatedId = this.mongo.generateEntityId();
+    const generatedId = this.backend.generateEntityId();
 
     if (!this.actualEntity) {
       throw new Error('ActualEntity missing');

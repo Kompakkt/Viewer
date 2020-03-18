@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { environment } from '../../../environments/environment';
 import { BabylonService } from '../../services/babylon/babylon.service';
 import { EntitySettingsService } from '../../services/entitysettings/entitysettings.service';
-import { MongohandlerService } from '../../services/mongohandler/mongohandler.service';
+import { BackendService } from '../../services/backend/backend.service';
 import { ProcessingService } from '../../services/processing/processing.service';
 import { UserdataService } from '../../services/userdata/userdata.service';
 // tslint:disable-next-line:max-line-length
@@ -28,7 +28,7 @@ export class EntityFeatureSettingsComponent {
     public processingService: ProcessingService,
     public entitySettingsService: EntitySettingsService,
     public dialog: MatDialog,
-    private mongoHandler: MongohandlerService,
+    private backend: BackendService,
     public userdataService: UserdataService,
   ) {}
 
@@ -93,7 +93,7 @@ export class EntityFeatureSettingsComponent {
       !this.processingService.fallbackEntityLoaded
     ) {
       const settings = this.processingService.actualEntitySettings;
-      this.mongoHandler.updateSettings(entity._id, settings).then(result => {
+      this.backend.updateSettings(entity._id, settings).then(result => {
         console.log('Settings gespeichert', result);
         this.processingService.actualEntitySettingsOnServer = JSON.parse(
           JSON.stringify(this.processingService.actualEntitySettings),
