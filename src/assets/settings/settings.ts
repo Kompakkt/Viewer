@@ -7,7 +7,7 @@
  *  - 3D model
  */
 
-import { IEntitySettings } from '../../app/interfaces/interfaces';
+import { IEntitySettings } from '@kompakkt/shared';
 
 export const settingsFallback: IEntitySettings = {
   preview:

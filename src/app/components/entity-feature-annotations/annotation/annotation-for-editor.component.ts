@@ -23,11 +23,13 @@ export class AnnotationComponentForEditorComponent extends AnnotationComponent {
       if (this.selectedAnnotation === this.annotation._id) {
         this.annotationService.setSelectedAnnotation('');
       }
-      this.babylonService.hideMesh(this.annotation._id, false);
+      this.babylonService.hideMesh(this.annotation._id.toString(), false);
     } else {
       this.showAnnotation = true;
-      this.annotationService.setSelectedAnnotation(this.annotation._id);
-      this.babylonService.hideMesh(this.annotation._id, true);
+      this.annotationService.setSelectedAnnotation(
+        this.annotation._id.toString(),
+      );
+      this.babylonService.hideMesh(this.annotation._id.toString(), true);
     }
   }
 
@@ -80,8 +82,10 @@ export class AnnotationComponentForEditorComponent extends AnnotationComponent {
     }
     this.collapsed && this.selectedAnnotation === this.annotation._id
       ? this.annotationService.setSelectedAnnotation('')
-      : this.annotationService.setSelectedAnnotation(this.annotation._id);
-    this.babylonService.hideMesh(this.annotation._id, true);
+      : this.annotationService.setSelectedAnnotation(
+          this.annotation._id.toString(),
+        );
+    this.babylonService.hideMesh(this.annotation._id.toString(), true);
     this.showAnnotation = true;
   }
 }

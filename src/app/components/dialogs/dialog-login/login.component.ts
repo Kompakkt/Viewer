@@ -1,7 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
-import { ILDAPData } from '../../../interfaces/interfaces';
+import { IUserData } from '@kompakkt/shared';
 import { BackendService } from '../../../services/backend/backend.service';
 
 @Component({
@@ -13,7 +13,7 @@ export class LoginComponent {
   public data: {
     username: string;
     password: string;
-    userData: ILDAPData | undefined;
+    userData: IUserData | undefined;
   } = {
     username: '',
     password: '',

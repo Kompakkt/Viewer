@@ -6,7 +6,8 @@
   },
   "files": [
     "./src/main.ts",
-    "./src/polyfills.ts"
+    "./src/polyfills.ts",
+    "./node_modules/@kompakkt/shared/index.ts"
   ],
   "include": [
     "**/*.d.ts"

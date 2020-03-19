@@ -21,8 +21,9 @@ import {
   ICompilation,
   IEntity,
   IEntitySettings,
-} from '../../interfaces/interfaces';
-import { isEntityForCompilation } from '../../typeguards/typeguards';
+  isEntity,
+  ObjectId,
+} from '@kompakkt/shared';
 import { BabylonService } from '../babylon/babylon.service';
 import { LoadingscreenhandlerService } from '../babylon/loadingscreen';
 import { MessageService } from '../message/message.service';
@@ -232,18 +233,18 @@ export class ProcessingService {
   public loadDefaultEntityData() {
     this.actualEntityQuality = 'low';
     this.actualEntityMediaType = 'entity';
-    this.loadEntity(defaultEntity, '');
+    this.loadEntity(defaultEntity as IEntity, '');
   }
 
   public loadFallbackEntity() {
     this.actualEntityQuality = 'low';
     this.actualEntityMediaType = 'entity';
-    this.loadEntity(fallbackEntity, '', '.gltf');
+    this.loadEntity(fallbackEntity as IEntity, '', '.gltf');
   }
 
   public fetchAndLoad(
-    entityId?: string | null,
-    compilationId?: string | null,
+    entityId?: string | ObjectId | null,
+    compilationId?: string | ObjectId | null,
     isFromCompilation?: boolean,
   ) {
     this.actualEntityQuality = 'low';
@@ -260,8 +261,8 @@ export class ProcessingService {
   }
 
   private fetchCompilationData(
-    query: string,
-    specifiedEntity?: string,
+    query: string | ObjectId,
+    specifiedEntity?: string | ObjectId,
     password?: string,
   ) {
     this.backend
@@ -309,19 +310,19 @@ export class ProcessingService {
       const loadEntity = compilation.entities.find(
         e => e && e._id === specifiedEntity,
       );
-      if (loadEntity && isEntityForCompilation(loadEntity)) {
+      if (loadEntity && isEntity(loadEntity)) {
         this.fetchEntityData(loadEntity._id);
       } else {
         const entity = compilation.entities[0];
-        if (isEntityForCompilation(entity)) this.fetchEntityData(entity._id);
+        if (isEntity(entity)) this.fetchEntityData(entity._id);
       }
     } else {
       const entity = compilation.entities[0];
-      if (isEntityForCompilation(entity)) this.fetchEntityData(entity._id);
+      if (isEntity(entity)) this.fetchEntityData(entity._id);
     }
   }
 
-  public fetchEntityData(query: string) {
+  public fetchEntityData(query: string | ObjectId) {
     this.backend
       .getEntity(query)
       .then(resultEntity => {

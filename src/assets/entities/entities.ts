@@ -3,7 +3,7 @@
  *  - KompakktLogo(Default)
  */
 
-import { IEntity } from '../../app/interfaces/interfaces';
+import { IEntity } from '@kompakkt/shared';
 import { baseEntity } from '../defaults';
 import { settingsFallback, settingsKompakktLogo } from '../settings/settings';
 
@@ -21,13 +21,11 @@ export const defaultEntity: IEntity = {
   ],
   annotationList: [],
   relatedDigitalEntity: { _id: 'default_entity' },
-  relatedEntityOwners: [
-    {
-      _id: '',
-      username: 'kompakkt',
-      fullname: 'kompakkt',
-    },
-  ],
+  creator: {
+    _id: '',
+    username: 'kompakkt',
+    fullname: 'kompakkt',
+  },
   mediaType: 'entity',
   processed: {
     low: 'assets/models/kompakkt.babylon',
@@ -52,13 +50,11 @@ export const fallbackEntity: IEntity = {
   ],
   annotationList: [],
   relatedDigitalEntity: { _id: 'fallback_entity' },
-  relatedEntityOwners: [
-    {
-      _id: '',
-      username: 'kompakkt',
-      fullname: 'kompakkt',
-    },
-  ],
+  creator: {
+    _id: '',
+    username: 'kompakkt',
+    fullname: 'kompakkt',
+  },
   mediaType: 'entity',
   processed: {
     low: 'assets/models/sketch_cat/scene.gltf',

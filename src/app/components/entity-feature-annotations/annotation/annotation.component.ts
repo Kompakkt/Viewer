@@ -2,7 +2,7 @@ import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Matrix, Vector3 } from 'babylonjs';
 
-import { IAnnotation } from '../../../interfaces/interfaces';
+import { IAnnotation } from '@kompakkt/shared';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
 import { BabylonService } from '../../../services/babylon/babylon.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
@@ -108,7 +108,7 @@ export class AnnotationComponent implements OnInit {
       throw new Error('AnnotationComponent without annotation');
     }
     this.annotationService.setEditModeAnnotation(
-      this.isEditMode ? '' : this.annotation._id,
+      this.isEditMode ? '' : this.annotation._id.toString(),
     );
   }
 

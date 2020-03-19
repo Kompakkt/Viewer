@@ -5,10 +5,11 @@ import { environment } from '../../../environments/environment';
 import {
   IAnnotation,
   ICompilation,
-  ILDAPData,
+  IUserData,
   IMetaDataDigitalEntity,
   IEntity,
-} from '../../interfaces/interfaces';
+  ObjectId,
+} from '@kompakkt/shared';
 
 @Injectable({
   providedIn: 'root',
@@ -56,7 +57,7 @@ export class BackendService {
     return this.get(`api/v1/get/findall/entity`);
   }
 
-  public async getEntity(identifier: string): Promise<IEntity> {
+  public async getEntity(identifier: string | ObjectId): Promise<IEntity> {
     return this.get(`api/v1/get/find/entity/${identifier}`);
   }
 
@@ -68,7 +69,7 @@ export class BackendService {
    * @return {Promise}            Returns the compilation or null if it's password protected
    */
   public async getCompilation(
-    identifier: string,
+    identifier: string | ObjectId,
     password?: string,
   ): Promise<ICompilation | null> {
     return password
@@ -77,17 +78,20 @@ export class BackendService {
   }
 
   public async getEntityMetadata(
-    identifier: string,
+    identifier: string | ObjectId,
   ): Promise<IMetaDataDigitalEntity> {
     return this.get(`api/v1/get/find/digitalentity/${identifier}`);
   }
 
-  public async getCurrentUserData(): Promise<ILDAPData> {
+  public async getCurrentUserData(): Promise<IUserData> {
     return this.get(`api/v1/get/ldata`);
   }
 
   // POSTs
-  public updateSettings(identifier: string, settings: any): Promise<any> {
+  public updateSettings(
+    identifier: string | ObjectId,
+    settings: any,
+  ): Promise<any> {
     return this.post(`api/v1/post/settings/${identifier}`, settings);
   }
 
@@ -96,7 +100,7 @@ export class BackendService {
   }
 
   // Auth
-  public login(username: string, password: string): Promise<ILDAPData> {
+  public login(username: string, password: string): Promise<IUserData> {
     return this.post(`login`, { username, password });
   }
 
@@ -104,7 +108,7 @@ export class BackendService {
     return this.get(`logout`);
   }
 
-  public async isAuthorized(): Promise<ILDAPData> {
+  public async isAuthorized(): Promise<IUserData> {
     return this.get(`auth`);
   }
 
@@ -114,7 +118,7 @@ export class BackendService {
 
   // TODO: check return type
   public deleteRequest(
-    identifier: string,
+    identifier: string | ObjectId,
     type: string,
     username: string,
     password: string,

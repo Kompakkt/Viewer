@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import PouchDB from 'pouchdb';
 
-import { IAnnotation } from '../../interfaces/interfaces';
+import { IAnnotation } from '@kompakkt/shared';
 
 @Injectable({
   providedIn: 'root',
@@ -49,7 +49,7 @@ export class DataService {
   public async putAnnotation(annotation: IAnnotation) {
     return annotation._id === 'DefaultAnnotation'
       ? undefined
-      : this.pouchdb.put(annotation);
+      : this.pouchdb.put(annotation as any);
   }
 
   public async cleanAndRenewDatabase() {
@@ -73,10 +73,10 @@ export class DataService {
     return annotation._id === 'DefaultAnnotation'
       ? undefined
       : this.pouchdb
-          .get(annotation._id)
+          .get(annotation._id.toString())
           .then(() => annotation)
           .catch(() => {
-            this.pouchdb.put(annotation);
+            this.pouchdb.put(annotation as any);
           });
   }
 

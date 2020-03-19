@@ -1,7 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
-import { ICompilation } from '../../../interfaces/interfaces';
+import { ICompilation } from '@kompakkt/shared';
 import { MessageService } from '../../../services/message/message.service';
 import { BackendService } from '../../../services/backend/backend.service';
 

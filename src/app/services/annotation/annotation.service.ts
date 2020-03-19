@@ -15,10 +15,11 @@ import { DialogGetUserDataComponent } from '../../components/dialogs/dialog-get-
 // tslint:disable-next-line:max-line-length
 import { DialogShareAnnotationComponent } from '../../components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
 import {
+  isAnnotation,
   IAnnotation,
   ICompilation,
   IEntity,
-} from '../../interfaces/interfaces';
+} from '@kompakkt/shared';
 import { AnnotationmarkerService } from '../annotationmarker/annotationmarker.service';
 import { BabylonService } from '../babylon/babylon.service';
 import { DataService } from '../data/data.service';
@@ -160,7 +161,7 @@ export class AnnotationService {
     if (!this.actualEntity) {
       throw new Error('ActualEntity missing');
     }
-    Tags.AddTagsTo(this.actualEntityMeshes, this.actualEntity._id);
+    Tags.AddTagsTo(this.actualEntityMeshes, this.actualEntity._id.toString());
     this.selectedAnnotation.next('');
     this.editModeAnnotation.next('');
     await this.annotationmarkerService.deleteAllMarker();
@@ -201,8 +202,8 @@ export class AnnotationService {
           );
         }
       }
-      if (this.annotations.length) {
-        this.selectedAnnotation.next(this.annotations[0]._id);
+      if (this.annotations.length > 0) {
+        this.selectedAnnotation.next(this.annotations[0]._id.toString());
       }
     }
   }
@@ -212,7 +213,7 @@ export class AnnotationService {
     // Annotationen vom Server des aktuellen Entityls...
     if (this.actualEntity && this.actualEntity.annotationList) {
       (this.actualEntity.annotationList.filter(
-        annotation => annotation && annotation._id,
+        annotation => isAnnotation(annotation) && annotation._id,
       ) as IAnnotation[]).forEach((annotation: IAnnotation) =>
         serverAnnotations.push(annotation),
       );
@@ -228,9 +229,9 @@ export class AnnotationService {
       const entityID = this.actualEntity._id;
       (this.actualCompilation.annotationList.filter(
         annotation =>
-          annotation &&
+          isAnnotation(annotation) &&
           annotation._id &&
-          annotation.target.source.relatedEntity === entityID,
+          annotation?.target?.source?.relatedEntity === entityID,
       ) as IAnnotation[]).forEach((annotation: IAnnotation) =>
         serverAnnotations.push(annotation),
       );
@@ -241,7 +242,7 @@ export class AnnotationService {
 
   private async getAnnotationsfromLocalDB() {
     let pouchAnnotations: IAnnotation[] = this.actualEntity
-      ? await this.fetchAnnotations(this.actualEntity._id)
+      ? await this.fetchAnnotations(this.actualEntity._id.toString())
       : [];
     // Annotationen aus PouchDB des aktuellen Entityls und der aktuellen Compilation (if existing)
 
@@ -249,7 +250,8 @@ export class AnnotationService {
       const _compilationAnnotations =
         this.actualEntity && this.actualCompilation
           ? await this.fetchAnnotations(
-              this.actualEntity._id && this.actualCompilation._id,
+              this.actualEntity._id.toString(),
+              this.actualCompilation._id.toString(),
             )
           : [];
       pouchAnnotations = pouchAnnotations.concat(_compilationAnnotations);
@@ -347,7 +349,7 @@ export class AnnotationService {
         } else {
           // Nicht local last editor === creator === ich
           // Annotation local löschen
-          await this.dataService.deleteAnnotation(annotation._id);
+          await this.dataService.deleteAnnotation(annotation._id.toString());
           localAnnotations.splice(
             localAnnotations.findIndex(ann => ann._id === annotation._id),
           );
@@ -475,10 +477,10 @@ export class AnnotationService {
         },
         target: {
           source: {
-            relatedEntity: this.actualEntity._id,
+            relatedEntity: this.actualEntity._id.toString(),
             relatedCompilation:
               this.processingService.compilationLoaded && this.actualCompilation
-                ? this.actualCompilation._id
+                ? this.actualCompilation._id.toString()
                 : '',
           },
           selector: {
@@ -518,8 +520,8 @@ export class AnnotationService {
     }
     this.drawMarker(newAnnotation);
     this.annotations.push(newAnnotation);
-    this.selectedAnnotation.next(newAnnotation._id);
-    this.editModeAnnotation.next(newAnnotation._id);
+    this.selectedAnnotation.next(newAnnotation._id.toString());
+    this.editModeAnnotation.next(newAnnotation._id.toString());
   }
 
   public updateAnnotation(_annotation: IAnnotation) {
@@ -570,8 +572,8 @@ export class AnnotationService {
           !this.processingService.fallbackEntityLoaded &&
           !this.processingService.defaultEntityLoaded
         ) {
-          this.dataService.deleteAnnotation(_annotation._id);
-          this.deleteAnnotationFromServer(_annotation._id);
+          this.dataService.deleteAnnotation(_annotation._id.toString());
+          this.deleteAnnotationFromServer(_annotation._id.toString());
         }
       }
     } else {

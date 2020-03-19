@@ -6,11 +6,12 @@ import {
   IAnnotation,
   ICompilation,
   IEntity,
-  ILDAPData,
-  ILoginData,
   IUserData,
-} from '../../interfaces/interfaces';
-import { isCompilation, isEntity } from '../../typeguards/typeguards';
+  ILoginData,
+  IStrippedUserData,
+  isCompilation,
+  isEntity,
+} from '@kompakkt/shared';
 import { BackendService } from '../backend/backend.service';
 
 @Injectable({
@@ -24,8 +25,8 @@ export class UserdataService {
     password: '',
     isCached: false,
   };
-  public userData: ILDAPData | undefined = undefined;
-  public guestUserData: IUserData | undefined;
+  public userData: IUserData | undefined = undefined;
+  public guestUserData: IStrippedUserData | undefined;
 
   public userOwnsEntity = false;
   public userOwnsCompilation = false;
@@ -132,7 +133,7 @@ export class UserdataService {
     this.userWhitlistedCompilation = false;
   }
 
-  private setUserData(userData: ILDAPData) {
+  private setUserData(userData: IUserData) {
     if (this.guestUserData) this.guestUserData = undefined;
     this.userData = userData;
   }
@@ -152,10 +153,9 @@ export class UserdataService {
     const id = element._id;
 
     if (isCompilation(element)) {
-      const idFromUser = this.userData._id;
-      this.userOwnsCompilation = element.relatedOwner
-        ? element.relatedOwner._id === idFromUser
-        : false;
+      this.userOwnsCompilation = JSON.stringify(
+        this.userData?.data?.compilation,
+      ).includes(element._id.toString());
       if (this.userOwnsCompilation) {
         return this.userOwnsCompilation;
       }
@@ -169,10 +169,9 @@ export class UserdataService {
     }
 
     if (isEntity(element)) {
-      const idFromUser = this.userData._id;
-      this.userOwnsEntity =
-        element.relatedEntityOwners.find(owner => owner._id === idFromUser) !==
-        undefined;
+      this.userOwnsEntity = JSON.stringify(
+        this.userData?.data?.entity,
+      ).includes(element._id.toString());
       if (this.userOwnsEntity) {
         return this.userOwnsEntity;
       }
@@ -205,7 +204,7 @@ export class UserdataService {
     const persons = element.whitelist.groups
       // Flatten group members and owners
       .map(group => group.members.concat(...group.owners))
-      .reduce((acc, val) => acc.concat(val), [] as IUserData[])
+      .reduce((acc, val) => acc.concat(val), [] as IStrippedUserData[])
       // Combine with whitelisted persons
       .concat(...element.whitelist.persons);
 

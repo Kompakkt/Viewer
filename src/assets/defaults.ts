@@ -1,4 +1,4 @@
-import { IEntity } from '../app/interfaces/interfaces';
+import { IEntity } from '@kompakkt/shared';
 
 // Creates a basic entity to be used as a building block
 export const baseEntity = (): IEntity => ({
@@ -7,13 +7,12 @@ export const baseEntity = (): IEntity => ({
   files: [],
   annotationList: [],
   relatedDigitalEntity: { _id: 'default_entity' },
-  relatedEntityOwners: [
-    {
-      _id: '',
-      username: 'kompakkt',
-      fullname: 'kompakkt',
-    },
-  ],
+  creator: {
+    _id: '',
+    username: 'kompakkt',
+    fullname: 'kompakkt',
+  },
+
   finished: false,
   online: false,
 

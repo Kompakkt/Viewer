@@ -11,7 +11,6 @@ import {
   Vector3,
 } from 'babylonjs';
 
-import { isDegreeSpectrum } from '../../typeguards/typeguards';
 import { BabylonService } from '../babylon/babylon.service';
 import { LightService } from '../light/light.service';
 import { ProcessingService } from '../processing/processing.service';
@@ -22,6 +21,10 @@ import {
   createlocalAxes,
   createWorldAxis,
 } from './visualUIHelper';
+
+const isDegreeSpectrum = (value: number) => {
+  return value >= 0 && value <= 360 ? value : value > 360 ? 360 : 0;
+};
 
 @Injectable({
   providedIn: 'root',

@@ -9,7 +9,7 @@ import {
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 // 11/02/19
 
-import { IAnnotation } from '../../interfaces/interfaces';
+import { IAnnotation } from '@kompakkt/shared';
 import { BabylonService } from '../babylon/babylon.service';
 
 @Injectable({
@@ -43,55 +43,53 @@ export class AnnotationmarkerService {
 
     // two Labels: one is for isOccluded true, one for false -> alpha 0.5 for transparancy
 
+    const _id = annotation._id.toString();
+
     const plane1 = this.createPlane(
-      annotation._id + '_pick',
+      _id + '_pick',
       1,
       1,
-      annotation._id,
+      _id,
       positionVector,
       normalVector,
     );
     const label1 = this.createClickLabel(
-      annotation._id,
+      _id,
       '100%',
       '100%',
-      annotation._id,
+      _id,
       'White',
       color,
       camera,
     );
 
     AdvancedDynamicTexture.CreateForMesh(plane1).addControl(label1);
-    label1.addControl(
-      this.createRankingNumber(annotation._id, annotation.ranking),
-    );
+    label1.addControl(this.createRankingNumber(_id, annotation.ranking));
     if (plane1.material) {
       plane1.material.alpha = 1;
     }
     plane1.renderingGroupId = 2;
 
     const plane2 = this.createPlane(
-      annotation._id + '_pick',
+      _id + '_pick',
       1,
       1,
-      annotation._id,
+      _id,
       positionVector,
       normalVector,
     );
     const label2 = this.createClickLabel(
-      annotation._id,
+      _id,
       '100%',
       '100%',
-      annotation._id,
+      _id,
       'White',
       color,
       camera,
     );
 
     AdvancedDynamicTexture.CreateForMesh(plane2).addControl(label2);
-    label2.addControl(
-      this.createRankingNumber(annotation._id, annotation.ranking),
-    );
+    label2.addControl(this.createRankingNumber(_id, annotation.ranking));
 
     if (plane2.material) {
       plane2.material.alpha = 0.5;
