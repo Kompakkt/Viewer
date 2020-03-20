@@ -119,6 +119,9 @@ import { MediaTypePipe } from './pipes/media-type.pipe';
     MatChipsModule,
     SocketIoModule.forRoot({
       url: `${environment.express_server_url}:${environment.express_server_port}`,
+      options: {
+        autoConnect: false,
+      },
     }),
     MarkdownModule.forRoot(),
     MatSidenavModule,
