@@ -5,14 +5,16 @@ import { MessageService } from '../../services/message/message.service';
 import { ProcessingService } from '../../services/processing/processing.service';
 import { UserdataService } from '../../services/userdata/userdata.service';
 
+import fscreen from 'fscreen';
+
 @Component({
   selector: 'app-menu',
   templateUrl: './menu.component.html',
   styleUrls: ['./menu.component.scss'],
 })
 export class MenuComponent implements OnInit {
-  public fullscreen = false;
-  public fullscreenCapable = document.fullscreenEnabled;
+  public fullscreen = !!fscreen.fullscreenElement;
+  public fullscreenCapable = fscreen.fullscreenEnabled;
 
   constructor(
     public processingService: ProcessingService,
@@ -22,14 +24,10 @@ export class MenuComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    document.addEventListener('fullscreenchange', _ => {
-      if (
-        !document.fullscreen &&
-        this.babylonService.getEngine().isFullscreen
-      ) {
-        this.babylonService.getEngine().switchFullscreen(false);
-      }
-    });
+    fscreen.addEventListener(
+      'fullscreenchange',
+      () => (this.fullscreen = !!fscreen.fullscreenElement),
+    );
   }
 
   getAvailableQuality(quality: string) {
@@ -72,23 +70,10 @@ export class MenuComponent implements OnInit {
   toggleFullscreen() {
     // BabylonJS' this.engine.switchFullscreen(false); creates a fullscreen without our menu.
     // To display the menu, we have to switch to fullscreen on our own.
-    const _tf = (): Promise<void> => {
-      const _docEl = document.documentElement as any;
-      return _docEl.mozRequestFullScreen
-        ? _docEl.mozRequestFullScreen()
-        : _docEl.webkitRequestFullscreen
-        ? _docEl.webkitRequestFullscreen()
-        : _docEl.requestFullscreen();
-    };
-    const isFullscreen = document.fullscreen;
-    // TODO: not working if user exit fullscreen with esc
-    this.fullscreen = !isFullscreen;
-    if (isFullscreen) {
-      this.babylonService.getEngine().switchFullscreen(false);
+    if (this.fullscreen) {
+      fscreen.exitFullscreen();
     } else {
-      _tf()
-        .then(() => {})
-        .catch(e => console.error(e));
+      fscreen.requestFullscreen(document.body);
     }
   }
 
