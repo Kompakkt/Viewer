@@ -81,7 +81,7 @@ export class ProcessingService {
   private showSidenav = new BehaviorSubject(true);
   private showAnnotationEditor = new BehaviorSubject(true);
   private showSettingsEditor = new BehaviorSubject(true);
-  private showCompilationBrowser = new BehaviorSubject(true);
+  private showCompilationBrowser = new BehaviorSubject(false);
   public showMenu$ = this.showMenu.asObservable();
   public showSidenav$ = this.showSidenav.asObservable();
   public showAnnotationEditor$ = this.showAnnotationEditor.asObservable();
