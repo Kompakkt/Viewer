@@ -11,24 +11,33 @@ import { ProcessingService } from '../../../services/processing/processing.servi
 })
 export class EntityFeatureSettingsLightsComponent {
   constructor(
-    public entitySettingsService: EntitySettingsService,
-    public lightService: LightService,
-    private processingService: ProcessingService,
+    public entitySettings: EntitySettingsService,
+    public lights: LightService,
+    private processing: ProcessingService,
   ) {}
 
+  get pointLightX() {
+    return this.lights.getLightByType('pointLight')?.position?.x ?? 0;
+  }
+  get pointLightY() {
+    return this.lights.getLightByType('pointLight')?.position?.y ?? 0;
+  }
+  get pointLightZ() {
+    return this.lights.getLightByType('pointLight')?.position?.z ?? 0;
+  }
+
   // Lights
-  setLightIntensity(intensity: number, lightType: string) {
-    if (!this.processingService.actualEntitySettings) {
+  setLightIntensity(intensity: number | null, lightType: string) {
+    if (!intensity) intensity = 0;
+    if (!this.processing.entitySettings) {
       throw new Error('Settings missing');
       console.error(this);
       return;
     }
-    const indexOfLight = this.lightService.getLightIndexByType(lightType);
+    const indexOfLight = this.lights.getLightIndexByType(lightType);
     if (indexOfLight !== undefined) {
-      this.processingService.actualEntitySettings.lights[
-        indexOfLight
-      ].intensity = intensity;
-      this.entitySettingsService.loadLightIntensity(lightType);
+      this.processing.entitySettings.lights[indexOfLight].intensity = intensity;
+      this.entitySettings.loadLightIntensity(lightType);
     } else {
       // tslint:disable-next-line:prefer-template
       throw new Error('Light, ' + lightType + ', is missing');
@@ -38,12 +47,12 @@ export class EntityFeatureSettingsLightsComponent {
   }
 
   getLightIntensity(lightType: string): number {
-    if (!this.processingService.actualEntitySettings) {
+    if (!this.processing.entitySettings) {
       throw new Error('Settings missing');
       console.error(this);
       return 0;
     }
-    const light = this.lightService.getLightByType(lightType);
+    const light = this.lights.getLightByType(lightType);
     if (light) {
       return light.intensity;
     } else {
@@ -51,27 +60,28 @@ export class EntityFeatureSettingsLightsComponent {
     }
   }
 
-  setPointlightPosition(dimension: string, value: number) {
-    if (!this.processingService.actualEntitySettings) {
+  setPointlightPosition(dimension: string, value: number | null) {
+    if (!value) value = 0;
+    if (!this.processing.entitySettings) {
       throw new Error('Settings missing');
       console.error(this);
       return;
     }
-    const indexOfLight = this.lightService.getLightIndexByType('pointLight');
+    const indexOfLight = this.lights.getLightIndexByType('pointLight');
     if (indexOfLight) {
       switch (dimension) {
         case 'x':
-          this.processingService.actualEntitySettings.lights[
+          this.processing.entitySettings.lights[
             indexOfLight
           ].position.x = value;
           break;
         case 'y':
-          this.processingService.actualEntitySettings.lights[
+          this.processing.entitySettings.lights[
             indexOfLight
           ].position.y = value;
           break;
         case 'z':
-          this.processingService.actualEntitySettings.lights[
+          this.processing.entitySettings.lights[
             indexOfLight
           ].position.z = value;
           break;
@@ -82,6 +92,6 @@ export class EntityFeatureSettingsLightsComponent {
           return;
       }
     }
-    this.entitySettingsService.loadPointLightPosition();
+    this.entitySettings.loadPointLightPosition();
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 import { LoadingscreenhandlerService } from '../../services/babylon/loadingscreen';
 
@@ -7,11 +7,11 @@ import { LoadingscreenhandlerService } from '../../services/babylon/loadingscree
   templateUrl: './loadingscreen.component.html',
   styleUrls: ['./loadingscreen.component.scss'],
 })
-export class LoadingscreenComponent implements OnInit {
-  public logo;
+export class LoadingscreenComponent {
+  public logo: string;
   public loadingText = 'Loading...';
   public opacity = '1';
-  public backgroundColor;
+  public backgroundColor: string;
   public style = {
     left: '0',
     top: '0',
@@ -19,9 +19,7 @@ export class LoadingscreenComponent implements OnInit {
     height: '100%',
   };
 
-  constructor(private loadingScreenHandler: LoadingscreenhandlerService) {}
-
-  ngOnInit() {
+  constructor(private loadingScreenHandler: LoadingscreenhandlerService) {
     this.logo = this.loadingScreenHandler.logo;
     this.backgroundColor = this.loadingScreenHandler.backgroundColor;
     this.loadingScreenHandler.opacity.subscribe(

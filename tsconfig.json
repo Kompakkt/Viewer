@@ -15,7 +15,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": false,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "target": "es5",
     "typeRoots": [
       "node_modules/@types"
@@ -37,6 +37,8 @@
   "angularCompilerOptions": {
     "enableIvy": true,
     "disableTypeScriptVersionCheck": true,
-    "strictInjectionParameters": true
+    "fullTemplateTypeCheck": true,
+    "strictInjectionParameters": true,
+    "strictTemplates": true
   }
 }

@@ -122,12 +122,12 @@ export const createWorldAxis = (scene: Scene, size: number) => {
 };
 
 export const createTextPlane = (
-  text,
-  color,
-  size,
-  tag,
-  tagIndividual,
-  scene,
+  text: string,
+  color: string,
+  size: number,
+  tag: string,
+  tagIndividual: string,
+  scene: Scene,
 ) => {
   const dynamicTexture = new DynamicTexture('DynamicTexture', 50, scene, true);
   dynamicTexture.hasAlpha = true;
@@ -154,7 +154,12 @@ export const createTextPlane = (
   return plane;
 };
 
-export const createlocalAxes = (scene: Scene, size: number, center, pivot: Vector3) => {
+export const createlocalAxes = (
+  scene: Scene,
+  size: number,
+  center: Mesh,
+  pivot: Vector3,
+) => {
   const sizeLocalAxis = size;
 
   const vecOneX = new Vector3(sizeLocalAxis, 0, 0);

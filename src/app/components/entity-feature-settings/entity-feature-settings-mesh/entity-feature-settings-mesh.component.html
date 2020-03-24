@@ -1,173 +1,323 @@
-<ng-template matStepLabel>Set Mesh Settings</ng-template>
-<h5>Information & Helpers
-    <button mat-icon-button (click)="meshSettingsHelperToggle = !meshSettingsHelperToggle"
-            matTooltip="Toggle" matTooltipPosition="above" type="button">
-        <mat-icon>{{meshSettingsHelperToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}}</mat-icon>
+<ng-container *ngIf="processing.entitySettings">
+  <ng-template matStepLabel>Set Mesh Settings</ng-template>
+  <h5>
+    Information & Helpers
+    <button
+      mat-icon-button
+      (click)="meshSettingsHelperToggle = !meshSettingsHelperToggle"
+      matTooltip="Toggle"
+      matTooltipPosition="above"
+      type="button"
+    >
+      <mat-icon>{{
+        meshSettingsHelperToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down'
+      }}</mat-icon>
     </button>
-</h5>
+  </h5>
 
-<div *ngIf="meshSettingsHelperToggle">
-    <button class="fullwidth-button" mat-raised-button
-            (click)="resetVisualUIMeshSettingsHelper()">Reset Helper
+  <div *ngIf="meshSettingsHelperToggle">
+    <button
+      class="fullwidth-button"
+      mat-raised-button
+      (click)="resetVisualUIMeshSettingsHelper()"
+    >
+      Reset Helper
     </button>
-    <h5>Number of meshes: {{processingService.getCurrentEntityMeshes().length}}</h5>
-    <mat-checkbox  [checked]="boundingBoxVisibility" (change)="toggleBoundingBoxEntityVisibility()">
-        <h5>Bounding Box Entity</h5>
+    <h5>Number of meshes: {{ meshes ? meshes.length : 0 }}</h5>
+    <mat-checkbox
+      [checked]="boundingBoxVisibility"
+      (change)="toggleBoundingBoxEntityVisibility()"
+    >
+      <h5>Bounding Box Entity</h5>
     </mat-checkbox>
 
-    <mat-checkbox [checked]="boundingBoxMeshesVisibility"
-                  (change)="toggleBoundingBoxMeshesVisibility()"><h5>Bounding Box Meshes</h5>
+    <mat-checkbox
+      [checked]="boundingBoxMeshesVisibility"
+      (change)="toggleBoundingBoxMeshesVisibility()"
+      ><h5>Bounding Box Meshes</h5>
     </mat-checkbox>
-    <h5> Background
-        <button mat-icon-button (click)="backgroundColorPickerToggle = !backgroundColorPickerToggle"
-                matTooltip="Toggle" matTooltipPosition="above" type="button">
-            <mat-icon>{{backgroundColorPickerToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}}</mat-icon>
-        </button>
+    <h5>
+      Background
+      <button
+        mat-icon-button
+        (click)="backgroundColorPickerToggle = !backgroundColorPickerToggle"
+        matTooltip="Toggle"
+        matTooltipPosition="above"
+        type="button"
+      >
+        <mat-icon>{{
+          backgroundColorPickerToggle
+            ? 'keyboard_arrow_up'
+            : 'keyboard_arrow_down'
+        }}</mat-icon>
+      </button>
     </h5>
     <div *ngIf="backgroundColorPickerToggle">
-        <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
+      <color-chrome
+        (onChange)="setBackgroundColor($event.color.rgb)"
+      ></color-chrome>
     </div>
 
-    <mat-checkbox [checked]="worldAxisVisibility"
-                  (change)="toggleAxesVisibility('worldAxis')"><h5>World Axis</h5>
+    <mat-checkbox
+      [checked]="worldAxisVisibility"
+      (change)="toggleAxesVisibility('worldAxis')"
+      ><h5>World Axis</h5>
     </mat-checkbox>
     <div *ngIf="worldAxisVisibility">
-        <h6>Size</h6>
-        <mat-slider min="0.1" max="3" step="0.1" [value]="worldAxisScalingFactor" #matslider
-                    (input)="setScalingFactorAxis($event.value, true)"></mat-slider>
+      <h6>Size</h6>
+      <mat-slider
+        min="0.1"
+        max="3"
+        step="0.1"
+        [value]="worldAxisScalingFactor"
+        #matslider
+        (input)="setScalingFactorAxis($event.value, true)"
+      ></mat-slider>
     </div>
-    <br>
-    <mat-checkbox [checked]="localAxisVisibility"
-                  (change)="toggleAxesVisibility('localAxis')"><h5>Local Axis</h5>
+    <br />
+    <mat-checkbox
+      [checked]="localAxisVisibility"
+      (change)="toggleAxesVisibility('localAxis')"
+      ><h5>Local Axis</h5>
     </mat-checkbox>
     <div *ngIf="localAxisVisibility">
-        <h6>Size</h6>
-        <mat-slider min="0.1" max="3" step="0.1" [value]="localAxisScalingFactor" #matslider
-                    (input)="setScalingFactorAxis($event.value, false)"></mat-slider>
+      <h6>Size</h6>
+      <mat-slider
+        min="0.1"
+        max="3"
+        step="0.1"
+        [value]="localAxisScalingFactor"
+        #matslider
+        (input)="setScalingFactorAxis($event.value, false)"
+      ></mat-slider>
     </div>
-    <br>
-    <mat-checkbox [checked]="groundVisibility"
-                  (change)="toggleGroundVisibility()"><h5>Ground</h5>
+    <br />
+    <mat-checkbox
+      [checked]="groundVisibility"
+      (change)="toggleGroundVisibility()"
+      ><h5>Ground</h5>
     </mat-checkbox>
     <div *ngIf="groundVisibility">
-        <h6>Size</h6>
-        <mat-slider min="0" max="10" step="1" [value]="groundScalingFactor" #matslider
-                    (input)="setScalingFactorGround($event.value)"></mat-slider>
-        <h6>Color</h6>
-        <color-chrome (onChange)="entitySettingsService.setGroundMaterial($event.color.rgb)"></color-chrome>
+      <h6>Size</h6>
+      <mat-slider
+        min="0"
+        max="10"
+        step="1"
+        [value]="groundScalingFactor"
+        #matslider
+        (input)="setScalingFactorGround($event.value)"
+      ></mat-slider>
+      <h6>Color</h6>
+      <color-chrome
+        (onChange)="entitySettings.setGroundMaterial($event.color.rgb)"
+      ></color-chrome>
     </div>
-    <button class="fullwidth-button" mat-raised-button
-            (click)="resetVisualUIMeshSettingsHelper()">Reset Helper
+    <button
+      class="fullwidth-button"
+      mat-raised-button
+      (click)="resetVisualUIMeshSettingsHelper()"
+    >
+      Reset Helper
     </button>
-</div>
+  </div>
 
-<h5>Set Settings</h5>
-<h5 style="padding-left:1em"> Scale
-    <button mat-icon-button (click)="meshScaleToggle = !meshScaleToggle"
-            matTooltip="Toggle" matTooltipPosition="above"
-            type="button">
-        <mat-icon>
-            {{meshScaleToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}}
-        </mat-icon>
+  <h5>Set Settings</h5>
+  <h5 style="padding-left:1em">
+    Scale
+    <button
+      mat-icon-button
+      (click)="meshScaleToggle = !meshScaleToggle"
+      matTooltip="Toggle"
+      matTooltipPosition="above"
+      type="button"
+    >
+      <mat-icon>
+        {{ meshScaleToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}
+      </mat-icon>
     </button>
-</h5>
-<div *ngIf="meshScaleToggle">
-    <button class="fullwidth-button"
-            mat-raised-button
-            (click)="handleChangeDimension('scale', 1)">Reset Size
+  </h5>
+  <div *ngIf="meshScaleToggle">
+    <button
+      class="fullwidth-button"
+      mat-raised-button
+      (click)="handleChangeDimension('scale', 1)"
+    >
+      Reset Size
     </button>
-    <h6>Height:
-        <mat-form-field>
-            <input matInput min="0" max={{entitySettingsService.initialSize.y*5}}
-                   [(ngModel)]="this.processingService.actualEntityHeight" type="number" step="0.5"
-                   (input)="handleChangeDimension('height')">
-        </mat-form-field>
-        cm
+    <h6>
+      Height:
+      <mat-form-field>
+        <input
+          matInput
+          min="0"
+          max="{{ entitySettings.initialSize.y * 5 }}"
+          [(ngModel)]="processing.entityHeight"
+          type="number"
+          step="0.5"
+          (input)="handleChangeDimension('height')"
+        />
+      </mat-form-field>
+      cm
     </h6>
 
-    <h6>Width:
-        <mat-form-field>
-            <input matInput min="0" max={{entitySettingsService.initialSize.x*5}}
-                   [(ngModel)]="this.processingService.actualEntityWidth" type="number" step="0.5"
-                   (input)="handleChangeDimension('width')">
-        </mat-form-field>
-        cm
+    <h6>
+      Width:
+      <mat-form-field>
+        <input
+          matInput
+          min="0"
+          max="{{ entitySettings.initialSize.x * 5 }}"
+          [(ngModel)]="processing.entityWidth"
+          type="number"
+          step="0.5"
+          (input)="handleChangeDimension('width')"
+        />
+      </mat-form-field>
+      cm
     </h6>
 
-    <h6>Depth:
-        <mat-form-field>
-            <input matInput min="0" max={{entitySettingsService.initialSize.z*5}}
-                   [(ngModel)]="this.processingService.actualEntityDepth" type="number" step="0.5"
-                   (input)="handleChangeDimension('depth')">
-        </mat-form-field>
-        cm
+    <h6>
+      Depth:
+      <mat-form-field>
+        <input
+          matInput
+          min="0"
+          max="{{ entitySettings.initialSize.z * 5 }}"
+          [(ngModel)]="processing.entityDepth"
+          type="number"
+          step="0.5"
+          (input)="handleChangeDimension('depth')"
+        />
+      </mat-form-field>
+      cm
     </h6>
 
-    <h6>Scale factor: {{this.processingService.actualEntitySettings.scale}}</h6>
-    <mat-slider min="0.0" max="5" step="0.05" [value]="this.processingService.actualEntitySettings.scale" #matslider
-                (input)="handleChangeDimension('scale', $event.value)"></mat-slider>
-
-</div>
-<h5 style="padding-left:1em"> Orientation
-    <button mat-icon-button (click)="meshOrientationToggle = !meshOrientationToggle"
-            matTooltip="Toggle" matTooltipPosition="above"
-            type="button">
-        <mat-icon>
-            {{meshOrientationToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}}
-        </mat-icon>
+    <h6>Scale factor: {{ processing.entitySettings.scale }}</h6>
+    <mat-slider
+      min="0.0"
+      max="5"
+      step="0.05"
+      [value]="processing.entitySettings.scale"
+      #matslider
+      (input)="handleChangeDimension('scale', $event.value)"
+    ></mat-slider>
+  </div>
+  <h5 style="padding-left:1em">
+    Orientation
+    <button
+      mat-icon-button
+      (click)="meshOrientationToggle = !meshOrientationToggle"
+      matTooltip="Toggle"
+      matTooltipPosition="above"
+      type="button"
+    >
+      <mat-icon>
+        {{
+          meshOrientationToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down'
+        }}
+      </mat-icon>
     </button>
-</h5>
-<div *ngIf="meshOrientationToggle">
-    <button class="fullwidth-button"
-            mat-raised-button
-            (click)="setRotation('xyz_reset', 0)">Reset Rotation
+  </h5>
+  <div *ngIf="meshOrientationToggle">
+    <button
+      class="fullwidth-button"
+      mat-raised-button
+      (click)="setRotation('xyz_reset', 0)"
+    >
+      Reset Rotation
     </button>
     <h5>X</h5>
-    <button mat-icon-button (click)="setRotation('x',-90)"
-            matTooltip="Rotate -90°" matTooltipPosition="above"
-            type="button">
-        <mat-icon aria-label="Rotate -90°">undo</mat-icon>
+    <button
+      mat-icon-button
+      (click)="setRotation('x', -90)"
+      matTooltip="Rotate -90°"
+      matTooltipPosition="above"
+      type="button"
+    >
+      <mat-icon aria-label="Rotate -90°">undo</mat-icon>
     </button>
     <mat-form-field>
-        <input matInput min="0" max="360" [(ngModel)]="processingService.actualEntitySettings.rotation.x" type="number" step="1"
-               (input)="entitySettingsService.loadRotation()">
+      <input
+        matInput
+        min="0"
+        max="360"
+        [(ngModel)]="processing.entitySettings.rotation.x"
+        type="number"
+        step="1"
+        (input)="entitySettings.loadRotation()"
+      />
     </mat-form-field>
     °
-    <button mat-icon-button (click)="setRotation('x',90)"
-            matTooltip="Rotate 90°" matTooltipPosition="above"
-            type="button">
-        <mat-icon aria-label="Rotate 90°">redo</mat-icon>
+    <button
+      mat-icon-button
+      (click)="setRotation('x', 90)"
+      matTooltip="Rotate 90°"
+      matTooltipPosition="above"
+      type="button"
+    >
+      <mat-icon aria-label="Rotate 90°">redo</mat-icon>
     </button>
     <h5>Y</h5>
-    <button mat-icon-button (click)="setRotation('y',-90)"
-            matTooltip="Rotate -90°" matTooltipPosition="above"
-            type="button">
-        <mat-icon aria-label="Rotate -90°">undo</mat-icon>
+    <button
+      mat-icon-button
+      (click)="setRotation('y', -90)"
+      matTooltip="Rotate -90°"
+      matTooltipPosition="above"
+      type="button"
+    >
+      <mat-icon aria-label="Rotate -90°">undo</mat-icon>
     </button>
     <mat-form-field>
-        <input matInput min="0" max="360" [(ngModel)]="processingService.actualEntitySettings.rotation.y" type="number" step="1"
-               (input)="entitySettingsService.loadRotation()">
+      <input
+        matInput
+        min="0"
+        max="360"
+        [(ngModel)]="processing.entitySettings.rotation.y"
+        type="number"
+        step="1"
+        (input)="entitySettings.loadRotation()"
+      />
     </mat-form-field>
     °
-    <button mat-icon-button (click)="setRotation('y',90)"
-            matTooltip="Rotate 90°" matTooltipPosition="above"
-            type="button">
-        <mat-icon aria-label="Rotate 90°">redo</mat-icon>
+    <button
+      mat-icon-button
+      (click)="setRotation('y', 90)"
+      matTooltip="Rotate 90°"
+      matTooltipPosition="above"
+      type="button"
+    >
+      <mat-icon aria-label="Rotate 90°">redo</mat-icon>
     </button>
     <h5>Z</h5>
-    <button mat-icon-button (click)="setRotation('z',-90)"
-            matTooltip="Rotate -90°" matTooltipPosition="above"
-            type="button">
-        <mat-icon aria-label="Rotate -90">undo</mat-icon>
+    <button
+      mat-icon-button
+      (click)="setRotation('z', -90)"
+      matTooltip="Rotate -90°"
+      matTooltipPosition="above"
+      type="button"
+    >
+      <mat-icon aria-label="Rotate -90">undo</mat-icon>
     </button>
     <mat-form-field>
-        <input matInput min="0" max="360" [(ngModel)]="processingService.actualEntitySettings.rotation.z" type="number" step="1"
-               (input)="entitySettingsService.loadRotation()">
+      <input
+        matInput
+        min="0"
+        max="360"
+        [(ngModel)]="processing.entitySettings.rotation.z"
+        type="number"
+        step="1"
+        (input)="entitySettings.loadRotation()"
+      />
     </mat-form-field>
     °
-    <button mat-icon-button (click)="setRotation('z',90)"
-            matTooltip="Rotate 90°" matTooltipPosition="above"
-            type="button">
-        <mat-icon aria-label="Rotate 90°">redo</mat-icon>
+    <button
+      mat-icon-button
+      (click)="setRotation('z', 90)"
+      matTooltip="Rotate 90°"
+      matTooltipPosition="above"
+      type="button"
+    >
+      <mat-icon aria-label="Rotate 90°">redo</mat-icon>
     </button>
-</div>
+  </div>
+</ng-container>

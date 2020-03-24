@@ -14,15 +14,15 @@ export class DialogDeleteSingleAnnotationComponent {
   public password = '';
   public success = false;
 
-  /*constructor(private processingService: ProcessingService,
+  /*constructor(private processing: ProcessingService,
               private message: MessageService,
-              private userdataService: UserdataService) { }*/
+              private userdata: UserdataService) { }*/
 
   public login() {
     /*
-    if (this.userdataService.cachedUser.username && this.userdataService.cachedUser.password) {
-      if (this.userdataService.cachedUser.username === this.username &&
-        this.userdataService.cachedUser.password === this.password) {
+    if (this.userdata.cachedUser.username && this.userdata.cachedUser.password) {
+      if (this.userdata.cachedUser.username === this.username &&
+        this.userdata.cachedUser.password === this.password) {
         this.success = true;
       } else {
         this.success = false;

@@ -1,5 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { MatStepper } from '@angular/material/stepper';
 
 import { environment } from '../../../environments/environment';
 import { BabylonService } from '../../services/babylon/babylon.service';
@@ -10,42 +11,58 @@ import { UserdataService } from '../../services/userdata/userdata.service';
 // tslint:disable-next-line:max-line-length
 import { DialogMeshsettingsComponent } from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
 
+import { IEntity, IColor } from '@kompakkt/shared';
+
 @Component({
   selector: 'app-entity-feature-settings',
   templateUrl: './entity-feature-settings.component.html',
   styleUrls: ['./entity-feature-settings.component.scss'],
 })
 export class EntityFeatureSettingsComponent {
-  @ViewChild('stepper') stepper;
+  @ViewChild('stepper') stepper: MatStepper | undefined;
 
   // used during upload while setting initial settings
   public backgroundToggle = false;
   public lightsToggle = false;
   public previewToggle = false;
 
+  public entity: IEntity | undefined;
+
   constructor(
-    private babylonService: BabylonService,
-    public processingService: ProcessingService,
-    public entitySettingsService: EntitySettingsService,
+    private babylon: BabylonService,
+    public processing: ProcessingService,
+    public entitySettings: EntitySettingsService,
     public dialog: MatDialog,
     private backend: BackendService,
-    public userdataService: UserdataService,
-  ) {}
+    public userdata: UserdataService,
+  ) {
+    this.processing.entity$.subscribe(entity => (this.entity = entity));
+  }
+
+  get settingsReady() {
+    return new Promise<boolean>((resolve, _) => {
+      if (!this.entity) return resolve(false);
+      if (!this.processing.entitySettings) return resolve(false);
+      this.processing.showSettingsEditor$
+        .toPromise()
+        .then(value => resolve(value));
+    });
+  }
 
   public setInitialPerspectivePreview() {
     this.setPreview();
-    this.setActualViewAsInitialView();
+    this.setViewAsInitialView();
   }
 
   private async setPreview() {
-    this.babylonService
+    this.babylon
       .createPreviewScreenshot()
       .then(screenshot => {
-        if (!this.processingService.actualEntitySettings) {
+        if (!this.processing.entitySettings) {
           console.error(this);
           throw new Error('Settings missing');
         }
-        this.processingService.actualEntitySettings.preview = screenshot;
+        this.processing.entitySettings.preview = screenshot;
       })
       .catch(error => {
         console.error(error);
@@ -53,57 +70,56 @@ export class EntityFeatureSettingsComponent {
       });
   }
 
-  private async setActualViewAsInitialView() {
-    if (!this.processingService.actualEntitySettings) {
+  private async setViewAsInitialView() {
+    if (!this.processing.entitySettings) {
       console.error(this);
       throw new Error('Settings missing');
     }
     const {
       position,
       target,
-    } = await this.babylonService.cameraManager.getInitialPosition();
-    this.processingService.actualEntitySettings.cameraPositionInitial = {
+    } = await this.babylon.cameraManager.getInitialPosition();
+    this.processing.entitySettings.cameraPositionInitial = {
       position,
       target,
     };
-    this.entitySettingsService.loadCameraInititalPosition();
+    this.entitySettings.loadCameraInititalPosition();
   }
 
-  public setBackgroundColor(color) {
-    if (!this.processingService.actualEntitySettings) {
+  public setBackgroundColor(color: IColor) {
+    if (!this.processing.entitySettings) {
       console.error(this);
       throw new Error('Settings missing');
     }
-    this.processingService.actualEntitySettings.background.color = color;
-    this.entitySettingsService.loadBackgroundColor();
+    this.processing.entitySettings.background.color = color;
+    this.entitySettings.loadBackgroundColor();
   }
 
-  public async saveActualSettings() {
-    if (!this.processingService.actualEntitySettings) {
+  public async saveSettings() {
+    if (!this.processing.entitySettings) {
       console.error(this);
       throw new Error('Settings missing');
     }
-    const entity = this.processingService.getCurrentEntity();
-    if (!entity) {
+    if (!this.entity) {
       console.error(this);
       throw new Error('Entity missing');
     }
     if (
-      !this.processingService.defaultEntityLoaded &&
-      !this.processingService.fallbackEntityLoaded
+      !this.processing.defaultEntityLoaded &&
+      !this.processing.fallbackEntityLoaded
     ) {
-      const settings = this.processingService.actualEntitySettings;
-      this.backend.updateSettings(entity._id, settings).then(result => {
+      const settings = this.processing.entitySettings;
+      this.backend.updateSettings(this.entity._id, settings).then(result => {
         console.log('Settings gespeichert', result);
-        this.processingService.actualEntitySettingsOnServer = JSON.parse(
-          JSON.stringify(this.processingService.actualEntitySettings),
+        this.processing.entitySettingsOnServer = JSON.parse(
+          JSON.stringify(this.processing.entitySettings),
         );
-        if (this.processingService.upload) {
+        if (this.processing.upload) {
           window.top.postMessage(
             { type: 'settings', settings },
             environment.repository,
           );
-          this.processingService.upload = false;
+          this.processing.upload = false;
         }
       });
     }
@@ -111,35 +127,25 @@ export class EntityFeatureSettingsComponent {
 
   public backToDefaultSettings() {
     if (
-      !this.processingService.actualEntitySettings ||
-      !this.processingService.actualEntitySettingsOnServer
+      !this.processing.entitySettings ||
+      !this.processing.entitySettingsOnServer
     ) {
       console.error(this);
       throw new Error('Settings missing');
     }
-    this.processingService.actualEntitySettings.preview = JSON.parse(
-      JSON.stringify(
-        this.processingService.actualEntitySettingsOnServer.preview,
-      ),
-    );
-    this.processingService.actualEntitySettings.cameraPositionInitial = JSON.parse(
-      JSON.stringify(
-        this.processingService.actualEntitySettingsOnServer
-          .cameraPositionInitial,
-      ),
-    );
-    this.processingService.actualEntitySettings.background = JSON.parse(
-      JSON.stringify(
-        this.processingService.actualEntitySettingsOnServer.background,
-      ),
-    );
-    this.processingService.actualEntitySettings.lights = JSON.parse(
-      JSON.stringify(
-        this.processingService.actualEntitySettingsOnServer.lights,
-      ),
-    );
+    this.processing.entitySettings = {
+      ...this.processing.entitySettings,
+      preview: `${this.processing.entitySettingsOnServer.preview}`,
+      cameraPositionInitial: {
+        ...this.processing.entitySettingsOnServer.cameraPositionInitial,
+      },
+      background: {
+        ...this.processing.entitySettingsOnServer.background,
+      },
+      lights: [...this.processing.entitySettingsOnServer.lights],
+    };
 
-    this.entitySettingsService.restoreSettings();
+    this.entitySettings.restoreSettings();
   }
 
   // _______Only used during Upload ________
@@ -149,7 +155,9 @@ export class EntityFeatureSettingsComponent {
     const dialogRef = this.dialog.open(DialogMeshsettingsComponent);
     dialogRef.afterClosed().subscribe(finish => {
       if (finish) {
-        this.entitySettingsService.meshSettingsCompleted.emit(true);
+        this.entitySettings.meshSettingsCompleted.emit(true);
+        if (!this.stepper)
+          return console.error('Stepper could not be accessed');
         this.stepper.selected.completed = true;
         this.stepper.selected.editable = false;
         this.stepper.next();
@@ -161,6 +169,7 @@ export class EntityFeatureSettingsComponent {
 
   public nextSecondStep() {
     this.setInitialPerspectivePreview();
+    if (!this.stepper) return console.error('Stepper could not be accessed');
     this.stepper.selected.completed = true;
     this.stepper.selected.editable = true;
     this.stepper.next();

@@ -2,6 +2,8 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 
 import { ProcessingService } from '../../../services/processing/processing.service';
 
+import { isCompilation, isEntity, ICompilation } from '@kompakkt/shared';
+
 @Component({
   selector: 'app-media-browser',
   templateUrl: './media-browser.component.html',
@@ -11,37 +13,42 @@ export class MediaBrowserComponent implements OnInit {
   @Output() addMedia = new EventEmitter();
 
   public url = '';
-  public entities: any;
+  public compilation: ICompilation | undefined;
   public description = '';
 
   public addExternalImage = false;
   public addCompilationEntity = false;
 
-  constructor(public processingService: ProcessingService) {}
+  public isEntity = isEntity;
+
+  constructor(public processing: ProcessingService) {}
 
   ngOnInit() {
-    this.processingService.Observables.actualCompilation.subscribe(
-      actualCompilation => {
-        this.entities = actualCompilation;
-      },
-    );
+    this.processing.compilation$.subscribe(compilation => {
+      if (isCompilation(compilation)) this.compilation = compilation;
+    });
+  }
+
+  get currentEntities() {
+    if (!isCompilation(this.compilation)) return [];
+    return Object.values(this.compilation.entities);
   }
 
   private hideBrowser() {
     this.addExternalImage = this.addCompilationEntity = false;
   }
 
-  addImage(address, text) {
+  addImage(url: string, description: string) {
     this.hideBrowser();
     this.addMedia.emit({
       mediaType: 'externalImage',
-      url: address,
-      description: text,
+      url,
+      description,
     });
   }
 
-  addEntity(index) {
+  addEntity(index: number) {
     this.hideBrowser();
-    this.addMedia.emit(this.entities.entities[index]);
+    this.addMedia.emit(this.currentEntities[index]);
   }
 }

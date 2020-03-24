@@ -6,13 +6,13 @@
   z-index: 99;
   color: #fff;
   background-color: rgba(0, 0, 0, 0.7);
-  border-top-right-radius: 3px;
-  border-bottom-right-radius: 10px;
+  border-top-right-radius: 0.75rem;
+  border-bottom-right-radius: 0.75rem;
   box-shadow: 1px 1px #333;
 }
 
 :host .mat-icon-button {
-  padding: 5px !important;
+  padding: 5px 0 5px 5px !important;
   width: auto;
   height: auto;
 }
@@ -25,6 +25,10 @@
 :host.is-open {
   transition: 280ms;
   left: 300px;
+}
+
+mat-icon.arrow {
+  margin-left: -5px;
 }
 
 .mat-icon-button.active {

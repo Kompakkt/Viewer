@@ -2,40 +2,25 @@ $cardbgr: #111;
 $max-width: 500px;
 
 :host {
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
 @keyframes fadein {
-  0% { opacity: 0; }
-  100% { opacity: 0.9; }
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0.9;
+  }
 }
 
 .single-annotation-card {
   z-index: 0;
-  margin-top: 5px;
   position: absolute;
   animation: fadein 280ms;
   opacity: 0.9 !important;
   border-radius: 5px !important;
-  transition: all .0s ease-in-out, opacity 280ms;
-}
-
-.single-annotation-card.resizable {
-  overflow: hidden;
-  resize: both;
-  width: 350px;
-  @media (max-width: 400px) {
-    width: 80vw;
-  }
-  max-width: 95vw !important;
-
-  padding: 15px 35px 20px 20px !important;
-  min-height: 175px;
-}
-
-.single-annotation-card.resizable.editmode {
-  overflow-y: scroll;
-  resize: none;
+  transition: all 0s ease-in-out, opacity 280ms;
 }
 
 .single-annotation-card.resizable .mat-card-content {
@@ -43,65 +28,68 @@ $max-width: 500px;
   height: 100% !important;
 }
 
-.single-annotation-card.resizable .mat-card-actions {
-  position: absolute;
-  top: 37px;
-  right: 15px;
-}
-
-.single-annotation-card.resizable .mat-card-actions .mat-icon-button {
-  display: block !important;
-}
-
-.single-annotation-card .mat-form-field {
+.mat-form-field {
   width: 100% !important;
+  font-weight: lighter;
+  font-size: 1.2rem;
 }
 
 #closeButton {
   position: absolute;
-  top: 3px;
-  right: 7px;
+  top: 0;
+  right: 0;
+  transform: translate(40%, -40%);
+  opacity: 0;
+  transition: opacity 280ms;
 }
 
 .mat-card {
   background-color: $cardbgr;
-  border-radius: 3px;
+  border-radius: 0.25rem;
   color: #fff;
-  font-size: 12px;
-  min-width: 250px;
-  padding: 15px 25px 0 20px !important;
-  max-width: 350px;
   word-wrap: break-word;
-}
 
-.mat-card-actions {
-  margin-bottom: 0 !important;
+  // This is to prevent annotations with
+  // large descriptions from taking up
+  // the whole viewport
+  max-width: 35%;
+
+  &:hover #closeButton {
+    opacity: 1;
+  }
 }
 
 .mat-card .mat-input-element {
   color: #fff;
 }
 
+.bigger-font {
+  line-height: 1.5rem;
+  font-size: 1.5rem;
+}
+
 .mat-card-title {
   font-weight: lighter;
-  line-height: 1.5em;
-  margin-right: 15px;
-}
+  margin: 0;
 
-.editmode {
-  // opacity: 1 !important;
-}
-
-.mat-form-field-infix,
-.editmode {
-  width: $max-width !important;
+  display: flex;
+  justify-content: center;
 }
 
 .mat-card-content {
-  max-height: 250px;
   overflow-y: auto;
-  padding-right: 30px;
   margin-bottom: 0;
+  font-size: 1.1rem;
+  font-weight: lighter;
+  max-height: 30vh;
+}
+
+.mat-card-actions {
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  justify-content: center;
 }
 
 #annotation-content {

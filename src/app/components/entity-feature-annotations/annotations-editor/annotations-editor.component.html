@@ -1,41 +1,51 @@
-<mat-card *ngIf="processingService.upload">Please set and save the settings before you add annotations.</mat-card>
-
-<mat-card
-  *ngIf="isAnnotatingAllowed && !processingService.compilationLoaded &&
-  !(annotationService.currentAnnotations | async).length">
-  All annotations you create are default annotations and visible for everyone who can access the entity.
+<mat-card *ngIf="processing.upload">
+  Please set and save the settings before you add annotations.
 </mat-card>
 
-<mat-card *ngIf="!processingService.upload && !isAnnotatingAllowed &&
-!processingService.compilationLoaded && !processingService.defaultEntityLoaded">
-  Default Annotations are not editable for foreign entities. Load entity from a collection to save your
-  annotations to make them visible for others. If you are the owner of this entity do not load it
-  from a collection to edit the default Annotations.
+<mat-card *ngIf="isDefault">
+  All annotations you create are default annotations and visible for everyone
+  who can access the entity.
 </mat-card>
 
-<mat-card *ngIf="isAnnotatingAllowed && !(annotationService.currentAnnotations | async).length">
+<mat-card *ngIf="isForbidden">
+  Default Annotations are not editable for foreign entities. Load entity from a
+  collection to save your annotations to make them visible for others. If you
+  are the owner of this entity do not load it from a collection to edit the
+  default Annotations.
+</mat-card>
+
+<mat-card *ngIf="isAnnotatingAllowed">
   To add annotations, simply double-click on the entity.
 </mat-card>
 
-<div cdkDropList
-     id="annotations-droplist"
-     class="annotations-list"
-     (cdkDropListDropped)="drop($event)">
-  <app-annotation-for-editor class="annotation-box"
-                             *ngFor="let annotation of (annotationService.currentAnnotations | async);"
-                             [annotation]="annotation"
-                             [cdkDragDisabled]="!(processingService.compilationLoaded ? (this.userDataService.userOwnsCompilation
-                             && isAnnotatingAllowed) : isAnnotatingAllowed)"
-                             cdkDrag cdkDragLockAxis="y"></app-annotation-for-editor>
+<div
+  cdkDropList
+  id="annotations-droplist"
+  class="annotations-list"
+  (cdkDropListDropped)="drop($event)"
+>
+  <app-annotation-for-editor
+    class="annotation-box"
+    *ngFor="let annotation of currentAnnotations | async"
+    [annotation]="annotation"
+    [cdkDragDisabled]="
+      !(processing.compilationLoaded
+        ? userdata.userOwnsCompilation && isAnnotatingAllowed
+        : isAnnotatingAllowed)
+    "
+    cdkDrag
+    cdkDragLockAxis="y"
+  ></app-annotation-for-editor>
 </div>
 
-<div id="editor-footermenu">
-
-  <button *ngIf="(annotationService.currentAnnotations | async).length"
-          mat-icon-button
-          matTooltip="Export Annotations to JSON"
-          matTooltipPosition="below"
-          (click)="exportAnnotations()">
+<div id="editor-footermenu" *ngIf="annotationCount | async; let count">
+  <button
+    *ngIf="count > 0"
+    mat-icon-button
+    matTooltip="Export Annotations to JSON"
+    matTooltipPosition="below"
+    (click)="exportAnnotations()"
+  >
     <mat-icon aria-label="Export Annotations to JSON">save</mat-icon>
   </button>
   <!--app-broadcast [style.visibility]="isBroadcastingAllowed ? 'visible' : 'hidden'"></app-broadcast-->

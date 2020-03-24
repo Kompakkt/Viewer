@@ -14,7 +14,7 @@ import { ICompilation } from '@kompakkt/shared';
 export class DialogShareAnnotationComponent {
   public targetCollectionId = '';
   public checkPwdMode = false;
-  private passwordCollection = '';
+  public passwordCollection = '';
   private entityId = '';
   private response: any = {
     status: false,
@@ -26,7 +26,7 @@ export class DialogShareAnnotationComponent {
     private backend: BackendService,
     private message: MessageService,
     private dialogRef: MatDialogRef<DialogShareAnnotationComponent>,
-    @Inject(MAT_DIALOG_DATA) data,
+    @Inject(MAT_DIALOG_DATA) data: { entityId: string },
   ) {
     this.entityId = data.entityId;
   }
@@ -44,22 +44,19 @@ export class DialogShareAnnotationComponent {
             // loaded'
             compilation = compilation as ICompilation;
 
-            if (
-              compilation.entities.filter(
-                entity => entity && entity._id === this.entityId,
-              ).length !== 0
-            ) {
-              this.response.status = true;
-              this.response.collectionId = this.targetCollectionId;
-              this.response.annotationListLength = compilation.annotationList
-                ? compilation.annotationList.length
-                : 0;
-              this.dialogRef.close(this.response);
-            } else {
-              this.message.error(
+            if (!compilation.entities[this.entityId])
+              return this.message.error(
                 'The entity of this annotation is not part of the target collection.',
               );
-            }
+
+            this.response = {
+              status: true,
+              collectionId: this.targetCollectionId,
+              annotationListLength:
+                Object.keys(compilation.annotations).length ?? 0,
+            };
+
+            this.dialogRef.close(this.response);
           }
         })
         .catch(error => {
@@ -83,19 +80,18 @@ export class DialogShareAnnotationComponent {
       this.backend
         .getCompilation(this.targetCollectionId, this.passwordCollection)
         .then(compilation => {
-          if (!compilation) {
-            this.message.error(
+          if (!compilation)
+            return this.message.error(
               `Password is wrong for collection with ID ${this.targetCollectionId}`,
             );
-          } else {
-            compilation = compilation as ICompilation;
-            this.response.status = true;
-            this.response.collectionId = this.targetCollectionId;
-            this.response.annotationListLength = compilation.annotationList
-              ? compilation.annotationList.length
-              : 1;
-            this.dialogRef.close(this.response);
-          }
+          compilation = compilation as ICompilation;
+          this.response = {
+            status: true,
+            collectionId: this.targetCollectionId,
+            annotationListLength:
+              Object.keys(compilation.annotations).length ?? 1,
+          };
+          this.dialogRef.close(this.response);
         })
         .catch(error => {
           console.error(error);

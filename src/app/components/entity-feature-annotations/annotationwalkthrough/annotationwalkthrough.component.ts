@@ -13,12 +13,12 @@ import { BabylonService } from '../../../services/babylon/babylon.service';
 })
 export class AnnotationwalkthroughComponent implements OnInit {
   public title = 'Annotation Walkthrough';
-  private actualRanking = -1;
-  public annotations;
+  private ranking = -1;
+  public annotations: IAnnotation[] = [];
 
   constructor(
     public annotationService: AnnotationService,
-    private babylonService: BabylonService,
+    private babylon: BabylonService,
     private annotationMarkerService: AnnotationmarkerService,
   ) {}
 
@@ -26,7 +26,7 @@ export class AnnotationwalkthroughComponent implements OnInit {
     this.annotationService.currentAnnotations.subscribe(currentAnnotations => {
       this.annotations = currentAnnotations;
       this.title = 'Annotation Walkthrough';
-      this.actualRanking = -1;
+      this.ranking = -1;
     });
 
     this.annotationMarkerService.isSelectedAnnotation.subscribe(
@@ -42,18 +42,18 @@ export class AnnotationwalkthroughComponent implements OnInit {
   }
 
   public previousAnnotation() {
-    const isFirst = this.actualRanking === 0;
-    this.actualRanking = isFirst
+    const isFirst = this.ranking === 0;
+    this.ranking = isFirst
       ? this.annotations.length - 1
-      : (this.actualRanking = this.actualRanking - 1);
-    this.getAction(this.actualRanking);
+      : (this.ranking = this.ranking - 1);
+    this.getAction(this.ranking);
   }
 
   public nextAnnotation() {
-    const isLast = this.actualRanking === this.annotations.length - 1;
+    const isLast = this.ranking === this.annotations.length - 1;
 
-    this.actualRanking = isLast ? 0 : this.actualRanking + 1;
-    this.getAction(this.actualRanking);
+    this.ranking = isLast ? 0 : this.ranking + 1;
+    this.getAction(this.ranking);
   }
 
   private getAction(index: number) {
@@ -64,14 +64,14 @@ export class AnnotationwalkthroughComponent implements OnInit {
     const perspective = annotation.body.content.relatedPerspective;
 
     if (perspective !== undefined) {
-      this.babylonService.cameraManager.moveActiveCameraToPosition(
+      this.babylon.cameraManager.moveActiveCameraToPosition(
         new Vector3(
           perspective.position.x,
           perspective.position.y,
           perspective.position.z,
         ),
       );
-      this.babylonService.cameraManager.setActiveCameraTarget(
+      this.babylon.cameraManager.setActiveCameraTarget(
         new Vector3(
           perspective.target.x,
           perspective.target.y,
@@ -80,7 +80,7 @@ export class AnnotationwalkthroughComponent implements OnInit {
       );
     }
 
-    this.annotationService.setSelectedAnnotation(annotation._id);
-    this.babylonService.hideMesh(annotation._id, true);
+    this.annotationService.setSelectedAnnotation(annotation._id.toString());
+    this.babylon.hideMesh(annotation._id.toString(), true);
   }
 }

@@ -5,7 +5,7 @@
   height: 100vh;
   transition: 280ms;
   z-index: 99;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
 :host.is-open {
@@ -21,6 +21,14 @@
   background-color: #222;
   padding: 15px;
   margin: 0;
+}
+
+#sidenav {
+  overflow-x: hidden;
+}
+
+#sidenav.hidden * {
+  display: none;
 }
 
 .mat-radio-button {

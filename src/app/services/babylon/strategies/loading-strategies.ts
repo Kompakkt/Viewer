@@ -187,7 +187,7 @@ export const loadVideo = (
 
 const createVideoScene = (
   videoTexture: VideoTexture,
-  texture,
+  texture: Texture,
   scene: Scene,
 ) => {
   // video as texture on mesh
@@ -279,7 +279,8 @@ const createAudioScene = (
 ) => {
   // audio analyser
   const analyser = new Analyser(scene);
-  Engine.audioEngine['connectToAnalyser'](analyser);
+  // TODO: AudioEngine implements IAudioEngine
+  (Engine.audioEngine as any).connectToAnalyser(analyser);
   analyser.FFT_SIZE = 4096;
   analyser.SMOOTHING = 0.9;
 
@@ -306,7 +307,7 @@ const createMediaControls = (
   _width: number,
   _height: number,
   scene: Scene,
-  video?,
+  video?: HTMLVideoElement,
   audio?: Sound,
 ) => {
   // time slider
@@ -370,7 +371,9 @@ const createMediaControls = (
 
   timeSlider.onValueChangedObservable.add(() => {
     header.text = `Current time: ${
-      audio ? secondsToHms(timeSlider.value) : getCurrentTime(video.currentTime)
+      audio
+        ? secondsToHms(timeSlider.value)
+        : getCurrentTime(video?.currentTime ?? 0)
     }`;
   });
   panel.addControl(timeSlider);
@@ -389,12 +392,16 @@ const createMediaControls = (
   const sliderVol = new Slider();
   sliderVol.minimum = 0;
   sliderVol.maximum = 1;
-  sliderVol.value = audio ? audio.getVolume() : video.volume;
+  sliderVol.value = audio ? audio.getVolume() : video?.volume ?? 0;
   sliderVol.isVertical = true;
   sliderVol.height = '500px';
   sliderVol.width = '45px';
   sliderVol.onValueChangedObservable.add(() => {
-    audio ? audio.setVolume(sliderVol.value) : (video.volume = sliderVol.value);
+    if (audio) {
+      audio.setVolume(sliderVol.value);
+    } else if (video) {
+      video.volume = sliderVol.value;
+    }
   });
 
   advancedTextureVol.addControl(sliderVol);
@@ -402,8 +409,8 @@ const createMediaControls = (
   return timeSlider;
 };
 
-const str_pad_left = (string, pad, length) => {
-  return (new Array(length + 1).join(pad) + string).slice(-length);
+const str_pad_left = (value: number, pad: string, length: number) => {
+  return (new Array(length + 1).join(pad) + value).slice(-length);
 };
 
 const getCurrentTime = (time: number): string => {

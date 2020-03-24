@@ -20,21 +20,46 @@ export class AnnotationsEditorComponent implements OnInit {
   public isAnnotatingAllowed = false;
 
   constructor(
-    public annotationService: AnnotationService,
-    public processingService: ProcessingService,
-    public userDataService: UserdataService,
+    public annotations: AnnotationService,
+    public processing: ProcessingService,
+    public userdata: UserdataService,
   ) {}
 
-  ngOnInit() {
-    this.isAnnotatingAllowed = this.processingService.annotationAllowance;
+  get currentAnnotations() {
+    return this.annotations.currentAnnotations;
+  }
 
-    this.processingService.setAnnotationAllowance.subscribe(allowed => {
+  get annotationCount() {
+    return this.currentAnnotations
+      .toPromise()
+      .then(annotations => annotations.length);
+  }
+
+  get isDefault() {
+    if (!this.isAnnotatingAllowed) return false;
+    if (this.processing.compilationLoaded) return false;
+    return true;
+  }
+
+  get isForbidden() {
+    return (
+      !this.processing.upload &&
+      !this.isAnnotatingAllowed &&
+      !this.processing.compilationLoaded &&
+      !this.processing.defaultEntityLoaded
+    );
+  }
+
+  ngOnInit() {
+    this.isAnnotatingAllowed = this.processing.annotationAllowance;
+
+    this.processing.setAnnotationAllowance.subscribe((allowed: boolean) => {
       this.isAnnotatingAllowed = allowed;
     });
   }
 
   drop(event: CdkDragDrop<string[]>) {
-    this.annotationService.moveAnnotationByIndex(
+    this.annotations.moveAnnotationByIndex(
       event.previousIndex,
       event.currentIndex,
     );
@@ -42,12 +67,9 @@ export class AnnotationsEditorComponent implements OnInit {
 
   exportAnnotations() {
     saveAs(
-      new Blob(
-        [JSON.stringify(this.annotationService.getCurrentAnnotations())],
-        {
-          type: 'text/plain;charset=utf-8',
-        },
-      ),
+      new Blob([JSON.stringify(this.annotations.getCurrentAnnotations())], {
+        type: 'text/plain;charset=utf-8',
+      }),
       'annotations.json',
     );
   }

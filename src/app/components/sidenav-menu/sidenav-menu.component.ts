@@ -11,17 +11,31 @@ import { ProcessingService } from '../../services/processing/processing.service'
 export class SidenavMenuComponent implements OnInit {
   @HostBinding('class.is-open')
   public isOpen = false;
+  private mode = '';
 
   constructor(
-    public overlayService: OverlayService,
-    public processingService: ProcessingService,
-  ) {}
-
-  ngOnInit() {
-    this.overlayService.sidenav.subscribe(
-      state =>
-        (this.isOpen =
-          this.overlayService.actualSidenavMode !== '' ? state : false),
-    );
+    public overlay: OverlayService,
+    public processing: ProcessingService,
+  ) {
+    setTimeout(() => {
+      this.overlay.sidenavMode$.subscribe(mode => (this.mode = mode));
+      this.overlay.sidenav$.subscribe(state => {
+        this.isOpen = state;
+      });
+    }, 0);
   }
+
+  get isSettings() {
+    return this.mode === 'settings';
+  }
+
+  get isCompilationBrowser() {
+    return this.mode === 'compilationBrowser';
+  }
+
+  get isAnnotation() {
+    return this.mode === 'annotation';
+  }
+
+  ngOnInit() {}
 }

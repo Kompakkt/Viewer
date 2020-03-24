@@ -18,10 +18,10 @@ export class DialogGetUserDataComponent {
 
   constructor(
     private backend: BackendService,
-    private userdataService: UserdataService,
+    private userdata: UserdataService,
     private message: MessageService,
     private dialogRef: MatDialogRef<DialogGetUserDataComponent>,
-    @Inject(MAT_DIALOG_DATA) data,
+    @Inject(MAT_DIALOG_DATA) data: { id: string },
   ) {
     this.id = data.id;
   }
@@ -30,18 +30,14 @@ export class DialogGetUserDataComponent {
     if (this.id && this.password !== '') {
       this.backend
         .deleteRequest(this.id, 'annotation', this.username, this.password)
-        .then((result: any) => {
-          if (result.status === 'ok') {
-            this.userdataService.loginData = {
-              username: this.username,
-              password: this.password,
-              isCached: true,
-            };
-            this.dialogRef.close(true);
-            this.message.info('Deleted from Server');
-          } else {
-            this.message.info('Not possible to deleted from Server');
-          }
+        .then(() => {
+          this.userdata.loginData = {
+            username: this.username,
+            password: this.password,
+            isCached: true,
+          };
+          this.dialogRef.close(true);
+          this.message.info('Deleted from Server');
         })
         .catch((errorMessage: any) => {
           console.log(errorMessage);

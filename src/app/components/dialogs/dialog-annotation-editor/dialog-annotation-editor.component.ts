@@ -1,4 +1,4 @@
-import { Component, Inject, ViewChild } from '@angular/core';
+import { Component, Inject, ViewChild, ElementRef } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { environment } from '../../../../environments/environment';
@@ -9,13 +9,20 @@ export interface IDialogData {
   content: string;
 }
 
+interface IExternalImage {
+  description: string;
+  url: string;
+  mediaType: string;
+}
+
 @Component({
   selector: 'app-dialog-annotation-editor',
   templateUrl: './dialog-annotation-editor.component.html',
   styleUrls: ['./dialog-annotation-editor.component.scss'],
 })
 export class DialogAnnotationEditorComponent {
-  @ViewChild('annotationContent') private annotationContent;
+  @ViewChild('annotationContent')
+  private annotationContent: ElementRef<HTMLTextAreaElement> | undefined;
 
   public editMode = false;
   public labelMode = 'edit';
@@ -28,10 +35,10 @@ export class DialogAnnotationEditorComponent {
     @Inject(MAT_DIALOG_DATA) public data: IDialogData,
   ) {}
 
-  public addEntitySwitch(entity: IEntity) {
+  public addEntitySwitch(entity: IEntity | IExternalImage) {
     switch (entity.mediaType) {
       case 'externalImage':
-        this.addExternalImage(entity);
+        this.addExternalImage(entity as IExternalImage);
         break;
 
       case 'video':
@@ -40,7 +47,7 @@ export class DialogAnnotationEditorComponent {
       case 'text':
       case 'entity':
       case 'model':
-        this.addEntity(entity);
+        this.addEntity(entity as IEntity);
         break;
       default:
         console.log(`Unknown media type ${entity.mediaType}`);
@@ -48,6 +55,7 @@ export class DialogAnnotationEditorComponent {
   }
 
   private getCaretPosition() {
+    if (!this.annotationContent) return { start: 0, value: '' };
     this.annotationContent.nativeElement.focus();
 
     return {
@@ -56,7 +64,7 @@ export class DialogAnnotationEditorComponent {
     };
   }
 
-  private createMarkdown(mdElement) {
+  private createMarkdown(mdElement: any) {
     const caret = this.getCaretPosition();
     const start = caret.start;
     const value = caret.value;
@@ -67,7 +75,7 @@ export class DialogAnnotationEditorComponent {
     )}`;
   }
 
-  private addExternalImage(image) {
+  private addExternalImage(image: IExternalImage) {
     this.data.content = this.createMarkdown(
       `![alt ${image.description}](${image.url})`,
     );

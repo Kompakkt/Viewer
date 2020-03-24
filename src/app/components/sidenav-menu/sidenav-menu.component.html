@@ -1,35 +1,43 @@
-<div [class.active]="overlayService.sidenav | async">
-    <div *ngIf="processingService.showAnnotationEditor">
-        <button mat-icon-button (click)="overlayService.toggleSidenav('annotation')"
-                matTooltip="{{isOpen && this.overlayService.actualSidenavMode === 'annotation' ? 'Close' : 'Annotation'}}"
-                matTooltipPosition="right">
-            <mat-icon aria-label="Toggle Annotation">place</mat-icon>
-            <mat-icon
-                    aria-label="Toggle Annotation">
-                {{isOpen && this.overlayService.actualSidenavMode === 'annotation' ? 'arrow_left' : 'arrow_right'}}
-            </mat-icon>
-        </button>
-    </div>
-    <div *ngIf="processingService.showSettingsEditor">
-        <button mat-icon-button (click)="overlayService.toggleSidenav('settings')"
-                matTooltip="{{isOpen && this.overlayService.actualSidenavMode === 'settings' ? 'Close' : 'Settings'}}"
-                matTooltipPosition="right">
-            <mat-icon aria-label="Toggle Settings">settings</mat-icon>
-            <mat-icon
-                    aria-label="Toggle Settings">
-                {{isOpen && this.overlayService.actualSidenavMode === 'settings' ? 'arrow_left' : 'arrow_right'}}
-            </mat-icon>
-        </button>
-    </div>
-    <div *ngIf="processingService.showCompilationBrowser">
-        <button mat-icon-button (click)="overlayService.toggleSidenav('compilationBrowser')"
-                matTooltip="{{isOpen && this.overlayService.actualSidenavMode === 'compilationBrowser' ? 'Close' : 'Browse in Collection'}}"
-                matTooltipPosition="right">
-            <mat-icon aria-label="Toggle Collection Browser">folder_open</mat-icon>
-            <mat-icon
-                    aria-label="Toggle Collection Browser">
-                {{isOpen && this.overlayService.actualSidenavMode === 'compilationBrowser' ? 'arrow_left' : 'arrow_right'}}
-            </mat-icon>
-        </button>
-    </div>
+<div [class.active]="isOpen">
+  <div *ngIf="processing.showAnnotationEditor$ | async">
+    <button
+      mat-icon-button
+      (click)="overlay.toggleSidenav('annotation')"
+      [matTooltip]="isOpen && isAnnotation ? 'Close' : 'Annotation'"
+      matTooltipPosition="right"
+    >
+      <mat-icon aria-label="Toggle Annotation">place</mat-icon>
+      <mat-icon class="arrow" aria-label="Toggle Annotation">
+        {{ isOpen && isAnnotation ? 'arrow_left' : 'arrow_right' }}
+      </mat-icon>
+    </button>
+  </div>
+  <div *ngIf="processing.showSettingsEditor$ | async">
+    <button
+      mat-icon-button
+      (click)="overlay.toggleSidenav('settings')"
+      [matTooltip]="isOpen && isSettings ? 'Close' : 'Settings'"
+      matTooltipPosition="right"
+    >
+      <mat-icon aria-label="Toggle Settings">settings</mat-icon>
+      <mat-icon class="arrow" aria-label="Toggle Settings">
+        {{ isOpen && isSettings ? 'arrow_left' : 'arrow_right' }}
+      </mat-icon>
+    </button>
+  </div>
+  <div *ngIf="processing.showCompilationBrowser$ | async">
+    <button
+      mat-icon-button
+      (click)="overlay.toggleSidenav('compilationBrowser')"
+      [matTooltip]="
+        isOpen && isCompilationBrowser ? 'Close' : 'Browse in Collection'
+      "
+      matTooltipPosition="right"
+    >
+      <mat-icon aria-label="Toggle Collection Browser">folder_open</mat-icon>
+      <mat-icon class="arrow" aria-label="Toggle Collection Browser">
+        {{ isOpen && isCompilationBrowser ? 'arrow_left' : 'arrow_right' }}
+      </mat-icon>
+    </button>
+  </div>
 </div>

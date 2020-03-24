@@ -1,9 +1,23 @@
 :host {
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
 .annotation-card {
   width: 100%;
+  padding: 0.8rem;
+}
+
+.mat-card-content {
+  max-height: 20vh;
+  overflow-y: auto;
+  margin: 0;
+}
+
+.mat-card-actions {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .annotation-card .mat-card-actions {
@@ -32,10 +46,10 @@ img {
 }
 
 .annotation-header-image {
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-size:16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
   color: #fff;
   background: rgba(0, 0, 0, 0.8);
 }

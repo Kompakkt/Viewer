@@ -16,10 +16,10 @@ export class LightService {
   private ambientlightDown: HemisphericLight | undefined;
 
   constructor(
-    private babylonService: BabylonService,
-    private processingService: ProcessingService,
+    private babylon: BabylonService,
+    private processing: ProcessingService,
   ) {
-    this.scene = this.babylonService.getScene();
+    this.scene = this.babylon.getScene();
   }
 
   public initialiseAmbientLight(type: string, intensity: number) {
@@ -49,7 +49,7 @@ export class LightService {
     this.pointlight = new PointLight('pointLight', position, this.scene);
     this.pointlight.specular = new BABYLON.Color3(0, 0, 0);
     this.pointlight.intensity = intensity;
-    this.pointlight.parent = this.babylonService.getActiveCamera();
+    this.pointlight.parent = this.babylon.getActiveCamera();
   }
 
   public setLightIntensity(light: string, intensity: number) {
@@ -72,22 +72,20 @@ export class LightService {
     this.pointlight.position = position;
   }
 
-  public getLightByType(lightType: string): IEntityLight {
-    if (!this.processingService.actualEntitySettings) {
+  public getLightByType(lightType: string): IEntityLight | undefined {
+    if (!this.processing.entitySettings) {
       console.error(this);
       throw new Error('Settings missing');
     }
-    let light;
+    let light: IEntityLight | undefined;
     if (lightType === 'ambientlightUp' || lightType === 'ambientlightDown') {
-      let direction;
-      if (lightType === 'ambientlightUp') direction = 1;
-      if (lightType === 'ambientlightDown') direction = -1;
-      light = this.processingService.actualEntitySettings.lights.find(
+      const direction = lightType === 'ambientlightUp' ? 1 : -1;
+      light = this.processing.entitySettings.lights.find(
         obj => obj.type === 'HemisphericLight' && obj.position.y === direction,
       );
     }
     if (lightType === 'pointLight') {
-      light = this.processingService.actualEntitySettings.lights.find(
+      light = this.processing.entitySettings.lights.find(
         obj => obj.type === 'PointLight',
       );
     }
@@ -95,24 +93,22 @@ export class LightService {
   }
 
   public getLightIndexByType(lightType: string): number | undefined {
-    if (!this.processingService.actualEntitySettings) {
+    if (!this.processing.entitySettings) {
       console.error(this);
       throw new Error('Settings missing');
     }
     console.log('get Index of', lightType);
     let indexOfLight;
     if (lightType === 'ambientlightUp' || lightType === 'ambientlightDown') {
-      let direction;
-      if (lightType === 'ambientlightUp') direction = 1;
-      if (lightType === 'ambientlightDown') direction = -1;
+      const direction = lightType === 'ambientlightUp' ? 1 : -1;
       console.log('diection:', direction);
-      indexOfLight = this.processingService.actualEntitySettings.lights.findIndex(
+      indexOfLight = this.processing.entitySettings.lights.findIndex(
         obj => obj.type === 'HemisphericLight' && obj.position.y === direction,
       );
       console.log('index ist', indexOfLight);
     }
     if (lightType === 'pointLight') {
-      indexOfLight = this.processingService.actualEntitySettings.lights.findIndex(
+      indexOfLight = this.processing.entitySettings.lights.findIndex(
         obj => obj.type === 'PointLight',
       );
     }

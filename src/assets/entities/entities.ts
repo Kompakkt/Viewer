@@ -19,7 +19,7 @@ export const defaultEntity: IEntity = {
       file_format: '.babylon',
     },
   ],
-  annotationList: [],
+  annotations: {},
   relatedDigitalEntity: { _id: 'default_entity' },
   creator: {
     _id: '',
@@ -48,7 +48,7 @@ export const fallbackEntity: IEntity = {
       file_format: '.gltf',
     },
   ],
-  annotationList: [],
+  annotations: {},
   relatedDigitalEntity: { _id: 'fallback_entity' },
   creator: {
     _id: '',

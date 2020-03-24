@@ -15,6 +15,8 @@ import { BabylonService } from '../babylon/babylon.service';
 import { LightService } from '../light/light.service';
 import { ProcessingService } from '../processing/processing.service';
 
+import { IColor } from '@kompakkt/shared';
+
 import {
   createBoundingBox,
   createGround,
@@ -42,30 +44,30 @@ export class EntitySettingsService {
   );
   public initialSize = Vector3.Zero();
   private initialCenterPoint = Vector3.Zero();
-  private actualCenterPoint = Vector3.Zero();
+  private currentCenterPoint = Vector3.Zero();
   private center: Mesh | undefined;
   public boundingBox: Mesh | undefined;
 
-  @Output() meshSettingsCompleted: EventEmitter<boolean> = new EventEmitter();
+  @Output() meshSettingsCompleted = new EventEmitter<boolean>();
   public ground: Mesh | undefined;
   private groundInitialSize = 0;
   public localAxisInitialSize = 0;
   public worldAxisInitialSize = 0;
 
+  private meshes: Mesh[] | undefined;
+
   constructor(
-    private babylonService: BabylonService,
-    private processingService: ProcessingService,
-    private lightService: LightService,
+    private babylon: BabylonService,
+    private processing: ProcessingService,
+    private lights: LightService,
   ) {
-    this.processingService.setSettings.subscribe(setSettings => {
+    this.processing.setSettings.subscribe((setSettings: boolean) => {
       if (setSettings) {
-        console.log(
-          'actual settings',
-          this.processingService.actualEntitySettings,
-        );
+        console.log('actual settings', this.processing.entitySettings);
         this.setUpSettings();
       }
     });
+    this.processing.meshes$.subscribe(meshes => (this.meshes = meshes));
   }
 
   private async resetInitialValues() {
@@ -80,25 +82,25 @@ export class EntitySettingsService {
       Number.MAX_VALUE * -1,
     );
     this.initialSize = Vector3.Zero();
-    this.initialCenterPoint = this.actualCenterPoint = Vector3.Zero();
+    this.initialCenterPoint = this.currentCenterPoint = Vector3.Zero();
     this.groundInitialSize = 0;
     this.localAxisInitialSize = 0;
     this.worldAxisInitialSize = 0;
-    this.processingService.actualRotationQuaternion = Quaternion.RotationYawPitchRoll(
+    this.processing.rotationQuaternion = Quaternion.RotationYawPitchRoll(
       0,
       0,
       0,
     );
-    this.processingService.actualEntityHeight = (0).toFixed(2);
-    this.processingService.actualEntityWidth = (0).toFixed(2);
-    this.processingService.actualEntityDepth = (0).toFixed(2);
+    this.processing.entityHeight = (0).toFixed(2);
+    this.processing.entityWidth = (0).toFixed(2);
+    this.processing.entityDepth = (0).toFixed(2);
   }
 
   private async setUpSettings() {
-    if (!this.processingService.actualEntitySettings) {
+    if (!this.processing.entitySettings) {
       throw new Error('No settings available.');
     }
-    if (!this.processingService.getCurrentEntityMeshes()) {
+    if (!this.meshes || this.meshes.length === 0) {
       throw new Error('No meshes available.');
     }
     await this.resetInitialValues();
@@ -106,10 +108,7 @@ export class EntitySettingsService {
     await this.setUpMeshSettingsHelper();
     await this.createVisualUIMeshSettingsHelper();
     await this.loadSettings();
-    if (
-      !this.processingService.upload ||
-      !this.processingService.meshSettings
-    ) {
+    if (!this.processing.upload || !this.processing.meshSettings) {
       await this.destroyMesh('boundingBox');
       await this.decomposeMeshSettingsHelper();
     }
@@ -118,10 +117,10 @@ export class EntitySettingsService {
   private async initialiseSizeValues() {
     await this.calculateMinMax();
     this.initialSize = await this.max.subtract(this.min);
-    this.processingService.actualEntityHeight = this.initialSize.y.toFixed(2);
-    this.processingService.actualEntityWidth = this.initialSize.x.toFixed(2);
-    this.processingService.actualEntityDepth = this.initialSize.z.toFixed(2);
-    this.initialCenterPoint = this.actualCenterPoint = new Vector3(
+    this.processing.entityHeight = this.initialSize.y.toFixed(2);
+    this.processing.entityWidth = this.initialSize.x.toFixed(2);
+    this.processing.entityDepth = this.initialSize.z.toFixed(2);
+    this.initialCenterPoint = this.currentCenterPoint = new Vector3(
       this.max.x - this.initialSize.x / 2,
       this.max.y - this.initialSize.y / 2,
       this.max.z - this.initialSize.z / 2,
@@ -129,11 +128,10 @@ export class EntitySettingsService {
   }
 
   private async calculateMinMax() {
-    const meshes = this.processingService.getCurrentEntityMeshes();
-    if (!meshes) {
+    if (!this.meshes) {
       throw new Error('Center missing');
     }
-    meshes.forEach(mesh => {
+    this.meshes.forEach(mesh => {
       mesh.computeWorldMatrix(true);
       // see if mesh is visible or just a dummy
       const bi = mesh.getBoundingInfo();
@@ -165,20 +163,19 @@ export class EntitySettingsService {
   }
 
   private async setUpMeshSettingsHelper() {
-    const meshes = this.processingService.getCurrentEntityMeshes();
-    if (!meshes) {
+    if (!this.meshes) {
       throw new Error('No meshes available.');
     }
     this.center = MeshBuilder.CreateBox(
       'center',
       { size: 0.01 },
-      this.babylonService.getScene(),
+      this.babylon.getScene(),
     );
     Tags.AddTagsTo(this.center, 'center');
     this.center.isVisible = false;
 
     // rotation to zero
-    this.center.rotationQuaternion = this.processingService.actualRotationQuaternion;
+    this.center.rotationQuaternion = this.processing.rotationQuaternion;
 
     // position model to origin of the world coordinate system
     if (this.min.x > 0) {
@@ -200,7 +197,7 @@ export class EntitySettingsService {
       this.center.position.z = Math.abs(this.min.z);
     }
 
-    this.actualCenterPoint = new Vector3(
+    this.currentCenterPoint = new Vector3(
       this.initialSize.x / 2,
       this.initialSize.y / 2,
       this.initialSize.z / 2,
@@ -209,7 +206,7 @@ export class EntitySettingsService {
     // pivot to the center of the (visible) model
     this.center.setPivotPoint(this.initialCenterPoint);
 
-    meshes.forEach(mesh => {
+    this.meshes.forEach(mesh => {
       if (!mesh.parent) {
         mesh.parent = this.center as Mesh;
         Tags.AddTagsTo(mesh, 'parentedMesh');
@@ -224,8 +221,8 @@ export class EntitySettingsService {
     this.loadBackgroundColor();
     this.initialiseLights();
     if (
-      this.processingService.meshSettings ||
-      this.processingService.actualEntityMediaType === 'audio'
+      this.processing.meshSettings ||
+      this.processing.entityMediaType === 'audio'
     ) {
       await this.loadRotation();
       await this.loadScaling();
@@ -241,14 +238,14 @@ export class EntitySettingsService {
   }
 
   private async initialiseCamera() {
-    if (!this.processingService.actualEntitySettings) {
+    if (!this.processing.entitySettings) {
       console.error(this);
       throw new Error('Settings missing');
     }
-    const scale = this.processingService.actualEntitySettings.scale;
+    const scale = this.processing.entitySettings.scale;
     const isModel =
-      this.processingService.actualEntityMediaType === 'model' ||
-      this.processingService.actualEntityMediaType === 'entity';
+      this.processing.entityMediaType === 'model' ||
+      this.processing.entityMediaType === 'entity';
     let diagonalLength = 0;
     if (this.boundingBox) {
       const bi = this.boundingBox.getBoundingInfo();
@@ -260,26 +257,23 @@ export class EntitySettingsService {
           this.initialSize.z * scale * (this.initialSize.z * scale),
       );
     }
-    const max = !this.processingService.defaultEntityLoaded
-      ? this.processingService.upload && isModel
+    const max = !this.processing.defaultEntityLoaded
+      ? this.processing.upload && isModel
         ? diagonalLength * 2.5
         : diagonalLength
       : 87.5;
-    await this.babylonService.cameraManager.setUpActiveCamera(max);
+    await this.babylon.cameraManager.setUpActiveCamera(max);
 
-    if (
-      this.processingService.upload &&
-      this.processingService.actualEntityMediaType !== 'audio'
-    ) {
+    if (this.processing.upload && this.processing.entityMediaType !== 'audio') {
       const position = new Vector3(
         isModel ? Math.PI / 4 : -Math.PI / 2,
         isModel ? Math.PI / 4 : Math.PI / 2,
         diagonalLength * 1.25,
       );
-      const target = this.actualCenterPoint;
+      const target = this.currentCenterPoint;
       console.log('target', target);
       console.log('position', position);
-      this.processingService.actualEntitySettings.cameraPositionInitial = {
+      this.processing.entitySettings.cameraPositionInitial = {
         position,
         target,
       };
@@ -291,9 +285,7 @@ export class EntitySettingsService {
     if (!center) {
       throw new Error('Center missing');
     }
-    const meshes = this.babylonService
-      .getScene()
-      .getMeshesByTags('parentedMesh');
+    const meshes = this.babylon.getScene().getMeshesByTags('parentedMesh');
     if (!meshes) {
       throw new Error('Meshes missing');
     }
@@ -310,7 +302,7 @@ export class EntitySettingsService {
       mesh.parent = null;
       mesh.position = abs;
       const meshRotation = mesh.rotationQuaternion;
-      mesh.rotationQuaternion = this.processingService.actualRotationQuaternion.multiply(
+      mesh.rotationQuaternion = this.processing.rotationQuaternion.multiply(
         meshRotation,
       );
       center.computeWorldMatrix();
@@ -330,7 +322,7 @@ export class EntitySettingsService {
   }
 
   private destroyMesh(tag: string) {
-    this.babylonService
+    this.babylon
       .getScene()
       .getMeshesByTags(tag)
       .map(mesh => mesh.dispose());
@@ -345,46 +337,46 @@ export class EntitySettingsService {
     if (!this.center) {
       throw new Error('Center missing');
     }
-    if (!this.processingService.actualEntitySettings) {
+    if (!this.processing.entitySettings) {
       throw new Error('Settings missing');
     }
     if (!this.center.rotationQuaternion) {
       throw new Error('RotationQuaternion for center missing');
     }
 
-    this.processingService.actualEntitySettings.rotation.x = isDegreeSpectrum(
-      this.processingService.actualEntitySettings.rotation.x,
+    this.processing.entitySettings.rotation.x = isDegreeSpectrum(
+      this.processing.entitySettings.rotation.x,
     );
-    this.processingService.actualEntitySettings.rotation.y = isDegreeSpectrum(
-      this.processingService.actualEntitySettings.rotation.y,
+    this.processing.entitySettings.rotation.y = isDegreeSpectrum(
+      this.processing.entitySettings.rotation.y,
     );
-    this.processingService.actualEntitySettings.rotation.z = isDegreeSpectrum(
-      this.processingService.actualEntitySettings.rotation.z,
+    this.processing.entitySettings.rotation.z = isDegreeSpectrum(
+      this.processing.entitySettings.rotation.z,
     );
 
-    const start = this.processingService.actualRotationQuaternion;
+    const start = this.processing.rotationQuaternion;
     const rotationQuaternion = Quaternion.RotationYawPitchRoll(0, 0, 0);
     const rotationQuaternionX = Quaternion.RotationAxis(
       Axis['X'],
-      (Math.PI / 180) * this.processingService.actualEntitySettings.rotation.x,
+      (Math.PI / 180) * this.processing.entitySettings.rotation.x,
     );
     let end = rotationQuaternionX.multiply(rotationQuaternion);
     const rotationQuaternionY = Quaternion.RotationAxis(
       Axis['Y'],
-      (Math.PI / 180) * this.processingService.actualEntitySettings.rotation.y,
+      (Math.PI / 180) * this.processing.entitySettings.rotation.y,
     );
     end = rotationQuaternionY.multiply(end);
     const rotationQuaternionZ = Quaternion.RotationAxis(
       Axis['Z'],
-      (Math.PI / 180) * this.processingService.actualEntitySettings.rotation.z,
+      (Math.PI / 180) * this.processing.entitySettings.rotation.z,
     );
     end = rotationQuaternionZ.multiply(end);
     this.animatedMovement(start, end);
-    this.processingService.actualRotationQuaternion = end;
+    this.processing.rotationQuaternion = end;
     this.center.rotationQuaternion = end;
   }
 
-  private async animatedMovement(start, end) {
+  private async animatedMovement(start: Quaternion, end: Quaternion) {
     if (!this.center) {
       throw new Error('Center missing');
     }
@@ -402,7 +394,7 @@ export class EntitySettingsService {
     anim.setKeys(frame);
     this.center.animations = [];
     this.center.animations.push(anim);
-    await this.babylonService
+    await this.babylon
       .getScene()
       .beginAnimation(
         this.center,
@@ -421,32 +413,26 @@ export class EntitySettingsService {
     if (!this.center) {
       throw new Error('Center missing');
     }
-    if (!this.processingService.actualEntitySettings) {
+    if (!this.processing.entitySettings) {
       throw new Error('Settings missing');
     }
-    const factor = this.processingService.actualEntitySettings.scale;
+    const factor = this.processing.entitySettings.scale;
     this.center.scaling = new Vector3(factor, factor, factor);
 
-    this.processingService.actualEntityHeight = (
-      this.initialSize.y * factor
-    ).toFixed(2);
-    this.processingService.actualEntityWidth = (
-      this.initialSize.x * factor
-    ).toFixed(2);
-    this.processingService.actualEntityDepth = (
-      this.initialSize.z * factor
-    ).toFixed(2);
+    this.processing.entityHeight = (this.initialSize.y * factor).toFixed(2);
+    this.processing.entityWidth = (this.initialSize.x * factor).toFixed(2);
+    this.processing.entityDepth = (this.initialSize.z * factor).toFixed(2);
   }
 
   public async createVisualUIMeshSettingsHelper() {
     if (!this.center) {
       throw new Error('Center missing');
     }
-    const scene = this.babylonService.getScene();
+    const scene = this.babylon.getScene();
     const size = Math.max(
-      +this.processingService.actualEntityHeight,
-      +this.processingService.actualEntityWidth,
-      +this.processingService.actualEntityDepth,
+      +this.processing.entityHeight,
+      +this.processing.entityWidth,
+      +this.processing.entityDepth,
     );
     this.boundingBox = createBoundingBox(
       scene,
@@ -455,7 +441,7 @@ export class EntitySettingsService {
       this.initialCenterPoint,
     );
     this.boundingBox.renderingGroupId = 2;
-    if (this.processingService.upload && this.processingService.meshSettings) {
+    if (this.processing.upload && this.processing.meshSettings) {
       this.worldAxisInitialSize = size * 1.2;
       this.localAxisInitialSize = size * 1.1;
       this.groundInitialSize = size * 1.2;
@@ -472,8 +458,8 @@ export class EntitySettingsService {
   }
 
   // Set the color for the helper grid
-  public setGroundMaterial(color?) {
-    const scene = this.babylonService.getScene();
+  public setGroundMaterial(color?: IColor) {
+    const scene = this.babylon.getScene();
     const oldMat = scene.getMaterialByName('GroundPlaneMaterial');
     const material = new StandardMaterial('GroundPlaneMaterial', scene);
     material.diffuseColor = new Color3(
@@ -492,17 +478,16 @@ export class EntitySettingsService {
 
   // Load cameraPosition
   public async loadCameraInititalPosition() {
-    if (!this.processingService.actualEntitySettings) {
+    if (!this.processing.entitySettings) {
       throw new Error('Settings missing');
     }
     const camera = Array.isArray(
-      this.processingService.actualEntitySettings.cameraPositionInitial,
+      this.processing.entitySettings.cameraPositionInitial,
     )
-      ? (this.processingService.actualEntitySettings
-          .cameraPositionInitial as any[]).find(
+      ? (this.processing.entitySettings.cameraPositionInitial as any[]).find(
           obj => obj.cameraType === 'arcRotateCam',
         )
-      : this.processingService.actualEntitySettings.cameraPositionInitial;
+      : this.processing.entitySettings.cameraPositionInitial;
 
     const positionVector = new Vector3(
       camera.position.x,
@@ -514,31 +499,26 @@ export class EntitySettingsService {
       camera.target.y,
       camera.target.z,
     );
-    this.babylonService.cameraManager.updateDefaults(
-      positionVector,
-      targetVector,
-    );
-    this.babylonService.cameraManager.moveActiveCameraToPosition(
-      positionVector,
-    );
-    this.babylonService.cameraManager.setActiveCameraTarget(targetVector);
+    this.babylon.cameraManager.updateDefaults(positionVector, targetVector);
+    this.babylon.cameraManager.moveActiveCameraToPosition(positionVector);
+    this.babylon.cameraManager.setActiveCameraTarget(targetVector);
   }
 
   // background: color, effect
   loadBackgroundColor() {
-    if (!this.processingService.actualEntitySettings) {
+    if (!this.processing.entitySettings) {
       throw new Error('Settings missing');
     }
-    const color = this.processingService.actualEntitySettings.background.color;
-    this.babylonService.setBackgroundColor(color);
+    const color = this.processing.entitySettings.background.color;
+    this.babylon.setBackgroundColor(color);
   }
 
   loadBackgroundEffect() {
-    if (!this.processingService.actualEntitySettings) {
+    if (!this.processing.entitySettings) {
       throw new Error('Settings missing');
     }
-    this.babylonService.setBackgroundImage(
-      this.processingService.actualEntitySettings.background.effect,
+    this.babylon.setBackgroundImage(
+      this.processing.entitySettings.background.effect,
     );
   }
 
@@ -546,32 +526,25 @@ export class EntitySettingsService {
   // Ambientlights
 
   private initialiseLights() {
-    if (!this.processingService.actualEntitySettings) {
+    if (!this.processing.entitySettings) {
       throw new Error('Settings missing');
     }
-    const pointLight = this.lightService.getLightByType('pointLight');
+    const pointLight = this.lights.getLightByType('pointLight');
     if (pointLight) {
       const position = new Vector3(
         pointLight.position.x,
         pointLight.position.y,
         pointLight.position.z,
       );
-      this.lightService.initialisePointLight(pointLight.intensity, position);
+      this.lights.initialisePointLight(pointLight.intensity, position);
     }
-    const hemisphericLightUp = this.lightService.getLightByType(
-      'ambientlightUp',
-    );
+    const hemisphericLightUp = this.lights.getLightByType('ambientlightUp');
     if (hemisphericLightUp) {
-      this.lightService.initialiseAmbientLight(
-        'up',
-        hemisphericLightUp.intensity,
-      );
+      this.lights.initialiseAmbientLight('up', hemisphericLightUp.intensity);
     }
-    const hemisphericLightDown = this.lightService.getLightByType(
-      'ambientlightDown',
-    );
+    const hemisphericLightDown = this.lights.getLightByType('ambientlightDown');
     if (hemisphericLightDown) {
-      this.lightService.initialiseAmbientLight(
+      this.lights.initialiseAmbientLight(
         'down',
         hemisphericLightDown.intensity,
       );
@@ -579,53 +552,48 @@ export class EntitySettingsService {
   }
 
   public loadLightIntensityAllLights() {
-    if (!this.processingService.actualEntitySettings) {
+    if (!this.processing.entitySettings) {
       throw new Error('Settings missing');
     }
-    const ambientlightUp = this.lightService.getLightByType('ambientlightUp');
+    const ambientlightUp = this.lights.getLightByType('ambientlightUp');
     if (ambientlightUp) {
-      this.lightService.setLightIntensity(
-        'ambientlightUp',
-        ambientlightUp.intensity,
-      );
+      this.lights.setLightIntensity('ambientlightUp', ambientlightUp.intensity);
     }
-    const ambientlightDown = this.lightService.getLightByType(
-      'ambientlightDown',
-    );
+    const ambientlightDown = this.lights.getLightByType('ambientlightDown');
     if (ambientlightDown) {
-      this.lightService.setLightIntensity(
+      this.lights.setLightIntensity(
         'ambientlightDown',
         ambientlightDown.intensity,
       );
     }
-    const pointLight = this.lightService.getLightByType('pointLight');
+    const pointLight = this.lights.getLightByType('pointLight');
     if (pointLight) {
-      this.lightService.setLightIntensity('pointLight', pointLight.intensity);
+      this.lights.setLightIntensity('pointLight', pointLight.intensity);
     }
   }
 
   public loadLightIntensity(lightType: string) {
-    if (!this.processingService.actualEntitySettings) {
+    if (!this.processing.entitySettings) {
       throw new Error('Settings missing');
     }
-    const light = this.lightService.getLightByType(lightType);
+    const light = this.lights.getLightByType(lightType);
     if (light) {
-      this.lightService.setLightIntensity(lightType, light.intensity);
+      this.lights.setLightIntensity(lightType, light.intensity);
     }
   }
 
   public loadPointLightPosition() {
-    if (!this.processingService.actualEntitySettings) {
+    if (!this.processing.entitySettings) {
       throw new Error('Settings missing');
     }
-    const pointLight = this.lightService.getLightByType('pointLight');
+    const pointLight = this.lights.getLightByType('pointLight');
     if (pointLight) {
       const position = new Vector3(
         pointLight.position.x,
         pointLight.position.y,
         pointLight.position.z,
       );
-      this.lightService.setPointLightPosition(position);
+      this.lights.setPointLightPosition(position);
     }
   }
 }

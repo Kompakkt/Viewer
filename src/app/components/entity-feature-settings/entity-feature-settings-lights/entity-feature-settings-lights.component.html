@@ -1,19 +1,52 @@
 <h4>Brightness</h4>
 <p>Ambient environment lights</p>
 <h5>Fabulous (down towards the ground)</h5>
-<mat-slider min="0" max="1" step="0.1" [value]="getLightIntensity('ambientlightUp')"
-            (input)="setLightIntensity($event.value, 'ambientlightUp')"></mat-slider>
+<mat-slider
+  min="0"
+  max="1"
+  step="0.1"
+  [value]="getLightIntensity('ambientlightUp')"
+  (input)="setLightIntensity($event.value, 'ambientlightUp')"
+></mat-slider>
 <h5>Sunny (up towards the sky)</h5>
-<mat-slider min="0" max="1" step="0.1" [value]="getLightIntensity('ambientlightDown')"
-            (input)="setLightIntensity($event.value, 'ambientlightDown')"></mat-slider>
-<br>
+<mat-slider
+  min="0"
+  max="1"
+  step="0.1"
+  [value]="getLightIntensity('ambientlightDown')"
+  (input)="setLightIntensity($event.value, 'ambientlightDown')"
+></mat-slider>
+<br />
 <p>Pointlight</p>
-<mat-slider min="0" max="1" step="0.1" [value]="getLightIntensity('pointLight')"
-            (input)="setLightIntensity($event.value, 'pointLight')"></mat-slider>
+<mat-slider
+  min="0"
+  max="1"
+  step="0.1"
+  [value]="getLightIntensity('pointLight')"
+  (input)="setLightIntensity($event.value, 'pointLight')"
+></mat-slider>
 <h5>Pointlight Dimensions: X Y Z</h5>
-<mat-slider min="-10" max="10" step="1" [value]="lightService.getLightByType('pointLight').position.x"
-            (input)="setPointlightPosition('x', $event.value)" vertical></mat-slider>
-<mat-slider min="-10" max="10" step="1" [value]="lightService.getLightByType('pointLight').position.y"
-            (input)="setPointlightPosition('y', $event.value)" vertical></mat-slider>
-<mat-slider min="-10" max="10" step="1" [value]="lightService.getLightByType('pointLight').position.z"
-            (input)="setPointlightPosition('z', $event.value)" vertical></mat-slider>
+<mat-slider
+  min="-10"
+  max="10"
+  step="1"
+  [value]="pointLightX"
+  (input)="setPointlightPosition('x', $event.value)"
+  vertical
+></mat-slider>
+<mat-slider
+  min="-10"
+  max="10"
+  step="1"
+  [value]="pointLightY"
+  (input)="setPointlightPosition('y', $event.value)"
+  vertical
+></mat-slider>
+<mat-slider
+  min="-10"
+  max="10"
+  step="1"
+  [value]="pointLightZ"
+  (input)="setPointlightPosition('z', $event.value)"
+  vertical
+></mat-slider>

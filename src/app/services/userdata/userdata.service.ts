@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 
 import { LoginComponent } from '../../components/dialogs/dialog-login/login.component';
 import {
+  isAnnotation,
   IAnnotation,
   ICompilation,
   IEntity,
@@ -223,20 +224,13 @@ export class UserdataService {
   }
 
   public isAnnotationOwner(annotation: IAnnotation): boolean {
-    const idFromUser = this.userData
-      ? this.userData._id
-      : this.guestUserData
-      ? this.guestUserData._id
-      : '';
-    console.log(
-      'Der Owner',
-      idFromUser,
-      'of',
-      annotation,
-      'ist',
-      idFromUser === annotation.creator._id,
-    );
-    return idFromUser === annotation.creator._id;
+    if (this.userData?.data?.annotation) {
+      const result = this.userData.data.annotation.find(
+        anno => isAnnotation(anno) && anno._id === annotation._id,
+      );
+      if (result) return true;
+    }
+    return annotation.creator._id === this.userData?._id ?? false;
   }
 
   public createTemporalUserData() {

@@ -15,11 +15,12 @@ import {
   FxaaPostProcess,
   Layer,
   Scene,
-  // SSAORenderingPipeline,
+  SharpenPostProcess,
   Sound,
   Texture,
   Tools,
   Vector3,
+  PostProcess,
 } from 'babylonjs';
 import { Slider } from 'babylonjs-gui';
 // tslint:disable-next-line:no-import-side-effect
@@ -71,6 +72,8 @@ export class BabylonService {
   private engine: Engine;
   private scene: Scene;
 
+  private effects: PostProcess[] = [];
+
   public mediaType = '';
   public videoContainer: IVideoContainer;
   public audioContainer: IAudioContainer;
@@ -96,7 +99,7 @@ export class BabylonService {
         z: this.getActiveCamera().target.z,
       },
     }),
-    getActualDefaultPosition: () => ({
+    getDefaultPosition: () => ({
       cameraType: 'arcRotateCam',
       position: getDefaultPosition(),
       target: getDefaultTarget(),
@@ -142,8 +145,17 @@ export class BabylonService {
     this.scene.addCamera(createDefaultCamera(this.scene, this.canvas));
 
     const fxaa = new FxaaPostProcess('fxaa', 1.0, this.getActiveCamera());
-    fxaa.forceFullscreenViewport = true;
     fxaa.samples = 16;
+
+    const sharpen = new SharpenPostProcess(
+      'sharpen',
+      1.0,
+      this.getActiveCamera(),
+    );
+    sharpen.edgeAmount = 0.25;
+
+    this.effects.push(fxaa, sharpen);
+    console.log('Effects applied', this.effects);
 
     // Initialize empty, otherwise we would need to check against
     // undefined in strict mode

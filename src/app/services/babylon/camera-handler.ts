@@ -159,14 +159,14 @@ const createAnimationsForCamera = (
       Animation.ANIMATIONLOOPMODE_CYCLE,
     );
     const multipleProperties = camAxis.indexOf('.') !== -1;
-    let value = camera[camAxis];
+    let value = (camera as any)[camAxis];
     if (multipleProperties) {
       const props = camAxis.split('.');
-      value = camera[props[0]][props[1]];
+      value = (camera as any)[props[0]][props[1]];
     }
     anim.setKeys([
       { frame: 0, value },
-      { frame: frames, value: positionVector[posAxis] },
+      { frame: frames, value: (positionVector as any)[posAxis] },
     ]);
     return anim;
   };

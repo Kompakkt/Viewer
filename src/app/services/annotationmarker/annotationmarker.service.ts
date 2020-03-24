@@ -19,7 +19,7 @@ export class AnnotationmarkerService {
   private selectedAnnotation: BehaviorSubject<string> = new BehaviorSubject('');
   public isSelectedAnnotation = this.selectedAnnotation.asObservable();
 
-  constructor(private babylonService: BabylonService) {}
+  constructor(private babylon: BabylonService) {}
 
   public createAnnotationMarker(annotation: IAnnotation, color: string) {
     // 11/02/19
@@ -109,7 +109,7 @@ export class AnnotationmarkerService {
     const plane = MeshBuilder.CreatePlane(
       name,
       { height, width },
-      this.babylonService.getScene(),
+      this.babylon.getScene(),
     );
     Tags.AddTagsTo(plane, tag + ' plane');
     plane.position = position;
@@ -146,7 +146,7 @@ export class AnnotationmarkerService {
     return label;
   }
 
-  private onMarkerClicked(id, camera: any) {
+  private onMarkerClicked(id: string, camera: any) {
     this.selectedAnnotation.next(id);
 
     const positionVector = new Vector3(
@@ -159,10 +159,8 @@ export class AnnotationmarkerService {
       camera.target.y,
       camera.target.z,
     );
-    this.babylonService.cameraManager.moveActiveCameraToPosition(
-      positionVector,
-    );
-    this.babylonService.cameraManager.setActiveCameraTarget(targetVector);
+    this.babylon.cameraManager.moveActiveCameraToPosition(positionVector);
+    this.babylon.cameraManager.setActiveCameraTarget(targetVector);
   }
 
   public createRankingNumber(annotationID: string, rankingNumber: number) {
@@ -179,32 +177,32 @@ export class AnnotationmarkerService {
     // need to redraw -> delete and create
     // http://playground.babylonjs.com/#HETZDX#4
     /*
-    const label = this.babylonService.getScene().getMeshesByTags(annotationID && 'plane');
+    const label = this.babylon.getScene().getMeshesByTags(annotationID && 'plane');
     label.forEach(function (value) {
       label.updateText(rankingNumber);
     });*/
   }
 
   public deleteMarker(annotationID: string) {
-    const marker = this.babylonService.getScene().getMeshesByTags(annotationID);
+    const marker = this.babylon.getScene().getMeshesByTags(annotationID);
     marker.forEach(value => {
       value.dispose();
     });
   }
 
   public async deleteAllMarker() {
-    await this.babylonService
+    await this.babylon
       .getScene()
       .getMeshesByTags('label')
       .map(mesh => mesh.dispose());
-    await this.babylonService
+    await this.babylon
       .getScene()
       .getMeshesByTags('plane')
       .map(mesh => mesh.dispose());
   }
 
   public async hideAllMarker(visibility: boolean) {
-    this.babylonService.hideMesh('label', visibility);
-    this.babylonService.hideMesh('plane', visibility);
+    this.babylon.hideMesh('label', visibility);
+    this.babylon.hideMesh('plane', visibility);
   }
 }

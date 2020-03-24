@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { Vector3 } from 'babylonjs';
+import { Vector3, Mesh } from 'babylonjs';
 
 import { BabylonService } from '../../../services/babylon/babylon.service';
 import { EntitySettingsService } from '../../../services/entitysettings/entitysettings.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
+
+import { IColor } from '@kompakkt/shared';
 
 @Component({
   selector: 'app-entity-feature-settings-mesh',
@@ -24,37 +26,41 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
   public meshScaleToggle = false;
   public meshOrientationToggle = false;
 
+  public meshes: Mesh[] | undefined;
+
   constructor(
-    public entitySettingsService: EntitySettingsService,
-    private processingService: ProcessingService,
-    private babylonService: BabylonService,
-  ) {}
+    public entitySettings: EntitySettingsService,
+    public processing: ProcessingService,
+    private babylon: BabylonService,
+  ) {
+    this.processing.meshes$.subscribe(meshes => (this.meshes = meshes));
+  }
 
   ngOnInit() {
-    this.entitySettingsService.meshSettingsCompleted.subscribe(finished => {
+    this.entitySettings.meshSettingsCompleted.subscribe((finished: boolean) => {
       if (finished) {
         this.resetVisualUIMeshSettingsHelper().then(() => {
-          this.entitySettingsService.destroyVisualUIMeshSettingsHelper();
-          this.entitySettingsService.decomposeMeshSettingsHelper();
+          this.entitySettings.destroyVisualUIMeshSettingsHelper();
+          this.entitySettings.decomposeMeshSettingsHelper();
         });
       }
     });
   }
 
-  public setBackgroundColor(color) {
-    if (!this.processingService.actualEntitySettings) {
+  public setBackgroundColor(color: IColor) {
+    if (!this.processing.entitySettings) {
       throw new Error('Settings missing');
       console.error(this);
       return;
     }
-    this.processingService.actualEntitySettings.background.color = color;
-    this.entitySettingsService.loadBackgroundColor();
+    this.processing.entitySettings.background.color = color;
+    this.entitySettings.loadBackgroundColor();
   }
   // ________Mesh Settings__________
 
   // Scaling
-  public handleChangeDimension(dimension: string, value?: number) {
-    if (!this.processingService.actualEntitySettings) {
+  public handleChangeDimension(dimension: string, value?: number | null) {
+    if (!this.processing.entitySettings) {
       throw new Error('Settings missing');
       console.error(this);
       return;
@@ -63,34 +69,25 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
     switch (dimension) {
       case 'height':
         factor =
-          +this.processingService.actualEntityHeight /
-          this.entitySettingsService.initialSize.y;
-        this.processingService.actualEntitySettings.scale = parseFloat(
-          factor.toFixed(2),
-        );
-        this.entitySettingsService.loadScaling();
+          +this.processing.entityHeight / this.entitySettings.initialSize.y;
+        this.processing.entitySettings.scale = parseFloat(factor.toFixed(2));
+        this.entitySettings.loadScaling();
         break;
       case 'width':
         factor =
-          +this.processingService.actualEntityWidth /
-          this.entitySettingsService.initialSize.x;
-        this.processingService.actualEntitySettings.scale = parseFloat(
-          factor.toFixed(2),
-        );
-        this.entitySettingsService.loadScaling();
+          +this.processing.entityWidth / this.entitySettings.initialSize.x;
+        this.processing.entitySettings.scale = parseFloat(factor.toFixed(2));
+        this.entitySettings.loadScaling();
         break;
       case 'depth':
         factor =
-          +this.processingService.actualEntityDepth /
-          this.entitySettingsService.initialSize.z;
-        this.processingService.actualEntitySettings.scale = parseFloat(
-          factor.toFixed(2),
-        );
-        this.entitySettingsService.loadScaling();
+          +this.processing.entityDepth / this.entitySettings.initialSize.z;
+        this.processing.entitySettings.scale = parseFloat(factor.toFixed(2));
+        this.entitySettings.loadScaling();
         break;
       case 'scale':
-        if (value) this.processingService.actualEntitySettings.scale = value;
-        this.entitySettingsService.loadScaling();
+        if (value) this.processing.entitySettings.scale = value;
+        this.entitySettings.loadScaling();
         break;
       default:
         console.log('I do not know this dimension: ', dimension);
@@ -99,32 +96,32 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
 
   // Rotation
   setRotation(axis: string, degree: number) {
-    if (!this.processingService.actualEntitySettings) {
+    if (!this.processing.entitySettings) {
       throw new Error('Settings missing');
       console.error(this);
       return;
     }
     switch (axis) {
       case 'x':
-        this.processingService.actualEntitySettings.rotation.x =
-          this.processingService.actualEntitySettings.rotation.x + degree;
-        this.entitySettingsService.loadRotation();
+        this.processing.entitySettings.rotation.x =
+          this.processing.entitySettings.rotation.x + degree;
+        this.entitySettings.loadRotation();
         break;
       case 'y':
-        this.processingService.actualEntitySettings.rotation.y =
-          this.processingService.actualEntitySettings.rotation.y + degree;
-        this.entitySettingsService.loadRotation();
+        this.processing.entitySettings.rotation.y =
+          this.processing.entitySettings.rotation.y + degree;
+        this.entitySettings.loadRotation();
         break;
       case 'z':
-        this.processingService.actualEntitySettings.rotation.z =
-          this.processingService.actualEntitySettings.rotation.z + degree;
-        this.entitySettingsService.loadRotation();
+        this.processing.entitySettings.rotation.z =
+          this.processing.entitySettings.rotation.z + degree;
+        this.entitySettings.loadRotation();
         break;
       case 'xyz_reset':
-        this.processingService.actualEntitySettings.rotation.x = 0;
-        this.processingService.actualEntitySettings.rotation.y = 0;
-        this.processingService.actualEntitySettings.rotation.z = 0;
-        this.entitySettingsService.loadRotation();
+        this.processing.entitySettings.rotation.x = 0;
+        this.processing.entitySettings.rotation.y = 0;
+        this.processing.entitySettings.rotation.z = 0;
+        this.entitySettings.loadRotation();
       default:
         console.log('I am not able to rotate.');
     }
@@ -132,8 +129,7 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
 
   // _____ Helpers for Mesh Settings _______
   public async resetVisualUIMeshSettingsHelper() {
-    const meshes = this.processingService.getCurrentEntityMeshes();
-    if (!meshes) {
+    if (!this.meshes) {
       throw new Error('Center missing');
       console.error(this);
       return;
@@ -146,22 +142,22 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
     this.setScalingFactorAxis(1, false);
     this.toggleGroundVisibility(false);
     this.setScalingFactorGround(1);
-    this.entitySettingsService.setGroundMaterial();
+    this.entitySettings.setGroundMaterial();
     this.resetBackgroundColor();
   }
 
   public resetBackgroundColor() {
-    if (!this.processingService.actualEntitySettingsOnServer) {
+    if (!this.processing.entitySettingsOnServer) {
       throw new Error('Settings from Server missing');
       console.error(this);
       return;
     }
-    const color = this.processingService.actualEntitySettingsOnServer
-      .background;
-    this.entitySettingsService.setGroundMaterial(color);
+    const color = this.processing.entitySettingsOnServer.background.color;
+    this.entitySettings.setGroundMaterial(color);
   }
 
-  public setScalingFactorAxis(factor: number, world: boolean) {
+  public setScalingFactorAxis(factor: number | null, world: boolean) {
+    if (!factor) factor = 1;
     world
       ? (this.worldAxisScalingFactor = factor)
       : (this.localAxisScalingFactor = factor);
@@ -169,64 +165,62 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
       factor *
       0.9 *
       (world
-        ? this.entitySettingsService.worldAxisInitialSize
-        : this.entitySettingsService.localAxisInitialSize);
-    this.babylonService
+        ? this.entitySettings.worldAxisInitialSize
+        : this.entitySettings.localAxisInitialSize);
+    this.babylon
       .getScene()
       .getMeshesByTags(world ? 'worldAxis' : 'localAxis')
-      .map(mesh => (mesh.scaling = new Vector3(factor, factor, factor)));
-    this.babylonService
+      .map(mesh => {
+        if (!factor) factor = 1;
+        mesh.scaling = new Vector3(factor, factor, factor);
+      });
+    this.babylon
       .getScene()
       .getMeshesByTags(world ? 'worldAxisX' : 'localAxisX')
       .map(mesh => (mesh.position = new Vector3(pos * 0.9, pos * -0.05, 0)));
-    this.babylonService
+    this.babylon
       .getScene()
       .getMeshesByTags(world ? 'worldAxisY' : 'localAxisY')
       .map(mesh => (mesh.position = new Vector3(0, pos * 0.9, pos * -0.05)));
-    this.babylonService
+    this.babylon
       .getScene()
       .getMeshesByTags(world ? 'worldAxisZ' : 'localAxisZ')
       .map(mesh => (mesh.position = new Vector3(0, pos * 0.05, pos * 0.9)));
   }
 
-  public setScalingFactorGround(factor: number) {
-    if (!this.entitySettingsService.ground) {
+  public setScalingFactorGround(factor: number | null) {
+    if (!factor) factor = 1;
+    if (!this.entitySettings.ground) {
       throw new Error('Ground missing');
       console.error(this);
       return;
     }
     this.groundScalingFactor = factor;
-    this.entitySettingsService.ground.scaling = new Vector3(
-      factor,
-      factor,
-      factor,
-    );
+    this.entitySettings.ground.scaling = new Vector3(factor, factor, factor);
   }
 
   public toggleBoundingBoxEntityVisibility(value?: boolean) {
-    if (!this.entitySettingsService.boundingBox) {
+    if (!this.entitySettings.boundingBox) {
       throw new Error('BoundingBox missing');
       console.error(this);
       return;
     }
     this.boundingBoxVisibility =
       value !== undefined ? value : !this.boundingBoxVisibility;
-    this.entitySettingsService.boundingBox.visibility = this
-      .boundingBoxVisibility
+    this.entitySettings.boundingBox.visibility = this.boundingBoxVisibility
       ? 1
       : 0;
   }
 
   public toggleBoundingBoxMeshesVisibility(value?: boolean) {
-    const meshes = this.processingService.getCurrentEntityMeshes();
-    if (!meshes) {
+    if (!this.meshes) {
       throw new Error('Meshes missing');
       console.error(this);
       return;
     }
     this.boundingBoxMeshesVisibility =
       value !== undefined ? value : !this.boundingBoxMeshesVisibility;
-    meshes.forEach(
+    this.meshes.forEach(
       mesh => (mesh.showBoundingBox = this.boundingBoxMeshesVisibility),
     );
   }
@@ -252,7 +246,7 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
 
   private visibilityMesh(tag: string, visibility: boolean) {
     const setVisibility = visibility ? 1 : 0;
-    this.babylonService
+    this.babylon
       .getScene()
       .getMeshesByTags(tag)
       .map(mesh => (mesh.visibility = setVisibility));

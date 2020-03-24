@@ -5,7 +5,7 @@ export const baseEntity = (): IEntity => ({
   _id: 'default',
   name: 'Cube',
   files: [],
-  annotationList: [],
+  annotations: {},
   relatedDigitalEntity: { _id: 'default_entity' },
   creator: {
     _id: '',

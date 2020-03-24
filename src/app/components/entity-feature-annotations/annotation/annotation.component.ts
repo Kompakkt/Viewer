@@ -37,10 +37,10 @@ export class AnnotationComponent implements OnInit {
 
   constructor(
     public annotationService: AnnotationService,
-    public babylonService: BabylonService,
+    public babylon: BabylonService,
     public dialog: MatDialog,
     private userdataService: UserdataService,
-    public processingService: ProcessingService,
+    public processing: ProcessingService,
   ) {}
 
   ngOnInit() {
@@ -50,7 +50,7 @@ export class AnnotationComponent implements OnInit {
     }
     this.showAnnotation = true;
     this.collapsed = false;
-    this.isAnnotatingAllowed = this.processingService.annotationAllowance;
+    this.isAnnotatingAllowed = this.processing.annotationAllowance;
     this.isAnnotationOwner = this.userdataService.isAnnotationOwner(
       this.annotation,
     );
@@ -64,7 +64,7 @@ export class AnnotationComponent implements OnInit {
       this.selectedAnnotation = selectedAnno;
     });
 
-    this.processingService.setAnnotationAllowance.subscribe(allowed => {
+    this.processing.setAnnotationAllowance.subscribe((allowed: boolean) => {
       this.isAnnotatingAllowed = allowed;
     });
 
@@ -98,6 +98,10 @@ export class AnnotationComponent implements OnInit {
     }, 15);
   }
 
+  get userOwnsCompilation() {
+    return this.userdataService.userOwnsCompilation;
+  }
+
   public closeAnnotation(): void {
     this.annotationService.setSelectedAnnotation('');
   }
@@ -129,7 +133,7 @@ export class AnnotationComponent implements OnInit {
   }
 
   private setPosition(annotation: IAnnotation) {
-    const scene = this.babylonService.getScene();
+    const scene = this.babylon.getScene();
 
     if (!scene) {
       return false;
@@ -145,7 +149,7 @@ export class AnnotationComponent implements OnInit {
         return;
       }
 
-      const engine = this.babylonService.getEngine();
+      const engine = this.babylon.getEngine();
 
       const [width, height] = [
         engine.getRenderWidth(),

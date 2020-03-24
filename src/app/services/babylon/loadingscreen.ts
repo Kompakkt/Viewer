@@ -6,6 +6,8 @@ import { ILoadingScreen } from 'babylonjs';
  */
 
 export class LoadingScreen implements ILoadingScreen {
+  private text = '';
+
   /**
    * Creates a new default loading screen
    * @param renderingCanvas defines the canvas used to render the scene
@@ -22,6 +24,7 @@ export class LoadingScreen implements ILoadingScreen {
     this.loadingScreenHandler.backgroundColor = this.loadingDivBackgroundColor;
     this.loadingScreenHandler.logo = this.logo;
     window.addEventListener('resize', this.resizeLoadingUI);
+    this.loadingScreenHandler.loadingText.subscribe(text => (this.text = text));
   }
 
   /**
@@ -52,7 +55,7 @@ export class LoadingScreen implements ILoadingScreen {
   }
 
   public get loadingUIText(): string {
-    return this.loadingScreenHandler.loadingText.source['value'];
+    return this.text;
   }
 
   /**

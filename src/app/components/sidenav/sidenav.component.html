@@ -1,5 +1,11 @@
-<div id="sidenav">
-    <app-annotations-editor [hidden]="this.overlayService.actualSidenavMode !== 'annotation'"></app-annotations-editor>
-    <app-entity-feature-settings [hidden]="this.overlayService.actualSidenavMode !== 'settings'"></app-entity-feature-settings>
-    <app-compilation-browser [hidden]="this.overlayService.actualSidenavMode !== 'compilationBrowser'"></app-compilation-browser>
+<div id="sidenav" [class.hidden]="!isOpen">
+  <app-annotations-editor
+    [hidden]="mode !== 'annotation'"
+  ></app-annotations-editor>
+  <app-entity-feature-settings
+    [hidden]="mode !== 'settings'"
+  ></app-entity-feature-settings>
+  <app-compilation-browser
+    [hidden]="mode !== 'compilationBrowser'"
+  ></app-compilation-browser>
 </div>

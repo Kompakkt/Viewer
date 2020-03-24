@@ -17,20 +17,32 @@ import { ProcessingService } from '../../services/processing/processing.service'
 export class SceneComponent implements AfterViewInit {
   @HostListener('window:resize', ['$event'])
   public onResize() {
-    this.babylonService.resize();
+    this.babylon.resize();
   }
 
+  public isReady = false;
+
   constructor(
-    private babylonService: BabylonService,
-    public processingService: ProcessingService,
-    public annotationService: AnnotationService,
+    private babylon: BabylonService,
+    public processing: ProcessingService,
+    public annotations: AnnotationService,
     private viewContainerRef: ViewContainerRef,
-  ) {}
+  ) {
+    setTimeout(() => {
+      this.processing.bootstrapped$.subscribe(
+        change => (this.isReady = change),
+      );
+    }, 0);
+  }
 
   private setupCanvas() {
-    this.babylonService.attachCanvas(this.viewContainerRef);
-    this.processingService.bootstrap();
-    this.babylonService.resize();
+    this.babylon.attachCanvas(this.viewContainerRef);
+    this.processing.bootstrap();
+    this.babylon.resize();
+  }
+
+  get currentAnnotations() {
+    return this.annotations.currentAnnotations;
   }
 
   ngAfterViewInit() {

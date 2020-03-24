@@ -1,20 +1,33 @@
-<mat-dialog-content>
-  <mat-form-field>
-    <h3>Invitation for Collaborators</h3>
-    <textarea matInput placeholder="You can edit this Text"
-              [value]="text + ((processingService.defaultEntityLoaded) ? (defaultURL) : (baseURL +
-            processingService.getCurrentCompilation()!._id))"
-              #userinput cdkTextareaAutosize cdkAutosizeMinRows="4"></textarea>
-  </mat-form-field>
-</mat-dialog-content>
-<mat-dialog-actions align="end">
-
-  <button mat-icon-button (click)="copyInputMessage(userinput)"
-          matTooltip="click to copy" matTooltipPosition="above">
-    <mat-icon aria-label="Copy from Textbox">file_copy</mat-icon>
-  </button>
+<ng-container *ngIf="compilation">
+  <mat-dialog-content>
+    <mat-form-field>
+      <h3>Invitation for Collaborators</h3>
+      <textarea
+        matInput
+        placeholder="You can edit this Text"
+        [value]="
+          text +
+          (processing.defaultEntityLoaded
+            ? defaultURL
+            : baseURL + compilation._id)
+        "
+        #userinput
+        cdkTextareaAutosize
+        cdkAutosizeMinRows="4"
+      ></textarea>
+    </mat-form-field>
+  </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <button mat-button [mat-dialog-close]="true">Close</button>
+    <button
+      mat-icon-button
+      (click)="copyInputMessage(userinput)"
+      matTooltip="click to copy"
+      matTooltipPosition="above"
+    >
+      <mat-icon aria-label="Copy from Textbox">file_copy</mat-icon>
+    </button>
+    <mat-dialog-actions align="end">
+      <button mat-button [mat-dialog-close]="true">Close</button>
+    </mat-dialog-actions>
   </mat-dialog-actions>
-</mat-dialog-actions>
-
+</ng-container>

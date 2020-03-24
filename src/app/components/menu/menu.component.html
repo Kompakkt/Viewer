@@ -1,57 +1,93 @@
-<div [ngClass]="'bottom'">
+<div class="bottom">
+  <button
+    mat-icon-button
+    *ngIf="processing.entityMediaType !== 'audio'"
+    (click)="babylon.cameraManager.resetCamera()"
+    matTooltip="Reset Camera Perspective"
+    matTooltipPosition="above"
+  >
+    <mat-icon>videocam</mat-icon>
+  </button>
 
-    <button mat-icon-button
-            *ngIf="processingService.actualEntityMediaType !== 'audio'"
-            (click)="babylonService.cameraManager.resetCamera();"
-            matTooltip="Reset Camera Perspective" matTooltipPosition="above">
-        <mat-icon>videocam</mat-icon>
+  <ng-container *ngIf="userData">
+    <button
+      mat-icon-button
+      *ngIf="loginRequired && !isAuthenticated"
+      (click)="userdata.openLoginDialog()"
+      matTooltip="Login required"
+      matTooltipPosition="above"
+      [ngClass]="'alert'"
+    >
+      <mat-icon>sentiment_very_dissatisfied</mat-icon>
     </button>
+  </ng-container>
 
-    <button mat-icon-button
-            *ngIf="userDataService.loginRequired && !userDataService.authenticatedUser"
-            (click)="userDataService.openLoginDialog()"
-            matTooltip="Login required" matTooltipPosition="above"
-            [ngClass]="'alert'">
-        <mat-icon>sentiment_very_dissatisfied</mat-icon>
-    </button>
+  <button
+    mat-icon-button
+    *ngIf="loginRequired && isAuthenticated"
+    (click)="openLoginExplanation()"
+    matTooltip="Authenticated"
+    matTooltipPosition="above"
+  >
+    <mat-icon>sentiment_very_satisfied</mat-icon>
+  </button>
 
-    <button mat-icon-button
-            *ngIf="userDataService.loginRequired && userDataService.authenticatedUser"
-            (click)="openLoginExplanation()"
-            matTooltip="Authenticated" matTooltipPosition="above">
-        <mat-icon>sentiment_very_satisfied</mat-icon>
+  <button
+    mat-icon-button
+    *ngIf="getAvailableQuality('high') && getAvailableQuality('medium')"
+    [matMenuTriggerFor]="quality"
+    matTooltip="Quality"
+    matTooltipPosition="above"
+  >
+    <mat-icon>high_quality</mat-icon>
+  </button>
+  <!-- Quality Submenu -->
+  <mat-menu #quality="matMenu">
+    <button
+      mat-menu-item
+      *ngIf="getAvailableQuality('high')"
+      (click)="updateEntityQuality('high')"
+      [ngClass]="this.processing.entityQuality === 'high' ? 'is-active' : ''"
+    >
+      High
     </button>
+    <button
+      mat-menu-item
+      *ngIf="getAvailableQuality('medium')"
+      (click)="updateEntityQuality('medium')"
+      [ngClass]="this.processing.entityQuality === 'medium' ? 'is-active' : ''"
+    >
+      Medium
+    </button>
+    <button
+      mat-menu-item
+      *ngIf="getAvailableQuality('low')"
+      (click)="updateEntityQuality('low')"
+      [ngClass]="this.processing.entityQuality === 'low' ? 'is-active' : ''"
+    >
+      Low
+    </button>
+  </mat-menu>
+  <!-- / Quality Submenu -->
 
-    <button mat-icon-button
-            *ngIf="getAvailableQuality('high') && getAvailableQuality('medium')"
-            [matMenuTriggerFor]="quality"
-            matTooltip="Quality" matTooltipPosition="above">
-        <mat-icon>high_quality</mat-icon>
-    </button>
-    <!-- Quality Submenu -->
-    <mat-menu #quality="matMenu">
-        <button mat-menu-item *ngIf="getAvailableQuality('high')"
-                (click)="updateEntityQuality('high')"
-                [ngClass]="this.processingService.actualEntityQuality === 'high' ? 'is-active' : '' ">High
-        </button>
-        <button mat-menu-item *ngIf="getAvailableQuality('medium')"
-                (click)="updateEntityQuality('medium')"
-                [ngClass]="this.processingService.actualEntityQuality === 'medium' ? 'is-active' : '' ">Medium
-        </button>
-        <button mat-menu-item *ngIf="getAvailableQuality('low')"
-                (click)="updateEntityQuality('low')"
-                [ngClass]="this.processingService.actualEntityQuality === 'low' ? 'is-active' : '' ">Low
-        </button>
-    </mat-menu>
-    <!-- / Quality Submenu -->
+  <button
+    mat-icon-button
+    (click)="babylon.createScreenshot()"
+    matTooltip="Screenshot"
+    matTooltipPosition="above"
+  >
+    <mat-icon>camera</mat-icon>
+  </button>
 
-    <button mat-icon-button (click)="babylonService.createScreenshot();"
-            matTooltip="Screenshot" matTooltipPosition="above">
-        <mat-icon>camera</mat-icon>
-    </button>
-
-    <button *ngIf="fullscreenCapable" mat-icon-button (click)="toggleFullscreen()"
-            matTooltip="{{fullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}}" matTooltipPosition="above">
-        <mat-icon aria-label="Exit fullscreen mode">{{fullscreen ? 'fullscreen_exit' : 'fullscreen'}}</mat-icon>
-    </button>
+  <button
+    *ngIf="fullscreenCapable"
+    mat-icon-button
+    (click)="toggleFullscreen()"
+    matTooltip="{{ fullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen' }}"
+    matTooltipPosition="above"
+  >
+    <mat-icon aria-label="Exit fullscreen mode">{{
+      fullscreen ? 'fullscreen_exit' : 'fullscreen'
+    }}</mat-icon>
+  </button>
 </div>

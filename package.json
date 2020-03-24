@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "scripts": {
     "ng": "ng",
-    "postinstall": "ngcc --properties esm5",
     "start": "ng serve",
     "local": "ng serve --host=0.0.0.0",
     "build": "ng build",

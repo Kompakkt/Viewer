@@ -20,7 +20,7 @@ export class DialogPasswordComponent {
     private backend: BackendService,
     private message: MessageService,
     private dialogRef: MatDialogRef<DialogPasswordComponent>,
-    @Inject(MAT_DIALOG_DATA) data,
+    @Inject(MAT_DIALOG_DATA) data: { id: string },
   ) {
     this.identifierCollection = data.id;
   }
