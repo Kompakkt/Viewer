@@ -139,7 +139,7 @@ export class AnnotationComponent implements OnInit {
       return false;
     }
 
-    const getMesh = scene.getMeshByName(annotation._id + '_pick');
+    const getMesh = scene.getMeshByName(`${annotation._id}_marker`);
 
     if (getMesh && scene.activeCamera) {
       if (

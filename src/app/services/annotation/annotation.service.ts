@@ -66,7 +66,6 @@ export class AnnotationService {
 
   constructor(
     private data: DataService,
-    private annotationMarker: AnnotationmarkerService,
     private babylon: BabylonService,
     private backend: BackendService,
     private message: MessageService,
@@ -101,9 +100,6 @@ export class AnnotationService {
       this.annotationMode(allowance);
     });
 
-    this.annotationMarker.isSelectedAnnotation.subscribe(selectedAnno => {
-      this.selectedAnnotation.next(selectedAnno);
-    });
   }
 
   get isHomepageEntity() {
@@ -165,7 +161,7 @@ export class AnnotationService {
     Tags.AddTagsTo(this.meshes, this.entity._id.toString());
     this.selectedAnnotation.next('');
     this.editModeAnnotation.next('');
-    await this.annotationMarker.deleteAllMarker();
+    await this.deleteAllMarker();
     this.annotations.splice(0, this.annotations.length);
 
     if (
@@ -645,24 +641,98 @@ export class AnnotationService {
     });
   }
 
+  public deleteMarker(annotationID: string) {
+    const marker = this.babylon.getScene()
+        .getMeshesByTags(annotationID);
+    marker.forEach(value => {
+      value.dispose();
+    });
+  }
+
+  public async deleteAllMarker() {
+    await this.babylon
+        .getScene()
+        .getMeshesByTags('marker')
+        .map(mesh => mesh.dispose());
+  }
+
   public redrawMarker() {
-    this.annotationMarker
-      .deleteAllMarker()
-      .then(() => {
-        for (const annotation of this.getCurrentAnnotations()) {
-          this.drawMarker(annotation);
-        }
-      })
-      .catch(e => console.error(e));
+    this.deleteAllMarker()
+        .then(() => {
+          for (const annotation of this.getCurrentAnnotations()) {
+            this.drawMarker(annotation);
+          }
+        })
+        .catch(e => console.error(e));
   }
 
   public drawMarker(newAnnotation: IAnnotation) {
+
+    const positionVector = new Vector3(
+        newAnnotation.target.selector.referencePoint.x,
+        newAnnotation.target.selector.referencePoint.y,
+        newAnnotation.target.selector.referencePoint.z,
+    );
+    const normalVector = new Vector3(
+        newAnnotation.target.selector.referenceNormal.x,
+        newAnnotation.target.selector.referenceNormal.y,
+        newAnnotation.target.selector.referenceNormal.z,
+    );
+
     const color = 'black';
-    this.annotationMarker.createAnnotationMarker(newAnnotation, color);
+    const scene = this.babylon.getScene();
+    const id = newAnnotation._id.toString();
+    const marker = createMarker(
+        scene, 1,
+        newAnnotation.ranking.toString(),
+        id, false, color, positionVector, normalVector);
+    marker.actionManager = new ActionManager(scene);
+    // register 'pickCylinder' as the handler function for cylinder picking action.
+    marker.actionManager.registerAction(
+        new ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
+          this.setSelectedAnnotation(id);
+        }));
+
+    const markertransparent = createMarker(
+        scene, 1,
+        newAnnotation.ranking.toString(),
+        id, true, color, positionVector, normalVector);
+    markertransparent.actionManager = new ActionManager(scene);
+    // register 'pickCylinder' as the handler function for cylinder picking action.
+    markertransparent.actionManager.registerAction(
+        new ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
+          this.setSelectedAnnotation(id);
+        }));
   }
 
   public setSelectedAnnotation(id: string) {
     this.selectedAnnotation.next(id);
+
+    const selectedAnnotation = this.getCurrentAnnotations()
+        .find((anno: IAnnotation) => anno._id === id,
+        );
+    if (selectedAnnotation) {
+
+      const perspective = selectedAnnotation.body.content.relatedPerspective;
+
+      if (perspective !== undefined) {
+        this.babylon.cameraManager.moveActiveCameraToPosition(
+            new Vector3(
+                perspective.position.x,
+                perspective.position.y,
+                perspective.position.z,
+            ),
+        );
+        this.babylon.cameraManager.setActiveCameraTarget(
+            new Vector3(
+                perspective.target.x,
+                perspective.target.y,
+                perspective.target.z,
+            ),
+        );
+      }
+      this.babylon.hideMesh(selectedAnnotation._id.toString(), true);
+    }
   }
 
   public setEditModeAnnotation(id: string) {
