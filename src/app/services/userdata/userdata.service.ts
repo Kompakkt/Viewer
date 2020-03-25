@@ -1,18 +1,18 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-
-import { LoginComponent } from '../../components/dialogs/dialog-login/login.component';
 import {
-  isAnnotation,
   IAnnotation,
   ICompilation,
   IEntity,
-  IUserData,
   ILoginData,
-  IStrippedUserData,
+  isAnnotation,
   isCompilation,
   isEntity,
+  IStrippedUserData,
+  IUserData,
 } from '@kompakkt/shared';
+
+import { LoginComponent } from '../../components/dialogs/dialog-login/login.component';
 import { BackendService } from '../backend/backend.service';
 
 @Injectable({

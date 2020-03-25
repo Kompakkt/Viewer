@@ -2,7 +2,13 @@ import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { Mesh, Tags } from 'babylonjs';
+import {
+  IAnnotation,
+  ICompilation,
+  IEntity,
+  isAnnotation,
+} from '@kompakkt/shared';
+import {ActionManager, ExecuteCodeAction, Mesh, Tags, Vector3} from 'babylonjs';
 import { Socket } from 'ngx-socket-io';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 
@@ -15,19 +21,14 @@ import { environment } from '../../../environments/environment';
 import { DialogGetUserDataComponent } from '../../components/dialogs/dialog-get-user-data/dialog-get-user-data.component';
 // tslint:disable-next-line:max-line-length
 import { DialogShareAnnotationComponent } from '../../components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
-import {
-  isAnnotation,
-  IAnnotation,
-  ICompilation,
-  IEntity,
-} from '@kompakkt/shared';
-import { AnnotationmarkerService } from '../annotationmarker/annotationmarker.service';
 import { BabylonService } from '../babylon/babylon.service';
+import { BackendService } from '../backend/backend.service';
 import { DataService } from '../data/data.service';
 import { MessageService } from '../message/message.service';
-import { BackendService } from '../backend/backend.service';
 import { ProcessingService } from '../processing/processing.service';
 import { UserdataService } from '../userdata/userdata.service';
+
+import {createMarker} from './visual3DElements';
 
 @Injectable({
   providedIn: 'root',

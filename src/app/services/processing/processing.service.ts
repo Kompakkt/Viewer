@@ -1,5 +1,12 @@
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import {
+  ICompilation,
+  IEntity,
+  IEntitySettings,
+  isEntity,
+  ObjectId,
+} from '@kompakkt/shared';
 import { Mesh, Quaternion } from 'babylonjs';
 import { BehaviorSubject } from 'rxjs';
 
@@ -17,17 +24,10 @@ import {
 import { environment } from '../../../environments/environment';
 // tslint:disable-next-line:max-line-length
 import { DialogPasswordComponent } from '../../components/dialogs/dialog-password/dialog-password.component';
-import {
-  ICompilation,
-  IEntity,
-  IEntitySettings,
-  isEntity,
-  ObjectId,
-} from '@kompakkt/shared';
 import { BabylonService } from '../babylon/babylon.service';
 import { LoadingscreenhandlerService } from '../babylon/loadingscreen';
-import { MessageService } from '../message/message.service';
 import { BackendService } from '../backend/backend.service';
+import { MessageService } from '../message/message.service';
 import { OverlayService } from '../overlay/overlay.service';
 import { UserdataService } from '../userdata/userdata.service';
 

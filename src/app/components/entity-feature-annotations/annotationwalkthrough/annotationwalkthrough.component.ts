@@ -1,15 +1,12 @@
-import { Component, OnInit } from '@angular/core';
-import { Vector3 } from 'babylonjs';
+import {Component, OnInit} from '@angular/core';
+import {IAnnotation} from '@kompakkt/shared';
 
-import { IAnnotation } from '@kompakkt/shared';
-import { AnnotationService } from '../../../services/annotation/annotation.service';
-import { AnnotationmarkerService } from '../../../services/annotationmarker/annotationmarker.service';
-import { BabylonService } from '../../../services/babylon/babylon.service';
+import {AnnotationService} from '../../../services/annotation/annotation.service';
 
 @Component({
-  selector: 'app-annotationwalkthrough',
-  templateUrl: './annotationwalkthrough.component.html',
-  styleUrls: ['./annotationwalkthrough.component.scss'],
+    selector: 'app-annotationwalkthrough',
+    templateUrl: './annotationwalkthrough.component.html',
+    styleUrls: ['./annotationwalkthrough.component.scss'],
 })
 export class AnnotationwalkthroughComponent implements OnInit {
   public title = 'Annotation Walkthrough';
