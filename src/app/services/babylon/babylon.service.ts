@@ -329,7 +329,6 @@ export class BabylonService {
     rootUrl: string,
     mediaType = 'model',
     extension = 'babylon',
-    isDefault?: boolean,
   ) {
     this.engine.displayLoadingUI();
     this.resize();
@@ -390,20 +389,6 @@ export class BabylonService {
         return load3DEntity(rootUrl, extension, this.scene).then(result => {
           if (result) {
             this.entityContainer = result;
-            if (isDefault) {
-              loadImage(
-                'assets/img/logo-background.png',
-                this.scene,
-                this.imageContainer,
-                isDefault,
-              ).then(img => {
-                if (img) {
-                  this.imageContainer = img;
-                } else {
-                  throw new Error('No result');
-                }
-              });
-            }
           } else {
             throw new Error('No result');
           }

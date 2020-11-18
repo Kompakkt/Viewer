@@ -9,6 +9,30 @@
 
 import { IEntitySettings } from '@kompakkt/shared';
 
+export const minimalSettings: IEntitySettings = {
+  preview: '',
+  cameraPositionInitial: {
+    position: { x: 2, y: 2, z: 50 },
+    target: { x: 0, y: 0, z: 0 },
+  },
+  lights: [],
+  background: {
+    color: {
+      r: 127,
+      g: 127,
+      b: 127,
+      a: 1,
+    },
+    effect: true,
+  },
+  rotation: {
+    x: 0,
+    y: 0,
+    z: 0,
+  },
+  scale: 1,
+};
+
 export const settingsFallback: IEntitySettings = {
   preview:
     // tslint:disable-next-line:max-line-length
@@ -78,59 +102,31 @@ export const settingsKompakktLogo: IEntitySettings = {
   cameraPositionInitial: {
     position: {
       x: 0.765,
-      y: 0.7,
-      z: 128,
+      y: 0.8,
+      z: 105,
     },
     target: {
-      x: 0,
-      y: 20,
-      z: 0,
+      x: 15,
+      y: 22,
+      z: 15,
     },
   },
   background: {
     color: {
       r: 0,
-      g: 0,
-      b: 0,
-      a: 0,
+      g: 158,
+      b: 224,
+      a: 1,
     },
     effect: false,
   },
-  lights: [
-    {
-      type: 'HemisphericLight',
-      position: {
-        x: 0,
-        y: -1,
-        z: 0,
-      },
-      intensity: 1,
-    },
-    {
-      type: 'HemisphericLight',
-      position: {
-        x: 0,
-        y: 1,
-        z: 0,
-      },
-      intensity: 1,
-    },
-    {
-      type: 'PointLight',
-      position: {
-        x: -9,
-        y: 8,
-        z: 7,
-      },
-      intensity: 1,
-    },
-  ],
+  lights: [],
   rotation: {
     x: 0,
     y: 0,
     z: 0,
   },
-  scale: 1.19,
+  scale: 1,
 };
 
 export const settings2D: IEntitySettings = {

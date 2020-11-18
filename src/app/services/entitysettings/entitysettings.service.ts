@@ -15,7 +15,9 @@ import { BabylonService } from '../babylon/babylon.service';
 import { LightService } from '../light/light.service';
 import { ProcessingService } from '../processing/processing.service';
 
-import { IColor } from '@kompakkt/shared';
+import { minimalSettings } from '../../../assets/settings/settings';
+
+import { IColor, IEntitySettings } from '@kompakkt/shared';
 
 import {
   createBoundingBox,
@@ -56,16 +58,17 @@ export class EntitySettingsService {
 
   private meshes: Mesh[] | undefined;
 
+  private entitySettings: IEntitySettings = minimalSettings;
+
   constructor(
     private babylon: BabylonService,
     private processing: ProcessingService,
     private lights: LightService,
   ) {
-    this.processing.setSettings.subscribe((setSettings: boolean) => {
-      if (setSettings) {
-        console.log('actual settings', this.processing.entitySettings);
-        this.setUpSettings();
-      }
+    this.processing.entitySettings$.subscribe(settings => {
+      this.entitySettings = settings;
+      console.log('actual settings', this.entitySettings);
+      requestAnimationFrame(() => this.setUpSettings());
     });
     this.processing.meshes$.subscribe(meshes => (this.meshes = meshes));
   }
@@ -97,7 +100,7 @@ export class EntitySettingsService {
   }
 
   private async setUpSettings() {
-    if (!this.processing.entitySettings) {
+    if (!this.entitySettings) {
       throw new Error('No settings available.');
     }
     if (!this.meshes || this.meshes.length === 0) {
@@ -238,11 +241,11 @@ export class EntitySettingsService {
   }
 
   private async initialiseCamera() {
-    if (!this.processing.entitySettings) {
+    if (!this.entitySettings) {
       console.error(this);
       throw new Error('Settings missing');
     }
-    const scale = this.processing.entitySettings.scale;
+    const scale = this.entitySettings.scale;
     const isModel =
       this.processing.entityMediaType === 'model' ||
       this.processing.entityMediaType === 'entity';
@@ -273,7 +276,7 @@ export class EntitySettingsService {
       const target = this.currentCenterPoint;
       console.log('target', target);
       console.log('position', position);
-      this.processing.entitySettings.cameraPositionInitial = {
+      this.entitySettings.cameraPositionInitial = {
         position,
         target,
       };
@@ -337,38 +340,38 @@ export class EntitySettingsService {
     if (!this.center) {
       throw new Error('Center missing');
     }
-    if (!this.processing.entitySettings) {
+    if (!this.entitySettings) {
       throw new Error('Settings missing');
     }
     if (!this.center.rotationQuaternion) {
       throw new Error('RotationQuaternion for center missing');
     }
 
-    this.processing.entitySettings.rotation.x = isDegreeSpectrum(
-      this.processing.entitySettings.rotation.x,
+    this.entitySettings.rotation.x = isDegreeSpectrum(
+      this.entitySettings.rotation.x,
     );
-    this.processing.entitySettings.rotation.y = isDegreeSpectrum(
-      this.processing.entitySettings.rotation.y,
+    this.entitySettings.rotation.y = isDegreeSpectrum(
+      this.entitySettings.rotation.y,
     );
-    this.processing.entitySettings.rotation.z = isDegreeSpectrum(
-      this.processing.entitySettings.rotation.z,
+    this.entitySettings.rotation.z = isDegreeSpectrum(
+      this.entitySettings.rotation.z,
     );
 
     const start = this.processing.rotationQuaternion;
     const rotationQuaternion = Quaternion.RotationYawPitchRoll(0, 0, 0);
     const rotationQuaternionX = Quaternion.RotationAxis(
       Axis['X'],
-      (Math.PI / 180) * this.processing.entitySettings.rotation.x,
+      (Math.PI / 180) * this.entitySettings.rotation.x,
     );
     let end = rotationQuaternionX.multiply(rotationQuaternion);
     const rotationQuaternionY = Quaternion.RotationAxis(
       Axis['Y'],
-      (Math.PI / 180) * this.processing.entitySettings.rotation.y,
+      (Math.PI / 180) * this.entitySettings.rotation.y,
     );
     end = rotationQuaternionY.multiply(end);
     const rotationQuaternionZ = Quaternion.RotationAxis(
       Axis['Z'],
-      (Math.PI / 180) * this.processing.entitySettings.rotation.z,
+      (Math.PI / 180) * this.entitySettings.rotation.z,
     );
     end = rotationQuaternionZ.multiply(end);
     this.animatedMovement(start, end);
@@ -413,10 +416,10 @@ export class EntitySettingsService {
     if (!this.center) {
       throw new Error('Center missing');
     }
-    if (!this.processing.entitySettings) {
+    if (!this.entitySettings) {
       throw new Error('Settings missing');
     }
-    const factor = this.processing.entitySettings.scale;
+    const factor = this.entitySettings.scale;
     this.center.scaling = new Vector3(factor, factor, factor);
 
     this.processing.entityHeight = (this.initialSize.y * factor).toFixed(2);
@@ -478,16 +481,14 @@ export class EntitySettingsService {
 
   // Load cameraPosition
   public async loadCameraInititalPosition() {
-    if (!this.processing.entitySettings) {
+    if (!this.entitySettings) {
       throw new Error('Settings missing');
     }
-    const camera = Array.isArray(
-      this.processing.entitySettings.cameraPositionInitial,
-    )
-      ? (this.processing.entitySettings.cameraPositionInitial as any[]).find(
+    const camera = Array.isArray(this.entitySettings.cameraPositionInitial)
+      ? (this.entitySettings.cameraPositionInitial as any[]).find(
           obj => obj.cameraType === 'arcRotateCam',
         )
-      : this.processing.entitySettings.cameraPositionInitial;
+      : this.entitySettings.cameraPositionInitial;
 
     const positionVector = new Vector3(
       camera.position.x,
@@ -506,27 +507,25 @@ export class EntitySettingsService {
 
   // background: color, effect
   loadBackgroundColor() {
-    if (!this.processing.entitySettings) {
+    if (!this.entitySettings) {
       throw new Error('Settings missing');
     }
-    const color = this.processing.entitySettings.background.color;
+    const color = this.entitySettings.background.color;
     this.babylon.setBackgroundColor(color);
   }
 
   loadBackgroundEffect() {
-    if (!this.processing.entitySettings) {
+    if (!this.entitySettings) {
       throw new Error('Settings missing');
     }
-    this.babylon.setBackgroundImage(
-      this.processing.entitySettings.background.effect,
-    );
+    this.babylon.setBackgroundImage(this.entitySettings.background.effect);
   }
 
   // lights: up, down, pointlight
   // Ambientlights
 
   private initialiseLights() {
-    if (!this.processing.entitySettings) {
+    if (!this.entitySettings) {
       throw new Error('Settings missing');
     }
     // TODO: Due to PBR, the old light intensitys are all way too high
@@ -555,7 +554,7 @@ export class EntitySettingsService {
   }
 
   public loadLightIntensityAllLights() {
-    if (!this.processing.entitySettings) {
+    if (!this.entitySettings) {
       throw new Error('Settings missing');
     }
     const ambientlightUp = this.lights.getLightByType('ambientlightUp');
@@ -576,7 +575,7 @@ export class EntitySettingsService {
   }
 
   public loadLightIntensity(lightType: string) {
-    if (!this.processing.entitySettings) {
+    if (!this.entitySettings) {
       throw new Error('Settings missing');
     }
     const light = this.lights.getLightByType(lightType);
@@ -586,7 +585,7 @@ export class EntitySettingsService {
   }
 
   public loadPointLightPosition() {
-    if (!this.processing.entitySettings) {
+    if (!this.entitySettings) {
       throw new Error('Settings missing');
     }
     const pointLight = this.lights.getLightByType('pointLight');

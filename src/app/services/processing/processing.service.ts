@@ -15,6 +15,7 @@ import {
   fallbackEntity,
 } from '../../../assets/entities/entities';
 import {
+  minimalSettings,
   settings2D,
   settingsAudio,
   settingsEntity,
@@ -52,7 +53,6 @@ export class ProcessingService {
   public meshes$ = this.entityMeshes.asObservable();
   public compilation$ = this.compilation.asObservable();
 
-  @Output() setSettings = new EventEmitter<boolean>();
   @Output() loadAnnotations = new EventEmitter<boolean>();
   @Output() initialiseEntityForAnnotating = new EventEmitter<boolean>();
   public annotatingFeatured = false;
@@ -63,8 +63,14 @@ export class ProcessingService {
   public entityMediaType = '';
 
   // settings
-  public entitySettings: IEntitySettings | undefined;
-  public entitySettingsOnServer: IEntitySettings | undefined;
+  private entitySettingsSubject = new BehaviorSubject<IEntitySettings>(
+    minimalSettings,
+  );
+  public entitySettings$ = this.entitySettingsSubject.asObservable();
+  private serverEntitySettingsSubject = new BehaviorSubject<IEntitySettings>(
+    minimalSettings,
+  );
+  public serverEntitySettings$ = this.serverEntitySettingsSubject.asObservable();
   public upload = false;
   public meshSettings = false;
   public rotationQuaternion = Quaternion.RotationYawPitchRoll(0, 0, 0);
@@ -99,6 +105,9 @@ export class ProcessingService {
   private sidenavMode = '';
   private sidenavOpen = false;
 
+  public entitySettings: IEntitySettings | undefined;
+  public entitySettingsOnServer: IEntitySettings | undefined;
+
   constructor(
     private backend: BackendService,
     private message: MessageService,
@@ -113,6 +122,13 @@ export class ProcessingService {
       this.checkAnnotationAllowance();
     });
     this.overlay.sidenavMode$.subscribe(mode => (this.sidenavMode = mode));
+
+    this.entitySettings$.subscribe(settings => {
+      this.entitySettings = settings;
+    });
+    this.serverEntitySettings$.subscribe(settings => {
+      this.entitySettingsOnServer = settings;
+    });
   }
 
   public updateEntityQuality(quality: string) {
@@ -160,7 +176,6 @@ export class ProcessingService {
     // End of TODO
     this._currentEntityMeshes = meshes;
     this.entityMeshes.next(this._currentEntityMeshes);
-    this.setSettings.emit(true);
     if (this.annotatingFeatured) this.initialiseEntityForAnnotating.emit(true);
     this.checkAnnotationAllowance();
   }
@@ -410,8 +425,8 @@ export class ProcessingService {
         this.entityMediaType = newEntity.mediaType;
         await this.initialiseEntitySettingsData(newEntity);
         if (this.upload && (this.mode !== 'upload' || newEntity.finished)) {
-          this.entitySettingsOnServer = undefined;
-          this.entitySettings = undefined;
+          this.serverEntitySettingsSubject.next(minimalSettings);
+          this.entitySettingsSubject.next(minimalSettings);
           this.loadFallbackEntity();
           this.message.error(
             'I can not load this Object without Settings and not during upload.',
@@ -429,13 +444,7 @@ export class ProcessingService {
           case 'model':
           case 'entity':
             await this.babylon
-              .loadEntity(
-                true,
-                _url,
-                mediaType,
-                extension,
-                newEntity._id === 'default',
-              )
+              .loadEntity(true, _url, mediaType, extension)
               .then(() => {
                 this.updateActiveEntity(newEntity);
                 this.updateActiveEntityMeshes(
@@ -471,13 +480,7 @@ export class ProcessingService {
             break;
           case 'audio':
             await this.babylon
-              .loadEntity(
-                true,
-                'assets/models/kompakkt.babylon',
-                'model',
-                '.babylon',
-                true,
-              )
+              .loadEntity(true, 'assets/models/kompakkt.glb', 'model', '.glb')
               .then(() => {
                 this.updateActiveEntityMeshes(
                   this.babylon.entityContainer.meshes as Mesh[],
@@ -552,8 +555,9 @@ export class ProcessingService {
       this.upload = upload;
     } else {
       this.upload = false;
-      this.entitySettings = entity.settings;
-      this.entitySettingsOnServer = JSON.parse(JSON.stringify(entity.settings));
+      this.entitySettingsSubject.next(entity.settings);
+      const clone = JSON.parse(JSON.stringify(entity.settings));
+      this.serverEntitySettingsSubject.next(clone);
     }
   }
 
@@ -590,8 +594,9 @@ export class ProcessingService {
       }
       upload = true;
     }
-    this.entitySettings = settings;
-    this.entitySettingsOnServer = JSON.parse(JSON.stringify(settings));
+    this.entitySettingsSubject.next(settings);
+    const clone = JSON.parse(JSON.stringify(settings));
+    this.serverEntitySettingsSubject.next(clone);
     return upload;
   }
 
