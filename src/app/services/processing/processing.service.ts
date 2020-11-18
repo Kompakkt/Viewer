@@ -444,7 +444,13 @@ export class ProcessingService {
           case 'model':
           case 'entity':
             await this.babylon
-              .loadEntity(true, _url, mediaType, extension)
+              .loadEntity(
+                true,
+                _url,
+                mediaType,
+                extension,
+                newEntity._id === 'default',
+              )
               .then(() => {
                 this.updateActiveEntity(newEntity);
                 this.updateActiveEntityMeshes(
@@ -480,7 +486,13 @@ export class ProcessingService {
             break;
           case 'audio':
             await this.babylon
-              .loadEntity(true, 'assets/models/kompakkt.glb', 'model', '.glb')
+              .loadEntity(
+                true,
+                'assets/models/kompakkt.babylon',
+                'model',
+                '.babylon',
+                true,
+              )
               .then(() => {
                 this.updateActiveEntityMeshes(
                   this.babylon.entityContainer.meshes as Mesh[],

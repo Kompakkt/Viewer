@@ -22,6 +22,7 @@ import {
   Vector3,
   PostProcess,
   ImageProcessingConfiguration,
+  PBRMaterial,
 } from 'babylonjs';
 import { Slider } from 'babylonjs-gui';
 // tslint:disable-next-line:no-import-side-effect
@@ -159,10 +160,10 @@ export class BabylonService {
 
     // TODO: Adjust with sliders or embed in entitySettings
     this.scene.imageProcessingConfiguration.exposure = 1;
-    this.scene.imageProcessingConfiguration.contrast = 1;
+    this.scene.imageProcessingConfiguration.contrast = 1.5;
     this.scene.imageProcessingConfiguration.toneMappingEnabled = true;
     this.scene.imageProcessingConfiguration.toneMappingType =
-      ImageProcessingConfiguration.TONEMAPPING_ACES;
+      ImageProcessingConfiguration.TONEMAPPING_STANDARD;
 
     this.effects.push(fxaa, sharpen);
     console.log('Effects applied', this.effects);
@@ -329,6 +330,7 @@ export class BabylonService {
     rootUrl: string,
     mediaType = 'model',
     extension = 'babylon',
+    isDefault?: boolean,
   ) {
     this.engine.displayLoadingUI();
     this.resize();
@@ -389,6 +391,16 @@ export class BabylonService {
         return load3DEntity(rootUrl, extension, this.scene).then(result => {
           if (result) {
             this.entityContainer = result;
+            if (isDefault) {
+              // Ignore environment lighting
+              result.meshes.forEach(mesh => {
+                if (!mesh.material) return;
+                const material = mesh.material as PBRMaterial;
+                material.environmentIntensity = 0;
+              });
+              // Disable Tone-Mapping
+              this.scene.imageProcessingConfiguration.toneMappingEnabled = false;
+            }
           } else {
             throw new Error('No result');
           }
