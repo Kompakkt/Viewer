@@ -5,11 +5,9 @@ import {
   Engine,
   ExecuteCodeAction,
   Mesh,
-  BaseTexture,
   MeshBuilder,
   Scene,
   SceneLoader,
-  Nullable,
   ISceneLoaderProgressEvent,
   PBRMaterial,
   Sound,
@@ -71,16 +69,18 @@ const patchMeshPBR = (mesh: AbstractMesh, scene: Scene) => {
     const pbrMaterial = pbr(scene, material);
 
     // Diffuse / Albedo
-    let albedo: Nullable<BaseTexture>;
     if (material instanceof PBRMaterial) {
-      albedo = material.albedoTexture;
+      pbrMaterial.albedoTexture = material.albedoTexture;
+      pbrMaterial.albedoColor = material.albedoColor;
     } else {
-      albedo = material.diffuseTexture;
+      pbrMaterial.albedoTexture =
+        material.diffuseTexture ?? pbrMaterial.albedoTexture;
+      pbrMaterial.albedoColor =
+        material.diffuseColor ?? pbrMaterial.albedoColor;
     }
 
     // Bump
     const bump = material.bumpTexture;
-    if (albedo) pbrMaterial.albedoTexture = albedo;
     if (bump) {
       pbrMaterial.bumpTexture = bump;
       pbrMaterial.bumpTexture.level = 1.5;
