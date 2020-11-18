@@ -21,6 +21,7 @@ import {
   Tools,
   Vector3,
   PostProcess,
+  ImageProcessingConfiguration,
 } from 'babylonjs';
 import { Slider } from 'babylonjs-gui';
 // tslint:disable-next-line:no-import-side-effect
@@ -156,6 +157,13 @@ export class BabylonService {
     );
     sharpen.edgeAmount = 0.25;
 
+    // TODO: Adjust with sliders or embed in entitySettings
+    this.scene.imageProcessingConfiguration.exposure = 1;
+    this.scene.imageProcessingConfiguration.contrast = 1;
+    this.scene.imageProcessingConfiguration.toneMappingEnabled = true;
+    this.scene.imageProcessingConfiguration.toneMappingType =
+      ImageProcessingConfiguration.TONEMAPPING_ACES;
+
     this.effects.push(fxaa, sharpen);
     console.log('Effects applied', this.effects);
 
@@ -201,6 +209,18 @@ export class BabylonService {
     this.engine.runRenderLoop(() => {
       this.scene.render();
     });
+
+    // Global
+    (window as any)['enableInspector'] = () => this.enableInspector();
+    (window as any)['disableInspector'] = () => this.disableInspector();
+  }
+
+  public enableInspector() {
+    this.scene.debugLayer.show();
+  }
+
+  public disableInspector() {
+    this.scene.debugLayer.hide();
   }
 
   public getScene(): Scene {
