@@ -10,6 +10,7 @@ import {
   Tags,
   Vector3,
 } from 'babylonjs';
+import { combineLatest } from 'rxjs';
 
 import { BabylonService } from '../babylon/babylon.service';
 import { LightService } from '../light/light.service';
@@ -65,12 +66,17 @@ export class EntitySettingsService {
     private processing: ProcessingService,
     private lights: LightService,
   ) {
-    this.processing.entitySettings$.subscribe(settings => {
+    combineLatest(
+      this.processing.entitySettings$,
+      this.processing.meshes$,
+    ).subscribe(arr => {
+      const settings = arr[0];
+      const meshes = arr[1];
       this.entitySettings = settings;
       console.log('actual settings', this.entitySettings);
+      this.meshes = meshes;
       requestAnimationFrame(() => this.setUpSettings());
     });
-    this.processing.meshes$.subscribe(meshes => (this.meshes = meshes));
   }
 
   private async resetInitialValues() {
@@ -531,7 +537,7 @@ export class EntitySettingsService {
     // TODO: Due to PBR, the old light intensitys are all way too high
     // The intensities need to be adjusted before this can be re-enabled
 
-    /*const pointLight = this.lights.getLightByType('pointLight');
+    const pointLight = this.lights.getLightByType('pointLight');
     if (pointLight) {
       const position = new Vector3(
         pointLight.position.x,
@@ -550,7 +556,7 @@ export class EntitySettingsService {
         'down',
         hemisphericLightDown.intensity,
       );
-    }*/
+    }
   }
 
   public loadLightIntensityAllLights() {
