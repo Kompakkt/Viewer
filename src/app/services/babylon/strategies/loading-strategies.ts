@@ -52,6 +52,11 @@ const pbr = (scene: Scene, material?: PBRMaterial | StandardMaterial) => {
 
   mat.roughness = 0.75;
   mat.metallic = 0;
+  if (material instanceof PBRMaterial) {
+    const { roughness, metallic } = material;
+    if (roughness) mat.roughness = roughness;
+    if (metallic) mat.metallic = metallic;
+  }
 
   /* ClearCoat doesnt work with lights enabled?
   mat.metallic = 0;
@@ -85,6 +90,11 @@ const patchMeshPBR = (mesh: AbstractMesh, scene: Scene) => {
       pbrMaterial.bumpTexture = bump;
       pbrMaterial.bumpTexture.level = 1.5;
     }
+
+    // Emissive
+    pbrMaterial.emissiveColor = material.emissiveColor;
+    pbrMaterial.emissiveTexture =
+      material.emissiveTexture ?? pbrMaterial.emissiveTexture;
 
     // Transparency
     pbrMaterial.transparencyMode = material.transparencyMode ?? 0;
