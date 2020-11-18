@@ -63,7 +63,7 @@ export class MenuComponent implements OnInit {
 
   updateEntityQuality(quality: string) {
     if (this.processing.entityQuality !== quality) {
-      this.processing.entityQuality = quality;
+      this.processing.updateEntityQuality(quality);
       if (!this.entity?.processed) {
         throw new Error(
           'The object is not available and unfortunately ' +

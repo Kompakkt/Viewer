@@ -31,6 +31,11 @@ import { MessageService } from '../message/message.service';
 import { OverlayService } from '../overlay/overlay.service';
 import { UserdataService } from '../userdata/userdata.service';
 
+type QualitySetting = 'low' | 'medium' | 'high' | 'raw';
+const isQualitySetting = (setting: any): setting is QualitySetting => {
+  return ['low', 'medium', 'high', 'raw'].includes(setting);
+};
+
 @Injectable({
   providedIn: 'root',
 })
@@ -71,7 +76,7 @@ export class ProcessingService {
   public compilationLoaded = false;
   public defaultEntityLoaded = false;
   public fallbackEntityLoaded = false;
-  public entityQuality = 'low';
+  public entityQuality: QualitySetting = 'low';
   private baseUrl = `${environment.express_server_url}:${environment.express_server_port}/`;
 
   // general features and modes
@@ -108,6 +113,11 @@ export class ProcessingService {
       this.checkAnnotationAllowance();
     });
     this.overlay.sidenavMode$.subscribe(mode => (this.sidenavMode = mode));
+  }
+
+  public updateEntityQuality(quality: string) {
+    if (!isQualitySetting(quality)) return;
+    this.entityQuality = quality;
   }
 
   public updateActiveEntity(entity: IEntity | undefined) {
@@ -161,6 +171,8 @@ export class ProcessingService {
     const entityParam =
       queryParams.get('model') || queryParams.get('entity') || undefined;
     const compParam = queryParams.get('compilation') || undefined;
+    const qualityParam = queryParams.get('quality') || 'low';
+    this.updateEntityQuality(qualityParam);
     // values = upload, explore, edit, annotation, open
     const mode = queryParams.get('mode') || '';
     this.mode = mode;
@@ -244,13 +256,13 @@ export class ProcessingService {
   }
 
   public loadDefaultEntityData() {
-    this.entityQuality = 'low';
+    this.updateEntityQuality('low');
     this.entityMediaType = 'entity';
     this.loadEntity(defaultEntity as IEntity, '');
   }
 
   public loadFallbackEntity() {
-    this.entityQuality = 'low';
+    this.updateEntityQuality('low');
     this.entityMediaType = 'entity';
     this.loadEntity(fallbackEntity as IEntity, '', '.gltf');
   }
@@ -260,7 +272,6 @@ export class ProcessingService {
     compilationId?: string | ObjectId | null,
     isFromCompilation?: boolean,
   ) {
-    this.entityQuality = 'low';
     if (!compilationId && !isFromCompilation) {
       this.compilationLoaded = false;
       this.updateActiveCompilation(undefined);
