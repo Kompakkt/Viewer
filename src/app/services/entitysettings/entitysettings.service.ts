@@ -529,7 +529,10 @@ export class EntitySettingsService {
     if (!this.processing.entitySettings) {
       throw new Error('Settings missing');
     }
-    const pointLight = this.lights.getLightByType('pointLight');
+    // TODO: Due to PBR, the old light intensitys are all way too high
+    // The intensities need to be adjusted before this can be re-enabled
+
+    /*const pointLight = this.lights.getLightByType('pointLight');
     if (pointLight) {
       const position = new Vector3(
         pointLight.position.x,
@@ -548,7 +551,7 @@ export class EntitySettingsService {
         'down',
         hemisphericLightDown.intensity,
       );
-    }
+    }*/
   }
 
   public loadLightIntensityAllLights() {

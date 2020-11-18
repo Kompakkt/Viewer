@@ -1,13 +1,17 @@
 import {
+  AbstractMesh,
   ActionManager,
   Analyser,
   Engine,
   ExecuteCodeAction,
   Mesh,
+  BaseTexture,
   MeshBuilder,
   Scene,
   SceneLoader,
-  SceneLoaderProgressEvent,
+  Nullable,
+  ISceneLoaderProgressEvent,
+  PBRMaterial,
   Sound,
   StandardMaterial,
   Tags,
@@ -33,13 +37,66 @@ import {
 } from '../container.interfaces';
 
 const updateLoadingUI = (engine: Engine) => (
-  progress: SceneLoaderProgressEvent,
+  progress: ISceneLoaderProgressEvent,
 ) => {
   if (progress.lengthComputable) {
     engine.loadingUIText = `${(
       (progress.loaded * 100) /
       progress.total
     ).toFixed()}%`;
+  }
+};
+
+let counter = 0;
+const pbr = (scene: Scene, material?: PBRMaterial | StandardMaterial) => {
+  const name = material ? `${material.name}_pbr` : `pbr${++counter}`;
+  const mat = new PBRMaterial(name, scene);
+
+  mat.roughness = 0.75;
+  mat.metallic = 0;
+
+  /* ClearCoat doesnt work with lights enabled?
+  mat.metallic = 0;
+  mat.roughness = 1;
+
+  mat.clearCoat.isEnabled = true;
+  mat.clearCoat.intensity = 0.5;*/
+
+  return mat;
+};
+
+const patchMeshPBR = (mesh: AbstractMesh, scene: Scene) => {
+  if (mesh.material) {
+    const material = mesh.material as StandardMaterial | PBRMaterial;
+    const pbrMaterial = pbr(scene, material);
+
+    // Diffuse / Albedo
+    let albedo: Nullable<BaseTexture>;
+    if (material instanceof PBRMaterial) {
+      albedo = material.albedoTexture;
+    } else {
+      albedo = material.diffuseTexture;
+    }
+
+    // Bump
+    const bump = material.bumpTexture;
+    if (albedo) pbrMaterial.albedoTexture = albedo;
+    if (bump) {
+      pbrMaterial.bumpTexture = bump;
+      pbrMaterial.bumpTexture.level = 1.5;
+    }
+
+    // Transparency
+    pbrMaterial.transparencyMode = material.transparencyMode ?? 0;
+    if (material instanceof PBRMaterial) {
+      pbrMaterial.useAlphaFromAlbedoTexture =
+        material?.useAlphaFromAlbedoTexture ?? false;
+    }
+
+    mesh.material = pbrMaterial;
+  } else {
+    const pbrMaterial = pbr(scene);
+    mesh.material = pbrMaterial;
   }
 };
 
@@ -63,6 +120,7 @@ export const load3DEntity = (
   )
     .then(result => {
       console.log(result);
+      result.meshes.forEach(mesh => patchMeshPBR(mesh, scene));
       return result;
     })
     .catch(e => {

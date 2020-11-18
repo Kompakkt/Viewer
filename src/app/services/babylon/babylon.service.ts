@@ -133,7 +133,9 @@ export class BabylonService {
       preserveDrawingBuffer: true,
       stencil: true,
     });
+
     this.scene = new Scene(this.engine);
+    this.scene.createDefaultEnvironment();
     this.engine.loadingScreen = new LoadingScreen(
       this.canvas,
       '#111111',
