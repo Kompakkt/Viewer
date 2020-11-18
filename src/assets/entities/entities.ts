@@ -13,10 +13,10 @@ export const defaultEntity: IEntity = {
   name: 'Cube',
   files: [
     {
-      file_name: 'kompakkt.babylon',
-      file_link: 'assets/models/kompakkt.babylon',
+      file_name: 'kompakkt.glb',
+      file_link: 'assets/models/kompakkt.glb',
       file_size: 0,
-      file_format: '.babylon',
+      file_format: '.glb',
     },
   ],
   annotations: {},
@@ -28,10 +28,10 @@ export const defaultEntity: IEntity = {
   },
   mediaType: 'entity',
   processed: {
-    low: 'assets/models/kompakkt.babylon',
-    medium: 'assets/models/kompakkt.babylon',
-    high: 'assets/models/kompakkt.babylon',
-    raw: 'assets/models/kompakkt.babylon',
+    low: 'assets/models/kompakkt.glb',
+    medium: 'assets/models/kompakkt.glb',
+    high: 'assets/models/kompakkt.glb',
+    raw: 'assets/models/kompakkt.glb',
   },
   settings: settingsKompakktLogo,
 };

@@ -83,10 +83,10 @@ export const baseEntity = (): IEntity => ({
   },
 
   processed: {
-    low: 'assets/models/kompakkt.babylon',
-    medium: 'assets/models/kompakkt.babylon',
-    high: 'assets/models/kompakkt.babylon',
-    raw: 'assets/models/kompakkt.babylon',
+    low: 'assets/models/kompakkt.glb',
+    medium: 'assets/models/kompakkt.glb',
+    high: 'assets/models/kompakkt.glb',
+    raw: 'assets/models/kompakkt.glb',
   },
 
   whitelist: {
