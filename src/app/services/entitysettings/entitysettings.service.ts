@@ -536,9 +536,11 @@ export class EntitySettingsService {
     }
     // TODO: Due to PBR, the old light intensitys are all way too high
     // The intensities need to be adjusted before this can be re-enabled
+    const pbrLightFactor = 0.1;
 
     const pointLight = this.lights.getLightByType('pointLight');
     if (pointLight) {
+      pointLight.intensity *= pbrLightFactor;
       const position = new Vector3(
         pointLight.position.x,
         pointLight.position.y,
@@ -548,10 +550,12 @@ export class EntitySettingsService {
     }
     const hemisphericLightUp = this.lights.getLightByType('ambientlightUp');
     if (hemisphericLightUp) {
+      hemisphericLightUp.intensity *= pbrLightFactor;
       this.lights.initialiseAmbientLight('up', hemisphericLightUp.intensity);
     }
     const hemisphericLightDown = this.lights.getLightByType('ambientlightDown');
     if (hemisphericLightDown) {
+      hemisphericLightDown.intensity *= pbrLightFactor;
       this.lights.initialiseAmbientLight(
         'down',
         hemisphericLightDown.intensity,
