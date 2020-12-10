@@ -67,7 +67,7 @@
     "@angular/platform-browser": "^9.0.6",
     "@angular/platform-browser-dynamic": "^9.0.6",
     "@angular/router": "^9.0.6",
-    "@kompakkt/shared": "git+https://github.com/DH-Cologne/Kompakkt.Shared.git",
+    "@kompakkt/shared": "Kompakkt/Shared",
     "@types/pouchdb-upsert": "^2.2.6",
     "babylonjs": "^4.2.0",
     "babylonjs-gui": "^4.2.0",
