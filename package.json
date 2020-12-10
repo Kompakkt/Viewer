@@ -77,8 +77,8 @@
     "fscreen": "^1.0.2",
     "marked": "^0.8.0",
     "ngx-color": "^5.0.1",
-    "ngx-markdown": "^9.0.0",
-    "ngx-socket-io": "^3.0.1",
+    "ngx-markdown": "^10.1.0",
+    "ngx-socket-io": "^3.2.0",
     "pepjs": "^0.5.2",
     "pouchdb": "^7.2.1",
     "pouchdb-find": "^7.2.1",
@@ -97,9 +97,8 @@
     "@types/jest": "^25.1.4",
     "@types/node": "^13.9.1",
     "@types/pouchdb": "^6.4.0",
-    "codelyzer": "^5.2.1",
+    "codelyzer": "^6.0.1",
     "concurrently": "^5.1.0",
-    "cypress": "^4.2.0",
     "husky": "^4.2.3",
     "jest": "^25.1.0",
     "jest-preset-angular": "^8.1.2",
@@ -112,6 +111,9 @@
     "tslint": "~6.1.0",
     "typescript": "^3.8.3",
     "wait-on": "^4.0.1"
+  },
+  "optionalDependencies": {
+    "cypress": "^4.2.0"
   },
   "jscpd": {
     "reporters": [
