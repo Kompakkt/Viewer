@@ -8,7 +8,13 @@ import {
   IEntity,
   isAnnotation,
 } from '@kompakkt/shared';
-import {ActionManager, ExecuteCodeAction, Mesh, Tags, Vector3} from 'babylonjs';
+import {
+  ActionManager,
+  ExecuteCodeAction,
+  Mesh,
+  Tags,
+  Vector3,
+} from 'babylonjs';
 import { Socket } from 'ngx-socket-io';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 
@@ -28,7 +34,7 @@ import { MessageService } from '../message/message.service';
 import { ProcessingService } from '../processing/processing.service';
 import { UserdataService } from '../userdata/userdata.service';
 
-import {createMarker} from './visual3DElements';
+import { createMarker } from './visual3DElements';
 
 @Injectable({
   providedIn: 'root',
@@ -99,7 +105,6 @@ export class AnnotationService {
       console.log('ich setze das mesh als', allowance);
       this.annotationMode(allowance);
     });
-
   }
 
   get isHomepageEntity() {
@@ -642,8 +647,7 @@ export class AnnotationService {
   }
 
   public deleteMarker(annotationID: string) {
-    const marker = this.babylon.getScene()
-        .getMeshesByTags(annotationID);
+    const marker = this.babylon.getScene().getMeshesByTags(annotationID);
     marker.forEach(value => {
       value.dispose();
     });
@@ -651,84 +655,96 @@ export class AnnotationService {
 
   public async deleteAllMarker() {
     await this.babylon
-        .getScene()
-        .getMeshesByTags('marker')
-        .map(mesh => mesh.dispose());
+      .getScene()
+      .getMeshesByTags('marker')
+      .map(mesh => mesh.dispose());
   }
 
   public redrawMarker() {
     this.deleteAllMarker()
-        .then(() => {
-          for (const annotation of this.getCurrentAnnotations()) {
-            this.drawMarker(annotation);
-          }
-        })
-        .catch(e => console.error(e));
+      .then(() => {
+        for (const annotation of this.getCurrentAnnotations()) {
+          this.drawMarker(annotation);
+        }
+      })
+      .catch(e => console.error(e));
   }
 
   public drawMarker(newAnnotation: IAnnotation) {
-
     const positionVector = new Vector3(
-        newAnnotation.target.selector.referencePoint.x,
-        newAnnotation.target.selector.referencePoint.y,
-        newAnnotation.target.selector.referencePoint.z,
+      newAnnotation.target.selector.referencePoint.x,
+      newAnnotation.target.selector.referencePoint.y,
+      newAnnotation.target.selector.referencePoint.z,
     );
     const normalVector = new Vector3(
-        newAnnotation.target.selector.referenceNormal.x,
-        newAnnotation.target.selector.referenceNormal.y,
-        newAnnotation.target.selector.referenceNormal.z,
+      newAnnotation.target.selector.referenceNormal.x,
+      newAnnotation.target.selector.referenceNormal.y,
+      newAnnotation.target.selector.referenceNormal.z,
     );
 
     const color = 'black';
     const scene = this.babylon.getScene();
     const id = newAnnotation._id.toString();
     const marker = createMarker(
-        scene, 1,
-        newAnnotation.ranking.toString(),
-        id, false, color, positionVector, normalVector);
+      scene,
+      1,
+      newAnnotation.ranking.toString(),
+      id,
+      false,
+      color,
+      positionVector,
+      normalVector,
+    );
     marker.actionManager = new ActionManager(scene);
     // register 'pickCylinder' as the handler function for cylinder picking action.
     marker.actionManager.registerAction(
-        new ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
-          this.setSelectedAnnotation(id);
-        }));
+      new ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
+        this.setSelectedAnnotation(id);
+      }),
+    );
 
     const markertransparent = createMarker(
-        scene, 1,
-        newAnnotation.ranking.toString(),
-        id, true, color, positionVector, normalVector);
+      scene,
+      1,
+      newAnnotation.ranking.toString(),
+      id,
+      true,
+      color,
+      positionVector,
+      normalVector,
+    );
     markertransparent.actionManager = new ActionManager(scene);
     // register 'pickCylinder' as the handler function for cylinder picking action.
     markertransparent.actionManager.registerAction(
-        new ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
-          this.setSelectedAnnotation(id);
-        }));
+      new ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
+        this.setSelectedAnnotation(id);
+      }),
+    );
   }
 
   public setSelectedAnnotation(id: string) {
     this.selectedAnnotation.next(id);
 
-    const selectedAnnotation = this.getCurrentAnnotations()
-        .find((anno: IAnnotation) => anno._id === id,
-        );
+    const selectedAnnotation = this.getCurrentAnnotations().find(
+      (anno: IAnnotation) => anno._id === id,
+    );
     if (selectedAnnotation) {
-
       const perspective = selectedAnnotation.body.content.relatedPerspective;
 
       if (perspective !== undefined) {
         this.babylon.cameraManager.moveActiveCameraToPosition(
-            new Vector3(
-                perspective.position.x,
-                perspective.position.y,
-                perspective.position.z,
-            ),
+          new Vector3(
+            perspective.position.x,
+            perspective.position.y,
+            perspective.position.z,
+          ),
         );
         this.babylon.cameraManager.setActiveCameraTarget(
-            new Vector3(
-                perspective.target.x,
-                perspective.target.y,
-                perspective.target.z,
-            ),
+          new Vector3(
+            perspective.target.x,
+            perspective.target.y,
+            perspective.target.z,
+          ),
         );
       }
       this.babylon.hideMesh(selectedAnnotation._id.toString(), true);

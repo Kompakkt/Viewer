@@ -7,7 +7,7 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 })
 export class RenderCanvasComponent {
   @ViewChild('renderCanvas', { read: ElementRef })
-  public canvasRef: ElementRef<HTMLCanvasElement> = new ElementRef<
-    HTMLCanvasElement
-  >(document.createElement('canvas'));
+  public canvasRef: ElementRef<HTMLCanvasElement> = new ElementRef<HTMLCanvasElement>(
+    document.createElement('canvas'),
+  );
 }
