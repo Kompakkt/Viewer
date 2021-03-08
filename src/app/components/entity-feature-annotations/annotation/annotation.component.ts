@@ -51,9 +51,7 @@ export class AnnotationComponent implements OnInit {
     this.showAnnotation = true;
     this.collapsed = false;
     this.isAnnotatingAllowed = this.processing.annotationAllowance;
-    this.isAnnotationOwner = this.userdataService.isAnnotationOwner(
-      this.annotation,
-    );
+    this.isAnnotationOwner = this.userdataService.isAnnotationOwner(this.annotation);
 
     this.annotationService.isSelectedAnnotation.subscribe(selectedAnno => {
       if (!this.annotation) {
@@ -142,19 +140,13 @@ export class AnnotationComponent implements OnInit {
     const getMesh = scene.getMeshByName(`${annotation._id}_marker`);
 
     if (getMesh && scene.activeCamera) {
-      if (
-        !this.annotationForm ||
-        !this.annotationForm.nativeElement.parentElement
-      ) {
+      if (!this.annotationForm || !this.annotationForm.nativeElement.parentElement) {
         return;
       }
 
       const engine = this.babylon.getEngine();
 
-      const [width, height] = [
-        engine.getRenderWidth(),
-        engine.getRenderHeight(),
-      ];
+      const [width, height] = [engine.getRenderWidth(), engine.getRenderHeight()];
 
       const p = Vector3.Project(
         getMesh.getBoundingInfo().boundingBox.centerWorld,
@@ -167,10 +159,8 @@ export class AnnotationComponent implements OnInit {
       const [left, top] = [Math.round(p.x), Math.round(p.y)];
       const [elHeight, elWidth] = [parent.clientHeight, parent.clientWidth];
 
-      this.positionTop =
-        top < 0 ? 0 : top + elHeight > height ? height - elHeight : top;
-      this.positionLeft =
-        left < 0 ? 0 : left + elWidth > width ? width - elWidth : left;
+      this.positionTop = top < 0 ? 0 : top + elHeight > height ? height - elHeight : top;
+      this.positionLeft = left < 0 ? 0 : left + elWidth > width ? width - elWidth : left;
     }
   }
 

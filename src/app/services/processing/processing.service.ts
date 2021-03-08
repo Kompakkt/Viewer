@@ -1,19 +1,10 @@
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import {
-  ICompilation,
-  IEntity,
-  IEntitySettings,
-  isEntity,
-  ObjectId,
-} from '@kompakkt/shared';
+import { ICompilation, IEntity, IEntitySettings, isEntity, ObjectId } from '@kompakkt/shared';
 import { Mesh, Quaternion } from 'babylonjs';
 import { BehaviorSubject } from 'rxjs';
 
-import {
-  defaultEntity,
-  fallbackEntity,
-} from '../../../assets/entities/entities';
+import { defaultEntity, fallbackEntity } from '../../../assets/entities/entities';
 import {
   minimalSettings,
   settings2D,
@@ -46,9 +37,7 @@ export class ProcessingService {
   private _currentCompilation: ICompilation | undefined;
   private entity = new BehaviorSubject<IEntity | undefined>(undefined);
   private entityMeshes = new BehaviorSubject<Mesh[]>([]);
-  private compilation = new BehaviorSubject<ICompilation | undefined>(
-    undefined,
-  );
+  private compilation = new BehaviorSubject<ICompilation | undefined>(undefined);
   public entity$ = this.entity.asObservable();
   public meshes$ = this.entityMeshes.asObservable();
   public compilation$ = this.compilation.asObservable();
@@ -63,13 +52,9 @@ export class ProcessingService {
   public entityMediaType = '';
 
   // settings
-  private entitySettingsSubject = new BehaviorSubject<IEntitySettings>(
-    minimalSettings,
-  );
+  private entitySettingsSubject = new BehaviorSubject<IEntitySettings>(minimalSettings);
   public entitySettings$ = this.entitySettingsSubject.asObservable();
-  private serverEntitySettingsSubject = new BehaviorSubject<IEntitySettings>(
-    minimalSettings,
-  );
+  private serverEntitySettingsSubject = new BehaviorSubject<IEntitySettings>(minimalSettings);
   public serverEntitySettings$ = this.serverEntitySettingsSubject.asObservable();
   public upload = false;
   public meshSettings = false;
@@ -170,9 +155,7 @@ export class ProcessingService {
     await this.setAnnotatingFeatured(entity);
     // TODO - move to babylon load: rendering groups
     meshes.forEach(mesh => (mesh.renderingGroupId = 2));
-    this.babylon
-      .getScene()
-      .getMeshesByTags('videoPlane', mesh => (mesh.renderingGroupId = 3));
+    this.babylon.getScene().getMeshesByTags('videoPlane', mesh => (mesh.renderingGroupId = 3));
     // End of TODO
     this._currentEntityMeshes = meshes;
     this.entityMeshes.next(this._currentEntityMeshes);
@@ -183,8 +166,7 @@ export class ProcessingService {
   public async bootstrap() {
     const searchParams = location.search;
     const queryParams = new URLSearchParams(searchParams);
-    const entityParam =
-      queryParams.get('model') || queryParams.get('entity') || undefined;
+    const entityParam = queryParams.get('model') || queryParams.get('entity') || undefined;
     const compParam = queryParams.get('compilation') || undefined;
     const qualityParam = queryParams.get('quality') || 'low';
     this.updateEntityQuality(qualityParam);
@@ -315,23 +297,19 @@ export class ProcessingService {
               id: query,
             },
           });
-          dialogRef
-            .afterClosed()
-            .subscribe((result: { result: boolean; data: ICompilation }) => {
-              if (result) {
-                const newData = result.data;
-                this.updateActiveCompilation(newData);
-                this.fetchEntityDataAfterCollection(
-                  newData,
-                  specifiedEntity ? specifiedEntity : undefined,
-                );
-              } else {
-                this.loadFallbackEntity();
-                this.message.error(
-                  'Sorry, you are not allowed to load this Collection.',
-                );
-              }
-            });
+          dialogRef.afterClosed().subscribe((result: { result: boolean; data: ICompilation }) => {
+            if (result) {
+              const newData = result.data;
+              this.updateActiveCompilation(newData);
+              this.fetchEntityDataAfterCollection(
+                newData,
+                specifiedEntity ? specifiedEntity : undefined,
+              );
+            } else {
+              this.loadFallbackEntity();
+              this.message.error('Sorry, you are not allowed to load this Collection.');
+            }
+          });
         } else {
           this.updateActiveCompilation(compilation as ICompilation);
           this.fetchEntityDataAfterCollection(
@@ -370,11 +348,7 @@ export class ProcessingService {
       .then(resultEntity => {
         console.log('Received this Entity:', resultEntity);
 
-        if (
-          !resultEntity.finished ||
-          !resultEntity.online ||
-          resultEntity.whitelist.enabled
-        ) {
+        if (!resultEntity.finished || !resultEntity.online || resultEntity.whitelist.enabled) {
           this.fetchRestrictedEntityData(resultEntity);
         } else {
           this.loadEntity(resultEntity);
@@ -410,17 +384,9 @@ export class ProcessingService {
       });
   }
 
-  public async loadEntity(
-    newEntity: IEntity,
-    overrideUrl?: string,
-    extension = '.babylon',
-  ) {
+  public async loadEntity(newEntity: IEntity, overrideUrl?: string, extension = '.babylon') {
     const URL = overrideUrl !== undefined ? overrideUrl : this.baseUrl;
-    if (
-      !this.loadingScreenHandler.isLoading &&
-      newEntity.processed &&
-      newEntity.mediaType
-    ) {
+    if (!this.loadingScreenHandler.isLoading && newEntity.processed && newEntity.mediaType) {
       if (!newEntity.dataSource.isExternal) {
         this.entityMediaType = newEntity.mediaType;
         await this.initialiseEntitySettingsData(newEntity);
@@ -428,29 +394,19 @@ export class ProcessingService {
           this.serverEntitySettingsSubject.next(minimalSettings);
           this.entitySettingsSubject.next(minimalSettings);
           this.loadFallbackEntity();
-          this.message.error(
-            'I can not load this Object without Settings and not during upload.',
-          );
+          this.message.error('I can not load this Object without Settings and not during upload.');
         }
         // cases: entity, image, audio, video, text
         const _quality = (newEntity.processed as any)[this.entityQuality];
         const _url =
-          _quality.includes('http') || _quality.includes('https')
-            ? _quality
-            : `${URL}${_quality}`;
+          _quality.includes('http') || _quality.includes('https') ? _quality : `${URL}${_quality}`;
         extension = _url.slice(_url.lastIndexOf('.'));
         const mediaType = newEntity.mediaType;
         switch (newEntity.mediaType) {
           case 'model':
           case 'entity':
             await this.babylon
-              .loadEntity(
-                true,
-                _url,
-                mediaType,
-                extension,
-                newEntity._id === 'default',
-              )
+              .loadEntity(true, _url, mediaType, extension, newEntity._id === 'default')
               .then(() => {
                 this.updateActiveEntity(newEntity);
                 this.updateActiveEntityMeshes(
@@ -460,9 +416,7 @@ export class ProcessingService {
               })
               .catch(error => {
                 console.error(error);
-                this.message.error(
-                  'Connection to entity server to load entity refused.',
-                );
+                this.message.error('Connection to entity server to load entity refused.');
                 this.loadFallbackEntity();
               });
             break;
@@ -478,21 +432,13 @@ export class ProcessingService {
               })
               .catch(error => {
                 console.error(error);
-                this.message.error(
-                  'Connection to entity server to load entity refused.',
-                );
+                this.message.error('Connection to entity server to load entity refused.');
                 this.loadFallbackEntity();
               });
             break;
           case 'audio':
             await this.babylon
-              .loadEntity(
-                true,
-                'assets/models/kompakkt.babylon',
-                'model',
-                '.babylon',
-                true,
-              )
+              .loadEntity(true, 'assets/models/kompakkt.babylon', 'model', '.babylon', true)
               .then(() => {
                 this.updateActiveEntityMeshes(
                   this.babylon.entityContainer.meshes as Mesh[],
@@ -504,9 +450,7 @@ export class ProcessingService {
               })
               .catch(error => {
                 console.error(error);
-                this.message.error(
-                  'Connection to entity server to load entity refused.',
-                );
+                this.message.error('Connection to entity server to load entity refused.');
                 this.loadFallbackEntity();
               });
             break;
@@ -522,9 +466,7 @@ export class ProcessingService {
               })
               .catch(error => {
                 console.error(error);
-                this.message.error(
-                  'Connection to entity server to load entity refused.',
-                );
+                this.message.error('Connection to entity server to load entity refused.');
                 this.loadFallbackEntity();
               });
             break;
@@ -541,11 +483,7 @@ export class ProcessingService {
 
   private async initialiseEntitySettingsData(entity: IEntity) {
     const mediaType = entity.mediaType;
-    if (
-      mediaType === 'model' ||
-      mediaType === 'entity' ||
-      mediaType === 'image'
-    ) {
+    if (mediaType === 'model' || mediaType === 'entity' || mediaType === 'image') {
       this.meshSettings = true;
     }
 
@@ -615,14 +553,8 @@ export class ProcessingService {
   // inititalize Annotation Mode
   private async setAnnotatingFeatured(entity: IEntity) {
     const annotatableMediaType =
-      entity.mediaType === 'image' ||
-      entity.mediaType === 'entity' ||
-      entity.mediaType === 'model';
-    if (
-      !this.showAnnotationEditor ||
-      !annotatableMediaType ||
-      this.fallbackEntityLoaded
-    ) {
+      entity.mediaType === 'image' || entity.mediaType === 'entity' || entity.mediaType === 'model';
+    if (!this.showAnnotationEditor || !annotatableMediaType || this.fallbackEntityLoaded) {
       if (
         (!annotatableMediaType || this.fallbackEntityLoaded) &&
         this.showAnnotationEditor &&

@@ -25,10 +25,7 @@ const DEFAULTS: {
   },
 };
 
-export const updateDefaults = (
-  positionVector: Vector3,
-  targetVector: Vector3,
-) => {
+export const updateDefaults = (positionVector: Vector3, targetVector: Vector3) => {
   DEFAULTS.position = {
     alpha: positionVector.x,
     beta: positionVector.y,
@@ -42,11 +39,7 @@ export const updateDefaults = (
 };
 
 export const resetCamera = (camera: ArcRotateCamera, scene: Scene) => {
-  const target = new Vector3(
-    DEFAULTS.target.x,
-    DEFAULTS.target.y,
-    DEFAULTS.target.z,
-  );
+  const target = new Vector3(DEFAULTS.target.x, DEFAULTS.target.y, DEFAULTS.target.z);
   setCameraTarget(camera, target);
   const position = new Vector3(
     DEFAULTS.position.alpha,
@@ -57,10 +50,7 @@ export const resetCamera = (camera: ArcRotateCamera, scene: Scene) => {
   return camera;
 };
 
-export const createDefaultCamera = (
-  scene: Scene,
-  canvas: HTMLCanvasElement,
-) => {
+export const createDefaultCamera = (scene: Scene, canvas: HTMLCanvasElement) => {
   // Dispose existing camera
   if (scene.activeCamera) {
     (scene.activeCamera as ArcRotateCamera).dispose();
@@ -114,11 +104,7 @@ export const createDefaultCamera = (
   return camera;
 };
 
-export const setUpCamera = (
-  camera: ArcRotateCamera,
-  maxSize: number,
-  mediaType: string,
-) => {
+export const setUpCamera = (camera: ArcRotateCamera, maxSize: number, mediaType: string) => {
   // camera for model, audio, video, image
   const radius = maxSize * 2.5;
   camera.minZ = maxSize * 0.0001;
@@ -186,11 +172,7 @@ export const moveCameraToTarget = (
   console.log('move Cam to', positionVector);
 
   camera.animations.push(
-    ...createAnimationsForCamera(camera, positionVector, [
-      'alpha',
-      'beta',
-      'radius',
-    ]),
+    ...createAnimationsForCamera(camera, positionVector, ['alpha', 'beta', 'radius']),
   );
   scene.beginAnimation(camera, 0, 30, false, 1, () => {});
 };
@@ -200,11 +182,7 @@ export const setCameraTarget = (camera: ArcRotateCamera, target: Vector3) => {
 };
 
 export const getDefaultPosition = () => {
-  return new Vector3(
-    DEFAULTS.position.alpha,
-    DEFAULTS.position.beta,
-    DEFAULTS.position.radius,
-  );
+  return new Vector3(DEFAULTS.position.alpha, DEFAULTS.position.beta, DEFAULTS.position.radius);
 };
 
 export const getDefaultTarget = () => {

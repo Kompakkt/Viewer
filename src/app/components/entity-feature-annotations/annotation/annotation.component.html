@@ -10,9 +10,7 @@
   <form class="annotation-form" #annotationForm>
     <mat-card-header>
       <mat-card-title>
-        <span class="bigger-font" *ngIf="!isEditMode">{{
-          annotation.body.content.title
-        }}</span>
+        <span class="bigger-font" *ngIf="!isEditMode">{{ annotation.body.content.title }}</span>
         <mat-form-field *ngIf="isEditMode">
           <mat-label>Title</mat-label>
           <input
@@ -25,12 +23,7 @@
         </mat-form-field>
       </mat-card-title>
 
-      <button
-        id="closeButton"
-        mat-icon-button
-        (click)="closeAnnotation()"
-        type="button"
-      >
+      <button id="closeButton" mat-icon-button (click)="closeAnnotation()" type="button">
         <mat-icon aria-label="Close">cancel</mat-icon>
       </button>
     </mat-card-header>
@@ -78,10 +71,9 @@
         matTooltipPosition="above"
         type="button"
       >
-        <mat-icon
-          [attr.aria-label]="isEditMode ? 'Save Annotation' : 'Edit Annotation'"
-          >{{ isEditMode ? 'save' : 'edit' }}</mat-icon
-        >
+        <mat-icon [attr.aria-label]="isEditMode ? 'Save Annotation' : 'Edit Annotation'">{{
+          isEditMode ? 'save' : 'edit'
+        }}</mat-icon>
       </button>
 
       <button

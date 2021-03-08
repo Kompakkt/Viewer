@@ -31,10 +31,7 @@ export const createMarker = (
     scene,
     false,
   );
-  const mat = new StandardMaterial(
-    `${id}_material${transparent ? '_transparent' : ''}`,
-    scene,
-  );
+  const mat = new StandardMaterial(`${id}_material${transparent ? '_transparent' : ''}`, scene);
   mat.diffuseTexture = dynamicTexture;
   dynamicTexture.drawText(
     ranking,

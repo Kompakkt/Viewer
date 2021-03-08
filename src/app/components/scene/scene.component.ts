@@ -1,9 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  HostListener,
-  ViewContainerRef,
-} from '@angular/core';
+import { AfterViewInit, Component, HostListener, ViewContainerRef } from '@angular/core';
 
 import { AnnotationService } from '../../services/annotation/annotation.service';
 import { BabylonService } from '../../services/babylon/babylon.service';
@@ -29,9 +24,7 @@ export class SceneComponent implements AfterViewInit {
     private viewContainerRef: ViewContainerRef,
   ) {
     setTimeout(() => {
-      this.processing.bootstrapped$.subscribe(
-        change => (this.isReady = change),
-      );
+      this.processing.bootstrapped$.subscribe(change => (this.isReady = change));
     }, 0);
   }
 

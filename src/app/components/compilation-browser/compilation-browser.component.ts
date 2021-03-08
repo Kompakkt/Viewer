@@ -15,9 +15,7 @@ export class CompilationBrowserComponent {
   public isEntity = isEntity;
 
   constructor(public processing: ProcessingService) {
-    this.processing.compilation$.subscribe(
-      compilation => (this.compilation = compilation),
-    );
+    this.processing.compilation$.subscribe(compilation => (this.compilation = compilation));
   }
 
   get currentEntities() {

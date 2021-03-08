@@ -6,9 +6,7 @@
       </div>
 
       <mat-card-title>
-        <span *ngIf="!isEditMode">{{
-          annotation.body.content.title | uppercase
-        }}</span>
+        <span *ngIf="!isEditMode">{{ annotation.body.content.title | uppercase }}</span>
         <mat-form-field *ngIf="isEditMode">
           <input
             matInput
@@ -75,10 +73,7 @@
     </mat-card-content>
 
     <mat-card-actions>
-      <mat-slide-toggle
-        [checked]="showAnnotation"
-        (change)="toggleVisibility()"
-      >
+      <mat-slide-toggle [checked]="showAnnotation" (change)="toggleVisibility()">
         {{ this.showAnnotation ? 'Hide' : 'Show' }}
       </mat-slide-toggle>
 
@@ -90,10 +85,9 @@
         matTooltipPosition="above"
         type="button"
       >
-        <mat-icon
-          [attr.aria-label]="isEditMode ? 'Save Annotation' : 'Edit Annotation'"
-          >{{ isEditMode ? 'save' : 'edit' }}</mat-icon
-        >
+        <mat-icon [attr.aria-label]="isEditMode ? 'Save Annotation' : 'Edit Annotation'">{{
+          isEditMode ? 'save' : 'edit'
+        }}</mat-icon>
       </button>
 
       <button

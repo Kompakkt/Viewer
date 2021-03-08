@@ -47,12 +47,7 @@ import {
   IVideoContainer,
 } from './container.interfaces';
 import { LoadingScreen, LoadingscreenhandlerService } from './loadingscreen';
-import {
-  load3DEntity,
-  loadAudio,
-  loadImage,
-  loadVideo,
-} from './strategies/loading-strategies';
+import { load3DEntity, loadAudio, loadImage, loadVideo } from './strategies/loading-strategies';
 import {
   afterAudioRender,
   beforeAudioRender,
@@ -68,8 +63,7 @@ export class BabylonService {
   private canvasRef = this.factoryResolver
     .resolveComponentFactory(RenderCanvasComponent)
     .create(this.injector);
-  private canvas = this.canvasRef.location.nativeElement
-    .childNodes[0] as HTMLCanvasElement;
+  private canvas = this.canvasRef.location.nativeElement.childNodes[0] as HTMLCanvasElement;
 
   private engine: Engine;
   private scene: Scene;
@@ -151,11 +145,7 @@ export class BabylonService {
     const fxaa = new FxaaPostProcess('fxaa', 1.0, this.getActiveCamera());
     fxaa.samples = 16;
 
-    const sharpen = new SharpenPostProcess(
-      'sharpen',
-      1.0,
-      this.getActiveCamera(),
-    );
+    const sharpen = new SharpenPostProcess('sharpen', 1.0, this.getActiveCamera());
     sharpen.edgeAmount = 0.25;
 
     // TODO: Adjust with sliders or embed in entitySettings
@@ -197,14 +187,8 @@ export class BabylonService {
       if (!camera) return;
 
       // Annotation_Marker -- Fixed_Size_On_Zoom
-      this.scene.getMeshesByTags(
-        'plane',
-        mesh => (mesh.scalingDeterminant = camera.radius / 35),
-      );
-      this.scene.getMeshesByTags(
-        'label',
-        mesh => (mesh.scalingDeterminant = camera.radius / 35),
-      );
+      this.scene.getMeshesByTags('plane', mesh => (mesh.scalingDeterminant = camera.radius / 35));
+      this.scene.getMeshesByTags('label', mesh => (mesh.scalingDeterminant = camera.radius / 35));
     });
 
     this.engine.runRenderLoop(() => {
@@ -245,9 +229,7 @@ export class BabylonService {
 
   public resize(): void {
     this.engine.resize();
-    this.scene.cameras.forEach(camera =>
-      camera.attachControl(this.canvas, false),
-    );
+    this.scene.cameras.forEach(camera => camera.attachControl(this.canvas, false));
   }
 
   public getEngine(): Engine {
@@ -256,12 +238,7 @@ export class BabylonService {
 
   public setBackgroundImage(background: boolean): void {
     if (background && !this.isBackground) {
-      this.background = new Layer(
-        'background',
-        this.backgroundURL,
-        this.scene,
-        true,
-      );
+      this.background = new Layer('background', this.backgroundURL, this.scene, true);
       this.background.alphaBlendingMode = Engine.ALPHA_ADD;
       this.background.isBackground = true;
       this.isBackground = true;
@@ -276,12 +253,7 @@ export class BabylonService {
 
   public setBackgroundColor(color: any): void {
     this.backgroundColor = color;
-    this.scene.clearColor = new Color4(
-      color.r / 255,
-      color.g / 255,
-      color.b / 255,
-      color.a,
-    );
+    this.scene.clearColor = new Color4(color.r / 255, color.g / 255, color.b / 255, color.a);
   }
 
   public getColor(): any {
@@ -341,49 +313,41 @@ export class BabylonService {
     this.mediaType = mediaType;
     switch (mediaType) {
       case 'audio':
-        return loadAudio(
-          rootUrl,
-          this.scene,
-          this.audioContainer,
-          this.entityContainer,
-        ).then(result => {
+        return loadAudio(rootUrl, this.scene, this.audioContainer, this.entityContainer).then(
+          result => {
+            if (result) {
+              this.audioContainer = result;
+              // Define as function so we can unregister by variable name
+              let renderAudio = () => beforeAudioRender(this.scene, this.audioContainer);
+              this.scene.registerBeforeRender(renderAudio);
+              renderAudio = () => afterAudioRender(this.audioContainer);
+              this.scene.registerAfterRender(renderAudio);
+            } else {
+              throw new Error('No audio result');
+            }
+          },
+        );
+        break;
+      case 'video':
+        return loadVideo(rootUrl, this.scene, this.videoContainer).then(result => {
           if (result) {
-            this.audioContainer = result;
+            this.videoContainer = result;
             // Define as function so we can unregister by variable name
-            let renderAudio = () =>
-              beforeAudioRender(this.scene, this.audioContainer);
-            this.scene.registerBeforeRender(renderAudio);
-            renderAudio = () => afterAudioRender(this.audioContainer);
-            this.scene.registerAfterRender(renderAudio);
+            const renderVideo = () => beforeVideoRender(this.videoContainer);
+            this.scene.registerBeforeRender(renderVideo);
           } else {
-            throw new Error('No audio result');
+            throw new Error('No video result');
           }
         });
         break;
-      case 'video':
-        return loadVideo(rootUrl, this.scene, this.videoContainer).then(
-          result => {
-            if (result) {
-              this.videoContainer = result;
-              // Define as function so we can unregister by variable name
-              const renderVideo = () => beforeVideoRender(this.videoContainer);
-              this.scene.registerBeforeRender(renderVideo);
-            } else {
-              throw new Error('No video result');
-            }
-          },
-        );
-        break;
       case 'image':
-        return loadImage(rootUrl, this.scene, this.imageContainer).then(
-          result => {
-            if (result) {
-              this.imageContainer = result;
-            } else {
-              throw new Error('No video result');
-            }
-          },
-        );
+        return loadImage(rootUrl, this.scene, this.imageContainer).then(result => {
+          if (result) {
+            this.imageContainer = result;
+          } else {
+            throw new Error('No video result');
+          }
+        });
         break;
       case 'entity':
       case 'model':
@@ -411,9 +375,7 @@ export class BabylonService {
   public async createScreenshot() {
     this.hideMesh('plane', false);
     this.hideMesh('label', false);
-    await new Promise<any>((resolve, _) =>
-      this.getEngine().onEndFrameObservable.add(resolve),
-    );
+    await new Promise<any>((resolve, _) => this.getEngine().onEndFrameObservable.add(resolve));
     const result = await new Promise<string>((resolve, reject) => {
       const _activeCamera = this.getScene().activeCamera;
       if (_activeCamera instanceof Camera) {

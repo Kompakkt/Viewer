@@ -34,20 +34,14 @@ export class AnnotationwalkthroughComponent implements OnInit {
 
   public previousAnnotation() {
     const isFirst = this.ranking === 0;
-    this.ranking = isFirst
-      ? this.annotations.length - 1
-      : (this.ranking = this.ranking - 1);
-    this.annotationService.setSelectedAnnotation(
-      this.annotations[this.ranking]._id.toString(),
-    );
+    this.ranking = isFirst ? this.annotations.length - 1 : (this.ranking = this.ranking - 1);
+    this.annotationService.setSelectedAnnotation(this.annotations[this.ranking]._id.toString());
   }
 
   public nextAnnotation() {
     const isLast = this.ranking === this.annotations.length - 1;
 
     this.ranking = isLast ? 0 : this.ranking + 1;
-    this.annotationService.setSelectedAnnotation(
-      this.annotations[this.ranking]._id.toString(),
-    );
+    this.annotationService.setSelectedAnnotation(this.annotations[this.ranking]._id.toString());
   }
 }

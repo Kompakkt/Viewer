@@ -1,21 +1,19 @@
 <h2 mat-dialog-title>Delete Annotation</h2>
 <mat-dialog-content>
-<h3>Please authenticate for deleting</h3>
-<mat-form-field>
-  <input matInput
-         name="username"
-         type="text"
-         placeholder="username"
-         [(ngModel)]="username"
-         cdkFocusInitial>
-</mat-form-field>
-<mat-form-field>
-  <input matInput
-         name="password"
-         type="password"
-         placeholder="password"
-         [(ngModel)]="password">
-</mat-form-field>
+  <h3>Please authenticate for deleting</h3>
+  <mat-form-field>
+    <input
+      matInput
+      name="username"
+      type="text"
+      placeholder="username"
+      [(ngModel)]="username"
+      cdkFocusInitial
+    />
+  </mat-form-field>
+  <mat-form-field>
+    <input matInput name="password" type="password" placeholder="password" [(ngModel)]="password" />
+  </mat-form-field>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-button [mat-dialog-close]="true" (click)="login()">Submit</button>

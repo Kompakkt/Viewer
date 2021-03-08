@@ -1,7 +1,4 @@
-<div
-  *ngIf="settingsReady && processing.entitySettings"
-  id="editor-entitysettings"
->
+<div *ngIf="settingsReady && processing.entitySettings" id="editor-entitysettings">
   <div *ngIf="processing.upload === false">
     <mat-card>
       <mat-card-content>
@@ -33,14 +30,10 @@
 
     <mat-card>
       <mat-card-header>
-        <mat-card-title>
-          Background
-        </mat-card-title>
+        <mat-card-title> Background </mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <color-chrome
-          (onChange)="setBackgroundColor($event.color.rgb)"
-        ></color-chrome>
+        <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
         <br />
         <mat-slide-toggle
           [(ngModel)]="processing.entitySettings.background.effect"
@@ -53,9 +46,7 @@
 
     <mat-card>
       <mat-card-header>
-        <mat-card-title>
-          Lights
-        </mat-card-title>
+        <mat-card-title> Lights </mat-card-title>
       </mat-card-header>
       <mat-card-content>
         <app-entity-feature-settings-lights></app-entity-feature-settings-lights>
@@ -64,9 +55,7 @@
 
     <mat-card>
       <mat-card-header>
-        <mat-card-title>
-          Preview & Initial Perspective
-        </mat-card-title>
+        <mat-card-title> Preview & Initial Perspective </mat-card-title>
       </mat-card-header>
       <mat-card-content>
         Click on this image to set actual view as initial perspective.
@@ -80,11 +69,7 @@
 
     <mat-card>
       <mat-card-content>
-        <button
-          class="fullwidth-button"
-          mat-raised-button
-          (click)="backToDefaultSettings()"
-        >
+        <button class="fullwidth-button" mat-raised-button (click)="backToDefaultSettings()">
           Back to Default
         </button>
         <button
@@ -125,16 +110,12 @@
             type="button"
           >
             <mat-icon>
-              {{
-                backgroundToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down'
-              }}
+              {{ backgroundToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}
             </mat-icon>
           </button>
         </h5>
         <div *ngIf="backgroundToggle">
-          <color-chrome
-            (onChange)="setBackgroundColor($event.color.rgb)"
-          ></color-chrome>
+          <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
           <br />
           <mat-slide-toggle
             [(ngModel)]="processing.entitySettings.background.effect"
@@ -171,17 +152,14 @@
               type="button"
             >
               <mat-icon>
-                {{
-                  previewToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down'
-                }}
+                {{ previewToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}
               </mat-icon>
             </button>
           </h5>
           <div *ngIf="previewToggle">
-            Please select a nice and fitting camera perspective before you go on
-            to the next step. By clicking on the next button the actual view
-            will be set as initial perspective. And I will automatically produce
-            a preview - smile!
+            Please select a nice and fitting camera perspective before you go on to the next step.
+            By clicking on the next button the actual view will be set as initial perspective. And I
+            will automatically produce a preview - smile!
           </div>
         </div>
         <div>

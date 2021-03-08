@@ -16,18 +16,11 @@
   </h5>
 
   <div *ngIf="meshSettingsHelperToggle">
-    <button
-      class="fullwidth-button"
-      mat-raised-button
-      (click)="resetVisualUIMeshSettingsHelper()"
-    >
+    <button class="fullwidth-button" mat-raised-button (click)="resetVisualUIMeshSettingsHelper()">
       Reset Helper
     </button>
     <h5>Number of meshes: {{ meshes ? meshes.length : 0 }}</h5>
-    <mat-checkbox
-      [checked]="boundingBoxVisibility"
-      (change)="toggleBoundingBoxEntityVisibility()"
-    >
+    <mat-checkbox [checked]="boundingBoxVisibility" (change)="toggleBoundingBoxEntityVisibility()">
       <h5>Bounding Box Entity</h5>
     </mat-checkbox>
 
@@ -46,21 +39,15 @@
         type="button"
       >
         <mat-icon>{{
-          backgroundColorPickerToggle
-            ? 'keyboard_arrow_up'
-            : 'keyboard_arrow_down'
+          backgroundColorPickerToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down'
         }}</mat-icon>
       </button>
     </h5>
     <div *ngIf="backgroundColorPickerToggle">
-      <color-chrome
-        (onChange)="setBackgroundColor($event.color.rgb)"
-      ></color-chrome>
+      <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
     </div>
 
-    <mat-checkbox
-      [checked]="worldAxisVisibility"
-      (change)="toggleAxesVisibility('worldAxis')"
+    <mat-checkbox [checked]="worldAxisVisibility" (change)="toggleAxesVisibility('worldAxis')"
       ><h5>World Axis</h5>
     </mat-checkbox>
     <div *ngIf="worldAxisVisibility">
@@ -75,9 +62,7 @@
       ></mat-slider>
     </div>
     <br />
-    <mat-checkbox
-      [checked]="localAxisVisibility"
-      (change)="toggleAxesVisibility('localAxis')"
+    <mat-checkbox [checked]="localAxisVisibility" (change)="toggleAxesVisibility('localAxis')"
       ><h5>Local Axis</h5>
     </mat-checkbox>
     <div *ngIf="localAxisVisibility">
@@ -92,9 +77,7 @@
       ></mat-slider>
     </div>
     <br />
-    <mat-checkbox
-      [checked]="groundVisibility"
-      (change)="toggleGroundVisibility()"
+    <mat-checkbox [checked]="groundVisibility" (change)="toggleGroundVisibility()"
       ><h5>Ground</h5>
     </mat-checkbox>
     <div *ngIf="groundVisibility">
@@ -108,21 +91,15 @@
         (input)="setScalingFactorGround($event.value)"
       ></mat-slider>
       <h6>Color</h6>
-      <color-chrome
-        (onChange)="entitySettings.setGroundMaterial($event.color.rgb)"
-      ></color-chrome>
+      <color-chrome (onChange)="entitySettings.setGroundMaterial($event.color.rgb)"></color-chrome>
     </div>
-    <button
-      class="fullwidth-button"
-      mat-raised-button
-      (click)="resetVisualUIMeshSettingsHelper()"
-    >
+    <button class="fullwidth-button" mat-raised-button (click)="resetVisualUIMeshSettingsHelper()">
       Reset Helper
     </button>
   </div>
 
   <h5>Set Settings</h5>
-  <h5 style="padding-left:1em">
+  <h5 style="padding-left: 1em">
     Scale
     <button
       mat-icon-button
@@ -137,11 +114,7 @@
     </button>
   </h5>
   <div *ngIf="meshScaleToggle">
-    <button
-      class="fullwidth-button"
-      mat-raised-button
-      (click)="handleChangeDimension('scale', 1)"
-    >
+    <button class="fullwidth-button" mat-raised-button (click)="handleChangeDimension('scale', 1)">
       Reset Size
     </button>
     <h6>
@@ -202,7 +175,7 @@
       (input)="handleChangeDimension('scale', $event.value)"
     ></mat-slider>
   </div>
-  <h5 style="padding-left:1em">
+  <h5 style="padding-left: 1em">
     Orientation
     <button
       mat-icon-button
@@ -212,18 +185,12 @@
       type="button"
     >
       <mat-icon>
-        {{
-          meshOrientationToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down'
-        }}
+        {{ meshOrientationToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}
       </mat-icon>
     </button>
   </h5>
   <div *ngIf="meshOrientationToggle">
-    <button
-      class="fullwidth-button"
-      mat-raised-button
-      (click)="setRotation('xyz_reset', 0)"
-    >
+    <button class="fullwidth-button" mat-raised-button (click)="setRotation('xyz_reset', 0)">
       Reset Rotation
     </button>
     <h5>X</h5>

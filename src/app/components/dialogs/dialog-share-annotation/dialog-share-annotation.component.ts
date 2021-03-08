@@ -52,8 +52,7 @@ export class DialogShareAnnotationComponent {
             this.response = {
               status: true,
               collectionId: this.targetCollectionId,
-              annotationListLength:
-                Object.keys(compilation.annotations).length ?? 0,
+              annotationListLength: Object.keys(compilation.annotations).length ?? 0,
             };
 
             this.dialogRef.close(this.response);
@@ -63,9 +62,7 @@ export class DialogShareAnnotationComponent {
           console.error(error);
           this.message.error('Connection to entity server refused.');
           // 'missing'
-          this.message.error(
-            'Can not find Collection with ID ' + this.targetCollectionId + '.',
-          );
+          this.message.error('Can not find Collection with ID ' + this.targetCollectionId + '.');
         });
     }
   }
@@ -88,8 +85,7 @@ export class DialogShareAnnotationComponent {
           this.response = {
             status: true,
             collectionId: this.targetCollectionId,
-            annotationListLength:
-              Object.keys(compilation.annotations).length ?? 1,
+            annotationListLength: Object.keys(compilation.annotations).length ?? 1,
           };
           this.dialogRef.close(this.response);
         })

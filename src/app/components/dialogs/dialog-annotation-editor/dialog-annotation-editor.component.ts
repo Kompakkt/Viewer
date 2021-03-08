@@ -69,16 +69,11 @@ export class DialogAnnotationEditorComponent {
     const start = caret.start;
     const value = caret.value;
 
-    return `${value.substring(0, start)}${mdElement}${value.substring(
-      start,
-      value.length,
-    )}`;
+    return `${value.substring(0, start)}${mdElement}${value.substring(start, value.length)}`;
   }
 
   private addExternalImage(image: IExternalImage) {
-    this.data.content = this.createMarkdown(
-      `![alt ${image.description}](${image.url})`,
-    );
+    this.data.content = this.createMarkdown(`![alt ${image.description}](${image.url})`);
   }
 
   private addEntity(entity: IEntity) {

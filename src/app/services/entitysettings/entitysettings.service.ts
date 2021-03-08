@@ -35,16 +35,8 @@ const isDegreeSpectrum = (value: number) => {
   providedIn: 'root',
 })
 export class EntitySettingsService {
-  private min = new Vector3(
-    Number.MAX_VALUE,
-    Number.MAX_VALUE,
-    Number.MAX_VALUE,
-  );
-  private max = new Vector3(
-    Number.MAX_VALUE * -1,
-    Number.MAX_VALUE * -1,
-    Number.MAX_VALUE * -1,
-  );
+  private min = new Vector3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
+  private max = new Vector3(Number.MAX_VALUE * -1, Number.MAX_VALUE * -1, Number.MAX_VALUE * -1);
   public initialSize = Vector3.Zero();
   private initialCenterPoint = Vector3.Zero();
   private currentCenterPoint = Vector3.Zero();
@@ -66,10 +58,7 @@ export class EntitySettingsService {
     private processing: ProcessingService,
     private lights: LightService,
   ) {
-    combineLatest(
-      this.processing.entitySettings$,
-      this.processing.meshes$,
-    ).subscribe(arr => {
+    combineLatest(this.processing.entitySettings$, this.processing.meshes$).subscribe(arr => {
       const settings = arr[0];
       const meshes = arr[1];
       this.entitySettings = settings;
@@ -78,34 +67,20 @@ export class EntitySettingsService {
       requestAnimationFrame(() =>
         this.setUpSettings()
           .then(() => console.log('Settings loaded'))
-          .catch((err: Error) =>
-            console.log('Settings not loaded', err.message),
-          ),
+          .catch((err: Error) => console.log('Settings not loaded', err.message)),
       );
     });
   }
 
   private async resetInitialValues() {
-    this.min = new Vector3(
-      Number.MAX_VALUE,
-      Number.MAX_VALUE,
-      Number.MAX_VALUE,
-    );
-    this.max = new Vector3(
-      Number.MAX_VALUE * -1,
-      Number.MAX_VALUE * -1,
-      Number.MAX_VALUE * -1,
-    );
+    this.min = new Vector3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
+    this.max = new Vector3(Number.MAX_VALUE * -1, Number.MAX_VALUE * -1, Number.MAX_VALUE * -1);
     this.initialSize = Vector3.Zero();
     this.initialCenterPoint = this.currentCenterPoint = Vector3.Zero();
     this.groundInitialSize = 0;
     this.localAxisInitialSize = 0;
     this.worldAxisInitialSize = 0;
-    this.processing.rotationQuaternion = Quaternion.RotationYawPitchRoll(
-      0,
-      0,
-      0,
-    );
+    this.processing.rotationQuaternion = Quaternion.RotationYawPitchRoll(0, 0, 0);
     this.processing.entityHeight = (0).toFixed(2);
     this.processing.entityWidth = (0).toFixed(2);
     this.processing.entityDepth = (0).toFixed(2);
@@ -142,9 +117,7 @@ export class EntitySettingsService {
           this.max.z - this.initialSize.z / 2,
         );
       })
-      .catch((err: Error) =>
-        console.log('Failed intitializing size', err.message),
-      );
+      .catch((err: Error) => console.log('Failed intitializing size', err.message));
   }
 
   private async calculateMinMax() {
@@ -186,11 +159,7 @@ export class EntitySettingsService {
     if (!this.meshes) {
       throw new Error('No meshes available.');
     }
-    this.center = MeshBuilder.CreateBox(
-      'center',
-      { size: 0.01 },
-      this.babylon.getScene(),
-    );
+    this.center = MeshBuilder.CreateBox('center', { size: 0.01 }, this.babylon.getScene());
     Tags.AddTagsTo(this.center, 'center');
     this.center.isVisible = false;
 
@@ -240,10 +209,7 @@ export class EntitySettingsService {
     this.loadBackgroundEffect();
     this.loadBackgroundColor();
     this.initialiseLights();
-    if (
-      this.processing.meshSettings ||
-      this.processing.entityMediaType === 'audio'
-    ) {
+    if (this.processing.meshSettings || this.processing.entityMediaType === 'audio') {
       await this.loadRotation();
       await this.loadScaling();
     }
@@ -264,8 +230,7 @@ export class EntitySettingsService {
     }
     const scale = this.entitySettings.scale;
     const isModel =
-      this.processing.entityMediaType === 'model' ||
-      this.processing.entityMediaType === 'entity';
+      this.processing.entityMediaType === 'model' || this.processing.entityMediaType === 'entity';
     let diagonalLength = 0;
     if (this.boundingBox) {
       const bi = this.boundingBox.getBoundingInfo();
@@ -322,9 +287,7 @@ export class EntitySettingsService {
       mesh.parent = null;
       mesh.position = abs;
       const meshRotation = mesh.rotationQuaternion;
-      mesh.rotationQuaternion = this.processing.rotationQuaternion.multiply(
-        meshRotation,
-      );
+      mesh.rotationQuaternion = this.processing.rotationQuaternion.multiply(meshRotation);
       center.computeWorldMatrix();
       mesh.scaling.x *= center.scaling.x;
       mesh.scaling.y *= center.scaling.y;
@@ -364,15 +327,9 @@ export class EntitySettingsService {
       throw new Error('RotationQuaternion for center missing');
     }
 
-    this.entitySettings.rotation.x = isDegreeSpectrum(
-      this.entitySettings.rotation.x,
-    );
-    this.entitySettings.rotation.y = isDegreeSpectrum(
-      this.entitySettings.rotation.y,
-    );
-    this.entitySettings.rotation.z = isDegreeSpectrum(
-      this.entitySettings.rotation.z,
-    );
+    this.entitySettings.rotation.x = isDegreeSpectrum(this.entitySettings.rotation.x);
+    this.entitySettings.rotation.y = isDegreeSpectrum(this.entitySettings.rotation.y);
+    this.entitySettings.rotation.z = isDegreeSpectrum(this.entitySettings.rotation.z);
 
     const start = this.processing.rotationQuaternion;
     const rotationQuaternion = Quaternion.RotationYawPitchRoll(0, 0, 0);
@@ -416,16 +373,7 @@ export class EntitySettingsService {
     this.center.animations.push(anim);
     await this.babylon
       .getScene()
-      .beginAnimation(
-        this.center,
-        0,
-        100,
-        false,
-        undefined,
-        undefined,
-        undefined,
-        false,
-      );
+      .beginAnimation(this.center, 0, 100, false, undefined, undefined, undefined, false);
   }
 
   // Size
@@ -466,12 +414,7 @@ export class EntitySettingsService {
       this.localAxisInitialSize = size * 1.1;
       this.groundInitialSize = size * 1.2;
       createWorldAxis(scene, this.worldAxisInitialSize);
-      createlocalAxes(
-        scene,
-        this.localAxisInitialSize,
-        this.center,
-        this.initialCenterPoint,
-      );
+      createlocalAxes(scene, this.localAxisInitialSize, this.center, this.initialCenterPoint);
       this.ground = createGround(scene, this.groundInitialSize);
       this.setGroundMaterial();
     }
@@ -507,16 +450,8 @@ export class EntitySettingsService {
         )
       : this.entitySettings.cameraPositionInitial;
 
-    const positionVector = new Vector3(
-      camera.position.x,
-      camera.position.y,
-      camera.position.z,
-    );
-    const targetVector = new Vector3(
-      camera.target.x,
-      camera.target.y,
-      camera.target.z,
-    );
+    const positionVector = new Vector3(camera.position.x, camera.position.y, camera.position.z);
+    const targetVector = new Vector3(camera.target.x, camera.target.y, camera.target.z);
     this.babylon.cameraManager.updateDefaults(positionVector, targetVector);
     this.babylon.cameraManager.moveActiveCameraToPosition(positionVector);
     this.babylon.cameraManager.setActiveCameraTarget(targetVector);
@@ -567,10 +502,7 @@ export class EntitySettingsService {
     const hemisphericLightDown = this.lights.getLightByType('ambientlightDown');
     if (hemisphericLightDown) {
       hemisphericLightDown.intensity *= pbrLightFactor;
-      this.lights.initialiseAmbientLight(
-        'down',
-        hemisphericLightDown.intensity,
-      );
+      this.lights.initialiseAmbientLight('down', hemisphericLightDown.intensity);
     }
   }
 
@@ -584,10 +516,7 @@ export class EntitySettingsService {
     }
     const ambientlightDown = this.lights.getLightByType('ambientlightDown');
     if (ambientlightDown) {
-      this.lights.setLightIntensity(
-        'ambientlightDown',
-        ambientlightDown.intensity,
-      );
+      this.lights.setLightIntensity('ambientlightDown', ambientlightDown.intensity);
     }
     const pointLight = this.lights.getLightByType('pointLight');
     if (pointLight) {

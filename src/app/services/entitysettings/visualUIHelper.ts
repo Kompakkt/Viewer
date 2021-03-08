@@ -63,14 +63,7 @@ export const createWorldAxis = (scene: Scene, size: number) => {
   Tags.AddTagsTo(axisX, 'worldAxis');
   axisX.color = new Color3(1, 0, 0);
   axisX.visibility = 0;
-  const xChar = createTextPlane(
-    'X',
-    'red',
-    sizeWorldAxis / 10,
-    'worldAxis',
-    'worldAxisX',
-    scene,
-  );
+  const xChar = createTextPlane('X', 'red', sizeWorldAxis / 10, 'worldAxis', 'worldAxisX', scene);
   xChar.position = new Vector3(sizeWorldAxis * 0.9, sizeWorldAxis * -0.05, 0);
   xChar.visibility = 0;
 
@@ -86,14 +79,7 @@ export const createWorldAxis = (scene: Scene, size: number) => {
   Tags.AddTagsTo(axisY, 'worldAxis');
   axisY.color = new Color3(0, 1, 0);
   axisY.visibility = 0;
-  const yChar = createTextPlane(
-    'Y',
-    'green',
-    sizeWorldAxis / 10,
-    'worldAxis',
-    'worldAxisY',
-    scene,
-  );
+  const yChar = createTextPlane('Y', 'green', sizeWorldAxis / 10, 'worldAxis', 'worldAxisY', scene);
   yChar.position = new Vector3(0, sizeWorldAxis * 0.9, sizeWorldAxis * -0.05);
   yChar.visibility = 0;
 
@@ -109,14 +95,7 @@ export const createWorldAxis = (scene: Scene, size: number) => {
   Tags.AddTagsTo(axisZ, 'worldAxis');
   axisZ.color = new Color3(0, 0, 1);
   axisZ.visibility = 0;
-  const zChar = createTextPlane(
-    'Z',
-    'blue',
-    sizeWorldAxis / 10,
-    'worldAxis',
-    'worldAxisZ',
-    scene,
-  );
+  const zChar = createTextPlane('Z', 'blue', sizeWorldAxis / 10, 'worldAxis', 'worldAxisZ', scene);
   zChar.position = new Vector3(0, sizeWorldAxis * 0.05, sizeWorldAxis * 0.9);
   zChar.visibility = 0;
 };
@@ -131,15 +110,7 @@ export const createTextPlane = (
 ) => {
   const dynamicTexture = new DynamicTexture('DynamicTexture', 50, scene, true);
   dynamicTexture.hasAlpha = true;
-  dynamicTexture.drawText(
-    text,
-    5,
-    40,
-    'bold 36px Arial',
-    color,
-    'transparent',
-    true,
-  );
+  dynamicTexture.drawText(text, 5, 40, 'bold 36px Arial', color, 'transparent', true);
 
   const plane = Mesh.CreatePlane(tag, size, scene, true);
   Tags.AddTagsTo(plane, tag);
@@ -154,12 +125,7 @@ export const createTextPlane = (
   return plane;
 };
 
-export const createlocalAxes = (
-  scene: Scene,
-  size: number,
-  center: Mesh,
-  pivot: Vector3,
-) => {
+export const createlocalAxes = (scene: Scene, size: number, center: Mesh, pivot: Vector3) => {
   const sizeLocalAxis = size;
 
   const vecOneX = new Vector3(sizeLocalAxis, 0, 0);
@@ -176,14 +142,7 @@ export const createlocalAxes = (
   local_axisX.visibility = 0;
   local_axisX.position = pivot;
   local_axisX.renderingGroupId = 2;
-  const xChar = createTextPlane(
-    'X',
-    'red',
-    sizeLocalAxis / 10,
-    'localAxis',
-    'localAxisX',
-    scene,
-  );
+  const xChar = createTextPlane('X', 'red', sizeLocalAxis / 10, 'localAxis', 'localAxisX', scene);
   xChar.position = new Vector3(0.9 * sizeLocalAxis, -0.05 * sizeLocalAxis, 0);
   xChar.visibility = 0;
   xChar.renderingGroupId = 2;
@@ -202,14 +161,7 @@ export const createlocalAxes = (
   local_axisY.visibility = 0;
   local_axisY.position = pivot;
   local_axisY.renderingGroupId = 2;
-  const yChar = createTextPlane(
-    'Y',
-    'green',
-    sizeLocalAxis / 10,
-    'localAxis',
-    'localAxisY',
-    scene,
-  );
+  const yChar = createTextPlane('Y', 'green', sizeLocalAxis / 10, 'localAxis', 'localAxisY', scene);
   yChar.position = new Vector3(0, 0.9 * sizeLocalAxis, -0.05 * sizeLocalAxis);
   yChar.visibility = 0;
   yChar.renderingGroupId = 2;
@@ -228,14 +180,7 @@ export const createlocalAxes = (
   local_axisZ.visibility = 0;
   local_axisZ.position = pivot;
   local_axisZ.renderingGroupId = 2;
-  const zChar = createTextPlane(
-    'Z',
-    'blue',
-    sizeLocalAxis / 10,
-    'localAxis',
-    'localAxisZ',
-    scene,
-  );
+  const zChar = createTextPlane('Z', 'blue', sizeLocalAxis / 10, 'localAxis', 'localAxisZ', scene);
   zChar.position = new Vector3(0, 0.05 * sizeLocalAxis, 0.9 * sizeLocalAxis);
   zChar.visibility = 0;
   zChar.renderingGroupId = 2;

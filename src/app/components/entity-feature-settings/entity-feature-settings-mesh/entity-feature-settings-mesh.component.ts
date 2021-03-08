@@ -68,20 +68,17 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
     let factor;
     switch (dimension) {
       case 'height':
-        factor =
-          +this.processing.entityHeight / this.entitySettings.initialSize.y;
+        factor = +this.processing.entityHeight / this.entitySettings.initialSize.y;
         this.processing.entitySettings.scale = parseFloat(factor.toFixed(2));
         this.entitySettings.loadScaling();
         break;
       case 'width':
-        factor =
-          +this.processing.entityWidth / this.entitySettings.initialSize.x;
+        factor = +this.processing.entityWidth / this.entitySettings.initialSize.x;
         this.processing.entitySettings.scale = parseFloat(factor.toFixed(2));
         this.entitySettings.loadScaling();
         break;
       case 'depth':
-        factor =
-          +this.processing.entityDepth / this.entitySettings.initialSize.z;
+        factor = +this.processing.entityDepth / this.entitySettings.initialSize.z;
         this.processing.entitySettings.scale = parseFloat(factor.toFixed(2));
         this.entitySettings.loadScaling();
         break;
@@ -158,15 +155,11 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
 
   public setScalingFactorAxis(factor: number | null, world: boolean) {
     if (!factor) factor = 1;
-    world
-      ? (this.worldAxisScalingFactor = factor)
-      : (this.localAxisScalingFactor = factor);
+    world ? (this.worldAxisScalingFactor = factor) : (this.localAxisScalingFactor = factor);
     const pos =
       factor *
       0.9 *
-      (world
-        ? this.entitySettings.worldAxisInitialSize
-        : this.entitySettings.localAxisInitialSize);
+      (world ? this.entitySettings.worldAxisInitialSize : this.entitySettings.localAxisInitialSize);
     this.babylon
       .getScene()
       .getMeshesByTags(world ? 'worldAxis' : 'localAxis')
@@ -205,11 +198,8 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
       console.error(this);
       return;
     }
-    this.boundingBoxVisibility =
-      value !== undefined ? value : !this.boundingBoxVisibility;
-    this.entitySettings.boundingBox.visibility = this.boundingBoxVisibility
-      ? 1
-      : 0;
+    this.boundingBoxVisibility = value !== undefined ? value : !this.boundingBoxVisibility;
+    this.entitySettings.boundingBox.visibility = this.boundingBoxVisibility ? 1 : 0;
   }
 
   public toggleBoundingBoxMeshesVisibility(value?: boolean) {
@@ -220,9 +210,7 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
     }
     this.boundingBoxMeshesVisibility =
       value !== undefined ? value : !this.boundingBoxMeshesVisibility;
-    this.meshes.forEach(
-      mesh => (mesh.showBoundingBox = this.boundingBoxMeshesVisibility),
-    );
+    this.meshes.forEach(mesh => (mesh.showBoundingBox = this.boundingBoxMeshesVisibility));
   }
 
   public toggleAxesVisibility(axis: string, value?: boolean) {
@@ -239,8 +227,7 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
   }
 
   public toggleGroundVisibility(value?: boolean) {
-    this.groundVisibility =
-      value !== undefined ? value : !this.groundVisibility;
+    this.groundVisibility = value !== undefined ? value : !this.groundVisibility;
     this.visibilityMesh('ground', this.groundVisibility);
   }
 

@@ -14,18 +14,14 @@ export class DialogInviteBroadcastingComponent {
     'Hi! Do you like new innovative things? Come and join me on Kompakkt and ' +
     'let us use the collaborative Annotationmode! Join me on: ';
 
-  public baseURL =
-    'https://blacklodge.hki.uni-koeln.de/builds/Kompakkt/live/?compilation=';
-  public defaultURL =
-    'https://blacklodge.hki.uni-koeln.de/builds/Kompakkt/live/';
+  public baseURL = 'https://blacklodge.hki.uni-koeln.de/builds/Kompakkt/live/?compilation=';
+  public defaultURL = 'https://blacklodge.hki.uni-koeln.de/builds/Kompakkt/live/';
   public collectionId: string | undefined;
 
   public compilation: ICompilation | undefined;
 
   constructor(public processing: ProcessingService) {
-    this.processing.compilation$.subscribe(
-      compilation => (this.compilation = compilation),
-    );
+    this.processing.compilation$.subscribe(compilation => (this.compilation = compilation));
   }
 
   copyInputMessage(inputElement: HTMLTextAreaElement) {

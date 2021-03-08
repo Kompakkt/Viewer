@@ -56,16 +56,8 @@
     <h3>Or embed an entity of your collection:</h3>
 
     <ng-container *ngFor="let entity of currentEntities; let i = index">
-      <mat-card
-        (click)="addEntity(i)"
-        class="compilation-entity"
-        *ngIf="isEntity(entity)"
-      >
-        <img
-          mat-card-image
-          [src]="entity.settings.preview"
-          [alt]="entity.name"
-        />
+      <mat-card (click)="addEntity(i)" class="compilation-entity" *ngIf="isEntity(entity)">
+        <img mat-card-image [src]="entity.settings.preview" [alt]="entity.name" />
         <mat-card-footer>{{ entity.name }}</mat-card-footer>
       </mat-card>
     </ng-container>

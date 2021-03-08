@@ -3,12 +3,14 @@
   <mat-dialog-content class="mat-typography">
     <h3>Please enter the ID of the target Collection</h3>
     <mat-form-field>
-      <input matInput
-             name="targetCollectionId"
-             type="text"
-             placeholder="Collection ID"
-             [(ngModel)]="targetCollectionId"
-             cdkFocusInitial>
+      <input
+        matInput
+        name="targetCollectionId"
+        type="text"
+        placeholder="Collection ID"
+        [(ngModel)]="targetCollectionId"
+        cdkFocusInitial
+      />
     </mat-form-field>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
@@ -22,13 +24,18 @@
     <p>Type in the password to load this collection.</p>
     <h3>Password</h3>
     <mat-form-field>
-      <input matInput name="password" #description="ngModel" type="password"
-             placeholder="password" [(ngModel)]="passwordCollection">
+      <input
+        matInput
+        name="password"
+        #description="ngModel"
+        type="password"
+        placeholder="password"
+        [(ngModel)]="passwordCollection"
+      />
     </mat-form-field>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
     <button mat-button mat-dialog-close (click)="cancel()">Cancel</button>
     <button mat-button cdkFocusInitial (click)="checkPwd()">Check</button>
   </mat-dialog-actions>
-
 </div>

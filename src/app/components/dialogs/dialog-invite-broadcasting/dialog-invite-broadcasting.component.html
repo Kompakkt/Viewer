@@ -5,12 +5,7 @@
       <textarea
         matInput
         placeholder="You can edit this Text"
-        [value]="
-          text +
-          (processing.defaultEntityLoaded
-            ? defaultURL
-            : baseURL + compilation._id)
-        "
+        [value]="text + (processing.defaultEntityLoaded ? defaultURL : baseURL + compilation._id)"
         #userinput
         cdkTextareaAutosize
         cdkAutosizeMinRows="4"

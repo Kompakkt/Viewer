@@ -43,9 +43,7 @@ export class EntityFeatureSettingsComponent {
     return new Promise<boolean>((resolve, _) => {
       if (!this.entity) return resolve(false);
       if (!this.processing.entitySettings) return resolve(false);
-      this.processing.showSettingsEditor$
-        .toPromise()
-        .then(value => resolve(value));
+      this.processing.showSettingsEditor$.toPromise().then(value => resolve(value));
     });
   }
 
@@ -75,10 +73,7 @@ export class EntityFeatureSettingsComponent {
       console.error(this);
       throw new Error('Settings missing');
     }
-    const {
-      position,
-      target,
-    } = await this.babylon.cameraManager.getInitialPosition();
+    const { position, target } = await this.babylon.cameraManager.getInitialPosition();
     this.processing.entitySettings.cameraPositionInitial = {
       position,
       target,
@@ -104,10 +99,7 @@ export class EntityFeatureSettingsComponent {
       console.error(this);
       throw new Error('Entity missing');
     }
-    if (
-      !this.processing.defaultEntityLoaded &&
-      !this.processing.fallbackEntityLoaded
-    ) {
+    if (!this.processing.defaultEntityLoaded && !this.processing.fallbackEntityLoaded) {
       const settings = this.processing.entitySettings;
       this.backend.updateSettings(this.entity._id, settings).then(result => {
         console.log('Settings gespeichert', result);
@@ -115,10 +107,7 @@ export class EntityFeatureSettingsComponent {
           JSON.stringify(this.processing.entitySettings),
         );
         if (this.processing.upload) {
-          window.top.postMessage(
-            { type: 'settings', settings },
-            environment.repository,
-          );
+          window.top.postMessage({ type: 'settings', settings }, environment.repository);
           this.processing.upload = false;
         }
       });
@@ -126,10 +115,7 @@ export class EntityFeatureSettingsComponent {
   }
 
   public backToDefaultSettings() {
-    if (
-      !this.processing.entitySettings ||
-      !this.processing.entitySettingsOnServer
-    ) {
+    if (!this.processing.entitySettings || !this.processing.entitySettingsOnServer) {
       console.error(this);
       throw new Error('Settings missing');
     }
@@ -156,8 +142,7 @@ export class EntityFeatureSettingsComponent {
     dialogRef.afterClosed().subscribe(finish => {
       if (finish) {
         this.entitySettings.meshSettingsCompleted.emit(true);
-        if (!this.stepper)
-          return console.error('Stepper could not be accessed');
+        if (!this.stepper) return console.error('Stepper could not be accessed');
         this.stepper.selected.completed = true;
         this.stepper.selected.editable = false;
         this.stepper.next();

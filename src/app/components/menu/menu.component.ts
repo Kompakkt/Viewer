@@ -66,8 +66,7 @@ export class MenuComponent implements OnInit {
       this.processing.updateEntityQuality(quality);
       if (!this.entity?.processed) {
         throw new Error(
-          'The object is not available and unfortunately ' +
-            'I can not update the entityQuality.',
+          'The object is not available and unfortunately ' + 'I can not update the entityQuality.',
         );
       }
       const qualities: any = this.entity?.processed ?? {};

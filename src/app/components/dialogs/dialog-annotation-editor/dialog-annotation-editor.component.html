@@ -1,40 +1,34 @@
 <h1 mat-dialog-title>
   <span *ngIf="!editMode" [innerHTML]="data.title"></span>
   <mat-form-field *ngIf="editMode">
-    <input matInput
-           name="title"
-           type="text"
-           placeholder="Title"
-           [(ngModel)]="data.title">
+    <input matInput name="title" type="text" placeholder="Title" [(ngModel)]="data.title" />
   </mat-form-field>
 </h1>
 
 <div mat-dialog-content>
+  <markdown *ngIf="!editMode" [data]="data.content"></markdown>
 
-  <markdown *ngIf="!editMode"
-            [data]="data.content"></markdown>
-
-  <app-media-browser *ngIf="editMode"
-                     (addMedia)="addEntitySwitch($event)"></app-media-browser>
+  <app-media-browser *ngIf="editMode" (addMedia)="addEntitySwitch($event)"></app-media-browser>
 
   <mat-form-field *ngIf="editMode">
-
-    <textarea id="annotation-content"
-              #annotationContent
-              matInput
-              cdkTextareaAutosize
-              cdkAutosizeMinRows="1"
-              name="description"
-              type="text"
-              placeholder="Description"
-              [(ngModel)]="data.content">
-      </textarea>
+    <textarea
+      id="annotation-content"
+      #annotationContent
+      matInput
+      cdkTextareaAutosize
+      cdkAutosizeMinRows="1"
+      name="description"
+      type="text"
+      placeholder="Description"
+      [(ngModel)]="data.content"
+    >
+    </textarea>
   </mat-form-field>
 </div>
 
 <div mat-dialog-actions>
-  <button mat-button (click)="toggleEditViewMode()" attr.aria-label="{{labelModeText}}">
-    <mat-icon>{{labelMode}}</mat-icon>
+  <button mat-button (click)="toggleEditViewMode()" attr.aria-label="{{ labelModeText }}">
+    <mat-icon>{{ labelMode }}</mat-icon>
   </button>
   <button mat-button [mat-dialog-close]="data">
     <mat-icon attr.aria-label="Save">save</mat-icon>

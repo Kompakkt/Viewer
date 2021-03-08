@@ -10,7 +10,7 @@
     "test:watch": "jest --watch",
     "lint": "ng lint",
     "report": "jscpd src/",
-    "prettier": "prettier 'src/**/*.ts' --write",
+    "prettier": "prettier --config .prettierrc.json 'src/**/*.{ts,html,scss}' --write",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
     "e2e": "concurrently \"npm run start\" \"wait-on http-get://localhost:4200 && npm run cy:run\" --kill-others --success first",

@@ -71,19 +71,13 @@ export class EntityFeatureSettingsLightsComponent {
     if (indexOfLight) {
       switch (dimension) {
         case 'x':
-          this.processing.entitySettings.lights[
-            indexOfLight
-          ].position.x = value;
+          this.processing.entitySettings.lights[indexOfLight].position.x = value;
           break;
         case 'y':
-          this.processing.entitySettings.lights[
-            indexOfLight
-          ].position.y = value;
+          this.processing.entitySettings.lights[indexOfLight].position.y = value;
           break;
         case 'z':
-          this.processing.entitySettings.lights[
-            indexOfLight
-          ].position.z = value;
+          this.processing.entitySettings.lights[indexOfLight].position.z = value;
           break;
         default:
           // tslint:disable-next-line:prefer-template

@@ -29,9 +29,7 @@
     <button
       mat-icon-button
       (click)="overlay.toggleSidenav('compilationBrowser')"
-      [matTooltip]="
-        isOpen && isCompilationBrowser ? 'Close' : 'Browse in Collection'
-      "
+      [matTooltip]="isOpen && isCompilationBrowser ? 'Close' : 'Browse in Collection'"
       matTooltipPosition="right"
     >
       <mat-icon aria-label="Toggle Collection Browser">folder_open</mat-icon>

@@ -37,15 +37,11 @@ export class BackendService {
 
   // Override GET and POST to use HttpOptions which is needed for auth
   private async get(path: string): Promise<any> {
-    return this.http
-      .get(`${this.endpoint}/${path}`, this.httpOptions)
-      .toPromise();
+    return this.http.get(`${this.endpoint}/${path}`, this.httpOptions).toPromise();
   }
 
   private post(path: string, obj: any): Promise<any> {
-    return this.http
-      .post(`${this.endpoint}/${path}`, obj, this.httpOptions)
-      .toPromise();
+    return this.http.post(`${this.endpoint}/${path}`, obj, this.httpOptions).toPromise();
   }
 
   // GETs
@@ -77,9 +73,7 @@ export class BackendService {
       : this.get(`api/v1/get/find/compilation/${identifier}`);
   }
 
-  public async getEntityMetadata(
-    identifier: string | ObjectId,
-  ): Promise<IMetaDataDigitalEntity> {
+  public async getEntityMetadata(identifier: string | ObjectId): Promise<IMetaDataDigitalEntity> {
     return this.get(`api/v1/get/find/digitalentity/${identifier}`);
   }
 
@@ -88,10 +82,7 @@ export class BackendService {
   }
 
   // POSTs
-  public updateSettings(
-    identifier: string | ObjectId,
-    settings: any,
-  ): Promise<any> {
+  public updateSettings(identifier: string | ObjectId, settings: any): Promise<any> {
     return this.post(`api/v1/post/settings/${identifier}`, settings);
   }
 
@@ -129,10 +120,7 @@ export class BackendService {
     });
   }
 
-  public async shareAnnotation(
-    identifierColl: string,
-    annotationArray: string[],
-  ): Promise<any> {
+  public async shareAnnotation(identifierColl: string, annotationArray: string[]): Promise<any> {
     return this.post(`utility/moveannotations/${identifierColl}`, {
       annotationArray,
     });
@@ -150,16 +138,12 @@ export class BackendService {
 
     const hex = (length: number, n: string | number) => {
       n = n.toString(16);
-      return n.length === length
-        ? n
-        : '00000000'.substring(n.length, length) + n;
+      return n.length === length ? n : '00000000'.substring(n.length, length) + n;
     };
 
     const time = parseInt((Date.now() / 1000).toString(), 10) % 0xffffffff;
 
-    return (
-      hex(8, time) + hex(6, this.MACHINE_ID) + hex(4, this.pid) + hex(6, next())
-    );
+    return hex(8, time) + hex(6, this.MACHINE_ID) + hex(4, this.pid) + hex(6, next());
     /* tslint:enable:no-magic-numbers */
   }
 }

@@ -2,26 +2,12 @@ import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import {
-  IAnnotation,
-  ICompilation,
-  IEntity,
-  isAnnotation,
-} from '@kompakkt/shared';
-import {
-  ActionManager,
-  ExecuteCodeAction,
-  Mesh,
-  Tags,
-  Vector3,
-} from 'babylonjs';
+import { IAnnotation, ICompilation, IEntity, isAnnotation } from '@kompakkt/shared';
+import { ActionManager, ExecuteCodeAction, Mesh, Tags, Vector3 } from 'babylonjs';
 import { Socket } from 'ngx-socket-io';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 
-import {
-  annotationFallback,
-  annotationLogo,
-} from '../../../assets/annotations/annotations';
+import { annotationFallback, annotationLogo } from '../../../assets/annotations/annotations';
 import { environment } from '../../../environments/environment';
 // tslint:disable-next-line:max-line-length
 import { DialogGetUserDataComponent } from '../../components/dialogs/dialog-get-user-data/dialog-get-user-data.component';
@@ -152,9 +138,7 @@ export class AnnotationService {
     // Since all annotations are in the same array but sorted
     // with defaults first and compilation following
     // we can calculate the offset if needed
-    const offset = this.processing.compilationLoaded
-      ? this.defaultAnnotations.length
-      : 0;
+    const offset = this.processing.compilationLoaded ? this.defaultAnnotations.length : 0;
     moveItemInArray(this.annotations, from_index + offset, to_index + offset);
     await this.changedRankingPositions();
   }
@@ -169,25 +153,17 @@ export class AnnotationService {
     await this.deleteAllMarker();
     this.annotations.splice(0, this.annotations.length);
 
-    if (
-      !this.processing.defaultEntityLoaded &&
-      !this.processing.fallbackEntityLoaded
-    ) {
+    if (!this.processing.defaultEntityLoaded && !this.processing.fallbackEntityLoaded) {
       // Filter null/undefined annotations
       const serverAnnotations = this.getAnnotationsfromServerDB().filter(
-        annotation =>
-          annotation && annotation._id && annotation.lastModificationDate,
+        annotation => annotation && annotation._id && annotation.lastModificationDate,
       );
       const pouchAnnotations = (await this.getAnnotationsfromLocalDB()).filter(
-        annotation =>
-          annotation && annotation._id && annotation.lastModificationDate,
+        annotation => annotation && annotation._id && annotation.lastModificationDate,
       );
       // Update and sort local
       await this.updateLocalDB(pouchAnnotations, serverAnnotations);
-      const updated = await this.updateAnnotationList(
-        pouchAnnotations,
-        serverAnnotations,
-      );
+      const updated = await this.updateAnnotationList(pouchAnnotations, serverAnnotations);
       this.annotations.push(...updated);
       await this.sortAnnotations();
     } else {
@@ -196,9 +172,7 @@ export class AnnotationService {
       }
       if (this.processing.defaultEntityLoaded) {
         if (this.processing.annotatingFeatured && annotationLogo.length) {
-          annotationLogo.forEach((annotation: IAnnotation) =>
-            this.annotations.push(annotation),
-          );
+          annotationLogo.forEach((annotation: IAnnotation) => this.annotations.push(annotation));
         }
       }
       if (this.annotations.length > 0) {
@@ -216,11 +190,7 @@ export class AnnotationService {
       serverAnnotations.push(anno);
     }
     // ...und der aktuellen Compilation (if existing)
-    if (
-      this.entity?._id &&
-      this.processing.compilationLoaded &&
-      this.compilation?.annotations
-    ) {
+    if (this.entity?._id && this.processing.compilationLoaded && this.compilation?.annotations) {
       const entityID = this.entity._id;
       for (const id in this.compilation?.annotations) {
         const anno = this.compilation?.annotations[id];
@@ -242,10 +212,7 @@ export class AnnotationService {
     if (this.processing.compilationLoaded) {
       const _compilationAnnotations =
         this.entity && this.compilation
-          ? await this.fetchAnnotations(
-              this.entity._id.toString(),
-              this.compilation._id.toString(),
-            )
+          ? await this.fetchAnnotations(this.entity._id.toString(), this.compilation._id.toString())
           : [];
       pouchAnnotations = pouchAnnotations.concat(_compilationAnnotations);
     }
@@ -253,10 +220,7 @@ export class AnnotationService {
     return pouchAnnotations;
   }
 
-  private async updateLocalDB(
-    localAnnotations: IAnnotation[],
-    serverAnnotations: IAnnotation[],
-  ) {
+  private async updateLocalDB(localAnnotations: IAnnotation[], serverAnnotations: IAnnotation[]) {
     for (const annotation of serverAnnotations) {
       const localAnnotation = localAnnotations.find(
         _localAnnotation => _localAnnotation._id === annotation._id,
@@ -290,27 +254,19 @@ export class AnnotationService {
       // Wenn sie gefunden wurde aktuellere speichern lokal bzw. server
 
       if (serverAnnotation) {
-        if (
-          !annotation.lastModificationDate ||
-          !serverAnnotation.lastModificationDate
-        ) {
+        if (!annotation.lastModificationDate || !serverAnnotation.lastModificationDate) {
           continue;
         }
         // vergleichen welche aktueller ist
-        const isSame =
-          annotation.lastModificationDate ===
-          serverAnnotation.lastModificationDate;
+        const isSame = annotation.lastModificationDate === serverAnnotation.lastModificationDate;
         const isLocalNewer =
-          annotation.lastModificationDate >
-          serverAnnotation.lastModificationDate;
+          annotation.lastModificationDate > serverAnnotation.lastModificationDate;
         if (isLocalNewer || isSame) {
           if (!isSame) {
             // Update Server
             this.backend.updateAnnotation(annotation);
             serverAnnotations.splice(
-              localAnnotations.findIndex(
-                ann => ann._id === serverAnnotation._id,
-              ),
+              localAnnotations.findIndex(ann => ann._id === serverAnnotation._id),
               1,
               annotation,
             );
@@ -343,9 +299,7 @@ export class AnnotationService {
           // Nicht local last editor === creator === ich
           // Annotation local löschen
           await this.data.deleteAnnotation(annotation._id.toString());
-          localAnnotations.splice(
-            localAnnotations.findIndex(ann => ann._id === annotation._id),
-          );
+          localAnnotations.splice(localAnnotations.findIndex(ann => ann._id === annotation._id));
         }
       }
     }
@@ -353,21 +307,19 @@ export class AnnotationService {
   }
 
   private async sortAnnotations() {
-    const sortedDefault = this.defaultAnnotations.sort(
-      (leftSide, rightSide): number =>
-        +leftSide.ranking === +rightSide.ranking
-          ? 0
-          : +leftSide.ranking < +rightSide.ranking
-          ? -1
-          : 1,
+    const sortedDefault = this.defaultAnnotations.sort((leftSide, rightSide): number =>
+      +leftSide.ranking === +rightSide.ranking
+        ? 0
+        : +leftSide.ranking < +rightSide.ranking
+        ? -1
+        : 1,
     );
-    const sortedCompilation = this.compilationAnnotations.sort(
-      (leftSide, rightSide): number =>
-        +leftSide.ranking === +rightSide.ranking
-          ? 0
-          : +leftSide.ranking < +rightSide.ranking
-          ? -1
-          : 1,
+    const sortedCompilation = this.compilationAnnotations.sort((leftSide, rightSide): number =>
+      +leftSide.ranking === +rightSide.ranking
+        ? 0
+        : +leftSide.ranking < +rightSide.ranking
+        ? -1
+        : 1,
     );
 
     this.annotations.splice(0, this.annotations.length);
@@ -414,9 +366,7 @@ export class AnnotationService {
       }
       const generatedId = this.backend.generateEntityId();
 
-      const personName = this.userdata.userData
-        ? this.userdata.userData.fullname
-        : 'guest';
+      const personName = this.userdata.userData ? this.userdata.userData.fullname : 'guest';
       const personID = this.userdata.userData
         ? this.userdata.userData._id
         : this.userdata.guestUserData
@@ -497,10 +447,7 @@ export class AnnotationService {
   private add(_annotation: IAnnotation): void {
     let newAnnotation = _annotation;
     newAnnotation.lastModificationDate = new Date().toISOString();
-    if (
-      !this.processing.defaultEntityLoaded &&
-      !this.processing.fallbackEntityLoaded
-    ) {
+    if (!this.processing.defaultEntityLoaded && !this.processing.fallbackEntityLoaded) {
       this.backend
         .updateAnnotation(_annotation)
         .then((resultAnnotation: IAnnotation) => {
@@ -520,10 +467,7 @@ export class AnnotationService {
   public updateAnnotation(_annotation: IAnnotation) {
     let newAnnotation = _annotation;
     newAnnotation.lastModificationDate = new Date().toISOString();
-    if (
-      !this.processing.fallbackEntityLoaded &&
-      !this.processing.defaultEntityLoaded
-    ) {
+    if (!this.processing.fallbackEntityLoaded && !this.processing.defaultEntityLoaded) {
       if (
         this.userdata.isAnnotationOwner(_annotation) ||
         (this.processing.compilationLoaded && this.userdata.userOwnsCompilation)
@@ -550,9 +494,7 @@ export class AnnotationService {
     if (this.userdata.isAnnotationOwner(_annotation)) {
       this.setSelectedAnnotation('');
       this.setEditModeAnnotation('');
-      const index: number = this.annotations.findIndex(
-        ann => ann._id === _annotation._id,
-      );
+      const index: number = this.annotations.findIndex(ann => ann._id === _annotation._id);
       if (index !== -1) {
         this.annotations.splice(
           this.annotations.findIndex(ann => ann._id === _annotation._id),
@@ -560,10 +502,7 @@ export class AnnotationService {
         );
         this.changedRankingPositions();
         this.redrawMarker();
-        if (
-          !this.processing.fallbackEntityLoaded &&
-          !this.processing.defaultEntityLoaded
-        ) {
+        if (!this.processing.fallbackEntityLoaded && !this.processing.defaultEntityLoaded) {
           this.data.deleteAnnotation(_annotation._id.toString());
           this.deleteAnnotationFromServer(_annotation._id.toString());
         }
@@ -603,10 +542,7 @@ export class AnnotationService {
     dialogConfig.data = {
       id: annotationId,
     };
-    const dialogRef = this.dialog.open(
-      DialogGetUserDataComponent,
-      dialogConfig,
-    );
+    const dialogRef = this.dialog.open(DialogGetUserDataComponent, dialogConfig);
     dialogRef.afterClosed().subscribe(data => {
       if (data === true) {
         this.message.info('Deleted from Server');
@@ -620,9 +556,7 @@ export class AnnotationService {
     // Decide whether we iterate over the first part of this.annotations
     // containing all the default annotations or to iterate over the second part
     // containing all of the compilation annotations
-    const offset = this.processing.compilationLoaded
-      ? this.defaultAnnotations.length
-      : 0;
+    const offset = this.processing.compilationLoaded ? this.defaultAnnotations.length : 0;
     const length = this.processing.compilationLoaded
       ? this.annotations.length
       : this.defaultAnnotations.length;
@@ -633,10 +567,7 @@ export class AnnotationService {
     }
   }
 
-  private async fetchAnnotations(
-    entity: string,
-    compilation?: string,
-  ): Promise<IAnnotation[]> {
+  private async fetchAnnotations(entity: string, compilation?: string): Promise<IAnnotation[]> {
     return new Promise<IAnnotation[]>(async (resolve, _) => {
       const annotationList: IAnnotation[] = await this.data.findAnnotations(
         entity,
@@ -733,18 +664,10 @@ export class AnnotationService {
 
       if (perspective !== undefined) {
         this.babylon.cameraManager.moveActiveCameraToPosition(
-          new Vector3(
-            perspective.position.x,
-            perspective.position.y,
-            perspective.position.z,
-          ),
+          new Vector3(perspective.position.x, perspective.position.y, perspective.position.z),
         );
         this.babylon.cameraManager.setActiveCameraTarget(
-          new Vector3(
-            perspective.target.x,
-            perspective.target.y,
-            perspective.target.z,
-          ),
+          new Vector3(perspective.target.x, perspective.target.y, perspective.target.z),
         );
       }
       this.babylon.hideMesh(selectedAnnotation._id.toString(), true);
@@ -768,10 +691,7 @@ export class AnnotationService {
       entityId: this.entity._id,
     };
 
-    const dialogRef = this.dialog.open(
-      DialogShareAnnotationComponent,
-      dialogConfig,
-    );
+    const dialogRef = this.dialog.open(DialogShareAnnotationComponent, dialogConfig);
     dialogRef
       .afterClosed()
       .toPromise()
@@ -788,9 +708,7 @@ export class AnnotationService {
         this.backend
           .updateAnnotation(copyAnnotation)
           .then(() => {
-            this.message.info(
-              `Annotation is shared to Collection with id: ${data.collectionId}`,
-            );
+            this.message.info(`Annotation is shared to Collection with id: ${data.collectionId}`);
           })
           .catch(() => this.message.error('Annotation can not be shared.'));
       });
@@ -818,9 +736,7 @@ export class AnnotationService {
       motivation: annotation.motivation,
       lastModifiedBy: {
         type: 'person',
-        name: this.userdata.userData
-          ? this.userdata.userData.fullname
-          : 'guest',
+        name: this.userdata.userData ? this.userdata.userData.fullname : 'guest',
         _id: this.userdata.userData ? this.userdata.userData._id : 'guest',
       },
       body: annotation.body,

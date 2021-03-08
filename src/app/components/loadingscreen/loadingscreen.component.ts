@@ -22,14 +22,8 @@ export class LoadingscreenComponent {
   constructor(private loadingScreenHandler: LoadingscreenhandlerService) {
     this.logo = this.loadingScreenHandler.logo;
     this.backgroundColor = this.loadingScreenHandler.backgroundColor;
-    this.loadingScreenHandler.opacity.subscribe(
-      newOpacity => (this.opacity = newOpacity),
-    );
-    this.loadingScreenHandler.loadingText.subscribe(
-      newText => (this.loadingText = newText),
-    );
-    this.loadingScreenHandler.loadingStyle.subscribe(
-      newStyle => (this.style = newStyle),
-    );
+    this.loadingScreenHandler.opacity.subscribe(newOpacity => (this.opacity = newOpacity));
+    this.loadingScreenHandler.loadingText.subscribe(newText => (this.loadingText = newText));
+    this.loadingScreenHandler.loadingStyle.subscribe(newStyle => (this.style = newStyle));
   }
 }

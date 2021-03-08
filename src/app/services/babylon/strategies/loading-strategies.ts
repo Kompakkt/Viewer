@@ -18,13 +18,7 @@ import {
   Vector3,
   VideoTexture,
 } from 'babylonjs';
-import {
-  AdvancedDynamicTexture,
-  Control,
-  Slider,
-  StackPanel,
-  TextBlock,
-} from 'babylonjs-gui';
+import { AdvancedDynamicTexture, Control, Slider, StackPanel, TextBlock } from 'babylonjs-gui';
 import 'babylonjs-loaders';
 
 import {
@@ -34,14 +28,9 @@ import {
   IVideoContainer,
 } from '../container.interfaces';
 
-const updateLoadingUI = (engine: Engine) => (
-  progress: ISceneLoaderProgressEvent,
-) => {
+const updateLoadingUI = (engine: Engine) => (progress: ISceneLoaderProgressEvent) => {
   if (progress.lengthComputable) {
-    engine.loadingUIText = `${(
-      (progress.loaded * 100) /
-      progress.total
-    ).toFixed()}%`;
+    engine.loadingUIText = `${((progress.loaded * 100) / progress.total).toFixed()}%`;
   }
 };
 
@@ -78,10 +67,8 @@ const patchMeshPBR = (mesh: AbstractMesh, scene: Scene) => {
       pbrMaterial.albedoTexture = material.albedoTexture;
       pbrMaterial.albedoColor = material.albedoColor;
     } else {
-      pbrMaterial.albedoTexture =
-        material.diffuseTexture ?? pbrMaterial.albedoTexture;
-      pbrMaterial.albedoColor =
-        material.diffuseColor ?? pbrMaterial.albedoColor;
+      pbrMaterial.albedoTexture = material.diffuseTexture ?? pbrMaterial.albedoTexture;
+      pbrMaterial.albedoColor = material.diffuseColor ?? pbrMaterial.albedoColor;
     }
 
     // Bump
@@ -93,14 +80,12 @@ const patchMeshPBR = (mesh: AbstractMesh, scene: Scene) => {
 
     // Emissive
     pbrMaterial.emissiveColor = material.emissiveColor;
-    pbrMaterial.emissiveTexture =
-      material.emissiveTexture ?? pbrMaterial.emissiveTexture;
+    pbrMaterial.emissiveTexture = material.emissiveTexture ?? pbrMaterial.emissiveTexture;
 
     // Transparency
     pbrMaterial.transparencyMode = material.transparencyMode ?? 0;
     if (material instanceof PBRMaterial) {
-      pbrMaterial.useAlphaFromAlbedoTexture =
-        material?.useAlphaFromAlbedoTexture ?? false;
+      pbrMaterial.useAlphaFromAlbedoTexture = material?.useAlphaFromAlbedoTexture ?? false;
     }
 
     mesh.material = pbrMaterial;
@@ -110,11 +95,7 @@ const patchMeshPBR = (mesh: AbstractMesh, scene: Scene) => {
   }
 };
 
-export const load3DEntity = (
-  rootUrl: string,
-  extension: string,
-  scene: Scene,
-) => {
+export const load3DEntity = (rootUrl: string, extension: string, scene: Scene) => {
   const rootFolder = Tools.GetFolderPath(rootUrl);
   const filename = Tools.GetFilename(rootUrl);
 
@@ -160,10 +141,7 @@ export const loadImage = (
       true,
       undefined,
       () => {
-        const [_width, _height] = [
-          texture.getSize().width,
-          texture.getSize().height,
-        ];
+        const [_width, _height] = [texture.getSize().width, texture.getSize().height];
         const ground = MeshBuilder.CreatePlane(
           'gnd',
           {
@@ -210,29 +188,16 @@ export const loadImage = (
     });
 };
 
-export const loadVideo = (
-  rootUrl: string,
-  scene: Scene,
-  videoContainer: IVideoContainer,
-) => {
+export const loadVideo = (rootUrl: string, scene: Scene, videoContainer: IVideoContainer) => {
   const engine = scene.getEngine();
   const filename = Tools.GetFilename(rootUrl);
 
   // TODO: Reject on videoTexture fails loading?
   return new Promise<IVideoContainer>((resolve, _) => {
-    const videoTexture = new VideoTexture(
-      `Video: ${filename}`,
-      rootUrl,
-      scene,
-      false,
-    );
+    const videoTexture = new VideoTexture(`Video: ${filename}`, rootUrl, scene, false);
     videoTexture.onLoadObservable.add(texture => {
       const video = videoTexture.video;
-      const { plane, timeSlider } = createVideoScene(
-        videoTexture,
-        texture,
-        scene,
-      );
+      const { plane, timeSlider } = createVideoScene(videoTexture, texture, scene);
       const newContainer: IVideoContainer = {
         ...videoContainer,
         video,
@@ -253,17 +218,10 @@ export const loadVideo = (
     });
 };
 
-const createVideoScene = (
-  videoTexture: VideoTexture,
-  texture: Texture,
-  scene: Scene,
-) => {
+const createVideoScene = (videoTexture: VideoTexture, texture: Texture, scene: Scene) => {
   // video as texture on mesh
   const video = videoTexture.video;
-  const [_width, _height] = [
-    texture.getSize().width * 0.05,
-    texture.getSize().height * 0.05,
-  ];
+  const [_width, _height] = [texture.getSize().width * 0.05, texture.getSize().height * 0.05];
   const groundVideo = MeshBuilder.CreatePlane(
     'videoGround',
     { height: _height, width: _width },
@@ -286,13 +244,7 @@ const createVideoScene = (
   );
 
   // Create mediaControls
-  const timeSlider = createMediaControls(
-    _width,
-    _height,
-    scene,
-    video,
-    undefined,
-  );
+  const timeSlider = createMediaControls(_width, _height, scene, video, undefined);
   const plane = groundVideo;
   return { plane, timeSlider };
 };
@@ -309,22 +261,13 @@ export const loadAudio = (
     .then(
       async (arrayBuffer): Promise<IAudioContainer> => {
         const audio = await new Promise<Sound>((resolve, _) => {
-          const sound = new Sound(
-            `Audio: ${filename}`,
-            arrayBuffer,
-            scene,
-            () => {
-              resolveSound();
-            },
-          );
+          const sound = new Sound(`Audio: ${filename}`, arrayBuffer, scene, () => {
+            resolveSound();
+          });
           const resolveSound = () => resolve(sound);
         });
 
-        const { timeSlider, analyser } = createAudioScene(
-          audio,
-          scene,
-          cubeMeshes,
-        );
+        const { timeSlider, analyser } = createAudioScene(audio, scene, cubeMeshes);
         return {
           ...audioContainer,
           audio,
@@ -340,11 +283,7 @@ export const loadAudio = (
     });
 };
 
-const createAudioScene = (
-  audio: Sound,
-  scene: Scene,
-  cubeMeshes: I3DEntityContainer,
-) => {
+const createAudioScene = (audio: Sound, scene: Scene, cubeMeshes: I3DEntityContainer) => {
   // audio analyser
   const analyser = new Analyser(scene);
   // TODO: AudioEngine implements IAudioEngine
@@ -379,11 +318,7 @@ const createMediaControls = (
   audio?: Sound,
 ) => {
   // time slider
-  const plane = MeshBuilder.CreatePlane(
-    'timeSlider',
-    { height: _height, width: _width },
-    scene,
-  );
+  const plane = MeshBuilder.CreatePlane('timeSlider', { height: _height, width: _width }, scene);
   plane.position = new Vector3(video ? 0 : 10, -_height * 0.6, 0);
   plane.renderingGroupId = 2;
   const advancedTexture = AdvancedDynamicTexture.CreateForMesh(plane);
@@ -439,9 +374,7 @@ const createMediaControls = (
 
   timeSlider.onValueChangedObservable.add(() => {
     header.text = `Current time: ${
-      audio
-        ? secondsToHms(timeSlider.value)
-        : getCurrentTime(video?.currentTime ?? 0)
+      audio ? secondsToHms(timeSlider.value) : getCurrentTime(video?.currentTime ?? 0)
     }`;
   });
   panel.addControl(timeSlider);

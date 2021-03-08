@@ -1,7 +1,4 @@
-**/*.json
-**/*.md
-**/*.js
-**/*.html
-**/*.css
-**/*.scss
-dist/**/*.*
+dist
+e2e
+node_modules
+.git

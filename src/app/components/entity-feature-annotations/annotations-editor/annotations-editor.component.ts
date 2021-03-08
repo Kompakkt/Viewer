@@ -30,9 +30,7 @@ export class AnnotationsEditorComponent implements OnInit {
   }
 
   get annotationCount() {
-    return this.currentAnnotations
-      .toPromise()
-      .then(annotations => annotations.length);
+    return this.currentAnnotations.toPromise().then(annotations => annotations.length);
   }
 
   get isDefault() {
@@ -59,10 +57,7 @@ export class AnnotationsEditorComponent implements OnInit {
   }
 
   drop(event: CdkDragDrop<string[]>) {
-    this.annotations.moveAnnotationByIndex(
-      event.previousIndex,
-      event.currentIndex,
-    );
+    this.annotations.moveAnnotationByIndex(event.previousIndex, event.currentIndex);
   }
 
   exportAnnotations() {

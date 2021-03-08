@@ -17,10 +17,7 @@ export class LightService {
 
   private entitySettings: IEntitySettings | undefined;
 
-  constructor(
-    private babylon: BabylonService,
-    private processing: ProcessingService,
-  ) {
+  constructor(private babylon: BabylonService, private processing: ProcessingService) {
     this.scene = this.babylon.getScene();
     this.processing.entitySettings$.subscribe(settings => {
       this.entitySettings = settings;
@@ -111,9 +108,7 @@ export class LightService {
       console.log('index ist', indexOfLight);
     }
     if (lightType === 'pointLight') {
-      indexOfLight = this.entitySettings.lights.findIndex(
-        obj => obj.type === 'PointLight',
-      );
+      indexOfLight = this.entitySettings.lights.findIndex(obj => obj.type === 'PointLight');
     }
     return indexOfLight !== undefined ? indexOfLight : undefined;
   }

@@ -13,20 +13,13 @@ export class DataService {
     return this.pouchdb.allDocs({ include_docs: true });
   }
 
-  public async findAnnotations(
-    entity: string,
-    compilation?: string,
-  ): Promise<IAnnotation[]> {
+  public async findAnnotations(entity: string, compilation?: string): Promise<IAnnotation[]> {
     const allDocs = await this.fetch();
     const annotationList: IAnnotation[] = [];
     allDocs.rows.forEach(annotation => {
       const isAnnotation = (obj: any): obj is IAnnotation => {
         const _annotation = obj as IAnnotation;
-        return (
-          _annotation &&
-          _annotation.body !== undefined &&
-          _annotation.target !== undefined
-        );
+        return _annotation && _annotation.body !== undefined && _annotation.target !== undefined;
       };
 
       if (isAnnotation(annotation)) {
@@ -47,15 +40,11 @@ export class DataService {
   }
 
   public async putAnnotation(annotation: IAnnotation) {
-    return annotation._id === 'DefaultAnnotation'
-      ? undefined
-      : this.pouchdb.put(annotation as any);
+    return annotation._id === 'DefaultAnnotation' ? undefined : this.pouchdb.put(annotation as any);
   }
 
   public async cleanAndRenewDatabase() {
-    return this.pouchdb
-      .destroy()
-      .then(() => (this.pouchdb = new PouchDB('annotationdb')));
+    return this.pouchdb.destroy().then(() => (this.pouchdb = new PouchDB('annotationdb')));
   }
 
   public async deleteAnnotation(id: string) {
@@ -64,9 +53,7 @@ export class DataService {
       : this.pouchdb
           .get(id)
           .then(result => this.pouchdb.remove(result))
-          .catch((error: any) =>
-            console.log('Failed removing annotation', error),
-          );
+          .catch((error: any) => console.log('Failed removing annotation', error));
   }
 
   public async updateAnnotation(annotation: IAnnotation) {
@@ -86,9 +73,7 @@ export class DataService {
       : this.pouchdb
           .get(id)
           .then(result => {
-            (result as PouchDB.Core.IdMeta &
-              IAnnotation &
-              PouchDB.Core.GetMeta).ranking = ranking;
+            (result as PouchDB.Core.IdMeta & IAnnotation & PouchDB.Core.GetMeta).ranking = ranking;
             this.pouchdb.put(result);
           })
           .catch(e => console.log('Failed updating annotation ranking', e));

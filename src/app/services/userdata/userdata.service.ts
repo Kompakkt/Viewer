@@ -143,10 +143,7 @@ export class UserdataService {
     if (!element) {
       return false;
     }
-    if (
-      !this.userData?.data ||
-      (!isEntity(element) && !isCompilation(element))
-    ) {
+    if (!this.userData?.data || (!isEntity(element) && !isCompilation(element))) {
       this.userOwnsEntity = false;
       this.userOwnsCompilation = false;
       return false;
@@ -154,9 +151,9 @@ export class UserdataService {
     const id = element._id;
 
     if (isCompilation(element)) {
-      this.userOwnsCompilation = JSON.stringify(
-        this.userData?.data?.compilation,
-      ).includes(element._id.toString());
+      this.userOwnsCompilation = JSON.stringify(this.userData?.data?.compilation).includes(
+        element._id.toString(),
+      );
       if (this.userOwnsCompilation) {
         return this.userOwnsCompilation;
       }
@@ -170,17 +167,15 @@ export class UserdataService {
     }
 
     if (isEntity(element)) {
-      this.userOwnsEntity = JSON.stringify(
-        this.userData?.data?.entity,
-      ).includes(element._id.toString());
+      this.userOwnsEntity = JSON.stringify(this.userData?.data?.entity).includes(
+        element._id.toString(),
+      );
       if (this.userOwnsEntity) {
         return this.userOwnsEntity;
       }
       if (this.userData.data.entity) {
         this.userOwnsEntity =
-          this.userData.data.entity.find(
-            (_entity: IEntity) => _entity._id === id,
-          ) !== undefined;
+          this.userData.data.entity.find((_entity: IEntity) => _entity._id === id) !== undefined;
       } else {
         this.userOwnsEntity = false;
       }
@@ -189,9 +184,7 @@ export class UserdataService {
     return false;
   }
 
-  public isUserWhitelisted(
-    element: ICompilation | IEntity | undefined,
-  ): boolean {
+  public isUserWhitelisted(element: ICompilation | IEntity | undefined): boolean {
     if (!element) {
       return false;
     }
@@ -209,8 +202,7 @@ export class UserdataService {
       // Combine with whitelisted persons
       .concat(...element.whitelist.persons);
 
-    const whitelistContainsUser =
-      persons.find(person => person._id === id) !== undefined;
+    const whitelistContainsUser = persons.find(person => person._id === id) !== undefined;
 
     if (isEntity(element)) {
       this.userWhitlistedEntity = whitelistContainsUser;
