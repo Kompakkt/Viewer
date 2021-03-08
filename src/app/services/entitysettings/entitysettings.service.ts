@@ -75,7 +75,13 @@ export class EntitySettingsService {
       this.entitySettings = settings;
       console.log('actual settings', this.entitySettings);
       this.meshes = meshes;
-      requestAnimationFrame(() => this.setUpSettings());
+      requestAnimationFrame(() =>
+        this.setUpSettings()
+          .then(() => console.log('Settings loaded'))
+          .catch((err: Error) =>
+            console.log('Settings not loaded', err.message),
+          ),
+      );
     });
   }
 
@@ -124,16 +130,21 @@ export class EntitySettingsService {
   }
 
   private async initialiseSizeValues() {
-    await this.calculateMinMax();
-    this.initialSize = await this.max.subtract(this.min);
-    this.processing.entityHeight = this.initialSize.y.toFixed(2);
-    this.processing.entityWidth = this.initialSize.x.toFixed(2);
-    this.processing.entityDepth = this.initialSize.z.toFixed(2);
-    this.initialCenterPoint = this.currentCenterPoint = new Vector3(
-      this.max.x - this.initialSize.x / 2,
-      this.max.y - this.initialSize.y / 2,
-      this.max.z - this.initialSize.z / 2,
-    );
+    await this.calculateMinMax()
+      .then(() => {
+        this.initialSize = this.max.subtract(this.min);
+        this.processing.entityHeight = this.initialSize.y.toFixed(2);
+        this.processing.entityWidth = this.initialSize.x.toFixed(2);
+        this.processing.entityDepth = this.initialSize.z.toFixed(2);
+        this.initialCenterPoint = this.currentCenterPoint = new Vector3(
+          this.max.x - this.initialSize.x / 2,
+          this.max.y - this.initialSize.y / 2,
+          this.max.z - this.initialSize.z / 2,
+        );
+      })
+      .catch((err: Error) =>
+        console.log('Failed intitializing size', err.message),
+      );
   }
 
   private async calculateMinMax() {
