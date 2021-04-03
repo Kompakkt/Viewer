@@ -5,7 +5,7 @@ import { MessageService } from '../../services/message/message.service';
 import { ProcessingService } from '../../services/processing/processing.service';
 import { UserdataService } from '../../services/userdata/userdata.service';
 
-import { IEntity } from '@kompakkt/shared';
+import { IEntity } from '~common/interfaces';
 
 import fscreen from 'fscreen';
 

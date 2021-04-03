@@ -2,7 +2,7 @@ import { Component, Inject, ViewChild, ElementRef } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { environment } from '../../../../environments/environment';
-import { IEntity } from '@kompakkt/shared';
+import { IEntity } from '~common/interfaces';
 
 export interface IDialogData {
   title: string;

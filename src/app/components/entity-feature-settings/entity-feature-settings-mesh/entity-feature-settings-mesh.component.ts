@@ -5,7 +5,7 @@ import { BabylonService } from '../../../services/babylon/babylon.service';
 import { EntitySettingsService } from '../../../services/entitysettings/entitysettings.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
 
-import { IColor } from '@kompakkt/shared';
+import { IColor } from '~common/interfaces';
 
 @Component({
   selector: 'app-entity-feature-settings-mesh',

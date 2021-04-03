@@ -9,7 +9,7 @@ import {
   IMetaDataDigitalEntity,
   IEntity,
   ObjectId,
-} from '@kompakkt/shared';
+} from '~common/interfaces';
 
 @Injectable({
   providedIn: 'root',

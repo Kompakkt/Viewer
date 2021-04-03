@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 
 import { ProcessingService } from '../../../services/processing/processing.service';
 
-import { ICompilation } from '@kompakkt/shared';
+import { ICompilation } from '~common/interfaces';
 
 @Component({
   selector: 'app-dialog-invite-broadcasting',

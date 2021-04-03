@@ -17,21 +17,12 @@
     "noImplicitReturns": false,
     "noImplicitAny": true,
     "target": "es2015",
-    "typeRoots": [
-      "node_modules/@types"
-    ],
-    "types": [
-      "babylonjs",
-      "babylonjs-gui"
-    ],
-    "lib": [
-      "es2017",
-      "dom"
-    ],
+    "typeRoots": ["node_modules/@types"],
+    "types": ["babylonjs", "babylonjs-gui"],
+    "lib": ["es2017", "dom"],
     "paths": {
-      "core-js/es7/reflect": [
-        "node_modules/core-js/proposals/reflect-metadata"
-      ]
+      "core-js/es7/reflect": ["node_modules/core-js/proposals/reflect-metadata"],
+      "~common/*": ["./src/common/*"]
     }
   },
   "angularCompilerOptions": {

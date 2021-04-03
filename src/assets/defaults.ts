@@ -1,4 +1,4 @@
-import { IEntity } from '@kompakkt/shared';
+import { IEntity } from '~common/interfaces';
 
 // Creates a basic entity to be used as a building block
 export const baseEntity = (): IEntity => ({

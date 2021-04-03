@@ -2,7 +2,7 @@ import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { IAnnotation, ICompilation, IEntity, isAnnotation } from '@kompakkt/shared';
+import { IAnnotation, ICompilation, IEntity, isAnnotation } from '~common/interfaces';
 import { ActionManager, ExecuteCodeAction, Mesh, Tags, Vector3 } from 'babylonjs';
 import { Socket } from 'ngx-socket-io';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';

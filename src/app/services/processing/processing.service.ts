@@ -1,6 +1,6 @@
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { ICompilation, IEntity, IEntitySettings, isEntity, ObjectId } from '@kompakkt/shared';
+import { ICompilation, IEntity, IEntitySettings, isEntity, ObjectId } from '~common/interfaces';
 import { Mesh, Quaternion } from 'babylonjs';
 import { BehaviorSubject } from 'rxjs';
 

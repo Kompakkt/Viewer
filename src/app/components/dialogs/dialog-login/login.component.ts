@@ -1,7 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
-import { IUserData } from '@kompakkt/shared';
+import { IUserData } from '~common/interfaces';
 import { BackendService } from '../../../services/backend/backend.service';
 
 @Component({

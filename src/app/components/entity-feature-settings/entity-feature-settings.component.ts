@@ -11,7 +11,7 @@ import { UserdataService } from '../../services/userdata/userdata.service';
 // tslint:disable-next-line:max-line-length
 import { DialogMeshsettingsComponent } from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
 
-import { IEntity, IColor } from '@kompakkt/shared';
+import { IEntity, IColor } from '~common/interfaces';
 
 @Component({
   selector: 'app-entity-feature-settings',

@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { IAnnotation } from '@kompakkt/shared';
+import { IAnnotation } from '~common/interfaces';
 import { Matrix, Vector3 } from 'babylonjs';
 
 import { AnnotationService } from '../../../services/annotation/annotation.service';

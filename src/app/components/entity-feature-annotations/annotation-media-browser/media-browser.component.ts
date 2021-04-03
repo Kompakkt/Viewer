@@ -2,7 +2,7 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 
 import { ProcessingService } from '../../../services/processing/processing.service';
 
-import { isCompilation, isEntity, ICompilation } from '@kompakkt/shared';
+import { isCompilation, isEntity, ICompilation } from '~common/interfaces';
 
 @Component({
   selector: 'app-media-browser',

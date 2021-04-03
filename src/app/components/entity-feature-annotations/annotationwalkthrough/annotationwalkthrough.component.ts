@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { IAnnotation } from '@kompakkt/shared';
+import { IAnnotation } from '~common/interfaces';
 
 import { AnnotationService } from '../../../services/annotation/annotation.service';
 

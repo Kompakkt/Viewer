@@ -10,7 +10,7 @@ import {
   isEntity,
   IStrippedUserData,
   IUserData,
-} from '@kompakkt/shared';
+} from '~common/interfaces';
 
 import { LoginComponent } from '../../components/dialogs/dialog-login/login.component';
 import { BackendService } from '../backend/backend.service';
