@@ -90,6 +90,10 @@ export const createDefaultCamera = (scene: Scene, canvas: HTMLCanvasElement) => 
   camera.setTarget(Vector3.Zero());
   camera.allowUpsideDown = false;
 
+  // Adjust camera zoom
+  camera.wheelDeltaPercentage = 0.01;
+  camera.pinchDeltaPercentage = 0.01;
+
   // Override setPosition to always store new Position in DEFAULTS
   camera.setPosition = (position: Vector3) => {
     if (!camera._position.equals(position)) {
