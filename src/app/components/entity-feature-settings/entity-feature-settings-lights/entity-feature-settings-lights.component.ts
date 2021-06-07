@@ -30,42 +30,32 @@ export class EntityFeatureSettingsLightsComponent {
   setLightIntensity(intensity: number | null, lightType: string) {
     if (!intensity) intensity = 0;
     if (!this.processing.entitySettings) {
-      throw new Error('Settings missing');
       console.error(this);
-      return;
+      throw new Error('Settings missing');
     }
     const indexOfLight = this.lights.getLightIndexByType(lightType);
     if (indexOfLight !== undefined) {
       this.processing.entitySettings.lights[indexOfLight].intensity = intensity;
       this.entitySettings.loadLightIntensity(lightType);
     } else {
-      // tslint:disable-next-line:prefer-template
-      throw new Error('Light, ' + lightType + ', is missing');
       console.error(this);
-      return;
+      throw new Error('Light, ' + lightType + ', is missing');
     }
   }
 
   getLightIntensity(lightType: string): number {
     if (!this.processing.entitySettings) {
-      throw new Error('Settings missing');
       console.error(this);
-      return 0;
+      throw new Error('Settings missing');
     }
-    const light = this.lights.getLightByType(lightType);
-    if (light) {
-      return light.intensity;
-    } else {
-      return 0;
-    }
+    return this.lights.getLightByType(lightType)?.intensity ?? 0;
   }
 
   setPointlightPosition(dimension: string, value: number | null) {
     if (!value) value = 0;
     if (!this.processing.entitySettings) {
-      throw new Error('Settings missing');
       console.error(this);
-      return;
+      throw new Error('Settings missing');
     }
     const indexOfLight = this.lights.getLightIndexByType('pointLight');
     if (indexOfLight) {
@@ -81,9 +71,8 @@ export class EntityFeatureSettingsLightsComponent {
           break;
         default:
           // tslint:disable-next-line:prefer-template
-          throw new Error('Pointlightposition, ' + dimension + ', is missing');
           console.error(this);
-          return;
+          throw new Error('Pointlightposition, ' + dimension + ', is missing');
       }
     }
     this.entitySettings.loadPointLightPosition();

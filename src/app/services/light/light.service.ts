@@ -17,8 +17,6 @@ export class LightService {
 
   private entitySettings: IEntitySettings | undefined;
 
-  private pbrLightFactor = 50;
-
   constructor(private babylon: BabylonService, private processing: ProcessingService) {
     this.scene = this.babylon.getScene();
     this.processing.entitySettings$.subscribe(settings => {
@@ -31,12 +29,15 @@ export class LightService {
       console.error(this);
       throw new Error('Can not create this light');
     }
+
+    const direction = type === 'up' ? new Vector3(1, -5, 1) : new Vector3(1, 5, 1);
+
     const light = new DirectionalLight(
       type === 'up' ? 'ambientlightUp' : 'ambientlightDown',
-      new Vector3(1, type === 'up' ? 1 : -1, -1),
+      direction,
       this.scene,
     );
-    light.intensity = intensity * this.pbrLightFactor;
+    light.intensity = intensity;
     light.specular = new BABYLON.Color3(0.5, 0.5, 0.5);
     if (type === 'up') {
       if (this.ambientlightUp) this.ambientlightUp.dispose();
@@ -51,19 +52,19 @@ export class LightService {
     if (this.pointlight) this.pointlight.dispose();
     this.pointlight = new PointLight('pointLight', position, this.scene);
     this.pointlight.specular = new BABYLON.Color3(0, 0, 0);
-    this.pointlight.intensity = intensity * this.pbrLightFactor;
+    this.pointlight.intensity = intensity;
     this.pointlight.parent = this.babylon.getActiveCamera();
   }
 
   public setLightIntensity(light: string, intensity: number) {
     if (light === 'pointLight' && this.pointlight) {
-      this.pointlight.intensity = intensity * this.pbrLightFactor;
+      this.pointlight.intensity = intensity;
     }
     if (light === 'ambientlightUp' && this.ambientlightUp) {
-      this.ambientlightUp.intensity = intensity * this.pbrLightFactor;
+      this.ambientlightUp.intensity = intensity;
     }
     if (light === 'ambientlightDown' && this.ambientlightDown) {
-      this.ambientlightDown.intensity = intensity * this.pbrLightFactor;
+      this.ambientlightDown.intensity = intensity;
     }
   }
 
