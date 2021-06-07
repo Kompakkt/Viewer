@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HemisphericLight, PointLight, Scene, Vector3 } from 'babylonjs';
+import { DirectionalLight, PointLight, Scene, Vector3 } from 'babylonjs';
 
 import { IEntityLight, IEntitySettings } from '~common/interfaces';
 import { BabylonService } from '../babylon/babylon.service';
@@ -12,10 +12,12 @@ export class LightService {
   private scene: Scene;
 
   private pointlight: PointLight | undefined;
-  private ambientlightUp: HemisphericLight | undefined;
-  private ambientlightDown: HemisphericLight | undefined;
+  private ambientlightUp: DirectionalLight | undefined;
+  private ambientlightDown: DirectionalLight | undefined;
 
   private entitySettings: IEntitySettings | undefined;
+
+  private pbrLightFactor = 50;
 
   constructor(private babylon: BabylonService, private processing: ProcessingService) {
     this.scene = this.babylon.getScene();
@@ -29,14 +31,13 @@ export class LightService {
       console.error(this);
       throw new Error('Can not create this light');
     }
-    const position = new Vector3(0, type === 'up' ? 1 : -1, 0);
-    const light = new HemisphericLight(
+    const light = new DirectionalLight(
       type === 'up' ? 'ambientlightUp' : 'ambientlightDown',
-      position,
+      new Vector3(1, type === 'up' ? 1 : -1, -1),
       this.scene,
     );
-    light.intensity = intensity;
-    light.specular = new BABYLON.Color3(0, 0, 0);
+    light.intensity = intensity * this.pbrLightFactor;
+    light.specular = new BABYLON.Color3(0.5, 0.5, 0.5);
     if (type === 'up') {
       if (this.ambientlightUp) this.ambientlightUp.dispose();
       this.ambientlightUp = light;
@@ -50,19 +51,19 @@ export class LightService {
     if (this.pointlight) this.pointlight.dispose();
     this.pointlight = new PointLight('pointLight', position, this.scene);
     this.pointlight.specular = new BABYLON.Color3(0, 0, 0);
-    this.pointlight.intensity = intensity;
+    this.pointlight.intensity = intensity * this.pbrLightFactor;
     this.pointlight.parent = this.babylon.getActiveCamera();
   }
 
   public setLightIntensity(light: string, intensity: number) {
     if (light === 'pointLight' && this.pointlight) {
-      this.pointlight.intensity = intensity;
+      this.pointlight.intensity = intensity * this.pbrLightFactor;
     }
     if (light === 'ambientlightUp' && this.ambientlightUp) {
-      this.ambientlightUp.intensity = intensity;
+      this.ambientlightUp.intensity = intensity * this.pbrLightFactor;
     }
     if (light === 'ambientlightDown' && this.ambientlightDown) {
-      this.ambientlightDown.intensity = intensity;
+      this.ambientlightDown.intensity = intensity * this.pbrLightFactor;
     }
   }
 
@@ -83,7 +84,9 @@ export class LightService {
     if (lightType === 'ambientlightUp' || lightType === 'ambientlightDown') {
       const direction = lightType === 'ambientlightUp' ? 1 : -1;
       light = this.entitySettings.lights.find(
-        obj => obj.type === 'HemisphericLight' && obj.position.y === direction,
+        obj =>
+          (obj.type === 'HemisphericLight' || obj.type === 'DirectionalLight') &&
+          obj.position.y === direction,
       );
     }
     if (lightType === 'pointLight') {
@@ -103,7 +106,9 @@ export class LightService {
       const direction = lightType === 'ambientlightUp' ? 1 : -1;
       console.log('diection:', direction);
       indexOfLight = this.entitySettings.lights.findIndex(
-        obj => obj.type === 'HemisphericLight' && obj.position.y === direction,
+        obj =>
+          (obj.type === 'HemisphericLight' || obj.type === 'DirectionalLight') &&
+          obj.position.y === direction,
       );
       console.log('index ist', indexOfLight);
     }

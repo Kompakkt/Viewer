@@ -138,6 +138,7 @@ export class BabylonService {
       'assets/img/kompakkt-icon.png',
       this.loadingScreenHandler,
     );
+    this.scene.environmentIntensity = 1;
 
     // Add default camera
     this.scene.addCamera(createDefaultCamera(this.scene, this.canvas));
@@ -150,7 +151,7 @@ export class BabylonService {
 
     // TODO: Adjust with sliders or embed in entitySettings
     this.scene.imageProcessingConfiguration.exposure = 1;
-    this.scene.imageProcessingConfiguration.contrast = 1.5;
+    this.scene.imageProcessingConfiguration.contrast = 1;
     this.scene.imageProcessingConfiguration.toneMappingEnabled = true;
     this.scene.imageProcessingConfiguration.toneMappingType =
       ImageProcessingConfiguration.TONEMAPPING_STANDARD;
