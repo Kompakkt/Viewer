@@ -12,6 +12,7 @@ import {
   PBRMaterial,
   Sound,
   StandardMaterial,
+  Material,
   Tags,
   Texture,
   Tools,
@@ -35,7 +36,10 @@ const updateLoadingUI = (engine: Engine) => (progress: ISceneLoaderProgressEvent
 };
 
 let counter = 0;
-const pbr = (scene: Scene, material?: PBRMaterial | StandardMaterial) => {
+const createOrClonePBRMaterial = (
+  scene: Scene,
+  material?: PBRMaterial | StandardMaterial | Material,
+) => {
   const name = material ? `${material.name}_pbr` : `pbr${++counter}`;
   const mat = new PBRMaterial(name, scene);
 
@@ -47,29 +51,20 @@ const pbr = (scene: Scene, material?: PBRMaterial | StandardMaterial) => {
     if (metallic) mat.metallic = metallic;
   }
 
-  /* ClearCoat doesnt work with lights enabled?
-  mat.metallic = 0;
-  mat.roughness = 1;
-
-  mat.clearCoat.isEnabled = true;
-  mat.clearCoat.intensity = 0.5;*/
-
   return mat;
 };
 
 const patchMeshPBR = (mesh: AbstractMesh, scene: Scene) => {
-  if (mesh.material) {
-    const material = mesh.material as StandardMaterial | PBRMaterial;
-    const pbrMaterial = pbr(scene, material);
+  const material = mesh.material as StandardMaterial | PBRMaterial | null;
+  if (material instanceof PBRMaterial) {
+    console.log('Material is PBRMaterial. Skipping...');
+  } else if (material instanceof StandardMaterial) {
+    console.log('Material is StandardMaterial. Patching to PBRMaterial');
+    const pbrMaterial = createOrClonePBRMaterial(scene, material);
 
     // Diffuse / Albedo
-    if (material instanceof PBRMaterial) {
-      pbrMaterial.albedoTexture = material.albedoTexture;
-      pbrMaterial.albedoColor = material.albedoColor;
-    } else {
-      pbrMaterial.albedoTexture = material.diffuseTexture ?? pbrMaterial.albedoTexture;
-      pbrMaterial.albedoColor = material.diffuseColor ?? pbrMaterial.albedoColor;
-    }
+    pbrMaterial.albedoTexture = material.diffuseTexture ?? pbrMaterial.albedoTexture;
+    pbrMaterial.albedoColor = material.diffuseColor ?? pbrMaterial.albedoColor;
 
     // Bump
     const bump = material.bumpTexture;
@@ -84,13 +79,11 @@ const patchMeshPBR = (mesh: AbstractMesh, scene: Scene) => {
 
     // Transparency
     pbrMaterial.transparencyMode = material.transparencyMode ?? 0;
-    if (material instanceof PBRMaterial) {
-      pbrMaterial.useAlphaFromAlbedoTexture = material?.useAlphaFromAlbedoTexture ?? false;
-    }
 
     mesh.material = pbrMaterial;
   } else {
-    const pbrMaterial = pbr(scene);
+    console.log('No Material. Creating default Material');
+    const pbrMaterial = createOrClonePBRMaterial(scene);
     mesh.material = pbrMaterial;
   }
 };
