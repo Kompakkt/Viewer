@@ -196,9 +196,10 @@ export class BabylonService {
       this.scene.render();
     });
 
-    // Global
+    // Global - for debugging
     (window as any)['enableInspector'] = () => this.enableInspector();
     (window as any)['disableInspector'] = () => this.disableInspector();
+    (window as any)['scene'] = () => this.getScene();
   }
 
   public enableInspector() {
