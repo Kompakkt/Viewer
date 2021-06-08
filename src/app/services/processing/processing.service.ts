@@ -345,14 +345,32 @@ export class ProcessingService {
   public fetchEntityData(query: string | ObjectId) {
     this.backend
       .getEntity(query)
-      .then(resultEntity => {
-        console.log('Received this Entity:', resultEntity);
+      .then(entity => {
+        console.log('Received this Entity:', entity);
 
-        if (!resultEntity.finished || !resultEntity.online || resultEntity.whitelist.enabled) {
-          this.fetchRestrictedEntityData(resultEntity);
-        } else {
-          this.loadEntity(resultEntity);
+        // Check if this is an external file and if it is,
+        // check if access should be allowed inside an iframe
+        const isExternal = !!entity.externalFile;
+        const parentUrl = document.location.ancestorOrigins[0] ?? document.referrer;
+        if (isExternal && !!parentUrl) {
+          const hostnameMatch =
+            new URL(parentUrl).hostname === new URL(entity.externalFile ?? location.href).hostname;
+          console.log('Is externalFile', isExternal, 'with matching hostnames', hostnameMatch);
+
+          if (hostnameMatch) {
+            return this.loadEntity(entity);
+          }
         }
+
+        // Check if access is otherwise restricted
+        const isRestricted = !entity.finished || !entity.online || entity.whitelist.enabled;
+        console.log('Are access to this entity restricted', isRestricted);
+
+        if (isRestricted) {
+          return this.fetchRestrictedEntityData(entity);
+        }
+
+        this.loadEntity(entity);
       })
       .catch(error => {
         console.error(error);
