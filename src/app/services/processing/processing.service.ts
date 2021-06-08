@@ -385,7 +385,7 @@ export class ProcessingService {
   }
 
   public async loadEntity(newEntity: IEntity, overrideUrl?: string, extension = '.babylon') {
-    const URL = overrideUrl !== undefined ? overrideUrl : this.baseUrl;
+    const baseURL = overrideUrl ?? this.baseUrl;
     if (!this.loadingScreenHandler.isLoading && newEntity.processed && newEntity.mediaType) {
       if (!newEntity.dataSource.isExternal) {
         this.entityMediaType = newEntity.mediaType;
@@ -397,16 +397,16 @@ export class ProcessingService {
           this.message.error('I can not load this Object without Settings and not during upload.');
         }
         // cases: entity, image, audio, video, text
-        const _quality = (newEntity.processed as any)[this.entityQuality];
-        const _url =
-          _quality.includes('http') || _quality.includes('https') ? _quality : `${URL}${_quality}`;
-        extension = _url.slice(_url.lastIndexOf('.'));
+        const path: string = newEntity.externalFile ?? newEntity.processed[this.entityQuality];
+        const url = path.includes('http') || path.includes('https') ? path : `${baseURL}${path}`;
+        extension = url.slice(url.lastIndexOf('.'));
+
         const mediaType = newEntity.mediaType;
         switch (newEntity.mediaType) {
           case 'model':
           case 'entity':
             await this.babylon
-              .loadEntity(true, _url, mediaType, extension, newEntity._id === 'default')
+              .loadEntity(true, url, mediaType, extension, newEntity._id === 'default')
               .then(() => {
                 this.updateActiveEntity(newEntity);
                 this.updateActiveEntityMeshes(
@@ -422,7 +422,7 @@ export class ProcessingService {
             break;
           case 'image':
             await this.babylon
-              .loadEntity(true, _url, mediaType)
+              .loadEntity(true, url, mediaType)
               .then(() => {
                 const plane = this.babylon.imageContainer.plane;
                 if (plane) {
@@ -446,7 +446,7 @@ export class ProcessingService {
                 );
                 this.updateActiveEntity(newEntity);
 
-                this.babylon.loadEntity(false, _url, mediaType).then(() => {});
+                this.babylon.loadEntity(false, url, mediaType).then(() => {});
               })
               .catch(error => {
                 console.error(error);
@@ -456,7 +456,7 @@ export class ProcessingService {
             break;
           case 'video':
             await this.babylon
-              .loadEntity(true, _url, mediaType)
+              .loadEntity(true, url, mediaType)
               .then(() => {
                 const plane = this.babylon.videoContainer.plane;
                 if (plane) {
