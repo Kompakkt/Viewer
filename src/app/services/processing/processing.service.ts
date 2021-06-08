@@ -351,7 +351,7 @@ export class ProcessingService {
         // Check if this is an external file and if it is,
         // check if access should be allowed inside an iframe
         const isExternal = !!entity.externalFile;
-        const parentUrl = document.location.ancestorOrigins[0] ?? document.referrer;
+        const parentUrl = document.location.ancestorOrigins?.[0] ?? document.referrer;
         if (isExternal && !!parentUrl) {
           const hostnameMatch =
             new URL(parentUrl).hostname === new URL(entity.externalFile ?? location.href).hostname;
