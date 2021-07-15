@@ -6,11 +6,19 @@ Web Based 3D Viewer and 3D Annotation System.
 
 ## Development setup
 
-Run `npm i` after cloning this repository in order to install needed libraries.
+In order to setup your own development environment, you have to have [NodeJS](https://nodejs.org/en/) as well as Node Package Manager ([NPM](https://www.npmjs.com/)) installed.
 
-## Development server
+Clone this repository, cd to the project directory and run the following commands:
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+```
+$ cd src
+$ git clone https://github.com/Kompakkt/Common.git
+$ cd ..
+$ npm i
+$ ng serve
+```
+
+Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 
 ## Build
 
