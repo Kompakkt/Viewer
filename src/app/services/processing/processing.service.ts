@@ -348,18 +348,12 @@ export class ProcessingService {
       .then(entity => {
         console.log('Received this Entity:', entity);
 
-        // Check if this is an external file and if it is,
-        // check if access should be allowed inside an iframe
+        // Check if this is an external file
+        // This can fail if the external file is not available or not reachable
         const isExternal = !!entity.externalFile;
-        const parentUrl = document.location.ancestorOrigins?.[0] ?? document.referrer;
-        if (isExternal && !!parentUrl) {
-          const hostnameMatch =
-            new URL(parentUrl).hostname === new URL(entity.externalFile ?? location.href).hostname;
-          console.log('Is externalFile', isExternal, 'with matching hostnames', hostnameMatch);
-
-          if (hostnameMatch) {
-            return this.loadEntity(entity);
-          }
+        if (isExternal) {
+          console.log('Loading external file');
+          return this.loadEntity(entity);
         }
 
         // Check if access is otherwise restricted
