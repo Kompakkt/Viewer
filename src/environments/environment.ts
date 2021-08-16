@@ -6,10 +6,9 @@
 //
 export const environment = {
   production: false,
-  express_server_url: 'https://miskatonic.hki.uni-koeln.de',
-  express_server_port: 8080,
+  server_url: 'https://kompakkt.de/server/',
   version: require('../../package.json').version,
-  repository: 'https://blacklodge.hki.uni-koeln.de/builds/ObjectsRepository/dev/#',
+  repo_url: 'https://kompakkt.de/',
 };
 
 // Local:

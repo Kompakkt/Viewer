@@ -68,7 +68,7 @@ export class ProcessingService {
   public defaultEntityLoaded = false;
   public fallbackEntityLoaded = false;
   public entityQuality: QualitySetting = 'low';
-  private baseUrl = `${environment.express_server_url}:${environment.express_server_port}/`;
+  private baseUrl = environment.server_url;
 
   // general features and modes
   // mode = '' || upload || explore || edit || annotation || open

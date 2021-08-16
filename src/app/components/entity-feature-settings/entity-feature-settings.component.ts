@@ -107,7 +107,7 @@ export class EntityFeatureSettingsComponent {
           JSON.stringify(this.processing.entitySettings),
         );
         if (this.processing.upload) {
-          window.top.postMessage({ type: 'settings', settings }, environment.repository);
+          window.top.postMessage({ type: 'settings', settings }, environment.repo_url);
           this.processing.upload = false;
         }
       });

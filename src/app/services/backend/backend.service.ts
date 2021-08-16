@@ -25,7 +25,7 @@ export class BackendService {
       : process.pid) % 0xffff;
   /* tslint:enable:no-magic-numbers */
   //
-  private endpoint = `${environment.express_server_url}:${environment.express_server_port}`;
+  private endpoint = environment.server_url;
   private httpOptions = {
     headers: new HttpHeaders({
       'Content-Type': 'application/json',

@@ -28,7 +28,7 @@ export class DialogAnnotationEditorComponent {
   public labelMode = 'edit';
   public labelModeText = 'Edit';
 
-  private serverUrl = `${environment.express_server_url}:${environment.express_server_port}`;
+  private serverUrl = environment.server_url;
 
   constructor(
     public dialogRef: MatDialogRef<DialogAnnotationEditorComponent>,
@@ -77,7 +77,7 @@ export class DialogAnnotationEditorComponent {
   }
 
   private addEntity(entity: IEntity) {
-    const target = `${environment.repository}/entity/${entity._id}`;
+    const target = `${environment.repo_url}/entity/${entity._id}`;
     let url = '';
 
     let markdown = '';

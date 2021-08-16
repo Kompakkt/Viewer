@@ -1,7 +1,6 @@
 export const environment = {
   production: true,
-  express_server_url: 'https://kompakkt.uni-koeln.de',
-  express_server_port: 8080,
+  server_url: 'https://kompakkt.de/server/',
   version: require('../../package.json').version,
-  repository: 'https://kompakkt.de/',
+  repo_url: 'https://kompakkt.de/',
 };

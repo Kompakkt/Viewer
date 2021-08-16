@@ -118,7 +118,7 @@ import { MediaTypePipe } from './pipes/media-type.pipe';
     MatProgressSpinnerModule,
     MatChipsModule,
     SocketIoModule.forRoot({
-      url: `${environment.express_server_url}:${environment.express_server_port}`,
+      url: environment.server_url,
       options: {
         autoConnect: false,
       },
