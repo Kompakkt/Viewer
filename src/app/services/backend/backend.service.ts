@@ -37,11 +37,11 @@ export class BackendService {
 
   // Override GET and POST to use HttpOptions which is needed for auth
   private async get(path: string): Promise<any> {
-    return this.http.get(`${this.endpoint}/${path}`, this.httpOptions).toPromise();
+    return this.http.get(`${this.endpoint}${path}`, this.httpOptions).toPromise();
   }
 
   private post(path: string, obj: any): Promise<any> {
-    return this.http.post(`${this.endpoint}/${path}`, obj, this.httpOptions).toPromise();
+    return this.http.post(`${this.endpoint}${path}`, obj, this.httpOptions).toPromise();
   }
 
   // GETs

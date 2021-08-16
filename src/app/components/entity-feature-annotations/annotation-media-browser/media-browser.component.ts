@@ -4,6 +4,8 @@ import { ProcessingService } from '../../../services/processing/processing.servi
 
 import { isCompilation, isEntity, ICompilation } from '~common/interfaces';
 
+import { environment } from 'src/environments/environment';
+
 @Component({
   selector: 'app-media-browser',
   templateUrl: './media-browser.component.html',
@@ -20,6 +22,7 @@ export class MediaBrowserComponent implements OnInit {
   public addCompilationEntity = false;
 
   public isEntity = isEntity;
+  public server_url = environment.server_url;
 
   constructor(public processing: ProcessingService) {}
 

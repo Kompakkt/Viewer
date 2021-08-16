@@ -103,7 +103,7 @@ export class DialogAnnotationEditorComponent {
       default:
         markdown += `
         <a href="${target}" target="_blank">
-          <img src="${entity.settings.preview}" alt="${entity.name}">
+          <img src="${environment.server_url + entity.settings.preview}" alt="${entity.name}">
         </a>`;
     }
 

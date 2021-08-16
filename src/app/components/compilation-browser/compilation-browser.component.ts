@@ -4,6 +4,8 @@ import { ProcessingService } from '../../services/processing/processing.service'
 
 import { isEntity, isCompilation, ICompilation } from '~common/interfaces';
 
+import { environment } from 'src/environments/environment';
+
 @Component({
   selector: 'app-compilation-browser',
   templateUrl: './compilation-browser.component.html',
@@ -11,6 +13,7 @@ import { isEntity, isCompilation, ICompilation } from '~common/interfaces';
 })
 export class CompilationBrowserComponent {
   public compilation: ICompilation | undefined;
+  public server_url = environment.server_url;
 
   public isEntity = isEntity;
 
