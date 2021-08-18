@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import PouchDB from 'pouchdb';
 
-import { IAnnotation } from '~common/interfaces';
+import { IAnnotation } from 'src/common';
 
 @Injectable({
   providedIn: 'root',

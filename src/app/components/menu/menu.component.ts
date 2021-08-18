@@ -5,7 +5,7 @@ import { MessageService } from '../../services/message/message.service';
 import { ProcessingService } from '../../services/processing/processing.service';
 import { UserdataService } from '../../services/userdata/userdata.service';
 
-import { IEntity } from '~common/interfaces';
+import { IEntity } from 'src/common';
 
 import fscreen from 'fscreen';
 

@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 
 import { ProcessingService } from '../../services/processing/processing.service';
 
-import { isEntity, isCompilation, ICompilation } from '~common/interfaces';
+import { isEntity, isCompilation, ICompilation } from 'src/common';
 
 import { environment } from 'src/environments/environment';
 

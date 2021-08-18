@@ -18,7 +18,7 @@ import { ProcessingService } from '../processing/processing.service';
 
 import { minimalSettings } from '../../../assets/settings/settings';
 
-import { IColor, IEntitySettings } from '~common/interfaces';
+import { IColor, IEntitySettings } from 'src/common';
 
 import {
   createBoundingBox,

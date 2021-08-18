@@ -6,10 +6,10 @@ import {
   IAnnotation,
   ICompilation,
   IUserData,
-  IMetaDataDigitalEntity,
+  IDigitalEntity,
   IEntity,
   ObjectId,
-} from '~common/interfaces';
+} from 'src/common';
 
 @Injectable({
   providedIn: 'root',
@@ -73,7 +73,7 @@ export class BackendService {
       : this.get(`api/v1/get/find/compilation/${identifier}`);
   }
 
-  public async getEntityMetadata(identifier: string | ObjectId): Promise<IMetaDataDigitalEntity> {
+  public async getEntityMetadata(identifier: string | ObjectId): Promise<IDigitalEntity> {
     return this.get(`api/v1/get/find/digitalentity/${identifier}`);
   }
 

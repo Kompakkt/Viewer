@@ -4,7 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MessageService } from '../../../services/message/message.service';
 import { BackendService } from '../../../services/backend/backend.service';
 
-import { ICompilation } from '~common/interfaces';
+import { ICompilation } from 'src/common';
 
 @Component({
   selector: 'app-dialog-share-annotation',

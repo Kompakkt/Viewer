@@ -4,13 +4,12 @@ import {
   IAnnotation,
   ICompilation,
   IEntity,
-  ILoginData,
   isAnnotation,
   isCompilation,
   isEntity,
   IStrippedUserData,
   IUserData,
-} from '~common/interfaces';
+} from 'src/common';
 
 import { LoginComponent } from '../../components/dialogs/dialog-login/login.component';
 import { BackendService } from '../backend/backend.service';
@@ -21,7 +20,7 @@ import { BackendService } from '../backend/backend.service';
 export class UserdataService {
   public loginRequired = false;
   public authenticatedUser = false;
-  public loginData: ILoginData = {
+  public loginData = {
     username: '',
     password: '',
     isCached: false,

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { DirectionalLight, PointLight, Scene, Vector3 } from 'babylonjs';
 
-import { IEntityLight, IEntitySettings } from '~common/interfaces';
+import { IEntityLight, IEntitySettings } from 'src/common';
 import { BabylonService } from '../babylon/babylon.service';
 import { ProcessingService } from '../processing/processing.service';
 

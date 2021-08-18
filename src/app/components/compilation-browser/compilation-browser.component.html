@@ -5,7 +5,10 @@
         <mat-card-header>
           <mat-card-title> Selected Object: {{ entity.name }} </mat-card-title>
         </mat-card-header>
-        <img *ngIf="entity.settings && entity.settings.preview" [src]="server_url + entity.settings.preview" />
+        <img
+          *ngIf="entity.settings && entity.settings.preview"
+          [src]="server_url + entity.settings.preview"
+        />
       </mat-card>
     </div>
 
