@@ -92,15 +92,15 @@ export class BackendService {
 
   // Auth
   public login(username: string, password: string): Promise<IUserData> {
-    return this.post(`login`, { username, password });
+    return this.post(`user-management/login`, { username, password });
   }
 
   public async logout(): Promise<string> {
-    return this.get(`logout`);
+    return this.get(`user-management/logout`);
   }
 
   public async isAuthorized(): Promise<IUserData> {
-    return this.get(`auth`);
+    return this.get(`user-management/auth`);
   }
 
   public async findUserInCompilations(): Promise<ICompilation[]> {
