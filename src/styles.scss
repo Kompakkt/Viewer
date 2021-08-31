@@ -168,6 +168,11 @@ a {
   max-width: 100%;
 }
 
+#annotation-content a {
+  color: #00afe7;
+  border-bottom: 1px solid;
+}
+
 mat-card-content {
   position: relative;
 }
