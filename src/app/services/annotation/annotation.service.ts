@@ -602,16 +602,9 @@ export class AnnotationService {
   }
 
   public drawMarker(newAnnotation: IAnnotation) {
-    const positionVector = new Vector3(
-      newAnnotation.target.selector.referencePoint.x,
-      newAnnotation.target.selector.referencePoint.y,
-      newAnnotation.target.selector.referencePoint.z,
-    );
-    const normalVector = new Vector3(
-      newAnnotation.target.selector.referenceNormal.x,
-      newAnnotation.target.selector.referenceNormal.y,
-      newAnnotation.target.selector.referenceNormal.z,
-    );
+    const { referencePoint, referenceNormal } = newAnnotation.target.selector;
+    const positionVector = new Vector3(referencePoint.x, referencePoint.y, referencePoint.z);
+    const normalVector = new Vector3(referenceNormal.x, referenceNormal.y, referenceNormal.z);
 
     const color = 'black';
     const scene = this.babylon.getScene();
@@ -626,13 +619,7 @@ export class AnnotationService {
       positionVector,
       normalVector,
     );
-    marker.actionManager = new ActionManager(scene);
-    // register 'pickCylinder' as the handler function for cylinder picking action.
-    marker.actionManager.registerAction(
-      new ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
-        this.setSelectedAnnotation(id);
-      }),
-    );
+    marker.isPickable = false;
 
     const markertransparent = createMarker(
       scene,
