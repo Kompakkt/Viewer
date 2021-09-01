@@ -2,6 +2,7 @@ import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { IAnnotation } from 'src/common';
 import { Matrix, Vector3 } from 'babylonjs';
+import { environment } from 'src/environments/environment';
 
 import { AnnotationService } from '../../../services/annotation/annotation.service';
 import { BabylonService } from '../../../services/babylon/babylon.service';
@@ -94,6 +95,10 @@ export class AnnotationComponent implements OnInit {
       }
       this.setPosition(this.annotation);
     }, 15);
+  }
+
+  get previewImage() {
+    return environment.server_url + this.annotation?.body.content.relatedPerspective.preview;
   }
 
   get userOwnsCompilation() {

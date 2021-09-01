@@ -24,11 +24,7 @@
       }}</mat-card-subtitle>
     </mat-card-header>
 
-    <img
-      mat-card-image
-      src="{{ annotation.body.content.relatedPerspective.preview }}"
-      *ngIf="!collapsed"
-    />
+    <img mat-card-image [src]="previewImage" *ngIf="!collapsed" />
 
     <mat-card-content *ngIf="!collapsed">
       <markdown
