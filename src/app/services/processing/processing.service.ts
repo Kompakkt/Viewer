@@ -154,6 +154,8 @@ export class ProcessingService {
     this.annotatingFeatured = false;
     await this.setAnnotatingFeatured(entity);
     // TODO - move to babylon load: rendering groups
+    const isPickableMode = ['upload', 'annotation'].includes(this.mode);
+    meshes.forEach(mesh => (mesh.isPickable = isPickableMode));
     meshes.forEach(mesh => (mesh.renderingGroupId = 2));
     this.babylon.getScene().getMeshesByTags('videoPlane', mesh => (mesh.renderingGroupId = 3));
     // End of TODO
