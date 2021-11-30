@@ -137,5 +137,4 @@ modules.xml
 # Sonarlint plugin
 .idea/sonarlint
 
-# End of https://www.gitignore.io/api/webstorm+all
-
+/src/common/
