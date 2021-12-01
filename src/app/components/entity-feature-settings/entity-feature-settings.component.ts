@@ -142,10 +142,15 @@ export class EntityFeatureSettingsComponent {
     dialogRef.afterClosed().subscribe(finish => {
       if (finish) {
         this.entitySettings.meshSettingsCompleted.emit(true);
-        if (!this.stepper) return console.error('Stepper could not be accessed');
-        this.stepper.selected.completed = true;
-        this.stepper.selected.editable = false;
-        this.stepper.next();
+        if (!this.stepper) {
+          return console.error('Stepper could not be accessed');
+        } else {
+          if (this.stepper.selected) {
+              this.stepper.selected.completed = true;
+              this.stepper.selected.editable = false;
+              this.stepper.next();
+          }
+        }
       } else {
         return;
       }
@@ -154,9 +159,14 @@ export class EntityFeatureSettingsComponent {
 
   public nextSecondStep() {
     this.setInitialPerspectivePreview();
-    if (!this.stepper) return console.error('Stepper could not be accessed');
-    this.stepper.selected.completed = true;
-    this.stepper.selected.editable = true;
-    this.stepper.next();
+    if (!this.stepper) {
+      return console.error('Stepper could not be accessed');
+    } else {
+        if (this.stepper.selected) {
+            this.stepper.selected.completed = true;
+            this.stepper.selected.editable = true;
+            this.stepper.next();
+        }
+    }
   }
 }

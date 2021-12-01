@@ -30,16 +30,16 @@
     }
   },
   "dependencies": {
-    "@angular/animations": "^11.0.4",
-    "@angular/cdk": "^11.0.2",
-    "@angular/common": "^11.0.4",
-    "@angular/compiler": "^11.0.4",
-    "@angular/core": "^11.0.4",
-    "@angular/forms": "^11.0.4",
-    "@angular/material": "^11.0.2",
-    "@angular/platform-browser": "^11.0.4",
-    "@angular/platform-browser-dynamic": "^11.0.4",
-    "@angular/router": "^11.0.4",
+    "@angular/animations": "^12.2.13",
+    "@angular/cdk": "^12.2.13",
+    "@angular/common": "^12.2.13",
+    "@angular/compiler": "^12.2.13",
+    "@angular/core": "^12.2.13",
+    "@angular/forms": "^12.2.13",
+    "@angular/material": "^12.2.13",
+    "@angular/platform-browser": "^12.2.13",
+    "@angular/platform-browser-dynamic": "^12.2.13",
+    "@angular/router": "^12.2.13",
     "@types/pouchdb-upsert": "^2.2.6",
     "babylonjs": "^4.2.0",
     "babylonjs-gui": "^4.2.0",
@@ -50,20 +50,20 @@
     "fscreen": "^1.1.0",
     "marked": "^1.2.6",
     "ngx-color": "^6.2.0",
-    "ngx-markdown": "^11.0.1",
+    "ngx-markdown": "12.0.1",
     "pepjs": "^0.5.3",
     "pouchdb": "^7.2.2",
     "pouchdb-find": "^7.2.2",
     "pouchdb-upsert": "^2.2.0",
     "rxjs": "~6.6.3",
     "tslib": "^2.0.3",
-    "zone.js": "~0.11.3"
+    "zone.js": "~0.11.4"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "~0.1100.4",
-    "@angular/cli": "11.0.4",
-    "@angular/compiler-cli": "^11.0.4",
-    "@angular/language-service": "^11.0.4",
+    "@angular-devkit/build-angular": "~12.2.13",
+    "@angular/cli": "12.2.13",
+    "@angular/compiler-cli": "^12.2.13",
+    "@angular/language-service": "^12.2.13",
     "@types/file-saver": "^2.0.1",
     "@types/fscreen": "^1.0.1",
     "@types/node": "^14.14.12",
@@ -74,6 +74,6 @@
     "pretty-quick": "^3.1.0",
     "ts-node": "~9.1.1",
     "tslint": "~6.1.0",
-    "typescript": "^4.1.2"
+    "typescript": "^4.3.5"
   }
 }

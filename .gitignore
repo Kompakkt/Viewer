@@ -137,4 +137,4 @@ modules.xml
 # Sonarlint plugin
 .idea/sonarlint
 
-/src/common/
+/src/common
