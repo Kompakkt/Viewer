@@ -4,7 +4,6 @@ import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { IAnnotation, ICompilation, IEntity, isAnnotation } from 'src/common';
 import { ActionManager, ExecuteCodeAction, Mesh, Tags, Vector3 } from 'babylonjs';
-import { Socket } from 'ngx-socket-io';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 
 import { annotationFallback, annotationLogo } from '../../../assets/annotations/annotations';
@@ -61,7 +60,6 @@ export class AnnotationService {
     private babylon: BabylonService,
     private backend: BackendService,
     private message: MessageService,
-    public socket: Socket,
     private processing: ProcessingService,
     private dialog: MatDialog,
     private userdata: UserdataService,

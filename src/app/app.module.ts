@@ -29,9 +29,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ColorChromeModule } from 'ngx-color/chrome';
 import { MarkdownModule } from 'ngx-markdown';
-import { SocketIoModule } from 'ngx-socket-io';
-
-import { environment } from '../environments/environment';
 
 import { AppComponent } from './app.component';
 import { CompilationBrowserComponent } from './components/compilation-browser/compilation-browser.component';
@@ -117,12 +114,6 @@ import { MediaTypePipe } from './pipes/media-type.pipe';
     MatStepperModule,
     MatProgressSpinnerModule,
     MatChipsModule,
-    SocketIoModule.forRoot({
-      url: environment.server_url,
-      options: {
-        autoConnect: false,
-      },
-    }),
     MarkdownModule.forRoot(),
     MatSidenavModule,
   ],
