@@ -1,6 +1,8 @@
 # Kompakkt.Viewer
 
-![Kompakkt](src/assets/img/kompakkt-logo.png)
+<p align="center">
+    <img src="https://github.com/Kompakkt/Assets/raw/main/viewer-logo.png" alt="Kompakkt Logo" width="600">
+</p>
 
 Web Based 3D Viewer and 3D Annotation System.
 
