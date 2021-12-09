@@ -24,7 +24,12 @@
       }}</mat-card-subtitle>
     </mat-card-header>
 
-    <img mat-card-image [src]="previewImage" *ngIf="!collapsed" />
+    <ng-container *ngIf="previewImage; else noPreviewImage">
+      <img mat-card-image [src]="previewImage" *ngIf="!collapsed" />
+    </ng-container>
+    <ng-template #noPreviewImage>
+      <p>This annotation has no preview image</p>
+    </ng-template>
 
     <mat-card-content *ngIf="!collapsed">
       <markdown

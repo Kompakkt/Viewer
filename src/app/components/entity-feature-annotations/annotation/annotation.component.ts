@@ -98,7 +98,9 @@ export class AnnotationComponent implements OnInit {
   }
 
   get previewImage() {
-    return environment.server_url + this.annotation?.body.content.relatedPerspective.preview;
+    const preview = this.annotation?.body.content.relatedPerspective.preview;
+    if (!preview) return undefined;
+    return preview.startsWith('data:image') ? preview : environment.server_url + preview;
   }
 
   get userOwnsCompilation() {
