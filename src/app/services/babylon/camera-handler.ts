@@ -1,4 +1,4 @@
-import { Animation, ArcRotateCamera, Scene, Vector3 } from 'babylonjs';
+import { Animation, ArcRotateCamera, EasingFunction, QuarticEase, Scene, Vector3 } from 'babylonjs';
 
 const halfPi = Math.PI / 180;
 const DEFAULTS: {
@@ -163,7 +163,11 @@ const createAnimationsForCamera = (
 
   const arr: Animation[] = [];
   for (let i = 0; i < 3; i++) {
-    arr.push(creatAnimCam(cameraAxis[i], positionAxis[i]));
+    const anim = creatAnimCam(cameraAxis[i], positionAxis[i]);
+    const ease = new QuarticEase();
+    ease.setEasingMode(EasingFunction.EASINGMODE_EASEOUT);
+    anim.setEasingFunction(ease);
+    arr.push(anim);
   }
   return arr;
 };
