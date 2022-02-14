@@ -3,8 +3,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { IAnnotation, ICompilation, IEntity, isAnnotation } from 'src/common';
-import { ActionManager, ExecuteCodeAction, Mesh, Tags, Vector3 } from 'babylonjs';
-import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
+import { ActionManager, ExecuteCodeAction, Mesh, Tags, Vector3, PickingInfo } from 'babylonjs';
+import { map } from 'rxjs/operators';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 import { annotationFallback, annotationLogo } from '../../../assets/annotations/annotations';
 import { environment } from '../../../environments/environment';
@@ -21,6 +22,17 @@ import { UserdataService } from '../userdata/userdata.service';
 
 import { createMarker } from './visual3DElements';
 
+const isDefaultAnnotation = (annotation: IAnnotation) =>
+  !annotation.target.source.relatedCompilation ||
+  annotation.target.source.relatedCompilation === '';
+
+const isCompilationAnnotation = (annotation: IAnnotation) =>
+  annotation.target.source.relatedCompilation !== undefined &&
+  annotation.target.source.relatedCompilation.length > 0;
+
+const sortByRanking = (a: IAnnotation, b: IAnnotation): number =>
+  +a.ranking === +b.ranking ? 0 : +a.ranking < +b.ranking ? -1 : 1;
+
 @Injectable({
   providedIn: 'root',
 })
@@ -35,25 +47,10 @@ export class AnnotationService {
   public isSelectedAnnotation = this.selectedAnnotation.asObservable();
   private editModeAnnotation = new BehaviorSubject('');
   public isEditModeAnnotation = this.editModeAnnotation.asObservable();
-  private currentAnnotationSubject = new BehaviorSubject([] as IAnnotation[]);
-  public currentAnnotations = this.currentAnnotationSubject.asObservable();
+  private annotations = new BehaviorSubject<IAnnotation[]>([]);
+  public annotations$ = this.annotations.asObservable();
 
-  private _annotations: IAnnotation[] = [];
-  public readonly annotations = new Proxy(this._annotations, {
-    get: (obj, prop) => {
-      // After splicing or pushing to this.annotations we want to
-      // update the currentAnnotations Subject.
-      // Use setTimeout with time 0 to append it to the end of the
-      // JavaScript execution queue
-      try {
-        return (obj as any)[prop] as IAnnotation;
-      } finally {
-        if (['splice', 'push'].includes(prop.toString())) {
-          setTimeout(() => this.updateCurrentAnnotationsSubject(), 0);
-        }
-      }
-    },
-  });
+  private defaultOffset = 0;
 
   constructor(
     private data: DataService,
@@ -89,55 +86,46 @@ export class AnnotationService {
       console.log('ich setze das mesh als', allowance);
       this.annotationMode(allowance);
     });
+
+    this.defaultAnnotations$.subscribe(arr => {
+      this.defaultOffset = arr.length;
+    });
+
+    this.currentAnnotations$.subscribe(() => this.redrawMarker());
   }
 
   get isHomepageEntity() {
     return this.entity?._id === 'default' && !this.processing.mode;
   }
 
-  get defaultAnnotations() {
-    if (this.isHomepageEntity) return [];
-    return this.annotations.filter(
-      annotation =>
-        !annotation.target.source.relatedCompilation ||
-        annotation.target.source.relatedCompilation === '',
+  get defaultAnnotations$() {
+    return this.annotations$.pipe(map(arr => arr.filter(isDefaultAnnotation)));
+  }
+
+  get compilationAnnotations$() {
+    return this.annotations$.pipe(map(arr => arr.filter(isCompilationAnnotation)));
+  }
+
+  get currentAnnotations$() {
+    return this.annotations$.pipe(
+      map(arr =>
+        arr.filter(annotation =>
+          this.processing.compilationLoaded
+            ? isCompilationAnnotation(annotation)
+            : isDefaultAnnotation(annotation),
+        ),
+      ),
     );
-  }
-
-  get compilationAnnotations() {
-    return this.annotations.filter(
-      annotation =>
-        annotation.target.source.relatedCompilation !== undefined &&
-        annotation.target.source.relatedCompilation.length > 0,
-    );
-  }
-
-  private updateCurrentAnnotationsSubject() {
-    const next = this.processing.compilationLoaded
-      ? this.compilationAnnotations
-      : this.defaultAnnotations;
-    this.currentAnnotationSubject.next(next);
-    // After the observable updates we want to redraw markers
-    setTimeout(() => this.redrawMarker(), 0);
-  }
-
-  public getCurrentAnnotations() {
-    // This function should not be used in DOM
-    // If you need current annotations in DOM, subscribe to the
-    // currentAnnotations Observable using the async pipe
-    // e.g. (annotationService.currentAnnotations | async)
-    return this.processing.compilationLoaded
-      ? this.compilationAnnotations
-      : this.defaultAnnotations;
   }
 
   public async moveAnnotationByIndex(from_index: number, to_index: number) {
-    await this.sortAnnotations();
     // Since all annotations are in the same array but sorted
     // with defaults first and compilation following
     // we can calculate the offset if needed
-    const offset = this.processing.compilationLoaded ? this.defaultAnnotations.length : 0;
-    moveItemInArray(this.annotations, from_index + offset, to_index + offset);
+    const arr = await this.getSortedAnnotations();
+    const offset = this.processing.compilationLoaded ? this.defaultOffset : 0;
+    moveItemInArray(arr, from_index + offset, to_index + offset);
+    this.annotations.next(arr);
     await this.changedRankingPositions();
   }
 
@@ -148,8 +136,7 @@ export class AnnotationService {
     Tags.AddTagsTo(this.meshes, this.entity._id.toString());
     this.selectedAnnotation.next('');
     this.editModeAnnotation.next('');
-    await this.deleteAllMarker();
-    this.annotations.splice(0, this.annotations.length);
+    this.annotations.next([]);
 
     if (!this.processing.defaultEntityLoaded && !this.processing.fallbackEntityLoaded) {
       // Filter null/undefined annotations
@@ -162,19 +149,20 @@ export class AnnotationService {
       // Update and sort local
       await this.updateLocalDB(pouchAnnotations, serverAnnotations);
       const updated = await this.updateAnnotationList(pouchAnnotations, serverAnnotations);
-      this.annotations.push(...updated);
+      this.annotations.next(updated);
       await this.sortAnnotations();
     } else {
       if (this.processing.fallbackEntityLoaded) {
-        this.annotations.push(annotationFallback);
+        this.annotations.next([annotationFallback]);
       }
       if (this.processing.defaultEntityLoaded) {
         if (this.processing.annotatingFeatured && annotationLogo.length) {
-          annotationLogo.forEach((annotation: IAnnotation) => this.annotations.push(annotation));
+          this.annotations.next(annotationLogo);
         }
       }
-      if (this.annotations.length > 0) {
-        this.selectedAnnotation.next(this.annotations[0]._id.toString());
+      const annotations = await firstValueFrom(this.annotations);
+      if (annotations.length > 0) {
+        this.selectedAnnotation.next(annotations[0]._id.toString());
       }
     }
   }
@@ -304,38 +292,30 @@ export class AnnotationService {
     return unsorted;
   }
 
-  private async sortAnnotations() {
-    const sortedDefault = this.defaultAnnotations.sort((leftSide, rightSide): number =>
-      +leftSide.ranking === +rightSide.ranking
-        ? 0
-        : +leftSide.ranking < +rightSide.ranking
-        ? -1
-        : 1,
-    );
-    const sortedCompilation = this.compilationAnnotations.sort((leftSide, rightSide): number =>
-      +leftSide.ranking === +rightSide.ranking
-        ? 0
-        : +leftSide.ranking < +rightSide.ranking
-        ? -1
-        : 1,
+  private async getSortedAnnotations() {
+    const defaultAnnotations = (await firstValueFrom(this.defaultAnnotations$)).sort(sortByRanking);
+    const compilationAnnotations = (await firstValueFrom(this.compilationAnnotations$)).sort(
+      sortByRanking,
     );
 
-    this.annotations.splice(0, this.annotations.length);
-    this.annotations.push(...sortedDefault, ...sortedCompilation);
+    return defaultAnnotations.concat(compilationAnnotations);
+  }
+
+  private async sortAnnotations() {
+    this.annotations.next(await this.getSortedAnnotations());
 
     await this.changedRankingPositions();
   }
 
   // Die Annotationsfunktionalität wird zue aktuellen Entity hinzugefügt
   public initializeAnnotationMode() {
-    this.babylon.getCanvas().ondblclick = () => {
+    this.babylon.getCanvas().addEventListener('dblclick', () => {
       const scene = this.babylon.getScene();
-      const result = scene.pick(scene.pointerX, scene.pointerY);
-      if (result && result.pickedMesh && result.pickedMesh.isPickable) {
-        console.log('Picked', result);
-        this.createNewAnnotation(result);
-      }
-    };
+      const result = scene.pick(scene.pointerX, scene.pointerY, mesh => mesh.isPickable);
+      if (!result) return;
+      console.log('Picked', result);
+      this.createNewAnnotation(result);
+    });
     this.annotationMode(false);
   }
 
@@ -352,11 +332,16 @@ export class AnnotationService {
     } else {
       this.babylon.getCanvas().classList.remove('annotation-mode');
     }
-    this.meshes.forEach(mesh => (mesh.isPickable = value));
+    for (const mesh of this.meshes) {
+      if (mesh.name === '__root__') continue; // Skip GlTF root node
+      console.log('Mesh', mesh);
+      mesh.isPickable = value;
+    }
   }
 
-  public async createNewAnnotation(result: any) {
+  public async createNewAnnotation(result: PickingInfo) {
     const camera = this.babylon.cameraManager.getInitialPosition();
+    const currentAnnotations = await firstValueFrom(this.currentAnnotations$);
 
     this.babylon.createPreviewScreenshot().then(detailScreenshot => {
       if (!this.entity) {
@@ -371,11 +356,21 @@ export class AnnotationService {
         ? this.userdata.guestUserData._id
         : 'guest';
 
+      const referencePoint = result.pickedPoint!;
+      const referenceNormal = result.getNormal(true, true)!;
+
+      const relatedCompilation =
+        this.processing.compilationLoaded && this.compilation
+          ? this.compilation._id.toString()
+          : '';
+
+      const { position, target, cameraType } = camera;
+
       const newAnnotation: IAnnotation = {
         validated: !this.processing.compilationLoaded,
         _id: generatedId,
         identifier: generatedId,
-        ranking: this.getCurrentAnnotations().length + 1,
+        ranking: currentAnnotations.length + 1,
         creator: {
           type: 'person',
           name: personName,
@@ -401,17 +396,9 @@ export class AnnotationService {
             title: '',
             description: '',
             relatedPerspective: {
-              cameraType: camera.cameraType,
-              position: {
-                x: camera.position.x,
-                y: camera.position.y,
-                z: camera.position.z,
-              },
-              target: {
-                x: camera.target.x,
-                y: camera.target.y,
-                z: camera.target.z,
-              },
+              cameraType,
+              position,
+              target,
               preview: detailScreenshot,
             },
           },
@@ -419,22 +406,11 @@ export class AnnotationService {
         target: {
           source: {
             relatedEntity: this.entity._id.toString(),
-            relatedCompilation:
-              this.processing.compilationLoaded && this.compilation
-                ? this.compilation._id.toString()
-                : '',
+            relatedCompilation,
           },
           selector: {
-            referencePoint: {
-              x: result.pickedPoint.x,
-              y: result.pickedPoint.y,
-              z: result.pickedPoint.z,
-            },
-            referenceNormal: {
-              x: result.getNormal(true, true).x,
-              y: result.getNormal(true, true).y,
-              z: result.getNormal(true, true).z,
-            },
+            referencePoint,
+            referenceNormal,
           },
         },
       };
@@ -457,7 +433,7 @@ export class AnnotationService {
       this.data.updateAnnotation(newAnnotation);
     }
     this.drawMarker(newAnnotation);
-    this.annotations.push(newAnnotation);
+    this.annotations.next(this.annotations.getValue().concat(newAnnotation));
     this.selectedAnnotation.next(newAnnotation._id.toString());
     this.editModeAnnotation.next(newAnnotation._id.toString());
   }
@@ -466,10 +442,10 @@ export class AnnotationService {
     let newAnnotation = _annotation;
     newAnnotation.lastModificationDate = new Date().toISOString();
     if (!this.processing.fallbackEntityLoaded && !this.processing.defaultEntityLoaded) {
-      if (
+      const isOwner =
         this.userdata.isAnnotationOwner(_annotation) ||
-        (this.processing.compilationLoaded && this.userdata.userOwnsCompilation)
-      ) {
+        (this.processing.compilationLoaded && this.userdata.userOwnsCompilation);
+      if (isOwner) {
         this.backend
           .updateAnnotation(_annotation)
           .then((resultAnnotation: IAnnotation) => {
@@ -481,25 +457,29 @@ export class AnnotationService {
       }
       this.data.updateAnnotation(newAnnotation);
     }
-    this.annotations.splice(
-      this.annotations.findIndex(ann => ann._id === _annotation._id),
+    const arr = this.annotations.getValue();
+    arr.splice(
+      arr.findIndex(ann => ann._id === _annotation._id),
       1,
       newAnnotation,
     );
+    this.annotations.next(arr);
   }
 
   public deleteAnnotation(_annotation: IAnnotation) {
     if (this.userdata.isAnnotationOwner(_annotation)) {
       this.setSelectedAnnotation('');
       this.setEditModeAnnotation('');
-      const index: number = this.annotations.findIndex(ann => ann._id === _annotation._id);
+      const arr = this.annotations.getValue();
+      const index = arr.findIndex(ann => ann._id === _annotation._id);
       if (index !== -1) {
-        this.annotations.splice(
-          this.annotations.findIndex(ann => ann._id === _annotation._id),
+        arr.splice(
+          arr.findIndex(ann => ann._id === _annotation._id),
           1,
         );
         this.changedRankingPositions();
         this.redrawMarker();
+        this.annotations.next(arr);
         if (!this.processing.fallbackEntityLoaded && !this.processing.defaultEntityLoaded) {
           this.data.deleteAnnotation(_annotation._id.toString());
           this.deleteAnnotationFromServer(_annotation._id.toString());
@@ -554,12 +534,11 @@ export class AnnotationService {
     // Decide whether we iterate over the first part of this.annotations
     // containing all the default annotations or to iterate over the second part
     // containing all of the compilation annotations
-    const offset = this.processing.compilationLoaded ? this.defaultAnnotations.length : 0;
-    const length = this.processing.compilationLoaded
-      ? this.annotations.length
-      : this.defaultAnnotations.length;
+    const arr = this.annotations.getValue();
+    const offset = this.processing.compilationLoaded ? this.defaultOffset : 0;
+    const length = this.processing.compilationLoaded ? arr.length : this.defaultOffset;
     for (let i = offset; i < length; i++) {
-      const annotation = this.annotations[i];
+      const annotation = arr[i];
       if (!annotation._id) continue;
       await this.updateAnnotation({ ...annotation, ranking: i - offset + 1 });
     }
@@ -576,27 +555,18 @@ export class AnnotationService {
   }
 
   public deleteMarker(annotationID: string) {
-    const marker = this.babylon.getScene().getMeshesByTags(annotationID);
-    marker.forEach(value => {
-      value.dispose();
-    });
-  }
-
-  public async deleteAllMarker() {
-    await this.babylon
+    this.babylon
       .getScene()
-      .getMeshesByTags('marker')
-      .map(mesh => mesh.dispose());
+      .getMeshesByTags(annotationID)
+      .forEach(value => value.dispose());
   }
 
-  public redrawMarker() {
-    this.deleteAllMarker()
-      .then(() => {
-        for (const annotation of this.getCurrentAnnotations()) {
-          this.drawMarker(annotation);
-        }
-      })
-      .catch(e => console.error(e));
+  public async redrawMarker() {
+    const arr = await firstValueFrom(this.currentAnnotations$);
+    for (const annotation of arr) {
+      this.deleteMarker(annotation._id.toString());
+      this.drawMarker(annotation);
+    }
   }
 
   public drawMarker(newAnnotation: IAnnotation) {
@@ -609,7 +579,6 @@ export class AnnotationService {
     const id = newAnnotation._id.toString();
     const marker = createMarker(
       scene,
-      1,
       newAnnotation.ranking.toString(),
       id,
       false,
@@ -621,7 +590,6 @@ export class AnnotationService {
 
     const markertransparent = createMarker(
       scene,
-      1,
       newAnnotation.ranking.toString(),
       id,
       true,
@@ -638,25 +606,22 @@ export class AnnotationService {
     );
   }
 
-  public setSelectedAnnotation(id: string) {
+  public async setSelectedAnnotation(id: string) {
+    const arr = await firstValueFrom(this.currentAnnotations$);
+    const selectedAnnotation = arr.find(anno => anno._id === id);
+    if (!selectedAnnotation) return;
     this.selectedAnnotation.next(id);
 
-    const selectedAnnotation = this.getCurrentAnnotations().find(
-      (anno: IAnnotation) => anno._id === id,
-    );
-    if (selectedAnnotation) {
-      const perspective = selectedAnnotation.body.content.relatedPerspective;
-
-      if (perspective !== undefined) {
-        this.babylon.cameraManager.moveActiveCameraToPosition(
-          new Vector3(perspective.position.x, perspective.position.y, perspective.position.z),
-        );
-        this.babylon.cameraManager.setActiveCameraTarget(
-          new Vector3(perspective.target.x, perspective.target.y, perspective.target.z),
-        );
-      }
-      this.babylon.hideMesh(selectedAnnotation._id.toString(), true);
+    const perspective = selectedAnnotation.body.content.relatedPerspective;
+    if (perspective !== undefined) {
+      this.babylon.cameraManager.moveActiveCameraToPosition(
+        new Vector3(perspective.position.x, perspective.position.y, perspective.position.z),
+      );
+      this.babylon.cameraManager.setActiveCameraTarget(
+        new Vector3(perspective.target.x, perspective.target.y, perspective.target.z),
+      );
     }
+    this.babylon.hideMesh(selectedAnnotation._id.toString(), true);
   }
 
   public setEditModeAnnotation(id: string) {

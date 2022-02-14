@@ -16,7 +16,7 @@ export class AnnotationwalkthroughComponent implements OnInit {
   constructor(public annotationService: AnnotationService) {}
 
   ngOnInit() {
-    this.annotationService.currentAnnotations.subscribe(currentAnnotations => {
+    this.annotationService.currentAnnotations$.subscribe(currentAnnotations => {
       this.annotations = currentAnnotations;
       this.title = 'Annotation Walkthrough';
       this.ranking = -1;

@@ -1,4 +1,4 @@
-<div *ngIf="settingsReady && processing.entitySettings" id="editor-entitysettings">
+<div *ngIf="(settingsReady$ | async) && processing.entitySettings" id="editor-entitysettings">
   <div *ngIf="processing.upload === false">
     <mat-card>
       <mat-card-content>

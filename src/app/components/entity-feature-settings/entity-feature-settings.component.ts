@@ -1,6 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatStepper } from '@angular/material/stepper';
+import { map } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
 import { BabylonService } from '../../services/babylon/babylon.service';
@@ -39,12 +40,14 @@ export class EntityFeatureSettingsComponent {
     this.processing.entity$.subscribe(entity => (this.entity = entity));
   }
 
-  get settingsReady() {
-    return new Promise<boolean>((resolve, _) => {
-      if (!this.entity) return resolve(false);
-      if (!this.processing.entitySettings) return resolve(false);
-      this.processing.showSettingsEditor$.toPromise().then(value => resolve(value));
-    });
+  get settingsReady$() {
+    return this.processing.showSettingsEditor$.pipe(
+      map(value => {
+        if (!this.entity) return false;
+        if (!this.processing.entitySettings) return false;
+        return value;
+      }),
+    );
   }
 
   public setInitialPerspectivePreview() {

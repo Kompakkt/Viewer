@@ -17,6 +17,8 @@ export class SceneComponent implements AfterViewInit {
 
   public isReady = false;
 
+  public currentAnnotations$ = this.annotations.currentAnnotations$;
+
   constructor(
     private babylon: BabylonService,
     public processing: ProcessingService,
@@ -32,10 +34,6 @@ export class SceneComponent implements AfterViewInit {
     this.babylon.attachCanvas(this.viewContainerRef);
     this.processing.bootstrap();
     this.babylon.resize();
-  }
-
-  get currentAnnotations() {
-    return this.annotations.currentAnnotations;
   }
 
   ngAfterViewInit() {
