@@ -378,8 +378,7 @@ export class BabylonService {
   }
 
   public async createScreenshot() {
-    this.hideMesh('plane', false);
-    this.hideMesh('label', false);
+    this.hideMesh('marker', false);
     await new Promise<any>((resolve, _) => this.getEngine().onEndFrameObservable.add(resolve));
     const result = await new Promise<string>((resolve, reject) => {
       const _activeCamera = this.getScene().activeCamera;
@@ -401,14 +400,12 @@ export class BabylonService {
         );
       }
     });
-    this.hideMesh('plane', true);
-    this.hideMesh('label', true);
+    this.hideMesh('marker', true);
     return result;
   }
 
   public async createPreviewScreenshot(): Promise<string> {
-    this.hideMesh('plane', false);
-    this.hideMesh('label', false);
+    this.hideMesh('marker', false);
 
     const clearColor = this.getScene().clearColor;
     this.getScene().clearColor = new Color4(0, 0, 0, 0);
@@ -431,8 +428,7 @@ export class BabylonService {
         );
       }
     });
-    this.hideMesh('plane', true);
-    this.hideMesh('label', true);
+    this.hideMesh('marker', true);
 
     return result;
   }
