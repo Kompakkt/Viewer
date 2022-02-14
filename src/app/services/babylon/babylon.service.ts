@@ -181,15 +181,18 @@ export class BabylonService {
       animationGroups: [],
     };
 
-    // Increase mouse precision the closer the camera is to it's target
-    // Increased mouse precision = slower zoom
     this.scene.registerBeforeRender(() => {
       const camera = this.getActiveCamera();
       if (!camera) return;
 
-      // Annotation_Marker -- Fixed_Size_On_Zoom
-      this.scene.getMeshesByTags('plane', mesh => (mesh.scalingDeterminant = camera.radius / 35));
-      this.scene.getMeshesByTags('label', mesh => (mesh.scalingDeterminant = camera.radius / 35));
+      this.scene.getMeshesByTags('marker', mesh => {
+        const dist = Vector3.Distance(mesh.position, camera.position);
+        const scale = Math.min(2, dist / 50);
+        // Scale based on distance
+        mesh.scaling = new Vector3(scale, scale, scale);
+        // Fade out markers with distance < 50
+        mesh.material!.alpha = Math.min(1, scale);
+      });
     });
 
     this.engine.runRenderLoop(() => {

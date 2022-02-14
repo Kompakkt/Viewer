@@ -609,8 +609,8 @@ export class AnnotationService {
   public async setSelectedAnnotation(id: string) {
     const arr = await firstValueFrom(this.currentAnnotations$);
     const selectedAnnotation = arr.find(anno => anno._id === id);
-    if (!selectedAnnotation) return;
     this.selectedAnnotation.next(id);
+    if (!selectedAnnotation) return;
 
     const perspective = selectedAnnotation.body.content.relatedPerspective;
     if (perspective !== undefined) {

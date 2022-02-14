@@ -9,6 +9,29 @@ import {
   Color3,
 } from 'babylonjs';
 
+const calcRadius = (scene: Scene) => {
+  // Try to get size from root mesh, only works for glTF models
+  const rootMesh = scene.getMeshByName('__root__');
+  if (rootMesh) {
+    const rootSize = rootMesh?._boundingInfo?.boundingBox.maximumWorld;
+    if (rootSize) {
+      const avgRootAxisLength = rootSize.asArray().sort()[1];
+      return avgRootAxisLength * 0.025;
+    }
+  }
+
+  // Calculate marker size from mesh bounding box
+  const max = { x: 0, y: 0, z: 0 };
+  for (const mesh of scene.meshes) {
+    if (!mesh._boundingInfo) continue;
+    const { x, y, z } = mesh._boundingInfo.boundingBox.extendSizeWorld;
+    if (x > max.x) max.x = x;
+    if (y > max.y) max.y = y;
+    if (z > max.z) max.x = z;
+  }
+  return Math.max(...Object.values(max)) * 0.05;
+};
+
 export const createMarker = (
   scene: Scene,
   ranking: string,
@@ -18,16 +41,7 @@ export const createMarker = (
   position?: Vector3,
   normal?: Vector3,
 ) => {
-  // Calculate marker size from mesh bounding box
-  let actualMeshes = 0;
-  const sumOfAvgs = scene.meshes.reduce((acc, mesh) => {
-    const tags = (Tags.GetTags(mesh, true) as string | undefined) ?? '';
-    if (tags.includes('marker')) return acc;
-    actualMeshes += 1;
-    const { x, y, z } = mesh._boundingInfo!.boundingBox.extendSize;
-    return acc + (x + y + z) / 3;
-  }, 0);
-  const radius = (sumOfAvgs / actualMeshes) * 0.075;
+  const radius = calcRadius(scene);
 
   // Create dynamic texture and write the text
   const resolution = 256;
@@ -41,7 +55,7 @@ export const createMarker = (
   ctx.font = `bold 16px Roboto, "Helvetica Neue", sans-serif`;
   const textWidth = ctx.measureText('00').width;
   const ratio = textWidth / 16;
-  const fontSize = Math.floor(resolution / (ratio * 2));
+  const fontSize = Math.floor(resolution / (ratio * 1.5));
   const font = `bold ${fontSize}px Roboto, "Helvetica Neue", sans-serif`;
 
   const mat = new StandardMaterial(`${id}_material${transparent ? '_transparent' : ''}`, scene);
@@ -50,11 +64,12 @@ export const createMarker = (
   mat.emissiveColor = new Color3(1, 1, 1);
   mat.specularColor = new Color3(0, 0, 0);
 
-  dynamicTexture.drawText(ranking, null, null, font, '#ffffff', color ?? '#000000', false, true);
+  dynamicTexture.drawText(ranking, null, 180, font, '#ffffff', color ?? '#000000', false, true);
 
   const markerName = `${id}_marker${transparent ? '_transparent' : ''}`;
   const marker = MeshBuilder.CreateDisc(markerName, { radius }, scene);
   Tags.AddTagsTo(marker, 'marker');
+  Tags.AddTagsTo(marker, transparent ? 'transparent_marker' : 'solid_marker');
   Tags.AddTagsTo(marker, id);
   Tags.AddTagsTo(marker, markerName);
   if (position && normal) {
