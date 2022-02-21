@@ -150,7 +150,15 @@ export class AnnotationService {
       await this.updateLocalDB(pouchAnnotations, serverAnnotations);
       const updated = await this.updateAnnotationList(pouchAnnotations, serverAnnotations);
       this.annotations.next(updated);
-      await this.sortAnnotations();
+
+      // above updateAnnotationList call already checks if values in pouchAnnotations changed
+      // and sends update requests to server.
+      // we still need to check if the order changed for which _id comparisons are sufficient
+      let unchanged = updated.length === serverAnnotations.length &&
+        updated.every((val, index) => val._id === serverAnnotations[index]._id);
+      if (!unchanged) {
+        await this.sortAnnotations();
+      }
     } else {
       if (this.processing.fallbackEntityLoaded) {
         this.annotations.next([annotationFallback]);
