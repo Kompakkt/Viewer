@@ -62,4 +62,9 @@ export class AnnotationComponentForEditorComponent extends AnnotationComponent {
     this.babylon.hideMesh(this.annotation._id.toString(), true);
     this.showAnnotation = true;
   }
+
+  public handleEditModeChange() {
+    // empty handler to overwrite parent handler
+    // otherwise we would send multiple write requests per annotation
+  }
 }

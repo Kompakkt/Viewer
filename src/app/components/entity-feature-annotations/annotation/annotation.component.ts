@@ -67,26 +67,7 @@ export class AnnotationComponent implements OnInit {
       this.isAnnotatingAllowed = allowed;
     });
 
-    this.annotationService.isEditModeAnnotation.subscribe(selectedEditAnno => {
-      if (!this.annotation) {
-        console.error('AnnotationComponent without annotation', this);
-        throw new Error('AnnotationComponent without annotation');
-      }
-      const isEditAnno = selectedEditAnno === this.annotation._id;
-      if (!isEditAnno && this.isEditMode) {
-        this.isEditMode = false;
-        this.annotationService.updateAnnotation(this.annotation);
-        console.log(this.isEditMode);
-      }
-      if (isEditAnno && !this.isEditMode) {
-        this.isEditMode = true;
-        console.log(this.isEditMode);
-        console.log(this.isAnnotatingAllowed);
-        console.log(this.isAnnotationOwner);
-
-        // this.annotationService.setSelectedAnnotation(this.annotation._id);
-      }
-    });
+    this.annotationService.isEditModeAnnotation.subscribe(this.handleEditModeChange.bind(this));
 
     setInterval(() => {
       if (!this.annotation) {
@@ -119,6 +100,27 @@ export class AnnotationComponent implements OnInit {
     this.annotationService.setEditModeAnnotation(
       this.isEditMode ? '' : this.annotation._id.toString(),
     );
+  }
+
+  public handleEditModeChange(selectedEditAnno : any) {
+    if (!this.annotation) {
+      console.error('AnnotationComponent without annotation', this);
+      throw new Error('AnnotationComponent without annotation');
+    }
+    const isEditAnno = selectedEditAnno === this.annotation._id;
+    if (!isEditAnno && this.isEditMode) {
+      this.isEditMode = false;
+      this.annotationService.updateAnnotation(this.annotation);
+      // console.log(this.isEditMode);
+    }
+    if (isEditAnno && !this.isEditMode) {
+      this.isEditMode = true;
+      // console.log(this.isEditMode);
+      // console.log(this.isAnnotatingAllowed);
+      // console.log(this.isAnnotationOwner);
+
+      // this.annotationService.setSelectedAnnotation(this.annotation._id);
+    }
   }
 
   public shareAnnotation() {
