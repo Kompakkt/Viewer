@@ -29,11 +29,11 @@
     </mat-card-header>
 
     <mat-card-content>
-      <markdown
+      <app-markdown-preview
         id="annotation-content"
         *ngIf="!isEditMode"
         [data]="annotation.body.content.description"
-      ></markdown>
+      ></app-markdown-preview>
 
       <div *ngIf="isEditMode">
         <mat-form-field>

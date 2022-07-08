@@ -32,11 +32,11 @@
     </ng-template>
 
     <mat-card-content *ngIf="!collapsed">
-      <markdown
+      <app-markdown-preview
         id="annotation-content"
         *ngIf="!isEditMode"
         [data]="annotation.body.content.description"
-      ></markdown>
+      ></app-markdown-preview>
 
       <mat-form-field *ngIf="isEditMode" class="description">
         <textarea
