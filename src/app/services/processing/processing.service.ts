@@ -1,10 +1,19 @@
 import { EventEmitter, Injectable, Output } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
-import { ICompilation, IEntity, IEntitySettings, isEntity, ObjectId } from 'src/common';
+import {
+  IAnnotation,
+  ICompilation,
+  IEntity,
+  IEntitySettings,
+  isEntity,
+  ObjectId,
+} from 'src/common';
 import { Mesh, Quaternion } from 'babylonjs';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 import { defaultEntity, fallbackEntity } from '../../../assets/entities/entities';
+import { baseEntity } from '../../../assets/defaults';
 import {
   minimalSettings,
   settings2D,
@@ -27,6 +36,22 @@ type QualitySetting = 'low' | 'medium' | 'high' | 'raw';
 const isQualitySetting = (setting: any): setting is QualitySetting => {
   return ['low', 'medium', 'high', 'raw'].includes(setting);
 };
+
+interface IQueryParams {
+  // regular params
+  model?: string;
+  entity?: string;
+  compilation?: string;
+  quality?: string;
+  mode?: string;
+
+  // iframe dataset params for standalone viewer
+  standalone?: string;
+  endpoint?: string;
+  settings?: string;
+  annotations?: string;
+  resource?: string;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -87,6 +112,9 @@ export class ProcessingService {
   private bootstrapped = new BehaviorSubject(false);
   public bootstrapped$ = this.bootstrapped.asObservable();
 
+  private isStandalone = new BehaviorSubject(false);
+  public isStandalone$ = this.isStandalone.asObservable();
+
   private sidenavMode = '';
   private sidenavOpen = false;
 
@@ -101,6 +129,7 @@ export class ProcessingService {
     private loadingScreenHandler: LoadingscreenhandlerService,
     private userdata: UserdataService,
     private dialog: MatDialog,
+    private http: HttpClient,
   ) {
     this.overlay.sidenav$.subscribe(isOpen => {
       this.sidenavOpen = isOpen;
@@ -166,15 +195,20 @@ export class ProcessingService {
   }
 
   public async bootstrap() {
-    const searchParams = location.search;
-    const queryParams = new URLSearchParams(searchParams);
-    const entityParam = queryParams.get('model') || queryParams.get('entity') || undefined;
-    const compParam = queryParams.get('compilation') || undefined;
-    const qualityParam = queryParams.get('quality') || 'low';
+    const queryParams = new URLSearchParams(location.search);
+    const entries = Object.fromEntries(queryParams.entries()) as IQueryParams;
+
+    const entityParam = entries['model'] ?? entries['entity'] ?? undefined;
+    const compParam = entries['compilation'] ?? undefined;
+    const qualityParam = entries['quality'] ?? 'low';
     this.updateEntityQuality(qualityParam);
     // values = upload, explore, edit, annotation, open
-    const mode = queryParams.get('mode') || '';
+    const mode = entries['mode'] ?? '';
     this.mode = mode;
+
+    // check if standalone and exit early to init standalone mode
+    const isStandalone = !!entries['standalone'];
+    if (isStandalone) return this.loadStandaloneEntity(entries);
 
     // loading         // modes
     // default        '', explore, annotation, open
@@ -252,6 +286,60 @@ export class ProcessingService {
     // TODO: error handling: wrong mode for loading
 
     this.bootstrapped.next(true);
+  }
+
+  private async loadStandaloneEntity(entries: IQueryParams) {
+    const { endpoint, settings, annotations, resource } = entries;
+    if (!endpoint || !resource)
+      return new Error('Standalone viewer mode needs an endpoint and a resource');
+
+    const url = `${endpoint}/${resource}`;
+    const entity = {
+      ...baseEntity(),
+      _id: 'standalone_entity',
+      name: 'Standalone Entity',
+      relatedDigitalEntity: { _id: 'standalone_entity' },
+      settings: minimalSettings,
+    };
+
+    if (settings) {
+      const request = this.http.get<IEntitySettings>(`${endpoint}/${settings}`);
+      const loadedSettings = await firstValueFrom(request);
+      if (loadedSettings) entity.settings = loadedSettings;
+    }
+
+    if (annotations) {
+      const request = this.http.get<IAnnotation[]>(`${endpoint}/${annotations}`);
+      const loadedAnnotations = await firstValueFrom(request);
+      const patchedAnnotations: { [id: string]: IAnnotation } = {};
+      for (const anno of loadedAnnotations) patchedAnnotations[anno._id.toString()] = anno;
+      if (loadedAnnotations) entity.annotations = patchedAnnotations;
+    }
+
+    await this.initialiseEntitySettingsData(entity);
+    this.serverEntitySettingsSubject.next(entity.settings);
+    this.entitySettingsSubject.next(entity.settings);
+    return this.babylon
+      .loadEntity(true, url)
+      .then(() => {
+        this.isStandalone.next(true);
+        this.updateActiveEntity(entity);
+        this.updateActiveEntityMeshes(this.babylon.entityContainer.meshes as Mesh[], entity);
+        this.entitySettingsSubject.next(entity.settings);
+      })
+      .catch(error => {
+        console.error(error);
+        this.message.error('Connection to entity server to load entity refused.');
+        this.loadFallbackEntity();
+      })
+      .then(() => {
+        this.showAnnotationEditor.next(!annotations);
+        this.showSettingsEditor.next(!settings);
+        const overlay = !settings ? 'settings' : !annotations ? 'annotation' : '';
+        this.showSidenav.next(!!overlay);
+        this.overlay.toggleSidenav(overlay, !!overlay);
+        this.bootstrapped.next(true);
+      });
   }
 
   public loadDefaultEntityData() {
@@ -565,6 +653,12 @@ export class ProcessingService {
 
   // inititalize Annotation Mode
   private async setAnnotatingFeatured(entity: IEntity) {
+    const isStandalone = this.isStandalone.getValue();
+    if (isStandalone) {
+      this.annotatingFeatured = true;
+      return;
+    }
+
     const annotatableMediaType =
       entity.mediaType === 'image' || entity.mediaType === 'entity' || entity.mediaType === 'model';
     if (!this.showAnnotationEditor || !annotatableMediaType || this.fallbackEntityLoaded) {
@@ -620,6 +714,12 @@ export class ProcessingService {
   }
 
   private checkAnnotationAllowance() {
+    const isStandalone = this.isStandalone.getValue();
+    if (isStandalone) {
+      this.annotationAllowance = true;
+      this.setAnnotationAllowance.emit(true);
+      return;
+    }
     if (!this.annotatingFeatured || this.upload) {
       return;
     }

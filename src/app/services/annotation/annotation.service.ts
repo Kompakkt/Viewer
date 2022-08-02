@@ -2,7 +2,7 @@ import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { IAnnotation, ICompilation, IEntity, isAnnotation } from 'src/common';
+import { IAnnotation, ICompilation, IEntity, IVector3, isAnnotation } from 'src/common';
 import { ActionManager, ExecuteCodeAction, Mesh, Tags, Vector3, PickingInfo } from 'babylonjs';
 import { map } from 'rxjs/operators';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
@@ -50,6 +50,7 @@ export class AnnotationService {
   private entity: IEntity | undefined;
   private meshes: Mesh[] = [];
   public compilation: ICompilation | undefined;
+  private isStandalone = false;
 
   // All about annotations
   private selectedAnnotation = new BehaviorSubject('');
@@ -81,6 +82,10 @@ export class AnnotationService {
 
     this.processing.compilation$.subscribe(compilation => {
       this.compilation = compilation;
+    });
+
+    this.processing.isStandalone$.subscribe(isStandalone => {
+      this.isStandalone = isStandalone;
     });
 
     this.processing.loadAnnotations.subscribe((load: boolean) => {
@@ -147,7 +152,12 @@ export class AnnotationService {
     this.editModeAnnotation.next('');
     this.annotations.next([]);
 
-    if (!this.processing.defaultEntityLoaded && !this.processing.fallbackEntityLoaded) {
+    const loadFromServer =
+      !this.isStandalone &&
+      !this.processing.defaultEntityLoaded &&
+      !this.processing.fallbackEntityLoaded;
+
+    if (loadFromServer) {
       // Filter null/undefined annotations
       const serverAnnotations = this.getAnnotationsfromServerDB().filter(
         annotation => annotation && annotation._id && annotation.lastModificationDate,
@@ -176,6 +186,9 @@ export class AnnotationService {
         if (this.processing.annotatingFeatured && annotationLogo.length) {
           this.annotations.next(annotationLogo);
         }
+      }
+      if (this.isStandalone) {
+        this.annotations.next(Object.values(this.entity.annotations) as IAnnotation[]);
       }
       const annotations = await firstValueFrom(this.annotations);
       if (annotations.length > 0) {
@@ -438,7 +451,11 @@ export class AnnotationService {
   private add(_annotation: IAnnotation): void {
     let newAnnotation = _annotation;
     newAnnotation.lastModificationDate = new Date().toISOString();
-    if (!this.processing.defaultEntityLoaded && !this.processing.fallbackEntityLoaded) {
+    const updateBackend =
+      !this.isStandalone &&
+      !this.processing.defaultEntityLoaded &&
+      !this.processing.fallbackEntityLoaded;
+    if (updateBackend) {
       this.backend
         .updateAnnotation(_annotation)
         .then((resultAnnotation: IAnnotation) => {
