@@ -306,7 +306,6 @@ export class BabylonService {
     clearScene: boolean,
     rootUrl: string,
     mediaType = 'model',
-    extension = 'babylon',
     isDefault?: boolean,
   ) {
     this.engine.displayLoadingUI();
@@ -357,7 +356,7 @@ export class BabylonService {
       case 'entity':
       case 'model':
       default:
-        return load3DEntity(rootUrl, extension, this.scene).then(result => {
+        return load3DEntity(rootUrl, this.scene).then(result => {
           if (result) {
             this.entityContainer = result;
             if (isDefault) {
