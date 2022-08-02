@@ -6,7 +6,7 @@
 </h1>
 
 <div mat-dialog-content>
-  <markdown *ngIf="!editMode" [data]="data.content"></markdown>
+  <app-markdown-preview *ngIf="!editMode" [data]="data.content"></app-markdown-preview>
 
   <app-media-browser *ngIf="editMode" (addMedia)="addEntitySwitch($event)"></app-media-browser>
 

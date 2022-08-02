@@ -28,7 +28,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ColorChromeModule } from 'ngx-color/chrome';
-import { MarkdownModule } from 'ngx-markdown';
 
 import { AppComponent } from './app.component';
 import { CompilationBrowserComponent } from './components/compilation-browser/compilation-browser.component';
@@ -56,6 +55,7 @@ import { SceneComponent } from './components/scene/scene.component';
 import { SidenavMenuComponent } from './components/sidenav-menu/sidenav-menu.component';
 import { SidenavComponent } from './components/sidenav/sidenav.component';
 import { MediaTypePipe } from './pipes/media-type.pipe';
+import { MarkdownPreviewComponent } from './components/markdown-preview/markdown-preview.component';
 
 @NgModule({
   declarations: [
@@ -85,6 +85,7 @@ import { MediaTypePipe } from './pipes/media-type.pipe';
     SidenavComponent,
     EntityFeatureSettingsLightsComponent,
     EntityFeatureSettingsMeshComponent,
+    MarkdownPreviewComponent,
   ],
   imports: [
     BrowserModule,
@@ -114,7 +115,6 @@ import { MediaTypePipe } from './pipes/media-type.pipe';
     MatStepperModule,
     MatProgressSpinnerModule,
     MatChipsModule,
-    MarkdownModule.forRoot(),
     MatSidenavModule,
   ],
   entryComponents: [

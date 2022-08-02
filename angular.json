@@ -30,8 +30,7 @@
               "src/styles.scss"
             ],
             "scripts": [
-              "node_modules/pepjs/dist/pep.js",
-              "node_modules/marked/lib/marked.js"
+              "node_modules/pepjs/dist/pep.js"
             ],
             "aot": false,
             "vendorChunk": true,
