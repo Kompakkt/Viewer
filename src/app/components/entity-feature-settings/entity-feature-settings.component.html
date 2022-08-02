@@ -167,17 +167,31 @@
         </div>
       </mat-step>
 
-      <mat-step>
-        <ng-template matStepLabel>Done</ng-template>
-        <img class="previewimage" [src]="processing.entitySettings.preview" />
-        You set all settings and I celebrate it with this preview.
-        <br />
-        Please save them if you are done. Afterwards you may add annotations.
-        <div>
-          <button mat-button matStepperPrevious>Back</button>
-          <button mat-button (click)="saveSettings()">Save</button>
-        </div>
-      </mat-step>
+      <ng-container *ngIf="!(isStandalone$ | async); else standaloneExport">
+        <mat-step>
+          <ng-template matStepLabel>Done</ng-template>
+          <img class="previewimage" [src]="processing.entitySettings.preview" />
+          You set all settings and I celebrate it with this preview.
+          <br />
+          Please save them if you are done. Afterwards you may add annotations.
+          <div>
+            <button mat-button matStepperPrevious>Back</button>
+            <button mat-button (click)="saveSettings()">Save</button>
+          </div>
+        </mat-step>
+      </ng-container>
+
+      <ng-template #standaloneExport>
+        <mat-step>
+          <ng-template matStepLabel>Export</ng-template>
+          <img class="previewimage" [src]="processing.entitySettings.preview" />
+          Your settings can now be exported and loaded in the standalone Kompakkt viewer.
+          <div>
+            <button mat-button matStepperPrevious>Back</button>
+            <button mat-button (click)="exportSettings()">Export</button>
+          </div>
+        </mat-step>
+      </ng-template>
     </mat-vertical-stepper>
   </div>
 </div>

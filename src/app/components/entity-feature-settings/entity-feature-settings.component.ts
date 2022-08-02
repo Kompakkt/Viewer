@@ -2,6 +2,7 @@ import { Component, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatStepper } from '@angular/material/stepper';
 import { map } from 'rxjs/operators';
+import { saveAs } from 'file-saver';
 
 import { environment } from '../../../environments/environment';
 import { BabylonService } from '../../services/babylon/babylon.service';
@@ -48,6 +49,10 @@ export class EntityFeatureSettingsComponent {
         return value;
       }),
     );
+  }
+
+  get isStandalone$() {
+    return this.processing.isStandalone$;
   }
 
   public setInitialPerspectivePreview() {
@@ -115,6 +120,16 @@ export class EntityFeatureSettingsComponent {
         }
       });
     }
+  }
+
+  public exportSettings() {
+    if (!this.processing.entitySettings) {
+      console.error(this);
+      throw new Error('Settings missing');
+    }
+    const settings = this.processing.entitySettings;
+    const blob = new Blob([JSON.stringify(settings)], { type: 'text/plain;charset=utf-8' });
+    saveAs(blob, 'settings.json');
   }
 
   public backToDefaultSettings() {

@@ -18,7 +18,7 @@
     "target": "es2015",
     "typeRoots": ["node_modules/@types", "src/@types"],
     "types": ["babylonjs", "babylonjs-gui"],
-    "lib": ["es2017", "dom"],
+    "lib": ["es2017", "dom", "es2019", "dom.iterable"],
     "paths": {
       "core-js/es7/reflect": ["node_modules/core-js/proposals/reflect-metadata"],
       "~common/*": ["./src/common/*"]
