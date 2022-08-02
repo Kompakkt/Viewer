@@ -33,6 +33,15 @@ const isCompilationAnnotation = (annotation: IAnnotation) =>
 const sortByRanking = (a: IAnnotation, b: IAnnotation): number =>
   +a.ranking === +b.ranking ? 0 : +a.ranking < +b.ranking ? -1 : 1;
 
+interface IAmbiguousVector extends IVector3 {
+  _x?: number;
+  _y?: number;
+  _z?: number;
+}
+
+const getVector = ({ x, y, z, _x, _y, _z }: IAmbiguousVector) =>
+  _x && _y && _z ? new Vector3(_x, _y, _z) : new Vector3(x, y, z);
+
 @Injectable({
   providedIn: 'root',
 })
@@ -579,8 +588,8 @@ export class AnnotationService {
 
   public drawMarker(newAnnotation: IAnnotation) {
     const { referencePoint, referenceNormal } = newAnnotation.target.selector;
-    const positionVector = new Vector3(referencePoint.x, referencePoint.y, referencePoint.z);
-    const normalVector = new Vector3(referenceNormal.x, referenceNormal.y, referenceNormal.z);
+    const positionVector = getVector(referencePoint);
+    const normalVector = getVector(referenceNormal);
 
     const color = 'black';
     const scene = this.babylon.getScene();
