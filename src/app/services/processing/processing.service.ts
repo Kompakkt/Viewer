@@ -263,7 +263,7 @@ export class ProcessingService {
   public loadFallbackEntity() {
     this.updateEntityQuality('low');
     this.entityMediaType = 'entity';
-    this.loadEntity(fallbackEntity as IEntity, '', '.gltf');
+    this.loadEntity(fallbackEntity as IEntity, '');
   }
 
   public fetchAndLoad(
@@ -398,7 +398,7 @@ export class ProcessingService {
       });
   }
 
-  public async loadEntity(newEntity: IEntity, overrideUrl?: string, extension = '.babylon') {
+  public async loadEntity(newEntity: IEntity, overrideUrl?: string) {
     const baseURL = overrideUrl ?? this.baseUrl;
     if (!this.loadingScreenHandler.isLoading && newEntity.processed && newEntity.mediaType) {
       if (!newEntity.dataSource.isExternal) {
@@ -413,14 +413,13 @@ export class ProcessingService {
         // cases: entity, image, audio, video, text
         const path: string = newEntity.externalFile ?? newEntity.processed[this.entityQuality];
         const url = path.includes('http') || path.includes('https') ? path : `${baseURL}${path}`;
-        extension = url.slice(url.lastIndexOf('.'));
 
         const mediaType = newEntity.mediaType;
         switch (newEntity.mediaType) {
           case 'model':
           case 'entity':
             await this.babylon
-              .loadEntity(true, url, mediaType, extension, newEntity._id === 'default')
+              .loadEntity(true, url, mediaType, newEntity._id === 'default')
               .then(() => {
                 this.updateActiveEntity(newEntity);
                 this.updateActiveEntityMeshes(
@@ -452,7 +451,7 @@ export class ProcessingService {
             break;
           case 'audio':
             await this.babylon
-              .loadEntity(true, 'assets/models/kompakkt.babylon', 'model', '.babylon', true)
+              .loadEntity(true, 'assets/models/kompakkt.babylon', 'model', true)
               .then(() => {
                 this.updateActiveEntityMeshes(
                   this.babylon.entityContainer.meshes as Mesh[],
