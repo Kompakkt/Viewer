@@ -27,13 +27,13 @@
 </div>
 
 <div mat-dialog-actions>
-  <button mat-button (click)="toggleEditViewMode()" attr.aria-label="{{ labelModeText }}">
+  <button mat-button (click)="toggleEditViewMode()" [attr.aria-label]="labelModeText">
     <mat-icon>{{ labelMode }}</mat-icon>
   </button>
   <button mat-button [mat-dialog-close]="data">
-    <mat-icon attr.aria-label="Save">save</mat-icon>
+    <mat-icon aria-label="Save">save</mat-icon>
   </button>
   <button mat-button (click)="cancel()">
-    <mat-icon attr.aria-label="Cancel">cancel</mat-icon>
+    <mat-icon aria-label="Cancel">cancel</mat-icon>
   </button>
 </div>

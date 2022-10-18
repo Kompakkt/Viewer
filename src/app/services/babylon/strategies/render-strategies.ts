@@ -12,7 +12,7 @@ export const beforeAudioRender = (scene: Scene, audioContainer: IAudioContainer)
         mesh.scaling = new Vector3(scale, scale, scale);
       });
     }
-    if (Engine.audioEngine.audioContext) {
+    if (Engine.audioEngine?.audioContext) {
       audioContainer.currentTime =
         Engine.audioEngine.audioContext['currentTime'] - audioContainer.currentTime;
       if (audioContainer.timeSlider) {
@@ -25,7 +25,7 @@ export const beforeAudioRender = (scene: Scene, audioContainer: IAudioContainer)
 
 export const afterAudioRender = (audioContainer: IAudioContainer) => {
   if (audioContainer.audio && audioContainer.audio.isPlaying) {
-    if (Engine.audioEngine.audioContext) {
+    if (Engine.audioEngine?.audioContext) {
       audioContainer.currentTime = Engine.audioEngine.audioContext['currentTime'];
     }
   }

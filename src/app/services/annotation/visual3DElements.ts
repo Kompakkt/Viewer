@@ -13,7 +13,7 @@ const calcRadius = (scene: Scene) => {
   // Try to get size from root mesh, only works for glTF models
   const rootMesh = scene.getMeshByName('__root__');
   if (rootMesh) {
-    const rootSize = rootMesh?._boundingInfo?.boundingBox.maximumWorld;
+    const rootSize = rootMesh?.getBoundingInfo()?.boundingBox.maximumWorld;
     if (rootSize) {
       const avgRootAxisLength = rootSize.asArray().sort()[1];
       return avgRootAxisLength * 0.025;
@@ -21,10 +21,11 @@ const calcRadius = (scene: Scene) => {
   }
 
   // Calculate marker size from mesh bounding box
+  // TODO: Use .getHierarchyBoundingVectors() instead of .getBoundingInfo()
   const max = { x: 0, y: 0, z: 0 };
   for (const mesh of scene.meshes) {
-    if (!mesh._boundingInfo) continue;
-    const { x, y, z } = mesh._boundingInfo.boundingBox.extendSizeWorld;
+    if (!mesh.hasBoundingInfo) continue;
+    const { x, y, z } = mesh.getBoundingInfo().boundingBox.extendSizeWorld;
     if (x > max.x) max.x = x;
     if (y > max.y) max.y = y;
     if (z > max.z) max.x = z;

@@ -1,6 +1,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "baseUrl": "./",
     "importHelpers": true,
@@ -15,7 +16,7 @@
     "noUnusedParameters": true,
     "noImplicitReturns": false,
     "noImplicitAny": true,
-    "target": "es2015",
+    "target": "es2020",
     "typeRoots": ["node_modules/@types", "src/@types"],
     "types": ["babylonjs", "babylonjs-gui"],
     "lib": ["es2017", "dom", "es2019", "dom.iterable"],

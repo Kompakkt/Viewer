@@ -55,10 +55,12 @@ export const createWorldAxis = (scene: Scene, size: number) => {
   const vecTwoX = new Vector3(sizeWorldAxis * 0.95, sizeWorldAxis * 0.05, 0);
   const vecThreeX = new Vector3(sizeWorldAxis, 0, 0);
   const vecFourX = new Vector3(sizeWorldAxis * 0.95, sizeWorldAxis * -0.05, 0);
+  // TODO: Replace CreateLines with MeshBuilder
   const axisX = Mesh.CreateLines(
     'axisX',
     [Vector3.Zero(), vecOneX, vecTwoX, vecThreeX, vecFourX],
     scene,
+    true,
   );
   Tags.AddTagsTo(axisX, 'worldAxis');
   axisX.color = new Color3(1, 0, 0);
@@ -75,6 +77,7 @@ export const createWorldAxis = (scene: Scene, size: number) => {
     'axisY',
     [Vector3.Zero(), vecOneY, vecTwoY, vecThreeY, vecFourY],
     scene,
+    true,
   );
   Tags.AddTagsTo(axisY, 'worldAxis');
   axisY.color = new Color3(0, 1, 0);
@@ -91,6 +94,7 @@ export const createWorldAxis = (scene: Scene, size: number) => {
     'axisZ',
     [Vector3.Zero(), vecOneZ, vecTwoZ, vecThreeZ, vecFourZ],
     scene,
+    true,
   );
   Tags.AddTagsTo(axisZ, 'worldAxis');
   axisZ.color = new Color3(0, 0, 1);
@@ -136,6 +140,7 @@ export const createlocalAxes = (scene: Scene, size: number, center: Mesh, pivot:
     'local_axisX',
     [Vector3.Zero(), vecOneX, vecTwoX, vecThreeX, vecFourX],
     scene,
+    true,
   );
   Tags.AddTagsTo(local_axisX, 'localAxis');
   local_axisX.color = new Color3(1, 0, 0);
@@ -155,6 +160,7 @@ export const createlocalAxes = (scene: Scene, size: number, center: Mesh, pivot:
     'local_axisY',
     [Vector3.Zero(), vecOneY, vecTwoY, vecThreeY, vecFourY],
     scene,
+    true,
   );
   Tags.AddTagsTo(local_axisY, 'localAxis');
   local_axisY.color = new Color3(0, 1, 0);
@@ -174,6 +180,7 @@ export const createlocalAxes = (scene: Scene, size: number, center: Mesh, pivot:
     'local_axisZ',
     [Vector3.Zero(), vecOneZ, vecTwoZ, vecThreeZ, vecFourZ],
     scene,
+    true,
   );
   Tags.AddTagsTo(local_axisZ, 'localAxis');
   local_axisZ.color = new Color3(0, 0, 1);
