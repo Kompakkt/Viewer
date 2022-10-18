@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { DirectionalLight, PointLight, Scene, Vector3 } from 'babylonjs';
+import { DirectionalLight, PointLight, Scene, Vector3, Color3 } from '@babylonjs/core';
 
 import { IEntityLight, IEntitySettings } from 'src/common';
 import { BabylonService } from '../babylon/babylon.service';
@@ -38,7 +38,7 @@ export class LightService {
       this.scene,
     );
     light.intensity = intensity;
-    light.specular = new BABYLON.Color3(0.5, 0.5, 0.5);
+    light.specular = new Color3(0.5, 0.5, 0.5);
     if (type === 'up') {
       if (this.ambientlightUp) this.ambientlightUp.dispose();
       this.ambientlightUp = light;
@@ -51,7 +51,7 @@ export class LightService {
   public initialisePointLight(intensity: number, position: Vector3) {
     if (this.pointlight) this.pointlight.dispose();
     this.pointlight = new PointLight('pointLight', position, this.scene);
-    this.pointlight.specular = new BABYLON.Color3(0, 0, 0);
+    this.pointlight.specular = new Color3(0, 0, 0);
     this.pointlight.intensity = intensity;
     this.pointlight.parent = this.babylon.getActiveCamera();
   }

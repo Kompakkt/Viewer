@@ -1,4 +1,4 @@
-import { ILoadingScreen } from 'babylonjs';
+import { ILoadingScreen } from '@babylonjs/core';
 
 /**
  * Extends Babylon.js/src/Loading/babylon.loadingScreen.ts

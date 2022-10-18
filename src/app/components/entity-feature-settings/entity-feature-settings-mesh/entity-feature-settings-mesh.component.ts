@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Vector3, Mesh } from 'babylonjs';
+import { Vector3, Mesh } from '@babylonjs/core';
 
 import { BabylonService } from '../../../services/babylon/babylon.service';
 import { EntitySettingsService } from '../../../services/entitysettings/entitysettings.service';

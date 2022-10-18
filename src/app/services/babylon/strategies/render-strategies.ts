@@ -1,4 +1,4 @@
-import { Engine, Scene, Vector3 } from 'babylonjs';
+import { Engine, Scene, Vector3 } from '@babylonjs/core';
 
 import { IAudioContainer, IVideoContainer } from '../container.interfaces';
 

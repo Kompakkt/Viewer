@@ -7,7 +7,7 @@ import {
   StandardMaterial,
   Tags,
   Vector3,
-} from 'babylonjs';
+} from '@babylonjs/core';
 
 export const createBoundingBox = (
   scene: Scene,
@@ -55,13 +55,9 @@ export const createWorldAxis = (scene: Scene, size: number) => {
   const vecTwoX = new Vector3(sizeWorldAxis * 0.95, sizeWorldAxis * 0.05, 0);
   const vecThreeX = new Vector3(sizeWorldAxis, 0, 0);
   const vecFourX = new Vector3(sizeWorldAxis * 0.95, sizeWorldAxis * -0.05, 0);
+  const pointsX = [Vector3.Zero(), vecOneX, vecTwoX, vecThreeX, vecFourX];
   // TODO: Replace CreateLines with MeshBuilder
-  const axisX = Mesh.CreateLines(
-    'axisX',
-    [Vector3.Zero(), vecOneX, vecTwoX, vecThreeX, vecFourX],
-    scene,
-    true,
-  );
+  const axisX = MeshBuilder.CreateLines('axisX', { points: pointsX, updatable: true }, scene);
   Tags.AddTagsTo(axisX, 'worldAxis');
   axisX.color = new Color3(1, 0, 0);
   axisX.visibility = 0;
@@ -73,12 +69,8 @@ export const createWorldAxis = (scene: Scene, size: number) => {
   const vecTwoY = new Vector3(sizeWorldAxis * -0.05, sizeWorldAxis * 0.95, 0);
   const vecThreeY = new Vector3(0, sizeWorldAxis, 0);
   const vecFourY = new Vector3(sizeWorldAxis * 0.05, sizeWorldAxis * 0.95, 0);
-  const axisY = Mesh.CreateLines(
-    'axisY',
-    [Vector3.Zero(), vecOneY, vecTwoY, vecThreeY, vecFourY],
-    scene,
-    true,
-  );
+  const pointsY = [Vector3.Zero(), vecOneY, vecTwoY, vecThreeY, vecFourY];
+  const axisY = MeshBuilder.CreateLines('axisY', { points: pointsY, updatable: true }, scene);
   Tags.AddTagsTo(axisY, 'worldAxis');
   axisY.color = new Color3(0, 1, 0);
   axisY.visibility = 0;
@@ -90,12 +82,8 @@ export const createWorldAxis = (scene: Scene, size: number) => {
   const vecTwoZ = new Vector3(0, sizeWorldAxis * -0.05, sizeWorldAxis * 0.95);
   const vecThreeZ = new Vector3(0, 0, sizeWorldAxis);
   const vecFourZ = new Vector3(0, sizeWorldAxis * 0.05, sizeWorldAxis * 0.95);
-  const axisZ = Mesh.CreateLines(
-    'axisZ',
-    [Vector3.Zero(), vecOneZ, vecTwoZ, vecThreeZ, vecFourZ],
-    scene,
-    true,
-  );
+  const pointsZ = [Vector3.Zero(), vecOneZ, vecTwoZ, vecThreeZ, vecFourZ];
+  const axisZ = MeshBuilder.CreateLines('axisZ', { points: pointsZ, updatable: true }, scene);
   Tags.AddTagsTo(axisZ, 'worldAxis');
   axisZ.color = new Color3(0, 0, 1);
   axisZ.visibility = 0;

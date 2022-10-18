@@ -7,8 +7,8 @@ import {
   Sound,
   StandardMaterial,
   Texture,
-} from 'babylonjs';
-import { Slider } from 'babylonjs-gui';
+} from '@babylonjs/core';
+import { Slider } from '@babylonjs/gui';
 
 export interface IAudioContainer {
   audio: Sound;

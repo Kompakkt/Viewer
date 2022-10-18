@@ -1,4 +1,11 @@
-import { Animation, ArcRotateCamera, EasingFunction, QuarticEase, Scene, Vector3 } from 'babylonjs';
+import {
+  Animation,
+  ArcRotateCamera,
+  EasingFunction,
+  QuarticEase,
+  Scene,
+  Vector3,
+} from '@babylonjs/core';
 
 const halfPi = Math.PI / 180;
 const DEFAULTS: {

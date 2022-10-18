@@ -7,13 +7,14 @@ import {
   Tags,
   Vector3,
   Color3,
-} from 'babylonjs';
+  Mesh,
+} from '@babylonjs/core';
 
 const calcRadius = (scene: Scene) => {
   // Try to get size from root mesh, only works for glTF models
   const rootMesh = scene.getMeshByName('__root__');
   if (rootMesh) {
-    const rootSize = rootMesh?.getBoundingInfo()?.boundingBox.maximumWorld;
+    const rootSize = rootMesh?.getBoundingInfo().boundingBox.maximumWorld;
     if (rootSize) {
       const avgRootAxisLength = rootSize.asArray().sort()[1];
       return avgRootAxisLength * 0.025;
@@ -24,7 +25,6 @@ const calcRadius = (scene: Scene) => {
   // TODO: Use .getHierarchyBoundingVectors() instead of .getBoundingInfo()
   const max = { x: 0, y: 0, z: 0 };
   for (const mesh of scene.meshes) {
-    if (!mesh.hasBoundingInfo) continue;
     const { x, y, z } = mesh.getBoundingInfo().boundingBox.extendSizeWorld;
     if (x > max.x) max.x = x;
     if (y > max.y) max.y = y;
@@ -77,7 +77,7 @@ export const createMarker = (
     marker.position = position;
     marker.translate(normal, 0.5, Space.WORLD);
   }
-  marker.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+  marker.billboardMode = Mesh.BILLBOARDMODE_ALL;
   marker.material = mat;
   marker.renderingGroupId = transparent ? 3 : 2;
 
