@@ -42,6 +42,7 @@
     "@angular/router": "^14.2.6",
     "@babylonjs/core": "^5.5.5",
     "@babylonjs/gui": "^5.5.5",
+    "@babylonjs/inspector": "^5.5.5",
     "@babylonjs/loaders": "^5.5.5",
     "@types/pouchdb-upsert": "^2.2.6",
     "bson": "^4.7.0",
