@@ -9,7 +9,7 @@ import {
   StandardMaterial,
   Tags,
   Vector3,
-} from 'babylonjs';
+} from '@babylonjs/core';
 import { combineLatest } from 'rxjs';
 
 import { BabylonService } from '../babylon/babylon.service';

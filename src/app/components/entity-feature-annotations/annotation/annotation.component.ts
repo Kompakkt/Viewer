@@ -1,7 +1,7 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { IAnnotation } from 'src/common';
-import { Matrix, Vector3 } from 'babylonjs';
+import { Matrix, Vector3 } from '@babylonjs/core';
 import { environment } from 'src/environments/environment';
 
 import { AnnotationService } from '../../../services/annotation/annotation.service';
@@ -102,7 +102,7 @@ export class AnnotationComponent implements OnInit {
     );
   }
 
-  public handleEditModeChange(selectedEditAnno : any) {
+  public handleEditModeChange(selectedEditAnno: any) {
     if (!this.annotation) {
       console.error('AnnotationComponent without annotation', this);
       throw new Error('AnnotationComponent without annotation');

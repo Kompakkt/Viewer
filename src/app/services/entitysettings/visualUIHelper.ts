@@ -7,7 +7,7 @@ import {
   StandardMaterial,
   Tags,
   Vector3,
-} from 'babylonjs';
+} from '@babylonjs/core';
 
 export const createBoundingBox = (
   scene: Scene,
@@ -55,11 +55,9 @@ export const createWorldAxis = (scene: Scene, size: number) => {
   const vecTwoX = new Vector3(sizeWorldAxis * 0.95, sizeWorldAxis * 0.05, 0);
   const vecThreeX = new Vector3(sizeWorldAxis, 0, 0);
   const vecFourX = new Vector3(sizeWorldAxis * 0.95, sizeWorldAxis * -0.05, 0);
-  const axisX = Mesh.CreateLines(
-    'axisX',
-    [Vector3.Zero(), vecOneX, vecTwoX, vecThreeX, vecFourX],
-    scene,
-  );
+  const pointsX = [Vector3.Zero(), vecOneX, vecTwoX, vecThreeX, vecFourX];
+  // TODO: Replace CreateLines with MeshBuilder
+  const axisX = MeshBuilder.CreateLines('axisX', { points: pointsX, updatable: true }, scene);
   Tags.AddTagsTo(axisX, 'worldAxis');
   axisX.color = new Color3(1, 0, 0);
   axisX.visibility = 0;
@@ -71,11 +69,8 @@ export const createWorldAxis = (scene: Scene, size: number) => {
   const vecTwoY = new Vector3(sizeWorldAxis * -0.05, sizeWorldAxis * 0.95, 0);
   const vecThreeY = new Vector3(0, sizeWorldAxis, 0);
   const vecFourY = new Vector3(sizeWorldAxis * 0.05, sizeWorldAxis * 0.95, 0);
-  const axisY = Mesh.CreateLines(
-    'axisY',
-    [Vector3.Zero(), vecOneY, vecTwoY, vecThreeY, vecFourY],
-    scene,
-  );
+  const pointsY = [Vector3.Zero(), vecOneY, vecTwoY, vecThreeY, vecFourY];
+  const axisY = MeshBuilder.CreateLines('axisY', { points: pointsY, updatable: true }, scene);
   Tags.AddTagsTo(axisY, 'worldAxis');
   axisY.color = new Color3(0, 1, 0);
   axisY.visibility = 0;
@@ -87,11 +82,8 @@ export const createWorldAxis = (scene: Scene, size: number) => {
   const vecTwoZ = new Vector3(0, sizeWorldAxis * -0.05, sizeWorldAxis * 0.95);
   const vecThreeZ = new Vector3(0, 0, sizeWorldAxis);
   const vecFourZ = new Vector3(0, sizeWorldAxis * 0.05, sizeWorldAxis * 0.95);
-  const axisZ = Mesh.CreateLines(
-    'axisZ',
-    [Vector3.Zero(), vecOneZ, vecTwoZ, vecThreeZ, vecFourZ],
-    scene,
-  );
+  const pointsZ = [Vector3.Zero(), vecOneZ, vecTwoZ, vecThreeZ, vecFourZ];
+  const axisZ = MeshBuilder.CreateLines('axisZ', { points: pointsZ, updatable: true }, scene);
   Tags.AddTagsTo(axisZ, 'worldAxis');
   axisZ.color = new Color3(0, 0, 1);
   axisZ.visibility = 0;
@@ -136,6 +128,7 @@ export const createlocalAxes = (scene: Scene, size: number, center: Mesh, pivot:
     'local_axisX',
     [Vector3.Zero(), vecOneX, vecTwoX, vecThreeX, vecFourX],
     scene,
+    true,
   );
   Tags.AddTagsTo(local_axisX, 'localAxis');
   local_axisX.color = new Color3(1, 0, 0);
@@ -155,6 +148,7 @@ export const createlocalAxes = (scene: Scene, size: number, center: Mesh, pivot:
     'local_axisY',
     [Vector3.Zero(), vecOneY, vecTwoY, vecThreeY, vecFourY],
     scene,
+    true,
   );
   Tags.AddTagsTo(local_axisY, 'localAxis');
   local_axisY.color = new Color3(0, 1, 0);
@@ -174,6 +168,7 @@ export const createlocalAxes = (scene: Scene, size: number, center: Mesh, pivot:
     'local_axisZ',
     [Vector3.Zero(), vecOneZ, vecTwoZ, vecThreeZ, vecFourZ],
     scene,
+    true,
   );
   Tags.AddTagsTo(local_axisZ, 'localAxis');
   local_axisZ.color = new Color3(0, 0, 1);

@@ -3,7 +3,14 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { IAnnotation, ICompilation, IEntity, IVector3, isAnnotation } from 'src/common';
-import { ActionManager, ExecuteCodeAction, Mesh, Tags, Vector3, PickingInfo } from 'babylonjs';
+import {
+  ActionManager,
+  ExecuteCodeAction,
+  Mesh,
+  Tags,
+  Vector3,
+  PickingInfo,
+} from '@babylonjs/core';
 import { map } from 'rxjs/operators';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
@@ -173,7 +180,8 @@ export class AnnotationService {
       // above updateAnnotationList call already checks if values in pouchAnnotations changed
       // and sends update requests to server.
       // we still need to check if the order changed for which _id comparisons are sufficient
-      let unchanged = updated.length === serverAnnotations.length &&
+      let unchanged =
+        updated.length === serverAnnotations.length &&
         updated.every((val, index) => val._id === serverAnnotations[index]._id);
       if (!unchanged) {
         await this.sortAnnotations();
@@ -634,7 +642,7 @@ export class AnnotationService {
     markertransparent.actionManager = new ActionManager(scene);
     // register 'pickCylinder' as the handler function for cylinder picking action.
     markertransparent.actionManager.registerAction(
-      new ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
+      new ExecuteCodeAction(ActionManager.OnPickTrigger, () => {
         this.setSelectedAnnotation(id);
       }),
     );

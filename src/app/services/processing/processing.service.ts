@@ -9,7 +9,7 @@ import {
   isEntity,
   ObjectId,
 } from 'src/common';
-import { Mesh, Quaternion } from 'babylonjs';
+import { Mesh, Quaternion } from '@babylonjs/core';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 import { defaultEntity, fallbackEntity } from '../../../assets/entities/entities';

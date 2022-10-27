@@ -18,9 +18,9 @@ import {
   Tools,
   Vector3,
   VideoTexture,
-} from 'babylonjs';
-import { AdvancedDynamicTexture, Control, Slider, StackPanel, TextBlock } from 'babylonjs-gui';
-import 'babylonjs-loaders';
+} from '@babylonjs/core';
+import { AdvancedDynamicTexture, Control, Slider, StackPanel, TextBlock } from '@babylonjs/gui';
+import '@babylonjs/loaders';
 
 import {
   I3DEntityContainer,

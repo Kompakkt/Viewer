@@ -115,7 +115,7 @@ export class EntityFeatureSettingsComponent {
           JSON.stringify(this.processing.entitySettings),
         );
         if (this.processing.upload) {
-          window.top.postMessage({ type: 'settings', settings }, environment.repo_url);
+          window.top?.postMessage({ type: 'settings', settings }, environment.repo_url);
           this.processing.upload = false;
         }
       });
@@ -164,9 +164,9 @@ export class EntityFeatureSettingsComponent {
           return console.error('Stepper could not be accessed');
         } else {
           if (this.stepper.selected) {
-              this.stepper.selected.completed = true;
-              this.stepper.selected.editable = false;
-              this.stepper.next();
+            this.stepper.selected.completed = true;
+            this.stepper.selected.editable = false;
+            this.stepper.next();
           }
         }
       } else {
@@ -180,11 +180,11 @@ export class EntityFeatureSettingsComponent {
     if (!this.stepper) {
       return console.error('Stepper could not be accessed');
     } else {
-        if (this.stepper.selected) {
-            this.stepper.selected.completed = true;
-            this.stepper.selected.editable = true;
-            this.stepper.next();
-        }
+      if (this.stepper.selected) {
+        this.stepper.selected.completed = true;
+        this.stepper.selected.editable = true;
+        this.stepper.next();
+      }
     }
   }
 }

@@ -23,10 +23,12 @@ import {
   PostProcess,
   ImageProcessingConfiguration,
   PBRMaterial,
-} from 'babylonjs';
-import { Slider } from 'babylonjs-gui';
+} from '@babylonjs/core';
+import { Slider } from '@babylonjs/gui';
 // tslint:disable-next-line:no-import-side-effect
-import 'babylonjs-loaders';
+import '@babylonjs/loaders';
+import '@babylonjs/core/Debug/debugLayer';
+import '@babylonjs/inspector';
 
 import { RenderCanvasComponent } from '../../components/render-canvas/render-canvas.component';
 
