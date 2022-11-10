@@ -30,8 +30,8 @@ export class LoadingScreen implements ILoadingScreen {
   /**
    * Function called to display the loading screen
    */
-  public displayLoadingUI(): void {
-    if (!this.loadingScreenHandler.isLoading) {
+  public async displayLoadingUI() {
+    if (!(await firstValueFrom(this.loadingScreenHandler.isLoading$))) {
       this.loadingScreenHandler.updateOpacity('1');
     }
   }
@@ -39,8 +39,8 @@ export class LoadingScreen implements ILoadingScreen {
   /**
    * Function called to hide the loading screen
    */
-  public hideLoadingUI(): void {
-    if (this.loadingScreenHandler.isLoading) {
+  public async hideLoadingUI() {
+    if (await firstValueFrom(this.loadingScreenHandler.isLoading$)) {
       // setTimeout of half a second to prevent pop-in
       // of some bigger meshes
       setTimeout(() => this.loadingScreenHandler.updateOpacity('0'), 500);
@@ -82,7 +82,7 @@ export class LoadingScreen implements ILoadingScreen {
 }
 
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -92,6 +92,8 @@ export class LoadingscreenhandlerService {
   public opacity = this.OpacitySubject.asObservable();
   private TextSubject = new BehaviorSubject<string>('Loading');
   public loadingText = this.TextSubject.asObservable();
+  private isLoading = new BehaviorSubject<boolean>(false);
+  public isLoading$ = this.isLoading.asObservable();
 
   private StyleSubject = new BehaviorSubject<any>({
     left: '0px',
@@ -102,18 +104,11 @@ export class LoadingscreenhandlerService {
 
   public loadingStyle = this.StyleSubject.asObservable();
 
-  public isLoading = false;
   public backgroundColor = '#111111';
   public logo = 'assets/img/kompakkt-icon.png';
 
-  constructor() {}
-
   public updateOpacity(newOpacity: string): void {
-    if (parseFloat(newOpacity) > 0.5) {
-      this.isLoading = true;
-    } else {
-      this.isLoading = false;
-    }
+    this.isLoading.next(parseFloat(newOpacity) > 0.5);
     this.OpacitySubject.next(newOpacity);
   }
 

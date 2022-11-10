@@ -488,7 +488,8 @@ export class ProcessingService {
 
   public async loadEntity(newEntity: IEntity, overrideUrl?: string) {
     const baseURL = overrideUrl ?? this.baseUrl;
-    if (!this.loadingScreenHandler.isLoading && newEntity.processed && newEntity.mediaType) {
+    const isLoading = await firstValueFrom(this.loadingScreenHandler.isLoading$);
+    if (!isLoading && newEntity.processed && newEntity.mediaType) {
       if (!newEntity.dataSource.isExternal) {
         this.entityMediaType = newEntity.mediaType;
         await this.initialiseEntitySettingsData(newEntity);
