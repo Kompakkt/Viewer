@@ -1,0 +1,34 @@
+<h2>Measurement</h2>
+
+<p>Set measurement points by clicking "Set" and then double clicking on the model</p>
+<div class="points-grid">
+  <ng-container *ngFor="let point of points$ | async; let index = index">
+    <span>Point #{{ index + 1 }}</span>
+    <span>{{ point ? (point | stringifyVector) : 'Not set' }}</span>
+    <button mat-stroked-button (click)="measurement.setPointToPick(index)">Set</button>
+  </ng-container>
+</div>
+
+<mat-divider></mat-divider>
+
+<form [formGroup]="formGroup" class="measurement-input">
+  <p>Enter the real-world length between the two selected points</p>
+
+  <div class="row">
+    <mat-form-field>
+      <mat-label>Length</mat-label>
+      <input matInput type="number" formControlName="length" />
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Unit</mat-label>
+      <mat-select formControlName="unit">
+        <mat-option value="mm">mm</mat-option>
+        <mat-option value="cm" selected>cm</mat-option>
+        <mat-option value="m">m</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+</form>
+
+<button mat-stroked-button (click)="saveMeasurement()">Preview rulers with measurement</button>

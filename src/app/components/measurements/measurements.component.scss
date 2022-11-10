@@ -1,0 +1,37 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: absolute;
+  top: 5px;
+  right: 15px;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 0.75rem;
+  box-shadow: 1px 1px #333;
+  color: white;
+  padding: 1rem;
+  max-width: 400px;
+}
+
+h2 {
+  margin: 0;
+}
+
+.points-grid {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  text-align: center;
+  grid-gap: 0.5rem;
+  align-items: center;
+}
+
+form {
+  input[type='number'] {
+    text-align: right;
+  }
+  div.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-column-gap: 1rem;
+  }
+}
