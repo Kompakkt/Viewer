@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { IAnnotation } from 'src/common';
-import { Matrix, Vector3 } from '@babylonjs/core';
+import { Camera, Matrix, Nullable, PointerEventTypes, Vector3 } from '@babylonjs/core';
 
 import { AnnotationService } from '../../../services/annotation/annotation.service';
 import { BabylonService } from '../../../services/babylon/babylon.service';
@@ -21,6 +21,13 @@ export class AnnotationMarkerComponent implements OnInit {
   public positionTop = 0;
   public positionLeft = 0;
   public positionZ = 0;
+  public isMoving = false;
+  public hasMoved = 50;
+  public cameraPosTemp: Vector3 | undefined;
+  public behind = false;
+  private scene = this.babylon.getScene();
+  private engine = this.babylon.getEngine();
+  private camera: Nullable<Camera> = null;
 
   public selectedAnnotation: IAnnotation | undefined;
 
@@ -37,6 +44,17 @@ export class AnnotationMarkerComponent implements OnInit {
       throw new Error('AnnotationComponent without annotation');
     }
 
+    this.camera = this.scene.activeCamera;
+    //eventlistener on long mousclick and drag
+    this.scene.onPointerObservable.add(pointerInfo => {
+      if (pointerInfo.type === PointerEventTypes.POINTERUP) {
+        this.isMoving = false;
+      }
+      if (pointerInfo.type === PointerEventTypes.POINTERDOWN) {
+        this.isMoving = true;
+      }
+    });
+
     setInterval(() => {
       if (!this.annotation) {
         console.error('AnnotationComponent without annotation', this);
@@ -47,34 +65,47 @@ export class AnnotationMarkerComponent implements OnInit {
   }
 
   private setPosition(annotation: IAnnotation) {
-    const scene = this.babylon.getScene();
-
-    if (!scene) {
+    //check if user is moving the view
+    if (!this.scene || this.hasMoved <= 0 || this.isMoving || !this.camera || !this.annotation) {
+      this.cameraPosTemp = this.camera?.position.clone();
       return false;
     }
-    const getMesh = scene.getMeshByName(`${annotation._id}_marker`);
 
-    if (getMesh && scene.activeCamera) {
-      const engine = this.babylon.getEngine();
+    //check if camera is still moving
+    if (this.camera && this.cameraPosTemp?.equals(this.camera?.position)) {
+      this.cameraPosTemp = this.camera?.position.clone();
+      return false;
+    }
 
-      const [width, height] = [engine.getRenderWidth(), engine.getRenderHeight()];
+    const getMesh = this.scene.getMeshByName(`${annotation._id}_marker`);
+
+    if (getMesh) {
+      const [width, height] = [this.engine.getRenderWidth(), this.engine.getRenderHeight()];
 
       const p = Vector3.Project(
         getMesh.getBoundingInfo().boundingBox.centerWorld,
         Matrix.Identity(),
-        scene.getTransformMatrix(),
-        scene.activeCamera.viewport.toGlobal(width, height),
+        this.scene.getTransformMatrix(),
+        this.camera.viewport.toGlobal(width, height),
       );
 
-      const [left, top] = [Math.round(p.x) - 20, Math.round(p.y) - 20];
+      const [left, top] = [Math.round(p.x), Math.round(p.y)];
       const [elHeight, elWidth] = [20, 20];
 
       this.positionTop = top < 0 ? 0 : top + elHeight > height ? height - elHeight : top;
       this.positionLeft = left < 0 ? 0 : left + elWidth > width ? width - elWidth : left;
-      /* p.z is just a minimal change like: 0.99993 -> 0.99994 */
-      /* so we have to look at the 5th decimal place and throw away the beginning */
-      this.positionZ = Math.round(((1 / p.z) * 1000000) % 100000);
+
+      this.positionZ = Math.round(p.z * 1000000) / 1000000;
+      this.cameraPosTemp = this.camera.position.clone();
+
+      this.castRay();
     }
+  }
+
+  private castRay() {
+    const result = this.scene.pick(this.positionTop, this.positionLeft, () => true);
+
+    this.behind = !(result?.pickedMesh?.name === `${this.annotation?._id}_marker`);
   }
 
   public selectAnnotation(annotation: IAnnotation) {

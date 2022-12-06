@@ -36,6 +36,7 @@ export class AnnotationComponent implements OnInit {
   public isAnnotatingAllowed = false;
   public isAnnotationOwner = false;
 
+
   constructor(
     public annotationService: AnnotationService,
     public babylon: BabylonService,
@@ -53,6 +54,7 @@ export class AnnotationComponent implements OnInit {
     this.collapsed = false;
     this.isAnnotatingAllowed = this.processing.annotationAllowance;
     this.isAnnotationOwner = this.userdataService.isAnnotationOwner(this.annotation);
+
 
     this.annotationService.isSelectedAnnotation.subscribe(selectedAnno => {
       if (!this.annotation) {

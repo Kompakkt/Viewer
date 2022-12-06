@@ -1,10 +1,8 @@
 <ng-container *ngIf="isReady">
-  <div *ngFor="let annotation of currentAnnotations$ | async" class="annotation-marker">
+  <ng-container *ngFor="let annotation of currentAnnotations$ | async">
     <app-annotation-marker [annotation]="annotation"></app-annotation-marker>
-  </div>
-  <div *ngFor="let annotation of currentAnnotations$ | async">
     <app-annotation [annotation]="annotation"></app-annotation>
-  </div>
+  </ng-container>
   <app-annotationwalkthrough></app-annotationwalkthrough>
   <app-menu *ngIf="processing.showMenu$ | async"></app-menu>
   <app-sidenav-menu *ngIf="processing.showSidenav$ | async"></app-sidenav-menu>
