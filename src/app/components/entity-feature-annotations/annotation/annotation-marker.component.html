@@ -3,14 +3,15 @@
   On click, the corresponding annotation will be selected and displayed
   The Indicator is annotation?.ranking
 -->
-<div class="marker single-annotation-card"
-  [style.top.px]="positionTop"
-  [style.left.px]="positionLeft"
+<div
+  class="marker"
+  [style.--top]="positionTop + 'px'"
+  [style.--left]="positionLeft + 'px'"
+  [style.--size]="markerSize + 'px'"
   [style.z-index]="positionZ"
-  [style.filter]="isMoving ? 'blur(5px)' : ''"
-  [style.opacity]="behind ? 0.2 : 1"
+  [class.selected]="isSelected$ | async"
   *ngIf="annotation"
   (click)="selectAnnotation(annotation)"
-  >
-  {{annotation.ranking}}
+>
+  {{ annotation.ranking }}
 </div>

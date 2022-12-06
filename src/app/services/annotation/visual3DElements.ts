@@ -4,7 +4,7 @@ export const createMarker = (scene: Scene, id: string, position?: Vector3, norma
   // const mat = new StandardMaterial(`${id}_material`, scene);
 
   const markerName = `${id}_marker`;
-  const marker = MeshBuilder.CreateDisc(markerName, {}, scene);
+  const marker = MeshBuilder.CreateDisc(markerName, { radius: 1 }, scene);
   Tags.AddTagsTo(marker, 'marker');
   Tags.AddTagsTo(marker, 'solid_marker');
   Tags.AddTagsTo(marker, id);
@@ -15,7 +15,7 @@ export const createMarker = (scene: Scene, id: string, position?: Vector3, norma
   }
   marker.billboardMode = Mesh.BILLBOARDMODE_ALL;
   // marker.material = mat;
-  marker.renderingGroupId = 0;
+  marker.renderingGroupId = 3;
   marker.visibility = 0;
 
   return marker;
