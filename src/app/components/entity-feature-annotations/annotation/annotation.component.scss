@@ -15,7 +15,7 @@ $max-width: 500px;
 }
 
 .single-annotation-card {
-  z-index: 0;
+  z-index: 150;
   position: absolute;
   animation: fadein 280ms;
   opacity: 0.9 !important;

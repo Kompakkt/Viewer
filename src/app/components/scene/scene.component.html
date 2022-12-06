@@ -1,4 +1,7 @@
 <ng-container *ngIf="isReady">
+  <div *ngFor="let annotation of currentAnnotations$ | async" class="annotation-marker">
+    <app-annotation-marker [annotation]="annotation"></app-annotation-marker>
+  </div>
   <div *ngFor="let annotation of currentAnnotations$ | async">
     <app-annotation [annotation]="annotation"></app-annotation>
   </div>

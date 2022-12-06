@@ -3,14 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { IAnnotation, ICompilation, IEntity, IVector3, isAnnotation } from 'src/common';
-import {
-  ActionManager,
-  ExecuteCodeAction,
-  Mesh,
-  Tags,
-  Vector3,
-  PickingInfo,
-} from '@babylonjs/core';
+import { Mesh, Tags, Vector3, PickingInfo } from '@babylonjs/core';
 import { map } from 'rxjs/operators';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
@@ -616,36 +609,10 @@ export class AnnotationService {
     const positionVector = getVector(referencePoint);
     const normalVector = getVector(referenceNormal);
 
-    const color = 'black';
     const scene = this.babylon.getScene();
     const id = newAnnotation._id.toString();
-    const marker = createMarker(
-      scene,
-      newAnnotation.ranking.toString(),
-      id,
-      false,
-      color,
-      positionVector,
-      normalVector,
-    );
+    const marker = createMarker(scene, id, positionVector, normalVector);
     marker.isPickable = false;
-
-    const markertransparent = createMarker(
-      scene,
-      newAnnotation.ranking.toString(),
-      id,
-      true,
-      color,
-      positionVector,
-      normalVector,
-    );
-    markertransparent.actionManager = new ActionManager(scene);
-    // register 'pickCylinder' as the handler function for cylinder picking action.
-    markertransparent.actionManager.registerAction(
-      new ExecuteCodeAction(ActionManager.OnPickTrigger, () => {
-        this.setSelectedAnnotation(id);
-      }),
-    );
   }
 
   public async setSelectedAnnotation(id: string) {

@@ -141,7 +141,16 @@ export class AnnotationComponent implements OnInit {
 
   private setPosition(annotation: IAnnotation) {
     const scene = this.babylon.getScene();
+    //check if annotation is visible
+    if (!this.visibility) {
+      if (this.positionLeft === 0 && this.positionTop === 0) {
+        // set position to middle of screen once
+        this.positionLeft = scene.getEngine().getRenderWidth() / 2;
+        this.positionTop = scene.getEngine().getRenderHeight() / 2;
+      }
 
+      return;
+    }
     if (!scene) {
       return false;
     }
@@ -167,7 +176,6 @@ export class AnnotationComponent implements OnInit {
       const parent = this.annotationForm.nativeElement.parentElement;
       const [left, top] = [Math.round(p.x), Math.round(p.y)];
       const [elHeight, elWidth] = [parent.clientHeight, parent.clientWidth];
-
       this.positionTop = top < 0 ? 0 : top + elHeight > height ? height - elHeight : top;
       this.positionLeft = left < 0 ? 0 : left + elWidth > width ? width - elWidth : left;
     }
