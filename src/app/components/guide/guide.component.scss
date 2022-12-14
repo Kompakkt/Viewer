@@ -8,7 +8,9 @@
   display: grid;
   grid-template-columns: repeat(3, min(25vw, 25ch));
   grid-template-rows: 1fr auto;
-  background-color: rgba(0, 0, 0, 0.5);
+  grid-column-gap: 1rem;
+  grid-row-gap: 2rem;
+  background-color: rgba(0, 0, 0, 0.7);
   border-radius: 0.75rem;
   padding: 1rem;
   column-gap: 1rem;
@@ -32,6 +34,14 @@
   &.visible {
     filter: opacity(1);
     transform: translateY(0%);
-    backdrop-filter: blur(4px);
+  }
+
+  p {
+    margin: 0;
+  }
+
+  p.dismiss {
+    grid-column: span 3;
+    font-weight: bold;
   }
 }
