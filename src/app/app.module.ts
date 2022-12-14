@@ -56,6 +56,7 @@ import { SidenavMenuComponent } from './components/sidenav-menu/sidenav-menu.com
 import { SidenavComponent } from './components/sidenav/sidenav.component';
 import { MediaTypePipe } from './pipes/media-type.pipe';
 import { MarkdownPreviewComponent } from './components/markdown-preview/markdown-preview.component';
+import { GuideComponent } from './components/guide/guide.component';
 
 @NgModule({
     declarations: [
@@ -86,6 +87,7 @@ import { MarkdownPreviewComponent } from './components/markdown-preview/markdown
         EntityFeatureSettingsLightsComponent,
         EntityFeatureSettingsMeshComponent,
         MarkdownPreviewComponent,
+        GuideComponent,
     ],
     imports: [
         BrowserModule,
