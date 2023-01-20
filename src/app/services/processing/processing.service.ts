@@ -438,6 +438,17 @@ export class ProcessingService {
       .then(entity => {
         console.log('Received this Entity:', entity);
 
+        // Force load the entity via query parameter, skipping any checks below.
+        // Behaviour can be undefined this way, but was needed for:
+        // https://gitlab.com/nfdi4culture/ta1-data-enrichment/kompakkt-viewer/-/issues/22
+        const queryParams = new URLSearchParams(location.search);
+        const entries = Object.fromEntries(queryParams.entries()) as { force?: string };
+
+        if (entries.force) {
+          console.log('Force loading entity');
+          return this.loadEntity(entity);
+        }
+
         // Check if this is an external file
         // This can fail if the external file is not available or not reachable
         const isExternal = !!entity.externalFile;
