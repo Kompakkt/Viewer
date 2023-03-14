@@ -656,6 +656,7 @@ export class AnnotationService {
 
     const perspective = selectedAnnotation.body.content.relatedPerspective;
     if (perspective !== undefined) {
+      this.babylon.cameraManager.setCameraType('ArcRotateCamera');
       this.babylon.cameraManager.moveActiveCameraToPosition(
         new Vector3(perspective.position.x, perspective.position.y, perspective.position.z),
       );
