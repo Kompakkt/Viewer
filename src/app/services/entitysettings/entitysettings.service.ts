@@ -450,11 +450,11 @@ export class EntitySettingsService {
         )
       : this.entitySettings.cameraPositionInitial;
 
-    const positionVector = new Vector3(camera.position.x, camera.position.y, camera.position.z);
-    const targetVector = new Vector3(camera.target.x, camera.target.y, camera.target.z);
-    this.babylon.cameraManager.updateDefaults(positionVector, targetVector);
-    this.babylon.cameraManager.moveActiveCameraToPosition(positionVector);
-    this.babylon.cameraManager.setActiveCameraTarget(targetVector);
+    const position = new Vector3(camera.position.x, camera.position.y, camera.position.z);
+    const target = new Vector3(camera.target.x, camera.target.y, camera.target.z);
+    this.babylon.cameraManager.cameraDefaults$.next({ position, target });
+    this.babylon.cameraManager.moveActiveCameraToPosition(position);
+    this.babylon.cameraManager.setActiveCameraTarget(target);
   }
 
   // background: color, effect

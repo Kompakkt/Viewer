@@ -1,58 +1,28 @@
 import {
   Animation,
   ArcRotateCamera,
+  UniversalCamera,
   EasingFunction,
   QuarticEase,
   Scene,
   Vector3,
 } from '@babylonjs/core';
+import { BehaviorSubject } from 'rxjs';
 
 const halfPi = Math.PI / 180;
-const DEFAULTS: {
-  position: {
-    alpha: number;
-    beta: number;
-    radius: number;
-  };
-  target: {
-    x: number;
-    y: number;
-    z: number;
-  };
-} = {
-  position: {
-    alpha: 0,
-    beta: 10,
-    radius: 100,
-  },
-  target: {
-    x: 0,
-    y: 0,
-    z: 0,
-  },
-};
 
-export const updateDefaults = (positionVector: Vector3, targetVector: Vector3) => {
-  DEFAULTS.position = {
-    alpha: positionVector.x,
-    beta: positionVector.y,
-    radius: positionVector.z,
-  };
-  DEFAULTS.target = {
-    x: targetVector.x,
-    y: targetVector.y,
-    z: targetVector.z,
-  };
-};
+export type CameraDefaults = { position: Vector3; target: Vector3 };
+export const cameraDefaults$ = new BehaviorSubject<CameraDefaults>({
+  position: new Vector3(0, 10, 100),
+  target: Vector3.Zero(),
+});
+cameraDefaults$.subscribe(defaults => {
+  console.log('Camera defaults set to', defaults);
+});
 
 export const resetCamera = (camera: ArcRotateCamera, scene: Scene) => {
-  const target = new Vector3(DEFAULTS.target.x, DEFAULTS.target.y, DEFAULTS.target.z);
+  const { position, target } = cameraDefaults$.getValue();
   setCameraTarget(camera, target);
-  const position = new Vector3(
-    DEFAULTS.position.alpha,
-    DEFAULTS.position.beta,
-    DEFAULTS.position.radius,
-  );
   moveCameraToTarget(camera, scene, position);
   return camera;
 };
@@ -98,43 +68,37 @@ export const createDefaultCamera = (scene: Scene, canvas: HTMLCanvasElement) => 
   camera.allowUpsideDown = false;
 
   // Adjust Zoom & Pan
-  camera.wheelDeltaPercentage = 0.01;
-  camera.pinchDeltaPercentage = 0.01;
+  camera.wheelDeltaPercentage = 0;
+  camera.pinchDeltaPercentage = 0;
   camera.panningSensibility = 250;
 
-  // Override setPosition to always store new Position in DEFAULTS
-  camera.setPosition = (position: Vector3) => {
-    if (!camera._position.equals(position)) {
-      camera._position.copyFrom(position);
-      camera.rebuildAnglesAndRadius();
-    }
-    DEFAULTS.position.alpha = position.x;
-    DEFAULTS.position.beta = position.y;
-    DEFAULTS.position.radius = position.z;
-  };
+  return camera;
+};
 
+export const createUniversalCamera = (scene: Scene) => {
+  const camera = new UniversalCamera('UniversalCamera', Vector3.Zero(), scene);
   return camera;
 };
 
 export const setUpCamera = (camera: ArcRotateCamera, maxSize: number, mediaType: string) => {
   // camera for model, audio, video, image
   const radius = maxSize * 2.5;
-  camera.minZ = maxSize * 0.0001;
-  camera.maxZ = radius + maxSize;
+  // camera.minZ = maxSize * 0.0001;
+  // camera.maxZ = radius + maxSize;
 
   if (mediaType === 'entity' || mediaType === 'model') {
     camera.lowerAlphaLimit = null;
     camera.upperAlphaLimit = null;
     camera.lowerBetaLimit = 0.01;
-    camera.upperBetaLimit = Math.PI;
+    camera.upperBetaLimit = Math.PI - 0.01;
   } else {
     camera.lowerAlphaLimit = camera.upperAlphaLimit = halfPi * -90;
     camera.lowerBetaLimit = camera.upperBetaLimit = halfPi * 90;
   }
   if (mediaType !== 'audio') {
-    camera.lowerRadiusLimit = camera.minZ * 2;
-    camera.upperRadiusLimit = radius;
-    camera.speed = maxSize * 0.8;
+    // camera.lowerRadiusLimit = camera.minZ * 2;
+    // camera.upperRadiusLimit = radius;
+    // camera.speed = maxSize * 0.8;
   } else {
     camera.lowerRadiusLimit = camera.upperRadiusLimit = radius;
   }
@@ -195,12 +159,4 @@ export const moveCameraToTarget = (
 
 export const setCameraTarget = (camera: ArcRotateCamera, target: Vector3) => {
   camera.setTarget(target, true);
-};
-
-export const getDefaultPosition = () => {
-  return new Vector3(DEFAULTS.position.alpha, DEFAULTS.position.beta, DEFAULTS.position.radius);
-};
-
-export const getDefaultTarget = () => {
-  return new Vector3(DEFAULTS.target.x, DEFAULTS.target.y, DEFAULTS.target.z);
 };
