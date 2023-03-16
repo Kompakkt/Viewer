@@ -6,24 +6,30 @@
   <h2>Camera settings</h2>
 
   <h3>Type</h3>
-  <div class="button-pair">
-    <button
-      mat-flat-button
-      (click)="babylon.cameraManager.setCameraType('ArcRotateCamera')"
-      [class.active]="(babylon.cameraManager.cameraType$ | async) === 'ArcRotateCamera'"
-      matTooltip="Orbit around an anchor point on the object"
-    >
-      Orbit
-    </button>
-    <button
-      mat-flat-button
-      (click)="babylon.cameraManager.setCameraType('UniversalCamera')"
-      [class.active]="(babylon.cameraManager.cameraType$ | async) === 'UniversalCamera'"
-      matTooltip="Move freely with the arrow keys"
-    >
-      Free
-    </button>
-  </div>
+  <p *ngIf="annotationService.isAnnotationMode$ | async; else cameraTypeButtons">
+    Switching the camera type is not<br />supported while annotating
+  </p>
+  <ng-template #cameraTypeButtons>
+    <div class="button-pair" [class.disabled]="annotationService.isAnnotationMode$ | async">
+      <button
+        mat-flat-button
+        (click)="babylon.cameraManager.setCameraType('ArcRotateCamera')"
+        [class.active]="(babylon.cameraManager.cameraType$ | async) === 'ArcRotateCamera'"
+        matTooltip="Orbit around an anchor point on the object"
+      >
+        Orbit
+      </button>
+      <button
+        mat-flat-button
+        (click)="babylon.cameraManager.setCameraType('UniversalCamera')"
+        [class.active]="(babylon.cameraManager.cameraType$ | async) === 'UniversalCamera'"
+        matTooltip="Move freely with the arrow keys"
+      >
+        Free
+      </button>
+    </div>
+  </ng-template>
+
   <h3>Speed ({{ cameraSpeed.value }}x)</h3>
   <mat-slider
     min="0.25"

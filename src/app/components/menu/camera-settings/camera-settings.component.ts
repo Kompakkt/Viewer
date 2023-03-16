@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { BehaviorSubject, debounceTime, filter, skip } from 'rxjs';
+import { BehaviorSubject, combineLatestWith, debounceTime, filter, skip } from 'rxjs';
+import { AnnotationService } from 'src/app/services/annotation/annotation.service';
 import { BabylonService } from 'src/app/services/babylon/babylon.service';
 
 @Component({
@@ -14,7 +15,7 @@ export class CameraSettingsComponent implements OnInit {
   public opened$ = new BehaviorSubject(false);
   public showNotification$ = new BehaviorSubject<string | undefined>(undefined);
 
-  constructor(public babylon: BabylonService) {
+  constructor(public babylon: BabylonService, public annotationService: AnnotationService) {
     this.cameraSpeed.valueChanges.subscribe(cameraSpeed => {
       this.babylon.cameraManager.cameraSpeed = cameraSpeed;
     });
@@ -29,6 +30,12 @@ export class CameraSettingsComponent implements OnInit {
       )
       .subscribe(() => {
         this.showNotification$.next(undefined);
+      });
+    this.annotationService.isAnnotationMode$
+      .pipe(combineLatestWith(this.babylon.cameraManager.cameraType$))
+      .subscribe(([isEnabled, cameraType]) => {
+        if (!isEnabled || cameraType === 'ArcRotateCamera') return;
+        this.babylon.cameraManager.setCameraType('ArcRotateCamera');
       });
   }
 

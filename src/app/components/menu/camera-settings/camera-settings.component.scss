@@ -51,6 +51,12 @@ div#camera-settings {
     button:last-of-type {
       border-radius: 0 8px 8px 0 !important;
     }
+
+    &.disabled {
+      pointer-events: none;
+      filter: opacity(0.5) grayscale(0.5);
+      white-space: pre-line;
+    }
   }
 }
 
