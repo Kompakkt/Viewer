@@ -1,6 +1,6 @@
 <div id="compilationBrowser">
-  <div *ngIf="compilation">
-    <div id="entity-overview" *ngIf="processing.entity$ | async; let entity">
+  <div *ngIf="compilation$ | async as compilation">
+    <div id="entity-overview" *ngIf="entity$ | async as entity">
       <mat-card class="entity-card">
         <mat-card-header>
           <mat-card-title> Selected Object: {{ entity.name }} </mat-card-title>
@@ -12,10 +12,12 @@
       </mat-card>
     </div>
 
-    <div class="category">Object{{ entityCount > 1 ? 's' : '' }} in {{ compilation.name }}:</div>
+    <ng-container *ngIf="entities$ | async as entities">
+      <div class="category">
+        Object{{ entities.length > 1 ? 's' : '' }} in {{ compilation.name }}:
+      </div>
 
-    <ng-container *ngFor="let entity of currentEntities">
-      <mat-card class="entity-card" *ngIf="isEntity(entity)">
+      <mat-card class="entity-card" *ngFor="let entity of entities">
         <mat-card-header>
           <mat-card-title>
             {{ entity.name }}
@@ -24,7 +26,7 @@
         <img
           *ngIf="entity.settings && entity.settings.preview"
           [src]="server_url + entity.settings.preview"
-          (click)="processing.fetchAndLoad(entity._id, undefined, true)"
+          (click)="processing.fetchAndLoad(entity._id, undefined)"
         />
       </mat-card>
     </ng-container>

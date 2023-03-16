@@ -33,14 +33,14 @@ export class AnnotationComponent implements OnInit {
 
   // external
   public visibility = false;
-  public isAnnotatingAllowed = false;
+  public isAnnotatingAllowed$ = this.processing.hasAnnotationAllowance$;
   public isAnnotationOwner = false;
 
   constructor(
     public annotationService: AnnotationService,
     public babylon: BabylonService,
     public dialog: MatDialog,
-    private userdataService: UserdataService,
+    public userdata: UserdataService,
     public processing: ProcessingService,
   ) {}
 
@@ -51,10 +51,9 @@ export class AnnotationComponent implements OnInit {
     }
     this.showAnnotation = true;
     this.collapsed = false;
-    this.isAnnotatingAllowed = this.processing.annotationAllowance;
-    this.isAnnotationOwner = this.userdataService.isAnnotationOwner(this.annotation);
+    this.isAnnotationOwner = this.userdata.isAnnotationOwner(this.annotation);
 
-    this.annotationService.isSelectedAnnotation.subscribe(selectedAnno => {
+    this.annotationService.selectedAnnotation$.subscribe(selectedAnno => {
       if (!this.annotation) {
         console.error('AnnotationComponent without annotation', this);
         throw new Error('AnnotationComponent without annotation');
@@ -63,11 +62,7 @@ export class AnnotationComponent implements OnInit {
       this.selectedAnnotation = selectedAnno;
     });
 
-    this.processing.setAnnotationAllowance.subscribe((allowed: boolean) => {
-      this.isAnnotatingAllowed = allowed;
-    });
-
-    this.annotationService.isEditModeAnnotation.subscribe(this.handleEditModeChange.bind(this));
+    this.annotationService.editModeAnnotation$.subscribe(this.handleEditModeChange.bind(this));
 
     setInterval(() => {
       if (!this.annotation) {
@@ -82,10 +77,6 @@ export class AnnotationComponent implements OnInit {
     const preview = this.annotation?.body.content.relatedPerspective.preview;
     if (!preview) return undefined;
     return preview.startsWith('data:image') ? preview : environment.server_url + preview;
-  }
-
-  get userOwnsCompilation() {
-    return this.userdataService.userOwnsCompilation;
   }
 
   public closeAnnotation(): void {

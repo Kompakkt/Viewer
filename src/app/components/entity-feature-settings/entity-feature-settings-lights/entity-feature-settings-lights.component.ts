@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 
 import { EntitySettingsService } from '../../../services/entitysettings/entitysettings.service';
 import { LightService } from '../../../services/light/light.service';
@@ -27,15 +28,12 @@ export class EntityFeatureSettingsLightsComponent {
   }
 
   // Lights
-  setLightIntensity(intensity: number | null, lightType: string) {
+  public async setLightIntensity(intensity: number | null, lightType: string) {
     if (!intensity) intensity = 0;
-    if (!this.processing.entitySettings) {
-      console.error(this);
-      throw new Error('Settings missing');
-    }
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
     const indexOfLight = this.lights.getLightIndexByType(lightType);
     if (indexOfLight !== undefined) {
-      this.processing.entitySettings.lights[indexOfLight].intensity = intensity;
+      localSettings.lights[indexOfLight].intensity = intensity;
       this.entitySettings.loadLightIntensity(lightType);
     } else {
       console.error(this);
@@ -43,31 +41,24 @@ export class EntityFeatureSettingsLightsComponent {
     }
   }
 
-  getLightIntensity(lightType: string): number {
-    if (!this.processing.entitySettings) {
-      console.error(this);
-      throw new Error('Settings missing');
-    }
+  public getLightIntensity(lightType: string) {
     return this.lights.getLightByType(lightType)?.intensity ?? 0;
   }
 
-  setPointlightPosition(dimension: string, value: number | null) {
+  public async setPointlightPosition(dimension: string, value: number | null) {
     if (!value) value = 0;
-    if (!this.processing.entitySettings) {
-      console.error(this);
-      throw new Error('Settings missing');
-    }
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
     const indexOfLight = this.lights.getLightIndexByType('pointLight');
     if (indexOfLight) {
       switch (dimension) {
         case 'x':
-          this.processing.entitySettings.lights[indexOfLight].position.x = value;
+          localSettings.lights[indexOfLight].position.x = value;
           break;
         case 'y':
-          this.processing.entitySettings.lights[indexOfLight].position.y = value;
+          localSettings.lights[indexOfLight].position.y = value;
           break;
         case 'z':
-          this.processing.entitySettings.lights[indexOfLight].position.z = value;
+          localSettings.lights[indexOfLight].position.z = value;
           break;
         default:
           // tslint:disable-next-line:prefer-template

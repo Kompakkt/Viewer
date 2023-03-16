@@ -1,10 +1,8 @@
 import { Component } from '@angular/core';
-
-import { ProcessingService } from '../../services/processing/processing.service';
-
-import { isEntity, isCompilation, ICompilation } from 'src/common';
-
+import { filter, map } from 'rxjs';
+import { isCompilation, isEntity } from 'src/common';
 import { environment } from 'src/environments/environment';
+import { ProcessingService } from '../../services/processing/processing.service';
 
 @Component({
   selector: 'app-compilation-browser',
@@ -12,21 +10,23 @@ import { environment } from 'src/environments/environment';
   styleUrls: ['./compilation-browser.component.scss'],
 })
 export class CompilationBrowserComponent {
-  public compilation: ICompilation | undefined;
   public server_url = environment.server_url;
 
-  public isEntity = isEntity;
+  constructor(public processing: ProcessingService) {}
 
-  constructor(public processing: ProcessingService) {
-    this.processing.compilation$.subscribe(compilation => (this.compilation = compilation));
+  get compilation$() {
+    return this.processing.compilation$;
   }
 
-  get currentEntities() {
-    if (!isCompilation(this.compilation)) return [];
-    return Object.values(this.compilation.entities);
+  get entity$() {
+    return this.processing.entity$;
   }
 
-  get entityCount() {
-    return this.currentEntities.length;
+  get entities$() {
+    return this.compilation$.pipe(
+      filter(isCompilation),
+      map(({ entities }) => Object.values(entities)),
+      map(entities => entities.filter(isEntity)),
+    );
   }
 }

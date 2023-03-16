@@ -19,8 +19,8 @@ export class LightService {
 
   constructor(private babylon: BabylonService, private processing: ProcessingService) {
     this.scene = this.babylon.getScene();
-    this.processing.entitySettings$.subscribe(settings => {
-      this.entitySettings = settings;
+    this.processing.settings$.subscribe(({ localSettings }) => {
+      this.entitySettings = localSettings;
     });
   }
 

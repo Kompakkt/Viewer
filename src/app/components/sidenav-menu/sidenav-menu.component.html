@@ -25,7 +25,7 @@
       </mat-icon>
     </button>
   </div>
-  <div *ngIf="processing.showCompilationBrowser$ | async">
+  <div *ngIf="processing.compilationLoaded$ | async">
     <button
       mat-icon-button
       (click)="overlay.toggleSidenav('compilationBrowser')"

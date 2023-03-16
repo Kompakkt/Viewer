@@ -51,14 +51,13 @@
       </div>
     </mat-card-content>
 
-    <mat-card-actions>
+    <mat-card-actions *ngIf="(isAnnotatingAllowed$ | async) && isAnnotationOwner">
       <button
         mat-icon-button
         (click)="editFullscreen()"
         matTooltip="Edit in Fullscreen Mode"
         matTooltipPosition="above"
         type="button"
-        *ngIf="isAnnotatingAllowed && isAnnotationOwner"
       >
         <mat-icon aria-label="Fullscreen">select_all</mat-icon>
       </button>
@@ -67,7 +66,6 @@
         mat-icon-button
         (click)="toggleEditViewMode()"
         [matTooltip]="isEditMode ? 'Save Annotation' : 'Edit Annotation'"
-        *ngIf="isAnnotatingAllowed && isAnnotationOwner"
         matTooltipPosition="above"
         type="button"
       >
@@ -77,7 +75,6 @@
       </button>
 
       <button
-        *ngIf="isAnnotatingAllowed && isAnnotationOwner"
         mat-icon-button
         (click)="deleteAnnotation()"
         matTooltip="Delete"

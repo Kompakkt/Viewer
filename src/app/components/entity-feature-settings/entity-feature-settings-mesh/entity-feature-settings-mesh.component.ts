@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { Vector3, Mesh } from '@babylonjs/core';
-
+import { Vector3 } from '@babylonjs/core';
+import { firstValueFrom } from 'rxjs';
+import { IColor } from 'src/common';
 import { BabylonService } from '../../../services/babylon/babylon.service';
 import { EntitySettingsService } from '../../../services/entitysettings/entitysettings.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
-
-import { IColor } from 'src/common';
 
 @Component({
   selector: 'app-entity-feature-settings-mesh',
@@ -26,14 +25,14 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
   public meshScaleToggle = false;
   public meshOrientationToggle = false;
 
-  public meshes: Mesh[] | undefined;
-
   constructor(
     public entitySettings: EntitySettingsService,
     public processing: ProcessingService,
     private babylon: BabylonService,
-  ) {
-    this.processing.meshes$.subscribe(meshes => (this.meshes = meshes));
+  ) {}
+
+  get meshes$() {
+    return this.processing.meshes$;
   }
 
   ngOnInit() {
@@ -47,43 +46,35 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
     });
   }
 
-  public setBackgroundColor(color: IColor) {
-    if (!this.processing.entitySettings) {
-      throw new Error('Settings missing');
-      console.error(this);
-      return;
-    }
-    this.processing.entitySettings.background.color = color;
+  public async setBackgroundColor(color: IColor) {
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
+    localSettings.background.color = color;
     this.entitySettings.loadBackgroundColor();
   }
   // ________Mesh Settings__________
 
   // Scaling
-  public handleChangeDimension(dimension: string, value?: number | null) {
-    if (!this.processing.entitySettings) {
-      throw new Error('Settings missing');
-      console.error(this);
-      return;
-    }
+  public async handleChangeDimension(dimension: string, value?: number | null) {
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
     let factor;
     switch (dimension) {
       case 'height':
         factor = +this.processing.entityHeight / this.entitySettings.initialSize.y;
-        this.processing.entitySettings.scale = parseFloat(factor.toFixed(2));
+        localSettings.scale = parseFloat(factor.toFixed(2));
         this.entitySettings.loadScaling();
         break;
       case 'width':
         factor = +this.processing.entityWidth / this.entitySettings.initialSize.x;
-        this.processing.entitySettings.scale = parseFloat(factor.toFixed(2));
+        localSettings.scale = parseFloat(factor.toFixed(2));
         this.entitySettings.loadScaling();
         break;
       case 'depth':
         factor = +this.processing.entityDepth / this.entitySettings.initialSize.z;
-        this.processing.entitySettings.scale = parseFloat(factor.toFixed(2));
+        localSettings.scale = parseFloat(factor.toFixed(2));
         this.entitySettings.loadScaling();
         break;
       case 'scale':
-        if (value) this.processing.entitySettings.scale = value;
+        if (value) localSettings.scale = value;
         this.entitySettings.loadScaling();
         break;
       default:
@@ -92,32 +83,25 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
   }
 
   // Rotation
-  setRotation(axis: string, degree: number) {
-    if (!this.processing.entitySettings) {
-      throw new Error('Settings missing');
-      console.error(this);
-      return;
-    }
+  public async setRotation(axis: string, degree: number) {
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
     switch (axis) {
       case 'x':
-        this.processing.entitySettings.rotation.x =
-          this.processing.entitySettings.rotation.x + degree;
+        localSettings.rotation.x = localSettings.rotation.x + degree;
         this.entitySettings.loadRotation();
         break;
       case 'y':
-        this.processing.entitySettings.rotation.y =
-          this.processing.entitySettings.rotation.y + degree;
+        localSettings.rotation.y = localSettings.rotation.y + degree;
         this.entitySettings.loadRotation();
         break;
       case 'z':
-        this.processing.entitySettings.rotation.z =
-          this.processing.entitySettings.rotation.z + degree;
+        localSettings.rotation.z = localSettings.rotation.z + degree;
         this.entitySettings.loadRotation();
         break;
       case 'xyz_reset':
-        this.processing.entitySettings.rotation.x = 0;
-        this.processing.entitySettings.rotation.y = 0;
-        this.processing.entitySettings.rotation.z = 0;
+        localSettings.rotation.x = 0;
+        localSettings.rotation.y = 0;
+        localSettings.rotation.z = 0;
         this.entitySettings.loadRotation();
       default:
         console.log('I am not able to rotate.');
@@ -126,7 +110,8 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
 
   // _____ Helpers for Mesh Settings _______
   public async resetVisualUIMeshSettingsHelper() {
-    if (!this.meshes) {
+    const meshes = await firstValueFrom(this.meshes$);
+    if (!meshes) {
       throw new Error('Center missing');
       console.error(this);
       return;
@@ -143,13 +128,9 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
     this.resetBackgroundColor();
   }
 
-  public resetBackgroundColor() {
-    if (!this.processing.entitySettingsOnServer) {
-      throw new Error('Settings from Server missing');
-      console.error(this);
-      return;
-    }
-    const color = this.processing.entitySettingsOnServer.background.color;
+  public async resetBackgroundColor() {
+    const { serverSettings } = await firstValueFrom(this.processing.settings$);
+    const color = serverSettings.background.color;
     this.entitySettings.setGroundMaterial(color);
   }
 
@@ -202,15 +183,16 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
     this.entitySettings.boundingBox.visibility = this.boundingBoxVisibility ? 1 : 0;
   }
 
-  public toggleBoundingBoxMeshesVisibility(value?: boolean) {
-    if (!this.meshes) {
+  public async toggleBoundingBoxMeshesVisibility(value?: boolean) {
+    const meshes = await firstValueFrom(this.meshes$);
+    if (!meshes) {
       throw new Error('Meshes missing');
       console.error(this);
       return;
     }
     this.boundingBoxMeshesVisibility =
       value !== undefined ? value : !this.boundingBoxMeshesVisibility;
-    this.meshes.forEach(mesh => (mesh.showBoundingBox = this.boundingBoxMeshesVisibility));
+    meshes.forEach(mesh => (mesh.showBoundingBox = this.boundingBoxMeshesVisibility));
   }
 
   public toggleAxesVisibility(axis: string, value?: boolean) {

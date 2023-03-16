@@ -22,7 +22,7 @@ export class AnnotationwalkthroughComponent implements OnInit {
       this.ranking = -1;
     });
 
-    this.annotationService.isSelectedAnnotation.subscribe(currentAnnotation => {
+    this.annotationService.selectedAnnotation$.subscribe(currentAnnotation => {
       const selectedAnnotation = this.annotations.find(
         (anno: IAnnotation) => anno._id === currentAnnotation,
       );

@@ -53,7 +53,7 @@
 
       <mat-checkbox
         class="validation"
-        *ngIf="isEditMode && userOwnsCompilation"
+        *ngIf="isEditMode && (userdata.userOwnsCompilation$ | async)"
         [checked]="annotation.validated"
         (change)="annotation.validated = !annotation.validated"
         >Validated
@@ -78,29 +78,39 @@
         {{ this.showAnnotation ? 'Hide' : 'Show' }}
       </mat-slide-toggle>
 
-      <button
-        mat-icon-button
-        (click)="toggleEditViewMode()"
-        [matTooltip]="isEditMode ? 'Save Annotation' : 'Edit Annotation'"
-        *ngIf="isAnnotatingAllowed && isAnnotationOwner"
-        matTooltipPosition="above"
-        type="button"
-      >
-        <mat-icon [attr.aria-label]="isEditMode ? 'Save Annotation' : 'Edit Annotation'">{{
-          isEditMode ? 'save' : 'edit'
-        }}</mat-icon>
-      </button>
+      <ng-container *ngIf="(processing.hasAnnotationAllowance$ | async) && isAnnotationOwner">
+        <button
+          mat-icon-button
+          (click)="toggleEditViewMode()"
+          [matTooltip]="isEditMode ? 'Save Annotation' : 'Edit Annotation'"
+          matTooltipPosition="above"
+          type="button"
+        >
+          <mat-icon [attr.aria-label]="isEditMode ? 'Save Annotation' : 'Edit Annotation'">{{
+            isEditMode ? 'save' : 'edit'
+          }}</mat-icon>
+        </button>
 
-      <button
-        mat-icon-button
-        (click)="editFullscreen()"
-        matTooltip="Edit in Fullscreen Mode"
-        matTooltipPosition="above"
-        type="button"
-        *ngIf="isAnnotatingAllowed && isAnnotationOwner"
-      >
-        <mat-icon aria-label="Fullscreen">select_all</mat-icon>
-      </button>
+        <button
+          mat-icon-button
+          (click)="editFullscreen()"
+          matTooltip="Edit in Fullscreen Mode"
+          matTooltipPosition="above"
+          type="button"
+        >
+          <mat-icon aria-label="Fullscreen">select_all</mat-icon>
+        </button>
+
+        <button
+          mat-icon-button
+          (click)="deleteAnnotation()"
+          matTooltip="Delete"
+          matTooltipPosition="above"
+          type="button"
+        >
+          <mat-icon aria-label="Delete">delete</mat-icon>
+        </button>
+      </ng-container>
 
       <button
         mat-icon-button
@@ -111,17 +121,6 @@
         type="button"
       >
         <mat-icon aria-label="Copy to collection">file_copy</mat-icon>
-      </button>
-
-      <button
-        *ngIf="isAnnotatingAllowed && isAnnotationOwner"
-        mat-icon-button
-        (click)="deleteAnnotation()"
-        matTooltip="Delete"
-        matTooltipPosition="above"
-        type="button"
-      >
-        <mat-icon aria-label="Delete">delete</mat-icon>
       </button>
     </mat-card-actions>
   </form>

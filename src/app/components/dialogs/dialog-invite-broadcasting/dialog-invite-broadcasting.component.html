@@ -1,11 +1,14 @@
-<ng-container *ngIf="compilation">
+<ng-container *ngIf="compilation$ | async as compilation">
   <mat-dialog-content>
     <mat-form-field>
       <h3>Invitation for Collaborators</h3>
       <textarea
         matInput
         placeholder="You can edit this Text"
-        [value]="text + (processing.defaultEntityLoaded ? defaultURL : baseURL + compilation._id)"
+        [value]="
+          text +
+          ((processing.defaultEntityLoaded$ | async) ? defaultURL : baseURL + compilation._id)
+        "
         #userinput
         cdkTextareaAutosize
         cdkAutosizeMinRows="4"

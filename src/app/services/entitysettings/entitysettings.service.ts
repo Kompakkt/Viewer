@@ -10,16 +10,12 @@ import {
   Tags,
   Vector3,
 } from '@babylonjs/core';
-import { combineLatest } from 'rxjs';
-
+import { firstValueFrom } from 'rxjs';
+import { IColor, IEntitySettings } from 'src/common';
+import { minimalSettings } from '../../../assets/settings/settings';
 import { BabylonService } from '../babylon/babylon.service';
 import { LightService } from '../light/light.service';
 import { ProcessingService } from '../processing/processing.service';
-
-import { minimalSettings } from '../../../assets/settings/settings';
-
-import { IColor, IEntitySettings } from 'src/common';
-
 import {
   createBoundingBox,
   createGround,
@@ -49,8 +45,6 @@ export class EntitySettingsService {
   public localAxisInitialSize = 0;
   public worldAxisInitialSize = 0;
 
-  private meshes: Mesh[] | undefined;
-
   private entitySettings: IEntitySettings = minimalSettings;
 
   constructor(
@@ -58,18 +52,19 @@ export class EntitySettingsService {
     private processing: ProcessingService,
     private lights: LightService,
   ) {
-    combineLatest(this.processing.entitySettings$, this.processing.meshes$).subscribe(arr => {
-      const settings = arr[0];
-      const meshes = arr[1];
+    this.processing.state$.subscribe(({ settings, entity, meshes }) => {
+      console.log('EntitySettingsService', { settings, entity, meshes });
       this.entitySettings = settings;
-      console.log('actual settings', this.entitySettings);
-      this.meshes = meshes;
       requestAnimationFrame(() =>
         this.setUpSettings()
           .then(() => console.log('Settings loaded'))
           .catch((err: Error) => console.log('Settings not loaded', err.message)),
       );
     });
+  }
+
+  get meshes$() {
+    return this.processing.meshes$;
   }
 
   private async resetInitialValues() {
@@ -87,10 +82,13 @@ export class EntitySettingsService {
   }
 
   private async setUpSettings() {
+    const meshes = await firstValueFrom(this.processing.meshes$);
+    const isInUpload = await firstValueFrom(this.processing.isInUpload$);
+    const hasMeshSettings = await firstValueFrom(this.processing.hasMeshSettings$);
     if (!this.entitySettings) {
       throw new Error('No settings available.');
     }
-    if (!this.meshes || this.meshes.length === 0) {
+    if (!meshes || meshes.length === 0) {
       throw new Error('No meshes available.');
     }
     await this.resetInitialValues();
@@ -98,7 +96,7 @@ export class EntitySettingsService {
     await this.setUpMeshSettingsHelper();
     await this.createVisualUIMeshSettingsHelper();
     await this.loadSettings();
-    if (!this.processing.upload || !this.processing.meshSettings) {
+    if (!isInUpload || !hasMeshSettings) {
       await this.destroyMesh('boundingBox');
       await this.decomposeMeshSettingsHelper();
     }
@@ -121,10 +119,11 @@ export class EntitySettingsService {
   }
 
   private async calculateMinMax() {
-    if (!this.meshes) {
+    const meshes = await firstValueFrom(this.processing.meshes$);
+    if (!meshes) {
       throw new Error('Center missing');
     }
-    this.meshes.forEach(mesh => {
+    meshes.forEach(mesh => {
       mesh.computeWorldMatrix(true);
       // see if mesh is visible or just a dummy
       const bi = mesh.getBoundingInfo();
@@ -156,7 +155,8 @@ export class EntitySettingsService {
   }
 
   private async setUpMeshSettingsHelper() {
-    if (!this.meshes) {
+    const meshes = await firstValueFrom(this.processing.meshes$);
+    if (!meshes) {
       throw new Error('No meshes available.');
     }
     this.center = MeshBuilder.CreateBox('center', { size: 0.01 }, this.babylon.getScene());
@@ -195,7 +195,7 @@ export class EntitySettingsService {
     // pivot to the center of the (visible) model
     this.center.setPivotPoint(this.initialCenterPoint);
 
-    this.meshes.forEach(mesh => {
+    meshes.forEach(mesh => {
       if (!mesh.parent) {
         mesh.parent = this.center as Mesh;
         Tags.AddTagsTo(mesh, 'parentedMesh');
@@ -204,12 +204,14 @@ export class EntitySettingsService {
   }
 
   private async loadSettings() {
+    const mediaType = await firstValueFrom(this.processing.mediaType$);
+    const hasMeshSettings = await firstValueFrom(this.processing.hasMeshSettings$);
     await this.initialiseCamera();
     await this.loadCameraInititalPosition();
     this.loadBackgroundEffect();
     this.loadBackgroundColor();
     this.initialiseLights();
-    if (this.processing.meshSettings || this.processing.entityMediaType === 'audio') {
+    if (hasMeshSettings || mediaType === 'audio') {
       await this.loadRotation();
       await this.loadScaling();
     }
@@ -228,9 +230,11 @@ export class EntitySettingsService {
       console.error(this);
       throw new Error('Settings missing');
     }
+    const mediaType = await firstValueFrom(this.processing.mediaType$);
+    const isInUpload = await firstValueFrom(this.processing.isInUpload$);
+    const isDefault = await firstValueFrom(this.processing.defaultEntityLoaded$);
     const scale = this.entitySettings.scale;
-    const isModel =
-      this.processing.entityMediaType === 'model' || this.processing.entityMediaType === 'entity';
+    const isModel = mediaType === 'model' || mediaType === 'entity';
     let diagonalLength = 0;
     if (this.boundingBox) {
       const bi = this.boundingBox.getBoundingInfo();
@@ -242,14 +246,10 @@ export class EntitySettingsService {
           this.initialSize.z * scale * (this.initialSize.z * scale),
       );
     }
-    const max = !this.processing.defaultEntityLoaded
-      ? this.processing.upload && isModel
-        ? diagonalLength * 2.5
-        : diagonalLength
-      : 87.5;
+    const max = !isDefault ? (isInUpload && isModel ? diagonalLength * 2.5 : diagonalLength) : 87.5;
     await this.babylon.cameraManager.setUpActiveCamera(max);
 
-    if (this.processing.upload && this.processing.entityMediaType !== 'audio') {
+    if (isInUpload && mediaType !== 'audio') {
       const position = new Vector3(
         isModel ? Math.PI / 4 : -Math.PI / 2,
         isModel ? Math.PI / 4 : Math.PI / 2,
@@ -396,6 +396,8 @@ export class EntitySettingsService {
     if (!this.center) {
       throw new Error('Center missing');
     }
+    const hasMeshSettings = await firstValueFrom(this.processing.hasMeshSettings$);
+    const isInUpload = await firstValueFrom(this.processing.isInUpload$);
     const scene = this.babylon.getScene();
     const size = Math.max(
       +this.processing.entityHeight,
@@ -409,7 +411,7 @@ export class EntitySettingsService {
       this.initialCenterPoint,
     );
     this.boundingBox.renderingGroupId = 2;
-    if (this.processing.upload && this.processing.meshSettings) {
+    if (isInUpload && hasMeshSettings) {
       this.worldAxisInitialSize = size * 1.2;
       this.localAxisInitialSize = size * 1.1;
       this.groundInitialSize = size * 1.2;

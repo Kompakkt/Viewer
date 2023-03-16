@@ -1,6 +1,8 @@
-import { EventEmitter, Injectable, Output } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { Mesh, Quaternion } from '@babylonjs/core';
+import { BehaviorSubject, combineLatest, debounceTime, filter, firstValueFrom, map } from 'rxjs';
 import {
   IAnnotation,
   ICompilation,
@@ -9,11 +11,8 @@ import {
   isEntity,
   ObjectId,
 } from 'src/common';
-import { Mesh, Quaternion } from '@babylonjs/core';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
-
-import { defaultEntity, fallbackEntity } from '../../../assets/entities/entities';
 import { baseEntity } from '../../../assets/defaults';
+import { defaultEntity, fallbackEntity } from '../../../assets/entities/entities';
 import {
   minimalSettings,
   settings2D,
@@ -53,73 +52,149 @@ interface IQueryParams {
   resource?: string;
 }
 
+type Mode = '' | 'upload' | 'explore' | 'edit' | 'annotation' | 'open';
+const isMode = (mode: any): mode is Mode => {
+  return ['', 'upload', 'explore', 'edit', 'annotation', 'open'].includes(mode);
+};
+
+const areSettingsSet = (entity: IEntity) => {
+  const { settings } = entity;
+  const props: Array<keyof IEntitySettings> = [
+    'preview',
+    'cameraPositionInitial',
+    'background',
+    'lights',
+    'rotation',
+    'scale',
+  ];
+  return !props.some(prop => !settings || settings[prop] === undefined || settings[prop] === '');
+};
+
 @Injectable({
   providedIn: 'root',
 })
 export class ProcessingService {
-  private _currentEntity: IEntity | undefined;
-  private _currentEntityMeshes: Mesh[] | undefined;
-  private _currentCompilation: ICompilation | undefined;
-  private entity = new BehaviorSubject<IEntity | undefined>(undefined);
-  private entityMeshes = new BehaviorSubject<Mesh[]>([]);
-  private compilation = new BehaviorSubject<ICompilation | undefined>(undefined);
-  public entity$ = this.entity.asObservable();
-  public meshes$ = this.entityMeshes.asObservable();
-  public compilation$ = this.compilation.asObservable();
+  public entity$ = new BehaviorSubject<IEntity | undefined>(undefined);
+  public meshes$ = new BehaviorSubject<Mesh[]>([]);
+  public compilation$ = new BehaviorSubject<ICompilation | undefined>(undefined);
+  public mode$ = new BehaviorSubject<Mode>('');
+  public settings$ = new BehaviorSubject({
+    localSettings: minimalSettings,
+    serverSettings: minimalSettings,
+  });
 
-  @Output() loadAnnotations = new EventEmitter<boolean>();
-  @Output() initialiseEntityForAnnotating = new EventEmitter<boolean>();
-  public annotatingFeatured = false;
-  public annotationAllowance = false;
-  @Output() setAnnotationAllowance = new EventEmitter<boolean>();
+  public mediaType$ = this.entity$.pipe(map(entity => entity?.mediaType));
+  public isInUpload$ = this.entity$.pipe(map(entity => entity && !areSettingsSet(entity)));
+  public hasMeshSettings$ = this.mediaType$.pipe(
+    map(mediaType => mediaType && ['model', 'entity', 'image'].includes(mediaType)),
+  );
 
-  // mediatype = 'model' || 'entity' || 'image' || 'audio' || 'video
-  public entityMediaType = '';
+  public compilationLoaded$ = this.compilation$.pipe(map(compilation => !!compilation?._id));
+  public defaultEntityLoaded$ = this.entity$.pipe(map(entity => entity?._id === 'default'));
+  public fallbackEntityLoaded$ = this.entity$.pipe(map(entity => entity?._id === 'fallback'));
+  public isStandalone$ = this.entity$.pipe(map(entity => entity?._id === 'standalone_entity'));
 
-  // settings
-  private entitySettingsSubject = new BehaviorSubject<IEntitySettings>(minimalSettings);
-  public entitySettings$ = this.entitySettingsSubject.asObservable();
-  private serverEntitySettingsSubject = new BehaviorSubject<IEntitySettings>(minimalSettings);
-  public serverEntitySettings$ = this.serverEntitySettingsSubject.asObservable();
-  public upload = false;
-  public meshSettings = false;
+  public entityQuality: QualitySetting = 'low';
+  private baseUrl = environment.server_url;
+
+  // general features and modes
+  public showMenu$ = new BehaviorSubject(true);
+  public showSidenav$ = new BehaviorSubject(true);
+  public showAnnotationEditor$ = new BehaviorSubject(true);
+  public showSettingsEditor$ = new BehaviorSubject(true);
+
+  public bootstrapped$ = new BehaviorSubject(false);
+
   public rotationQuaternion = Quaternion.RotationYawPitchRoll(0, 0, 0);
   public entityHeight = (0).toFixed(2);
   public entityWidth = (0).toFixed(2);
   public entityDepth = (0).toFixed(2);
 
-  // loading
-  public compilationLoaded = false;
-  public defaultEntityLoaded = false;
-  public fallbackEntityLoaded = false;
-  public entityQuality: QualitySetting = 'low';
-  private baseUrl = environment.server_url;
+  get isAnnotatingFeatured$() {
+    return combineLatest([
+      this.entity$,
+      this.compilation$,
+      this.defaultEntityLoaded$,
+      this.fallbackEntityLoaded$,
+      this.showAnnotationEditor$,
+      this.compilationLoaded$,
+      this.isStandalone$,
+      this.mode$,
+      this.userdata.isAuthenticated$,
+      this.userdata.userOwnsEntity$,
+      this.userdata.isUserWhitelistedInCompilation$,
+    ]).pipe(
+      map(
+        ([
+          entity,
+          compilation,
+          isDefault,
+          isFallback,
+          showEditor,
+          isCompilationLoaded,
+          isStandalone,
+          mode,
+          isAuthenticated,
+          userOwnsEntity,
+          isUserWhitelistedInCompilation,
+        ]) => {
+          if (!entity) return false;
+          if (isStandalone) return true;
 
-  // general features and modes
-  // mode = '' || upload || explore || edit || annotation || open
-  public mode = '';
-  private showMenu = new BehaviorSubject(true);
-  private showSidenav = new BehaviorSubject(true);
-  private showAnnotationEditor = new BehaviorSubject(true);
-  private showSettingsEditor = new BehaviorSubject(true);
-  private showCompilationBrowser = new BehaviorSubject(false);
-  public showMenu$ = this.showMenu.asObservable();
-  public showSidenav$ = this.showSidenav.asObservable();
-  public showAnnotationEditor$ = this.showAnnotationEditor.asObservable();
-  public showSettingsEditor$ = this.showSettingsEditor.asObservable();
-  public showCompilationBrowser$ = this.showCompilationBrowser.asObservable();
+          const isAnnotatable =
+            entity.mediaType === 'image' ||
+            entity.mediaType === 'entity' ||
+            entity.mediaType === 'model';
 
-  private bootstrapped = new BehaviorSubject(false);
-  public bootstrapped$ = this.bootstrapped.asObservable();
+          const hideEditor = !showEditor || !isAnnotatable || isFallback;
+          const shouldHideEditor = !isAnnotatable || isFallback;
+          const isEditorVisible = showEditor && !isCompilationLoaded;
+          if (hideEditor && shouldHideEditor && isEditorVisible) return false;
 
-  private isStandalone = new BehaviorSubject(false);
-  public isStandalone$ = this.isStandalone.asObservable();
+          if (isCompilationLoaded) {
+            if (!compilation) return false;
+            if (compilation?.whitelist.enabled && isAuthenticated) return true;
+            if (compilation.whitelist.enabled) return isUserWhitelistedInCompilation;
+          } else {
+            if ((isDefault || isFallback) && mode === 'annotation') return true;
+            if (userOwnsEntity) return true;
+          }
+          return false;
+        },
+      ),
+    );
+  }
 
-  private sidenavMode = '';
-  private sidenavOpen = false;
+  get hasAnnotationAllowance$() {
+    return combineLatest([
+      this.isStandalone$,
+      this.overlay.sidenav$,
+      this.isInUpload$,
+      this.isAnnotatingFeatured$,
+      this.userdata.isAuthenticated$,
+    ]).pipe(
+      map(([isStandalone, { mode, open }, isInUpload, isAnnotatingFeatured, isAuthenticated]) => {
+        if (isInUpload) return false;
+        if (!open) return false;
+        if (!isAnnotatingFeatured) return false;
+        if (isStandalone) return true;
+        if (mode === 'annotation' && isAuthenticated) return true;
+        return false;
+      }),
+    );
+  }
 
-  public entitySettings: IEntitySettings | undefined;
-  public entitySettingsOnServer: IEntitySettings | undefined;
+  get state$() {
+    return combineLatest([this.entity$, this.settings$, this.meshes$, this.compilation$]).pipe(
+      map(([entity, { localSettings }, meshes, compilation]) => ({
+        entity,
+        settings: localSettings,
+        meshes,
+        compilation,
+      })),
+      debounceTime(100),
+    );
+  }
 
   constructor(
     private backend: BackendService,
@@ -131,18 +206,38 @@ export class ProcessingService {
     private dialog: MatDialog,
     private http: HttpClient,
   ) {
-    this.overlay.sidenav$.subscribe(isOpen => {
-      this.sidenavOpen = isOpen;
-      this.checkAnnotationAllowance();
-    });
-    this.overlay.sidenavMode$.subscribe(mode => (this.sidenavMode = mode));
+    this.entity$.pipe(filter(isEntity)).subscribe(entity => this.handleEntitySettings(entity));
+  }
 
-    this.entitySettings$.subscribe(settings => {
-      this.entitySettings = settings;
-    });
-    this.serverEntitySettings$.subscribe(settings => {
-      this.entitySettingsOnServer = settings;
-    });
+  private handleEntitySettings(entity: IEntity) {
+    if (areSettingsSet(entity)) {
+      this.settings$.next({
+        localSettings: entity.settings,
+        serverSettings: entity.settings,
+      });
+    } else {
+      const settings = (() => {
+        if (entity._id === 'default') return settingsKompakktLogo;
+        if (entity._id === 'fallback') return settingsFallback;
+        switch (entity.mediaType) {
+          case 'entity':
+          case 'model':
+            return settingsEntity;
+          case 'audio':
+            return settingsAudio;
+          case 'video':
+            return settings2D;
+          case 'image':
+            return settings2D;
+          default:
+            return settingsEntity;
+        }
+      })();
+      this.settings$.next({
+        localSettings: settings,
+        serverSettings: settings,
+      });
+    }
   }
 
   public updateEntityQuality(quality: string) {
@@ -150,48 +245,22 @@ export class ProcessingService {
     this.entityQuality = quality;
   }
 
-  public updateActiveEntity(entity: IEntity | undefined) {
-    console.log('New loaded Entity:', entity);
-    this._currentEntity = entity;
-    this.entity.next(this._currentEntity);
-    if (entity?._id === 'default' || entity?._id === 'fallback') {
-      this.defaultEntityLoaded = entity._id === 'default';
-      this.fallbackEntityLoaded = entity._id === 'fallback';
-    }
-    if (this.userdata.userData) {
-      this.userdata.checkOwnerState(entity);
-    }
-    this.babylon.getEngine().hideLoadingUI();
-    this.babylon.resize();
+  public updateActiveEntity(entity: IEntity | undefined, meshes: Mesh[]) {
+    console.log('New loaded Entity:', { entity, meshes });
+    this.entity$.next(entity);
 
-    // TODO load Annotations emit (Frage: nur, wenn !collection loaded?)
-    this.loadAnnotations.emit(true);
-  }
-
-  public async updateActiveCompilation(compilation: ICompilation | undefined) {
-    this._currentCompilation = compilation;
-    this.compilation.next(this._currentCompilation);
-    this.compilationLoaded = !!(compilation && compilation._id);
-    this.showCompilationBrowser.next(this.compilationLoaded);
-    if (this.userdata.userData && this.compilationLoaded) {
-      this.userdata.checkOwnerState(compilation);
-    }
-    // TODO load annotations emit
-  }
-
-  public async updateActiveEntityMeshes(meshes: Mesh[], entity: IEntity) {
-    this.annotatingFeatured = false;
-    await this.setAnnotatingFeatured(entity);
-    // TODO - move to babylon load: rendering groups
-    const isPickableMode = ['upload', 'annotation'].includes(this.mode);
+    const isPickableMode = ['upload', 'annotation'].includes(this.mode$.getValue());
     meshes.forEach(mesh => (mesh.isPickable = isPickableMode));
     meshes.forEach(mesh => (mesh.renderingGroupId = 2));
     this.babylon.getScene().getMeshesByTags('videoPlane', mesh => (mesh.renderingGroupId = 3));
-    // End of TODO
-    this._currentEntityMeshes = meshes;
-    this.entityMeshes.next(this._currentEntityMeshes);
-    if (this.annotatingFeatured) this.initialiseEntityForAnnotating.emit(true);
-    this.checkAnnotationAllowance();
+    this.meshes$.next(meshes);
+
+    this.babylon.getEngine().hideLoadingUI();
+    this.babylon.resize();
+  }
+
+  public async updateActiveCompilation(compilation: ICompilation | undefined) {
+    this.compilation$.next(compilation);
   }
 
   public async bootstrap() {
@@ -204,7 +273,7 @@ export class ProcessingService {
     this.updateEntityQuality(qualityParam);
     // values = upload, explore, edit, annotation, open
     const mode = entries['mode'] ?? '';
-    this.mode = mode;
+    if (isMode(mode)) this.mode$.next(mode);
 
     // check if standalone and exit early to init standalone mode
     const isStandalone = !!entries['standalone'];
@@ -233,22 +302,18 @@ export class ProcessingService {
     }
 
     if (mode === 'annotation' && !entityParam && !compParam) {
-      await this.userdata.userAuthentication(false).then(result => {
-        if (!result) {
-          this.userdata.createTemporalUserData();
-        }
-      });
+      await this.userdata.userAuthentication(false);
     }
 
     // 3) Load Entity and compilation
     if (compParam || entityParam) {
-      this.fetchAndLoad(entityParam, compParam, compParam !== undefined);
+      this.fetchAndLoad(entityParam, compParam);
     } else {
       this.loadDefaultEntityData();
     }
 
     // 2) check modes
-    this.showMenu.next(!!mode);
+    this.showMenu$.next(!!mode);
 
     // Default
     let showAnnotationEditor = true;
@@ -258,7 +323,7 @@ export class ProcessingService {
       showAnnotationEditor = false;
       showSettingsEditor = false;
       if (!compParam) {
-        this.showSidenav.next(false);
+        this.showSidenav$.next(false);
       }
     }
 
@@ -266,8 +331,8 @@ export class ProcessingService {
       showAnnotationEditor = false;
     }
 
-    this.showAnnotationEditor.next(showAnnotationEditor);
-    this.showSettingsEditor.next(showSettingsEditor);
+    this.showAnnotationEditor$.next(showAnnotationEditor);
+    this.showSettingsEditor$.next(showSettingsEditor);
 
     // 4) toggle sidenav
     switch (mode) {
@@ -285,7 +350,7 @@ export class ProcessingService {
     }
     // TODO: error handling: wrong mode for loading
 
-    this.bootstrapped.next(true);
+    this.bootstrapped$.next(true);
   }
 
   private async loadStandaloneEntity(entries: IQueryParams) {
@@ -316,16 +381,14 @@ export class ProcessingService {
       if (loadedAnnotations) entity.annotations = patchedAnnotations;
     }
 
-    await this.initialiseEntitySettingsData(entity);
-    this.serverEntitySettingsSubject.next(entity.settings);
-    this.entitySettingsSubject.next(entity.settings);
     return this.babylon
       .loadEntity(true, url)
       .then(() => {
-        this.isStandalone.next(true);
-        this.updateActiveEntity(entity);
-        this.updateActiveEntityMeshes(this.babylon.entityContainer.meshes as Mesh[], entity);
-        this.entitySettingsSubject.next(entity.settings);
+        this.updateActiveEntity(entity, this.babylon.entityContainer.meshes as Mesh[]);
+        this.settings$.next({
+          localSettings: entity.settings,
+          serverSettings: entity.settings,
+        });
       })
       .catch(error => {
         console.error(error);
@@ -333,36 +396,29 @@ export class ProcessingService {
         this.loadFallbackEntity();
       })
       .then(() => {
-        this.showAnnotationEditor.next(!annotations);
-        this.showSettingsEditor.next(!settings);
+        this.showAnnotationEditor$.next(!annotations);
+        this.showSettingsEditor$.next(!settings);
         const overlay = !settings ? 'settings' : !annotations ? 'annotation' : '';
-        this.showSidenav.next(!!overlay);
+        this.showSidenav$.next(!!overlay);
         this.overlay.toggleSidenav(overlay, !!overlay);
-        this.bootstrapped.next(true);
+        this.bootstrapped$.next(true);
       });
   }
 
   public loadDefaultEntityData() {
     this.updateEntityQuality('low');
-    this.entityMediaType = 'entity';
     this.loadEntity(defaultEntity as IEntity, '');
   }
 
   public loadFallbackEntity() {
     this.updateEntityQuality('low');
-    this.entityMediaType = 'entity';
     this.loadEntity(fallbackEntity as IEntity, '');
   }
 
   public fetchAndLoad(
     entityId?: string | ObjectId | null,
     compilationId?: string | ObjectId | null,
-    isFromCompilation?: boolean,
   ) {
-    if (!compilationId && !isFromCompilation) {
-      this.compilationLoaded = false;
-      this.updateActiveCompilation(undefined);
-    }
     if (entityId && !compilationId) {
       this.fetchEntityData(entityId);
     }
@@ -372,40 +428,33 @@ export class ProcessingService {
   }
 
   private fetchCompilationData(
-    query: string | ObjectId,
+    id: string | ObjectId,
     specifiedEntity?: string | ObjectId,
     password?: string,
   ) {
     this.backend
-      .getCompilation(query, password ? password : undefined)
+      .getCompilation(id, password ?? undefined)
       .then(compilation => {
-        if (!compilation) {
+        if (compilation) {
+          this.updateActiveCompilation(compilation as ICompilation);
+          this.fetchEntityDataAfterCollection(compilation, specifiedEntity);
+        } else {
           const dialogRef = this.dialog.open(DialogPasswordComponent, {
             disableClose: true,
             autoFocus: true,
-            data: {
-              id: query,
-            },
+            data: { id },
           });
-          dialogRef.afterClosed().subscribe((result: { result: boolean; data: ICompilation }) => {
-            if (result) {
-              const newData = result.data;
-              this.updateActiveCompilation(newData);
-              this.fetchEntityDataAfterCollection(
-                newData,
-                specifiedEntity ? specifiedEntity : undefined,
-              );
-            } else {
-              this.loadFallbackEntity();
-              this.message.error('Sorry, you are not allowed to load this Collection.');
-            }
-          });
-        } else {
-          this.updateActiveCompilation(compilation as ICompilation);
-          this.fetchEntityDataAfterCollection(
-            compilation,
-            specifiedEntity ? specifiedEntity : undefined,
-          );
+          dialogRef
+            .afterClosed()
+            .subscribe(({ result, data }: { result: boolean; data: ICompilation }) => {
+              if (result) {
+                this.updateActiveCompilation(data);
+                this.fetchEntityDataAfterCollection(data, specifiedEntity);
+              } else {
+                this.loadFallbackEntity();
+                this.message.error('Sorry, you are not allowed to load this Collection.');
+              }
+            });
         }
       })
       .catch(error => {
@@ -418,18 +467,9 @@ export class ProcessingService {
     compilation: ICompilation,
     specifiedEntity?: string | ObjectId,
   ) {
-    if (specifiedEntity) {
-      const loadEntity = compilation.entities[specifiedEntity.toString()];
-      if (loadEntity && isEntity(loadEntity)) {
-        this.fetchEntityData(loadEntity._id);
-      } else {
-        const entity = Object.values(compilation.entities)[0];
-        if (isEntity(entity)) this.fetchEntityData(entity._id);
-      }
-    } else {
-      const entity = Object.values(compilation.entities)[0];
-      if (isEntity(entity)) this.fetchEntityData(entity._id);
-    }
+    const specified = specifiedEntity && compilation.entities[specifiedEntity.toString()];
+    const entityToLoad = isEntity(specified) ? specified : Object.values(compilation.entities)[0];
+    if (isEntity(entityToLoad)) this.fetchEntityData(entityToLoad._id);
   }
 
   public fetchEntityData(query: string | ObjectId) {
@@ -473,23 +513,25 @@ export class ProcessingService {
       });
   }
 
-  private fetchRestrictedEntityData(resultEntity: IEntity) {
+  private async fetchRestrictedEntityData(entity: IEntity) {
+    const isOwner = await firstValueFrom(this.userdata.userOwnsEntity$);
+    const isUserWhitelisted = await firstValueFrom(this.userdata.isUserWhitelistedInEntity$);
     this.userdata
       .userAuthentication(true)
       .then(auth => {
         // Check for user authentication
         if (!auth) return false;
         // Check for ownership
-        if (!this.userdata.checkOwnerState(resultEntity)) {
+        if (!isOwner) {
           // Check for whitelist
-          if (!resultEntity.whitelist.enabled) return false;
-          if (!this.userdata.isUserWhitelisted(resultEntity)) return false;
+          if (!entity.whitelist.enabled) return false;
+          if (!isUserWhitelisted) return false;
         }
         return true;
       })
       .then(canUserAccess => {
         if (canUserAccess) {
-          this.loadEntity(resultEntity);
+          this.loadEntity(entity);
         } else {
           this.message.error('Sorry you are not allowed to load this object.');
           this.loadFallbackEntity();
@@ -498,251 +540,73 @@ export class ProcessingService {
   }
 
   public async loadEntity(newEntity: IEntity, overrideUrl?: string) {
+    const mode = this.mode$.getValue();
     const baseURL = overrideUrl ?? this.baseUrl;
-    if (!this.loadingScreenHandler.isLoading && newEntity.processed && newEntity.mediaType) {
-      if (!newEntity.dataSource.isExternal) {
-        this.entityMediaType = newEntity.mediaType;
-        await this.initialiseEntitySettingsData(newEntity);
-        if (this.upload && (this.mode !== 'upload' || newEntity.finished)) {
-          this.serverEntitySettingsSubject.next(minimalSettings);
-          this.entitySettingsSubject.next(minimalSettings);
-          this.loadFallbackEntity();
-          this.message.error('I can not load this Object without Settings and not during upload.');
-        }
-        // cases: entity, image, audio, video, text
-        const path: string = newEntity.externalFile ?? newEntity.processed[this.entityQuality];
-        const url = path.includes('http') || path.includes('https') ? path : `${baseURL}${path}`;
-
-        const mediaType = newEntity.mediaType;
-        switch (newEntity.mediaType) {
-          case 'model':
-          case 'entity':
-            await this.babylon
-              .loadEntity(true, url, mediaType, newEntity._id === 'default')
-              .then(() => {
-                this.updateActiveEntity(newEntity);
-                this.updateActiveEntityMeshes(
-                  this.babylon.entityContainer.meshes as Mesh[],
-                  newEntity,
-                );
-              })
-              .catch(error => {
-                console.error(error);
-                this.message.error('Connection to entity server to load entity refused.');
-                this.loadFallbackEntity();
-              });
-            break;
-          case 'image':
-            await this.babylon
-              .loadEntity(true, url, mediaType)
-              .then(() => {
-                const plane = this.babylon.imageContainer.plane;
-                if (plane) {
-                  this.updateActiveEntity(newEntity);
-                  this.updateActiveEntityMeshes([plane as Mesh], newEntity);
-                }
-              })
-              .catch(error => {
-                console.error(error);
-                this.message.error('Connection to entity server to load entity refused.');
-                this.loadFallbackEntity();
-              });
-            break;
-          case 'audio':
-            await this.babylon
-              .loadEntity(true, 'assets/models/kompakkt.babylon', 'model', true)
-              .then(() => {
-                this.updateActiveEntityMeshes(
-                  this.babylon.entityContainer.meshes as Mesh[],
-                  newEntity,
-                );
-                this.updateActiveEntity(newEntity);
-
-                this.babylon.loadEntity(false, url, mediaType).then(() => {});
-              })
-              .catch(error => {
-                console.error(error);
-                this.message.error('Connection to entity server to load entity refused.');
-                this.loadFallbackEntity();
-              });
-            break;
-          case 'video':
-            await this.babylon
-              .loadEntity(true, url, mediaType)
-              .then(() => {
-                const plane = this.babylon.videoContainer.plane;
-                if (plane) {
-                  this.updateActiveEntity(newEntity);
-                  this.updateActiveEntityMeshes([plane as Mesh], newEntity);
-                }
-              })
-              .catch(error => {
-                console.error(error);
-                this.message.error('Connection to entity server to load entity refused.');
-                this.loadFallbackEntity();
-              });
-            break;
-          default:
-            this.loadFallbackEntity();
-        }
-      } else {
-        this.entity.next(newEntity);
-        this.loadFallbackEntity();
-        return;
-      }
-    }
-  }
-
-  private async initialiseEntitySettingsData(entity: IEntity) {
-    const mediaType = entity.mediaType;
-    if (mediaType === 'model' || mediaType === 'entity' || mediaType === 'image') {
-      this.meshSettings = true;
+    if (this.loadingScreenHandler.isLoading || !newEntity.processed || !newEntity.mediaType) {
+      return;
     }
 
-    let upload = false;
-    const settings = entity.settings;
-
-    if (
-      !settings ||
-      settings.preview === undefined ||
-      // TODO: how to check if settings need to be set? atm next line
-      settings.preview === '' ||
-      settings.cameraPositionInitial === undefined ||
-      settings.background === undefined ||
-      settings.lights === undefined ||
-      settings.rotation === undefined ||
-      settings.scale === undefined
-    ) {
-      upload = await this.createSettings();
-      this.upload = upload;
-    } else {
-      this.upload = false;
-      this.entitySettingsSubject.next(entity.settings);
-      const clone = JSON.parse(JSON.stringify(entity.settings));
-      this.serverEntitySettingsSubject.next(clone);
+    if (newEntity.dataSource.isExternal) {
+      this.entity$.next(newEntity);
+      this.loadFallbackEntity();
+      return;
     }
-  }
 
-  private createSettings(): boolean {
-    let settings;
-    let upload = false;
+    const { mediaType } = newEntity;
 
-    if (this.defaultEntityLoaded) {
-      settings = settingsKompakktLogo;
-    } else if (this.fallbackEntityLoaded) {
-      settings = settingsFallback;
-    } else {
-      switch (this.entityMediaType) {
+    const isInUpload = await firstValueFrom(this.isInUpload$);
+    if (isInUpload && (mode !== 'upload' || newEntity.finished)) {
+      this.settings$.next({
+        localSettings: minimalSettings,
+        serverSettings: minimalSettings,
+      });
+      this.loadFallbackEntity();
+      this.message.error('Object has no settings and cannot be loaded');
+      return;
+    }
+    // cases: entity, image, audio, video, text
+    const path: string = newEntity.externalFile ?? newEntity.processed[this.entityQuality];
+    const url = path.includes('http') || path.includes('https') ? path : `${baseURL}${path}`;
+
+    const promise = (() => {
+      switch (mediaType) {
+        case 'model':
         case 'entity':
-        case 'model': {
-          settings = settingsEntity;
-          break;
-        }
-        case 'audio': {
-          settings = settingsAudio;
-          break;
-        }
-        case 'video': {
-          settings = settings2D;
-          break;
-        }
-        case 'image': {
-          settings = settings2D;
-          break;
-        }
-        default: {
-          settings = settingsEntity;
-        }
+          return this.babylon
+            .loadEntity(true, url, mediaType, newEntity._id === 'default')
+            .then(() => {
+              this.updateActiveEntity(newEntity, this.babylon.entityContainer.meshes as Mesh[]);
+            });
+        case 'image':
+          return this.babylon.loadEntity(true, url, mediaType).then(() => {
+            const { plane } = this.babylon.imageContainer;
+            if (plane) this.updateActiveEntity(newEntity, [plane as Mesh]);
+          });
+        case 'audio':
+          return this.babylon
+            .loadEntity(true, 'assets/models/kompakkt.babylon', 'model', true)
+            .then(() => {
+              this.updateActiveEntity(newEntity, this.babylon.entityContainer.meshes as Mesh[]);
+              this.babylon.loadEntity(false, url, mediaType).then(() => {});
+            });
+        case 'video':
+          return this.babylon.loadEntity(true, url, mediaType).then(() => {
+            const { plane } = this.babylon.videoContainer;
+            if (plane) this.updateActiveEntity(newEntity, [plane as Mesh]);
+          });
+        default:
+          return undefined;
       }
-      upload = true;
-    }
-    this.entitySettingsSubject.next(settings);
-    const clone = JSON.parse(JSON.stringify(settings));
-    this.serverEntitySettingsSubject.next(clone);
-    return upload;
-  }
+    })();
 
-  // inititalize Annotation Mode
-  private async setAnnotatingFeatured(entity: IEntity) {
-    const isStandalone = this.isStandalone.getValue();
-    if (isStandalone) {
-      this.annotatingFeatured = true;
-      return;
-    }
+    if (!promise) return this.loadFallbackEntity();
 
-    const annotatableMediaType =
-      entity.mediaType === 'image' || entity.mediaType === 'entity' || entity.mediaType === 'model';
-    if (!this.showAnnotationEditor || !annotatableMediaType || this.fallbackEntityLoaded) {
-      if (
-        (!annotatableMediaType || this.fallbackEntityLoaded) &&
-        this.showAnnotationEditor &&
-        !this.compilationLoaded
-      ) {
-        this.showAnnotationEditor.next(false);
-      }
-      return;
-    }
-    if (!this.compilationLoaded) {
-      if (this.defaultEntityLoaded || this.fallbackEntityLoaded) {
-        this.annotatingFeatured = true;
-        return;
-      }
-      if (this.userdata.userOwnsEntity) {
-        this.annotatingFeatured = true;
-        return;
-      }
-      const _userOwned = this.userdata.checkOwnerState(entity);
-      this.annotatingFeatured = _userOwned;
-      if (!_userOwned && this.showAnnotationEditor) {
-        this.showAnnotationEditor.next(false);
-      }
-      return;
-    } else {
-      const compilation = this._currentCompilation;
-      if (!compilation) {
-        if (this.showAnnotationEditor) {
-          this.showAnnotationEditor.next(false);
-        }
-        return;
-      }
-      if (!compilation.whitelist.enabled && this.userdata.authenticatedUser) {
-        this.annotatingFeatured = true;
-        return;
-      }
-      if (compilation.whitelist.enabled) {
-        if (this.userdata.checkOwnerState(compilation)) {
-          this.annotatingFeatured = true;
-          return;
-        }
-        const _isUserWhitelisted = this.userdata.isUserWhitelisted(compilation);
-        this.annotatingFeatured = _isUserWhitelisted;
-        if (!_isUserWhitelisted && this.showAnnotationEditor) {
-          this.showAnnotationEditor.next(false);
-        }
-        return;
-      }
-    }
-  }
+    promise.catch(error => {
+      console.error('Failed to load entity from server', error);
+      this.message.error('Failed to load entity from server');
+      this.loadFallbackEntity();
+    });
 
-  private checkAnnotationAllowance() {
-    const isStandalone = this.isStandalone.getValue();
-    if (isStandalone) {
-      this.annotationAllowance = true;
-      this.setAnnotationAllowance.emit(true);
-      return;
-    }
-    if (!this.annotatingFeatured || this.upload) {
-      return;
-    }
-    if (!this.sidenavOpen) {
-      this.annotationAllowance = false;
-      this.setAnnotationAllowance.emit(false);
-    } else {
-      const user = this.userdata.userData || this.userdata.guestUserData;
-      if (this.sidenavMode === 'annotation' && user) {
-        this.annotationAllowance = true;
-        this.setAnnotationAllowance.emit(true);
-      }
-    }
+    return promise;
   }
 }

@@ -1,8 +1,8 @@
-<div class="bottom">
+<div class="bottom" *ngIf="entity$ | async as entity">
   <div class="anchor">
     <button
       mat-icon-button
-      *ngIf="processing.entityMediaType !== 'audio'"
+      *ngIf="entity.mediaType !== 'audio'"
       matTooltip="Camera settings"
       matTooltipPosition="above"
       (click)="cameraSettings.toggle()"
@@ -12,7 +12,7 @@
     <app-camera-settings #cameraSettings></app-camera-settings>
   </div>
 
-  <ng-container *ngIf="userData">
+  <!--   <ng-container *ngIf="userData">
     <button
       mat-icon-button
       *ngIf="loginRequired && !isAuthenticated"
@@ -33,45 +33,47 @@
     matTooltipPosition="above"
   >
     <mat-icon>sentiment_very_satisfied</mat-icon>
-  </button>
+  </button> -->
 
-  <button
-    mat-icon-button
-    *ngIf="getAvailableQuality('high') && getAvailableQuality('medium')"
-    [matMenuTriggerFor]="quality"
-    matTooltip="Quality"
-    matTooltipPosition="above"
-  >
-    <mat-icon>high_quality</mat-icon>
-  </button>
-  <!-- Quality Submenu -->
-  <mat-menu #quality="matMenu">
+  <ng-container *ngIf="qualities$ | async as qualities">
     <button
-      mat-menu-item
-      *ngIf="getAvailableQuality('high')"
-      (click)="updateEntityQuality('high')"
-      [ngClass]="this.processing.entityQuality === 'high' ? 'is-active' : ''"
+      mat-icon-button
+      *ngIf="qualities.high && qualities.medium"
+      [matMenuTriggerFor]="quality"
+      matTooltip="Quality"
+      matTooltipPosition="above"
     >
-      High
+      <mat-icon>high_quality</mat-icon>
     </button>
-    <button
-      mat-menu-item
-      *ngIf="getAvailableQuality('medium')"
-      (click)="updateEntityQuality('medium')"
-      [ngClass]="this.processing.entityQuality === 'medium' ? 'is-active' : ''"
-    >
-      Medium
-    </button>
-    <button
-      mat-menu-item
-      *ngIf="getAvailableQuality('low')"
-      (click)="updateEntityQuality('low')"
-      [ngClass]="this.processing.entityQuality === 'low' ? 'is-active' : ''"
-    >
-      Low
-    </button>
-  </mat-menu>
-  <!-- / Quality Submenu -->
+    <!-- Quality Submenu -->
+    <mat-menu #quality="matMenu">
+      <button
+        mat-menu-item
+        *ngIf="qualities.high"
+        (click)="updateEntityQuality('high')"
+        [ngClass]="this.processing.entityQuality === 'high' ? 'is-active' : ''"
+      >
+        High
+      </button>
+      <button
+        mat-menu-item
+        *ngIf="qualities.medium"
+        (click)="updateEntityQuality('medium')"
+        [ngClass]="this.processing.entityQuality === 'medium' ? 'is-active' : ''"
+      >
+        Medium
+      </button>
+      <button
+        mat-menu-item
+        *ngIf="qualities.low"
+        (click)="updateEntityQuality('low')"
+        [ngClass]="this.processing.entityQuality === 'low' ? 'is-active' : ''"
+      >
+        Low
+      </button>
+    </mat-menu>
+    <!-- / Quality Submenu -->
+  </ng-container>
 
   <button
     mat-icon-button

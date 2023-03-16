@@ -15,9 +15,9 @@ export class SidenavMenuComponent implements OnInit {
 
   constructor(public overlay: OverlayService, public processing: ProcessingService) {
     setTimeout(() => {
-      this.overlay.sidenavMode$.subscribe(mode => (this.mode = mode));
-      this.overlay.sidenav$.subscribe(state => {
-        this.isOpen = state;
+      this.overlay.sidenav$.subscribe(({ mode, open }) => {
+        this.mode = mode;
+        this.isOpen = open;
       });
     }, 0);
   }

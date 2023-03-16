@@ -1,19 +1,18 @@
 import { Component, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatStepper } from '@angular/material/stepper';
-import { map } from 'rxjs/operators';
 import { saveAs } from 'file-saver';
-
+import { combineLatest, firstValueFrom } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { IColor } from 'src/common';
 import { environment } from '../../../environments/environment';
 import { BabylonService } from '../../services/babylon/babylon.service';
-import { EntitySettingsService } from '../../services/entitysettings/entitysettings.service';
 import { BackendService } from '../../services/backend/backend.service';
+import { EntitySettingsService } from '../../services/entitysettings/entitysettings.service';
 import { ProcessingService } from '../../services/processing/processing.service';
 import { UserdataService } from '../../services/userdata/userdata.service';
 // tslint:disable-next-line:max-line-length
 import { DialogMeshsettingsComponent } from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
-
-import { IEntity, IColor } from 'src/common';
 
 @Component({
   selector: 'app-entity-feature-settings',
@@ -28,8 +27,6 @@ export class EntityFeatureSettingsComponent {
   public lightsToggle = false;
   public previewToggle = false;
 
-  public entity: IEntity | undefined;
-
   constructor(
     private babylon: BabylonService,
     public processing: ProcessingService,
@@ -37,15 +34,25 @@ export class EntityFeatureSettingsComponent {
     public dialog: MatDialog,
     private backend: BackendService,
     public userdata: UserdataService,
-  ) {
-    this.processing.entity$.subscribe(entity => (this.entity = entity));
+  ) {}
+
+  get entity$() {
+    return this.processing.entity$;
+  }
+
+  get mode$() {
+    return this.processing.mode$;
   }
 
   get settingsReady$() {
-    return this.processing.showSettingsEditor$.pipe(
-      map(value => {
-        if (!this.entity) return false;
-        if (!this.processing.entitySettings) return false;
+    return combineLatest([
+      this.processing.showSettingsEditor$,
+      this.entity$,
+      this.processing.settings$,
+    ]).pipe(
+      map(([value, entity, { localSettings }]) => {
+        if (!entity) return false;
+        if (!localSettings) return false;
         return value;
       }),
     );
@@ -55,20 +62,32 @@ export class EntityFeatureSettingsComponent {
     return this.processing.isStandalone$;
   }
 
+  get canSaveSettings$() {
+    return combineLatest([
+      this.processing.defaultEntityLoaded$,
+      this.processing.fallbackEntityLoaded$,
+      this.processing.compilationLoaded$,
+      this.mode$,
+      this.userdata.userOwnsEntity$,
+    ]).pipe(
+      map(
+        ([isDefault, isFallback, isCompilationLoaded, mode, userOwnsEntity]) =>
+          !isDefault && !isFallback && !isCompilationLoaded && mode === 'edit' && userOwnsEntity,
+      ),
+    );
+  }
+
   public setInitialPerspectivePreview() {
     this.setPreview();
     this.setViewAsInitialView();
   }
 
   private async setPreview() {
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
     this.babylon
       .createPreviewScreenshot()
       .then(screenshot => {
-        if (!this.processing.entitySettings) {
-          console.error(this);
-          throw new Error('Settings missing');
-        }
-        this.processing.entitySettings.preview = screenshot;
+        localSettings.preview = screenshot;
       })
       .catch(error => {
         console.error(error);
@@ -77,78 +96,57 @@ export class EntityFeatureSettingsComponent {
   }
 
   private async setViewAsInitialView() {
-    if (!this.processing.entitySettings) {
-      console.error(this);
-      throw new Error('Settings missing');
-    }
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
     const { position, target } = await this.babylon.cameraManager.getInitialPosition();
-    this.processing.entitySettings.cameraPositionInitial = {
+    localSettings.cameraPositionInitial = {
       position,
       target,
     };
     this.entitySettings.loadCameraInititalPosition();
   }
 
-  public setBackgroundColor(color: IColor) {
-    if (!this.processing.entitySettings) {
-      console.error(this);
-      throw new Error('Settings missing');
-    }
-    this.processing.entitySettings.background.color = color;
+  public async setBackgroundColor(color: IColor) {
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
+    localSettings.background.color = color;
     this.entitySettings.loadBackgroundColor();
   }
 
   public async saveSettings() {
-    if (!this.processing.entitySettings) {
-      console.error(this);
-      throw new Error('Settings missing');
-    }
-    if (!this.entity) {
+    const entity = await firstValueFrom(this.entity$);
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
+    const isDefault = await firstValueFrom(this.processing.defaultEntityLoaded$);
+    const isFallback = await firstValueFrom(this.processing.fallbackEntityLoaded$);
+    const isInUpload = await firstValueFrom(this.processing.isInUpload$);
+    if (!entity) {
       console.error(this);
       throw new Error('Entity missing');
     }
-    if (!this.processing.defaultEntityLoaded && !this.processing.fallbackEntityLoaded) {
-      const settings = this.processing.entitySettings;
-      this.backend.updateSettings(this.entity._id, settings).then(result => {
-        console.log('Settings gespeichert', result);
-        this.processing.entitySettingsOnServer = JSON.parse(
-          JSON.stringify(this.processing.entitySettings),
-        );
-        if (this.processing.upload) {
-          window.top?.postMessage({ type: 'settings', settings }, environment.repo_url);
-          this.processing.upload = false;
-        }
+    if (isDefault || isFallback) return;
+    this.backend.updateSettings(entity._id, localSettings).then(result => {
+      console.log('Settings gespeichert', result);
+      this.processing.settings$.next({
+        localSettings,
+        serverSettings: localSettings,
       });
-    }
+      if (isInUpload) {
+        window.top?.postMessage(
+          { type: 'settings', settings: localSettings },
+          environment.repo_url,
+        );
+        // this.processing.upload = false;
+      }
+    });
   }
 
-  public exportSettings() {
-    if (!this.processing.entitySettings) {
-      console.error(this);
-      throw new Error('Settings missing');
-    }
-    const settings = this.processing.entitySettings;
-    const blob = new Blob([JSON.stringify(settings)], { type: 'text/plain;charset=utf-8' });
+  public async exportSettings() {
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
+    const blob = new Blob([JSON.stringify(localSettings)], { type: 'text/plain;charset=utf-8' });
     saveAs(blob, 'settings.json');
   }
 
-  public backToDefaultSettings() {
-    if (!this.processing.entitySettings || !this.processing.entitySettingsOnServer) {
-      console.error(this);
-      throw new Error('Settings missing');
-    }
-    this.processing.entitySettings = {
-      ...this.processing.entitySettings,
-      preview: `${this.processing.entitySettingsOnServer.preview}`,
-      cameraPositionInitial: {
-        ...this.processing.entitySettingsOnServer.cameraPositionInitial,
-      },
-      background: {
-        ...this.processing.entitySettingsOnServer.background,
-      },
-      lights: [...this.processing.entitySettingsOnServer.lights],
-    };
-
+  public async backToDefaultSettings() {
+    const { serverSettings } = await firstValueFrom(this.processing.settings$);
+    this.processing.settings$.next({ serverSettings, localSettings: serverSettings });
     this.entitySettings.restoreSettings();
   }
 
