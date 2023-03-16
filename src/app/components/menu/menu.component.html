@@ -1,13 +1,16 @@
 <div class="bottom">
-  <button
-    mat-icon-button
-    *ngIf="processing.entityMediaType !== 'audio'"
-    (click)="babylon.cameraManager.resetCamera()"
-    matTooltip="Reset Camera Perspective"
-    matTooltipPosition="above"
-  >
-    <mat-icon>videocam</mat-icon>
-  </button>
+  <div class="anchor">
+    <button
+      mat-icon-button
+      *ngIf="processing.entityMediaType !== 'audio'"
+      matTooltip="Camera settings"
+      matTooltipPosition="above"
+      (click)="cameraSettings.toggle()"
+    >
+      <mat-icon>videocam</mat-icon>
+    </button>
+    <app-camera-settings #cameraSettings></app-camera-settings>
+  </div>
 
   <ng-container *ngIf="userData">
     <button

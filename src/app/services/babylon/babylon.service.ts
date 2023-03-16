@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import {
   ArcRotateCamera,
+  UniversalCamera,
   Camera,
   Color4,
   Engine,
@@ -34,13 +35,11 @@ import { RenderCanvasComponent } from '../../components/render-canvas/render-can
 
 import {
   createDefaultCamera,
-  getDefaultPosition,
-  getDefaultTarget,
+  createUniversalCamera,
+  cameraDefaults$,
   moveCameraToTarget,
-  resetCamera,
   setCameraTarget,
   setUpCamera,
-  updateDefaults,
 } from './camera-handler';
 import {
   I3DEntityContainer,
@@ -55,6 +54,7 @@ import {
   beforeAudioRender,
   beforeVideoRender,
 } from './strategies/render-strategies';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -83,7 +83,13 @@ export class BabylonService {
     moveActiveCameraToPosition: (positionVector: Vector3) => {
       moveCameraToTarget(this.getActiveCamera(), this.scene, positionVector);
     },
-    resetCamera: () => resetCamera(this.getActiveCamera(), this.scene),
+    resetCamera: () => {
+      this.cameraManager.setCameraType('ArcRotateCamera');
+      const camera = this.getActiveCamera();
+      const { position, target } = cameraDefaults$.getValue();
+      setCameraTarget(camera, target);
+      moveCameraToTarget(camera, this.scene, position);
+    },
     getInitialPosition: () => ({
       cameraType: 'arcRotateCam',
       position: {
@@ -97,16 +103,38 @@ export class BabylonService {
         z: this.getActiveCamera().target.z,
       },
     }),
-    getDefaultPosition: () => ({
-      cameraType: 'arcRotateCam',
-      position: getDefaultPosition(),
-      target: getDefaultTarget(),
-    }),
     setActiveCameraTarget: (targetVector: Vector3) =>
       setCameraTarget(this.getActiveCamera(), targetVector),
-    updateDefaults,
     setUpActiveCamera: (maxSize: number) =>
       setUpCamera(this.getActiveCamera(), maxSize, this.mediaType),
+    setCameraType: (type: 'ArcRotateCamera' | 'UniversalCamera') => {
+      const cameras = this.scene.cameras;
+      const currentType = this.cameraManager.cameraType$.getValue();
+      if (type === currentType) return;
+      this.cameraManager.cameraType$.next(type);
+
+      const rotateCamera = cameras.find(
+        camera => camera instanceof ArcRotateCamera,
+      )! as ArcRotateCamera;
+      const universalCamera = cameras.find(
+        camera => camera instanceof UniversalCamera,
+      )! as UniversalCamera;
+
+      const { position, target } = cameraDefaults$.getValue();
+      if (type === 'UniversalCamera') {
+        universalCamera.position = rotateCamera.position.clone();
+        universalCamera.setTarget(target);
+        this.scene.activeCamera = universalCamera;
+      } else {
+        rotateCamera.position = universalCamera.position.clone();
+        this.scene.activeCamera = rotateCamera;
+        setCameraTarget(rotateCamera, target);
+        moveCameraToTarget(rotateCamera, this.scene, position);
+      }
+    },
+    cameraSpeed: 1.0,
+    cameraType$: new BehaviorSubject<'ArcRotateCamera' | 'UniversalCamera'>('ArcRotateCamera'),
+    cameraDefaults$,
   };
 
   private backgroundURL = 'assets/textures/backgrounds/darkgrey.jpg';
@@ -144,6 +172,7 @@ export class BabylonService {
 
     // Add default camera
     this.scene.addCamera(createDefaultCamera(this.scene, this.canvas));
+    this.scene.addCamera(createUniversalCamera(this.scene));
 
     const fxaa = new FxaaPostProcess('fxaa', 1.0, this.getActiveCamera());
     fxaa.samples = 16;
@@ -186,6 +215,10 @@ export class BabylonService {
     this.scene.registerBeforeRender(() => {
       const camera = this.getActiveCamera();
       if (!camera) return;
+      camera.panningSensibility =
+        1000 / (this.cameraManager.cameraSpeed * Math.min(Math.max(camera.radius, 1), 10));
+      camera.wheelDeltaPercentage = this.cameraManager.cameraSpeed * 0.01;
+      camera.speed = this.cameraManager.cameraSpeed;
 
       this.scene.getMeshesByTags('marker', mesh => {
         const dist = Vector3.Distance(mesh.position, camera.position);

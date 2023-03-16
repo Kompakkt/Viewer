@@ -67,6 +67,8 @@ export class AnnotationService {
   private annotations = new BehaviorSubject<IAnnotation[]>([]);
   public annotations$ = this.annotations.asObservable();
 
+  public isAnnotationMode$ = new BehaviorSubject(false);
+
   private defaultOffset = 0;
 
   constructor(
@@ -105,7 +107,7 @@ export class AnnotationService {
 
     this.processing.setAnnotationAllowance.subscribe((allowance: boolean) => {
       console.log('ich setze das mesh als', allowance);
-      this.annotationMode(allowance);
+      this.setAnnotationMode(allowance);
     });
 
     this.defaultAnnotations$.subscribe(arr => {
@@ -354,17 +356,18 @@ export class AnnotationService {
       console.log('Picked', result);
       this.createNewAnnotation(result);
     });
-    this.annotationMode(false);
+    this.setAnnotationMode(false);
   }
 
   // Das aktuelle Entityl wird anklickbar und damit annotierbar
-  public annotationMode(value: boolean) {
+  private setAnnotationMode(value: boolean) {
     if (
       this.processing.entityMediaType === 'video' ||
       this.processing.entityMediaType === 'audio'
     ) {
       return;
     }
+    this.isAnnotationMode$.next(value);
     if (value) {
       this.babylon.getCanvas().classList.add('annotation-mode');
     } else {
@@ -656,6 +659,7 @@ export class AnnotationService {
 
     const perspective = selectedAnnotation.body.content.relatedPerspective;
     if (perspective !== undefined) {
+      this.babylon.cameraManager.setCameraType('ArcRotateCamera');
       this.babylon.cameraManager.moveActiveCameraToPosition(
         new Vector3(perspective.position.x, perspective.position.y, perspective.position.z),
       );

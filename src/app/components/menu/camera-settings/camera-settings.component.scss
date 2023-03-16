@@ -1,0 +1,77 @@
+:host {
+  position: relative;
+}
+
+div#camera-settings {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  text-align: left;
+
+  position: absolute;
+  bottom: 36px;
+  right: 8px;
+  white-space: nowrap; // Fix width of absolutely positioned element
+
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 16px 16px;
+  border-radius: 12px;
+
+  transform-origin: bottom right;
+  transform: scale(0);
+  filter: opacity(0);
+  transition: all 250ms cubic-bezier(0.25, 1, 0.5, 1);
+  &.opened {
+    transform: scale(1);
+    filter: opacity(1);
+  }
+
+  > * {
+    margin: 0;
+  }
+
+  hr {
+    opacity: 0;
+  }
+
+  .button-pair {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    position: relative;
+
+    button.active {
+      background-color: #00aee6;
+    }
+
+    button:first-of-type {
+      border-radius: 8px 0 0 8px !important;
+    }
+    button:last-of-type {
+      border-radius: 0 8px 8px 0 !important;
+    }
+
+    &.disabled {
+      pointer-events: none;
+      filter: opacity(0.5) grayscale(0.5);
+      white-space: pre-line;
+    }
+  }
+}
+
+div#camera-type-notification {
+  position: absolute;
+  left: 50%;
+  top: -8px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 8px;
+
+  transform-origin: top center;
+  transform: translateX(-50%) translateY(0%) scale(0);
+  transition: all 250ms cubic-bezier(0.25, 1, 0.5, 1);
+  &.opened {
+    transform: translateX(-50%) translateY(-100%) scale(1);
+  }
+}
