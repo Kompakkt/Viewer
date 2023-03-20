@@ -353,7 +353,7 @@ export class BabylonService {
       case 'entity':
       case 'model':
       default:
-        return load3DEntity(rootUrl, this.scene).then(result => {
+        return load3DEntity(rootUrl, this.scene, isDefault).then(result => {
           entity$.next(result);
           return result.meshes;
         });

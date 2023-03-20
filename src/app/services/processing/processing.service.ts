@@ -564,15 +564,16 @@ export class ProcessingService {
     // cases: entity, image, audio, video, text
     const path: string = newEntity.externalFile ?? newEntity.processed[this.entityQuality];
     const isAudio = mediaType === 'audio';
-    const url = isAudio
-      ? 'assets/models/kompakkt.babylon'
-      : path.includes('http') || path.includes('https')
-      ? path
-      : `${baseURL}${path}`;
+    const url = path.includes('http') || path.includes('https') ? path : `${baseURL}${path}`;
     const isDefault = newEntity._id === 'default';
 
     this.babylon
-      .loadEntity(true, url, isAudio ? 'model' : mediaType, isDefault)
+      .loadEntity(
+        true,
+        isAudio ? 'assets/models/kompakkt.babylon' : url,
+        isAudio ? 'model' : mediaType,
+        isDefault,
+      )
       .then(meshes => {
         if (isAudio) return this.babylon.loadEntity(false, url, mediaType);
         return meshes;
