@@ -72,7 +72,6 @@ export class BabylonService {
 
   private effects: PostProcess[] = [];
 
-  public mediaType = '';
   public videoContainer: IVideoContainer;
   public audioContainer: IAudioContainer;
   public imageContainer: IImageContainer;
@@ -105,8 +104,8 @@ export class BabylonService {
     }),
     setActiveCameraTarget: (targetVector: Vector3) =>
       setCameraTarget(this.getActiveCamera(), targetVector),
-    setUpActiveCamera: (maxSize: number) =>
-      setUpCamera(this.getActiveCamera(), maxSize, this.mediaType),
+    setUpActiveCamera: (maxSize: number, mediaType: string) =>
+      setUpCamera(this.getActiveCamera(), maxSize, mediaType),
     setCameraType: (type: 'ArcRotateCamera' | 'UniversalCamera') => {
       const cameras = this.scene.cameras;
       const currentType = this.cameraManager.cameraType$.getValue();
@@ -348,8 +347,6 @@ export class BabylonService {
     if (clearScene) {
       this.clearScene();
     }
-    // TODO: manage mediaType via Observable
-    this.mediaType = mediaType;
     switch (mediaType) {
       case 'audio':
         return loadAudio(rootUrl, this.scene, this.audioContainer, this.entityContainer).then(

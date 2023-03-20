@@ -247,7 +247,7 @@ export class EntitySettingsService {
       );
     }
     const max = !isDefault ? (isInUpload && isModel ? diagonalLength * 2.5 : diagonalLength) : 87.5;
-    await this.babylon.cameraManager.setUpActiveCamera(max);
+    await this.babylon.cameraManager.setUpActiveCamera(max, mediaType!);
 
     if (isInUpload && mediaType !== 'audio') {
       const position = new Vector3(
