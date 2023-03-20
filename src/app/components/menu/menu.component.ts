@@ -3,7 +3,7 @@ import fscreen from 'fscreen';
 import { firstValueFrom, map } from 'rxjs';
 import { BabylonService } from '../../services/babylon/babylon.service';
 import { MessageService } from '../../services/message/message.service';
-import { ProcessingService } from '../../services/processing/processing.service';
+import { ProcessingService, QualitySetting } from '../../services/processing/processing.service';
 import { UserdataService } from '../../services/userdata/userdata.service';
 
 @Component({
@@ -46,22 +46,14 @@ export class MenuComponent implements OnInit {
     );
   }
 
-  public async updateEntityQuality(quality: string) {
+  public async updateEntityQuality(nextQuality: QualitySetting) {
+    const currentQuality = this.processing.quality$.getValue();
     const entity = await firstValueFrom(this.entity$);
-    if (this.processing.entityQuality !== quality) {
-      this.processing.updateEntityQuality(quality);
-      if (!entity?.processed) {
-        throw new Error(
-          'The object is not available and unfortunately ' + 'I can not update the entityQuality.',
-        );
-      }
-      const qualities: any = entity?.processed ?? {};
-      if (!!qualities[this.processing.entityQuality]) {
-        this.processing.loadEntity(entity);
-      } else {
-        throw new Error('Entity entityQuality is not available.');
-      }
-    }
+    if (nextQuality === currentQuality) return;
+    if (!entity?.processed?.[nextQuality]) return;
+
+    this.processing.updateEntityQuality(nextQuality);
+    this.processing.loadEntity(entity);
   }
 
   toggleFullscreen() {

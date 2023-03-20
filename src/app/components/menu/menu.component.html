@@ -47,30 +47,32 @@
     </button>
     <!-- Quality Submenu -->
     <mat-menu #quality="matMenu">
-      <button
-        mat-menu-item
-        *ngIf="qualities.high"
-        (click)="updateEntityQuality('high')"
-        [ngClass]="this.processing.entityQuality === 'high' ? 'is-active' : ''"
-      >
-        High
-      </button>
-      <button
-        mat-menu-item
-        *ngIf="qualities.medium"
-        (click)="updateEntityQuality('medium')"
-        [ngClass]="this.processing.entityQuality === 'medium' ? 'is-active' : ''"
-      >
-        Medium
-      </button>
-      <button
-        mat-menu-item
-        *ngIf="qualities.low"
-        (click)="updateEntityQuality('low')"
-        [ngClass]="this.processing.entityQuality === 'low' ? 'is-active' : ''"
-      >
-        Low
-      </button>
+      <ng-container *ngIf="processing.quality$ | async as currentQuality">
+        <button
+          mat-menu-item
+          *ngIf="qualities.high"
+          (click)="updateEntityQuality('high')"
+          [class.is-active]="currentQuality === 'high'"
+        >
+          High
+        </button>
+        <button
+          mat-menu-item
+          *ngIf="qualities.medium"
+          (click)="updateEntityQuality('medium')"
+          [class.is-active]="currentQuality === 'medium'"
+        >
+          Medium
+        </button>
+        <button
+          mat-menu-item
+          *ngIf="qualities.low"
+          (click)="updateEntityQuality('low')"
+          [class.is-active]="currentQuality === 'low'"
+        >
+          Low
+        </button>
+      </ng-container>
     </mat-menu>
     <!-- / Quality Submenu -->
   </ng-container>

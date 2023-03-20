@@ -31,7 +31,7 @@ import { MessageService } from '../message/message.service';
 import { OverlayService } from '../overlay/overlay.service';
 import { UserdataService } from '../userdata/userdata.service';
 
-type QualitySetting = 'low' | 'medium' | 'high' | 'raw';
+export type QualitySetting = 'low' | 'medium' | 'high' | 'raw';
 const isQualitySetting = (setting: any): setting is QualitySetting => {
   return ['low', 'medium', 'high', 'raw'].includes(setting);
 };
@@ -82,6 +82,7 @@ export class ProcessingService {
     localSettings: minimalSettings,
     serverSettings: minimalSettings,
   });
+  public quality$ = new BehaviorSubject<QualitySetting>('low');
 
   public mediaType$ = this.entity$.pipe(map(entity => entity?.mediaType));
   public isInUpload$ = this.entity$.pipe(map(entity => entity && !areSettingsSet(entity)));
@@ -93,9 +94,6 @@ export class ProcessingService {
   public defaultEntityLoaded$ = this.entity$.pipe(map(entity => entity?._id === 'default'));
   public fallbackEntityLoaded$ = this.entity$.pipe(map(entity => entity?._id === 'fallback'));
   public isStandalone$ = this.entity$.pipe(map(entity => entity?._id === 'standalone_entity'));
-
-  public entityQuality: QualitySetting = 'low';
-  private baseUrl = environment.server_url;
 
   // general features and modes
   public showMenu$ = new BehaviorSubject(true);
@@ -237,9 +235,8 @@ export class ProcessingService {
     }
   }
 
-  public updateEntityQuality(quality: string) {
-    if (!isQualitySetting(quality)) return;
-    this.entityQuality = quality;
+  public updateEntityQuality(quality: QualitySetting) {
+    this.quality$.next(quality);
   }
 
   public updateActiveEntity(entity: IEntity | undefined, meshes: Mesh[]) {
@@ -267,7 +264,7 @@ export class ProcessingService {
     const entityParam = entries['model'] ?? entries['entity'] ?? undefined;
     const compParam = entries['compilation'] ?? undefined;
     const qualityParam = entries['quality'] ?? 'low';
-    this.updateEntityQuality(qualityParam);
+    if (isQualitySetting(qualityParam)) this.updateEntityQuality(qualityParam);
     // values = upload, explore, edit, annotation, open
     const mode = entries['mode'] ?? '';
     if (isMode(mode)) this.mode$.next(mode);
@@ -538,7 +535,7 @@ export class ProcessingService {
 
   public async loadEntity(newEntity: IEntity, overrideUrl?: string) {
     const mode = this.mode$.getValue();
-    const baseURL = overrideUrl ?? this.baseUrl;
+    const baseURL = overrideUrl ?? environment.server_url;
     if (this.loadingScreenHandler.isLoading || !newEntity.processed || !newEntity.mediaType) {
       return;
     }
@@ -562,7 +559,8 @@ export class ProcessingService {
       return;
     }
     // cases: entity, image, audio, video, text
-    const path: string = newEntity.externalFile ?? newEntity.processed[this.entityQuality];
+    const quality = this.quality$.getValue();
+    const path: string = newEntity.externalFile ?? newEntity.processed[quality];
     const isAudio = mediaType === 'audio';
     const url = path.includes('http') || path.includes('https') ? path : `${baseURL}${path}`;
     const isDefault = newEntity._id === 'default';
