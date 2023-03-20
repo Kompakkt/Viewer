@@ -6,7 +6,7 @@ import { IAnnotation } from 'src/common';
 @Injectable({
   providedIn: 'root',
 })
-export class DataService {
+export class PouchService {
   public pouchdb: PouchDB.Database = new PouchDB('annotationdb');
 
   public fetch() {

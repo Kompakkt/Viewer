@@ -14,8 +14,8 @@ import { DialogGetUserDataComponent } from '../../components/dialogs/dialog-get-
 import { DialogShareAnnotationComponent } from '../../components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
 import { BabylonService } from '../babylon/babylon.service';
 import { BackendService } from '../backend/backend.service';
-import { DataService } from '../data/data.service';
 import { MessageService } from '../message/message.service';
+import { PouchService } from '../pouch/pouch.service';
 import { ProcessingService } from '../processing/processing.service';
 import { UserdataService } from '../userdata/userdata.service';
 import { createMarker } from './visual3DElements';
@@ -59,7 +59,7 @@ export class AnnotationService {
   );
 
   constructor(
-    private data: DataService,
+    private pouch: PouchService,
     private babylon: BabylonService,
     private backend: BackendService,
     private message: MessageService,
@@ -232,7 +232,7 @@ export class AnnotationService {
         _localAnnotation => _localAnnotation._id === annotation._id,
       );
       if (!localAnnotation) {
-        await this.data.updateAnnotation(annotation);
+        await this.pouch.updateAnnotation(annotation);
         localAnnotations.push(annotation);
       }
     }
@@ -277,7 +277,7 @@ export class AnnotationService {
           unsorted.push(annotation);
         } else {
           // Update local DB
-          await this.data.updateAnnotation(serverAnnotation);
+          await this.pouch.updateAnnotation(serverAnnotation);
           localAnnotations.splice(
             localAnnotations.findIndex(ann => ann._id === annotation._id),
             1,
@@ -301,7 +301,7 @@ export class AnnotationService {
         } else {
           // Nicht local last editor === creator === ich
           // Annotation local löschen
-          await this.data.deleteAnnotation(annotation._id.toString());
+          await this.pouch.deleteAnnotation(annotation._id.toString());
           localAnnotations.splice(localAnnotations.findIndex(ann => ann._id === annotation._id));
         }
       }
@@ -446,7 +446,7 @@ export class AnnotationService {
         .catch((errorMessage: any) => {
           console.log(errorMessage);
         });
-      this.data.updateAnnotation(newAnnotation);
+      this.pouch.updateAnnotation(newAnnotation);
     }
     this.drawMarker(newAnnotation);
     this.annotations$.next(this.annotations$.getValue().concat(newAnnotation));
@@ -475,7 +475,7 @@ export class AnnotationService {
             console.log(errorMessage);
           });
       }
-      this.data.updateAnnotation(newAnnotation);
+      this.pouch.updateAnnotation(newAnnotation);
     }
     const arr = this.annotations$.getValue();
     arr.splice(
@@ -503,7 +503,7 @@ export class AnnotationService {
         this.redrawMarker();
         this.annotations$.next(arr);
         if (!isFallback && !isDefault) {
-          this.data.deleteAnnotation(_annotation._id.toString());
+          this.pouch.deleteAnnotation(_annotation._id.toString());
           this.deleteAnnotationFromServer(_annotation._id.toString());
         }
       }
@@ -566,7 +566,7 @@ export class AnnotationService {
 
   private async fetchAnnotations(entity: string, compilation?: string): Promise<IAnnotation[]> {
     return new Promise<IAnnotation[]>(async (resolve, _) => {
-      const annotationList: IAnnotation[] = await this.data.findAnnotations(
+      const annotationList: IAnnotation[] = await this.pouch.findAnnotations(
         entity,
         compilation ? compilation : '',
       );
