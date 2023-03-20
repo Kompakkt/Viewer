@@ -1,42 +1,31 @@
 /* tslint:disable:max-line-length */
-import { DOCUMENT } from '@angular/common';
-import {
-  ComponentFactoryResolver,
-  Inject,
-  Injectable,
-  Injector,
-  ViewContainerRef,
-} from '@angular/core';
+import { ComponentFactoryResolver, Injectable, Injector, ViewContainerRef } from '@angular/core';
 import {
   ArcRotateCamera,
-  UniversalCamera,
   Camera,
   Color4,
   Engine,
   FxaaPostProcess,
+  ImageProcessingConfiguration,
   Layer,
+  Mesh,
+  PostProcess,
   Scene,
   SharpenPostProcess,
-  Sound,
-  Texture,
   Tools,
+  UniversalCamera,
   Vector3,
-  PostProcess,
-  ImageProcessingConfiguration,
-  PBRMaterial,
 } from '@babylonjs/core';
-import { Slider } from '@babylonjs/gui';
-// tslint:disable-next-line:no-import-side-effect
-import '@babylonjs/loaders';
 import '@babylonjs/core/Debug/debugLayer';
 import '@babylonjs/inspector';
-
+// tslint:disable-next-line:no-import-side-effect
+import '@babylonjs/loaders';
+import { BehaviorSubject } from 'rxjs';
 import { RenderCanvasComponent } from '../../components/render-canvas/render-canvas.component';
-
 import {
+  cameraDefaults$,
   createDefaultCamera,
   createUniversalCamera,
-  cameraDefaults$,
   moveCameraToTarget,
   setCameraTarget,
   setUpCamera,
@@ -54,7 +43,8 @@ import {
   beforeAudioRender,
   beforeVideoRender,
 } from './strategies/render-strategies';
-import { BehaviorSubject } from 'rxjs';
+
+type RGBA = { r: number; b: number; g: number; a: number };
 
 @Injectable({
   providedIn: 'root',
@@ -69,13 +59,14 @@ export class BabylonService {
 
   private engine: Engine;
   private scene: Scene;
-
   private effects: PostProcess[] = [];
 
-  public videoContainer: IVideoContainer;
-  public audioContainer: IAudioContainer;
-  public imageContainer: IImageContainer;
-  public entityContainer: I3DEntityContainer;
+  public containers = {
+    video$: new BehaviorSubject<IVideoContainer | undefined>(undefined),
+    audio$: new BehaviorSubject<IAudioContainer | undefined>(undefined),
+    image$: new BehaviorSubject<IImageContainer | undefined>(undefined),
+    entity$: new BehaviorSubject<I3DEntityContainer | undefined>(undefined),
+  };
 
   public cameraManager = {
     getActiveCamera: this.getActiveCamera,
@@ -136,19 +127,18 @@ export class BabylonService {
     cameraDefaults$,
   };
 
-  private backgroundURL = 'assets/textures/backgrounds/darkgrey.jpg';
-  private backgroundColor: {
-    r: number;
-    g: number;
-    b: number;
-    a: number;
-  } = { r: 0, g: 0, b: 0, a: 0 };
-  private background: Layer | undefined;
-  private isBackground: boolean | undefined;
+  public background: {
+    url: string;
+    color: RGBA;
+    layer: Layer | undefined;
+  } = {
+    url: 'assets/textures/backgrounds/darkgrey.jpg',
+    color: { r: 0, g: 0, b: 0, a: 0 },
+    layer: undefined,
+  };
 
   constructor(
     private loadingScreenHandler: LoadingscreenhandlerService,
-    @Inject(DOCUMENT) private document: HTMLDocument,
     private factoryResolver: ComponentFactoryResolver,
     private injector: Injector,
   ) {
@@ -189,27 +179,20 @@ export class BabylonService {
     this.effects.push(fxaa, sharpen);
     console.log('Effects applied', this.effects);
 
-    // Initialize empty, otherwise we would need to check against
-    // undefined in strict mode
-    this.audioContainer = {
-      audio: new Sound('', '', this.scene),
-      currentTime: 0,
-      timeSlider: new Slider(),
-    };
-    this.videoContainer = {
-      video: this.document.createElement('video'),
-      timeSlider: new Slider(),
-      currentTime: 0,
-    };
-    this.imageContainer = {
-      image: new Texture('', this.scene),
-    };
-    this.entityContainer = {
-      meshes: [],
-      particleSystems: [],
-      skeletons: [],
-      animationGroups: [],
-    };
+    this.containers.audio$.subscribe(audioContainer => {
+      if (!audioContainer) return;
+      // Define as function so we can unregister by variable name
+      let renderAudio = () => beforeAudioRender(this.scene, audioContainer);
+      this.scene.registerBeforeRender(renderAudio);
+      renderAudio = () => afterAudioRender(audioContainer);
+      this.scene.registerAfterRender(renderAudio);
+    });
+    this.containers.video$.subscribe(videoContainer => {
+      if (!videoContainer) return;
+      // Define as function so we can unregister by variable name
+      const renderVideo = () => beforeVideoRender(videoContainer);
+      this.scene.registerBeforeRender(renderVideo);
+    });
 
     this.scene.registerBeforeRender(() => {
       const camera = this.getActiveCamera();
@@ -275,28 +258,24 @@ export class BabylonService {
     return this.engine;
   }
 
-  public setBackgroundImage(background: boolean): void {
-    if (background && !this.isBackground) {
-      this.background = new Layer('background', this.backgroundURL, this.scene, true);
-      this.background.alphaBlendingMode = Engine.ALPHA_ADD;
-      this.background.isBackground = true;
-      this.isBackground = true;
-    }
-    if (!background && this.background) {
-      this.background.dispose();
-      this.isBackground = false;
+  public setBackgroundImage(setBackground: boolean): void {
+    if (setBackground) {
+      const layer = new Layer('background', this.background.url, this.scene, true);
+      layer.alphaBlendingMode = Engine.ALPHA_ADD;
+      layer.isBackground = true;
+      this.background.layer = layer;
     } else {
-      return;
+      this.background.layer?.dispose();
     }
   }
 
-  public setBackgroundColor(color: any): void {
-    this.backgroundColor = color;
+  public setBackgroundColor(color: RGBA): void {
+    this.background.color = color;
     this.scene.clearColor = new Color4(color.r / 255, color.g / 255, color.b / 255, color.a);
   }
 
   public getColor(): any {
-    return this.backgroundColor;
+    return this.background.color;
   }
 
   public hideMesh(tag: string, visibility: boolean) {
@@ -310,15 +289,22 @@ export class BabylonService {
     // Lights
     this.scene.lights.forEach(light => light.dispose());
     this.scene.lights = [];
-    // Audio
-    this.audioContainer.audio.dispose();
-    this.audioContainer.timeSlider.dispose();
-    this.audioContainer.currentTime = 0;
+    // Audio & Video
+    const { audio$, video$ } = this.containers;
+    const audio = audio$.getValue();
+    const video = video$.getValue();
+    if (audio) {
+      audio.audio.dispose();
+      audio.timeSlider.dispose();
+      audio.currentTime = 0;
+    }
     // Video
-    this.videoContainer.video.pause();
-    this.videoContainer.video.remove();
-    this.videoContainer.timeSlider.dispose();
-    this.videoContainer.currentTime = 0;
+    if (video) {
+      video.video.pause();
+      video.video.remove();
+      video.timeSlider.dispose();
+      video.currentTime = 0;
+    }
     // Unregister renderers
     const preObservers = this.scene.onBeforeRenderObservable['_observers'];
     const postObservers = this.scene.onAfterRenderObservable['_observers'];
@@ -336,74 +322,40 @@ export class BabylonService {
     }
   }
 
-  public loadEntity(
+  public async loadEntity(
     clearScene: boolean,
     rootUrl: string,
     mediaType = 'model',
     isDefault?: boolean,
-  ) {
+  ): Promise<Mesh[]> {
     this.engine.displayLoadingUI();
     this.resize();
-    if (clearScene) {
-      this.clearScene();
-    }
+    if (clearScene) this.clearScene();
+    const { audio$, entity$, image$, video$ } = this.containers;
+
     switch (mediaType) {
       case 'audio':
-        return loadAudio(rootUrl, this.scene, this.audioContainer, this.entityContainer).then(
-          result => {
-            if (result) {
-              this.audioContainer = result;
-              // Define as function so we can unregister by variable name
-              let renderAudio = () => beforeAudioRender(this.scene, this.audioContainer);
-              this.scene.registerBeforeRender(renderAudio);
-              renderAudio = () => afterAudioRender(this.audioContainer);
-              this.scene.registerAfterRender(renderAudio);
-            } else {
-              throw new Error('No audio result');
-            }
-          },
-        );
-        break;
+        const meshes = entity$.getValue()!.meshes;
+        return loadAudio(rootUrl, this.scene, meshes).then(result => {
+          audio$.next(result);
+          return [];
+        });
       case 'video':
-        return loadVideo(rootUrl, this.scene, this.videoContainer).then(result => {
-          if (result) {
-            this.videoContainer = result;
-            // Define as function so we can unregister by variable name
-            const renderVideo = () => beforeVideoRender(this.videoContainer);
-            this.scene.registerBeforeRender(renderVideo);
-          } else {
-            throw new Error('No video result');
-          }
+        return loadVideo(rootUrl, this.scene).then(result => {
+          video$.next(result);
+          return [result.plane];
         });
-        break;
       case 'image':
-        return loadImage(rootUrl, this.scene, this.imageContainer).then(result => {
-          if (result) {
-            this.imageContainer = result;
-          } else {
-            throw new Error('No video result');
-          }
+        return loadImage(rootUrl, this.scene, isDefault).then(result => {
+          image$.next(result);
+          return [result.plane];
         });
-        break;
       case 'entity':
       case 'model':
       default:
         return load3DEntity(rootUrl, this.scene).then(result => {
-          if (result) {
-            this.entityContainer = result;
-            if (isDefault) {
-              // Ignore environment lighting
-              result.meshes.forEach(mesh => {
-                if (!mesh.material) return;
-                const material = mesh.material as PBRMaterial;
-                material.environmentIntensity = 0;
-              });
-              // Disable Tone-Mapping
-              this.scene.imageProcessingConfiguration.toneMappingEnabled = false;
-            }
-          } else {
-            throw new Error('No result');
-          }
+          entity$.next(result);
+          return result.meshes;
         });
     }
   }

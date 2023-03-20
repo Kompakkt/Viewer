@@ -380,8 +380,8 @@ export class ProcessingService {
 
     return this.babylon
       .loadEntity(true, url)
-      .then(() => {
-        this.updateActiveEntity(entity, this.babylon.entityContainer.meshes as Mesh[]);
+      .then(meshes => {
+        this.updateActiveEntity(entity, meshes);
         this.settings$.next({
           localSettings: entity.settings,
           serverSettings: entity.settings,
@@ -563,47 +563,30 @@ export class ProcessingService {
     }
     // cases: entity, image, audio, video, text
     const path: string = newEntity.externalFile ?? newEntity.processed[this.entityQuality];
-    const url = path.includes('http') || path.includes('https') ? path : `${baseURL}${path}`;
+    const isAudio = mediaType === 'audio';
+    const url = isAudio
+      ? 'assets/models/kompakkt.babylon'
+      : path.includes('http') || path.includes('https')
+      ? path
+      : `${baseURL}${path}`;
+    const isDefault = newEntity._id === 'default';
 
-    const promise = (() => {
-      switch (mediaType) {
-        case 'model':
-        case 'entity':
-          return this.babylon
-            .loadEntity(true, url, mediaType, newEntity._id === 'default')
-            .then(() => {
-              this.updateActiveEntity(newEntity, this.babylon.entityContainer.meshes as Mesh[]);
-            });
-        case 'image':
-          return this.babylon.loadEntity(true, url, mediaType).then(() => {
-            const { plane } = this.babylon.imageContainer;
-            if (plane) this.updateActiveEntity(newEntity, [plane as Mesh]);
-          });
-        case 'audio':
-          return this.babylon
-            .loadEntity(true, 'assets/models/kompakkt.babylon', 'model', true)
-            .then(() => {
-              this.updateActiveEntity(newEntity, this.babylon.entityContainer.meshes as Mesh[]);
-              this.babylon.loadEntity(false, url, mediaType).then(() => {});
-            });
-        case 'video':
-          return this.babylon.loadEntity(true, url, mediaType).then(() => {
-            const { plane } = this.babylon.videoContainer;
-            if (plane) this.updateActiveEntity(newEntity, [plane as Mesh]);
-          });
-        default:
-          return undefined;
-      }
-    })();
-
-    if (!promise) return this.loadFallbackEntity();
-
-    promise.catch(error => {
-      console.error('Failed to load entity from server', error);
-      this.message.error('Failed to load entity from server');
-      this.loadFallbackEntity();
-    });
-
-    return promise;
+    this.babylon
+      .loadEntity(true, url, isAudio ? 'model' : mediaType, isDefault)
+      .then(meshes => {
+        if (isAudio) return this.babylon.loadEntity(false, url, mediaType);
+        return meshes;
+      })
+      .then(meshes => {
+        this.updateActiveEntity(newEntity, meshes);
+      })
+      .catch(error => {
+        console.error('Failed to load entity from server', error);
+        this.message.error('Failed to load entity from server');
+        this.loadFallbackEntity();
+      })
+      .finally(() => {
+        this.babylon.getEngine().hideLoadingUI();
+      });
   }
 }
