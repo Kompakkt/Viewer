@@ -1,6 +1,6 @@
 <ng-container *ngIf="settingsReady$ | async">
   <ng-container *ngIf="processing.settings$ | async as settings">
-    <div *ngIf="" id="editor-entitysettings">
+    <div id="editor-entitysettings">
       <div *ngIf="(processing.isInUpload$ | async) === false">
         <mat-card>
           <mat-card-content>

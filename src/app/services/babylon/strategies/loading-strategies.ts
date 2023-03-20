@@ -252,25 +252,23 @@ export const loadAudio = (
   const engine = scene.getEngine();
   const filename = Tools.GetFilename(rootUrl);
   return requestFile(rootUrl)
-    .then(
-      async (arrayBuffer): Promise<IAudioContainer> => {
-        const audio = await new Promise<Sound>((resolve, _) => {
-          const sound = new Sound(`Audio: ${filename}`, arrayBuffer, scene, () => {
-            resolveSound();
-          });
-          const resolveSound = () => resolve(sound);
+    .then(async (arrayBuffer): Promise<IAudioContainer> => {
+      const audio = await new Promise<Sound>((resolve, _) => {
+        const sound = new Sound(`Audio: ${filename}`, arrayBuffer, scene, () => {
+          resolveSound();
         });
+        const resolveSound = () => resolve(sound);
+      });
 
-        const { timeSlider, analyser } = createAudioScene(audio, scene, cubeMeshes);
-        return {
-          ...audioContainer,
-          audio,
-          currentTime: 0,
-          timeSlider,
-          analyser,
-        };
-      },
-    )
+      const { timeSlider, analyser } = createAudioScene(audio, scene, cubeMeshes);
+      return {
+        ...audioContainer,
+        audio,
+        currentTime: 0,
+        timeSlider,
+        analyser,
+      };
+    })
     .catch(e => {
       console.error(e);
       engine.hideLoadingUI();
@@ -404,15 +402,13 @@ const createMediaControls = (
   return timeSlider;
 };
 
-const str_pad_left = (value: number, pad: string, length: number) => {
-  return (new Array(length + 1).join(pad) + value).slice(-length);
-};
+const padDigits = (value: number) => value.toString().padStart(2, '0');
 
 const getCurrentTime = (time: number): string => {
   const minutes = Math.floor(time / 60);
   const seconds = time - minutes * 60;
 
-  return `${str_pad_left(minutes, '0', 2)}:${str_pad_left(seconds, '0', 2)}`;
+  return `${padDigits(minutes)}:${padDigits(seconds)}`;
 };
 
 const secondsToHms = (sec: string | number) => {

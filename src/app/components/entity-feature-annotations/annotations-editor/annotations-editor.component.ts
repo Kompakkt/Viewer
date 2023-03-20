@@ -56,11 +56,11 @@ export class AnnotationsEditorComponent {
     return combineLatest([
       this.processing.hasAnnotationAllowance$,
       this.processing.compilationLoaded$,
-      this.userdata.userOwnsCompilation$,
+      this.processing.compilation$,
     ]).pipe(
-      map(([isAnnotatingAllowed, isCompilationLoaded, userOwnsCompilation]) => {
+      map(([isAnnotatingAllowed, isCompilationLoaded, compilation]) => {
         if (!isAnnotatingAllowed) return true;
-        if (isCompilationLoaded) return userOwnsCompilation;
+        if (isCompilationLoaded) return this.userdata.doesUserOwn(compilation);
         return false;
       }),
     );

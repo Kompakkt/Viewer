@@ -17,6 +17,7 @@ export class SidenavComponent implements OnInit {
   constructor(public overlay: OverlayService) {
     setTimeout(() => {
       this.overlay.sidenav$.subscribe(({ mode, open }) => {
+        console.log(mode, open);
         this.mode = mode;
         this.isOpen = open;
         this.isReady = this.isOpen && !!this.mode;

@@ -458,9 +458,10 @@ export class AnnotationService {
     let newAnnotation = _annotation;
     newAnnotation.lastModificationDate = new Date().toISOString();
     const isCompilationLoaded = await firstValueFrom(this.processing.compilationLoaded$);
+    const compilation = await firstValueFrom(this.processing.compilation$);
     const isDefault = await firstValueFrom(this.processing.defaultEntityLoaded$);
     const isFallback = await firstValueFrom(this.processing.fallbackEntityLoaded$);
-    const userOwnsCompilation = await firstValueFrom(this.userdata.userOwnsCompilation$);
+    const userOwnsCompilation = compilation && this.userdata.doesUserOwn(compilation);
     if (!isFallback && !isDefault) {
       const isOwner =
         this.userdata.isAnnotationOwner(_annotation) ||

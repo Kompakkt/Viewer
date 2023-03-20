@@ -7,22 +7,15 @@ import { BehaviorSubject } from 'rxjs';
 export class OverlayService {
   public sidenav$ = new BehaviorSubject({ mode: '', open: true });
 
-  public toggleSidenav(mode: string, open?: boolean): boolean {
+  public toggleSidenav(mode: string, open?: boolean) {
     const sidenavState = this.sidenav$.getValue();
 
     if (sidenavState.mode === mode) {
       const shouldOpen = open !== undefined ? open : !sidenavState.open;
-      this.sidenav$.next({ ...sidenavState, open: shouldOpen });
-      return shouldOpen;
+      return this.sidenav$.next({ mode, open: shouldOpen });
     }
 
-    if (sidenavState.open) {
-      setTimeout(() => this.sidenav$.next({ ...sidenavState, open: true }), 300);
-    } else {
-      this.sidenav$.next({ ...sidenavState, open: true });
-    }
-
+    setTimeout(() => this.sidenav$.next({ mode, open: true }), sidenavState.open ? 300 : 0);
     this.sidenav$.next({ mode, open: false });
-    return true;
   }
 }

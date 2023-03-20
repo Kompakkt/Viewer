@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { BehaviorSubject, combineLatestWith, firstValueFrom, map } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
 import {
   IAnnotation,
   ICompilation,
@@ -11,10 +11,8 @@ import {
   IStrippedUserData,
   IUserData,
 } from 'src/common';
-
 import { LoginComponent } from '../../components/dialogs/dialog-login/login.component';
 import { BackendService } from '../backend/backend.service';
-import { ProcessingService } from '../processing/processing.service';
 
 const getWhitelistedPersons = (element: IEntity | ICompilation) => {
   return (
@@ -57,37 +55,20 @@ export class UserdataService {
   public userData$ = new BehaviorSubject<IUserData | undefined>(undefined);
   public isAuthenticated$ = this.userData$.pipe(map(userdata => !!userdata?._id));
 
-  public userOwnsEntity$ = this.processing.entity$.pipe(
-    combineLatestWith(this.userData$),
-    map(([entity, userdata]) => isEntity(entity) && isUserOwned(entity, userdata, 'entity')),
-  );
+  constructor(private backend: BackendService, private dialog: MatDialog) {}
 
-  public userOwnsCompilation$ = this.processing.compilation$.pipe(
-    combineLatestWith(this.userData$),
-    map(
-      ([compilation, userdata]) =>
-        isCompilation(compilation) && isUserOwned(compilation, userdata, 'compilation'),
-    ),
-  );
+  public doesUserOwn(element?: IEntity | ICompilation) {
+    if (isEntity(element)) return isUserOwned(element, this.userData$.getValue(), 'entity');
+    if (isCompilation(element))
+      return isUserOwned(element, this.userData$.getValue(), 'compilation');
+    return false;
+  }
 
-  public isUserWhitelistedInEntity$ = this.processing.entity$.pipe(
-    combineLatestWith(this.userData$),
-    map(([entity, userdata]) => isEntity(entity) && isUserWhitelisted(entity, userdata)),
-  );
-
-  public isUserWhitelistedInCompilation$ = this.processing.compilation$.pipe(
-    combineLatestWith(this.userData$),
-    map(
-      ([compilation, userdata]) =>
-        isCompilation(compilation) && isUserWhitelisted(compilation, userdata),
-    ),
-  );
-
-  constructor(
-    private backend: BackendService,
-    private dialog: MatDialog,
-    private processing: ProcessingService,
-  ) {}
+  public isUserWhitelistedFor(element?: IEntity | ICompilation) {
+    if (isEntity(element)) return isUserWhitelisted(element, this.userData$.getValue());
+    if (isCompilation(element)) return isUserWhitelisted(element, this.userData$.getValue());
+    return false;
+  }
 
   public async userAuthentication(loginRequired: boolean): Promise<boolean> {
     this.loginRequired$.next(loginRequired);

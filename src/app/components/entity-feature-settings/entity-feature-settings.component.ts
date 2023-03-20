@@ -68,11 +68,15 @@ export class EntityFeatureSettingsComponent {
       this.processing.fallbackEntityLoaded$,
       this.processing.compilationLoaded$,
       this.mode$,
-      this.userdata.userOwnsEntity$,
+      this.processing.entity$,
     ]).pipe(
       map(
-        ([isDefault, isFallback, isCompilationLoaded, mode, userOwnsEntity]) =>
-          !isDefault && !isFallback && !isCompilationLoaded && mode === 'edit' && userOwnsEntity,
+        ([isDefault, isFallback, isCompilationLoaded, mode, entity]) =>
+          !isDefault &&
+          !isFallback &&
+          !isCompilationLoaded &&
+          mode === 'edit' &&
+          this.userdata.doesUserOwn(entity),
       ),
     );
   }

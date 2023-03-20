@@ -121,8 +121,6 @@ export class ProcessingService {
       this.isStandalone$,
       this.mode$,
       this.userdata.isAuthenticated$,
-      this.userdata.userOwnsEntity$,
-      this.userdata.isUserWhitelistedInCompilation$,
     ]).pipe(
       map(
         ([
@@ -135,8 +133,6 @@ export class ProcessingService {
           isStandalone,
           mode,
           isAuthenticated,
-          userOwnsEntity,
-          isUserWhitelistedInCompilation,
         ]) => {
           if (!entity) return false;
           if (isStandalone) return true;
@@ -154,10 +150,11 @@ export class ProcessingService {
           if (isCompilationLoaded) {
             if (!compilation) return false;
             if (compilation?.whitelist.enabled && isAuthenticated) return true;
-            if (compilation.whitelist.enabled) return isUserWhitelistedInCompilation;
+            if (compilation.whitelist.enabled)
+              return this.userdata.isUserWhitelistedFor(compilation);
           } else {
             if ((isDefault || isFallback) && mode === 'annotation') return true;
-            if (userOwnsEntity) return true;
+            if (this.userdata.doesUserOwn(entity)) return true;
           }
           return false;
         },
@@ -514,8 +511,8 @@ export class ProcessingService {
   }
 
   private async fetchRestrictedEntityData(entity: IEntity) {
-    const isOwner = await firstValueFrom(this.userdata.userOwnsEntity$);
-    const isUserWhitelisted = await firstValueFrom(this.userdata.isUserWhitelistedInEntity$);
+    const isOwner = this.userdata.doesUserOwn(entity);
+    const isUserWhitelisted = this.userdata.isUserWhitelistedFor(entity);
     this.userdata
       .userAuthentication(true)
       .then(auth => {
