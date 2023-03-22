@@ -1,13 +1,12 @@
-<mat-card class="annotation-card">
-  <form class="annotation-form" *ngIf="annotation">
+<mat-card class="annotation-card" *ngIf="annotation$ | async as annotation">
+  <form class="annotation-form">
     <mat-card-header (click)="changeOpenPopup()">
       <div mat-card-avatar class="annotation-header-image">
         <span>{{ annotation.ranking }}</span>
       </div>
 
       <mat-card-title>
-        <span *ngIf="!isEditMode">{{ annotation.body.content.title | uppercase }}</span>
-        <mat-form-field *ngIf="isEditMode">
+        <mat-form-field *ngIf="isEditMode$ | async; else showTitle">
           <input
             matInput
             name="title"
@@ -17,78 +16,87 @@
             [(ngModel)]="annotation.body.content.title"
           />
         </mat-form-field>
+        <ng-template #showTitle>
+          <span>{{ annotation.body.content.title | uppercase }}</span>
+        </ng-template>
       </mat-card-title>
 
-      <mat-card-subtitle>{{
-        annotation.validated ? 'validated' : 'unvalidated'
-      }}</mat-card-subtitle>
+      <mat-card-subtitle>
+        {{ annotation.validated ? 'validated' : 'unvalidated' }}
+      </mat-card-subtitle>
     </mat-card-header>
 
-    <ng-container *ngIf="previewImage; else noPreviewImage">
-      <img mat-card-image [src]="previewImage" *ngIf="!collapsed" />
+    <ng-container *ngIf="previewImage$ | async as previewImage; else noPreviewImage">
+      <img mat-card-image [src]="previewImage" *ngIf="!(collapsed$ | async)" />
     </ng-container>
     <ng-template #noPreviewImage>
       <p>This annotation has no preview image</p>
     </ng-template>
 
-    <mat-card-content *ngIf="!collapsed">
-      <app-markdown-preview
-        id="annotation-content"
-        *ngIf="!isEditMode"
-        [data]="annotation.body.content.description"
-      ></app-markdown-preview>
+    <mat-card-content *ngIf="!(collapsed$ | async)">
+      <ng-container *ngIf="isEditMode$ | async; else showContent">
+        <mat-form-field class="description">
+          <textarea
+            matInput
+            #annotationContent
+            cdkTextareaAutosize
+            cdkAutosizeMinRows="1"
+            name="description"
+            type="text"
+            placeholder="Description"
+            [(ngModel)]="annotation.body.content.description"
+          ></textarea>
+        </mat-form-field>
 
-      <mat-form-field *ngIf="isEditMode" class="description">
-        <textarea
-          matInput
-          #annotationContent
-          cdkTextareaAutosize
-          cdkAutosizeMinRows="1"
-          name="description"
-          type="text"
-          placeholder="Description"
-          [(ngModel)]="annotation.body.content.description"
-        ></textarea>
-      </mat-form-field>
+        <mat-checkbox
+          class="validation"
+          *ngIf="userOwnsCompilation$ | async"
+          [checked]="annotation.validated"
+          (change)="annotation.validated = !annotation.validated"
+          >Validated
+        </mat-checkbox>
 
-      <mat-checkbox
-        class="validation"
-        *ngIf="isEditMode && (userOwnsCompilation$ | async)"
-        [checked]="annotation.validated"
-        (change)="annotation.validated = !annotation.validated"
-        >Validated
-      </mat-checkbox>
+        <button
+          mat-icon-button
+          (click)="selectPerspective()"
+          matTooltip="Select Perspective"
+          matTooltipPosition="right"
+          type="button"
+          class="perspective"
+        >
+          <mat-icon aria-label="Select Perspective">camera</mat-icon>
+          Select Perspective
+        </button>
+      </ng-container>
 
-      <button
-        mat-icon-button
-        (click)="selectPerspective()"
-        matTooltip="Select Perspective"
-        matTooltipPosition="right"
-        *ngIf="isEditMode"
-        type="button"
-        class="perspective"
-      >
-        <mat-icon aria-label="Select Perspective">camera</mat-icon>
-        Select Perspective
-      </button>
+      <ng-template #showContent>
+        <app-markdown-preview
+          id="annotation-content"
+          [data]="annotation.body.content.description"
+        ></app-markdown-preview>
+      </ng-template>
     </mat-card-content>
 
     <mat-card-actions>
-      <mat-slide-toggle [checked]="showAnnotation" (change)="toggleVisibility()">
-        {{ this.showAnnotation ? 'Hide' : 'Show' }}
+      <mat-slide-toggle [checked]="showAnnotation$ | async" (change)="toggleVisibility()">
+        {{ (showAnnotation$ | async) ? 'Hide' : 'Show' }}
       </mat-slide-toggle>
 
-      <ng-container *ngIf="(processing.hasAnnotationAllowance$ | async) && isAnnotationOwner">
+      <ng-container
+        *ngIf="(processing.hasAnnotationAllowance$ | async) && (isAnnotationOwner$ | async)"
+      >
         <button
           mat-icon-button
           (click)="toggleEditViewMode()"
-          [matTooltip]="isEditMode ? 'Save Annotation' : 'Edit Annotation'"
+          [matTooltip]="(isEditMode$ | async) ? 'Save Annotation' : 'Edit Annotation'"
           matTooltipPosition="above"
           type="button"
         >
-          <mat-icon [attr.aria-label]="isEditMode ? 'Save Annotation' : 'Edit Annotation'">{{
-            isEditMode ? 'save' : 'edit'
-          }}</mat-icon>
+          <mat-icon
+            [attr.aria-label]="(isEditMode$ | async) ? 'Save Annotation' : 'Edit Annotation'"
+          >
+            {{ (isEditMode$ | async) ? 'save' : 'edit' }}
+          </mat-icon>
         </button>
 
         <button
@@ -124,10 +132,4 @@
       </button>
     </mat-card-actions>
   </form>
-  <div *ngIf="!annotation">
-    <h2>Annotation not defined</h2>
-    <p>Open the devloper console for more information on this error</p>
-    <br />
-    <p>If you're a user, please report this bug to a developer</p>
-  </div>
 </mat-card>

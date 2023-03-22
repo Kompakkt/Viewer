@@ -1,8 +1,10 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { filter, firstValueFrom, map } from 'rxjs';
-import { isCompilation, isEntity } from 'src/common';
+import { IEntity, isCompilation, isEntity } from 'src/common';
 import { environment } from 'src/environments/environment';
 import { ProcessingService } from '../../../services/processing/processing.service';
+
+type BrowsedMedia = IEntity | { mediaType: string; url: string; description: string };
 
 @Component({
   selector: 'app-media-browser',
@@ -10,10 +12,7 @@ import { ProcessingService } from '../../../services/processing/processing.servi
   styleUrls: ['./media-browser.component.scss'],
 })
 export class MediaBrowserComponent {
-  @Output() addMedia = new EventEmitter();
-
-  public url = '';
-  public description = '';
+  @Output() addMedia = new EventEmitter<BrowsedMedia>();
 
   public addExternalImage = false;
   public addCompilationEntity = false;
@@ -35,7 +34,8 @@ export class MediaBrowserComponent {
   }
 
   private hideBrowser() {
-    this.addExternalImage = this.addCompilationEntity = false;
+    this.addExternalImage = false;
+    this.addCompilationEntity = false;
   }
 
   public addImage(url: string, description: string) {

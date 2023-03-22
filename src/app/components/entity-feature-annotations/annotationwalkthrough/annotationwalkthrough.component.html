@@ -1,4 +1,4 @@
-<div id="annotationwalkthrough" *ngIf="annotations.length > 1">
+<div id="annotationwalkthrough" *ngIf="this.annotationService.currentAnnotations$ | async">
   <button
     id="btn-previous"
     mat-icon-button
@@ -9,7 +9,7 @@
     <mat-icon aria-label="Back">keyboard_arrow_left</mat-icon>
   </button>
 
-  <div id="walktertitle">{{ title }}</div>
+  <div id="walktertitle">{{ title$ | async }}</div>
 
   <button
     id="btn-next"
