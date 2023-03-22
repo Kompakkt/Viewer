@@ -53,7 +53,7 @@
 
       <mat-checkbox
         class="validation"
-        *ngIf="isEditMode && (userdata.userOwnsCompilation$ | async)"
+        *ngIf="isEditMode && (userOwnsCompilation$ | async)"
         [checked]="annotation.validated"
         (change)="annotation.validated = !annotation.validated"
         >Validated

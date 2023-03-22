@@ -1,9 +1,9 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { IAnnotation } from 'src/common';
 import { Matrix, Vector3 } from '@babylonjs/core';
+import { map } from 'rxjs';
+import { IAnnotation } from 'src/common';
 import { environment } from 'src/environments/environment';
-
 import { AnnotationService } from '../../../services/annotation/annotation.service';
 import { BabylonService } from '../../../services/babylon/babylon.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
@@ -35,6 +35,9 @@ export class AnnotationComponent implements OnInit {
   public visibility = false;
   public isAnnotatingAllowed$ = this.processing.hasAnnotationAllowance$;
   public isAnnotationOwner = false;
+  public userOwnsCompilation$ = this.processing.compilation$.pipe(
+    map(compilation => this.userdata.doesUserOwn(compilation)),
+  );
 
   constructor(
     public annotationService: AnnotationService,
