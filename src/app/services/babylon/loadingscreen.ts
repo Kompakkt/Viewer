@@ -11,7 +11,7 @@ export class LoadingScreenService {
   public isLoading = false;
 
   public show() {
-    if (!this.isLoading) this.updateOpacity('1');
+    if (!this.isLoading) setTimeout(() => this.updateOpacity('1'), 500);
   }
 
   public hide() {
