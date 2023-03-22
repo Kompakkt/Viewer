@@ -21,6 +21,9 @@ export class AnnotationwalkthroughComponent {
   public title$ = this.selectedAnnotation$.pipe(
     map(annotation => annotation?.body.content.title ?? 'Annotation Walkthrough'),
   );
+  public showWalkthrough$ = this.annotationService.currentAnnotations$.pipe(
+    map(annotations => annotations.length > 1),
+  );
 
   constructor(public annotationService: AnnotationService) {}
 
