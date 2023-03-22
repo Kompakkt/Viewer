@@ -1,8 +1,5 @@
 import { Component } from '@angular/core';
-
 import { ProcessingService } from '../../../services/processing/processing.service';
-
-import { ICompilation } from 'src/common';
 
 @Component({
   selector: 'app-dialog-invite-broadcasting',
@@ -18,10 +15,10 @@ export class DialogInviteBroadcastingComponent {
   public defaultURL = 'https://blacklodge.hki.uni-koeln.de/builds/Kompakkt/live/';
   public collectionId: string | undefined;
 
-  public compilation: ICompilation | undefined;
+  constructor(public processing: ProcessingService) {}
 
-  constructor(public processing: ProcessingService) {
-    this.processing.compilation$.subscribe(compilation => (this.compilation = compilation));
+  get compilation$() {
+    return this.processing.compilation$;
   }
 
   copyInputMessage(inputElement: HTMLTextAreaElement) {

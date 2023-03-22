@@ -4,15 +4,15 @@ import {
   Analyser,
   Engine,
   ExecuteCodeAction,
+  ISceneLoaderProgressEvent,
+  Material,
   Mesh,
   MeshBuilder,
+  PBRMaterial,
   Scene,
   SceneLoader,
-  ISceneLoaderProgressEvent,
-  PBRMaterial,
   Sound,
   StandardMaterial,
-  Material,
   Tags,
   Texture,
   Tools,
@@ -21,7 +21,6 @@ import {
 } from '@babylonjs/core';
 import { AdvancedDynamicTexture, Control, Slider, StackPanel, TextBlock } from '@babylonjs/gui';
 import '@babylonjs/loaders';
-
 import {
   I3DEntityContainer,
   IAudioContainer,
@@ -88,7 +87,7 @@ const patchMeshPBR = (mesh: AbstractMesh, scene: Scene) => {
   }
 };
 
-export const load3DEntity = (rootUrl: string, scene: Scene) => {
+export const load3DEntity = (rootUrl: string, scene: Scene, isDefault?: boolean) => {
   const rootFolder = Tools.GetFolderPath(rootUrl);
   const filename = Tools.GetFilename(rootUrl);
   const extension = filename.includes('.') ? `.${filename.split('.').slice(-1).pop()!}` : undefined;
@@ -102,16 +101,21 @@ export const load3DEntity = (rootUrl: string, scene: Scene) => {
     scene,
     updateLoadingUI(engine),
     extension,
-  )
-    .then(result => {
-      console.log(result);
-      result.meshes.forEach(mesh => patchMeshPBR(mesh, scene));
-      return result;
-    })
-    .catch(e => {
-      console.error(e);
-      engine.hideLoadingUI();
-    });
+  ).then(result => {
+    console.log(result);
+    if (isDefault) {
+      // Ignore environment lighting
+      result.meshes.forEach(mesh => {
+        if (!mesh.material) return;
+        const material = mesh.material as PBRMaterial;
+        material.environmentIntensity = 0;
+      });
+      // Disable Tone-Mapping
+      scene.imageProcessingConfiguration.toneMappingEnabled = false;
+    }
+    result.meshes.forEach(mesh => patchMeshPBR(mesh, scene));
+    return result as unknown as I3DEntityContainer;
+  });
 };
 
 const requestFile = (url: string) => {
@@ -120,13 +124,7 @@ const requestFile = (url: string) => {
     .catch(e => console.error(e));
 };
 
-export const loadImage = (
-  rootUrl: string,
-  scene: Scene,
-  imageContainer: IImageContainer,
-  isDefault?: boolean,
-) => {
-  const engine = scene.getEngine();
+export const loadImage = (rootUrl: string, scene: Scene, isDefault?: boolean) => {
   return new Promise<IImageContainer>((resolve, reject) => {
     const texture = new Texture(
       rootUrl,
@@ -160,7 +158,6 @@ export const loadImage = (
         }
 
         const newImageContainer: IImageContainer = {
-          ...imageContainer,
           image: texture,
           material: gndmat,
           plane: ground,
@@ -172,18 +169,12 @@ export const loadImage = (
         reject(err);
       },
     );
-  })
-    .then(image => {
-      return image;
-    })
-    .catch(e => {
-      engine.hideLoadingUI();
-      console.error(e);
-    });
+  }).then(image => {
+    return image;
+  });
 };
 
-export const loadVideo = (rootUrl: string, scene: Scene, videoContainer: IVideoContainer) => {
-  const engine = scene.getEngine();
+export const loadVideo = (rootUrl: string, scene: Scene) => {
   const filename = Tools.GetFilename(rootUrl);
 
   // TODO: Reject on videoTexture fails loading?
@@ -193,7 +184,6 @@ export const loadVideo = (rootUrl: string, scene: Scene, videoContainer: IVideoC
       const video = videoTexture.video;
       const { plane, timeSlider } = createVideoScene(videoTexture, texture, scene);
       const newContainer: IVideoContainer = {
-        ...videoContainer,
         video,
         currentTime: 0,
         timeSlider,
@@ -202,14 +192,9 @@ export const loadVideo = (rootUrl: string, scene: Scene, videoContainer: IVideoC
       resolve(newContainer);
       return newContainer;
     });
-  })
-    .then(resultContainer => {
-      return resultContainer;
-    })
-    .catch(e => {
-      console.error(e);
-      engine.hideLoadingUI();
-    });
+  }).then(resultContainer => {
+    return resultContainer;
+  });
 };
 
 const createVideoScene = (videoTexture: VideoTexture, texture: Texture, scene: Scene) => {
@@ -243,41 +228,27 @@ const createVideoScene = (videoTexture: VideoTexture, texture: Texture, scene: S
   return { plane, timeSlider };
 };
 
-export const loadAudio = (
-  rootUrl: string,
-  scene: Scene,
-  audioContainer: IAudioContainer,
-  cubeMeshes: I3DEntityContainer,
-) => {
-  const engine = scene.getEngine();
+export const loadAudio = (rootUrl: string, scene: Scene, meshes: Mesh[]) => {
   const filename = Tools.GetFilename(rootUrl);
-  return requestFile(rootUrl)
-    .then(
-      async (arrayBuffer): Promise<IAudioContainer> => {
-        const audio = await new Promise<Sound>((resolve, _) => {
-          const sound = new Sound(`Audio: ${filename}`, arrayBuffer, scene, () => {
-            resolveSound();
-          });
-          const resolveSound = () => resolve(sound);
-        });
-
-        const { timeSlider, analyser } = createAudioScene(audio, scene, cubeMeshes);
-        return {
-          ...audioContainer,
-          audio,
-          currentTime: 0,
-          timeSlider,
-          analyser,
-        };
-      },
-    )
-    .catch(e => {
-      console.error(e);
-      engine.hideLoadingUI();
+  return requestFile(rootUrl).then(async (arrayBuffer): Promise<IAudioContainer> => {
+    const audio = await new Promise<Sound>((resolve, _) => {
+      const sound = new Sound(`Audio: ${filename}`, arrayBuffer, scene, () => {
+        resolveSound();
+      });
+      const resolveSound = () => resolve(sound);
     });
+
+    const { timeSlider, analyser } = createAudioScene(audio, scene, meshes);
+    return {
+      audio,
+      currentTime: 0,
+      timeSlider,
+      analyser,
+    };
+  });
 };
 
-const createAudioScene = (audio: Sound, scene: Scene, cubeMeshes: I3DEntityContainer) => {
+const createAudioScene = (audio: Sound, scene: Scene, meshes: Mesh[]) => {
   // audio analyser
   const analyser = new Analyser(scene);
   // TODO: AudioEngine implements IAudioEngine
@@ -289,7 +260,7 @@ const createAudioScene = (audio: Sound, scene: Scene, cubeMeshes: I3DEntityConta
   const timeSlider = createMediaControls(30, 20, scene, undefined, audio);
 
   // Click on cube -> start/ stop sound
-  cubeMeshes.meshes.forEach(mesh => {
+  meshes.forEach(mesh => {
     Tags.AddTagsTo(mesh, 'audioCenter');
     mesh.isPickable = true;
     mesh.actionManager = new ActionManager(scene);
@@ -404,15 +375,13 @@ const createMediaControls = (
   return timeSlider;
 };
 
-const str_pad_left = (value: number, pad: string, length: number) => {
-  return (new Array(length + 1).join(pad) + value).slice(-length);
-};
+const padDigits = (value: number) => value.toString().padStart(2, '0');
 
 const getCurrentTime = (time: number): string => {
   const minutes = Math.floor(time / 60);
   const seconds = time - minutes * 60;
 
-  return `${str_pad_left(minutes, '0', 2)}:${str_pad_left(seconds, '0', 2)}`;
+  return `${padDigits(minutes)}:${padDigits(seconds)}`;
 };
 
 const secondsToHms = (sec: string | number) => {

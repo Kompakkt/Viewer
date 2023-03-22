@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
 import {
   IAnnotation,
   ICompilation,
@@ -10,104 +11,112 @@ import {
   IStrippedUserData,
   IUserData,
 } from 'src/common';
-
 import { LoginComponent } from '../../components/dialogs/dialog-login/login.component';
 import { BackendService } from '../backend/backend.service';
+
+const getWhitelistedPersons = (element: IEntity | ICompilation) => {
+  return (
+    element.whitelist.groups
+      // Flatten group members and owners
+      .map(group => group.members.concat(...group.owners))
+      .reduce((acc, val) => acc.concat(val), [] as IStrippedUserData[])
+      // Combine with whitelisted persons
+      .concat(...element.whitelist.persons)
+  );
+};
+
+const isUserOwned = (
+  element: IEntity | ICompilation | null,
+  userdata: IUserData | undefined,
+  elementType: 'entity' | 'compilation',
+) => {
+  if (!element || !userdata) return false;
+  const userElements = userdata.data?.[elementType];
+  return userElements?.some((other: IEntity | ICompilation) => other._id === element._id);
+};
+
+const isUserWhitelisted = (
+  element: IEntity | ICompilation | null,
+  userdata: IUserData | undefined,
+) => {
+  if (!element || !userdata) return false;
+  const persons = getWhitelistedPersons(element);
+  return !!persons.find(person => person._id === userdata._id);
+};
+
+export type LoginData = { username: string; password: string };
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserdataService {
-  public loginRequired = false;
-  public authenticatedUser = false;
-  public loginData = {
-    username: '',
-    password: '',
-    isCached: false,
-  };
-  public userData: IUserData | undefined = undefined;
-  public guestUserData: IStrippedUserData | undefined;
-
-  public userOwnsEntity = false;
-  public userOwnsCompilation = false;
-  public userWhitlistedEntity = false;
-  public userWhitlistedCompilation = false;
+  public loginRequired$ = new BehaviorSubject(false);
+  public loginData$ = new BehaviorSubject<LoginData | undefined>(undefined);
+  public userData$ = new BehaviorSubject<IUserData | undefined>(undefined);
+  public isAuthenticated$ = this.userData$.pipe(map(userdata => !!userdata?._id));
 
   constructor(private backend: BackendService, private dialog: MatDialog) {}
 
-  public userAuthentication(loginRequired: boolean): Promise<boolean> {
-    this.loginRequired = loginRequired;
+  public doesUserOwn(element?: IEntity | ICompilation) {
+    if (isEntity(element)) return isUserOwned(element, this.userData$.getValue(), 'entity');
+    if (isCompilation(element))
+      return isUserOwned(element, this.userData$.getValue(), 'compilation');
+    return false;
+  }
 
-    return new Promise<boolean>((resolve, _) => {
-      if (this.authenticatedUser && this.userData) resolve(true);
-      this.backend
-        .isAuthorized()
-        .then(result => {
-          this.setUserData(result);
-          this.authenticatedUser = true;
-          resolve(true);
-        })
-        .catch(e => {
-          if (loginRequired) {
-            this.attemptLogin().then(authorized => {
-              resolve(authorized);
-            });
-          } else {
-            // Server might not be reachable, skip login
-            console.error(e);
-            this.clearUserData();
-            resolve(false);
-          }
-        });
-    });
+  public isUserWhitelistedFor(element?: IEntity | ICompilation) {
+    if (isEntity(element)) return isUserWhitelisted(element, this.userData$.getValue());
+    if (isCompilation(element)) return isUserWhitelisted(element, this.userData$.getValue());
+    return false;
+  }
+
+  public async userAuthentication(loginRequired: boolean): Promise<boolean> {
+    this.loginRequired$.next(loginRequired);
+    const isAuthenticated = await firstValueFrom(this.isAuthenticated$);
+    if (isAuthenticated) return true;
+
+    return this.backend
+      .isAuthorized()
+      .then(result => {
+        this.userData$.next(result);
+        return true;
+      })
+      .catch(async e => {
+        if (loginRequired) {
+          return await this.attemptLogin();
+        } else {
+          // Server might not be reachable, skip login
+          console.error(e);
+          return false;
+        }
+      });
   }
 
   private async attemptLogin(): Promise<boolean> {
-    return new Promise<boolean>((resolve, _) => {
-      if (this.loginData.isCached) {
-        this.backend
-          .login(this.loginData.username, this.loginData.password)
-          .then(result => {
-            this.setUserData(result);
-            this.authenticatedUser = true;
-            resolve(true);
-          })
-          .catch(() => {
-            this.openLoginDialog().then(loggedIn => {
-              resolve(loggedIn);
-            });
+    const loginData = this.loginData$.getValue();
 
-            /*console.error(err);
-            this.clearUserData();
-            reject(false);*/
-          });
-      } else {
-        this.openLoginDialog().then(loggedIn => {
-          resolve(loggedIn);
-        });
-      }
-    });
+    if (loginData) {
+      return this.backend
+        .login(loginData.username, loginData.password)
+        .then(result => {
+          this.userData$.next(result);
+          return true;
+        })
+        .catch(() => this.openLoginDialog());
+    }
+
+    return this.openLoginDialog();
   }
 
-  public openLoginDialog(): Promise<boolean> {
-    return new Promise<boolean>(resolve => {
-      const dialogRef = this.dialog.open(LoginComponent);
-      dialogRef.afterClosed().subscribe(result => {
-        if (result !== false) {
-          const data = result.data;
-          this.setUserData(data.userData);
-          this.authenticatedUser = true;
-          this.loginData = {
-            username: data.username,
-            password: data.password,
-            isCached: true,
-          };
-          resolve(true);
-        } else {
-          resolve(false);
-        }
-      });
-    });
+  public async openLoginDialog(): Promise<boolean> {
+    const dialogRef = this.dialog.open(LoginComponent);
+    const result = await firstValueFrom(dialogRef.afterClosed());
+    if (!result || result === false) return false;
+
+    const { username, password, userData } = result.data;
+    this.userData$.next(userData);
+    this.loginData$.next({ username, password });
+    return true;
   }
 
   public logout() {
@@ -115,121 +124,15 @@ export class UserdataService {
       .logout()
       .then(() => {})
       .catch(err => console.error(err));
-    this.clearUserData();
-  }
-
-  private clearUserData() {
-    this.authenticatedUser = false;
-    this.loginData = {
-      username: '',
-      password: '',
-      isCached: false,
-    };
-    this.userData = undefined;
-    this.guestUserData = undefined;
-    this.userOwnsEntity = false;
-    this.userOwnsCompilation = false;
-    this.userWhitlistedEntity = false;
-    this.userWhitlistedCompilation = false;
-  }
-
-  private setUserData(userData: IUserData) {
-    if (this.guestUserData) this.guestUserData = undefined;
-    this.userData = userData;
-  }
-
-  public checkOwnerState(element: ICompilation | IEntity | undefined): boolean {
-    if (!element) {
-      return false;
-    }
-    if (!this.userData?.data || (!isEntity(element) && !isCompilation(element))) {
-      this.userOwnsEntity = false;
-      this.userOwnsCompilation = false;
-      return false;
-    }
-    const id = element._id;
-
-    if (isCompilation(element)) {
-      this.userOwnsCompilation = JSON.stringify(this.userData?.data?.compilation).includes(
-        element._id.toString(),
-      );
-      if (this.userOwnsCompilation) {
-        return this.userOwnsCompilation;
-      }
-      if (this.userData.data.compilation) {
-        this.userOwnsCompilation =
-          this.userData.data.compilation.find(
-            (_compilation: ICompilation) => _compilation._id === id,
-          ) !== undefined;
-      }
-      return this.userOwnsCompilation;
-    }
-
-    if (isEntity(element)) {
-      this.userOwnsEntity = JSON.stringify(this.userData?.data?.entity).includes(
-        element._id.toString(),
-      );
-      if (this.userOwnsEntity) {
-        return this.userOwnsEntity;
-      }
-      if (this.userData.data.entity) {
-        this.userOwnsEntity =
-          this.userData.data.entity.find((_entity: IEntity) => _entity._id === id) !== undefined;
-      } else {
-        this.userOwnsEntity = false;
-      }
-      return this.userOwnsEntity;
-    }
-    return false;
-  }
-
-  public isUserWhitelisted(element: ICompilation | IEntity | undefined): boolean {
-    if (!element) {
-      return false;
-    }
-    if (!this.userData?.data) {
-      this.userWhitlistedEntity = false;
-      this.userWhitlistedCompilation = false;
-      return false;
-    }
-    const id = this.userData._id;
-
-    const persons = element.whitelist.groups
-      // Flatten group members and owners
-      .map(group => group.members.concat(...group.owners))
-      .reduce((acc, val) => acc.concat(val), [] as IStrippedUserData[])
-      // Combine with whitelisted persons
-      .concat(...element.whitelist.persons);
-
-    const whitelistContainsUser = persons.find(person => person._id === id) !== undefined;
-
-    if (isEntity(element)) {
-      this.userWhitlistedEntity = whitelistContainsUser;
-    }
-    // tslint:disable-next-line:max-line-length
-    if (isCompilation(element)) {
-      this.userWhitlistedCompilation = whitelistContainsUser;
-    }
-
-    return whitelistContainsUser;
+    this.userData$.next(undefined);
+    this.loginData$.next(undefined);
   }
 
   public isAnnotationOwner(annotation: IAnnotation): boolean {
-    if (this.userData?.data?.annotation) {
-      const result = this.userData.data.annotation.find(
-        anno => isAnnotation(anno) && anno._id === annotation._id,
-      );
-      if (result) return true;
-    }
-    return annotation.creator._id === this.userData?._id ?? false;
-  }
+    const userData = this.userData$.getValue();
+    const annotations = userData?.data?.annotation;
 
-  public createTemporalUserData() {
-    if (this.userData) return;
-    this.guestUserData = {
-      fullname: 'guest',
-      username: 'guest',
-      _id: this.backend.generateEntityId(),
-    };
+    if (annotation.creator._id === userData?._id) return true;
+    return annotations?.some(other => isAnnotation(other) && other._id === annotation._id) ?? false;
   }
 }

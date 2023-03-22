@@ -1,6 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { IAnnotation } from 'src/common';
-
+import { Component } from '@angular/core';
+import { BehaviorSubject, combineLatest, firstValueFrom, map } from 'rxjs';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
 
 @Component({
@@ -8,40 +7,42 @@ import { AnnotationService } from '../../../services/annotation/annotation.servi
   templateUrl: './annotationwalkthrough.component.html',
   styleUrls: ['./annotationwalkthrough.component.scss'],
 })
-export class AnnotationwalkthroughComponent implements OnInit {
-  public title = 'Annotation Walkthrough';
-  private ranking = -1;
-  public annotations: IAnnotation[] = [];
+export class AnnotationwalkthroughComponent {
+  public ranking$ = new BehaviorSubject(-1);
+  public selectedAnnotation$ = combineLatest([
+    this.annotationService.currentAnnotations$,
+    this.annotationService.selectedAnnotation$,
+  ]).pipe(
+    map(([annotations, selectedAnnotationId]) =>
+      annotations.find(({ _id }) => _id === selectedAnnotationId),
+    ),
+  );
+
+  public title$ = this.selectedAnnotation$.pipe(
+    map(annotation => annotation?.body.content.title ?? 'Annotation Walkthrough'),
+  );
 
   constructor(public annotationService: AnnotationService) {}
 
-  ngOnInit() {
-    this.annotationService.currentAnnotations$.subscribe(currentAnnotations => {
-      this.annotations = currentAnnotations;
-      this.title = 'Annotation Walkthrough';
-      this.ranking = -1;
-    });
-
-    this.annotationService.isSelectedAnnotation.subscribe(currentAnnotation => {
-      const selectedAnnotation = this.annotations.find(
-        (anno: IAnnotation) => anno._id === currentAnnotation,
-      );
-      if (selectedAnnotation) {
-        this.title = selectedAnnotation.body.content.title;
-      }
-    });
+  public async previousAnnotation() {
+    const [ranking, annotations] = await Promise.all([
+      firstValueFrom(this.ranking$),
+      firstValueFrom(this.annotationService.currentAnnotations$),
+    ]);
+    const isFirst = ranking === 0;
+    const newRanking = isFirst ? annotations.length - 1 : ranking - 1;
+    this.ranking$.next(newRanking);
+    this.annotationService.setSelectedAnnotation(annotations[newRanking]._id.toString());
   }
 
-  public previousAnnotation() {
-    const isFirst = this.ranking === 0;
-    this.ranking = isFirst ? this.annotations.length - 1 : (this.ranking = this.ranking - 1);
-    this.annotationService.setSelectedAnnotation(this.annotations[this.ranking]._id.toString());
-  }
-
-  public nextAnnotation() {
-    const isLast = this.ranking === this.annotations.length - 1;
-
-    this.ranking = isLast ? 0 : this.ranking + 1;
-    this.annotationService.setSelectedAnnotation(this.annotations[this.ranking]._id.toString());
+  public async nextAnnotation() {
+    const [ranking, annotations] = await Promise.all([
+      firstValueFrom(this.ranking$),
+      firstValueFrom(this.annotationService.currentAnnotations$),
+    ]);
+    const isLast = ranking === annotations.length - 1;
+    const newRanking = isLast ? 0 : ranking + 1;
+    this.ranking$.next(newRanking);
+    this.annotationService.setSelectedAnnotation(annotations[newRanking]._id.toString());
   }
 }

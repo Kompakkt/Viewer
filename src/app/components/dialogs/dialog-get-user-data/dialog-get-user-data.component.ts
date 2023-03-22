@@ -31,11 +31,7 @@ export class DialogGetUserDataComponent {
       this.backend
         .deleteRequest(this.id, 'annotation', this.username, this.password)
         .then(() => {
-          this.userdata.loginData = {
-            username: this.username,
-            password: this.password,
-            isCached: true,
-          };
+          this.userdata.loginData$.next({ username: this.username, password: this.password });
           this.dialogRef.close(true);
           this.message.info('Deleted from Server');
         })

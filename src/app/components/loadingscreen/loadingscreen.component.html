@@ -1,6 +1,4 @@
-<div [style.opacity]="opacity" [style.background-color]="backgroundColor" id="loadingDiv">
-  <img *ngIf="logo !== null" id="loadingDivImg" [src]="logo" alt="" />
-  <div id="loadingDivText">
-    {{ loadingText }}
-  </div>
+<div [style.opacity]="loadingScreen.opacity$ | async" id="loadingDiv">
+  <img src="assets/img/kompakkt-icon.png" alt="" />
+  <span>{{ loadingScreen.loadingText$ | async }}</span>
 </div>

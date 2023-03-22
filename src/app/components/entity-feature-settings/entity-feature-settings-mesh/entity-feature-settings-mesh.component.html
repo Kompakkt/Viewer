@@ -1,4 +1,4 @@
-<ng-container *ngIf="processing.entitySettings">
+<ng-container *ngIf="processing.settings$ | async as settings">
   <ng-template matStepLabel>Set Mesh Settings</ng-template>
   <h5>
     Information & Helpers
@@ -19,7 +19,7 @@
     <button class="fullwidth-button" mat-raised-button (click)="resetVisualUIMeshSettingsHelper()">
       Reset Helper
     </button>
-    <h5>Number of meshes: {{ meshes ? meshes.length : 0 }}</h5>
+    <h5 *ngIf="meshes$ | async as meshes">Number of meshes: {{ meshes.length }}</h5>
     <mat-checkbox [checked]="boundingBoxVisibility" (change)="toggleBoundingBoxEntityVisibility()">
       <h5>Bounding Box Entity</h5>
     </mat-checkbox>
@@ -165,12 +165,12 @@
       cm
     </h6>
 
-    <h6>Scale factor: {{ processing.entitySettings.scale }}</h6>
+    <h6>Scale factor: {{ settings.localSettings.scale }}</h6>
     <mat-slider
       min="0.0"
       max="5"
       step="0.05"
-      [value]="processing.entitySettings.scale"
+      [value]="settings.localSettings.scale"
       #matslider
       (input)="handleChangeDimension('scale', $event.value)"
     ></mat-slider>
@@ -208,7 +208,7 @@
         matInput
         min="0"
         max="360"
-        [(ngModel)]="processing.entitySettings.rotation.x"
+        [(ngModel)]="settings.localSettings.rotation.x"
         type="number"
         step="1"
         (input)="entitySettings.loadRotation()"
@@ -239,7 +239,7 @@
         matInput
         min="0"
         max="360"
-        [(ngModel)]="processing.entitySettings.rotation.y"
+        [(ngModel)]="settings.localSettings.rotation.y"
         type="number"
         step="1"
         (input)="entitySettings.loadRotation()"
@@ -270,7 +270,7 @@
         matInput
         min="0"
         max="360"
-        [(ngModel)]="processing.entitySettings.rotation.z"
+        [(ngModel)]="settings.localSettings.rotation.z"
         type="number"
         step="1"
         (input)="entitySettings.loadRotation()"

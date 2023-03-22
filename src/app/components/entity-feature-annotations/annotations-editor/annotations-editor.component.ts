@@ -1,9 +1,8 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Component, QueryList, ViewChildren } from '@angular/core';
 import { saveAs } from 'file-saver';
-
+import { combineLatest, firstValueFrom } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
 import { UserdataService } from '../../../services/userdata/userdata.service';
@@ -14,12 +13,12 @@ import { AnnotationComponent } from '../annotation/annotation.component';
   templateUrl: './annotations-editor.component.html',
   styleUrls: ['./annotations-editor.component.scss'],
 })
-export class AnnotationsEditorComponent implements OnInit {
+export class AnnotationsEditorComponent {
   @ViewChildren(AnnotationComponent)
   annotationsList: QueryList<AnnotationComponent> | undefined;
 
   // external
-  public isAnnotatingAllowed = false;
+  public isAnnotatingAllowed$ = this.processing.hasAnnotationAllowance$;
 
   public currentAnnotations$ = this.annotations.currentAnnotations$;
 
@@ -33,27 +32,38 @@ export class AnnotationsEditorComponent implements OnInit {
     return this.currentAnnotations$.pipe(map(arr => arr.length));
   }
 
-  get isDefault() {
-    if (!this.isAnnotatingAllowed) return false;
-    if (this.processing.compilationLoaded) return false;
-    return true;
-  }
-
-  get isForbidden() {
-    return (
-      !this.processing.upload &&
-      !this.isAnnotatingAllowed &&
-      !this.processing.compilationLoaded &&
-      !this.processing.defaultEntityLoaded
+  get isDefault$() {
+    return combineLatest([
+      this.processing.hasAnnotationAllowance$,
+      this.processing.compilationLoaded$,
+    ]).pipe(
+      map(
+        ([isAnnotatingAllowed, isCompilationLoaded]) => isAnnotatingAllowed && !isCompilationLoaded,
+      ),
     );
   }
 
-  ngOnInit() {
-    this.isAnnotatingAllowed = this.processing.annotationAllowance;
+  get isForbidden$() {
+    return combineLatest([
+      this.processing.isInUpload$,
+      this.processing.hasAnnotationAllowance$,
+      this.processing.compilationLoaded$,
+      this.processing.defaultEntityLoaded$,
+    ]).pipe(map(arr => arr.every(boolean => !boolean)));
+  }
 
-    this.processing.setAnnotationAllowance.subscribe((allowed: boolean) => {
-      this.isAnnotatingAllowed = allowed;
-    });
+  get isDraggingDisabled$() {
+    return combineLatest([
+      this.processing.hasAnnotationAllowance$,
+      this.processing.compilationLoaded$,
+      this.processing.compilation$,
+    ]).pipe(
+      map(([isAnnotatingAllowed, isCompilationLoaded, compilation]) => {
+        if (!isAnnotatingAllowed) return true;
+        if (isCompilationLoaded) return this.userdata.doesUserOwn(compilation);
+        return false;
+      }),
+    );
   }
 
   drop(event: CdkDragDrop<string[]>) {

@@ -1,47 +1,44 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-
+import { Component, EventEmitter, Output } from '@angular/core';
+import { filter, firstValueFrom, map } from 'rxjs';
+import { IEntity, isCompilation, isEntity } from 'src/common';
+import { environment } from 'src/environments/environment';
 import { ProcessingService } from '../../../services/processing/processing.service';
 
-import { isCompilation, isEntity, ICompilation } from 'src/common';
-
-import { environment } from 'src/environments/environment';
+type BrowsedMedia = IEntity | { mediaType: string; url: string; description: string };
 
 @Component({
   selector: 'app-media-browser',
   templateUrl: './media-browser.component.html',
   styleUrls: ['./media-browser.component.scss'],
 })
-export class MediaBrowserComponent implements OnInit {
-  @Output() addMedia = new EventEmitter();
-
-  public url = '';
-  public compilation: ICompilation | undefined;
-  public description = '';
+export class MediaBrowserComponent {
+  @Output() addMedia = new EventEmitter<BrowsedMedia>();
 
   public addExternalImage = false;
   public addCompilationEntity = false;
 
-  public isEntity = isEntity;
   public server_url = environment.server_url;
 
   constructor(public processing: ProcessingService) {}
 
-  ngOnInit() {
-    this.processing.compilation$.subscribe(compilation => {
-      if (isCompilation(compilation)) this.compilation = compilation;
-    });
+  get compilation$() {
+    return this.processing.compilation$;
   }
 
-  get currentEntities() {
-    if (!isCompilation(this.compilation)) return [];
-    return Object.values(this.compilation.entities);
+  get entities$() {
+    return this.compilation$.pipe(
+      filter(isCompilation),
+      map(({ entities }) => Object.values(entities)),
+      map(entities => entities.filter(isEntity)),
+    );
   }
 
   private hideBrowser() {
-    this.addExternalImage = this.addCompilationEntity = false;
+    this.addExternalImage = false;
+    this.addCompilationEntity = false;
   }
 
-  addImage(url: string, description: string) {
+  public addImage(url: string, description: string) {
     this.hideBrowser();
     this.addMedia.emit({
       mediaType: 'externalImage',
@@ -50,8 +47,9 @@ export class MediaBrowserComponent implements OnInit {
     });
   }
 
-  addEntity(index: number) {
+  public async addEntity(index: number) {
     this.hideBrowser();
-    this.addMedia.emit(this.currentEntities[index]);
+    const entities = await firstValueFrom(this.entities$);
+    this.addMedia.emit(entities[index]);
   }
 }

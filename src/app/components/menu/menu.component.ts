@@ -1,13 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-
+import fscreen from 'fscreen';
+import { firstValueFrom, map } from 'rxjs';
 import { BabylonService } from '../../services/babylon/babylon.service';
 import { MessageService } from '../../services/message/message.service';
-import { ProcessingService } from '../../services/processing/processing.service';
+import { ProcessingService, QualitySetting } from '../../services/processing/processing.service';
 import { UserdataService } from '../../services/userdata/userdata.service';
-
-import { IEntity } from 'src/common';
-
-import fscreen from 'fscreen';
 
 @Component({
   selector: 'app-menu',
@@ -17,27 +14,29 @@ import fscreen from 'fscreen';
 export class MenuComponent implements OnInit {
   public fullscreen = !!fscreen.fullscreenElement;
   public fullscreenCapable = fscreen.fullscreenEnabled;
-  private entity: IEntity | undefined;
 
   constructor(
     public processing: ProcessingService,
     public babylon: BabylonService,
     public userdata: UserdataService,
     private message: MessageService,
-  ) {
-    this.processing.entity$.subscribe(entity => (this.entity = entity));
+  ) {}
+
+  get entity$() {
+    return this.processing.entity$;
   }
 
-  get userData() {
-    return this.userdata.userData;
-  }
-
-  get loginRequired() {
-    return this.userdata.loginRequired;
-  }
-
-  get isAuthenticated() {
-    return this.userdata.authenticatedUser;
+  get qualities$() {
+    return this.entity$.pipe(
+      map(entity => {
+        if (!entity) return undefined;
+        return {
+          low: entity.processed.low !== entity.processed.medium,
+          medium: entity.processed.medium !== entity.processed.low,
+          high: entity.processed.high !== entity.processed.medium,
+        };
+      }),
+    );
   }
 
   ngOnInit() {
@@ -47,35 +46,14 @@ export class MenuComponent implements OnInit {
     );
   }
 
-  getAvailableQuality(quality: string) {
-    if (!this.entity) return false;
-    switch (quality) {
-      case 'low':
-        return this.entity.processed.low !== this.entity.processed.medium;
-      case 'medium':
-        return this.entity.processed.medium !== this.entity.processed.low;
-      case 'high':
-        return this.entity.processed.high !== this.entity.processed.medium;
-      default:
-        return false;
-    }
-  }
+  public async updateEntityQuality(nextQuality: QualitySetting) {
+    const currentQuality = this.processing.quality$.getValue();
+    const entity = await firstValueFrom(this.entity$);
+    if (nextQuality === currentQuality) return;
+    if (!entity?.processed?.[nextQuality]) return;
 
-  updateEntityQuality(quality: string) {
-    if (this.processing.entityQuality !== quality) {
-      this.processing.updateEntityQuality(quality);
-      if (!this.entity?.processed) {
-        throw new Error(
-          'The object is not available and unfortunately ' + 'I can not update the entityQuality.',
-        );
-      }
-      const qualities: any = this.entity?.processed ?? {};
-      if (!!qualities[this.processing.entityQuality]) {
-        this.processing.loadEntity(this.entity);
-      } else {
-        throw new Error('Entity entityQuality is not available.');
-      }
-    }
+    this.processing.updateEntityQuality(nextQuality);
+    this.processing.loadEntity(entity);
   }
 
   toggleFullscreen() {

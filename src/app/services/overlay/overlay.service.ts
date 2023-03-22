@@ -5,38 +5,17 @@ import { BehaviorSubject } from 'rxjs';
   providedIn: 'root',
 })
 export class OverlayService {
-  private sidenavIsOpen = true;
-  private _mode = '';
-  private sidenavMode = new BehaviorSubject(this._mode);
-  public sidenavMode$ = this.sidenavMode.asObservable();
+  public sidenav$ = new BehaviorSubject({ mode: '', open: true });
 
-  private sidenav = new BehaviorSubject(this.sidenavIsOpen);
-  public sidenav$ = this.sidenav.asObservable();
+  public toggleSidenav(mode: string, open?: boolean) {
+    const sidenavState = this.sidenav$.getValue();
 
-  public toggleSidenav(mode: string, open?: boolean): boolean {
-    if (this._mode === mode) {
-      if (open !== undefined) {
-        this.sidenavIsOpen = open;
-      } else {
-        this.sidenavIsOpen = !this.sidenavIsOpen;
-      }
-      this.sidenav.next(this.sidenavIsOpen);
-      return this.sidenavIsOpen;
+    if (sidenavState.mode === mode) {
+      const shouldOpen = open !== undefined ? open : !sidenavState.open;
+      return this.sidenav$.next({ mode, open: shouldOpen });
     }
 
-    setTimeout(
-      () => {
-        this.sidenavIsOpen = true;
-        this.sidenav.next(this.sidenavIsOpen);
-      },
-      this.sidenavIsOpen ? 300 : 0,
-    );
-
-    this._mode = mode;
-    this.sidenavMode.next(this._mode);
-
-    this.sidenavIsOpen = false;
-    this.sidenav.next(this.sidenavIsOpen);
-    return true;
+    setTimeout(() => this.sidenav$.next({ mode, open: true }), sidenavState.open ? 300 : 0);
+    this.sidenav$.next({ mode, open: false });
   }
 }

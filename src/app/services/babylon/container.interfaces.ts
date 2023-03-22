@@ -1,5 +1,5 @@
 import {
-  AbstractMesh,
+  Mesh,
   Analyser,
   AnimationGroup,
   IParticleSystem,
@@ -21,17 +21,17 @@ export interface IVideoContainer {
   video: HTMLVideoElement;
   currentTime: number;
   timeSlider: Slider;
-  plane?: AbstractMesh;
+  plane: Mesh;
 }
 
 export interface IImageContainer {
   image: Texture;
-  plane?: AbstractMesh;
+  plane: Mesh;
   material?: StandardMaterial;
 }
 
 export interface I3DEntityContainer {
-  meshes: AbstractMesh[];
+  meshes: Mesh[];
   particleSystems: IParticleSystem[];
   skeletons: Skeleton[];
   animationGroups: AnimationGroup[];

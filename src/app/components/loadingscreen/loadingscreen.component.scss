@@ -1,20 +1,8 @@
-:host {
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
-}
-
-@-webkit-keyframes spin1 {
-  0% {
-    -webkit-transform: rotate(0deg);
-  }
-  100% {
-    -webkit-transform: rotate(360deg);
-  }
-}
-@keyframes spin1 {
-  0% {
+@keyframes kompakkt-logo-spin {
+  from {
     transform: rotate(0deg);
   }
-  100% {
+  to {
     transform: rotate(360deg);
   }
 }
@@ -25,33 +13,29 @@
   transition: opacity 0.3s ease;
   pointer-events: none;
   z-index: 100;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   margin: 0;
   padding: 0;
-}
 
-#loadingDivImg {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  margin-left: -60px;
-  margin-top: -60px;
-  animation: spin1 2s infinite ease-in-out;
-  /*WebkitAnimation WebkitTransformOrigin*/
-  transform-origin: 50% 50%;
-  pointer-events: none;
-}
+  background: #111111;
 
-#loadingDivText {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  margin-top: 80px;
-  width: 100%;
-  height: 20px;
-  font-size: 17px;
-  color: rgb(255, 255, 255);
-  text-align: center;
-  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  img {
+    animation: kompakkt-logo-spin 2s infinite ease-in-out;
+    transform-origin: center center;
+    pointer-events: none;
+  }
+
+  span {
+    color: white;
+    text-align: center;
+    pointer-events: none;
+    font-size: 16px;
+    margin-top: 1em;
+  }
 }

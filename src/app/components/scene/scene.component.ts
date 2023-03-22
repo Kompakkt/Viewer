@@ -1,5 +1,4 @@
 import { AfterViewInit, Component, HostListener, ViewContainerRef } from '@angular/core';
-
 import { AnnotationService } from '../../services/annotation/annotation.service';
 import { BabylonService } from '../../services/babylon/babylon.service';
 import { ProcessingService } from '../../services/processing/processing.service';
@@ -15,25 +14,16 @@ export class SceneComponent implements AfterViewInit {
     this.babylon.resize();
   }
 
-  public isReady = false;
-
-  public currentAnnotations$ = this.annotations.currentAnnotations$;
-
   constructor(
     private babylon: BabylonService,
     public processing: ProcessingService,
     public annotations: AnnotationService,
     private viewContainerRef: ViewContainerRef,
-  ) {
-    setTimeout(() => {
-      this.processing.bootstrapped$.subscribe(change => (this.isReady = change));
-    }, 0);
-  }
+  ) {}
 
   private setupCanvas() {
     this.babylon.attachCanvas(this.viewContainerRef);
-    this.processing.bootstrap();
-    this.babylon.resize();
+    this.processing.bootstrap().then(() => this.babylon.resize());
   }
 
   ngAfterViewInit() {

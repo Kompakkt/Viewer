@@ -1,91 +1,95 @@
-<mat-card
-  class="single-annotation-card resizable"
-  [class.editmode]="isEditMode"
-  [style.top.px]="positionTop"
-  [style.left.px]="positionLeft"
-  *ngIf="visibility && annotation"
-  [style.background-color]="'$cardbgr'"
-  [id]="annotation._id"
->
-  <form class="annotation-form" #annotationForm>
-    <mat-card-header>
-      <mat-card-title>
-        <span class="bigger-font" *ngIf="!isEditMode">{{ annotation.body.content.title }}</span>
-        <mat-form-field *ngIf="isEditMode">
-          <mat-label>Title</mat-label>
-          <input
-            matInput
-            name="title"
-            #title="ngModel"
-            type="text"
-            [(ngModel)]="annotation.body.content.title"
-          />
-        </mat-form-field>
-      </mat-card-title>
+<ng-container *ngIf="annotation$ | async as annotation">
+  <mat-card
+    *ngIf="isSelectedAnnotation$ | async"
+    class="single-annotation-card resizable"
+    [class.editmode]="isEditMode$ | async"
+    [style.top.px]="positionTop"
+    [style.left.px]="positionLeft"
+    [style.background-color]="'$cardbgr'"
+    [id]="annotation._id"
+  >
+    <form class="annotation-form" #annotationForm>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-form-field *ngIf="isEditMode$ | async; else showTitle">
+            <mat-label>Title</mat-label>
+            <input
+              matInput
+              name="title"
+              #title="ngModel"
+              type="text"
+              [(ngModel)]="annotation.body.content.title"
+            />
+          </mat-form-field>
+          <ng-template #showTitle>
+            <span class="bigger-font">{{ annotation.body.content.title }}</span>
+          </ng-template>
+        </mat-card-title>
 
-      <button id="closeButton" mat-icon-button (click)="closeAnnotation()" type="button">
-        <mat-icon aria-label="Close">cancel</mat-icon>
-      </button>
-    </mat-card-header>
+        <button id="closeButton" mat-icon-button (click)="closeAnnotation()" type="button">
+          <mat-icon aria-label="Close">cancel</mat-icon>
+        </button>
+      </mat-card-header>
 
-    <mat-card-content>
-      <app-markdown-preview
-        id="annotation-content"
-        *ngIf="!isEditMode"
-        [data]="annotation.body.content.description"
-      ></app-markdown-preview>
+      <mat-card-content>
+        <div *ngIf="isEditMode$ | async; else showContent">
+          <mat-form-field>
+            <mat-label>Description</mat-label>
+            <textarea
+              #annotationContent
+              matInput
+              cdkTextareaAutosize
+              cdkAutosizeMinRows="1"
+              name="description"
+              type="text"
+              [(ngModel)]="annotation.body.content.description"
+            ></textarea>
+          </mat-form-field>
+        </div>
 
-      <div *ngIf="isEditMode">
-        <mat-form-field>
-          <mat-label>Description</mat-label>
-          <textarea
-            #annotationContent
-            matInput
-            cdkTextareaAutosize
-            cdkAutosizeMinRows="1"
-            name="description"
-            type="text"
-            [(ngModel)]="annotation.body.content.description"
-          ></textarea>
-        </mat-form-field>
-      </div>
-    </mat-card-content>
+        <ng-template #showContent>
+          <app-markdown-preview
+            id="annotation-content"
+            [data]="annotation.body.content.description"
+          ></app-markdown-preview>
+        </ng-template>
+      </mat-card-content>
 
-    <mat-card-actions>
-      <button
-        mat-icon-button
-        (click)="editFullscreen()"
-        matTooltip="Edit in Fullscreen Mode"
-        matTooltipPosition="above"
-        type="button"
-        *ngIf="isAnnotatingAllowed && isAnnotationOwner"
-      >
-        <mat-icon aria-label="Fullscreen">select_all</mat-icon>
-      </button>
+      <mat-card-actions *ngIf="(isAnnotatingAllowed$ | async) && (isAnnotationOwner$ | async)">
+        <button
+          mat-icon-button
+          (click)="editFullscreen()"
+          matTooltip="Edit in Fullscreen Mode"
+          matTooltipPosition="above"
+          type="button"
+        >
+          <mat-icon aria-label="Fullscreen">select_all</mat-icon>
+        </button>
 
-      <button
-        mat-icon-button
-        (click)="toggleEditViewMode()"
-        [matTooltip]="isEditMode ? 'Save Annotation' : 'Edit Annotation'"
-        *ngIf="isAnnotatingAllowed && isAnnotationOwner"
-        matTooltipPosition="above"
-        type="button"
-      >
-        <mat-icon [attr.aria-label]="isEditMode ? 'Save Annotation' : 'Edit Annotation'">{{
-          isEditMode ? 'save' : 'edit'
-        }}</mat-icon>
-      </button>
+        <button
+          mat-icon-button
+          (click)="toggleEditViewMode()"
+          [matTooltip]="(isEditMode$ | async) ? 'Save Annotation' : 'Edit Annotation'"
+          matTooltipPosition="above"
+          type="button"
+        >
+          <mat-icon
+            [attr.aria-label]="(isEditMode$ | async) ? 'Save Annotation' : 'Edit Annotation'"
+          >
+            {{ (isEditMode$ | async) ? 'save' : 'edit' }}
+          </mat-icon>
+        </button>
 
-      <button
-        *ngIf="isAnnotatingAllowed && isAnnotationOwner"
-        mat-icon-button
-        (click)="deleteAnnotation()"
-        matTooltip="Delete"
-        matTooltipPosition="above"
-        type="button"
-      >
-        <mat-icon aria-label="Delete">delete</mat-icon>
-      </button>
-    </mat-card-actions>
-  </form>
-</mat-card>
+        <button
+          mat-icon-button
+          (click)="deleteAnnotation()"
+          matTooltip="Delete"
+          matTooltipPosition="above"
+          type="button"
+        >
+          <mat-icon aria-label="Delete">delete</mat-icon>
+        </button>
+      </mat-card-actions>
+    </form>
+  </mat-card>
+</ng-container>

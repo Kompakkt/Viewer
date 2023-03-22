@@ -11,7 +11,7 @@
       <mat-icon aria-label="Add External Image">image</mat-icon>
     </button>
     <button
-      *ngIf="compilation"
+      *ngIf="compilation$ | async"
       mat-icon-button
       (click)="addCompilationEntity = !addCompilationEntity"
       matTooltip="Add Entity From Collection"
@@ -55,11 +55,13 @@
   <div *ngIf="addCompilationEntity" id="collection-entities">
     <h3>Or embed an entity of your collection:</h3>
 
-    <ng-container *ngFor="let entity of currentEntities; let i = index">
-      <mat-card (click)="addEntity(i)" class="compilation-entity" *ngIf="isEntity(entity)">
-        <img mat-card-image [src]="server_url + entity.settings.preview" [alt]="entity.name" />
-        <mat-card-footer>{{ entity.name }}</mat-card-footer>
-      </mat-card>
-    </ng-container>
+    <mat-card
+      *ngFor="let entity of entities$ | async; let i = index"
+      (click)="addEntity(i)"
+      class="compilation-entity"
+    >
+      <img mat-card-image [src]="server_url + entity.settings.preview" [alt]="entity.name" />
+      <mat-card-footer>{{ entity.name }}</mat-card-footer>
+    </mat-card>
   </div>
 </div>
