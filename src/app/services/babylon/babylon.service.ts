@@ -36,7 +36,6 @@ import {
   IImageContainer,
   IVideoContainer,
 } from './container.interfaces';
-import { LoadingScreen, LoadingscreenhandlerService } from './loadingscreen';
 import { load3DEntity, loadAudio, loadImage, loadVideo } from './strategies/loading-strategies';
 import {
   afterAudioRender,
@@ -137,11 +136,7 @@ export class BabylonService {
     layer: undefined,
   };
 
-  constructor(
-    private loadingScreenHandler: LoadingscreenhandlerService,
-    private factoryResolver: ComponentFactoryResolver,
-    private injector: Injector,
-  ) {
+  constructor(private factoryResolver: ComponentFactoryResolver, private injector: Injector) {
     this.canvas.id = 'renderCanvas';
     this.engine = new Engine(this.canvas, true, {
       audioEngine: true,
@@ -151,12 +146,6 @@ export class BabylonService {
 
     this.scene = new Scene(this.engine);
     this.scene.createDefaultEnvironment();
-    this.engine.loadingScreen = new LoadingScreen(
-      this.canvas,
-      '#111111',
-      'assets/img/kompakkt-icon.png',
-      this.loadingScreenHandler,
-    );
     this.scene.environmentIntensity = 1;
 
     // Add default camera
@@ -328,7 +317,6 @@ export class BabylonService {
     mediaType = 'model',
     isDefault?: boolean,
   ): Promise<Mesh[]> {
-    this.engine.displayLoadingUI();
     this.resize();
     if (clearScene) this.clearScene();
     const { audio$, entity$, image$, video$ } = this.containers;

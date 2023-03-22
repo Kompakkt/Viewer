@@ -25,7 +25,7 @@ import { environment } from '../../../environments/environment';
 // tslint:disable-next-line:max-line-length
 import { DialogPasswordComponent } from '../../components/dialogs/dialog-password/dialog-password.component';
 import { BabylonService } from '../babylon/babylon.service';
-import { LoadingscreenhandlerService } from '../babylon/loadingscreen';
+import { LoadingScreenService } from '../babylon/loadingscreen';
 import { BackendService } from '../backend/backend.service';
 import { MessageService } from '../message/message.service';
 import { OverlayService } from '../overlay/overlay.service';
@@ -196,7 +196,7 @@ export class ProcessingService {
     private message: MessageService,
     private overlay: OverlayService,
     public babylon: BabylonService,
-    private loadingScreenHandler: LoadingscreenhandlerService,
+    private loadingScreen: LoadingScreenService,
     private userdata: UserdataService,
     private dialog: MatDialog,
     private http: HttpClient,
@@ -248,8 +248,6 @@ export class ProcessingService {
     meshes.forEach(mesh => (mesh.renderingGroupId = 2));
     this.babylon.getScene().getMeshesByTags('videoPlane', mesh => (mesh.renderingGroupId = 3));
     this.meshes$.next(meshes);
-
-    this.babylon.getEngine().hideLoadingUI();
     this.babylon.resize();
   }
 
@@ -534,7 +532,7 @@ export class ProcessingService {
   public async loadEntity(newEntity: IEntity, overrideUrl?: string) {
     const mode = this.mode$.getValue();
     const baseURL = overrideUrl ?? environment.server_url;
-    if (this.loadingScreenHandler.isLoading || !newEntity.processed || !newEntity.mediaType) {
+    if (this.loadingScreen.isLoading || !newEntity.processed || !newEntity.mediaType) {
       return;
     }
 
@@ -563,6 +561,7 @@ export class ProcessingService {
     const url = path.includes('http') || path.includes('https') ? path : `${baseURL}${path}`;
     const isDefault = newEntity._id === 'default';
 
+    this.loadingScreen.show();
     this.babylon
       .loadEntity(
         true,
@@ -583,7 +582,7 @@ export class ProcessingService {
         this.loadFallbackEntity();
       })
       .finally(() => {
-        this.babylon.getEngine().hideLoadingUI();
+        this.loadingScreen.hide();
       });
   }
 }
