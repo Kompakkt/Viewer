@@ -508,18 +508,16 @@ export class ProcessingService {
   }
 
   private async fetchRestrictedEntityData(entity: IEntity) {
-    const isOwner = this.userdata.doesUserOwn(entity);
-    const isUserWhitelisted = this.userdata.isUserWhitelistedFor(entity);
     this.userdata
       .userAuthentication(true)
       .then(auth => {
         // Check for user authentication
         if (!auth) return false;
         // Check for ownership
-        if (!isOwner) {
+        if (!this.userdata.doesUserOwn(entity)) {
           // Check for whitelist
           if (!entity.whitelist.enabled) return false;
-          if (!isUserWhitelisted) return false;
+          if (!this.userdata.isUserWhitelistedFor(entity)) return false;
         }
         return true;
       })
