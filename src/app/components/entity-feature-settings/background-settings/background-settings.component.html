@@ -1,4 +1,4 @@
-<mat-expansion-panel expanded *ngIf="processing.settings$ | async as settings">
+<mat-expansion-panel [expanded]="expanded" *ngIf="processing.settings$ | async as settings">
   <mat-expansion-panel-header>
     <mat-panel-title>Background</mat-panel-title>
   </mat-expansion-panel-header>

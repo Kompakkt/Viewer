@@ -1,7 +1,7 @@
 <ng-container *ngIf="settingsReady$ | async">
   <ng-container *ngIf="processing.settings$ | async as settings">
     <ng-container *ngIf="(processing.isInUpload$ | async) === false">
-      <app-background-settings></app-background-settings>
+      <app-background-settings [expanded]="true"></app-background-settings>
 
       <mat-expansion-panel expanded>
         <mat-expansion-panel-header>
@@ -61,7 +61,7 @@
         <mat-step [completed]="isPreviewSet$ | async" [editable]="!(isPreviewSet$ | async)">
           <ng-template matStepLabel>Settings</ng-template>
 
-          <app-background-settings></app-background-settings>
+          <app-background-settings [expanded]="true"></app-background-settings>
 
           <mat-expansion-panel expanded>
             <mat-expansion-panel-header>
