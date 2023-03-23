@@ -4,33 +4,41 @@
   left: 0;
   transition: 280ms;
   z-index: 99;
+
+  &.is-open {
+    transition: 280ms;
+    left: 300px;
+  }
+}
+
+button.active {
+  background: rgba(255, 255, 255);
+}
+
+div#menu {
   color: #fff;
-  background-color: rgba(0, 0, 0, 0.7);
-  border-top-right-radius: 0.75rem;
-  border-bottom-right-radius: 0.75rem;
-  box-shadow: 1px 1px #333;
-}
+  background-color: var(--transparent-background-color);
+  border-top-right-radius: 24px;
+  border-bottom-right-radius: 24px;
 
-:host .mat-icon-button {
-  padding: 5px 0 5px 5px !important;
-  width: auto;
-  height: auto;
-}
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 12px 16px 4px;
 
-:host a {
-  text-decoration: none;
-  color: #fff;
-}
-
-:host.is-open {
-  transition: 280ms;
-  left: 300px;
-}
-
-mat-icon.arrow {
-  margin-left: -5px;
-}
-
-.mat-icon-button.active {
-  background-color: rgba(255, 255, 255, 0.2);
+  > div {
+    cursor: pointer;
+    padding: 4px;
+    width: 24px;
+    height: 24px;
+    display: grid;
+    place-items: center;
+    clip-path: circle(16px);
+    background-color: rgba(255, 255, 255, 0);
+    transition: background-color 120ms ease-out;
+    &.active {
+      background-color: rgba(255, 255, 255, 0.5);
+    }
+  }
 }

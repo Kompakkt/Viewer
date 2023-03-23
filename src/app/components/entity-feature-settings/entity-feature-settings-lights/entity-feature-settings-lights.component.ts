@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
-
+import { firstValueFrom, map, ReplaySubject } from 'rxjs';
+import { IEntityLight } from '~common/interfaces';
 import { EntitySettingsService } from '../../../services/entitysettings/entitysettings.service';
 import { LightService } from '../../../services/light/light.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
@@ -11,11 +11,19 @@ import { ProcessingService } from '../../../services/processing/processing.servi
   styleUrls: ['./entity-feature-settings-lights.component.scss'],
 })
 export class EntityFeatureSettingsLightsComponent {
+  public pointlight$ = new ReplaySubject<IEntityLight>(1);
+  public pointlightPosition$ = this.pointlight$.pipe(
+    map(({ position: { x, y, z } }) => ({ x, y, z })),
+  );
+
   constructor(
     public entitySettings: EntitySettingsService,
     public lights: LightService,
     private processing: ProcessingService,
-  ) {}
+  ) {
+    const pointLight = this.lights.getLightByType('pointLight');
+    if (pointLight) this.pointlight$.next(pointLight);
+  }
 
   get pointLightX() {
     return this.lights.getLightByType('pointLight')?.position?.x ?? 0;
@@ -28,44 +36,23 @@ export class EntityFeatureSettingsLightsComponent {
   }
 
   // Lights
-  public async setLightIntensity(intensity: number | null, lightType: string) {
-    if (!intensity) intensity = 0;
+  public async setLightIntensity(intensity = 0, lightType: string) {
     const { localSettings } = await firstValueFrom(this.processing.settings$);
     const indexOfLight = this.lights.getLightIndexByType(lightType);
-    if (indexOfLight !== undefined) {
-      localSettings.lights[indexOfLight].intensity = intensity;
-      this.entitySettings.loadLightIntensity(lightType);
-    } else {
-      console.error(this);
-      throw new Error('Light, ' + lightType + ', is missing');
-    }
+    if (!indexOfLight) return;
+    localSettings.lights[indexOfLight].intensity = intensity;
+    this.entitySettings.loadLightIntensity(lightType);
   }
 
   public getLightIntensity(lightType: string) {
     return this.lights.getLightByType(lightType)?.intensity ?? 0;
   }
 
-  public async setPointlightPosition(dimension: string, value: number | null) {
-    if (!value) value = 0;
+  public async setPointlightPosition(dimension: 'x' | 'y' | 'z', value = 0) {
     const { localSettings } = await firstValueFrom(this.processing.settings$);
     const indexOfLight = this.lights.getLightIndexByType('pointLight');
-    if (indexOfLight) {
-      switch (dimension) {
-        case 'x':
-          localSettings.lights[indexOfLight].position.x = value;
-          break;
-        case 'y':
-          localSettings.lights[indexOfLight].position.y = value;
-          break;
-        case 'z':
-          localSettings.lights[indexOfLight].position.z = value;
-          break;
-        default:
-          // tslint:disable-next-line:prefer-template
-          console.error(this);
-          throw new Error('Pointlightposition, ' + dimension + ', is missing');
-      }
-    }
+    if (!indexOfLight) return;
+    localSettings.lights[indexOfLight].position[dimension] = value;
     this.entitySettings.loadPointLightPosition();
   }
 }

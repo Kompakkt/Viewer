@@ -12,18 +12,14 @@ import { ProcessingService } from '../../../services/processing/processing.servi
   styleUrls: ['./entity-feature-settings-mesh.component.scss'],
 })
 export class EntityFeatureSettingsMeshComponent implements OnInit {
-  public meshSettingsHelperToggle = false;
   public boundingBoxVisibility = false;
   public boundingBoxMeshesVisibility = false;
-  public backgroundColorPickerToggle = false;
   public localAxisVisibility = false;
   public worldAxisVisibility = false;
   public groundVisibility = false;
   public groundScalingFactor = 1;
   public localAxisScalingFactor = 1;
   public worldAxisScalingFactor = 1;
-  public meshScaleToggle = false;
-  public meshOrientationToggle = false;
 
   constructor(
     public entitySettings: EntitySettingsService,
@@ -51,71 +47,58 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
     localSettings.background.color = color;
     this.entitySettings.loadBackgroundColor();
   }
-  // ________Mesh Settings__________
 
-  // Scaling
-  public async handleChangeDimension(dimension: string, value?: number | null) {
+  public async handleChangeDimension(
+    dimension: 'height' | 'width' | 'depth' | 'scale',
+    value?: number | null,
+  ) {
     const { localSettings } = await firstValueFrom(this.processing.settings$);
-    let factor;
-    switch (dimension) {
-      case 'height':
-        factor = +this.processing.entityHeight / this.entitySettings.initialSize.y;
-        localSettings.scale = parseFloat(factor.toFixed(2));
-        this.entitySettings.loadScaling();
-        break;
-      case 'width':
-        factor = +this.processing.entityWidth / this.entitySettings.initialSize.x;
-        localSettings.scale = parseFloat(factor.toFixed(2));
-        this.entitySettings.loadScaling();
-        break;
-      case 'depth':
-        factor = +this.processing.entityDepth / this.entitySettings.initialSize.z;
-        localSettings.scale = parseFloat(factor.toFixed(2));
-        this.entitySettings.loadScaling();
-        break;
-      case 'scale':
-        if (value) localSettings.scale = value;
-        this.entitySettings.loadScaling();
-        break;
-      default:
-        console.log('I do not know this dimension: ', dimension);
-    }
+
+    const setScaling = (factor: number) => {
+      localSettings.scale = parseFloat(factor.toFixed(2));
+    };
+
+    const { entityHeight, entityWidth, entityDepth } = this.processing;
+    const { y, x, z } = this.entitySettings.initialSize;
+
+    const methods = {
+      height: () => setScaling(+entityHeight / y),
+      width: () => setScaling(+entityWidth / x),
+      depth: () => setScaling(+entityDepth / z),
+      scale: () => value && setScaling(value),
+    };
+
+    methods[dimension]();
+    this.entitySettings.loadScaling();
   }
 
-  // Rotation
-  public async setRotation(axis: string, degree: number) {
+  public async setRotation(axis: 'x' | 'y' | 'z' | 'xyz_reset', degree: number) {
     const { localSettings } = await firstValueFrom(this.processing.settings$);
-    switch (axis) {
-      case 'x':
-        localSettings.rotation.x = localSettings.rotation.x + degree;
-        this.entitySettings.loadRotation();
-        break;
-      case 'y':
-        localSettings.rotation.y = localSettings.rotation.y + degree;
-        this.entitySettings.loadRotation();
-        break;
-      case 'z':
-        localSettings.rotation.z = localSettings.rotation.z + degree;
-        this.entitySettings.loadRotation();
-        break;
-      case 'xyz_reset':
+
+    const rotationMethods = {
+      x: () => {
+        localSettings.rotation.x += degree;
+      },
+      y: () => {
+        localSettings.rotation.y += degree;
+      },
+      z: () => {
+        localSettings.rotation.z += degree;
+      },
+      xyz_reset: () => {
         localSettings.rotation.x = 0;
         localSettings.rotation.y = 0;
         localSettings.rotation.z = 0;
-        this.entitySettings.loadRotation();
-      default:
-        console.log('I am not able to rotate.');
-    }
+      },
+    };
+
+    rotationMethods[axis]();
+    this.entitySettings.loadRotation();
   }
 
-  // _____ Helpers for Mesh Settings _______
   public async resetVisualUIMeshSettingsHelper() {
     const meshes = await firstValueFrom(this.meshes$);
-    if (!meshes) {
-      throw new Error('Center missing');
-      console.error(this);
-      return;
-    }
+    if (!meshes) throw new Error('Center missing');
     this.toggleBoundingBoxEntityVisibility(false);
     this.toggleBoundingBoxMeshesVisibility(false);
     this.toggleAxesVisibility('worldAxis', false);
@@ -134,77 +117,55 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
     this.entitySettings.setGroundMaterial(color);
   }
 
-  public setScalingFactorAxis(factor: number | null, world: boolean) {
-    if (!factor) factor = 1;
-    world ? (this.worldAxisScalingFactor = factor) : (this.localAxisScalingFactor = factor);
+  public setScalingFactorAxis(factor = 1, world: boolean) {
+    if (world) this.worldAxisScalingFactor = factor;
+    else this.localAxisScalingFactor = factor;
+
     const pos =
       factor *
       0.9 *
       (world ? this.entitySettings.worldAxisInitialSize : this.entitySettings.localAxisInitialSize);
-    this.babylon
-      .getScene()
-      .getMeshesByTags(world ? 'worldAxis' : 'localAxis')
-      .map(mesh => {
-        if (!factor) factor = 1;
-        mesh.scaling = new Vector3(factor, factor, factor);
-      });
-    this.babylon
-      .getScene()
-      .getMeshesByTags(world ? 'worldAxisX' : 'localAxisX')
-      .map(mesh => (mesh.position = new Vector3(pos * 0.9, pos * -0.05, 0)));
-    this.babylon
-      .getScene()
-      .getMeshesByTags(world ? 'worldAxisY' : 'localAxisY')
-      .map(mesh => (mesh.position = new Vector3(0, pos * 0.9, pos * -0.05)));
-    this.babylon
-      .getScene()
-      .getMeshesByTags(world ? 'worldAxisZ' : 'localAxisZ')
-      .map(mesh => (mesh.position = new Vector3(0, pos * 0.05, pos * 0.9)));
+
+    const axisPrefix = world ? 'world' : 'local';
+    const updateMeshes = (tag: string, positionUpdate: (pos: number) => Vector3) =>
+      this.babylon
+        .getScene()
+        .getMeshesByTags(`${axisPrefix}${tag}`)
+        .forEach(mesh => {
+          mesh.scaling = new Vector3(factor, factor, factor);
+          mesh.position = positionUpdate(pos);
+        });
+
+    updateMeshes('Axis', () => new Vector3(factor, factor, factor));
+    updateMeshes('AxisX', () => new Vector3(pos * 0.9, pos * -0.05, 0));
+    updateMeshes('AxisY', () => new Vector3(0, pos * 0.9, pos * -0.05));
+    updateMeshes('AxisZ', () => new Vector3(0, pos * 0.05, pos * 0.9));
   }
 
-  public setScalingFactorGround(factor: number | null) {
-    if (!factor) factor = 1;
-    if (!this.entitySettings.ground) {
-      throw new Error('Ground missing');
-      console.error(this);
-      return;
-    }
+  public setScalingFactorGround(factor = 1) {
+    if (!this.entitySettings.ground) throw new Error('Ground missing');
     this.groundScalingFactor = factor;
     this.entitySettings.ground.scaling = new Vector3(factor, factor, factor);
   }
 
   public toggleBoundingBoxEntityVisibility(value?: boolean) {
-    if (!this.entitySettings.boundingBox) {
-      throw new Error('BoundingBox missing');
-      console.error(this);
-      return;
-    }
+    if (!this.entitySettings.boundingBox) throw new Error('BoundingBox missing');
     this.boundingBoxVisibility = value !== undefined ? value : !this.boundingBoxVisibility;
     this.entitySettings.boundingBox.visibility = this.boundingBoxVisibility ? 1 : 0;
   }
 
   public async toggleBoundingBoxMeshesVisibility(value?: boolean) {
     const meshes = await firstValueFrom(this.meshes$);
-    if (!meshes) {
-      throw new Error('Meshes missing');
-      console.error(this);
-      return;
-    }
+    if (!meshes) throw new Error('Meshes missing');
     this.boundingBoxMeshesVisibility =
       value !== undefined ? value : !this.boundingBoxMeshesVisibility;
     meshes.forEach(mesh => (mesh.showBoundingBox = this.boundingBoxMeshesVisibility));
   }
 
-  public toggleAxesVisibility(axis: string, value?: boolean) {
-    let axisVisibility = false;
-    if (axis === 'localAxis') {
-      axisVisibility = value !== undefined ? value : !this.localAxisVisibility;
-      this.localAxisVisibility = axisVisibility;
-    }
-    if (axis === 'worldAxis') {
-      axisVisibility = value !== undefined ? value : !this.worldAxisVisibility;
-      this.worldAxisVisibility = axisVisibility;
-    }
+  public toggleAxesVisibility(axis: 'localAxis' | 'worldAxis', value?: boolean) {
+    const visibilityKey = axis === 'localAxis' ? 'localAxisVisibility' : 'worldAxisVisibility';
+    const axisVisibility = value !== undefined ? value : !this[visibilityKey];
+    this[visibilityKey] = axisVisibility;
     this.visibilityMesh(axis, axisVisibility);
   }
 

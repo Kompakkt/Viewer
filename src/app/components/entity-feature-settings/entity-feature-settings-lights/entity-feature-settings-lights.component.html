@@ -6,7 +6,7 @@
   max="50"
   step="0.1"
   [value]="getLightIntensity('ambientlightUp')"
-  (input)="setLightIntensity($event.value, 'ambientlightUp')"
+  (input)="setLightIntensity($event.value!, 'ambientlightUp')"
 ></mat-slider>
 <h5>Sunny (up towards the sky)</h5>
 <mat-slider
@@ -14,7 +14,7 @@
   max="50"
   step="0.1"
   [value]="getLightIntensity('ambientlightDown')"
-  (input)="setLightIntensity($event.value, 'ambientlightDown')"
+  (input)="setLightIntensity($event.value!, 'ambientlightDown')"
 ></mat-slider>
 <br />
 <p>Pointlight</p>
@@ -23,30 +23,32 @@
   max="50"
   step="0.1"
   [value]="getLightIntensity('pointLight')"
-  (input)="setLightIntensity($event.value, 'pointLight')"
+  (input)="setLightIntensity($event.value!, 'pointLight')"
 ></mat-slider>
 <h5>Pointlight Dimensions: X Y Z</h5>
-<mat-slider
-  min="-10"
-  max="10"
-  step="1"
-  [value]="pointLightX"
-  (input)="setPointlightPosition('x', $event.value)"
-  vertical
-></mat-slider>
-<mat-slider
-  min="-10"
-  max="10"
-  step="1"
-  [value]="pointLightY"
-  (input)="setPointlightPosition('y', $event.value)"
-  vertical
-></mat-slider>
-<mat-slider
-  min="-10"
-  max="10"
-  step="1"
-  [value]="pointLightZ"
-  (input)="setPointlightPosition('z', $event.value)"
-  vertical
-></mat-slider>
+<ng-container *ngIf="pointlightPosition$ | async as position">
+  <mat-slider
+    min="-10"
+    max="10"
+    step="1"
+    [value]="position.x"
+    (input)="setPointlightPosition('x', $event.value!)"
+    vertical
+  ></mat-slider>
+  <mat-slider
+    min="-10"
+    max="10"
+    step="1"
+    [value]="position.y"
+    (input)="setPointlightPosition('y', $event.value!)"
+    vertical
+  ></mat-slider>
+  <mat-slider
+    min="-10"
+    max="10"
+    step="1"
+    [value]="position.z"
+    (input)="setPointlightPosition('z', $event.value!)"
+    vertical
+  ></mat-slider>
+</ng-container>

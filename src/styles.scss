@@ -7,6 +7,7 @@
     'Gill Sans MT', 'Myriad Pro', Myriad, 'DejaVu Sans Condensed', 'Liberation Sans',
     'Nimbus Sans L', Tahoma, Geneva, 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --brand-color: #00afe7;
+  --transparent-background-color: rgba(0, 0, 0, 0.8);
 }
 
 html,
@@ -80,6 +81,12 @@ a {
 
 .mat-form-field-infix {
   width: 100% !important;
+  display: flex !important;
+  align-items: center;
+  gap: 4px;
+  input {
+    text-align: right;
+  }
 }
 
 .chrome-picker {
@@ -93,7 +100,8 @@ a {
   width: 300px;
   height: 100%;
   z-index: auto;
-  background: rgba(0, 0, 0, 0.9);
+  background: var(--transparent-background-color);
+  backdrop-filter: blur(4px);
   box-sizing: border-box;
   border: 0;
   padding: 0;
