@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { firstValueFrom, map, ReplaySubject } from 'rxjs';
 import { IEntityLight } from '~common/interfaces';
 import { EntitySettingsService } from '../../../services/entitysettings/entitysettings.service';
-import { LightService } from '../../../services/light/light.service';
+import { IEntityLightType, LightService } from '../../../services/light/light.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
 
 @Component({
@@ -25,18 +25,7 @@ export class EntityFeatureSettingsLightsComponent {
     if (pointLight) this.pointlight$.next(pointLight);
   }
 
-  get pointLightX() {
-    return this.lights.getLightByType('pointLight')?.position?.x ?? 0;
-  }
-  get pointLightY() {
-    return this.lights.getLightByType('pointLight')?.position?.y ?? 0;
-  }
-  get pointLightZ() {
-    return this.lights.getLightByType('pointLight')?.position?.z ?? 0;
-  }
-
-  // Lights
-  public async setLightIntensity(intensity = 0, lightType: string) {
+  public async setLightIntensity(intensity = 0, lightType: IEntityLightType) {
     const { localSettings } = await firstValueFrom(this.processing.settings$);
     const indexOfLight = this.lights.getLightIndexByType(lightType);
     if (!indexOfLight) return;
@@ -44,7 +33,7 @@ export class EntityFeatureSettingsLightsComponent {
     this.entitySettings.loadLightIntensity(lightType);
   }
 
-  public getLightIntensity(lightType: string) {
+  public getLightIntensity(lightType: IEntityLightType) {
     return this.lights.getLightByType(lightType)?.intensity ?? 0;
   }
 

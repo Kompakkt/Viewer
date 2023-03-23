@@ -14,7 +14,7 @@ import { firstValueFrom } from 'rxjs';
 import { IColor, IEntitySettings } from 'src/common';
 import { minimalSettings } from '../../../assets/settings/settings';
 import { BabylonService } from '../babylon/babylon.service';
-import { LightService } from '../light/light.service';
+import { IEntityLightType, LightService } from '../light/light.service';
 import { ProcessingService } from '../processing/processing.service';
 import {
   createBoundingBox,
@@ -484,12 +484,8 @@ export class EntitySettingsService {
     }
     const pointLight = this.lights.getLightByType('pointLight');
     if (pointLight) {
-      const position = new Vector3(
-        pointLight.position.x,
-        pointLight.position.y,
-        pointLight.position.z,
-      );
-      this.lights.initialisePointLight(pointLight.intensity, position);
+      const { x, y, z } = pointLight.position;
+      this.lights.initialisePointLight(pointLight.intensity, new Vector3(x, y, z));
     }
     const hemisphericLightUp = this.lights.getLightByType('ambientlightUp');
     if (hemisphericLightUp) {
@@ -519,7 +515,7 @@ export class EntitySettingsService {
     }
   }
 
-  public loadLightIntensity(lightType: string) {
+  public loadLightIntensity(lightType: IEntityLightType) {
     if (!this.entitySettings) {
       throw new Error('Settings missing');
     }
