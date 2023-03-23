@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Vector3 } from '@babylonjs/core';
 import { firstValueFrom } from 'rxjs';
-import { IColor } from 'src/common';
 import { BabylonService } from '../../../services/babylon/babylon.service';
 import { EntitySettingsService } from '../../../services/entitysettings/entitysettings.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
@@ -42,12 +41,6 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
     });
   }
 
-  public async setBackgroundColor(color: IColor) {
-    const { localSettings } = await firstValueFrom(this.processing.settings$);
-    localSettings.background.color = color;
-    this.entitySettings.loadBackgroundColor();
-  }
-
   public async handleChangeDimension(
     dimension: 'height' | 'width' | 'depth' | 'scale',
     value?: number | null,
@@ -58,13 +51,13 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
       localSettings.scale = parseFloat(factor.toFixed(2));
     };
 
-    const { entityHeight, entityWidth, entityDepth } = this.processing;
+    const { height, width, depth } = this.processing.entitySize;
     const { y, x, z } = this.entitySettings.initialSize;
 
     const methods = {
-      height: () => setScaling(+entityHeight / y),
-      width: () => setScaling(+entityWidth / x),
-      depth: () => setScaling(+entityDepth / z),
+      height: () => setScaling(+height / y),
+      width: () => setScaling(+width / x),
+      depth: () => setScaling(+depth / z),
       scale: () => value && setScaling(value),
     };
 
@@ -108,13 +101,6 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
     this.toggleGroundVisibility(false);
     this.setScalingFactorGround(1);
     this.entitySettings.setGroundMaterial();
-    this.resetBackgroundColor();
-  }
-
-  public async resetBackgroundColor() {
-    const { serverSettings } = await firstValueFrom(this.processing.settings$);
-    const color = serverSettings.background.color;
-    this.entitySettings.setGroundMaterial(color);
   }
 
   public setScalingFactorAxis(factor = 1, world: boolean) {

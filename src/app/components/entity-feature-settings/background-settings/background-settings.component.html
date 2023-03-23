@@ -1,0 +1,13 @@
+<mat-expansion-panel expanded *ngIf="processing.settings$ | async as settings">
+  <mat-expansion-panel-header>
+    <mat-panel-title>Background</mat-panel-title>
+  </mat-expansion-panel-header>
+
+  <color-chrome (onChange)="changeColor($event.color.rgb)"></color-chrome>
+  <mat-slide-toggle
+    [(ngModel)]="settings.localSettings.background.effect"
+    (change)="toggleGradientEffect($event.checked)"
+  >
+    Gradient-Brightness Effect
+  </mat-slide-toggle>
+</mat-expansion-panel>

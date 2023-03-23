@@ -104,9 +104,11 @@ export class ProcessingService {
   public bootstrapped$ = new BehaviorSubject(false);
 
   public rotationQuaternion = Quaternion.RotationYawPitchRoll(0, 0, 0);
-  public entityHeight = (0).toFixed(2);
-  public entityWidth = (0).toFixed(2);
-  public entityDepth = (0).toFixed(2);
+  public entitySize = {
+    height: (0).toFixed(2),
+    width: (0).toFixed(2),
+    depth: (0).toFixed(2),
+  };
 
   get isAnnotatingFeatured$() {
     return combineLatest([

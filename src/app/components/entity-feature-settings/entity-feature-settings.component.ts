@@ -4,7 +4,6 @@ import { MatStepper } from '@angular/material/stepper';
 import { saveAs } from 'file-saver';
 import { BehaviorSubject, combineLatest, firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { IColor } from 'src/common';
 import { environment } from '../../../environments/environment';
 import { BabylonService } from '../../services/babylon/babylon.service';
 import { BackendService } from '../../services/backend/backend.service';
@@ -115,12 +114,6 @@ export class EntityFeatureSettingsComponent {
     this.entitySettings.loadCameraInititalPosition();
   }
 
-  public async setBackgroundColor(color: IColor) {
-    const { localSettings } = await firstValueFrom(this.processing.settings$);
-    localSettings.background.color = color;
-    this.entitySettings.loadBackgroundColor();
-  }
-
   public async saveSettings() {
     const [entity, { localSettings }, isDefault, isFallback, isInUpload] = await Promise.all([
       firstValueFrom(this.entity$),
@@ -158,7 +151,7 @@ export class EntityFeatureSettingsComponent {
   public async backToDefaultSettings() {
     const { serverSettings } = await firstValueFrom(this.processing.settings$);
     this.processing.settings$.next({ serverSettings, localSettings: serverSettings });
-    this.entitySettings.restoreSettings();
+    // this.entitySettings.restoreSettings();
   }
 
   public confirmMeshSettings(stepper: MatStepper) {

@@ -27,13 +27,7 @@
       </mat-checkbox>
     </mat-expansion-panel>
 
-    <mat-expansion-panel>
-      <mat-expansion-panel-header>
-        <mat-panel-title>Background</mat-panel-title>
-      </mat-expansion-panel-header>
-
-      <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
-    </mat-expansion-panel>
+    <app-background-settings></app-background-settings>
 
     <mat-expansion-panel>
       <mat-expansion-panel-header>

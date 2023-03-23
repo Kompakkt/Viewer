@@ -57,6 +57,7 @@ import { SidenavComponent } from './components/sidenav/sidenav.component';
 import { MediaTypePipe } from './pipes/media-type.pipe';
 import { MarkdownPreviewComponent } from './components/markdown-preview/markdown-preview.component';
 import { CameraSettingsComponent } from './components/menu/camera-settings/camera-settings.component';
+import { BackgroundSettingsComponent } from './components/entity-feature-settings/background-settings/background-settings.component';
 
 @NgModule({
   declarations: [
@@ -88,6 +89,7 @@ import { CameraSettingsComponent } from './components/menu/camera-settings/camer
     EntityFeatureSettingsMeshComponent,
     MarkdownPreviewComponent,
     CameraSettingsComponent,
+    BackgroundSettingsComponent,
   ],
   imports: [
     BrowserModule,
