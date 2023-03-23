@@ -1,187 +1,160 @@
 <ng-container *ngIf="settingsReady$ | async">
   <ng-container *ngIf="processing.settings$ | async as settings">
-    <div id="editor-entitysettings">
-      <div *ngIf="(processing.isInUpload$ | async) === false">
-        <mat-card>
-          <mat-card-content>
-            <button
-              id="resetDefaultSettings"
-              class="fullwidth-button"
-              mat-raised-button
-              (click)="backToDefaultSettings()"
-            >
-              Back to Default
-            </button>
-            <button
-              id="saveDefaultSettings"
-              class="fullwidth-button"
-              mat-raised-button
-              *ngIf="canSaveSettings$ | async"
-              (click)="saveSettings()"
-            >
-              Save as default
-            </button>
-          </mat-card-content>
-        </mat-card>
+    <ng-container *ngIf="(processing.isInUpload$ | async) === false">
+      <mat-expansion-panel expanded>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Background</mat-panel-title>
+        </mat-expansion-panel-header>
+        <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
+        <mat-slide-toggle
+          [(ngModel)]="settings.localSettings.background.effect"
+          (change)="entitySettings.loadBackgroundEffect()"
+        >
+          Gradient-Brightness Effect
+        </mat-slide-toggle>
+      </mat-expansion-panel>
+
+      <mat-expansion-panel expanded>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Lights</mat-panel-title>
+        </mat-expansion-panel-header>
+        <app-entity-feature-settings-lights></app-entity-feature-settings-lights>
+      </mat-expansion-panel>
+
+      <mat-expansion-panel *ngIf="(processing.mediaType$ | async) !== 'audio'" expanded>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Preview & Initial Perspective</mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <span>
+          Please select a nice and fitting camera perspective. This perspective will be used for the
+          preview image of your object, aswell as the initial perspective when loading your object
+          in Kompakkt.
+        </span>
+
+        <button mat-flat-button color="primary" (click)="setInitialPerspectivePreview()">
+          Update Preview
+        </button>
 
         <mat-card>
-          <mat-card-header>
-            <mat-card-title> Background </mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
+          <img class="previewimage" [src]="previewImage$ | async" />
+        </mat-card>
+      </mat-expansion-panel>
+
+      <button class="fullwidth-button" mat-flat-button (click)="backToDefaultSettings()">
+        Reset changed settings
+      </button>
+      <button
+        class="fullwidth-button"
+        mat-flat-button
+        [disabled]="!(canSaveSettings$ | async)"
+        (click)="saveSettings()"
+        color="primary"
+      >
+        Save settings
+      </button>
+    </ng-container>
+
+    <ng-container *ngIf="processing.isInUpload$ | async">
+      <mat-vertical-stepper [linear]="true" #stepper>
+        <mat-step
+          *ngIf="processing.hasMeshSettings$ | async"
+          [completed]="entitySettings.meshSettingsCompleted | async"
+          [editable]="!(entitySettings.meshSettingsCompleted | async)"
+        >
+          <ng-template matStepLabel>Mesh Setup</ng-template>
+          <app-entity-feature-settings-mesh></app-entity-feature-settings-mesh>
+          <button mat-flat-button color="primary" (click)="confirmMeshSettings(stepper)">
+            Confirm Scale & Orientation
+          </button>
+        </mat-step>
+
+        <mat-step [completed]="isPreviewSet$ | async" [editable]="!(isPreviewSet$ | async)">
+          <ng-template matStepLabel>Settings</ng-template>
+
+          <mat-expansion-panel expanded>
+            <mat-expansion-panel-header>
+              <mat-panel-title>Background</mat-panel-title>
+            </mat-expansion-panel-header>
+
             <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
-            <br />
             <mat-slide-toggle
               [(ngModel)]="settings.localSettings.background.effect"
               (change)="entitySettings.loadBackgroundEffect()"
             >
               Gradient-Brightness Effect
             </mat-slide-toggle>
-          </mat-card-content>
-        </mat-card>
+          </mat-expansion-panel>
 
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title> Lights </mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
+          <mat-expansion-panel expanded>
+            <mat-expansion-panel-header>
+              <mat-panel-title>Lights</mat-panel-title>
+            </mat-expansion-panel-header>
+
             <app-entity-feature-settings-lights></app-entity-feature-settings-lights>
-          </mat-card-content>
-        </mat-card>
+          </mat-expansion-panel>
 
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title> Preview & Initial Perspective </mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            Click on this image to set actual view as initial perspective.
-            <img
-              class="previewimage"
-              [src]="settings.localSettings.preview"
-              (click)="setInitialPerspectivePreview()"
-            />
-          </mat-card-content>
-        </mat-card>
+          <mat-expansion-panel expanded *ngIf="(processing.mediaType$ | async) !== 'audio'">
+            <mat-expansion-panel-header>
+              <mat-panel-title>Preview & Initial Perspective</mat-panel-title>
+            </mat-expansion-panel-header>
 
-        <mat-card>
-          <mat-card-content>
-            <button class="fullwidth-button" mat-raised-button (click)="backToDefaultSettings()">
-              Back to Default
+            <span>
+              Please select a nice and fitting camera perspective. This perspective will be used for
+              the preview image of your object, aswell as the initial perspective when loading your
+              object in Kompakkt.
+            </span>
+
+            <button mat-flat-button color="primary" (click)="setInitialPerspectivePreview()">
+              {{ (isPreviewSet$ | async) ? 'Update' : 'Set' }} Preview
             </button>
-            <button
-              class="fullwidth-button"
-              mat-raised-button
-              *ngIf="canSaveSettings$ | async"
-              (click)="saveSettings()"
-            >
-              Save as default
-            </button>
-          </mat-card-content>
-        </mat-card>
-      </div>
 
-      <div *ngIf="processing.isInUpload$ | async">
-        <mat-vertical-stepper [linear]="true" #stepper>
-          <mat-step
-            *ngIf="processing.hasMeshSettings$ | async"
-            [completed]="entitySettings.meshSettingsCompleted | async"
-            [editable]="!(entitySettings.meshSettingsCompleted | async)"
+            <mat-card>
+              <img class="previewimage" [src]="settings.localSettings.preview" />
+            </mat-card>
+          </mat-expansion-panel>
+
+          <button
+            mat-flat-button
+            color="primary"
+            (click)="saveSettings()"
+            [disabled]="!(isPreviewSet$ | async)"
           >
-            <ng-template matStepLabel>Mesh Setup</ng-template>
-            <app-entity-feature-settings-mesh></app-entity-feature-settings-mesh>
-            <button mat-flat-button color="primary" (click)="confirmMeshSettings(stepper)">
-              Confirm Scale & Orientation
-            </button>
+            Save Settings
+          </button>
+        </mat-step>
+
+        <ng-container *ngIf="!(isStandalone$ | async); else standaloneExport">
+          <mat-step>
+            <ng-template matStepLabel>Done</ng-template>
+            <mat-card>
+              <img class="previewimage" [src]="settings.localSettings.preview" />
+            </mat-card>
+            <mat-card>
+              <span>Your settings have been set!</span>
+            </mat-card>
           </mat-step>
+        </ng-container>
 
-          <mat-step [completed]="isPreviewSet$ | async" [editable]="!(isPreviewSet$ | async)">
-            <ng-template matStepLabel>Settings</ng-template>
-
-            <mat-expansion-panel>
-              <mat-expansion-panel-header>
-                <mat-panel-title>Background</mat-panel-title>
-              </mat-expansion-panel-header>
-
-              <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
-              <br />
-              <mat-slide-toggle
-                [(ngModel)]="settings.localSettings.background.effect"
-                (change)="entitySettings.loadBackgroundEffect()"
-              >
-                Gradient-Brightness Effect
-              </mat-slide-toggle>
-            </mat-expansion-panel>
-
-            <mat-expansion-panel>
-              <mat-expansion-panel-header>
-                <mat-panel-title>Lights</mat-panel-title>
-              </mat-expansion-panel-header>
-
-              <app-entity-feature-settings-lights></app-entity-feature-settings-lights>
-            </mat-expansion-panel>
-
-            <mat-expansion-panel *ngIf="(processing.mediaType$ | async) !== 'audio'">
-              <mat-expansion-panel-header>
-                <mat-panel-title>Preview & Initial Perspective</mat-panel-title>
-              </mat-expansion-panel-header>
-
+        <ng-template #standaloneExport>
+          <mat-step>
+            <ng-template matStepLabel>Export</ng-template>
+            <mat-card>
+              <mat-card>
+                <img class="previewimage" [src]="settings.localSettings.preview" />
+              </mat-card>
               <span>
-                Please select a nice and fitting camera perspective. This perspective will be used
-                for the preview image of your object, aswell as the initial perspective when loading
-                your object in Kompakkt.
+                Your settings can now be exported and loaded in the standalone Kompakkt viewer.
               </span>
-
-              <button mat-flat-button color="primary" (click)="setInitialPerspectivePreview()">
-                {{ (isPreviewSet$ | async) ? 'Update' : 'Set' }} Preview
-              </button>
-
-              <mat-card>
-                <img class="previewimage" [src]="settings.localSettings.preview" />
-              </mat-card>
-            </mat-expansion-panel>
-
-            <button
-              mat-flat-button
-              color="primary"
-              (click)="saveSettings()"
-              [disabled]="!(isPreviewSet$ | async)"
-            >
-              Save Settings
-            </button>
+              <br />
+              <div class="button-pair">
+                <button mat-flat-button matStepperPrevious>Back</button>
+                <button mat-flat-button (click)="exportSettings()">Export</button>
+              </div>
+            </mat-card>
           </mat-step>
-
-          <ng-container *ngIf="!(isStandalone$ | async); else standaloneExport">
-            <mat-step>
-              <ng-template matStepLabel>Done</ng-template>
-              <mat-card>
-                <img class="previewimage" [src]="settings.localSettings.preview" />
-              </mat-card>
-              <mat-card>
-                <span>Your settings have been set!</span>
-              </mat-card>
-            </mat-step>
-          </ng-container>
-
-          <ng-template #standaloneExport>
-            <mat-step>
-              <ng-template matStepLabel>Export</ng-template>
-              <mat-card>
-                <mat-card>
-                  <img class="previewimage" [src]="settings.localSettings.preview" />
-                </mat-card>
-                <span>
-                  Your settings can now be exported and loaded in the standalone Kompakkt viewer.
-                </span>
-                <br />
-                <div class="button-pair">
-                  <button mat-flat-button matStepperPrevious>Back</button>
-                  <button mat-flat-button (click)="exportSettings()">Export</button>
-                </div>
-              </mat-card>
-            </mat-step>
-          </ng-template>
-        </mat-vertical-stepper>
-      </div>
-    </div>
+        </ng-template>
+      </mat-vertical-stepper>
+    </ng-container>
   </ng-container>
 </ng-container>

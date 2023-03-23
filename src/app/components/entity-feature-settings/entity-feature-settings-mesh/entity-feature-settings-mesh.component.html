@@ -1,5 +1,5 @@
 <ng-container *ngIf="processing.settings$ | async as settings">
-  <mat-expansion-panel>
+  <mat-expansion-panel expanded>
     <mat-expansion-panel-header>
       <mat-panel-title>Information & Helpers</mat-panel-title>
     </mat-expansion-panel-header>
@@ -50,7 +50,7 @@
         step="0.1"
         [value]="worldAxisScalingFactor"
         #matslider
-        (input)="setScalingFactorAxis($event.value, true)"
+        (input)="setScalingFactorAxis($event.value!, true)"
       ></mat-slider>
     </mat-expansion-panel>
 
@@ -69,7 +69,7 @@
         step="0.1"
         [value]="localAxisScalingFactor"
         #matslider
-        (input)="setScalingFactorAxis($event.value, false)"
+        (input)="setScalingFactorAxis($event.value!, false)"
       ></mat-slider>
     </mat-expansion-panel>
 
@@ -89,7 +89,7 @@
         step="1"
         [value]="groundScalingFactor"
         #matslider
-        (input)="setScalingFactorGround($event.value)"
+        (input)="setScalingFactorGround($event.value!)"
       ></mat-slider>
 
       <small>Color</small>
@@ -97,7 +97,7 @@
     </mat-expansion-panel>
   </mat-expansion-panel>
 
-  <mat-expansion-panel>
+  <mat-expansion-panel expanded>
     <mat-expansion-panel-header>
       <mat-panel-title>Scale</mat-panel-title>
     </mat-expansion-panel-header>
@@ -160,7 +160,7 @@
     </p>
   </mat-expansion-panel>
 
-  <mat-expansion-panel>
+  <mat-expansion-panel expanded>
     <mat-expansion-panel-header>
       <mat-panel-title>Orientation</mat-panel-title>
     </mat-expansion-panel-header>

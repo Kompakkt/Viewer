@@ -33,6 +33,14 @@ export class EntityFeatureSettingsComponent {
     public userdata: UserdataService,
   ) {}
 
+  get previewImage$() {
+    return this.processing.settings$.pipe(
+      map(({ localSettings: { preview } }) =>
+        preview.startsWith('data:image') ? preview : `${environment.server_url}uploads/${preview}`,
+      ),
+    );
+  }
+
   get entity$() {
     return this.processing.entity$;
   }
