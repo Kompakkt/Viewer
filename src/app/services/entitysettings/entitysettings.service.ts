@@ -12,7 +12,7 @@ import {
   Tags,
   Vector3,
 } from '@babylonjs/core';
-import { firstValueFrom } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { IColor, IEntityLight, IEntitySettings } from 'src/common';
 import { minimalSettings } from '../../../assets/settings/settings';
 import { BabylonService } from '../babylon/babylon.service';
@@ -217,7 +217,7 @@ export class EntitySettingsService {
     await this.loadCameraInititalPosition();
     this.loadBackgroundEffect();
     this.loadBackgroundColor();
-    this.initialiseLights();
+    this.loadLights();
     if (hasMeshSettings || mediaType === 'audio') {
       await this.loadRotation();
       await this.loadScaling();
@@ -228,8 +228,7 @@ export class EntitySettingsService {
     this.loadCameraInititalPosition();
     this.loadBackgroundEffect();
     this.loadBackgroundColor();
-    this.loadPointLightPosition();
-    this.loadLightIntensityAllLights();
+    this.loadLights();
   }
 
   private async initialiseCamera() {
@@ -468,126 +467,60 @@ export class EntitySettingsService {
 
   // background: color, effect
   loadBackgroundColor() {
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
+    if (!this.entitySettings) throw new Error('Settings missing');
     const color = this.entitySettings.background.color;
     this.babylon.setBackgroundColor(color);
   }
 
   loadBackgroundEffect() {
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
+    if (!this.entitySettings) throw new Error('Settings missing');
     this.babylon.setBackgroundImage(this.entitySettings.background.effect);
   }
 
   // Lights
-  private lights = {
-    pointLight: undefined as PointLight | undefined,
-    ambientlightUp: undefined as DirectionalLight | undefined,
-    ambientlightDown: undefined as DirectionalLight | undefined,
-  };
+  public lights$ = new BehaviorSubject<
+    | {
+        pointLight: PointLight;
+        ambientlightUp: DirectionalLight;
+        ambientlightDown: DirectionalLight;
+      }
+    | undefined
+  >(undefined);
 
   public initialiseAmbientLight(type: 'up' | 'down', intensity: number) {
     const direction = type === 'up' ? new Vector3(1, -5, 1) : new Vector3(1, 5, 1);
     const lightName = type === 'up' ? 'ambientlightUp' : 'ambientlightDown';
-
-    if (this.lights[lightName]) this.lights[lightName]?.dispose();
     const light = new DirectionalLight(lightName, direction, this.babylon.getScene());
     light.intensity = intensity;
     light.specular = new Color3(0.5, 0.5, 0.5);
-    this.lights[lightName] = light;
+    return light;
   }
 
   public initialisePointLight(intensity: number, position: Vector3) {
-    if (this.lights.pointLight) this.lights.pointLight.dispose();
-    const pointlight = new PointLight('pointLight', position, this.babylon.getScene());
-    pointlight.specular = new Color3(0, 0, 0);
-    pointlight.intensity = intensity;
-    pointlight.parent = this.babylon.getActiveCamera();
-    this.lights.pointLight = pointlight;
+    const light = new PointLight('pointLight', position, this.babylon.getScene());
+    light.specular = new Color3(0, 0, 0);
+    light.intensity = intensity;
+    light.parent = this.babylon.getActiveCamera();
+    return light;
   }
 
-  public setLightIntensity(lightType: IEntityLightType, intensity: number) {
-    const light = this.lights[lightType];
-    if (light) light.intensity = intensity;
-  }
+  private async loadLights() {
+    const existingLights = this.lights$.getValue();
+    if (existingLights) Object.values(existingLights).forEach(light => light.dispose());
 
-  public setPointLightPosition(position: Vector3) {
-    if (!this.lights.pointLight) throw new Error('No pointlight in scene');
-    this.lights.pointLight.position = position;
-  }
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
+    const entries = ['pointLight', 'ambientlightUp', 'ambientlightDown'].map(lightType => {
+      const {
+        intensity,
+        position: { x, y, z },
+        type,
+      } = localSettings.lights.find(filterLightByType[lightType])!;
+      if (type === 'PointLight')
+        return [lightType, this.initialisePointLight(intensity, new Vector3(x, y, z))];
+      const direction = lightType.includes('Up') ? 'up' : 'down';
+      return [lightType, this.initialiseAmbientLight(direction, intensity)];
+    });
 
-  public getLightSettingsByType(lightType: IEntityLightType): IEntityLight | undefined {
-    if (!this.entitySettings) throw new Error('Settings missing');
-    return this.entitySettings.lights.find(filterLightByType[lightType]);
-  }
-
-  public getLightIndexByType(lightType: IEntityLightType): number | undefined {
-    if (!this.entitySettings) throw new Error('Settings missing');
-    return this.entitySettings.lights.findIndex(filterLightByType[lightType]);
-  }
-
-  private initialiseLights() {
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    const pointLight = this.getLightSettingsByType('pointLight');
-    if (pointLight) {
-      const { x, y, z } = pointLight.position;
-      this.initialisePointLight(pointLight.intensity, new Vector3(x, y, z));
-    }
-    const hemisphericLightUp = this.getLightSettingsByType('ambientlightUp');
-    if (hemisphericLightUp) {
-      this.initialiseAmbientLight('up', hemisphericLightUp.intensity);
-    }
-    const hemisphericLightDown = this.getLightSettingsByType('ambientlightDown');
-    if (hemisphericLightDown) {
-      this.initialiseAmbientLight('down', hemisphericLightDown.intensity);
-    }
-  }
-
-  public loadLightIntensityAllLights() {
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    const ambientlightUp = this.getLightSettingsByType('ambientlightUp');
-    if (ambientlightUp) {
-      this.setLightIntensity('ambientlightUp', ambientlightUp.intensity);
-    }
-    const ambientlightDown = this.getLightSettingsByType('ambientlightDown');
-    if (ambientlightDown) {
-      this.setLightIntensity('ambientlightDown', ambientlightDown.intensity);
-    }
-    const pointLight = this.getLightSettingsByType('pointLight');
-    if (pointLight) {
-      this.setLightIntensity('pointLight', pointLight.intensity);
-    }
-  }
-
-  public loadLightIntensity(lightType: IEntityLightType) {
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    const light = this.getLightSettingsByType(lightType);
-    if (light) {
-      this.setLightIntensity(lightType, light.intensity);
-    }
-  }
-
-  public loadPointLightPosition() {
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    const pointLight = this.getLightSettingsByType('pointLight');
-    if (pointLight) {
-      const position = new Vector3(
-        pointLight.position.x,
-        pointLight.position.y,
-        pointLight.position.z,
-      );
-      this.setPointLightPosition(position);
-    }
+    this.lights$.next(Object.fromEntries(entries));
   }
 }
