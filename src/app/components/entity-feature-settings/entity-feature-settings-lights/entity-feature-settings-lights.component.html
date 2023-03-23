@@ -25,8 +25,8 @@
   [value]="getLightIntensity('pointLight')"
   (input)="setLightIntensity($event.value!, 'pointLight')"
 ></mat-slider>
-<h5>Pointlight Dimensions: X Y Z</h5>
 <ng-container *ngIf="pointlightPosition$ | async as position">
+  <h5>Pointlight Dimensions: X Y Z</h5>
   <mat-slider
     min="-10"
     max="10"

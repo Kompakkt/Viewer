@@ -3,18 +3,19 @@ import {
   Animation,
   Axis,
   Color3,
+  DirectionalLight,
   Mesh,
   MeshBuilder,
+  PointLight,
   Quaternion,
   StandardMaterial,
   Tags,
   Vector3,
 } from '@babylonjs/core';
 import { firstValueFrom } from 'rxjs';
-import { IColor, IEntitySettings } from 'src/common';
+import { IColor, IEntityLight, IEntitySettings } from 'src/common';
 import { minimalSettings } from '../../../assets/settings/settings';
 import { BabylonService } from '../babylon/babylon.service';
-import { IEntityLightType, LightService } from '../light/light.service';
 import { ProcessingService } from '../processing/processing.service';
 import {
   createBoundingBox,
@@ -22,6 +23,16 @@ import {
   createlocalAxes,
   createWorldAxis,
 } from './visualUIHelper';
+
+export type IEntityLightType = 'pointLight' | 'ambientlightUp' | 'ambientlightDown';
+
+const filterLightByType: { [key: string]: (light: IEntityLight) => boolean } = {
+  ambientlightUp: light =>
+    ['HemisphericLight', 'DirectionalLight'].includes(light.type) && light.position.y === 1,
+  ambientlightDown: light =>
+    ['HemisphericLight', 'DirectionalLight'].includes(light.type) && light.position.y === -1,
+  pointLight: light => light.type === 'PointLight',
+};
 
 const isDegreeSpectrum = (value: number) => {
   return value >= 0 && value <= 360 ? value : value > 360 ? 360 : 0;
@@ -47,11 +58,7 @@ export class EntitySettingsService {
 
   private entitySettings: IEntitySettings = minimalSettings;
 
-  constructor(
-    private babylon: BabylonService,
-    private processing: ProcessingService,
-    private lights: LightService,
-  ) {
+  constructor(private babylon: BabylonService, private processing: ProcessingService) {
     this.processing.state$.subscribe(({ settings, entity, meshes }) => {
       console.log('EntitySettingsService', { settings, entity, meshes });
       this.entitySettings = settings;
@@ -475,25 +482,69 @@ export class EntitySettingsService {
     this.babylon.setBackgroundImage(this.entitySettings.background.effect);
   }
 
-  // lights: up, down, pointlight
-  // Ambientlights
+  // Lights
+  private lights = {
+    pointLight: undefined as PointLight | undefined,
+    ambientlightUp: undefined as DirectionalLight | undefined,
+    ambientlightDown: undefined as DirectionalLight | undefined,
+  };
+
+  public initialiseAmbientLight(type: 'up' | 'down', intensity: number) {
+    const direction = type === 'up' ? new Vector3(1, -5, 1) : new Vector3(1, 5, 1);
+    const lightName = type === 'up' ? 'ambientlightUp' : 'ambientlightDown';
+
+    if (this.lights[lightName]) this.lights[lightName]?.dispose();
+    const light = new DirectionalLight(lightName, direction, this.babylon.getScene());
+    light.intensity = intensity;
+    light.specular = new Color3(0.5, 0.5, 0.5);
+    this.lights[lightName] = light;
+  }
+
+  public initialisePointLight(intensity: number, position: Vector3) {
+    if (this.lights.pointLight) this.lights.pointLight.dispose();
+    const pointlight = new PointLight('pointLight', position, this.babylon.getScene());
+    pointlight.specular = new Color3(0, 0, 0);
+    pointlight.intensity = intensity;
+    pointlight.parent = this.babylon.getActiveCamera();
+    this.lights.pointLight = pointlight;
+  }
+
+  public setLightIntensity(lightType: IEntityLightType, intensity: number) {
+    const light = this.lights[lightType];
+    if (light) light.intensity = intensity;
+  }
+
+  public setPointLightPosition(position: Vector3) {
+    if (!this.lights.pointLight) throw new Error('No pointlight in scene');
+    this.lights.pointLight.position = position;
+  }
+
+  public getLightSettingsByType(lightType: IEntityLightType): IEntityLight | undefined {
+    if (!this.entitySettings) throw new Error('Settings missing');
+    return this.entitySettings.lights.find(filterLightByType[lightType]);
+  }
+
+  public getLightIndexByType(lightType: IEntityLightType): number | undefined {
+    if (!this.entitySettings) throw new Error('Settings missing');
+    return this.entitySettings.lights.findIndex(filterLightByType[lightType]);
+  }
 
   private initialiseLights() {
     if (!this.entitySettings) {
       throw new Error('Settings missing');
     }
-    const pointLight = this.lights.getLightByType('pointLight');
+    const pointLight = this.getLightSettingsByType('pointLight');
     if (pointLight) {
       const { x, y, z } = pointLight.position;
-      this.lights.initialisePointLight(pointLight.intensity, new Vector3(x, y, z));
+      this.initialisePointLight(pointLight.intensity, new Vector3(x, y, z));
     }
-    const hemisphericLightUp = this.lights.getLightByType('ambientlightUp');
+    const hemisphericLightUp = this.getLightSettingsByType('ambientlightUp');
     if (hemisphericLightUp) {
-      this.lights.initialiseAmbientLight('up', hemisphericLightUp.intensity);
+      this.initialiseAmbientLight('up', hemisphericLightUp.intensity);
     }
-    const hemisphericLightDown = this.lights.getLightByType('ambientlightDown');
+    const hemisphericLightDown = this.getLightSettingsByType('ambientlightDown');
     if (hemisphericLightDown) {
-      this.lights.initialiseAmbientLight('down', hemisphericLightDown.intensity);
+      this.initialiseAmbientLight('down', hemisphericLightDown.intensity);
     }
   }
 
@@ -501,17 +552,17 @@ export class EntitySettingsService {
     if (!this.entitySettings) {
       throw new Error('Settings missing');
     }
-    const ambientlightUp = this.lights.getLightByType('ambientlightUp');
+    const ambientlightUp = this.getLightSettingsByType('ambientlightUp');
     if (ambientlightUp) {
-      this.lights.setLightIntensity('ambientlightUp', ambientlightUp.intensity);
+      this.setLightIntensity('ambientlightUp', ambientlightUp.intensity);
     }
-    const ambientlightDown = this.lights.getLightByType('ambientlightDown');
+    const ambientlightDown = this.getLightSettingsByType('ambientlightDown');
     if (ambientlightDown) {
-      this.lights.setLightIntensity('ambientlightDown', ambientlightDown.intensity);
+      this.setLightIntensity('ambientlightDown', ambientlightDown.intensity);
     }
-    const pointLight = this.lights.getLightByType('pointLight');
+    const pointLight = this.getLightSettingsByType('pointLight');
     if (pointLight) {
-      this.lights.setLightIntensity('pointLight', pointLight.intensity);
+      this.setLightIntensity('pointLight', pointLight.intensity);
     }
   }
 
@@ -519,9 +570,9 @@ export class EntitySettingsService {
     if (!this.entitySettings) {
       throw new Error('Settings missing');
     }
-    const light = this.lights.getLightByType(lightType);
+    const light = this.getLightSettingsByType(lightType);
     if (light) {
-      this.lights.setLightIntensity(lightType, light.intensity);
+      this.setLightIntensity(lightType, light.intensity);
     }
   }
 
@@ -529,14 +580,14 @@ export class EntitySettingsService {
     if (!this.entitySettings) {
       throw new Error('Settings missing');
     }
-    const pointLight = this.lights.getLightByType('pointLight');
+    const pointLight = this.getLightSettingsByType('pointLight');
     if (pointLight) {
       const position = new Vector3(
         pointLight.position.x,
         pointLight.position.y,
         pointLight.position.z,
       );
-      this.lights.setPointLightPosition(position);
+      this.setPointLightPosition(position);
     }
   }
 }
