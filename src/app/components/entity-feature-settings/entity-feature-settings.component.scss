@@ -1,3 +1,5 @@
+@use 'src/helpers';
+
 .previewimage {
   width: 100%;
   height: 160px;
@@ -16,47 +18,7 @@ div.button-pair {
   grid-gap: 8px;
 }
 
-@mixin flex-column-with-gap() {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 12px;
-}
-
 :host {
-  @include flex-column-with-gap();
+  @include helpers.flex-column-with-gap();
   padding: 8px;
-}
-
-::ng-deep {
-  .mat-stepper-vertical,
-  mat-expansion-panel {
-    background: transparent !important;
-  }
-  .mat-expansion-panel {
-    box-shadow: unset !important;
-    border-radius: 4px !important;
-    background: rgba(255, 255, 255, 0.1) !important;
-  }
-  .mat-expansion-panel-body {
-    @include flex-column-with-gap();
-    padding: 12px 16px 16px !important;
-    > * {
-      margin-left: 0 !important;
-      margin-right: 0 !important;
-    }
-  }
-  .mat-expansion-indicator {
-    display: none !important;
-  }
-  .mat-vertical-content-container {
-    margin-left: 0px !important;
-  }
-  .mat-vertical-content {
-    @include flex-column-with-gap();
-    padding: 8px !important;
-  }
-  .mat-flat-button:not(.mat-primary):not(.mat-accent) {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-  }
 }

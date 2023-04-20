@@ -1,0 +1,40 @@
+@use 'src/helpers';
+
+.white-mat-card {
+  margin: 8px !important;
+  border-radius: 4px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  box-sizing: border-box !important;
+}
+
+.custom-expansion-panel {
+  box-shadow: unset !important;
+  border-radius: 4px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  .mat-expansion-panel-body {
+    @include helpers.flex-column-with-gap();
+    padding: 12px 16px 16px !important;
+    > * {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+    }
+  }
+  .mat-expansion-indicator {
+    display: none !important;
+  }
+}
+
+.custom-vertical-stepper {
+  background: transparent !important;
+  .mat-vertical-content-container {
+    margin-left: 0px !important;
+  }
+  .mat-vertical-content {
+    @include helpers.flex-column-with-gap();
+    padding: 8px !important;
+  }
+}
+
+.white-mat-button {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}

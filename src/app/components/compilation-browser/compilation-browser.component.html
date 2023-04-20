@@ -1,7 +1,7 @@
 <div id="compilationBrowser">
   <div *ngIf="compilation$ | async as compilation">
     <div id="entity-overview" *ngIf="entity$ | async as entity">
-      <mat-card class="entity-card">
+      <mat-card class="white-mat-card entity-card">
         <mat-card-header>
           <mat-card-title> Selected Object: {{ entity.name }} </mat-card-title>
         </mat-card-header>
@@ -17,7 +17,7 @@
         Object{{ entities.length > 1 ? 's' : '' }} in {{ compilation.name }}:
       </div>
 
-      <mat-card class="entity-card" *ngFor="let entity of entities">
+      <mat-card class="white-mat-card entity-card" *ngFor="let entity of entities">
         <mat-card-header>
           <mat-card-title>
             {{ entity.name }}

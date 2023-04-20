@@ -3,14 +3,18 @@
     <ng-container *ngIf="(processing.isInUpload$ | async) === false">
       <app-background-settings [expanded]="true"></app-background-settings>
 
-      <mat-expansion-panel expanded>
+      <mat-expansion-panel class="custom-expansion-panel" expanded>
         <mat-expansion-panel-header>
           <mat-panel-title>Lights</mat-panel-title>
         </mat-expansion-panel-header>
         <app-entity-feature-settings-lights></app-entity-feature-settings-lights>
       </mat-expansion-panel>
 
-      <mat-expansion-panel *ngIf="(processing.mediaType$ | async) !== 'audio'" expanded>
+      <mat-expansion-panel
+        class="custom-expansion-panel"
+        *ngIf="(processing.mediaType$ | async) !== 'audio'"
+        expanded
+      >
         <mat-expansion-panel-header>
           <mat-panel-title>Preview & Initial Perspective</mat-panel-title>
         </mat-expansion-panel-header>
@@ -25,12 +29,16 @@
           Update Preview
         </button>
 
-        <mat-card>
+        <mat-card class="white-mat-card">
           <img class="previewimage" [src]="previewImage$ | async" />
         </mat-card>
       </mat-expansion-panel>
 
-      <button class="fullwidth-button" mat-flat-button (click)="backToDefaultSettings()">
+      <button
+        class="fullwidth-button white-mat-button"
+        mat-flat-button
+        (click)="backToDefaultSettings()"
+      >
         Reset changed settings
       </button>
       <button
@@ -45,7 +53,7 @@
     </ng-container>
 
     <ng-container *ngIf="processing.isInUpload$ | async">
-      <mat-vertical-stepper [linear]="true" #stepper>
+      <mat-vertical-stepper class="custom-vertical-stepper" [linear]="true" #stepper>
         <mat-step
           *ngIf="processing.hasMeshSettings$ | async"
           [completed]="entitySettings.meshSettingsCompleted | async"
@@ -63,7 +71,7 @@
 
           <app-background-settings [expanded]="true"></app-background-settings>
 
-          <mat-expansion-panel expanded>
+          <mat-expansion-panel class="custom-expansion-panel" expanded>
             <mat-expansion-panel-header>
               <mat-panel-title>Lights</mat-panel-title>
             </mat-expansion-panel-header>
@@ -71,7 +79,11 @@
             <app-entity-feature-settings-lights></app-entity-feature-settings-lights>
           </mat-expansion-panel>
 
-          <mat-expansion-panel expanded *ngIf="(processing.mediaType$ | async) !== 'audio'">
+          <mat-expansion-panel
+            class="custom-expansion-panel"
+            expanded
+            *ngIf="(processing.mediaType$ | async) !== 'audio'"
+          >
             <mat-expansion-panel-header>
               <mat-panel-title>Preview & Initial Perspective</mat-panel-title>
             </mat-expansion-panel-header>
@@ -86,7 +98,7 @@
               {{ (isPreviewSet$ | async) ? 'Update' : 'Set' }} Preview
             </button>
 
-            <mat-card>
+            <mat-card class="white-mat-card">
               <img class="previewimage" [src]="settings.localSettings.preview" />
             </mat-card>
           </mat-expansion-panel>
@@ -104,10 +116,10 @@
         <ng-container *ngIf="!(isStandalone$ | async); else standaloneExport">
           <mat-step>
             <ng-template matStepLabel>Done</ng-template>
-            <mat-card>
+            <mat-card class="white-mat-card">
               <img class="previewimage" [src]="settings.localSettings.preview" />
             </mat-card>
-            <mat-card>
+            <mat-card class="white-mat-card">
               <span>Your settings have been set!</span>
             </mat-card>
           </mat-step>
@@ -116,8 +128,8 @@
         <ng-template #standaloneExport>
           <mat-step>
             <ng-template matStepLabel>Export</ng-template>
-            <mat-card>
-              <mat-card>
+            <mat-card class="white-mat-card">
+              <mat-card class="white-mat-card">
                 <img class="previewimage" [src]="settings.localSettings.preview" />
               </mat-card>
               <span>
@@ -125,8 +137,10 @@
               </span>
               <br />
               <div class="button-pair">
-                <button mat-flat-button matStepperPrevious>Back</button>
-                <button mat-flat-button (click)="exportSettings()">Export</button>
+                <button mat-flat-button class="white-mat-button" matStepperPrevious>Back</button>
+                <button mat-flat-button class="white-mat-button" (click)="exportSettings()">
+                  Export
+                </button>
               </div>
             </mat-card>
           </mat-step>
