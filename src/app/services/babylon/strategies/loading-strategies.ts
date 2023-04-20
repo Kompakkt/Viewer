@@ -87,7 +87,7 @@ const patchMeshPBR = (mesh: AbstractMesh, scene: Scene) => {
   }
 };
 
-export const load3DEntity = (rootUrl: string, scene: Scene, isDefault?: boolean) => {
+export const load3DEntity = async (rootUrl: string, scene: Scene, isDefault?: boolean) => {
   const rootFolder = Tools.GetFolderPath(rootUrl);
   const filename = Tools.GetFilename(rootUrl);
   const extension = filename.includes('.') ? `.${filename.split('.').slice(-1).pop()!}` : undefined;

@@ -11,11 +11,11 @@ export class LoadingScreenService {
   public isLoading = false;
 
   public show() {
-    if (!this.isLoading) setTimeout(() => this.updateOpacity('1'), 500);
+    this.updateOpacity('1');
   }
 
   public hide() {
-    if (this.isLoading) this.updateOpacity('0');
+    this.updateOpacity('0');
   }
 
   public updateOpacity(newOpacity: string): void {
