@@ -23,9 +23,8 @@
   width: auto;
   bottom: 5px;
 
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: var(--transparent-background-color);
   border-radius: 0.75rem;
-  box-shadow: 1px 1px #333;
 }
 
 .is-active {

@@ -4,7 +4,7 @@
   left: 50%;
   max-width: 300px;
   transform: translateX(-50%);
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: var(--transparent-background-color);
   border-radius: 0.75rem;
   color: #fff;
   text-align: center;

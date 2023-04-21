@@ -14,7 +14,7 @@ div#camera-settings {
   right: 8px;
   white-space: nowrap; // Fix width of absolutely positioned element
 
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--transparent-background-color);
   color: white;
   padding: 16px 16px;
   border-radius: 12px;
@@ -65,7 +65,7 @@ div#camera-type-notification {
   left: 50%;
   top: -8px;
   padding: 8px;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--transparent-background-color);
   border-radius: 8px;
 
   transform-origin: top center;
