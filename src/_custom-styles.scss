@@ -5,6 +5,9 @@
   border-radius: 4px !important;
   background: rgba(255, 255, 255, 0.1) !important;
   box-sizing: border-box !important;
+  &.active {
+    border: solid 2px rgba(255, 255, 255, 0.5) !important;
+  }
 }
 
 .custom-expansion-panel {
@@ -22,6 +25,11 @@
   .mat-expansion-indicator {
     display: none !important;
   }
+}
+
+.padded-expansion-panel-header {
+  height: unset !important;
+  padding: 16px !important;
 }
 
 .custom-vertical-stepper {

@@ -58,6 +58,7 @@ import { MediaTypePipe } from './pipes/media-type.pipe';
 import { MarkdownPreviewComponent } from './components/markdown-preview/markdown-preview.component';
 import { CameraSettingsComponent } from './components/menu/camera-settings/camera-settings.component';
 import { BackgroundSettingsComponent } from './components/entity-feature-settings/background-settings/background-settings.component';
+import { ColorToRgbaPipe } from './pipes/color-to-rgba.pipe';
 
 @NgModule({
   declarations: [
@@ -90,6 +91,7 @@ import { BackgroundSettingsComponent } from './components/entity-feature-setting
     MarkdownPreviewComponent,
     CameraSettingsComponent,
     BackgroundSettingsComponent,
+    ColorToRgbaPipe,
   ],
   imports: [
     BrowserModule,

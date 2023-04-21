@@ -1,34 +1,40 @@
-<div id="compilationBrowser">
-  <div *ngIf="compilation$ | async as compilation">
-    <div id="entity-overview" *ngIf="entity$ | async as entity">
-      <mat-card class="white-mat-card entity-card">
-        <mat-card-header>
-          <mat-card-title> Selected Object: {{ entity.name }} </mat-card-title>
-        </mat-card-header>
-        <img
-          *ngIf="entity.settings && entity.settings.preview"
-          [src]="server_url + entity.settings.preview"
-        />
-      </mat-card>
-    </div>
+<ng-container *ngIf="entities$ | async as entities">
+  <mat-card class="white-mat-card" *ngIf="compilation$ | async as compilation">
+    <p class="center">
+      <strong>{{ compilation.name }}</strong>
+    </p>
+  </mat-card>
 
-    <ng-container *ngIf="entities$ | async as entities">
-      <div class="category">
-        Object{{ entities.length > 1 ? 's' : '' }} in {{ compilation.name }}:
-      </div>
-
-      <mat-card class="white-mat-card entity-card" *ngFor="let entity of entities">
-        <mat-card-header>
-          <mat-card-title>
-            {{ entity.name }}
-          </mat-card-title>
-        </mat-card-header>
-        <img
-          *ngIf="entity.settings && entity.settings.preview"
-          [src]="server_url + entity.settings.preview"
-          (click)="processing.fetchAndLoad(entity._id, undefined)"
-        />
-      </mat-card>
-    </ng-container>
-  </div>
-</div>
+  <ng-container *ngIf="entity$ | async as selectedEntity">
+    <mat-card
+      class="white-mat-card card-without-padding"
+      *ngFor="let entity of entities"
+      [class.active]="selectedEntity._id === entity._id"
+    >
+      <img
+        class="previewimage"
+        [style.--bg]="entity.settings.background.color | colorToRgba"
+        *ngIf="entity.settings && entity.settings.preview"
+        [src]="server_url + entity.settings.preview"
+        (click)="processing.fetchAndLoad(entity._id, undefined)"
+        matTooltip="Click to load"
+        matTooltipPosition="after"
+      />
+      <mat-expansion-panel
+        class="custom-expansion-panel"
+        [expanded]="selectedEntity._id === entity._id"
+      >
+        <mat-expansion-panel-header
+          class="padded-expansion-panel-header"
+          matTooltip="Toggle description"
+          matTooltipPosition="after"
+        >
+          <strong>{{ entity.name }}</strong>
+        </mat-expansion-panel-header>
+        <mat-expansion-panel-body>
+          <small>{{ entity.relatedDigitalEntity.description }}</small>
+        </mat-expansion-panel-body>
+      </mat-expansion-panel>
+    </mat-card>
+  </ng-container>
+</ng-container>

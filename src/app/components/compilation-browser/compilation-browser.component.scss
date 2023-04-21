@@ -1,25 +1,26 @@
-.mat-radio-button {
-  display: block;
-  margin-top: 5px;
+@use 'src/helpers';
+
+:host {
+  @include helpers.flex-column-with-gap(0px);
+  padding: 8px;
 }
 
-.mat-form-field {
-  display: inherit;
+p.center {
+  text-align: center;
 }
 
-.category {
-  margin: 25px 0 0 0;
-}
-.entity-card {
-  margin-bottom: 25px;
+.card-without-padding {
+  padding: 0px !important;
 }
 
-.entity-card .mat-card-title {
-  text-transform: capitalize;
-}
-
-.entity-card img {
-  cursor: pointer;
-  max-height: 150px;
+.previewimage {
   width: 100%;
+  height: 160px;
+  aspect-ratio: 16/10;
+  transition: all 250ms ease-out;
+  object-fit: contain;
+  border-radius: inherit;
+  background-color: var(--bg);
+  cursor: pointer;
+  filter: brightness(1.25);
 }
