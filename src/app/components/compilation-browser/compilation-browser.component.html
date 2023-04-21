@@ -31,9 +31,11 @@
         >
           <strong>{{ entity.name }}</strong>
         </mat-expansion-panel-header>
-        <mat-expansion-panel-body>
-          <small>{{ entity.relatedDigitalEntity.description }}</small>
-        </mat-expansion-panel-body>
+
+        <small *ngIf="digitalEntity$ | async as digitalEntity; else noDescription">
+          {{ digitalEntity.description }}
+        </small>
+        <ng-template #noDescription> No description available </ng-template>
       </mat-expansion-panel>
     </mat-card>
   </ng-container>

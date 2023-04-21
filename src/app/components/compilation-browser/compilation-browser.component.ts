@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { filter, map } from 'rxjs';
-import { isCompilation, isEntity } from 'src/common';
+import { IDigitalEntity, isCompilation, isDigitalEntity, isEntity } from 'src/common';
 import { environment } from 'src/environments/environment';
 import { ProcessingService } from '../../services/processing/processing.service';
 
@@ -20,6 +20,14 @@ export class CompilationBrowserComponent {
 
   get entity$() {
     return this.processing.entity$;
+  }
+
+  get digitalEntity$() {
+    return this.entity$.pipe(
+      map(entity => entity?.relatedDigitalEntity),
+      filter(digitalEntity => isDigitalEntity(digitalEntity)),
+      map(digitalEntity => digitalEntity as IDigitalEntity),
+    );
   }
 
   get entities$() {
