@@ -31,6 +31,7 @@ import { ColorChromeModule } from 'ngx-color/chrome';
 
 import { AppComponent } from './app.component';
 import { CompilationBrowserComponent } from './components/compilation-browser/compilation-browser.component';
+import { CompilationBrowserEntityCardComponent } from './components/compilation-browser/entity-card/entity-card.component';
 import { DialogAnnotationEditorComponent } from './components/dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
 import { DialogDeleteAnnotationsComponent } from './components/dialogs/dialog-delete-annotations/dialog-delete-annotations.component';
 import { DialogDeleteSingleAnnotationComponent } from './components/dialogs/dialog-delete-single-annotation/dialog-delete-single-annotation.component';
@@ -70,6 +71,7 @@ import { ColorToRgbaPipe } from './pipes/color-to-rgba.pipe';
     AnnotationComponentForEditorComponent,
     AnnotationwalkthroughComponent,
     CompilationBrowserComponent,
+    CompilationBrowserEntityCardComponent,
     LoadingscreenComponent,
     EntityFeatureSettingsComponent,
     LoginComponent,

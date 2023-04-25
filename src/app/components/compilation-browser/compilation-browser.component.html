@@ -6,37 +6,10 @@
   </mat-card>
 
   <ng-container *ngIf="entity$ | async as selectedEntity">
-    <mat-card
-      class="white-mat-card card-without-padding"
+    <app-compilation-browser-entity-card
       *ngFor="let entity of entities"
-      [class.active]="selectedEntity._id === entity._id"
-    >
-      <img
-        class="previewimage"
-        [style.--bg]="entity.settings.background.color | colorToRgba"
-        *ngIf="entity.settings && entity.settings.preview"
-        [src]="server_url + entity.settings.preview"
-        (click)="processing.fetchAndLoad(entity._id, undefined)"
-        matTooltip="Click to load"
-        matTooltipPosition="after"
-      />
-      <mat-expansion-panel
-        class="custom-expansion-panel"
-        [expanded]="selectedEntity._id === entity._id"
-      >
-        <mat-expansion-panel-header
-          class="padded-expansion-panel-header"
-          matTooltip="Toggle description"
-          matTooltipPosition="after"
-        >
-          <strong>{{ entity.name }}</strong>
-        </mat-expansion-panel-header>
-
-        <small *ngIf="digitalEntity$ | async as digitalEntity; else noDescription">
-          {{ digitalEntity.description }}
-        </small>
-        <ng-template #noDescription> No description available </ng-template>
-      </mat-expansion-panel>
-    </mat-card>
+      [entity]="entity"
+      [isSelected]="entity._id === selectedEntity._id"
+    ></app-compilation-browser-entity-card>
   </ng-container>
 </ng-container>
