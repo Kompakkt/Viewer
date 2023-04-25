@@ -1,25 +1,10 @@
-.mat-radio-button {
-  display: block;
-  margin-top: 5px;
+@use 'src/helpers';
+
+:host {
+  @include helpers.flex-column-with-gap(0px);
+  padding: 8px;
 }
 
-.mat-form-field {
-  display: inherit;
-}
-
-.category {
-  margin: 25px 0 0 0;
-}
-.entity-card {
-  margin-bottom: 25px;
-}
-
-.entity-card .mat-card-title {
-  text-transform: capitalize;
-}
-
-.entity-card img {
-  cursor: pointer;
-  max-height: 150px;
-  width: 100%;
+p.center {
+  text-align: center;
 }

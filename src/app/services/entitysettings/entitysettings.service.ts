@@ -3,18 +3,19 @@ import {
   Animation,
   Axis,
   Color3,
+  DirectionalLight,
   Mesh,
   MeshBuilder,
+  PointLight,
   Quaternion,
   StandardMaterial,
   Tags,
   Vector3,
 } from '@babylonjs/core';
-import { firstValueFrom } from 'rxjs';
-import { IColor, IEntitySettings } from 'src/common';
-import { minimalSettings } from '../../../assets/settings/settings';
+import { RGBA } from 'ngx-color';
+import { BehaviorSubject, filter, firstValueFrom } from 'rxjs';
+import { IColor, IEntityLight, isEntity } from 'src/common';
 import { BabylonService } from '../babylon/babylon.service';
-import { LightService } from '../light/light.service';
 import { ProcessingService } from '../processing/processing.service';
 import {
   createBoundingBox,
@@ -22,6 +23,18 @@ import {
   createlocalAxes,
   createWorldAxis,
 } from './visualUIHelper';
+
+export type IEntityLightType = 'pointLight' | 'ambientlightUp' | 'ambientlightDown';
+export type Lights = {
+  ambientlightUp: DirectionalLight;
+  ambientlightDown: DirectionalLight;
+  pointLight: PointLight;
+};
+const filterLightByType: { [key: string]: (light: IEntityLight) => boolean } = {
+  ambientlightUp: ({ type, position }) => type !== 'PointLight' && position.y === 1,
+  ambientlightDown: ({ type, position }) => type !== 'PointLight' && position.y === -1,
+  pointLight: ({ type }) => type === 'PointLight',
+};
 
 const isDegreeSpectrum = (value: number) => {
   return value >= 0 && value <= 360 ? value : value > 360 ? 360 : 0;
@@ -31,8 +44,6 @@ const isDegreeSpectrum = (value: number) => {
   providedIn: 'root',
 })
 export class EntitySettingsService {
-  private min = new Vector3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
-  private max = new Vector3(Number.MAX_VALUE * -1, Number.MAX_VALUE * -1, Number.MAX_VALUE * -1);
   public initialSize = Vector3.Zero();
   private initialCenterPoint = Vector3.Zero();
   private currentCenterPoint = Vector3.Zero();
@@ -45,156 +56,112 @@ export class EntitySettingsService {
   public localAxisInitialSize = 0;
   public worldAxisInitialSize = 0;
 
-  private entitySettings: IEntitySettings = minimalSettings;
+  constructor(private babylon: BabylonService, private processing: ProcessingService) {
+    this.processing.state$
+      .pipe(filter(({ entity, meshes }) => isEntity(entity) && meshes?.length > 0))
+      .subscribe(async ({ settings }) => {
+        await this.setInitialValues();
+        await this.setUpMeshSettingsHelper();
 
-  constructor(
-    private babylon: BabylonService,
-    private processing: ProcessingService,
-    private lights: LightService,
-  ) {
-    this.processing.state$.subscribe(({ settings, entity, meshes }) => {
-      console.log('EntitySettingsService', { settings, entity, meshes });
-      this.entitySettings = settings;
-      requestAnimationFrame(() =>
-        this.setUpSettings()
-          .then(() => console.log('Settings loaded'))
-          .catch((err: Error) => console.log('Settings not loaded', err.message)),
-      );
-    });
+        await this.createVisualUIMeshSettingsHelper();
+
+        await this.initialiseCamera();
+        await this.loadCameraInititalPosition();
+
+        const { color, effect: enabled } = settings.background;
+        await this.setBackground({ color, enabled });
+        await this.loadLights();
+
+        const mediaType = await firstValueFrom(this.processing.mediaType$);
+        const hasMeshSettings = await firstValueFrom(this.processing.hasMeshSettings$);
+        if (hasMeshSettings || mediaType === 'audio') {
+          await this.loadRotation();
+          await this.loadScaling();
+        }
+
+        const isInUpload = await firstValueFrom(this.processing.isInUpload$);
+        if (!isInUpload || !hasMeshSettings) {
+          await this.destroyMesh('boundingBox');
+          await this.decomposeMeshSettingsHelper();
+        }
+      });
   }
 
-  get meshes$() {
-    return this.processing.meshes$;
-  }
-
-  private async resetInitialValues() {
-    this.min = new Vector3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
-    this.max = new Vector3(Number.MAX_VALUE * -1, Number.MAX_VALUE * -1, Number.MAX_VALUE * -1);
-    this.initialSize = Vector3.Zero();
-    this.initialCenterPoint = this.currentCenterPoint = Vector3.Zero();
-    this.groundInitialSize = 0;
-    this.localAxisInitialSize = 0;
-    this.worldAxisInitialSize = 0;
-    this.processing.rotationQuaternion = Quaternion.RotationYawPitchRoll(0, 0, 0);
-    this.processing.entityHeight = (0).toFixed(2);
-    this.processing.entityWidth = (0).toFixed(2);
-    this.processing.entityDepth = (0).toFixed(2);
-  }
-
-  private async setUpSettings() {
-    const meshes = await firstValueFrom(this.processing.meshes$);
-    const isInUpload = await firstValueFrom(this.processing.isInUpload$);
-    const hasMeshSettings = await firstValueFrom(this.processing.hasMeshSettings$);
-    if (!this.entitySettings) {
-      throw new Error('No settings available.');
-    }
-    if (!meshes || meshes.length === 0) {
-      throw new Error('No meshes available.');
-    }
-    await this.resetInitialValues();
-    await this.initialiseSizeValues();
-    await this.setUpMeshSettingsHelper();
-    await this.createVisualUIMeshSettingsHelper();
-    await this.loadSettings();
-    if (!isInUpload || !hasMeshSettings) {
-      await this.destroyMesh('boundingBox');
-      await this.decomposeMeshSettingsHelper();
-    }
-  }
-
-  private async initialiseSizeValues() {
-    await this.calculateMinMax()
-      .then(() => {
-        this.initialSize = this.max.subtract(this.min);
-        this.processing.entityHeight = this.initialSize.y.toFixed(2);
-        this.processing.entityWidth = this.initialSize.x.toFixed(2);
-        this.processing.entityDepth = this.initialSize.z.toFixed(2);
-        this.initialCenterPoint = this.currentCenterPoint = new Vector3(
-          this.max.x - this.initialSize.x / 2,
-          this.max.y - this.initialSize.y / 2,
-          this.max.z - this.initialSize.z / 2,
-        );
-      })
-      .catch((err: Error) => console.log('Failed intitializing size', err.message));
-  }
-
-  private async calculateMinMax() {
-    const meshes = await firstValueFrom(this.processing.meshes$);
-    if (!meshes) {
-      throw new Error('Center missing');
-    }
-    meshes.forEach(mesh => {
-      mesh.computeWorldMatrix(true);
-      // see if mesh is visible or just a dummy
-      const bi = mesh.getBoundingInfo();
-      if (bi.diagonalLength !== 0) {
-        // compare min max values
-        const minimum = bi.boundingBox.minimumWorld;
-        const maximum = bi.boundingBox.maximumWorld;
-
-        if (minimum.x < this.min.x) {
-          this.min.x = minimum.x;
-        }
-        if (minimum.y < this.min.y) {
-          this.min.y = minimum.y;
-        }
-        if (minimum.z < this.min.z) {
-          this.min.z = minimum.z;
-        }
-        if (maximum.x > this.max.x) {
-          this.max.x = maximum.x;
-        }
-        if (maximum.y > this.max.y) {
-          this.max.y = maximum.y;
-        }
-        if (maximum.z > this.max.z) {
-          this.max.z = maximum.z;
-        }
+  public async setBackground({ color, enabled }: { color?: RGBA; enabled?: boolean }) {
+    await firstValueFrom(this.processing.settings$).then(({ localSettings }) => {
+      if (color) {
+        localSettings.background.color = color;
+        this.babylon.setBackgroundColor(color);
+      }
+      if (enabled !== undefined) {
+        localSettings.background.effect = enabled;
+        this.babylon.setBackgroundEffect(enabled);
       }
     });
   }
 
-  private async setUpMeshSettingsHelper() {
+  private async computeMeshMinMaxWorld() {
+    const min = new Vector3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
+    const max = new Vector3(Number.MAX_VALUE * -1, Number.MAX_VALUE * -1, Number.MAX_VALUE * -1);
+
     const meshes = await firstValueFrom(this.processing.meshes$);
-    if (!meshes) {
-      throw new Error('No meshes available.');
-    }
-    this.center = MeshBuilder.CreateBox('center', { size: 0.01 }, this.babylon.getScene());
+    meshes.forEach(mesh => {
+      mesh.computeWorldMatrix(true);
+      const bi = mesh.getBoundingInfo();
+      if (bi.diagonalLength === 0) return;
+      const { minimumWorld: minimum, maximumWorld: maximum } = bi.boundingBox;
+      min.x = Math.min(min.x, minimum.x);
+      min.y = Math.min(min.y, minimum.y);
+      min.z = Math.min(min.z, minimum.z);
+      max.x = Math.max(max.x, maximum.x);
+      max.y = Math.max(max.y, maximum.y);
+      max.z = Math.max(max.z, maximum.z);
+    });
+    const distance = max.subtract(min);
+    const centerPoint = Vector3.Lerp(min, max, 0.5);
+    return { min, max, centerPoint, distance };
+  }
+
+  private async setInitialValues() {
+    const { centerPoint, distance } = await this.computeMeshMinMaxWorld();
+    this.initialSize = distance;
+    this.groundInitialSize = 0;
+    this.localAxisInitialSize = 0;
+    this.worldAxisInitialSize = 0;
+    this.processing.rotationQuaternion = Quaternion.RotationYawPitchRoll(0, 0, 0);
+    this.processing.entitySize = {
+      height: this.initialSize.y.toFixed(2),
+      width: this.initialSize.x.toFixed(2),
+      depth: this.initialSize.z.toFixed(2),
+    };
+
+    this.initialCenterPoint = centerPoint.clone();
+    this.currentCenterPoint = centerPoint.clone();
+  }
+
+  private async setUpMeshSettingsHelper() {
+    // TODO: Maybe the center could be created with the service?
+    // Then just run the meshes-loop when new meshes are added to the scene
+    const meshes = await firstValueFrom(this.processing.meshes$);
+    const scene = this.babylon.getScene();
+    this.center = MeshBuilder.CreateBox('center', { size: 0.01 }, scene);
     Tags.AddTagsTo(this.center, 'center');
     this.center.isVisible = false;
-
-    // rotation to zero
     this.center.rotationQuaternion = this.processing.rotationQuaternion;
 
     // position model to origin of the world coordinate system
-    if (this.min.x > 0) {
-      this.center.position.x = -this.min.x;
-    }
-    if (this.min.x < 0) {
-      this.center.position.x = Math.abs(this.min.x);
-    }
-    if (this.min.y > 0) {
-      this.center.position.y = -this.min.y;
-    }
-    if (this.min.y < 0) {
-      this.center.position.y = Math.abs(this.min.y);
-    }
-    if (this.min.z > 0) {
-      this.center.position.z = -this.min.z;
-    }
-    if (this.min.z < 0) {
-      this.center.position.z = Math.abs(this.min.z);
-    }
-
-    this.currentCenterPoint = new Vector3(
-      this.initialSize.x / 2,
-      this.initialSize.y / 2,
-      this.initialSize.z / 2,
+    const { min } = await this.computeMeshMinMaxWorld();
+    this.center.position = new Vector3(
+      min.x > 0 ? -min.x : Math.abs(min.x),
+      min.y > 0 ? -min.y : Math.abs(min.y),
+      min.z > 0 ? -min.z : Math.abs(min.z),
     );
 
-    // pivot to the center of the (visible) model
-    this.center.setPivotPoint(this.initialCenterPoint);
+    // TODO: Find out if this fixes issues when updating Babylon beyond 5.5.5
+    // const { x, y, z } = localSettings.cameraPositionInitial.target;
+    // this.center.position = new Vector3(x, y, z);
 
+    this.center.setPivotPoint(this.initialCenterPoint);
     meshes.forEach(mesh => {
       if (!mesh.parent) {
         mesh.parent = this.center as Mesh;
@@ -203,49 +170,21 @@ export class EntitySettingsService {
     });
   }
 
-  private async loadSettings() {
-    const mediaType = await firstValueFrom(this.processing.mediaType$);
-    const hasMeshSettings = await firstValueFrom(this.processing.hasMeshSettings$);
-    await this.initialiseCamera();
-    await this.loadCameraInititalPosition();
-    this.loadBackgroundEffect();
-    this.loadBackgroundColor();
-    this.initialiseLights();
-    if (hasMeshSettings || mediaType === 'audio') {
-      await this.loadRotation();
-      await this.loadScaling();
-    }
-  }
-
-  public restoreSettings() {
-    this.loadCameraInititalPosition();
-    this.loadBackgroundEffect();
-    this.loadBackgroundColor();
-    this.loadPointLightPosition();
-    this.loadLightIntensityAllLights();
-  }
-
   private async initialiseCamera() {
-    if (!this.entitySettings) {
-      console.error(this);
-      throw new Error('Settings missing');
-    }
-    const mediaType = await firstValueFrom(this.processing.mediaType$);
-    const isInUpload = await firstValueFrom(this.processing.isInUpload$);
-    const isDefault = await firstValueFrom(this.processing.defaultEntityLoaded$);
-    const scale = this.entitySettings.scale;
+    const [mediaType, isInUpload, isDefault, { localSettings }] = await Promise.all([
+      firstValueFrom(this.processing.mediaType$),
+      firstValueFrom(this.processing.isInUpload$),
+      firstValueFrom(this.processing.defaultEntityLoaded$),
+      firstValueFrom(this.processing.settings$),
+    ]);
+
+    const { scale } = localSettings;
     const isModel = mediaType === 'model' || mediaType === 'entity';
-    let diagonalLength = 0;
-    if (this.boundingBox) {
-      const bi = this.boundingBox.getBoundingInfo();
-      diagonalLength = bi.diagonalLength;
-    } else {
-      diagonalLength = Math.sqrt(
-        this.initialSize.x * scale * (this.initialSize.x * scale) +
-          this.initialSize.y * scale * (this.initialSize.y * scale) +
-          this.initialSize.z * scale * (this.initialSize.z * scale),
-      );
-    }
+    const { x, y, z } = this.initialSize;
+    const diagonalLength = this.boundingBox
+      ? this.boundingBox.getBoundingInfo().diagonalLength
+      : Math.sqrt(x * scale * (x * scale) + y * scale * (y * scale) + z * scale * (z * scale));
+
     const max = !isDefault ? (isInUpload && isModel ? diagonalLength * 2.5 : diagonalLength) : 87.5;
     await this.babylon.cameraManager.setUpActiveCamera(max, mediaType!);
 
@@ -256,25 +195,20 @@ export class EntitySettingsService {
         diagonalLength * 1.25,
       );
       const target = this.currentCenterPoint;
-      console.log('target', target);
-      console.log('position', position);
-      this.entitySettings.cameraPositionInitial = {
-        position,
-        target,
-      };
+      console.log('initialiseCamera', { target, position });
+      localSettings.cameraPositionInitial = { position, target };
+      this.babylon.cameraManager.setActiveCameraTarget(target);
+      this.babylon.cameraManager.moveActiveCameraToPosition(position);
     }
   }
 
   public async decomposeMeshSettingsHelper() {
     const center = this.center;
-    if (!center) {
-      throw new Error('Center missing');
-    }
+    if (!center) throw new Error('Center missing');
+
     const meshes = this.babylon.getScene().getMeshesByTags('parentedMesh');
-    if (!meshes) {
-      throw new Error('Meshes missing');
-    }
-    await meshes.forEach(mesh => {
+    if (!meshes) throw new Error('Meshes missing');
+    meshes.forEach(mesh => {
       mesh.computeWorldMatrix();
       const abs = mesh.absolutePosition;
       if (!mesh.rotationQuaternion) {
@@ -305,58 +239,51 @@ export class EntitySettingsService {
   }
 
   private destroyMesh(tag: string) {
-    this.babylon
-      .getScene()
-      .getMeshesByTags(tag)
-      .map(mesh => mesh.dispose());
+    return new Promise<void>(resolve =>
+      this.babylon
+        .getScene()
+        .getMeshesByTags(tag)
+        .map(mesh => {
+          mesh.dispose();
+          resolve();
+        }),
+    );
   }
 
-  /*
-   * Mesh Settings
-   */
-
-  // Rotation
   public async loadRotation() {
-    if (!this.center) {
-      throw new Error('Center missing');
-    }
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    if (!this.center.rotationQuaternion) {
-      throw new Error('RotationQuaternion for center missing');
-    }
+    if (!this.center?.rotationQuaternion) throw new Error('RotationQuaternion for center missing');
 
-    this.entitySettings.rotation.x = isDegreeSpectrum(this.entitySettings.rotation.x);
-    this.entitySettings.rotation.y = isDegreeSpectrum(this.entitySettings.rotation.y);
-    this.entitySettings.rotation.z = isDegreeSpectrum(this.entitySettings.rotation.z);
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
+    localSettings.rotation.x = isDegreeSpectrum(localSettings.rotation.x);
+    localSettings.rotation.y = isDegreeSpectrum(localSettings.rotation.y);
+    localSettings.rotation.z = isDegreeSpectrum(localSettings.rotation.z);
 
     const start = this.processing.rotationQuaternion;
     const rotationQuaternion = Quaternion.RotationYawPitchRoll(0, 0, 0);
     const rotationQuaternionX = Quaternion.RotationAxis(
-      Axis['X'],
-      (Math.PI / 180) * this.entitySettings.rotation.x,
+      Axis.X,
+      (Math.PI / 180) * localSettings.rotation.x,
     );
     let end = rotationQuaternionX.multiply(rotationQuaternion);
     const rotationQuaternionY = Quaternion.RotationAxis(
-      Axis['Y'],
-      (Math.PI / 180) * this.entitySettings.rotation.y,
+      Axis.Y,
+      (Math.PI / 180) * localSettings.rotation.y,
     );
     end = rotationQuaternionY.multiply(end);
     const rotationQuaternionZ = Quaternion.RotationAxis(
-      Axis['Z'],
-      (Math.PI / 180) * this.entitySettings.rotation.z,
+      Axis.Z,
+      (Math.PI / 180) * localSettings.rotation.z,
     );
     end = rotationQuaternionZ.multiply(end);
+
     this.animatedMovement(start, end);
+
     this.processing.rotationQuaternion = end;
     this.center.rotationQuaternion = end;
   }
 
-  private async animatedMovement(start: Quaternion, end: Quaternion) {
-    if (!this.center) {
-      throw new Error('Center missing');
-    }
+  public async animatedMovement(start: Quaternion, end: Quaternion) {
+    if (!this.center) throw new Error('Center missing');
     const anim = new Animation(
       'anim',
       'rotationQuaternion',
@@ -376,53 +303,42 @@ export class EntitySettingsService {
       .beginAnimation(this.center, 0, 100, false, undefined, undefined, undefined, false);
   }
 
-  // Size
-  public loadScaling() {
-    if (!this.center) {
-      throw new Error('Center missing');
-    }
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    const factor = this.entitySettings.scale;
-    this.center.scaling = new Vector3(factor, factor, factor);
+  public async loadScaling() {
+    if (!this.center) throw new Error('Center missing');
 
-    this.processing.entityHeight = (this.initialSize.y * factor).toFixed(2);
-    this.processing.entityWidth = (this.initialSize.x * factor).toFixed(2);
-    this.processing.entityDepth = (this.initialSize.z * factor).toFixed(2);
+    const {
+      localSettings: { scale },
+    } = await firstValueFrom(this.processing.settings$);
+
+    this.center.scaling = new Vector3(scale, scale, scale);
+
+    this.processing.entitySize = {
+      height: (this.initialSize.y * scale).toFixed(2),
+      width: (this.initialSize.x * scale).toFixed(2),
+      depth: (this.initialSize.z * scale).toFixed(2),
+    };
   }
 
   public async createVisualUIMeshSettingsHelper() {
-    if (!this.center) {
-      throw new Error('Center missing');
-    }
+    const { center, initialSize, initialCenterPoint } = this;
+    if (!center) throw new Error('Center missing');
     const hasMeshSettings = await firstValueFrom(this.processing.hasMeshSettings$);
     const isInUpload = await firstValueFrom(this.processing.isInUpload$);
     const scene = this.babylon.getScene();
-    const size = Math.max(
-      +this.processing.entityHeight,
-      +this.processing.entityWidth,
-      +this.processing.entityDepth,
-    );
-    this.boundingBox = createBoundingBox(
-      scene,
-      this.center,
-      this.initialSize,
-      this.initialCenterPoint,
-    );
+    const size = Math.max(...Object.values(this.processing.entitySize).map(v => +v));
+    this.boundingBox = createBoundingBox(scene, center, initialSize, initialCenterPoint);
     this.boundingBox.renderingGroupId = 2;
     if (isInUpload && hasMeshSettings) {
       this.worldAxisInitialSize = size * 1.2;
       this.localAxisInitialSize = size * 1.1;
       this.groundInitialSize = size * 1.2;
       createWorldAxis(scene, this.worldAxisInitialSize);
-      createlocalAxes(scene, this.localAxisInitialSize, this.center, this.initialCenterPoint);
+      createlocalAxes(scene, this.localAxisInitialSize, center, this.initialCenterPoint);
       this.ground = createGround(scene, this.groundInitialSize);
       this.setGroundMaterial();
     }
   }
 
-  // Set the color for the helper grid
   public setGroundMaterial(color?: IColor) {
     const scene = this.babylon.getScene();
     const oldMat = scene.getMaterialByName('GroundPlaneMaterial');
@@ -441,106 +357,58 @@ export class EntitySettingsService {
     }
   }
 
-  // Load cameraPosition
   public async loadCameraInititalPosition() {
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    const camera = Array.isArray(this.entitySettings.cameraPositionInitial)
-      ? (this.entitySettings.cameraPositionInitial as any[]).find(
-          obj => obj.cameraType === 'arcRotateCam',
-        )
-      : this.entitySettings.cameraPositionInitial;
+    const {
+      localSettings: { cameraPositionInitial },
+    } = await firstValueFrom(this.processing.settings$);
+    const settings = Array.isArray(cameraPositionInitial)
+      ? (cameraPositionInitial as any[]).find(obj => obj.cameraType === 'arcRotateCam')
+      : cameraPositionInitial;
 
-    const position = new Vector3(camera.position.x, camera.position.y, camera.position.z);
-    const target = new Vector3(camera.target.x, camera.target.y, camera.target.z);
+    const position = new Vector3(settings.position.x, settings.position.y, settings.position.z);
+    const target = new Vector3(settings.target.x, settings.target.y, settings.target.z);
     this.babylon.cameraManager.cameraDefaults$.next({ position, target });
+    console.log('loadCameraInititalPosition', { position, target });
     this.babylon.cameraManager.moveActiveCameraToPosition(position);
     this.babylon.cameraManager.setActiveCameraTarget(target);
   }
 
-  // background: color, effect
-  loadBackgroundColor() {
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    const color = this.entitySettings.background.color;
-    this.babylon.setBackgroundColor(color);
+  public lights$ = new BehaviorSubject<Lights | undefined>(undefined);
+
+  public initialiseAmbientLight(type: 'up' | 'down', intensity: number) {
+    const direction = type === 'up' ? new Vector3(1, -5, 1) : new Vector3(1, 5, 1);
+    const lightName = type === 'up' ? 'ambientlightUp' : 'ambientlightDown';
+    const light = new DirectionalLight(lightName, direction, this.babylon.getScene());
+    light.intensity = intensity;
+    light.specular = new Color3(0.5, 0.5, 0.5);
+    return light;
   }
 
-  loadBackgroundEffect() {
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    this.babylon.setBackgroundImage(this.entitySettings.background.effect);
+  public initialisePointLight(intensity: number, position: Vector3) {
+    const light = new PointLight('pointLight', position, this.babylon.getScene());
+    light.specular = new Color3(0, 0, 0);
+    light.intensity = intensity;
+    light.parent = this.babylon.getActiveCamera();
+    return light;
   }
 
-  // lights: up, down, pointlight
-  // Ambientlights
+  private async loadLights() {
+    const existingLights = this.lights$.getValue();
+    if (existingLights) Object.values(existingLights).forEach(light => light.dispose());
 
-  private initialiseLights() {
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    const pointLight = this.lights.getLightByType('pointLight');
-    if (pointLight) {
-      const position = new Vector3(
-        pointLight.position.x,
-        pointLight.position.y,
-        pointLight.position.z,
-      );
-      this.lights.initialisePointLight(pointLight.intensity, position);
-    }
-    const hemisphericLightUp = this.lights.getLightByType('ambientlightUp');
-    if (hemisphericLightUp) {
-      this.lights.initialiseAmbientLight('up', hemisphericLightUp.intensity);
-    }
-    const hemisphericLightDown = this.lights.getLightByType('ambientlightDown');
-    if (hemisphericLightDown) {
-      this.lights.initialiseAmbientLight('down', hemisphericLightDown.intensity);
-    }
-  }
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
+    const entries = ['pointLight', 'ambientlightUp', 'ambientlightDown'].map(lightType => {
+      const {
+        intensity,
+        position: { x, y, z },
+        type,
+      } = localSettings.lights.find(filterLightByType[lightType])!;
+      if (type === 'PointLight')
+        return [lightType, this.initialisePointLight(intensity, new Vector3(x, y, z))];
+      const direction = lightType.includes('Up') ? 'up' : 'down';
+      return [lightType, this.initialiseAmbientLight(direction, intensity)];
+    });
 
-  public loadLightIntensityAllLights() {
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    const ambientlightUp = this.lights.getLightByType('ambientlightUp');
-    if (ambientlightUp) {
-      this.lights.setLightIntensity('ambientlightUp', ambientlightUp.intensity);
-    }
-    const ambientlightDown = this.lights.getLightByType('ambientlightDown');
-    if (ambientlightDown) {
-      this.lights.setLightIntensity('ambientlightDown', ambientlightDown.intensity);
-    }
-    const pointLight = this.lights.getLightByType('pointLight');
-    if (pointLight) {
-      this.lights.setLightIntensity('pointLight', pointLight.intensity);
-    }
-  }
-
-  public loadLightIntensity(lightType: string) {
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    const light = this.lights.getLightByType(lightType);
-    if (light) {
-      this.lights.setLightIntensity(lightType, light.intensity);
-    }
-  }
-
-  public loadPointLightPosition() {
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    const pointLight = this.lights.getLightByType('pointLight');
-    if (pointLight) {
-      const position = new Vector3(
-        pointLight.position.x,
-        pointLight.position.y,
-        pointLight.position.z,
-      );
-      this.lights.setPointLightPosition(position);
-    }
+    this.lights$.next(Object.fromEntries(entries));
   }
 }

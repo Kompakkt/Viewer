@@ -126,15 +126,7 @@ export class BabylonService {
     cameraDefaults$,
   };
 
-  public background: {
-    url: string;
-    color: RGBA;
-    layer: Layer | undefined;
-  } = {
-    url: 'assets/textures/backgrounds/darkgrey.jpg',
-    color: { r: 0, g: 0, b: 0, a: 0 },
-    layer: undefined,
-  };
+  public background: { color: RGBA; layer: Layer };
 
   constructor(private factoryResolver: ComponentFactoryResolver, private injector: Injector) {
     this.canvas.id = 'renderCanvas';
@@ -147,6 +139,12 @@ export class BabylonService {
     this.scene = new Scene(this.engine);
     this.scene.createDefaultEnvironment();
     this.scene.environmentIntensity = 1;
+
+    this.background = {
+      color: { r: 0, g: 0, b: 0, a: 0 },
+      layer: new Layer('background', 'assets/textures/backgrounds/darkgrey.jpg', this.scene, true),
+    };
+    this.background.layer.alphaBlendingMode = Engine.ALPHA_ADD;
 
     // Add default camera
     this.scene.addCamera(createDefaultCamera(this.scene, this.canvas));
@@ -247,15 +245,8 @@ export class BabylonService {
     return this.engine;
   }
 
-  public setBackgroundImage(setBackground: boolean): void {
-    if (setBackground) {
-      const layer = new Layer('background', this.background.url, this.scene, true);
-      layer.alphaBlendingMode = Engine.ALPHA_ADD;
-      layer.isBackground = true;
-      this.background.layer = layer;
-    } else {
-      this.background.layer?.dispose();
-    }
+  public setBackgroundEffect(setBackground: boolean): void {
+    this.background.layer.isEnabled = setBackground;
   }
 
   public setBackgroundColor(color: RGBA): void {

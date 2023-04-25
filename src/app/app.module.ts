@@ -31,6 +31,7 @@ import { ColorChromeModule } from 'ngx-color/chrome';
 
 import { AppComponent } from './app.component';
 import { CompilationBrowserComponent } from './components/compilation-browser/compilation-browser.component';
+import { CompilationBrowserEntityCardComponent } from './components/compilation-browser/entity-card/entity-card.component';
 import { DialogAnnotationEditorComponent } from './components/dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
 import { DialogDeleteAnnotationsComponent } from './components/dialogs/dialog-delete-annotations/dialog-delete-annotations.component';
 import { DialogDeleteSingleAnnotationComponent } from './components/dialogs/dialog-delete-single-annotation/dialog-delete-single-annotation.component';
@@ -57,6 +58,8 @@ import { SidenavComponent } from './components/sidenav/sidenav.component';
 import { MediaTypePipe } from './pipes/media-type.pipe';
 import { MarkdownPreviewComponent } from './components/markdown-preview/markdown-preview.component';
 import { CameraSettingsComponent } from './components/menu/camera-settings/camera-settings.component';
+import { BackgroundSettingsComponent } from './components/entity-feature-settings/background-settings/background-settings.component';
+import { ColorToRgbaPipe } from './pipes/color-to-rgba.pipe';
 
 @NgModule({
   declarations: [
@@ -68,6 +71,7 @@ import { CameraSettingsComponent } from './components/menu/camera-settings/camer
     AnnotationComponentForEditorComponent,
     AnnotationwalkthroughComponent,
     CompilationBrowserComponent,
+    CompilationBrowserEntityCardComponent,
     LoadingscreenComponent,
     EntityFeatureSettingsComponent,
     LoginComponent,
@@ -88,6 +92,8 @@ import { CameraSettingsComponent } from './components/menu/camera-settings/camer
     EntityFeatureSettingsMeshComponent,
     MarkdownPreviewComponent,
     CameraSettingsComponent,
+    BackgroundSettingsComponent,
+    ColorToRgbaPipe,
   ],
   imports: [
     BrowserModule,

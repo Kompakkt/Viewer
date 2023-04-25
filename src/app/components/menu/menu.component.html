@@ -46,7 +46,7 @@
       <mat-icon>high_quality</mat-icon>
     </button>
     <!-- Quality Submenu -->
-    <mat-menu #quality="matMenu">
+    <mat-menu #quality="matMenu" class="custom-mat-menu">
       <ng-container *ngIf="processing.quality$ | async as currentQuality">
         <button
           mat-menu-item

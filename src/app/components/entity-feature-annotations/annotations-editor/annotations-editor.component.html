@@ -1,19 +1,19 @@
-<mat-card *ngIf="processing.isInUpload$ | async">
+<mat-card class="white-mat-card" *ngIf="processing.isInUpload$ | async">
   Please set and save the settings before you add annotations.
 </mat-card>
 
-<mat-card *ngIf="isDefault$ | async">
+<mat-card class="white-mat-card" *ngIf="isDefault$ | async">
   All annotations you create are default annotations and visible for everyone who can access the
   entity.
 </mat-card>
 
-<mat-card *ngIf="isForbidden$ | async">
+<mat-card class="white-mat-card" *ngIf="isForbidden$ | async">
   Default Annotations are not editable for foreign entities. Load entity from a collection to save
   your annotations to make them visible for others. If you are the owner of this entity do not load
   it from a collection to edit the default Annotations.
 </mat-card>
 
-<mat-card *ngIf="isAnnotatingAllowed$ | async">
+<mat-card class="white-mat-card" *ngIf="isAnnotatingAllowed$ | async">
   To add annotations, simply double-click on the entity.
 </mat-card>
 

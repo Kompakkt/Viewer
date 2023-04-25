@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { filter, map } from 'rxjs';
 import { isCompilation, isEntity } from 'src/common';
-import { environment } from 'src/environments/environment';
 import { ProcessingService } from '../../services/processing/processing.service';
 
 @Component({
@@ -10,8 +9,6 @@ import { ProcessingService } from '../../services/processing/processing.service'
   styleUrls: ['./compilation-browser.component.scss'],
 })
 export class CompilationBrowserComponent {
-  public server_url = environment.server_url;
-
   constructor(public processing: ProcessingService) {}
 
   get compilation$() {

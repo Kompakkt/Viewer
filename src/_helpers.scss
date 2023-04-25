@@ -1,10 +1,6 @@
-:host {
+@mixin flex-column-with-gap($gap-size: 12px) {
   display: flex;
   flex-direction: column;
-  gap: 1em;
   align-items: stretch;
-}
-
-mat-slider {
-  width: 100%;
+  gap: $gap-size;
 }
