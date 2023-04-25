@@ -25,7 +25,11 @@ import {
 } from './visualUIHelper';
 
 export type IEntityLightType = 'pointLight' | 'ambientlightUp' | 'ambientlightDown';
-
+export type Lights = {
+  ambientlightUp: DirectionalLight;
+  ambientlightDown: DirectionalLight;
+  pointLight: PointLight;
+};
 const filterLightByType: { [key: string]: (light: IEntityLight) => boolean } = {
   ambientlightUp: ({ type, position }) => type !== 'PointLight' && position.y === 1,
   ambientlightDown: ({ type, position }) => type !== 'PointLight' && position.y === -1,
@@ -369,14 +373,7 @@ export class EntitySettingsService {
     this.babylon.cameraManager.setActiveCameraTarget(target);
   }
 
-  public lights$ = new BehaviorSubject<
-    | {
-        pointLight: PointLight;
-        ambientlightUp: DirectionalLight;
-        ambientlightDown: DirectionalLight;
-      }
-    | undefined
-  >(undefined);
+  public lights$ = new BehaviorSubject<Lights | undefined>(undefined);
 
   public initialiseAmbientLight(type: 'up' | 'down', intensity: number) {
     const direction = type === 'up' ? new Vector3(1, -5, 1) : new Vector3(1, 5, 1);
