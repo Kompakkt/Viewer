@@ -40,8 +40,6 @@ const isDegreeSpectrum = (value: number) => {
   providedIn: 'root',
 })
 export class EntitySettingsService {
-  private min = new Vector3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
-  private max = new Vector3(Number.MAX_VALUE * -1, Number.MAX_VALUE * -1, Number.MAX_VALUE * -1);
   public initialSize = Vector3.Zero();
   private initialCenterPoint = Vector3.Zero();
   private currentCenterPoint = Vector3.Zero();
@@ -98,27 +96,31 @@ export class EntitySettingsService {
     });
   }
 
-  private async setInitialValues() {
-    // Min-Max
-    this.min = new Vector3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
-    this.max = new Vector3(Number.MAX_VALUE * -1, Number.MAX_VALUE * -1, Number.MAX_VALUE * -1);
+  private async computeMeshMinMaxWorld() {
+    const min = new Vector3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
+    const max = new Vector3(Number.MAX_VALUE * -1, Number.MAX_VALUE * -1, Number.MAX_VALUE * -1);
+
     const meshes = await firstValueFrom(this.processing.meshes$);
     meshes.forEach(mesh => {
       mesh.computeWorldMatrix(true);
       const bi = mesh.getBoundingInfo();
       if (bi.diagonalLength === 0) return;
-
       const { minimumWorld: minimum, maximumWorld: maximum } = bi.boundingBox;
-
-      this.min.x = Math.min(this.min.x, minimum.x);
-      this.min.y = Math.min(this.min.y, minimum.y);
-      this.min.z = Math.min(this.min.z, minimum.z);
-      this.max.x = Math.max(this.max.x, maximum.x);
-      this.max.y = Math.max(this.max.y, maximum.y);
-      this.max.z = Math.max(this.max.z, maximum.z);
+      min.x = Math.min(min.x, minimum.x);
+      min.y = Math.min(min.y, minimum.y);
+      min.z = Math.min(min.z, minimum.z);
+      max.x = Math.max(max.x, maximum.x);
+      max.y = Math.max(max.y, maximum.y);
+      max.z = Math.max(max.z, maximum.z);
     });
+    const distance = max.subtract(min);
+    const centerPoint = Vector3.Lerp(min, max, 0.5);
+    return { min, max, centerPoint, distance };
+  }
 
-    this.initialSize = this.max.subtract(this.min);
+  private async setInitialValues() {
+    const { centerPoint, distance } = await this.computeMeshMinMaxWorld();
+    this.initialSize = distance;
     this.groundInitialSize = 0;
     this.localAxisInitialSize = 0;
     this.worldAxisInitialSize = 0;
@@ -128,35 +130,34 @@ export class EntitySettingsService {
       width: this.initialSize.x.toFixed(2),
       depth: this.initialSize.z.toFixed(2),
     };
-    this.initialCenterPoint = this.currentCenterPoint = new Vector3(
-      this.max.x - this.initialSize.x / 2,
-      this.max.y - this.initialSize.y / 2,
-      this.max.z - this.initialSize.z / 2,
-    );
+
+    this.initialCenterPoint = centerPoint.clone();
+    this.currentCenterPoint = centerPoint.clone();
   }
 
   private async setUpMeshSettingsHelper() {
+    // TODO: Maybe the center could be created with the service?
+    // Then just run the meshes-loop when new meshes are added to the scene
     const meshes = await firstValueFrom(this.processing.meshes$);
     const scene = this.babylon.getScene();
     this.center = MeshBuilder.CreateBox('center', { size: 0.01 }, scene);
     Tags.AddTagsTo(this.center, 'center');
     this.center.isVisible = false;
-
     this.center.rotationQuaternion = this.processing.rotationQuaternion;
+
+    // position model to origin of the world coordinate system
+    const { min } = await this.computeMeshMinMaxWorld();
     this.center.position = new Vector3(
-      -this.min.x * Math.sign(this.min.x),
-      -this.min.y * Math.sign(this.min.y),
-      -this.min.z * Math.sign(this.min.z),
+      min.x > 0 ? -min.x : Math.abs(min.x),
+      min.y > 0 ? -min.y : Math.abs(min.y),
+      min.z > 0 ? -min.z : Math.abs(min.z),
     );
 
-    this.currentCenterPoint = new Vector3(
-      this.initialSize.x / 2,
-      this.initialSize.y / 2,
-      this.initialSize.z / 2,
-    );
+    // TODO: Find out if this fixes issues when updating Babylon beyond 5.5.5
+    // const { x, y, z } = localSettings.cameraPositionInitial.target;
+    // this.center.position = new Vector3(x, y, z);
 
     this.center.setPivotPoint(this.initialCenterPoint);
-
     meshes.forEach(mesh => {
       if (!mesh.parent) {
         mesh.parent = this.center as Mesh;
@@ -192,6 +193,8 @@ export class EntitySettingsService {
       const target = this.currentCenterPoint;
       console.log('initialiseCamera', { target, position });
       localSettings.cameraPositionInitial = { position, target };
+      this.babylon.cameraManager.setActiveCameraTarget(target);
+      this.babylon.cameraManager.moveActiveCameraToPosition(position);
     }
   }
 
@@ -232,17 +235,21 @@ export class EntitySettingsService {
   }
 
   private destroyMesh(tag: string) {
-    this.babylon
-      .getScene()
-      .getMeshesByTags(tag)
-      .map(mesh => mesh.dispose());
+    return new Promise<void>(resolve =>
+      this.babylon
+        .getScene()
+        .getMeshesByTags(tag)
+        .map(mesh => {
+          mesh.dispose();
+          resolve();
+        }),
+    );
   }
 
   public async loadRotation() {
     if (!this.center?.rotationQuaternion) throw new Error('RotationQuaternion for center missing');
 
     const { localSettings } = await firstValueFrom(this.processing.settings$);
-
     localSettings.rotation.x = isDegreeSpectrum(localSettings.rotation.x);
     localSettings.rotation.y = isDegreeSpectrum(localSettings.rotation.y);
     localSettings.rotation.z = isDegreeSpectrum(localSettings.rotation.z);
@@ -250,26 +257,28 @@ export class EntitySettingsService {
     const start = this.processing.rotationQuaternion;
     const rotationQuaternion = Quaternion.RotationYawPitchRoll(0, 0, 0);
     const rotationQuaternionX = Quaternion.RotationAxis(
-      Axis['X'],
+      Axis.X,
       (Math.PI / 180) * localSettings.rotation.x,
     );
     let end = rotationQuaternionX.multiply(rotationQuaternion);
     const rotationQuaternionY = Quaternion.RotationAxis(
-      Axis['Y'],
+      Axis.Y,
       (Math.PI / 180) * localSettings.rotation.y,
     );
     end = rotationQuaternionY.multiply(end);
     const rotationQuaternionZ = Quaternion.RotationAxis(
-      Axis['Z'],
+      Axis.Z,
       (Math.PI / 180) * localSettings.rotation.z,
     );
     end = rotationQuaternionZ.multiply(end);
+
     this.animatedMovement(start, end);
+
     this.processing.rotationQuaternion = end;
     this.center.rotationQuaternion = end;
   }
 
-  private async animatedMovement(start: Quaternion, end: Quaternion) {
+  public async animatedMovement(start: Quaternion, end: Quaternion) {
     if (!this.center) throw new Error('Center missing');
     const anim = new Animation(
       'anim',
@@ -348,13 +357,14 @@ export class EntitySettingsService {
     const {
       localSettings: { cameraPositionInitial },
     } = await firstValueFrom(this.processing.settings$);
-    const camera = Array.isArray(cameraPositionInitial)
+    const settings = Array.isArray(cameraPositionInitial)
       ? (cameraPositionInitial as any[]).find(obj => obj.cameraType === 'arcRotateCam')
       : cameraPositionInitial;
 
-    const position = new Vector3(camera.position.x, camera.position.y, camera.position.z);
-    const target = new Vector3(camera.target.x, camera.target.y, camera.target.z);
+    const position = new Vector3(settings.position.x, settings.position.y, settings.position.z);
+    const target = new Vector3(settings.target.x, settings.target.y, settings.target.z);
     this.babylon.cameraManager.cameraDefaults$.next({ position, target });
+    console.log('loadCameraInititalPosition', { position, target });
     this.babylon.cameraManager.moveActiveCameraToPosition(position);
     this.babylon.cameraManager.setActiveCameraTarget(target);
   }
