@@ -60,13 +60,14 @@ export class EntitySettingsService {
       .subscribe(async ({ settings }) => {
         await this.setInitialValues();
         await this.setUpMeshSettingsHelper();
+
         await this.createVisualUIMeshSettingsHelper();
 
         await this.initialiseCamera();
         await this.loadCameraInititalPosition();
 
-        await this.setBackground(settings.background);
-
+        const { color, effect: enabled } = settings.background;
+        await this.setBackground({ color, enabled });
         await this.loadLights();
 
         const mediaType = await firstValueFrom(this.processing.mediaType$);
@@ -75,6 +76,7 @@ export class EntitySettingsService {
           await this.loadRotation();
           await this.loadScaling();
         }
+
         const isInUpload = await firstValueFrom(this.processing.isInUpload$);
         if (!isInUpload || !hasMeshSettings) {
           await this.destroyMesh('boundingBox');
@@ -91,7 +93,7 @@ export class EntitySettingsService {
       }
       if (enabled !== undefined) {
         localSettings.background.effect = enabled;
-        this.babylon.setBackgroundImage(enabled);
+        this.babylon.setBackgroundEffect(enabled);
       }
     });
   }
