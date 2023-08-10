@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ChangeDetectorRef, AfterContentChecked } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 
 @Component({
@@ -6,6 +6,12 @@ import { MatSidenav } from '@angular/material/sidenav';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
-export class AppComponent {
+export class AppComponent implements AfterContentChecked {
   @ViewChild('sidenav') public sidenav: MatSidenav | undefined;
+
+  constructor(private changeDetector: ChangeDetectorRef) {}
+
+  ngAfterContentChecked(): void {
+    this.changeDetector.detectChanges();
+  }
 }

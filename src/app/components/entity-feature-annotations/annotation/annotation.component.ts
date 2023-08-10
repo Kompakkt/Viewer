@@ -10,6 +10,7 @@ import { ProcessingService } from '../../../services/processing/processing.servi
 import { UserdataService } from '../../../services/userdata/userdata.service';
 // tslint:disable-next-line:max-line-length
 import { DialogAnnotationEditorComponent } from '../../dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
+import { TranslateService } from './../../../services/translate/translate.service';
 
 @Component({
   selector: 'app-annotation',
@@ -55,17 +56,25 @@ export class AnnotationComponent {
       return isEditAnno;
     }),
   );
+  translateItems: string[] = [];
 
-  constructor(
+  constructor(private translate: TranslateService,
     public annotationService: AnnotationService,
     public babylon: BabylonService,
     public dialog: MatDialog,
     public userdata: UserdataService,
     public processing: ProcessingService,
   ) {
+    this.translate.use(window.navigator.language.split("-")[0]);
+    this.translateStrings();
     combineLatest([interval(15), this.annotation$])
       .pipe(map(([_, annotation]) => annotation))
       .subscribe(annotation => this.setPosition(annotation));
+  }
+
+  async translateStrings () {
+    let translateSet = ["Save Annotation","Edit Annotation","Show","Hide","validated","unvalidated"];
+    this.translateItems = await this.translate.loadFromFile(translateSet);
   }
 
   get previewImage$() {

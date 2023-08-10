@@ -5,6 +5,7 @@ import { BabylonService } from '../../services/babylon/babylon.service';
 import { MessageService } from '../../services/message/message.service';
 import { ProcessingService, QualitySetting } from '../../services/processing/processing.service';
 import { UserdataService } from '../../services/userdata/userdata.service';
+import { TranslateService } from './../../services/translate/translate.service';
 
 @Component({
   selector: 'app-menu',
@@ -14,13 +15,22 @@ import { UserdataService } from '../../services/userdata/userdata.service';
 export class MenuComponent implements OnInit {
   public fullscreen = !!fscreen.fullscreenElement;
   public fullscreenCapable = fscreen.fullscreenEnabled;
+  translateItems: string[] = [];
 
-  constructor(
+  constructor(private translate: TranslateService, 
     public processing: ProcessingService,
     public babylon: BabylonService,
     public userdata: UserdataService,
     private message: MessageService,
-  ) {}
+  ) {
+    this.translate.use(window.navigator.language.split("-")[0]);
+    this.translateStrings();
+  }
+
+  async translateStrings () {
+    let translateSet = ["Exit Fullscreen","Enter Fullscreen"];
+    this.translateItems = await this.translate.loadFromFile(translateSet);
+  }
 
   get entity$() {
     return this.processing.entity$;

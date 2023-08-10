@@ -1,6 +1,6 @@
-<h4>Brightness</h4>
-<p>Ambient environment lights</p>
-<h5>Fabulous (down towards the ground)</h5>
+<h4>{{ 'Brightness' | translate }}</h4>
+<p>{{ 'Ambient environment lights' | translate }}</p>
+<h5>{{ 'Fabulous' | translate }} ({{ 'down towards the ground' | translate }})</h5>
 <mat-slider
   min="0"
   max="50"
@@ -8,7 +8,7 @@
   [value]="getLightIntensity('ambientlightUp')"
   (input)="setLightIntensity($event.value, 'ambientlightUp')"
 ></mat-slider>
-<h5>Sunny (up towards the sky)</h5>
+<h5>{{ 'Sunny' | translate }} ({{ 'up towards the sky' | translate }})</h5>
 <mat-slider
   min="0"
   max="50"
@@ -17,7 +17,7 @@
   (input)="setLightIntensity($event.value, 'ambientlightDown')"
 ></mat-slider>
 <br />
-<p>Pointlight</p>
+<p>{{ 'Pointlight' | translate }}</p>
 <mat-slider
   min="0"
   max="50"
@@ -25,7 +25,7 @@
   [value]="getLightIntensity('pointLight')"
   (input)="setLightIntensity($event.value, 'pointLight')"
 ></mat-slider>
-<h5>Pointlight Dimensions: X Y Z</h5>
+<h5>{{ 'Pointlight Dimensions:' | translate }} X Y Z</h5>
 <mat-slider
   min="-10"
   max="10"

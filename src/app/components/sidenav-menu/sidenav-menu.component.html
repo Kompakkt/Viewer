@@ -3,11 +3,11 @@
     <button
       mat-icon-button
       (click)="overlay.toggleSidenav('annotation')"
-      [matTooltip]="isOpen && isAnnotation ? 'Close' : 'Annotation'"
+      [matTooltip]="isOpen && isAnnotation ? translateItems[0] : translateItems[1]"
       matTooltipPosition="right"
     >
-      <mat-icon aria-label="Toggle Annotation">place</mat-icon>
-      <mat-icon class="arrow" aria-label="Toggle Annotation">
+      <mat-icon aria-label="{{ 'Toggle Annotation' | translate }}">place</mat-icon>
+      <mat-icon class="arrow" aria-label="{{ 'Toggle Annotation' | translate }}">
         {{ isOpen && isAnnotation ? 'arrow_left' : 'arrow_right' }}
       </mat-icon>
     </button>
@@ -16,11 +16,11 @@
     <button
       mat-icon-button
       (click)="overlay.toggleSidenav('settings')"
-      [matTooltip]="isOpen && isSettings ? 'Close' : 'Settings'"
+      [matTooltip]="isOpen && isSettings ? translateItems[0] : translateItems[2]"
       matTooltipPosition="right"
     >
-      <mat-icon aria-label="Toggle Settings">settings</mat-icon>
-      <mat-icon class="arrow" aria-label="Toggle Settings">
+      <mat-icon aria-label="{{ 'Toggle Settings' | translate }}">settings</mat-icon>
+      <mat-icon class="arrow" aria-label="{{ 'Toggle Settings' | translate }}">
         {{ isOpen && isSettings ? 'arrow_left' : 'arrow_right' }}
       </mat-icon>
     </button>
@@ -29,11 +29,11 @@
     <button
       mat-icon-button
       (click)="overlay.toggleSidenav('compilationBrowser')"
-      [matTooltip]="isOpen && isCompilationBrowser ? 'Close' : 'Browse in Collection'"
+      [matTooltip]="isOpen && isCompilationBrowser ? translateItems[0] : translateItems[3]"
       matTooltipPosition="right"
     >
-      <mat-icon aria-label="Toggle Collection Browser">folder_open</mat-icon>
-      <mat-icon class="arrow" aria-label="Toggle Collection Browser">
+      <mat-icon aria-label="{{ 'Toggle Collection Browser' | translate }}">folder_open</mat-icon>
+      <mat-icon class="arrow" aria-label="{{ 'Toggle Collection Browser' | translate }}">
         {{ isOpen && isCompilationBrowser ? 'arrow_left' : 'arrow_right' }}
       </mat-icon>
     </button>

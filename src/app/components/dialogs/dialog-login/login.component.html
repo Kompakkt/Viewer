@@ -1,10 +1,10 @@
 <form action="auth-dialog_submit" method="get" accept-charset="utf-8">
-  <h1 mat-dialog-title>{{ concern && concern !== '' ? concern : 'Login' }}</h1>
+  <h1 mat-dialog-title>{{ concern && concern !== '' ? concern : translateItems[0] }}</h1>
   <div mat-dialog-content>
     <mat-form-field>
       <input
         autocomplete="username"
-        placeholder="Username"
+        placeholder="{{ 'Username' | translate }}"
         type="username"
         matInput
         [(ngModel)]="data.username"
@@ -16,7 +16,7 @@
     <mat-form-field
       ><input
         autocomplete="password"
-        placeholder="Password"
+        placeholder="{{ 'Password' | translate }}"
         type="password"
         matInput
         [(ngModel)]="data.password"
@@ -25,7 +25,7 @@
     </mat-form-field>
   </div>
   <div mat-dialog-content *ngIf="loginFailed">
-    <span style="color: red">Login failed</span>
+    <span style="color: red">{{ 'Login failed' | translate }}</span>
   </div>
   <div mat-dialog-actions>
     <button
@@ -34,7 +34,7 @@
       (click)="dialogRef.close(false)"
       [disabled]="waitingForResponse"
     >
-      Cancel
+      {{ 'Cancel' | translate }}
     </button>
     <button
       mat-button
@@ -42,7 +42,7 @@
       (click)="login()"
       [disabled]="data.username.length === 0 || data.password.length === 0 || waitingForResponse"
     >
-      Login
+      {{ 'Login' | translate }}
     </button>
   </div>
 </form>

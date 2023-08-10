@@ -9,6 +9,7 @@ import { AnnotationComponent } from './annotation.component';
   styleUrls: ['./annotation-for-editor.component.scss'],
 })
 export class AnnotationComponentForEditorComponent extends AnnotationComponent {
+  
   public async toggleVisibility() {
     const [{ _id }, showAnnotation, isSelectedAnnotation] = await Promise.all([
       firstValueFrom(this.annotation$),

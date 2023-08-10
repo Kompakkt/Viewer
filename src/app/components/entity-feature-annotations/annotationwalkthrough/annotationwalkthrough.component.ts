@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { BehaviorSubject, combineLatest, firstValueFrom, map } from 'rxjs';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
+import { TranslateService } from './../../../services/translate/translate.service';
 
 @Component({
   selector: 'app-annotationwalkthrough',
@@ -25,7 +26,9 @@ export class AnnotationwalkthroughComponent {
     map(annotations => annotations.length > 1),
   );
 
-  constructor(public annotationService: AnnotationService) {}
+  constructor(private translate: TranslateService, public annotationService: AnnotationService) {
+    this.translate.use(window.navigator.language.split("-")[0]);
+  }
 
   public async previousAnnotation() {
     const [ranking, annotations] = await Promise.all([

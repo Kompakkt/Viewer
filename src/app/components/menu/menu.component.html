@@ -3,7 +3,7 @@
     <button
       mat-icon-button
       *ngIf="entity.mediaType !== 'audio'"
-      matTooltip="Camera settings"
+      matTooltip="{{ 'Camera settings' | translate }}"
       matTooltipPosition="above"
       (click)="cameraSettings.toggle()"
     >
@@ -40,7 +40,7 @@
       mat-icon-button
       *ngIf="qualities.high && qualities.medium"
       [matMenuTriggerFor]="quality"
-      matTooltip="Quality"
+      matTooltip="{{ 'Quality' | translate }}"
       matTooltipPosition="above"
     >
       <mat-icon>high_quality</mat-icon>
@@ -54,7 +54,7 @@
           (click)="updateEntityQuality('high')"
           [class.is-active]="currentQuality === 'high'"
         >
-          High
+        {{ 'High' | translate }}
         </button>
         <button
           mat-menu-item
@@ -62,7 +62,7 @@
           (click)="updateEntityQuality('medium')"
           [class.is-active]="currentQuality === 'medium'"
         >
-          Medium
+        {{ 'Medium' | translate }}
         </button>
         <button
           mat-menu-item
@@ -70,7 +70,7 @@
           (click)="updateEntityQuality('low')"
           [class.is-active]="currentQuality === 'low'"
         >
-          Low
+        {{ 'Low' | translate }}
         </button>
       </ng-container>
     </mat-menu>
@@ -80,7 +80,7 @@
   <button
     mat-icon-button
     (click)="babylon.createScreenshot()"
-    matTooltip="Screenshot"
+    matTooltip="{{ 'Screenshot' | translate }}"
     matTooltipPosition="above"
   >
     <mat-icon>camera</mat-icon>
@@ -90,10 +90,10 @@
     *ngIf="fullscreenCapable"
     mat-icon-button
     (click)="toggleFullscreen()"
-    matTooltip="{{ fullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen' }}"
+    matTooltip="{{ fullscreen ? translateItems[0] : translateItems[1] }}"
     matTooltipPosition="above"
   >
-    <mat-icon aria-label="Exit fullscreen mode">{{
+    <mat-icon aria-label="{{ 'Exit fullscreen mode' | translate }}">{{
       fullscreen ? 'fullscreen_exit' : 'fullscreen'
     }}</mat-icon>
   </button>

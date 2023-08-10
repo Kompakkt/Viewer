@@ -10,7 +10,7 @@
               mat-raised-button
               (click)="backToDefaultSettings()"
             >
-              Back to Default
+              {{ 'Back to Default' | translate }}
             </button>
             <button
               id="saveDefaultSettings"
@@ -19,14 +19,14 @@
               *ngIf="canSaveSettings$ | async"
               (click)="saveSettings()"
             >
-              Save as default
+            {{ 'Save as default' | translate }}
             </button>
           </mat-card-content>
         </mat-card>
 
         <mat-card>
           <mat-card-header>
-            <mat-card-title> Background </mat-card-title>
+            <mat-card-title> {{ 'Background' | translate }} </mat-card-title>
           </mat-card-header>
           <mat-card-content>
             <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
@@ -35,14 +35,14 @@
               [(ngModel)]="settings.localSettings.background.effect"
               (change)="entitySettings.loadBackgroundEffect()"
             >
-              Gradient-Brightness Effect
+            {{ 'Gradient-Brightness Effect' | translate }}
             </mat-slide-toggle>
           </mat-card-content>
         </mat-card>
 
         <mat-card>
           <mat-card-header>
-            <mat-card-title> Lights </mat-card-title>
+            <mat-card-title> {{ 'Lights' | translate }} </mat-card-title>
           </mat-card-header>
           <mat-card-content>
             <app-entity-feature-settings-lights></app-entity-feature-settings-lights>
@@ -51,10 +51,10 @@
 
         <mat-card>
           <mat-card-header>
-            <mat-card-title> Preview & Initial Perspective </mat-card-title>
+            <mat-card-title> {{ 'Preview & Initial Perspective' | translate }} </mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            Click on this image to set actual view as initial perspective.
+            {{ 'Click on this image to set actual view as initial perspective.' | translate }}
             <img
               class="previewimage"
               [src]="settings.localSettings.preview"
@@ -66,7 +66,7 @@
         <mat-card>
           <mat-card-content>
             <button class="fullwidth-button" mat-raised-button (click)="backToDefaultSettings()">
-              Back to Default
+              {{ 'Back to Default' | translate }}
             </button>
             <button
               class="fullwidth-button"
@@ -74,7 +74,7 @@
               *ngIf="canSaveSettings$ | async"
               (click)="saveSettings()"
             >
-              Save as default
+            {{ 'Save as default' | translate }}
             </button>
           </mat-card-content>
         </mat-card>
@@ -85,18 +85,18 @@
           <mat-step *ngIf="processing.hasMeshSettings$ | async">
             <app-entity-feature-settings-mesh></app-entity-feature-settings-mesh>
             <div>
-              <button mat-button (click)="showNextAlertFirstStep()">Next</button>
+              <button mat-button (click)="showNextAlertFirstStep()">{{ 'Next' | translate }}</button>
             </div>
           </mat-step>
 
           <mat-step>
-            <ng-template matStepLabel>Set Initial Settings</ng-template>
+            <ng-template matStepLabel>{{ 'Set Initial Settings' | translate }}</ng-template>
             <h5>
-              Background
+              {{ 'Background' | translate }}
               <button
                 mat-icon-button
                 (click)="backgroundToggle = !backgroundToggle"
-                matTooltip="Toggle"
+                matTooltip="{{ 'Toggle' | translate }}"
                 matTooltipPosition="above"
                 type="button"
               >
@@ -112,7 +112,7 @@
                 [(ngModel)]="settings.localSettings.background.effect"
                 (change)="entitySettings.loadBackgroundEffect()"
               >
-                Gradient-Brightness Effect
+              {{ 'Gradient-Brightness Effect' | translate }}
               </mat-slide-toggle>
             </div>
             <h5>
@@ -120,7 +120,7 @@
               <button
                 mat-icon-button
                 (click)="lightsToggle = !lightsToggle"
-                matTooltip="Toggle"
+                matTooltip="{{ 'Toggle' | translate }}"
                 matTooltipPosition="above"
                 type="button"
               >
@@ -134,11 +134,11 @@
             </div>
             <div *ngIf="(processing.mediaType$ | async) !== 'audio'">
               <h5>
-                Preview & Initial Perspective
+                {{ 'Preview & Initial Perspective' | translate }}
                 <button
                   mat-icon-button
                   (click)="previewToggle = !previewToggle"
-                  matTooltip="Toggle"
+                  matTooltip="{{ 'Toggle' | translate }}"
                   matTooltipPosition="above"
                   type="button"
                 >
@@ -148,38 +148,38 @@
                 </button>
               </h5>
               <div *ngIf="previewToggle">
-                Please select a nice and fitting camera perspective before you go on to the next
+                {{ 'Please select a nice and fitting camera perspective before you go on to the next
                 step. By clicking on the next button the actual view will be set as initial
-                perspective. And I will automatically produce a preview - smile!
+                perspective. And I will automatically produce a preview - smile!' | translate }}
               </div>
             </div>
             <div>
-              <button mat-button (click)="nextSecondStep()">Next</button>
+              <button mat-button (click)="nextSecondStep()">{{ 'Next' | translate }}</button>
             </div>
           </mat-step>
 
           <ng-container *ngIf="!(isStandalone$ | async); else standaloneExport">
             <mat-step>
-              <ng-template matStepLabel>Done</ng-template>
+              <ng-template matStepLabel>{{ 'Done' | translate }}</ng-template>
               <img class="previewimage" [src]="settings.localSettings.preview" />
-              You set all settings and I celebrate it with this preview.
+              {{ 'You set all settings and I celebrate it with this preview.' | translate }}
               <br />
-              Please save them if you are done. Afterwards you may add annotations.
+              {{ 'Please save them if you are done. Afterwards you may add annotations.' | translate }}
               <div>
-                <button mat-button matStepperPrevious>Back</button>
-                <button mat-button (click)="saveSettings()">Save</button>
+                <button mat-button matStepperPrevious>{{ 'Back' | translate }}</button>
+                <button mat-button (click)="saveSettings()">{{ 'Save' | translate }}</button>
               </div>
             </mat-step>
           </ng-container>
 
           <ng-template #standaloneExport>
             <mat-step>
-              <ng-template matStepLabel>Export</ng-template>
+              <ng-template matStepLabel>{{ 'Export' | translate }}</ng-template>
               <img class="previewimage" [src]="settings.localSettings.preview" />
-              Your settings can now be exported and loaded in the standalone Kompakkt viewer.
+              {{ 'Your settings can now be exported and loaded in the standalone Kompakkt viewer.' | translate }}
               <div>
-                <button mat-button matStepperPrevious>Back</button>
-                <button mat-button (click)="exportSettings()">Export</button>
+                <button mat-button matStepperPrevious>{{ 'Back' | translate }}</button>
+                <button mat-button (click)="exportSettings()">{{ 'Export' | translate }}</button>
               </div>
             </mat-step>
           </ng-template>

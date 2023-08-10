@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { EntitySettingsService } from '../../../services/entitysettings/entitysettings.service';
 import { LightService } from '../../../services/light/light.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
+import { TranslateService } from './../../../services/translate/translate.service';
 
 @Component({
   selector: 'app-entity-feature-settings-lights',
@@ -11,11 +12,13 @@ import { ProcessingService } from '../../../services/processing/processing.servi
   styleUrls: ['./entity-feature-settings-lights.component.scss'],
 })
 export class EntityFeatureSettingsLightsComponent {
-  constructor(
+  constructor(private translate: TranslateService,
     public entitySettings: EntitySettingsService,
     public lights: LightService,
     private processing: ProcessingService,
-  ) {}
+  ) {
+    this.translate.use(window.navigator.language.split("-")[0]);
+  }
 
   get pointLightX() {
     return this.lights.getLightByType('pointLight')?.position?.x ?? 0;

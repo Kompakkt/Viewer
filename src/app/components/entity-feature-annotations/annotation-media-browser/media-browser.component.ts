@@ -3,6 +3,7 @@ import { filter, firstValueFrom, map } from 'rxjs';
 import { IEntity, isCompilation, isEntity } from 'src/common';
 import { environment } from 'src/environments/environment';
 import { ProcessingService } from '../../../services/processing/processing.service';
+import { TranslateService } from './../../../services/translate/translate.service';
 
 type BrowsedMedia = IEntity | { mediaType: string; url: string; description: string };
 
@@ -19,7 +20,9 @@ export class MediaBrowserComponent {
 
   public server_url = environment.server_url;
 
-  constructor(public processing: ProcessingService) {}
+  constructor(private translate: TranslateService,public processing: ProcessingService) {
+    this.translate.use(window.navigator.language.split("-")[0]);
+  }
 
   get compilation$() {
     return this.processing.compilation$;

@@ -3,6 +3,7 @@ import { FormControl } from '@angular/forms';
 import { BehaviorSubject, combineLatestWith, debounceTime, filter, skip } from 'rxjs';
 import { AnnotationService } from 'src/app/services/annotation/annotation.service';
 import { BabylonService } from 'src/app/services/babylon/babylon.service';
+import { TranslateService } from './../../../services/translate/translate.service';
 
 @Component({
   selector: 'app-camera-settings',
@@ -15,7 +16,8 @@ export class CameraSettingsComponent implements OnInit {
   public opened$ = new BehaviorSubject(false);
   public showNotification$ = new BehaviorSubject<string | undefined>(undefined);
 
-  constructor(public babylon: BabylonService, public annotationService: AnnotationService) {
+  constructor(private translate: TranslateService, public babylon: BabylonService, public annotationService: AnnotationService) {
+    this.translate.use(window.navigator.language.split("-")[0]);
     this.cameraSpeed.valueChanges.subscribe(cameraSpeed => {
       this.babylon.cameraManager.cameraSpeed = cameraSpeed;
     });

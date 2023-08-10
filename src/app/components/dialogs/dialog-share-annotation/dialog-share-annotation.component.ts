@@ -5,6 +5,7 @@ import { MessageService } from '../../../services/message/message.service';
 import { BackendService } from '../../../services/backend/backend.service';
 
 import { ICompilation } from 'src/common';
+import { TranslateService } from './../../../services/translate/translate.service';
 
 @Component({
   selector: 'app-dialog-share-annotation',
@@ -22,12 +23,13 @@ export class DialogShareAnnotationComponent {
     annotationListLength: 1,
   };
 
-  constructor(
+  constructor(private translate: TranslateService,
     private backend: BackendService,
     private message: MessageService,
     private dialogRef: MatDialogRef<DialogShareAnnotationComponent>,
     @Inject(MAT_DIALOG_DATA) data: { entityId: string },
   ) {
+    this.translate.use(window.navigator.language.split("-")[0]);
     this.entityId = data.entityId;
   }
 

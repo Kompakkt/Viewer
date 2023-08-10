@@ -3,6 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { IUserData } from 'src/common';
 import { BackendService } from '../../../services/backend/backend.service';
+import { TranslateService } from './../../../services/translate/translate.service';
 
 @Component({
   selector: 'app-login',
@@ -22,12 +23,21 @@ export class LoginComponent {
 
   public waitingForResponse = false;
   public loginFailed = false;
+  translateItems: string[] = [];
 
-  constructor(
+  constructor(private translate: TranslateService,
     public dialogRef: MatDialogRef<LoginComponent>,
     public backend: BackendService,
     @Inject(MAT_DIALOG_DATA) public concern: string,
-  ) {}
+  ) {
+    this.translate.use(window.navigator.language.split("-")[0]);
+    this.translateStrings();
+  }
+
+  async translateStrings () {
+    let translateSet = ["Login"];
+    this.translateItems = await this.translate.loadFromFile(translateSet);
+  }
 
   public login() {
     this.waitingForResponse = true;

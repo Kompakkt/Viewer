@@ -1,7 +1,7 @@
 // tslint:disable:max-line-length
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { HttpClientModule } from '@angular/common/http';
-import { NgModule } from '@angular/core';
+import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'; // <-- NgEntity lives here
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -58,6 +58,13 @@ import { MediaTypePipe } from './pipes/media-type.pipe';
 import { MarkdownPreviewComponent } from './components/markdown-preview/markdown-preview.component';
 import { CameraSettingsComponent } from './components/menu/camera-settings/camera-settings.component';
 
+import { TranslatePipe } from './services/translate/translate.pipe';
+import { TranslateService } from './services/translate/translate.service';
+
+export function setupTranslateFactory(service: TranslateService): Function {
+  return () => service.use('en');
+}
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -88,6 +95,7 @@ import { CameraSettingsComponent } from './components/menu/camera-settings/camer
     EntityFeatureSettingsMeshComponent,
     MarkdownPreviewComponent,
     CameraSettingsComponent,
+    TranslatePipe
   ],
   imports: [
     BrowserModule,
@@ -120,7 +128,16 @@ import { CameraSettingsComponent } from './components/menu/camera-settings/camer
     MatChipsModule,
     MatSidenavModule,
   ],
-  providers: [],
+  providers: [TranslateService, 
+    {
+      provide: APP_INITIALIZER,
+      useFactory: setupTranslateFactory,
+      deps: [
+          TranslateService
+      ],
+      multi: true
+    }
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

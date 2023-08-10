@@ -7,6 +7,7 @@ import { AnnotationService } from '../../../services/annotation/annotation.servi
 import { ProcessingService } from '../../../services/processing/processing.service';
 import { UserdataService } from '../../../services/userdata/userdata.service';
 import { AnnotationComponent } from '../annotation/annotation.component';
+import { TranslateService } from './../../../services/translate/translate.service';
 
 @Component({
   selector: 'app-annotations-editor',
@@ -22,11 +23,13 @@ export class AnnotationsEditorComponent {
 
   public currentAnnotations$ = this.annotations.currentAnnotations$;
 
-  constructor(
+  constructor(private translate: TranslateService,
     public annotations: AnnotationService,
     public processing: ProcessingService,
     public userdata: UserdataService,
-  ) {}
+  ) {
+    this.translate.use(window.navigator.language.split("-")[0]);
+  }
 
   get annotationCount$() {
     return this.currentAnnotations$.pipe(map(arr => arr.length));

@@ -3,11 +3,11 @@
     {{ showNotification$ | async }}
   </div>
 
-  <h2>Camera settings</h2>
+  <h2>{{ 'Camera settings' | translate }}</h2>
 
-  <h3>Type</h3>
+  <h3>{{ 'Type' | translate }}</h3>
   <p *ngIf="annotationService.isAnnotationMode$ | async; else cameraTypeButtons">
-    Switching the camera type is not<br />supported while annotating
+    {{ 'Switching the camera type is not supported while annotating' | translate }}
   </p>
   <ng-template #cameraTypeButtons>
     <div class="button-pair" [class.disabled]="annotationService.isAnnotationMode$ | async">
@@ -15,22 +15,22 @@
         mat-flat-button
         (click)="babylon.cameraManager.setCameraType('ArcRotateCamera')"
         [class.active]="(babylon.cameraManager.cameraType$ | async) === 'ArcRotateCamera'"
-        matTooltip="Orbit around an anchor point on the object"
+        matTooltip="{{ 'Orbit around an anchor point on the object' | translate }}"
       >
-        Orbit
+        {{ 'Orbit' | translate }}
       </button>
       <button
         mat-flat-button
         (click)="babylon.cameraManager.setCameraType('UniversalCamera')"
         [class.active]="(babylon.cameraManager.cameraType$ | async) === 'UniversalCamera'"
-        matTooltip="Move freely with the arrow keys"
+        matTooltip="{{ 'Move freely with the arrow keys' | translate }}"
       >
-        Free
+        {{ 'Free' | translate }}
       </button>
     </div>
   </ng-template>
 
-  <h3>Speed ({{ cameraSpeed.value }}x)</h3>
+  <h3>{{ 'Speed' | translate }} ({{ cameraSpeed.value }}x)</h3>
   <mat-slider
     min="0.25"
     max="2"
@@ -43,5 +43,5 @@
     <input matSliderThumb />
   </mat-slider>
   <hr />
-  <button mat-flat-button (click)="resetCamera()">Reset camera</button>
+  <button mat-flat-button (click)="resetCamera()">{{ 'Reset camera' | translate }}</button>
 </div>

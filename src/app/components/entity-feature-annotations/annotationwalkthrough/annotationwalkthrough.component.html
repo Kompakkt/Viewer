@@ -3,10 +3,10 @@
     id="btn-previous"
     mat-icon-button
     (click)="previousAnnotation()"
-    matTooltip="Back"
+    matTooltip="{{ 'Back' | translate }}"
     matTooltipPosition="above"
   >
-    <mat-icon aria-label="Back">keyboard_arrow_left</mat-icon>
+    <mat-icon aria-label="{{ 'Back' | translate }}">keyboard_arrow_left</mat-icon>
   </button>
 
   <div id="walktertitle">{{ title$ | async }}</div>
@@ -15,9 +15,9 @@
     id="btn-next"
     mat-icon-button
     (click)="nextAnnotation()"
-    matTooltip="Next"
+    matTooltip="{{ 'Next' | translate }}"
     matTooltipPosition="above"
   >
-    <mat-icon aria-label="Save Scene">keyboard_arrow_right</mat-icon>
+    <mat-icon aria-label="{{ 'Save Scene' | translate }}">keyboard_arrow_right</mat-icon>
   </button>
 </div>

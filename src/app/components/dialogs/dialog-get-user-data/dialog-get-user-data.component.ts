@@ -4,6 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MessageService } from '../../../services/message/message.service';
 import { BackendService } from '../../../services/backend/backend.service';
 import { UserdataService } from '../../../services/userdata/userdata.service';
+import { TranslateService } from './../../../services/translate/translate.service';
 
 @Component({
   selector: 'app-dialog-get-user-data',
@@ -16,13 +17,14 @@ export class DialogGetUserDataComponent {
   public success = false;
   private id = '';
 
-  constructor(
+  constructor(private translate: TranslateService,
     private backend: BackendService,
     private userdata: UserdataService,
     private message: MessageService,
     private dialogRef: MatDialogRef<DialogGetUserDataComponent>,
     @Inject(MAT_DIALOG_DATA) data: { id: string },
   ) {
+    this.translate.use(window.navigator.language.split("-")[0]);
     this.id = data.id;
   }
 
