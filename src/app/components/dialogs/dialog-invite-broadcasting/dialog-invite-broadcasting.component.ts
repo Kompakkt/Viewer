@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { ProcessingService } from '../../../services/processing/processing.service';
-import { TranslateService } from './../../../services/translate/translate.service';
 
 @Component({
   selector: 'app-dialog-invite-broadcasting',
@@ -15,17 +14,8 @@ export class DialogInviteBroadcastingComponent {
   public baseURL = 'https://blacklodge.hki.uni-koeln.de/builds/Kompakkt/live/?compilation=';
   public defaultURL = 'https://blacklodge.hki.uni-koeln.de/builds/Kompakkt/live/';
   public collectionId: string | undefined;
-  translateItems: string[] = [];
 
-  constructor(private translate: TranslateService,public processing: ProcessingService) {
-    this.translate.use(window.navigator.language.split("-")[0]);
-    this.translateStrings();
-  }
-
-  async translateStrings () {
-    let translateSet = [this.text];
-    this.translateItems = await this.translate.loadFromFile(translateSet);
-  }
+  constructor(public processing: ProcessingService) {}
 
   get compilation$() {
     return this.processing.compilation$;

@@ -90,7 +90,7 @@
     *ngIf="fullscreenCapable"
     mat-icon-button
     (click)="toggleFullscreen()"
-    matTooltip="{{ fullscreen ? translateItems[0] : translateItems[1] }}"
+    matTooltip="{{ ( fullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen' ) | translate }}"
     matTooltipPosition="above"
   >
     <mat-icon aria-label="{{ 'Exit fullscreen mode' | translate }}">{{

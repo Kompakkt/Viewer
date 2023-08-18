@@ -4,8 +4,6 @@ import { isCompilation, isEntity } from 'src/common';
 import { environment } from 'src/environments/environment';
 import { ProcessingService } from '../../services/processing/processing.service';
 
-import { TranslateService } from './../../services/translate/translate.service';
-
 @Component({
   selector: 'app-compilation-browser',
   templateUrl: './compilation-browser.component.html',
@@ -13,17 +11,8 @@ import { TranslateService } from './../../services/translate/translate.service';
 })
 export class CompilationBrowserComponent {
   public server_url = environment.server_url;
-  translateItems: string[] = [];
 
-  constructor(private translate: TranslateService, public processing: ProcessingService) {
-    this.translate.use(window.navigator.language.split("-")[0]);
-    this.translateStrings();
-  }
-
-  async translateStrings () {
-    let translateSet = ["Object","Objects"];
-    this.translateItems = await this.translate.loadFromFile(translateSet);
-  }
+  constructor(public processing: ProcessingService) {}
 
   get compilation$() {
     return this.processing.compilation$;

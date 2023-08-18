@@ -69,12 +69,12 @@
         <button
           mat-icon-button
           (click)="toggleEditViewMode()"
-          [matTooltip]="(isEditMode$ | async) ? translateItems[0] : translateItems[1]"
+          [matTooltip]="( (isEditMode$ | async) ? 'Save Annotation' : 'Edit Annotation' ) | translate"
           matTooltipPosition="above"
           type="button"
         >
           <mat-icon
-            [attr.aria-label]="(isEditMode$ | async) ? translateItems[0] : translateItems[1]"
+            [attr.aria-label]="( (isEditMode$ | async) ? 'Save Annotation' : 'Edit Annotation' ) | translate"
           >
             {{ (isEditMode$ | async) ? 'save' : 'edit' }}
           </mat-icon>

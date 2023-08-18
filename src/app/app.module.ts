@@ -58,11 +58,11 @@ import { MediaTypePipe } from './pipes/media-type.pipe';
 import { MarkdownPreviewComponent } from './components/markdown-preview/markdown-preview.component';
 import { CameraSettingsComponent } from './components/menu/camera-settings/camera-settings.component';
 
-import { TranslatePipe } from './services/translate/translate.pipe';
+import { TranslatePipe } from './pipes/translate.pipe';
 import { TranslateService } from './services/translate/translate.service';
 
-export function setupTranslateFactory(service: TranslateService): Function {
-  return () => service.use('en');
+export function setupTranslateFactory(service: TranslateService): () => Promise<void> {
+  return () => service.requestLanguage();
 }
 
 @NgModule({
@@ -128,7 +128,8 @@ export function setupTranslateFactory(service: TranslateService): Function {
     MatChipsModule,
     MatSidenavModule,
   ],
-  providers: [TranslateService, 
+  providers: [TranslateService,
+    TranslatePipe, 
     {
       provide: APP_INITIALIZER,
       useFactory: setupTranslateFactory,

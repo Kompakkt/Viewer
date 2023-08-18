@@ -4,7 +4,6 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ICompilation } from 'src/common';
 import { MessageService } from '../../../services/message/message.service';
 import { BackendService } from '../../../services/backend/backend.service';
-import { TranslateService } from './../../../services/translate/translate.service';
 
 @Component({
   selector: 'app-password',
@@ -17,13 +16,12 @@ export class DialogPasswordComponent {
 
   private compilation: ICompilation | undefined;
 
-  constructor(private translate: TranslateService,
+  constructor(
     private backend: BackendService,
     private message: MessageService,
     private dialogRef: MatDialogRef<DialogPasswordComponent>,
     @Inject(MAT_DIALOG_DATA) data: { id: string },
   ) {
-    this.translate.use(window.navigator.language.split("-")[0]);
     this.identifierCollection = data.id;
   }
 

@@ -13,7 +13,6 @@ import { ProcessingService } from '../../services/processing/processing.service'
 import { UserdataService } from '../../services/userdata/userdata.service';
 // tslint:disable-next-line:max-line-length
 import { DialogMeshsettingsComponent } from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
-import { TranslateService } from './../../services/translate/translate.service';
 
 @Component({
   selector: 'app-entity-feature-settings',
@@ -28,16 +27,14 @@ export class EntityFeatureSettingsComponent {
   public lightsToggle = false;
   public previewToggle = false;
 
-  constructor(private translate: TranslateService,
+  constructor(
     private babylon: BabylonService,
     public processing: ProcessingService,
     public entitySettings: EntitySettingsService,
     public dialog: MatDialog,
     private backend: BackendService,
     public userdata: UserdataService,
-  ) {
-    this.translate.use(window.navigator.language.split("-")[0]);
-  }
+  ) {}
 
   get entity$() {
     return this.processing.entity$;

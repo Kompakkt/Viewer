@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { TranslateService } from './../../../services/translate/translate.service';
 
 @Component({
                selector: 'app-dialog-delete-single-annotation',
@@ -7,10 +6,6 @@ import { TranslateService } from './../../../services/translate/translate.servic
                styleUrls: ['./dialog-delete-single-annotation.component.scss'],
            })
 export class DialogDeleteSingleAnnotationComponent {
-
-    constructor (private translate: TranslateService) {
-        this.translate.use(window.navigator.language.split("-")[0]);
-    }
 
     public username = '';
     public password = '';

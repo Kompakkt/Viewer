@@ -4,8 +4,6 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { environment } from '../../../../environments/environment';
 import { IEntity } from 'src/common';
 
-import { TranslateService } from './../../../services/translate/translate.service';
-
 export interface IDialogData {
   title: string;
   content: string;
@@ -33,11 +31,9 @@ export class DialogAnnotationEditorComponent {
   private serverUrl = environment.server_url;
 
   constructor(
-    private translate: TranslateService, public dialogRef: MatDialogRef<DialogAnnotationEditorComponent>,
+    public dialogRef: MatDialogRef<DialogAnnotationEditorComponent>,
     @Inject(MAT_DIALOG_DATA) public data: IDialogData,
-  ) {
-    this.translate.use(window.navigator.language.split("-")[0]);
-  }
+  ) {}
 
   public addEntitySwitch(entity: IEntity | IExternalImage) {
     switch (entity.mediaType) {

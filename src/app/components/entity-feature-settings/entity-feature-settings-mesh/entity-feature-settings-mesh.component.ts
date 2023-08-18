@@ -5,7 +5,6 @@ import { IColor } from 'src/common';
 import { BabylonService } from '../../../services/babylon/babylon.service';
 import { EntitySettingsService } from '../../../services/entitysettings/entitysettings.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
-import { TranslateService } from './../../../services/translate/translate.service';
 
 @Component({
   selector: 'app-entity-feature-settings-mesh',
@@ -26,13 +25,11 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
   public meshScaleToggle = false;
   public meshOrientationToggle = false;
 
-  constructor(private translate: TranslateService,
+  constructor(
     public entitySettings: EntitySettingsService,
     public processing: ProcessingService,
     private babylon: BabylonService,
-  ) {
-    this.translate.use(window.navigator.language.split("-")[0]);
-  }
+  ) {}
 
   get meshes$() {
     return this.processing.meshes$;

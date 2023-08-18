@@ -14,7 +14,7 @@
 
     <ng-container *ngIf="entities$ | async as entities">
       <div class="category">
-        {{ entities.length > 1 ? translateItems[1] : translateItems[0] }} {{ 'in' | translate }} {{ compilation.name }}:
+        {{ ( entities.length > 1 ? 'Objects' : 'Object' ) | translate }} {{ 'in' | translate }} {{ compilation.name }}:
       </div>
 
       <mat-card class="entity-card" *ngFor="let entity of entities">

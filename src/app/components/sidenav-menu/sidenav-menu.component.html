@@ -3,7 +3,7 @@
     <button
       mat-icon-button
       (click)="overlay.toggleSidenav('annotation')"
-      [matTooltip]="isOpen && isAnnotation ? translateItems[0] : translateItems[1]"
+      [matTooltip]="( isOpen && isAnnotation ? 'Close' : 'Annotation' ) | translate"
       matTooltipPosition="right"
     >
       <mat-icon aria-label="{{ 'Toggle Annotation' | translate }}">place</mat-icon>
@@ -16,7 +16,7 @@
     <button
       mat-icon-button
       (click)="overlay.toggleSidenav('settings')"
-      [matTooltip]="isOpen && isSettings ? translateItems[0] : translateItems[2]"
+      [matTooltip]="( isOpen && isSettings ? 'Close' : 'Settings' ) | translate"
       matTooltipPosition="right"
     >
       <mat-icon aria-label="{{ 'Toggle Settings' | translate }}">settings</mat-icon>
@@ -29,7 +29,7 @@
     <button
       mat-icon-button
       (click)="overlay.toggleSidenav('compilationBrowser')"
-      [matTooltip]="isOpen && isCompilationBrowser ? translateItems[0] : translateItems[3]"
+      [matTooltip]="( isOpen && isCompilationBrowser ? 'Close' : 'Browse in Collection' ) | translate"
       matTooltipPosition="right"
     >
       <mat-icon aria-label="{{ 'Toggle Collection Browser' | translate }}">folder_open</mat-icon>
