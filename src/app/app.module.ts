@@ -61,10 +61,6 @@ import { CameraSettingsComponent } from './components/menu/camera-settings/camer
 import { TranslatePipe } from './pipes/translate.pipe';
 import { TranslateService } from './services/translate/translate.service';
 
-export function setupTranslateFactory(service: TranslateService): () => Promise<void> {
-  return () => service.requestLanguage();
-}
-
 @NgModule({
   declarations: [
     AppComponent,
@@ -95,7 +91,7 @@ export function setupTranslateFactory(service: TranslateService): () => Promise<
     EntityFeatureSettingsMeshComponent,
     MarkdownPreviewComponent,
     CameraSettingsComponent,
-    TranslatePipe
+    TranslatePipe,
   ],
   imports: [
     BrowserModule,
@@ -128,16 +124,15 @@ export function setupTranslateFactory(service: TranslateService): () => Promise<
     MatChipsModule,
     MatSidenavModule,
   ],
-  providers: [TranslateService,
-    TranslatePipe, 
+  providers: [
+    TranslateService,
+    TranslatePipe,
     {
       provide: APP_INITIALIZER,
-      useFactory: setupTranslateFactory,
-      deps: [
-          TranslateService
-      ],
-      multi: true
-    }
+      useFactory: (service: TranslateService) => service.requestLanguage(),
+      deps: [TranslateService],
+      multi: true,
+    },
   ],
   bootstrap: [AppComponent],
 })

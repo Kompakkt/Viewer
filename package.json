@@ -8,7 +8,8 @@
     "build": "ng build",
     "lint": "ng lint",
     "prettier": "prettier --config .prettierrc.json 'src/**/*.{ts,html,scss}' --write",
-    "postprepare": "git submodule update --remote --merge"
+    "postprepare": "git submodule update --remote --merge",
+    "extract-translations": "ts-node --skipProject ./extract-translations.ts"
   },
   "contributors": [
     {

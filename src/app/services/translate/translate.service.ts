@@ -9,6 +9,9 @@ export class TranslateService {
   private requestedLanguage$ = new BehaviorSubject<string | undefined>(undefined);
   private languageData$ = new BehaviorSubject<TranslationData>({});
 
+  // TODO: Extract this data when necessary
+  private missingTranslations = new Set<string>();
+
   constructor(private http: HttpClient) {
     this.requestedLanguage$.subscribe(requestedLanguage => {
       const supportedLanguage = this.getSupportedLanguage(requestedLanguage);
@@ -30,13 +33,13 @@ export class TranslateService {
   public getTranslatedKey(key: string) {
     const translation = this.languageData$.getValue()[key];
     if (!translation) {
-      console.debug('No translation for', key);
+      this.missingTranslations.add(key);
       return key;
     }
     return translation;
   }
 
-  public async requestLanguage(requestedLanguage?: string) {
+  public requestLanguage(requestedLanguage?: string) {
     this.requestedLanguage$.next(requestedLanguage);
   }
 
