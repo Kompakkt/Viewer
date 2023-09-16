@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
+import { BehaviorSubject, firstValueFrom, ReplaySubject } from 'rxjs';
 
 export type TranslationData = Record<string, string | undefined>;
 
@@ -12,13 +13,24 @@ export class TranslateService {
   // TODO: Extract this data when necessary
   private missingTranslations = new Set<string>();
 
-  constructor(private http: HttpClient) {
+  public selectedLanguage$ = new ReplaySubject<string>(1);
+  public supportedLanguages = {
+    en: 'English',
+    mn: 'монгол хэл (Mongolian)',
+  };
+
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+  ) {
     this.requestedLanguage$.subscribe(requestedLanguage => {
       const supportedLanguage = this.getSupportedLanguage(requestedLanguage);
       this.getTranslationData(supportedLanguage)
         .then(data => {
           console.log('Loaded translation data', { requestedLanguage, supportedLanguage, data });
           this.languageData$.next(data);
+          this.selectedLanguage$.next(supportedLanguage);
         })
         .catch(err =>
           console.error('Could not load translation data:', {
@@ -27,6 +39,21 @@ export class TranslateService {
             err,
           }),
         );
+    });
+
+    this.selectedLanguage$.subscribe(() => {
+      this.addLocaleToSearchParams();
+    });
+  }
+
+  private async addLocaleToSearchParams() {
+    const locale = await firstValueFrom(this.selectedLanguage$);
+    const currentParams = this.router.getCurrentNavigation()?.extras?.queryParams;
+
+    this.router.navigate([], {
+      relativeTo: this.activatedRoute,
+      queryParams: { ...currentParams, locale },
+      queryParamsHandling: 'merge',
     });
   }
 
@@ -44,7 +71,7 @@ export class TranslateService {
   }
 
   private getSupportedLanguage(requestedLanguage?: string): string {
-    const supportedLanguages = ['en', 'de', 'mn', 'el', 'it'];
+    const supportedLanguages = Object.keys(this.supportedLanguages);
 
     const queryLanguage = new URLSearchParams(location.search).get('locale');
     const navigatorLanguage = window.navigator.language.split('-').at(0);

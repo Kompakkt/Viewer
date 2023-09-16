@@ -87,6 +87,22 @@
   </button>
 
   <button
+    mat-icon-button
+    matTooltip="{{ 'Select your language' | translate }}"
+    matTooltipPosition="above"
+    [matMenuTriggerFor]="languageMenu"
+  >
+    <mat-icon>translate</mat-icon>
+  </button>
+
+  <mat-menu #languageMenu="matMenu">
+    <button mat-menu-item *ngFor="let language of languages | keyvalue" (click)="translateService.requestLanguage(language.key)">
+      {{ language.value }}
+    </button>
+  </mat-menu>
+
+
+  <button
     *ngIf="fullscreenCapable"
     mat-icon-button
     (click)="toggleFullscreen()"

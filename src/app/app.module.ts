@@ -27,6 +27,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterModule } from '@angular/router';
 import { ColorChromeModule } from 'ngx-color/chrome';
 
 import { AppComponent } from './app.component';
@@ -94,6 +95,7 @@ import { TranslateService } from './services/translate/translate.service';
     TranslatePipe,
   ],
   imports: [
+    RouterModule.forRoot([]),
     BrowserModule,
     BrowserAnimationsModule,
     MatSnackBarModule,
@@ -129,7 +131,7 @@ import { TranslateService } from './services/translate/translate.service';
     TranslatePipe,
     {
       provide: APP_INITIALIZER,
-      useFactory: (service: TranslateService) => service.requestLanguage(),
+      useFactory: (service: TranslateService) => () => service.requestLanguage(),
       deps: [TranslateService],
       multi: true,
     },
