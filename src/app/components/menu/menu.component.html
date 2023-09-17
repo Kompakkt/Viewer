@@ -109,7 +109,7 @@
     matTooltip="{{ ( fullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen' ) | translate }}"
     matTooltipPosition="above"
   >
-    <mat-icon aria-label="{{ 'Exit fullscreen mode' | translate }}">{{
+    <mat-icon [attr.aria-label]="'Exit fullscreen mode' | translate">{{
       fullscreen ? 'fullscreen_exit' : 'fullscreen'
     }}</mat-icon>
   </button>
