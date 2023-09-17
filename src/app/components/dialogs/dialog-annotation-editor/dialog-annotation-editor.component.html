@@ -31,9 +31,9 @@
     <mat-icon>{{ labelMode }}</mat-icon>
   </button>
   <button mat-button [mat-dialog-close]="data">
-    <mat-icon aria-label="{{ 'Save' | translate }}">save</mat-icon>
+    <mat-icon [attr.aria-label]="'Save' | translate">save</mat-icon>
   </button>
   <button mat-button (click)="cancel()">
-    <mat-icon aria-label="{{ 'Cancel' | translate }}">cancel</mat-icon>
+    <mat-icon [attr.aria-label]="'Cancel' | translate">cancel</mat-icon>
   </button>
 </div>

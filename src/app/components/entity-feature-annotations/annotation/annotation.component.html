@@ -27,7 +27,7 @@
         </mat-card-title>
 
         <button id="closeButton" mat-icon-button (click)="closeAnnotation()" type="button">
-          <mat-icon aria-label="{{ 'Close' | translate }}">cancel</mat-icon>
+          <mat-icon [attr.aria-label]="'Close' | translate">cancel</mat-icon>
         </button>
       </mat-card-header>
 
@@ -63,7 +63,7 @@
           matTooltipPosition="above"
           type="button"
         >
-          <mat-icon aria-label="{{ 'Fullscreen' | translate }}">select_all</mat-icon>
+          <mat-icon [attr.aria-label]="'Fullscreen' | translate">select_all</mat-icon>
         </button>
 
         <button
@@ -87,7 +87,7 @@
           matTooltipPosition="above"
           type="button"
         >
-          <mat-icon aria-label="{{ 'Delete' | translate }}">delete</mat-icon>
+          <mat-icon [attr.aria-label]="'Delete' | translate">delete</mat-icon>
         </button>
       </mat-card-actions>
     </form>

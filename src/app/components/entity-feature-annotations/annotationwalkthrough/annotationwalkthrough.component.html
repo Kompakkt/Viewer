@@ -6,7 +6,7 @@
     matTooltip="{{ 'Back' | translate }}"
     matTooltipPosition="above"
   >
-    <mat-icon aria-label="{{ 'Back' | translate }}">keyboard_arrow_left</mat-icon>
+    <mat-icon [attr.aria-label]="'Back' | translate">keyboard_arrow_left</mat-icon>
   </button>
 
   <div id="walktertitle">{{ title$ | async }}</div>
@@ -18,6 +18,6 @@
     matTooltip="{{ 'Next' | translate }}"
     matTooltipPosition="above"
   >
-    <mat-icon aria-label="{{ 'Save Scene' | translate }}">keyboard_arrow_right</mat-icon>
+    <mat-icon [attr.aria-label]="'Save Scene' | translate">keyboard_arrow_right</mat-icon>
   </button>
 </div>

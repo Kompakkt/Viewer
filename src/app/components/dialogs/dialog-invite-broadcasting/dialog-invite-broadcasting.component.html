@@ -22,7 +22,7 @@
       matTooltip="{{ 'click to copy' | translate }}"
       matTooltipPosition="above"
     >
-      <mat-icon aria-label="{{ 'Copy from Textbox' | translate }}">file_copy</mat-icon>
+      <mat-icon [attr.aria-label]="'Copy from Textbox' | translate">file_copy</mat-icon>
     </button>
     <mat-dialog-actions align="end">
       <button mat-button [mat-dialog-close]="true">{{ 'Close' | translate }}</button>

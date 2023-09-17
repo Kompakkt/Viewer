@@ -8,7 +8,7 @@
       type="mat-icon-button"
       class="btn-add-medium"
     >
-      <mat-icon aria-label="{{ 'Add External Image' | translate }}">image</mat-icon>
+      <mat-icon [attr.aria-label]="'Add External Image' | translate">image</mat-icon>
     </button>
     <button
       *ngIf="compilation$ | async"
@@ -19,7 +19,7 @@
       type="mat-icon-button"
       class="btn-add-medium"
     >
-      <mat-icon aria-label="{{ 'Add Entity From Collection' | translate }}">folder_open</mat-icon>
+      <mat-icon [attr.aria-label]="'Add Entity From Collection' | translate">folder_open</mat-icon>
     </button>
   </div>
 
@@ -47,7 +47,7 @@
       matTooltipPosition="above"
       type="button"
     >
-      <mat-icon aria-label="{{ 'Add Image' | translate }}">add</mat-icon>
+      <mat-icon [attr.aria-label]="'Add Image' | translate">add</mat-icon>
       {{ 'Add Image' | translate }}
     </button>
   </div>

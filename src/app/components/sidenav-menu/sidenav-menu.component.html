@@ -6,8 +6,8 @@
       [matTooltip]="( isOpen && isAnnotation ? 'Close' : 'Annotation' ) | translate"
       matTooltipPosition="right"
     >
-      <mat-icon aria-label="{{ 'Toggle Annotation' | translate }}">place</mat-icon>
-      <mat-icon class="arrow" aria-label="{{ 'Toggle Annotation' | translate }}">
+      <mat-icon [attr.aria-label]="'Toggle Annotation' | translate">place</mat-icon>
+      <mat-icon class="arrow" [attr.aria-label]="'Toggle Annotation' | translate">
         {{ isOpen && isAnnotation ? 'arrow_left' : 'arrow_right' }}
       </mat-icon>
     </button>
@@ -19,8 +19,8 @@
       [matTooltip]="( isOpen && isSettings ? 'Close' : 'Settings' ) | translate"
       matTooltipPosition="right"
     >
-      <mat-icon aria-label="{{ 'Toggle Settings' | translate }}">settings</mat-icon>
-      <mat-icon class="arrow" aria-label="{{ 'Toggle Settings' | translate }}">
+      <mat-icon [attr.aria-label]="'Toggle Settings' | translate">settings</mat-icon>
+      <mat-icon class="arrow" [attr.aria-label]="'Toggle Settings' | translate">
         {{ isOpen && isSettings ? 'arrow_left' : 'arrow_right' }}
       </mat-icon>
     </button>
@@ -32,8 +32,8 @@
       [matTooltip]="( isOpen && isCompilationBrowser ? 'Close' : 'Browse in Collection' ) | translate"
       matTooltipPosition="right"
     >
-      <mat-icon aria-label="{{ 'Toggle Collection Browser' | translate }}">folder_open</mat-icon>
-      <mat-icon class="arrow" aria-label="{{ 'Toggle Collection Browser' | translate }}">
+      <mat-icon [attr.aria-label]="'Toggle Collection Browser' | translate">folder_open</mat-icon>
+      <mat-icon class="arrow" [attr.aria-label]="'Toggle Collection Browser' | translate">
         {{ isOpen && isCompilationBrowser ? 'arrow_left' : 'arrow_right' }}
       </mat-icon>
     </button>
