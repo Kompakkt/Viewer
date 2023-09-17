@@ -1,20 +1,20 @@
 <mat-card *ngIf="processing.isInUpload$ | async">
-  Please set and save the settings before you add annotations.
+  {{ 'Please set and save the settings before you add annotations.' | translate }}
 </mat-card>
 
 <mat-card *ngIf="isDefault$ | async">
-  All annotations you create are default annotations and visible for everyone who can access the
-  entity.
+  {{ 'All annotations you create are default annotations and visible for everyone who can access the
+  entity.' | translate }}
 </mat-card>
 
 <mat-card *ngIf="isForbidden$ | async">
-  Default Annotations are not editable for foreign entities. Load entity from a collection to save
+  {{ 'Default Annotations are not editable for foreign entities. Load entity from a collection to save
   your annotations to make them visible for others. If you are the owner of this entity do not load
-  it from a collection to edit the default Annotations.
+  it from a collection to edit the default Annotations.' | translate }}
 </mat-card>
 
 <mat-card *ngIf="isAnnotatingAllowed$ | async">
-  To add annotations, simply double-click on the entity.
+  {{ 'To add annotations, simply double-click on the entity.' | translate }}
 </mat-card>
 
 <div
@@ -37,11 +37,11 @@
   <button
     *ngIf="count > 0"
     mat-icon-button
-    matTooltip="Export Annotations to JSON"
+    matTooltip="{{ 'Export Annotations to JSON' | translate }}"
     matTooltipPosition="below"
     (click)="exportAnnotations()"
   >
-    <mat-icon aria-label="Export Annotations to JSON">save</mat-icon>
+    <mat-icon aria-label="{{ 'Export Annotations to JSON' | translate }}">save</mat-icon>
   </button>
   <!--app-broadcast [style.visibility]="isBroadcastingAllowed ? 'visible' : 'hidden'"></app-broadcast-->
 </div>

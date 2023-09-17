@@ -12,7 +12,7 @@
             name="title"
             #title="ngModel"
             type="text"
-            placeholder="Title"
+            placeholder="{{ 'Title' | translate }}"
             [(ngModel)]="annotation.body.content.title"
           />
         </mat-form-field>
@@ -22,7 +22,7 @@
       </mat-card-title>
 
       <mat-card-subtitle>
-        {{ annotation.validated ? 'validated' : 'unvalidated' }}
+        {{ annotation.validated ? translateItems[4] : translateItems[5] }}
       </mat-card-subtitle>
     </mat-card-header>
 
@@ -30,7 +30,7 @@
       <img mat-card-image [src]="previewImage" *ngIf="!(collapsed$ | async)" />
     </ng-container>
     <ng-template #noPreviewImage>
-      <p>This annotation has no preview image</p>
+      <p>{{ 'This annotation has no preview image' | translate }}</p>
     </ng-template>
 
     <mat-card-content *ngIf="!(collapsed$ | async)">
@@ -43,7 +43,7 @@
             cdkAutosizeMinRows="1"
             name="description"
             type="text"
-            placeholder="Description"
+            placeholder="{{ 'Description' | translate }}"
             [(ngModel)]="annotation.body.content.description"
           ></textarea>
         </mat-form-field>
@@ -53,19 +53,19 @@
           *ngIf="userOwnsCompilation$ | async"
           [checked]="annotation.validated"
           (change)="annotation.validated = !annotation.validated"
-          >Validated
+          >{{ 'Validated' | translate }}
         </mat-checkbox>
 
         <button
           mat-icon-button
           (click)="selectPerspective()"
-          matTooltip="Select Perspective"
+          matTooltip="{{ 'Select Perspective' | translate }}"
           matTooltipPosition="right"
           type="button"
           class="perspective"
         >
-          <mat-icon aria-label="Select Perspective">camera</mat-icon>
-          Select Perspective
+          <mat-icon aria-label="{{ 'Select Perspective' | translate }}">camera</mat-icon>
+          {{ 'Select Perspective' | translate }}
         </button>
       </ng-container>
 
@@ -79,7 +79,7 @@
 
     <mat-card-actions>
       <mat-slide-toggle [checked]="showAnnotation$ | async" (change)="toggleVisibility()">
-        {{ (showAnnotation$ | async) ? 'Hide' : 'Show' }}
+        {{ (showAnnotation$ | async) ? translateItems[3] : translateItems[2] }}
       </mat-slide-toggle>
 
       <ng-container
@@ -88,12 +88,12 @@
         <button
           mat-icon-button
           (click)="toggleEditViewMode()"
-          [matTooltip]="(isEditMode$ | async) ? 'Save Annotation' : 'Edit Annotation'"
+          [matTooltip]="(isEditMode$ | async) ? translateItems[0] : translateItems[1]"
           matTooltipPosition="above"
           type="button"
         >
           <mat-icon
-            [attr.aria-label]="(isEditMode$ | async) ? 'Save Annotation' : 'Edit Annotation'"
+            [attr.aria-label]="(isEditMode$ | async) ? translateItems[0] : translateItems[1]"
           >
             {{ (isEditMode$ | async) ? 'save' : 'edit' }}
           </mat-icon>
@@ -102,21 +102,21 @@
         <button
           mat-icon-button
           (click)="editFullscreen()"
-          matTooltip="Edit in Fullscreen Mode"
+          matTooltip="{{ 'Edit in Fullscreen Mode' | translate }}"
           matTooltipPosition="above"
           type="button"
         >
-          <mat-icon aria-label="Fullscreen">select_all</mat-icon>
+          <mat-icon aria-label="{{ 'Fullscreen' | translate }}">select_all</mat-icon>
         </button>
 
         <button
           mat-icon-button
           (click)="deleteAnnotation()"
-          matTooltip="Delete"
+          matTooltip="{{ 'Delete' | translate }}"
           matTooltipPosition="above"
           type="button"
         >
-          <mat-icon aria-label="Delete">delete</mat-icon>
+          <mat-icon aria-label="{{ 'Delete' | translate }}">delete</mat-icon>
         </button>
       </ng-container>
 
@@ -124,11 +124,11 @@
         mat-icon-button
         *ngIf="annotation._id !== 'DefaultAnnotation'"
         (click)="shareAnnotation()"
-        matTooltip="Copy to collection"
+        matTooltip="{{ 'Copy to collection' | translate }}"
         matTooltipPosition="above"
         type="button"
       >
-        <mat-icon aria-label="Copy to collection">file_copy</mat-icon>
+        <mat-icon aria-label="{{ 'Copy to collection' | translate }}">file_copy</mat-icon>
       </button>
     </mat-card-actions>
   </form>

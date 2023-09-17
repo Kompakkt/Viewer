@@ -1,7 +1,7 @@
 // tslint:disable:max-line-length
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { HttpClientModule } from '@angular/common/http';
-import { NgModule } from '@angular/core';
+import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'; // <-- NgEntity lives here
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -27,6 +27,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterModule } from '@angular/router';
 import { ColorChromeModule } from 'ngx-color/chrome';
 
 import { AppComponent } from './app.component';
@@ -58,6 +59,9 @@ import { MediaTypePipe } from './pipes/media-type.pipe';
 import { MarkdownPreviewComponent } from './components/markdown-preview/markdown-preview.component';
 import { CameraSettingsComponent } from './components/menu/camera-settings/camera-settings.component';
 
+import { TranslatePipe } from './pipes/translate.pipe';
+import { TranslateService } from './services/translate/translate.service';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -88,8 +92,10 @@ import { CameraSettingsComponent } from './components/menu/camera-settings/camer
     EntityFeatureSettingsMeshComponent,
     MarkdownPreviewComponent,
     CameraSettingsComponent,
+    TranslatePipe,
   ],
   imports: [
+    RouterModule.forRoot([]),
     BrowserModule,
     BrowserAnimationsModule,
     MatSnackBarModule,
@@ -120,7 +126,16 @@ import { CameraSettingsComponent } from './components/menu/camera-settings/camer
     MatChipsModule,
     MatSidenavModule,
   ],
-  providers: [],
+  providers: [
+    TranslateService,
+    TranslatePipe,
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (service: TranslateService) => () => service.requestLanguage(),
+      deps: [TranslateService],
+      multi: true,
+    },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

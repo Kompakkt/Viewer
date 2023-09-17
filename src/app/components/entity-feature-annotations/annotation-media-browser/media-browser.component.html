@@ -3,38 +3,38 @@
     <button
       mat-icon-button
       (click)="addExternalImage = !addExternalImage"
-      matTooltip="Add External Image"
+      matTooltip="{{ 'Add External Image' | translate }}"
       matTooltipPosition="above"
       type="mat-icon-button"
       class="btn-add-medium"
     >
-      <mat-icon aria-label="Add External Image">image</mat-icon>
+      <mat-icon aria-label="{{ 'Add External Image' | translate }}">image</mat-icon>
     </button>
     <button
       *ngIf="compilation$ | async"
       mat-icon-button
       (click)="addCompilationEntity = !addCompilationEntity"
-      matTooltip="Add Entity From Collection"
+      matTooltip="{{ 'Add Entity From Collection' | translate }}"
       matTooltipPosition="above"
       type="mat-icon-button"
       class="btn-add-medium"
     >
-      <mat-icon aria-label="Add Entity From Collection">folder_open</mat-icon>
+      <mat-icon aria-label="{{ 'Add Entity From Collection' | translate }}">folder_open</mat-icon>
     </button>
   </div>
 
   <div *ngIf="addExternalImage" id="external-image">
-    <h3>Embed an external image at cursor position:</h3>
+    <h3>{{ 'Embed an external image at cursor position:' | translate }}</h3>
 
     <mat-form-field>
-      <input matInput #url placeholder="URL" name="URL" type="text" />
+      <input matInput #url placeholder="{{ 'URL' | translate }}" name="URL" type="text" />
     </mat-form-field>
 
     <mat-form-field>
       <input
         matInput
         #description
-        placeholder="Image Description"
+        placeholder="{{ 'Image Description' | translate }}"
         name="Image Description"
         type="text"
       />
@@ -43,17 +43,17 @@
     <button
       mat-icon-button
       (click)="addImage(url.value, description.value)"
-      matTooltip="Add Image at Cursor Position"
+      matTooltip="{{ 'Add Image at Cursor Position' | translate }}"
       matTooltipPosition="above"
       type="button"
     >
-      <mat-icon aria-label="Add Image">add</mat-icon>
-      Add Image
+      <mat-icon aria-label="{{ 'Add Image' | translate }}">add</mat-icon>
+      {{ 'Add Image' | translate }}
     </button>
   </div>
 
   <div *ngIf="addCompilationEntity" id="collection-entities">
-    <h3>Or embed an entity of your collection:</h3>
+    <h3>{{ 'Or embed an entity of your collection:' | translate }}</h3>
 
     <mat-card
       *ngFor="let entity of entities$ | async; let i = index"

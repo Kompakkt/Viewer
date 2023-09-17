@@ -6,6 +6,7 @@ import { Component } from '@angular/core';
                styleUrls: ['./dialog-delete-single-annotation.component.scss'],
            })
 export class DialogDeleteSingleAnnotationComponent {
+
     public username = '';
     public password = '';
 

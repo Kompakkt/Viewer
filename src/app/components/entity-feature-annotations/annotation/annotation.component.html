@@ -12,7 +12,7 @@
       <mat-card-header>
         <mat-card-title>
           <mat-form-field *ngIf="isEditMode$ | async; else showTitle">
-            <mat-label>Title</mat-label>
+            <mat-label>{{ 'Title' | translate }}</mat-label>
             <input
               matInput
               name="title"
@@ -27,14 +27,14 @@
         </mat-card-title>
 
         <button id="closeButton" mat-icon-button (click)="closeAnnotation()" type="button">
-          <mat-icon aria-label="Close">cancel</mat-icon>
+          <mat-icon aria-label="{{ 'Close' | translate }}">cancel</mat-icon>
         </button>
       </mat-card-header>
 
       <mat-card-content>
         <div *ngIf="isEditMode$ | async; else showContent">
           <mat-form-field>
-            <mat-label>Description</mat-label>
+            <mat-label>{{ 'Description' | translate }}</mat-label>
             <textarea
               #annotationContent
               matInput
@@ -59,22 +59,22 @@
         <button
           mat-icon-button
           (click)="editFullscreen()"
-          matTooltip="Edit in Fullscreen Mode"
+          matTooltip="{{ 'Edit in Fullscreen Mode' | translate }}"
           matTooltipPosition="above"
           type="button"
         >
-          <mat-icon aria-label="Fullscreen">select_all</mat-icon>
+          <mat-icon aria-label="{{ 'Fullscreen' | translate }}">select_all</mat-icon>
         </button>
 
         <button
           mat-icon-button
           (click)="toggleEditViewMode()"
-          [matTooltip]="(isEditMode$ | async) ? 'Save Annotation' : 'Edit Annotation'"
+          [matTooltip]="( (isEditMode$ | async) ? 'Save Annotation' : 'Edit Annotation' ) | translate"
           matTooltipPosition="above"
           type="button"
         >
           <mat-icon
-            [attr.aria-label]="(isEditMode$ | async) ? 'Save Annotation' : 'Edit Annotation'"
+            [attr.aria-label]="( (isEditMode$ | async) ? 'Save Annotation' : 'Edit Annotation' ) | translate"
           >
             {{ (isEditMode$ | async) ? 'save' : 'edit' }}
           </mat-icon>
@@ -83,11 +83,11 @@
         <button
           mat-icon-button
           (click)="deleteAnnotation()"
-          matTooltip="Delete"
+          matTooltip="{{ 'Delete' | translate }}"
           matTooltipPosition="above"
           type="button"
         >
-          <mat-icon aria-label="Delete">delete</mat-icon>
+          <mat-icon aria-label="{{ 'Delete' | translate }}">delete</mat-icon>
         </button>
       </mat-card-actions>
     </form>

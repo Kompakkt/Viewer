@@ -3,7 +3,7 @@
     <div id="entity-overview" *ngIf="entity$ | async as entity">
       <mat-card class="entity-card">
         <mat-card-header>
-          <mat-card-title> Selected Object: {{ entity.name }} </mat-card-title>
+          <mat-card-title> {{ 'Selected Object:' | translate }} {{ entity.name }} </mat-card-title>
         </mat-card-header>
         <img
           *ngIf="entity.settings && entity.settings.preview"
@@ -14,7 +14,7 @@
 
     <ng-container *ngIf="entities$ | async as entities">
       <div class="category">
-        Object{{ entities.length > 1 ? 's' : '' }} in {{ compilation.name }}:
+        {{ ( entities.length > 1 ? 'Objects' : 'Object' ) | translate }} {{ 'in' | translate }} {{ compilation.name }}:
       </div>
 
       <mat-card class="entity-card" *ngFor="let entity of entities">

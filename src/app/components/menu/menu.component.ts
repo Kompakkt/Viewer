@@ -4,6 +4,7 @@ import { firstValueFrom, map } from 'rxjs';
 import { BabylonService } from '../../services/babylon/babylon.service';
 import { MessageService } from '../../services/message/message.service';
 import { ProcessingService, QualitySetting } from '../../services/processing/processing.service';
+import { TranslateService } from '../../services/translate/translate.service';
 import { UserdataService } from '../../services/userdata/userdata.service';
 
 @Component({
@@ -19,8 +20,13 @@ export class MenuComponent implements OnInit {
     public processing: ProcessingService,
     public babylon: BabylonService,
     public userdata: UserdataService,
+    public translateService: TranslateService,
     private message: MessageService,
   ) {}
+
+  get languages() {
+    return this.translateService.supportedLanguages;
+  }
 
   get entity$() {
     return this.processing.entity$;
