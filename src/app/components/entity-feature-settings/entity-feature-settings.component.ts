@@ -5,10 +5,10 @@ import { saveAs } from 'file-saver';
 import { combineLatest, firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { IColor } from 'src/common';
-import { environment } from '../../../environments/environment';
 import { BabylonService } from '../../services/babylon/babylon.service';
 import { BackendService } from '../../services/backend/backend.service';
 import { EntitySettingsService } from '../../services/entitysettings/entitysettings.service';
+import { PostMessageService } from '../../services/post-message/post-message.service';
 import { ProcessingService } from '../../services/processing/processing.service';
 import { UserdataService } from '../../services/userdata/userdata.service';
 // tslint:disable-next-line:max-line-length
@@ -34,6 +34,7 @@ export class EntityFeatureSettingsComponent {
     public dialog: MatDialog,
     private backend: BackendService,
     public userdata: UserdataService,
+    private postMessage: PostMessageService,
   ) {}
 
   get entity$() {
@@ -133,10 +134,11 @@ export class EntityFeatureSettingsComponent {
         serverSettings: localSettings,
       });
       if (isInUpload) {
-        window.top?.postMessage(
-          { type: 'settings', settings: localSettings },
-          environment.repo_url,
-        );
+        this.postMessage.sendToParent({
+          type: 'settings',
+          settings: localSettings,
+          data: localSettings,
+        });
         // this.processing.upload = false;
       }
     });
@@ -144,8 +146,16 @@ export class EntityFeatureSettingsComponent {
 
   public async exportSettings() {
     const { localSettings } = await firstValueFrom(this.processing.settings$);
-    const blob = new Blob([JSON.stringify(localSettings)], { type: 'text/plain;charset=utf-8' });
-    saveAs(blob, 'settings.json');
+    if (this.postMessage.hasParent) {
+      this.postMessage.sendToParent({
+        type: 'settings',
+        settings: localSettings,
+        data: localSettings,
+      });
+    } else {
+      const blob = new Blob([JSON.stringify(localSettings)], { type: 'text/plain;charset=utf-8' });
+      saveAs(blob, 'settings.json');
+    }
   }
 
   public async backToDefaultSettings() {
