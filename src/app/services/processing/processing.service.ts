@@ -394,6 +394,9 @@ export class ProcessingService {
         this.showSidenav$.next(!!overlay);
         this.overlay.toggleSidenav(overlay, !!overlay);
         this.bootstrapped$.next(true);
+      })
+      .finally(() => {
+        this.loadingScreen.hide();
       });
   }
 
