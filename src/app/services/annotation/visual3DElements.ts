@@ -2,7 +2,6 @@ import {
   DynamicTexture,
   MeshBuilder,
   Scene,
-  Space,
   StandardMaterial,
   Tags,
   Vector3,
@@ -75,7 +74,10 @@ export const createMarker = (
   Tags.AddTagsTo(marker, markerName);
   if (position && normal) {
     marker.position = position;
-    marker.translate(normal, 0.5, Space.WORLD);
+    // TODO: Discuss if this is needed
+    // When uncommented, this breaks the IIIF example
+    // If its needed, the distance parameter should be relative to the model size
+    // marker.translate(normal, 0.5, Space.WORLD);
   }
   marker.billboardMode = Mesh.BILLBOARDMODE_ALL;
   marker.material = mat;

@@ -618,6 +618,12 @@ export class AnnotationService {
       positionVector,
       normalVector,
     );
+
+    // Parent markers to center to fix offset
+    const center = scene.getMeshesByTags('center')[0];
+    marker.parent = center;
+    markertransparent.parent = center;
+
     markertransparent.actionManager = new ActionManager(scene);
     // register 'pickCylinder' as the handler function for cylinder picking action.
     markertransparent.actionManager.registerAction(

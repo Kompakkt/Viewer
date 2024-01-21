@@ -24,6 +24,8 @@ import {
 import { environment } from '../../../environments/environment';
 // tslint:disable-next-line:max-line-length
 import { DialogPasswordComponent } from '../../components/dialogs/dialog-password/dialog-password.component';
+import { decodeBase64, isBase64 } from '../../helpers';
+import { convertIIIFAnnotation, IIIFData, isIIIFData } from '../../helpers/iiif-data-helper';
 import { BabylonService } from '../babylon/babylon.service';
 import { LoadingScreenService } from '../babylon/loadingscreen';
 import { BackendService } from '../backend/backend.service';
@@ -50,6 +52,7 @@ interface IQueryParams {
   settings?: string;
   annotations?: string;
   resource?: string;
+  minimal?: string;
 }
 
 type Mode = '' | 'upload' | 'explore' | 'edit' | 'annotation' | 'open';
@@ -346,11 +349,38 @@ export class ProcessingService {
   }
 
   private async loadStandaloneEntity(entries: IQueryParams) {
-    const { endpoint, settings, annotations, resource } = entries;
-    if (!endpoint || !resource)
-      return new Error('Standalone viewer mode needs an endpoint and a resource');
+    const { settings, annotations } = entries;
 
-    const url = `${endpoint}/${resource}`;
+    console.log('loadStandaloneEntity', entries);
+
+    const url = ((): string | undefined => {
+      if (!entries.endpoint && !entries.resource) {
+        return undefined;
+      }
+      // If only endpoint or resource is set, use as is
+      if (!entries.endpoint && entries.resource) {
+        if (isBase64(entries.resource)) {
+          return decodeBase64(entries.resource);
+        }
+        return entries.resource;
+      }
+      if (entries.endpoint && !entries.resource) {
+        if (isBase64(entries.endpoint)) {
+          return decodeBase64(entries.endpoint);
+        }
+        return entries.endpoint;
+      }
+      // If both are set, concatenate them as url
+      return `${entries.endpoint}/${entries.resource}`;
+    })();
+
+    if (!url) throw new Error('No endpoint or resource defined');
+    console.log('URL', url);
+
+    // Extract endpoint from url, so we can load settings and annotations
+    // tslint:disable-next-line:newline-per-chained-call
+    const endpoint = url.split('/').reverse().slice(1).reverse().join('/');
+
     const entity = {
       ...baseEntity(),
       _id: 'standalone_entity',
@@ -359,18 +389,60 @@ export class ProcessingService {
       settings: minimalSettings,
     };
 
+    const getResource = async <T extends unknown>(
+      resource: string,
+      parseJson = false,
+    ): Promise<T | undefined> => {
+      console.log('Attempting to load resource', resource);
+      if (resource.startsWith('http://') || resource.startsWith('https://')) {
+        console.log('Attempting to load remote resource', resource);
+        const request = this.http.get<T>(resource);
+        const loaded = await firstValueFrom(request);
+        return loaded as T;
+      }
+      if (resource.endsWith('.json')) {
+        const request = this.http.get<T>(`${endpoint}/${resource}`);
+        const loaded = await firstValueFrom(request);
+        return loaded as T;
+      }
+      if (isBase64(resource)) {
+        const decoded = decodeBase64(resource);
+        if (!decoded) return undefined;
+        return parseJson ? (JSON.parse(decoded) as T) : (decoded as T);
+      }
+      return undefined;
+    };
+
     if (settings) {
-      const request = this.http.get<IEntitySettings>(`${endpoint}/${settings}`);
-      const loadedSettings = await firstValueFrom(request);
-      if (loadedSettings) entity.settings = loadedSettings;
+      console.log('Attempting to load settings', settings);
+      const loadedSettings = await getResource<IEntitySettings>(settings, true);
+      if (loadedSettings) {
+        entity.settings = loadedSettings;
+        console.log('Loaded settings', loadedSettings);
+      }
     }
 
     if (annotations) {
-      const request = this.http.get<IAnnotation[]>(`${endpoint}/${annotations}`);
-      const loadedAnnotations = await firstValueFrom(request);
-      const patchedAnnotations: { [id: string]: IAnnotation } = {};
-      for (const anno of loadedAnnotations) patchedAnnotations[anno._id.toString()] = anno;
-      if (loadedAnnotations) entity.annotations = patchedAnnotations;
+      console.log('Attempting to load annotations', annotations);
+      let loadedAnnotations = await getResource<IAnnotation[] | IIIFData | {}>(annotations, true);
+      console.log('Loaded annotations', loadedAnnotations);
+      if (loadedAnnotations) {
+        if (isIIIFData(loadedAnnotations)) {
+          loadedAnnotations = loadedAnnotations.annotations.map((anno, index) =>
+            convertIIIFAnnotation(anno, index),
+          );
+        }
+
+        if (Array.isArray(loadedAnnotations)) {
+          const patchedAnnotations: { [id: string]: IAnnotation } = {};
+          for (const anno of loadedAnnotations) patchedAnnotations[anno._id.toString()] = anno;
+          console.log('Loaded annotations', patchedAnnotations);
+
+          entity.annotations = patchedAnnotations;
+        } else {
+          console.log('Unknown annotations format', loadedAnnotations);
+        }
+      }
     }
 
     return this.babylon
@@ -388,11 +460,17 @@ export class ProcessingService {
         this.loadFallbackEntity();
       })
       .then(() => {
-        this.showAnnotationEditor$.next(!annotations);
-        this.showSettingsEditor$.next(!settings);
-        const overlay = !settings ? 'settings' : !annotations ? 'annotation' : '';
-        this.showSidenav$.next(!!overlay);
-        this.overlay.toggleSidenav(overlay, !!overlay);
+        if (!!entries.minimal) {
+          this.showAnnotationEditor$.next(false);
+          this.showSettingsEditor$.next(false);
+          this.showSidenav$.next(false);
+        } else {
+          this.showAnnotationEditor$.next(!annotations);
+          this.showSettingsEditor$.next(!settings);
+          const overlay = !settings ? 'settings' : !annotations ? 'annotation' : '';
+          this.showSidenav$.next(!!overlay);
+          this.overlay.toggleSidenav(overlay, !!overlay);
+        }
         this.bootstrapped$.next(true);
       })
       .finally(() => {

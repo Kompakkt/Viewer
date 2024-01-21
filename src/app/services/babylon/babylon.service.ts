@@ -197,7 +197,7 @@ export class BabylonService {
         // Scale based on distance
         mesh.scaling = new Vector3(scale, scale, scale);
         // Fade out markers with distance < 50
-        mesh.material!.alpha = Math.min(1, scale);
+        mesh.material!.alpha = Math.max(Math.min(1, scale), 0.5);
       });
     });
 
