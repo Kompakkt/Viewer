@@ -25,7 +25,7 @@ import { environment } from '../../../environments/environment';
 // tslint:disable-next-line:max-line-length
 import { DialogPasswordComponent } from '../../components/dialogs/dialog-password/dialog-password.component';
 import { decodeBase64, isBase64 } from '../../helpers';
-import { convertIIIFAnnotation, isIIIFData } from '../../helpers/iiif-data-helper';
+import { convertIIIFAnnotation, IIIFData, isIIIFData } from '../../helpers/iiif-data-helper';
 import { BabylonService } from '../babylon/babylon.service';
 import { LoadingScreenService } from '../babylon/loadingscreen';
 import { BackendService } from '../backend/backend.service';
@@ -52,6 +52,7 @@ interface IQueryParams {
   settings?: string;
   annotations?: string;
   resource?: string;
+  minimal?: string;
 }
 
 type Mode = '' | 'upload' | 'explore' | 'edit' | 'annotation' | 'open';
@@ -388,7 +389,10 @@ export class ProcessingService {
       settings: minimalSettings,
     };
 
-    const getResource = async <T extends unknown>(resource: string, parseJson = false): Promise<T | undefined>  => {
+    const getResource = async <T extends unknown>(
+      resource: string,
+      parseJson = false,
+    ): Promise<T | undefined> => {
       console.log('Attempting to load resource', resource);
       if (resource.startsWith('http://') || resource.startsWith('https://')) {
         console.log('Attempting to load remote resource', resource);
@@ -404,7 +408,7 @@ export class ProcessingService {
       if (isBase64(resource)) {
         const decoded = decodeBase64(resource);
         if (!decoded) return undefined;
-        return parseJson ? JSON.parse(decoded) as T : decoded as T;
+        return parseJson ? (JSON.parse(decoded) as T) : (decoded as T);
       }
       return undefined;
     };
@@ -420,17 +424,24 @@ export class ProcessingService {
 
     if (annotations) {
       console.log('Attempting to load annotations', annotations);
-      let loadedAnnotations = await getResource<IAnnotation[]>(annotations, true);
+      let loadedAnnotations = await getResource<IAnnotation[] | IIIFData | {}>(annotations, true);
+      console.log('Loaded annotations', loadedAnnotations);
       if (loadedAnnotations) {
         if (isIIIFData(loadedAnnotations)) {
-          loadedAnnotations = loadedAnnotations.annotations.map((anno, index) => convertIIIFAnnotation(anno, index));
+          loadedAnnotations = loadedAnnotations.annotations.map((anno, index) =>
+            convertIIIFAnnotation(anno, index),
+          );
         }
 
-        const patchedAnnotations: { [id: string]: IAnnotation } = {};
-        for (const anno of loadedAnnotations) patchedAnnotations[anno._id.toString()] = anno;
-        console.log('Loaded annotations', patchedAnnotations);
+        if (Array.isArray(loadedAnnotations)) {
+          const patchedAnnotations: { [id: string]: IAnnotation } = {};
+          for (const anno of loadedAnnotations) patchedAnnotations[anno._id.toString()] = anno;
+          console.log('Loaded annotations', patchedAnnotations);
 
-        entity.annotations = patchedAnnotations;
+          entity.annotations = patchedAnnotations;
+        } else {
+          console.log('Unknown annotations format', loadedAnnotations);
+        }
       }
     }
 
@@ -449,11 +460,17 @@ export class ProcessingService {
         this.loadFallbackEntity();
       })
       .then(() => {
-        this.showAnnotationEditor$.next(!annotations);
-        this.showSettingsEditor$.next(!settings);
-        const overlay = !settings ? 'settings' : !annotations ? 'annotation' : '';
-        this.showSidenav$.next(!!overlay);
-        this.overlay.toggleSidenav(overlay, !!overlay);
+        if (!!entries.minimal) {
+          this.showAnnotationEditor$.next(false);
+          this.showSettingsEditor$.next(false);
+          this.showSidenav$.next(false);
+        } else {
+          this.showAnnotationEditor$.next(!annotations);
+          this.showSettingsEditor$.next(!settings);
+          const overlay = !settings ? 'settings' : !annotations ? 'annotation' : '';
+          this.showSidenav$.next(!!overlay);
+          this.overlay.toggleSidenav(overlay, !!overlay);
+        }
         this.bootstrapped$.next(true);
       })
       .finally(() => {

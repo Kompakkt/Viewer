@@ -13,6 +13,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { IColor, IEntitySettings } from 'src/common';
 import { minimalSettings } from '../../../assets/settings/settings';
+import { AnnotationService } from '../annotation/annotation.service';
 import { BabylonService } from '../babylon/babylon.service';
 import { LightService } from '../light/light.service';
 import { ProcessingService } from '../processing/processing.service';
@@ -51,6 +52,7 @@ export class EntitySettingsService {
     private babylon: BabylonService,
     private processing: ProcessingService,
     private lights: LightService,
+    private annotationService: AnnotationService,
   ) {
     this.processing.state$.subscribe(({ settings, entity, meshes }) => {
       console.log('EntitySettingsService', { settings, entity, meshes });
@@ -100,6 +102,9 @@ export class EntitySettingsService {
       await this.destroyMesh('boundingBox');
       await this.decomposeMeshSettingsHelper();
     }
+
+    // Force redraw annotation markers to fix annotations being offset from the entity if the entity is parented to center
+    await this.annotationService.redrawMarker();
   }
 
   private async initialiseSizeValues() {

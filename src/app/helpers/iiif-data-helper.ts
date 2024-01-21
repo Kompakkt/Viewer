@@ -17,6 +17,8 @@ export const isIIIFData = (data: any): data is IIIFData => {
 };
 
 export const convertIIIFAnnotation = ({ id, normal, position, value }: IIIFAnnotation, ranking: number): IAnnotation => {
+    // Note: The IIIF astronaut example assumes a right-handed coordinate system.
+    // Hence we have to flip the X axis
     const conversionAgent = {
         _id: '',
         type: 'software',
@@ -34,12 +36,12 @@ export const convertIIIFAnnotation = ({ id, normal, position, value }: IIIFAnnot
                 relatedPerspective: {
                     cameraType: 'arcRotateCam',
                     position: {
-                        x: position[0] * normal[0] * 3,
+                        x: -position[0] * normal[0] * 3,
                         y: position[1] * normal[1] * 3,
                         z: position[2] * normal[2] * 3,
                     },
                     target: {
-                        x: position[0],
+                        x: -position[0],
                         y: position[1],
                         z: position[2],
                     },
@@ -63,12 +65,12 @@ export const convertIIIFAnnotation = ({ id, normal, position, value }: IIIFAnnot
             },
             selector: {
                 referencePoint: {
-                    x: position[0],
+                    x: -position[0],
                     y: position[1],
                     z: position[2],
                 },
                 referenceNormal: {
-                    x: normal[0],
+                    x: -normal[0],
                     y: normal[1],
                     z: normal[2],
                 },
