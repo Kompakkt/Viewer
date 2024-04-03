@@ -389,9 +389,11 @@ export class ProcessingService {
       return { r, g, b, a };
     }
     if (scene) {
-      minimalSettings.background = {
-        color: hexToRgb(scene.backgroundColor),
-        effect: true,
+      if (scene.backgroundColor) {
+        minimalSettings.background = {
+          color: hexToRgb(scene.backgroundColor),
+          effect: true,
+        }
       }
     }
 
