@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Mesh, Quaternion } from '@babylonjs/core';
 import { BehaviorSubject, combineLatest, debounceTime, filter, firstValueFrom, map } from 'rxjs';
 import {
+  IColor,
   ICompilation,
   IEntity,
   IEntitySettings,
@@ -348,21 +349,11 @@ export class ProcessingService {
   private async loadStandaloneEntity(entries: IQueryParams) {
     const { manifest } = entries;
     let url = "";
-
+    let scene;
     console.log('loadStandaloneEntity', entries);
 
     // Extract endpoint from url, so we can load settings and annotations
     // tslint:disable-next-line:newline-per-chained-call
-    const entity = {
-      ...baseEntity(),
-      _id: 'standalone_entity',
-      name: 'Standalone Entity',
-      relatedDigitalEntity: { _id: 'standalone_entity' },
-      settings: minimalSettings
-    };
-
-    console.log('Attempting to load standalone entity', entity);
-    console.log('Attempting to load standalone manifest', manifest);
 
 
     if (manifest) {
@@ -376,11 +367,44 @@ export class ProcessingService {
       if (isIIIFManifest(manifestData)) {
         console.log('Loaded manifest', manifestData);
         const model = getIIIFItem(manifestData, 'Annotation');
+        scene = getIIIFItem(manifestData, "Scene") as any;
+        console.log("Scene", scene);
         url = model?.body?.id ?? "";
         console.log('Loaded model url', url);
       }
     }
+    //scene.backgroundColor is hex and should be stored in iColor rgb
+    // Function to convert hex color to RGB
+    function hexToRgb(hex: string): IColor {
+      // Remove the # if present
+      hex = hex.replace(/^#/, '');
 
+      // Parse the hex values to separate R, G, and B values
+      let bigint = parseInt(hex, 16);
+      let r = (bigint >> 16) & 255;
+      let g = (bigint >> 8) & 255;
+      let b = bigint & 255;
+      let a = 1;
+      // Return an object containing the RGB values
+      return { r, g, b, a };
+    }
+    if (scene) {
+      minimalSettings.background = {
+        color: hexToRgb(scene.backgroundColor),
+        effect: true,
+      }
+    }
+
+    const entity = {
+      ...baseEntity(),
+      _id: 'standalone_entity',
+      name: 'Standalone Entity',
+      relatedDigitalEntity: { _id: 'standalone_entity' },
+      settings: minimalSettings
+    };
+
+    console.log('Attempting to load standalone entity', entity);
+    console.log('Attempting to load standalone manifest', manifest);
 
 
     /* const getResource = async <T extends unknown>(
@@ -453,6 +477,18 @@ export class ProcessingService {
         console.error(error);
         this.message.error('Connection to entity server to load entity refused.');
         this.loadFallbackEntity();
+      })
+      .then(() => {
+        if (!!entries.minimal) {
+          this.showAnnotationEditor$.next(false);
+          this.showSettingsEditor$.next(true);
+          this.showSidenav$.next(false);
+        } else {
+          this.showAnnotationEditor$.next(false);
+          this.showSettingsEditor$.next(true);
+          this.showSidenav$.next(false);
+        }
+        this.bootstrapped$.next(true);
       })
       .finally(() => {
         this.loadingScreen.hide();
