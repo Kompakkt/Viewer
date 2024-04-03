@@ -61,6 +61,7 @@ import { CameraSettingsComponent } from './components/menu/camera-settings/camer
 
 import { TranslatePipe } from './pipes/translate.pipe';
 import { TranslateService } from './services/translate/translate.service';
+import { AnnotationMarkerComponent } from './components/entity-feature-annotations/annotation/annotation-marker.component';
 
 @NgModule({
   declarations: [
@@ -93,6 +94,7 @@ import { TranslateService } from './services/translate/translate.service';
     MarkdownPreviewComponent,
     CameraSettingsComponent,
     TranslatePipe,
+    AnnotationMarkerComponent
   ],
   imports: [
     RouterModule.forRoot([]),
@@ -138,4 +140,4 @@ import { TranslateService } from './services/translate/translate.service';
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule { }

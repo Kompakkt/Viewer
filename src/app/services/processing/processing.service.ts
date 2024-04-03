@@ -1,10 +1,8 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Mesh, Quaternion } from '@babylonjs/core';
 import { BehaviorSubject, combineLatest, debounceTime, filter, firstValueFrom, map } from 'rxjs';
 import {
-  IAnnotation,
   ICompilation,
   IEntity,
   IEntitySettings,
@@ -24,8 +22,8 @@ import {
 import { environment } from '../../../environments/environment';
 // tslint:disable-next-line:max-line-length
 import { DialogPasswordComponent } from '../../components/dialogs/dialog-password/dialog-password.component';
-import { decodeBase64, isBase64 } from '../../helpers';
-import { convertIIIFAnnotation, IIIFData, isIIIFData } from '../../helpers/iiif-data-helper';
+import { decodeBase64 } from '../../helpers';
+import { getIIIFItem, isIIIFManifest } from '../../helpers/iiif-data-helper';
 import { BabylonService } from '../babylon/babylon.service';
 import { LoadingScreenService } from '../babylon/loadingscreen';
 import { BackendService } from '../backend/backend.service';
@@ -50,7 +48,7 @@ interface IQueryParams {
   standalone?: string;
   endpoint?: string;
   settings?: string;
-  annotations?: string;
+  manifest?: string;
   resource?: string;
   minimal?: string;
 }
@@ -136,7 +134,7 @@ export class ProcessingService {
           isAuthenticated,
         ]) => {
           if (!entity) return false;
-          if (isStandalone) return true;
+          if (isStandalone) return false;
 
           const isAnnotatable =
             entity.mediaType === 'image' ||
@@ -202,7 +200,6 @@ export class ProcessingService {
     private loadingScreen: LoadingScreenService,
     private userdata: UserdataService,
     private dialog: MatDialog,
-    private http: HttpClient,
   ) {
     this.entity$.pipe(filter(isEntity)).subscribe(entity => this.handleEntitySettings(entity));
   }
@@ -349,47 +346,44 @@ export class ProcessingService {
   }
 
   private async loadStandaloneEntity(entries: IQueryParams) {
-    const { settings, annotations } = entries;
+    const { manifest } = entries;
+    let url = "";
 
     console.log('loadStandaloneEntity', entries);
 
-    const url = ((): string | undefined => {
-      if (!entries.endpoint && !entries.resource) {
-        return undefined;
-      }
-      // If only endpoint or resource is set, use as is
-      if (!entries.endpoint && entries.resource) {
-        if (isBase64(entries.resource)) {
-          return decodeBase64(entries.resource);
-        }
-        return entries.resource;
-      }
-      if (entries.endpoint && !entries.resource) {
-        if (isBase64(entries.endpoint)) {
-          return decodeBase64(entries.endpoint);
-        }
-        return entries.endpoint;
-      }
-      // If both are set, concatenate them as url
-      return `${entries.endpoint}/${entries.resource}`;
-    })();
-
-    if (!url) throw new Error('No endpoint or resource defined');
-    console.log('URL', url);
-
     // Extract endpoint from url, so we can load settings and annotations
     // tslint:disable-next-line:newline-per-chained-call
-    const endpoint = url.split('/').reverse().slice(1).reverse().join('/');
-
     const entity = {
       ...baseEntity(),
       _id: 'standalone_entity',
       name: 'Standalone Entity',
       relatedDigitalEntity: { _id: 'standalone_entity' },
-      settings: minimalSettings,
+      settings: minimalSettings
     };
 
-    const getResource = async <T extends unknown>(
+    console.log('Attempting to load standalone entity', entity);
+    console.log('Attempting to load standalone manifest', manifest);
+
+
+    if (manifest) {
+      const decodedManifest = decodeBase64(manifest);
+
+      if (!decodedManifest) return;
+
+      const manifestData = JSON.parse(decodedManifest);
+
+      console.log('Attempting to load manifest', manifestData);
+      if (isIIIFManifest(manifestData)) {
+        console.log('Loaded manifest', manifestData);
+        const model = getIIIFItem(manifestData, 'Annotation');
+        url = model?.body?.id ?? "";
+        console.log('Loaded model url', url);
+      }
+    }
+
+
+
+    /* const getResource = async <T extends unknown>(
       resource: string,
       parseJson = false,
     ): Promise<T | undefined> => {
@@ -413,7 +407,9 @@ export class ProcessingService {
       return undefined;
     };
 
-    if (settings) {
+    const url = "tes";
+
+    /* if (settings) {
       console.log('Attempting to load settings', settings);
       const loadedSettings = await getResource<IEntitySettings>(settings, true);
       if (loadedSettings) {
@@ -422,28 +418,27 @@ export class ProcessingService {
       }
     }
 
-    if (annotations) {
-      console.log('Attempting to load annotations', annotations);
-      let loadedAnnotations = await getResource<IAnnotation[] | IIIFData | {}>(annotations, true);
-      console.log('Loaded annotations', loadedAnnotations);
-      if (loadedAnnotations) {
-        if (isIIIFData(loadedAnnotations)) {
-          loadedAnnotations = loadedAnnotations.annotations.map((anno, index) =>
-            convertIIIFAnnotation(anno, index),
-          );
+    if (manifest) {
+      console.log('Attempting to load manifest', manifest);
+      let loadedManifest = await getResource<IAnnotation[] | IIIFData | {}>(manifest, true);
+      console.log('Loaded manifest', loadedManifest);
+      if (loadedManifest) {
+        if (isIIIFManifest(loadedManifest)) {
+          // load manifest
         }
 
-        if (Array.isArray(loadedAnnotations)) {
-          const patchedAnnotations: { [id: string]: IAnnotation } = {};
-          for (const anno of loadedAnnotations) patchedAnnotations[anno._id.toString()] = anno;
-          console.log('Loaded annotations', patchedAnnotations);
+        if (Array.isArray(loadedManifest)) {
+          const patchedManifest: { [id: string]: IAnnotation } = {};
+          for (const anno of loadedManifest) patchedManifest[anno._id.toString()] = anno;
+          console.log('Loaded manifest', patchedManifest);
 
-          entity.annotations = patchedAnnotations;
+          entity.manifest = patchedManifest;
         } else {
-          console.log('Unknown annotations format', loadedAnnotations);
+          console.log('Unknown manifest format', loadedManifest);
         }
       }
     }
+    */
 
     return this.babylon
       .loadEntity(true, url)
@@ -458,20 +453,6 @@ export class ProcessingService {
         console.error(error);
         this.message.error('Connection to entity server to load entity refused.');
         this.loadFallbackEntity();
-      })
-      .then(() => {
-        if (!!entries.minimal) {
-          this.showAnnotationEditor$.next(false);
-          this.showSettingsEditor$.next(false);
-          this.showSidenav$.next(false);
-        } else {
-          this.showAnnotationEditor$.next(!annotations);
-          this.showSettingsEditor$.next(!settings);
-          const overlay = !settings ? 'settings' : !annotations ? 'annotation' : '';
-          this.showSidenav$.next(!!overlay);
-          this.overlay.toggleSidenav(overlay, !!overlay);
-        }
-        this.bootstrapped$.next(true);
       })
       .finally(() => {
         this.loadingScreen.hide();

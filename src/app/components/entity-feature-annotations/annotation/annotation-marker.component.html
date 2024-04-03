@@ -1,0 +1,11 @@
+<!--
+  Marker Component, displaying a round marker to indicate the annotation positions
+  On click, the corresponding annotation will be selected and displayed
+  The Indicator is annotation?.ranking
+-->
+<div class="marker single-annotation-card" [style.top.px]="annotation.positionXOnView - markerSize / 2"
+  [style.left.px]="annotation.positionYOnView - markerSize / 2" [style.z-index]="positionZ" [style.filter]="''"
+  [style.opacity]="behind ? 0.1 : 1" *ngIf="annotation && annotation.positionXOnView && annotation.positionYOnView"
+  (click)="selectAnnotation(annotation)">
+  {{annotation.ranking}}
+</div>

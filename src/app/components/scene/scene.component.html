@@ -1,5 +1,8 @@
 <ng-container *ngIf="processing.bootstrapped$ | async">
-  <div *ngFor="let annotation of annotations.currentAnnotations$ | async">
+  <div *ngFor="let annotation of annotations.currentAnnotations$| async">
+    <div class="annotation-marker">
+      <app-annotation-marker [annotation]="annotation"></app-annotation-marker>
+    </div>
     <app-annotation [annotation]="annotation"></app-annotation>
   </div>
   <app-annotationwalkthrough></app-annotationwalkthrough>

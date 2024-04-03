@@ -1,3 +1,4 @@
+import { Vector3 } from '@babylonjs/core';
 import { IAgent, IAnnotation } from '~common/interfaces';
 
 export type IIIFData = {
@@ -5,20 +6,51 @@ export type IIIFData = {
 }
 
 export type IIIFAnnotation = {
-    id: number; normal: number[]; position: number[]; value: string;
+    id: number;
+    normal: Vector3;
+    position: Vector3;
+    value: string;
+}
+
+export interface IIIFItem {
+    "@context"?: string;
+    id: string;
+    type: string;
+    label: { [key: string]: string[] };
+    items?: IIIFItem[];
+    motivation?: string[];
+    body?: {
+        id: string;
+        type: string;
+    };
+    target?: string;
+}
+
+function hasKeys(obj: any, keys: string[]): boolean {
+    return keys.every(key => key in obj);
 }
 
 export const isIIIFAnnotation = (annotation: any): annotation is IIIFAnnotation => {
-    return 'id' in annotation && 'normal' in annotation && 'position' in annotation && 'value' in annotation;
+    return hasKeys(annotation, ['id', 'normal', 'position', 'value']);
 };
 
+export const isIIIFManifest = (manifest: any): manifest is IIIFItem => {
+    return hasKeys(manifest, ['id', 'type']) && manifest.type === 'Manifest';
+}
+
+export const isIIIFItem = (item: any): item is IIIFItem => {
+    return hasKeys(item, ['id', 'type', 'label']);
+}
+
 export const isIIIFData = (data: any): data is IIIFData => {
-    return 'annotations' in data && Array.isArray(data.annotations) && data.annotations.every(isIIIFAnnotation);
+    return hasKeys(data, ['annotations']) && Array.isArray(data.annotations) && data.annotations.every(isIIIFAnnotation);
 };
 
 export const convertIIIFAnnotation = ({ id, normal, position, value }: IIIFAnnotation, ranking: number): IAnnotation => {
+
     // Note: The IIIF astronaut example assumes a right-handed coordinate system.
     // Hence we have to flip the X axis
+    console.log("Normale: ", normal);
     const conversionAgent = {
         _id: '',
         type: 'software',
@@ -35,16 +67,8 @@ export const convertIIIFAnnotation = ({ id, normal, position, value }: IIIFAnnot
                 description: '',
                 relatedPerspective: {
                     cameraType: 'arcRotateCam',
-                    position: {
-                        x: -position[0] * normal[0] * 3,
-                        y: position[1] * normal[1] * 3,
-                        z: position[2] * normal[2] * 3,
-                    },
-                    target: {
-                        x: -position[0],
-                        y: position[1],
-                        z: position[2],
-                    },
+                    position: position.add(normal.scale(3)),
+                    target: position.multiply(new Vector3(-1, 1, 1)),
                     preview: 'https://kompakkt.uni-koeln.de:8080/previews/annotation/5e56525cd32cd0237c090355.png',
                 },
             },
@@ -64,17 +88,34 @@ export const convertIIIFAnnotation = ({ id, normal, position, value }: IIIFAnnot
                 relatedCompilation: '',
             },
             selector: {
-                referencePoint: {
-                    x: -position[0],
-                    y: position[1],
-                    z: position[2],
-                },
-                referenceNormal: {
-                    x: -normal[0],
-                    y: normal[1],
-                    z: normal[2],
-                },
+                referencePoint: position.multiply(new Vector3(-1, 1, 1)),
+                referenceNormal: normal.multiply(new Vector3(-1, 1, 1)),
             },
         },
+        positionXOnView: 0,
+        positionYOnView: 0
     } as IAnnotation;
 };
+
+/* 
+    * Recursively search for an item of a specific type in a IIIF manifest
+    * @param item The item to search in
+    * @param type The type of item to search for
+    * @returns The first item of the specified type found in the manifest, or null if no such item was found
+
+*/
+export function getIIIFItem(item: IIIFItem, type: string): IIIFItem | null {
+    if (item.type === type) {
+        return item;
+    }
+    if (item.items) {
+        for (const subItem of item.items) {
+            const result = getIIIFItem(subItem, type);
+            if (result) {
+                return result;
+            }
+        }
+    }
+    return null;
+}
+

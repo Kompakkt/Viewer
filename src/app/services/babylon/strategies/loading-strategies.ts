@@ -94,6 +94,7 @@ export const load3DEntity = async (rootUrl: string, scene: Scene, isDefault?: bo
 
   const engine = scene.getEngine();
 
+  console.log('Loading 3D Entity:', rootUrl);
   return SceneLoader.ImportMeshAsync(
     null,
     rootFolder,
@@ -338,9 +339,8 @@ const createMediaControls = (
   panel.addControl(header);
 
   timeSlider.onValueChangedObservable.add(() => {
-    header.text = `Current time: ${
-      audio ? secondsToHms(timeSlider.value) : getCurrentTime(video?.currentTime ?? 0)
-    }`;
+    header.text = `Current time: ${audio ? secondsToHms(timeSlider.value) : getCurrentTime(video?.currentTime ?? 0)
+      }`;
   });
   panel.addControl(timeSlider);
 

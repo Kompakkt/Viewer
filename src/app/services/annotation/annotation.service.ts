@@ -6,7 +6,6 @@ import { ActionManager, ExecuteCodeAction, PickingInfo, Tags, Vector3 } from '@b
 import { BehaviorSubject, combineLatest, firstValueFrom, fromEvent, ReplaySubject } from 'rxjs';
 import { distinct, map } from 'rxjs/operators';
 import { IAnnotation, isAnnotation, IVector3 } from 'src/common';
-import { annotationFallback, annotationLogo } from '../../../assets/annotations/annotations';
 import { environment } from '../../../environments/environment';
 // tslint:disable-next-line:max-line-length
 import { DialogGetUserDataComponent } from '../../components/dialogs/dialog-get-user-data/dialog-get-user-data.component';
@@ -130,6 +129,9 @@ export class AnnotationService {
     const isDefault = await firstValueFrom(this.processing.defaultEntityLoaded$);
     const isFallback = await firstValueFrom(this.processing.fallbackEntityLoaded$);
     const isAnnotatingFeatured = await firstValueFrom(this.processing.isAnnotatingFeatured$);
+    if (isAnnotatingFeatured) {
+      console.log("Anno feat");
+    }
     if (!entity) {
       throw new Error('Entity missing');
     }
@@ -164,12 +166,7 @@ export class AnnotationService {
       }
     } else {
       if (isFallback) {
-        this.annotations$.next([annotationFallback]);
-      }
-      if (isDefault) {
-        if (isAnnotatingFeatured && annotationLogo.length) {
-          this.annotations$.next(annotationLogo);
-        }
+        this.annotations$.next([]);
       }
       if (isStandalone) {
         this.annotations$.next(Object.values(entity.annotations) as IAnnotation[]);
@@ -401,6 +398,8 @@ export class AnnotationService {
           name: personName,
           _id: personID,
         },
+        positionXOnView: 0,
+        positionYOnView: 0,
         body: {
           type: 'annotation',
           content: {

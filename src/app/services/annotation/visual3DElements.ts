@@ -41,7 +41,7 @@ export const createMarker = (
   position?: Vector3,
   normal?: Vector3,
 ) => {
-  const radius = calcRadius(scene);
+  const radius = calcRadius(scene) * 2;
 
   // Create dynamic texture and write the text
   const resolution = 256;
