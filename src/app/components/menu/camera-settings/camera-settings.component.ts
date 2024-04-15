@@ -1,13 +1,29 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BehaviorSubject, combineLatestWith, debounceTime, filter, skip } from 'rxjs';
 import { AnnotationService } from 'src/app/services/annotation/annotation.service';
 import { BabylonService } from 'src/app/services/babylon/babylon.service';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { AsyncPipe } from '@angular/common';
+import { MatSlider, MatSliderThumb } from '@angular/material/slider';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
 
 @Component({
   selector: 'app-camera-settings',
   templateUrl: './camera-settings.component.html',
   styleUrls: ['./camera-settings.component.scss'],
+  standalone: true,
+  imports: [
+    MatButton,
+    MatTooltip,
+    MatSlider,
+    FormsModule,
+    ReactiveFormsModule,
+    MatSliderThumb,
+    AsyncPipe,
+    TranslatePipe,
+  ],
 })
 export class CameraSettingsComponent implements OnInit {
   public cameraSpeed = new FormControl(1.0, { nonNullable: true });

@@ -1,4 +1,5 @@
-<div id="annotationwalkthrough" *ngIf="showWalkthrough$ | async">
+@if (showWalkthrough$ | async) {
+<div id="annotationwalkthrough">
   <button
     id="btn-previous"
     mat-icon-button
@@ -8,9 +9,7 @@
   >
     <mat-icon [attr.aria-label]="'Back' | translate">keyboard_arrow_left</mat-icon>
   </button>
-
   <div id="walktertitle">{{ title$ | async }}</div>
-
   <button
     id="btn-next"
     mat-icon-button
@@ -21,3 +20,4 @@
     <mat-icon [attr.aria-label]="'Save Scene' | translate">keyboard_arrow_right</mat-icon>
   </button>
 </div>
+}

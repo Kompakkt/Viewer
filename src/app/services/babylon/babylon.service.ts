@@ -1,5 +1,11 @@
 /* tslint:disable:max-line-length */
-import { ComponentFactoryResolver, Injectable, Injector, ViewContainerRef } from '@angular/core';
+import {
+  EnvironmentInjector,
+  Injectable,
+  ViewContainerRef,
+  createComponent,
+  inject,
+} from '@angular/core';
 import {
   ArcRotateCamera,
   Camera,
@@ -49,11 +55,13 @@ type RGBA = { r: number; b: number; g: number; a: number };
   providedIn: 'root',
 })
 export class BabylonService {
+  private environmentInjector = inject(EnvironmentInjector);
+
   // Create an instance of RenderCanvasComponent
   // and use this for the Engine
-  private canvasRef = this.factoryResolver
-    .resolveComponentFactory(RenderCanvasComponent)
-    .create(this.injector);
+  private canvasRef = createComponent(RenderCanvasComponent, {
+    environmentInjector: this.environmentInjector,
+  });
   private canvas = this.canvasRef.location.nativeElement.childNodes[0] as HTMLCanvasElement;
 
   private engine: Engine;
@@ -136,7 +144,7 @@ export class BabylonService {
     layer: undefined,
   };
 
-  constructor(private factoryResolver: ComponentFactoryResolver, private injector: Injector) {
+  constructor() {
     this.canvas.id = 'renderCanvas';
     this.engine = new Engine(this.canvas, true, {
       audioEngine: true,

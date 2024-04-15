@@ -1,5 +1,5 @@
 <form action="auth-dialog_submit" method="get" accept-charset="utf-8">
-  <h1 mat-dialog-title>{{ ( concern && concern !== '' ? concern : 'Login' ) | translate }}</h1>
+  <h1 mat-dialog-title>{{ (concern && concern !== '' ? concern : 'Login') | translate }}</h1>
   <div mat-dialog-content>
     <mat-form-field>
       <input
@@ -24,9 +24,11 @@
       />
     </mat-form-field>
   </div>
-  <div mat-dialog-content *ngIf="loginFailed">
+  @if (loginFailed) {
+  <div mat-dialog-content>
     <span style="color: red">{{ 'Login failed' | translate }}</span>
   </div>
+  }
   <div mat-dialog-actions>
     <button
       mat-button

@@ -1,14 +1,38 @@
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogRef,
+  MatDialogTitle,
+  MatDialogContent,
+  MatDialogActions,
+  MatDialogClose,
+} from '@angular/material/dialog';
 
 import { MessageService } from '../../../services/message/message.service';
 import { BackendService } from '../../../services/backend/backend.service';
 import { UserdataService } from '../../../services/userdata/userdata.service';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { MatButton } from '@angular/material/button';
+import { FormsModule } from '@angular/forms';
+import { MatInput } from '@angular/material/input';
+import { MatFormField } from '@angular/material/form-field';
 
 @Component({
   selector: 'app-dialog-get-user-data',
   templateUrl: './dialog-get-user-data.component.html',
   styleUrls: ['./dialog-get-user-data.component.scss'],
+  standalone: true,
+  imports: [
+    MatDialogTitle,
+    MatDialogContent,
+    MatFormField,
+    MatInput,
+    FormsModule,
+    MatDialogActions,
+    MatButton,
+    MatDialogClose,
+    TranslatePipe,
+  ],
 })
 export class DialogGetUserDataComponent {
   public username = '';

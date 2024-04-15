@@ -7,20 +7,20 @@
   padding: 0.8rem;
 }
 
-.mat-card-content {
+.mat-mdc-card-content {
   max-height: 20vh;
   overflow-y: auto;
   margin: 0;
 }
 
-.mat-card-actions {
+.mat-mdc-card-actions {
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.annotation-card .mat-card-actions {
+.annotation-card .mat-mdc-card-actions {
   padding: 0;
   margin: 0;
   float: right;

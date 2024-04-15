@@ -3,11 +3,10 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ActionManager, ExecuteCodeAction, PickingInfo, Tags, Vector3 } from '@babylonjs/core';
-import { BehaviorSubject, combineLatest, firstValueFrom, fromEvent, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, combineLatest, firstValueFrom, fromEvent } from 'rxjs';
 import { distinct, map } from 'rxjs/operators';
-import { IAnnotation, isAnnotation, IVector3 } from 'src/common';
+import { IAnnotation, IVector3, isAnnotation } from 'src/common';
 import { annotationFallback, annotationLogo } from '../../../assets/annotations/annotations';
-import { environment } from '../../../environments/environment';
 // tslint:disable-next-line:max-line-length
 import { DialogGetUserDataComponent } from '../../components/dialogs/dialog-get-user-data/dialog-get-user-data.component';
 // tslint:disable-next-line:max-line-length
@@ -391,9 +390,9 @@ export class AnnotationService {
         created: new Date().toISOString(),
         generator: {
           type: 'software',
-          name: environment.version,
+          name: 'Kompakkt',
           _id: personID,
-          homepage: 'https://github.com/DH-Cologne/Kompakkt',
+          homepage: 'https://github.com/Kompakkt/Kompakkt',
         },
         motivation: 'defaultMotivation',
         lastModifiedBy: {

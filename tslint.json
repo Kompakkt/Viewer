@@ -1,20 +1,10 @@
 {
   "extends": "tslint:all",
   "linterOptions": {
-    "exclude": [
-      "**/*.spec.ts",
-      "bin",
-      "dist",
-      "e2e/**/*.*",
-      "src/polyfills.ts",
-      "src/test.ts"
-    ]
+    "exclude": ["**/*.spec.ts", "bin", "dist", "e2e/**/*.*", "src/test.ts"]
   },
   "rules": {
-    "arrow-parens": [
-      true,
-      "ban-single-arg-parens"
-    ],
+    "arrow-parens": [true, "ban-single-arg-parens"],
     "arrow-return-shorthand": true,
     "callable-types": true,
     "class-name": true,
@@ -22,17 +12,12 @@
       true,
       "check-space",
       {
-        "ignore-words": [
-          "TODO"
-        ]
+        "ignore-words": ["TODO"]
       }
     ],
     "completed-docs": false,
     "component-class-suffix": true,
-    "curly": [
-      true,
-      "ignore-same-line"
-    ],
+    "curly": [true, "ignore-same-line"],
     "deprecation": [
       true,
       {
@@ -43,57 +28,32 @@
     "eofline": true,
     "file-name-casing": false,
     "forin": true,
-    "import-blacklist": [
-      true,
-      "rxjs/Rx"
-    ],
+    "import-blacklist": [true, "rxjs/Rx"],
     "import-spacing": true,
     "increment-decrement": false,
-    "indent": [
-      true,
-      "spaces",
-      4
-    ],
+    "indent": [true, "spaces", 4],
     "interface-over-type-literal": true,
     "label-position": true,
-    "max-line-length": [
-      true,
-      100
-    ],
+    "max-line-length": [true, 100],
     "member-access": false,
     "member-ordering": [
       true,
       {
-        "order": [
-          "instance-field",
-          "instance-method",
-          "static-field",
-          "static-method"
-        ]
+        "order": ["instance-field", "instance-method", "static-field", "static-method"]
       }
     ],
     "newline-before-return": false,
     "no-any": false,
     "no-arg": true,
     "no-bitwise": true,
-    "no-console": [
-      true,
-      "debug",
-      "info",
-      "time",
-      "timeEnd",
-      "trace"
-    ],
+    "no-console": [true, "debug", "info", "time", "timeEnd", "trace"],
     "no-construct": true,
     "no-debugger": true,
     "no-duplicate-super": true,
     "no-empty": false,
     "no-empty-interface": true,
     "no-eval": true,
-    "no-inferrable-types": [
-      true,
-      "ignore-params"
-    ],
+    "no-inferrable-types": [true, "ignore-params"],
     "no-input-rename": true,
     "no-misused-new": true,
     "no-magic-numbers": false,
@@ -113,35 +73,17 @@
     "no-unsafe-any": false,
     "no-unused-expression": true,
     "no-var-keyword": true,
-    "no-void-expression": [
-      true,
-      "ignore-arrow-function-shorthand"
-    ],
+    "no-void-expression": [true, "ignore-arrow-function-shorthand"],
     "object-literal-sort-keys": false,
-    "one-line": [
-      true,
-      "check-catch",
-      "check-else",
-      "check-open-brace",
-      "check-whitespace"
-    ],
+    "one-line": [true, "check-catch", "check-else", "check-open-brace", "check-whitespace"],
     "prefer-const": true,
     "prefer-function-over-method": false,
     "prefer-readonly": false,
-    "quotemark": [
-      true,
-      "single"
-    ],
+    "quotemark": [true, "single"],
     "radix": true,
     "strict-boolean-expressions": false,
-    "semicolon": [
-      true,
-      "always"
-    ],
-    "triple-equals": [
-      true,
-      "allow-null-check"
-    ],
+    "semicolon": [true, "always"],
+    "triple-equals": [true, "allow-null-check"],
     "typedef": false,
     "typedef-whitespace": [
       true,
@@ -169,7 +111,5 @@
       "check-type"
     ]
   },
-  "rulesDirectory": [
-    "node_modules/codelyzer"
-  ]
+  "rulesDirectory": ["node_modules/codelyzer"]
 }

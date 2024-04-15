@@ -1,13 +1,35 @@
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogRef,
+  MatDialogTitle,
+  MatDialogContent,
+  MatDialogActions,
+} from '@angular/material/dialog';
 
 import { IUserData } from 'src/common';
 import { BackendService } from '../../../services/backend/backend.service';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { MatButton } from '@angular/material/button';
+import { MatInput } from '@angular/material/input';
+import { MatFormField } from '@angular/material/form-field';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
+  standalone: true,
+  imports: [
+    FormsModule,
+    MatDialogTitle,
+    MatDialogContent,
+    MatFormField,
+    MatInput,
+    MatDialogActions,
+    MatButton,
+    TranslatePipe,
+  ],
 })
 export class LoginComponent {
   public data: {

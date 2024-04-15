@@ -5,11 +5,40 @@ import { IColor } from 'src/common';
 import { BabylonService } from '../../../services/babylon/babylon.service';
 import { EntitySettingsService } from '../../../services/entitysettings/entitysettings.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { AsyncPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatInput } from '@angular/material/input';
+import { MatFormField } from '@angular/material/form-field';
+import { MatSlider, MatSliderThumb } from '@angular/material/slider';
+import { ColorChromeModule } from 'ngx-color/chrome';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatStepLabel } from '@angular/material/stepper';
 
 @Component({
   selector: 'app-entity-feature-settings-mesh',
   templateUrl: './entity-feature-settings-mesh.component.html',
   styleUrls: ['./entity-feature-settings-mesh.component.scss'],
+  standalone: true,
+  imports: [
+    MatStepLabel,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    MatButton,
+    MatCheckbox,
+    ColorChromeModule,
+    MatSlider,
+    MatSliderThumb,
+    MatFormField,
+    MatInput,
+    FormsModule,
+    AsyncPipe,
+    TranslatePipe,
+  ],
 })
 export class EntityFeatureSettingsMeshComponent implements OnInit {
   public meshSettingsHelperToggle = false;

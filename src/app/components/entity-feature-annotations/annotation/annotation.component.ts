@@ -1,22 +1,64 @@
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Matrix, Vector3 } from '@babylonjs/core';
-import { BehaviorSubject, combineLatest, firstValueFrom, interval, map, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, combineLatest, firstValueFrom, interval, map } from 'rxjs';
 import { IAnnotation } from 'src/common';
-import { environment } from 'src/environments/environment';
+import { environment } from 'src/environment';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
 import { BabylonService } from '../../../services/babylon/babylon.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
 import { UserdataService } from '../../../services/userdata/userdata.service';
 // tslint:disable-next-line:max-line-length
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { AsyncPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatIconButton } from '@angular/material/button';
+import {
+  MatCard,
+  MatCardActions,
+  MatCardContent,
+  MatCardHeader,
+  MatCardTitle,
+} from '@angular/material/card';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatIcon } from '@angular/material/icon';
+import { MatInput } from '@angular/material/input';
+import { MatTooltip } from '@angular/material/tooltip';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { DialogAnnotationEditorComponent } from '../../dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
+import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-preview.component';
 
 @Component({
   selector: 'app-annotation',
   templateUrl: './annotation.component.html',
   styleUrls: ['./annotation.component.scss'],
+  standalone: true,
+  imports: [
+    MatCard,
+    FormsModule,
+    MatCardHeader,
+    MatCardTitle,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatIconButton,
+    MatIcon,
+    MatCardContent,
+    CdkTextareaAutosize,
+    MarkdownPreviewComponent,
+    MatCardActions,
+    MatTooltip,
+    AsyncPipe,
+    TranslatePipe,
+  ],
 })
 export class AnnotationComponent {
+  public annotationService = inject(AnnotationService);
+  public babylon = inject(BabylonService);
+  public dialog = inject(MatDialog);
+  public userdata = inject(UserdataService);
+  public processing = inject(ProcessingService);
+
   @Input() entityFileName: string | undefined;
   @Input('annotation') set setAnnotation(annotation: IAnnotation) {
     this.annotation$.next(annotation);
@@ -56,13 +98,7 @@ export class AnnotationComponent {
     }),
   );
 
-  constructor(
-    public annotationService: AnnotationService,
-    public babylon: BabylonService,
-    public dialog: MatDialog,
-    public userdata: UserdataService,
-    public processing: ProcessingService,
-  ) {
+  constructor() {
     combineLatest([interval(15), this.annotation$])
       .pipe(map(([_, annotation]) => annotation))
       .subscribe(annotation => this.setPosition(annotation));

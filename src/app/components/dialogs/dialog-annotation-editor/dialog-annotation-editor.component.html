@@ -1,16 +1,26 @@
 <h1 mat-dialog-title>
-  <span *ngIf="!editMode" [innerHTML]="data.title"></span>
-  <mat-form-field *ngIf="editMode">
-    <input matInput name="title" type="text" placeholder="{{ 'Title' | translate }}" [(ngModel)]="data.title" />
+  @if (!editMode) {
+  <span [innerHTML]="data.title"></span>
+  } @if (editMode) {
+  <mat-form-field>
+    <input
+      matInput
+      name="title"
+      type="text"
+      placeholder="{{ 'Title' | translate }}"
+      [(ngModel)]="data.title"
+    />
   </mat-form-field>
+  }
 </h1>
 
 <div mat-dialog-content>
-  <app-markdown-preview *ngIf="!editMode" [data]="data.content"></app-markdown-preview>
-
-  <app-media-browser *ngIf="editMode" (addMedia)="addEntitySwitch($event)"></app-media-browser>
-
-  <mat-form-field *ngIf="editMode">
+  @if (!editMode) {
+  <app-markdown-preview [data]="data.content"></app-markdown-preview>
+  } @if (editMode) {
+  <app-media-browser (addMedia)="addEntitySwitch($event)"></app-media-browser>
+  } @if (editMode) {
+  <mat-form-field>
     <textarea
       id="annotation-content"
       #annotationContent
@@ -24,6 +34,7 @@
     >
     </textarea>
   </mat-form-field>
+  }
 </div>
 
 <div mat-dialog-actions>

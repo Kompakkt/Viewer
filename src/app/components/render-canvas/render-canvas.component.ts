@@ -4,6 +4,7 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
   selector: 'app-render-canvas',
   templateUrl: './render-canvas.component.html',
   styleUrls: ['./render-canvas.component.scss'],
+  standalone: true,
 })
 export class RenderCanvasComponent {
   @ViewChild('renderCanvas', { read: ElementRef })

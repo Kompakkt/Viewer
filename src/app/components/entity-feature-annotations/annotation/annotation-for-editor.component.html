@@ -1,12 +1,13 @@
-<mat-card class="annotation-card" *ngIf="annotation$ | async as annotation">
+@if (annotation$ | async; as annotation) {
+<mat-card appearance="outlined" class="annotation-card">
   <form class="annotation-form">
     <mat-card-header (click)="changeOpenPopup()">
       <div mat-card-avatar class="annotation-header-image">
         <span>{{ annotation.ranking }}</span>
       </div>
-
       <mat-card-title>
-        <mat-form-field *ngIf="isEditMode$ | async; else showTitle">
+        @if (isEditMode$ | async) {
+        <mat-form-field>
           <input
             matInput
             name="title"
@@ -16,113 +17,101 @@
             [(ngModel)]="annotation.body.content.title"
           />
         </mat-form-field>
-        <ng-template #showTitle>
-          <span>{{ annotation.body.content.title | uppercase }}</span>
-        </ng-template>
+        } @else {
+        <span>{{ annotation.body.content.title | uppercase }}</span>
+        }
       </mat-card-title>
-
       <mat-card-subtitle>
         {{ (annotation.validated ? 'validated' : 'not validated') | translate }}
       </mat-card-subtitle>
     </mat-card-header>
-
-    <ng-container *ngIf="previewImage$ | async as previewImage; else noPreviewImage">
-      <img mat-card-image [src]="previewImage" *ngIf="!(collapsed$ | async)" />
-    </ng-container>
-    <ng-template #noPreviewImage>
-      <p>{{ 'This annotation has no preview image' | translate }}</p>
-    </ng-template>
-
-    <mat-card-content *ngIf="!(collapsed$ | async)">
-      <ng-container *ngIf="isEditMode$ | async; else showContent">
-        <mat-form-field class="description">
-          <textarea
-            matInput
-            #annotationContent
-            cdkTextareaAutosize
-            cdkAutosizeMinRows="1"
-            name="description"
-            type="text"
-            placeholder="{{ 'Description' | translate }}"
-            [(ngModel)]="annotation.body.content.description"
-          ></textarea>
-        </mat-form-field>
-
-        <mat-checkbox
-          class="validation"
-          *ngIf="userOwnsCompilation$ | async"
-          [checked]="annotation.validated"
-          (change)="annotation.validated = !annotation.validated"
-          >{{ 'Validated' | translate }}
-        </mat-checkbox>
-
-        <button
-          mat-icon-button
-          (click)="selectPerspective()"
-          matTooltip="{{ 'Select Perspective' | translate }}"
-          matTooltipPosition="right"
-          type="button"
-          class="perspective"
-        >
-          <mat-icon [attr.aria-label]="'Select Perspective' | translate">camera</mat-icon>
-          {{ 'Select Perspective' | translate }}
-        </button>
-      </ng-container>
-
-      <ng-template #showContent>
-        <app-markdown-preview
-          id="annotation-content"
-          [data]="annotation.body.content.description"
-        ></app-markdown-preview>
-      </ng-template>
-    </mat-card-content>
-
-    <mat-card-actions>
-      <mat-slide-toggle [checked]="showAnnotation$ | async" (change)="toggleVisibility()">
-        {{ ((showAnnotation$ | async) ? "Hide" : "Show") | translate }}
-      </mat-slide-toggle>
-
-      <ng-container
-        *ngIf="(processing.hasAnnotationAllowance$ | async) && (isAnnotationOwner$ | async)"
-      >
-        <button
-          mat-icon-button
-          (click)="toggleEditViewMode()"
-          [matTooltip]="((isEditMode$ | async) ? 'Save annotation' : 'Edit annotation') | translate"
-          matTooltipPosition="above"
-          type="button"
-        >
-          <mat-icon
-            [attr.aria-label]="((isEditMode$ | async) ? 'Save annotation' : 'Edit annotation') | translate"
-          >
-            {{ (isEditMode$ | async) ? 'save' : 'edit' }}
-          </mat-icon>
-        </button>
-
-        <button
-          mat-icon-button
-          (click)="editFullscreen()"
-          matTooltip="{{ 'Edit in Fullscreen Mode' | translate }}"
-          matTooltipPosition="above"
-          type="button"
-        >
-          <mat-icon [attr.aria-label]="'Fullscreen' | translate">select_all</mat-icon>
-        </button>
-
-        <button
-          mat-icon-button
-          (click)="deleteAnnotation()"
-          matTooltip="{{ 'Delete' | translate }}"
-          matTooltipPosition="above"
-          type="button"
-        >
-          <mat-icon [attr.aria-label]="'Delete' | translate">delete</mat-icon>
-        </button>
-      </ng-container>
-
+    @if (previewImage$ | async; as previewImage) { @if (!(collapsed$ | async)) {
+    <img mat-card-image [src]="previewImage" />
+    } } @else {
+    <p>{{ 'This annotation has no preview image' | translate }}</p>
+    } @if (!(collapsed$ | async)) {
+    <mat-card-content>
+      @if (isEditMode$ | async) {
+      <mat-form-field class="description">
+        <textarea
+          matInput
+          #annotationContent
+          cdkTextareaAutosize
+          cdkAutosizeMinRows="1"
+          name="description"
+          type="text"
+          placeholder="{{ 'Description' | translate }}"
+          [(ngModel)]="annotation.body.content.description"
+        ></textarea>
+      </mat-form-field>
+      @if (userOwnsCompilation$ | async) {
+      <mat-checkbox
+        class="validation"
+        [checked]="annotation.validated"
+        (change)="annotation.validated = !annotation.validated"
+        >{{ 'Validated' | translate }}
+      </mat-checkbox>
+      }
       <button
         mat-icon-button
-        *ngIf="annotation._id !== 'DefaultAnnotation'"
+        (click)="selectPerspective()"
+        matTooltip="{{ 'Select Perspective' | translate }}"
+        matTooltipPosition="right"
+        type="button"
+        class="perspective"
+      >
+        <mat-icon [attr.aria-label]="'Select Perspective' | translate">camera</mat-icon>
+        {{ 'Select Perspective' | translate }}
+      </button>
+      } @else {
+      <app-markdown-preview
+        id="annotation-content"
+        [data]="annotation.body.content.description"
+      ></app-markdown-preview>
+      }
+    </mat-card-content>
+    }
+    <mat-card-actions>
+      <mat-slide-toggle [checked]="showAnnotation$ | async" (change)="toggleVisibility()">
+        {{ ((showAnnotation$ | async) ? 'Hide' : 'Show') | translate }}
+      </mat-slide-toggle>
+      @if ((processing.hasAnnotationAllowance$ | async) && (isAnnotationOwner$ | async)) {
+      <button
+        mat-icon-button
+        (click)="toggleEditViewMode()"
+        [matTooltip]="((isEditMode$ | async) ? 'Save annotation' : 'Edit annotation') | translate"
+        matTooltipPosition="above"
+        type="button"
+      >
+        <mat-icon
+          [attr.aria-label]="
+            ((isEditMode$ | async) ? 'Save annotation' : 'Edit annotation') | translate
+          "
+        >
+          {{ (isEditMode$ | async) ? 'save' : 'edit' }}
+        </mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        (click)="editFullscreen()"
+        matTooltip="{{ 'Edit in Fullscreen Mode' | translate }}"
+        matTooltipPosition="above"
+        type="button"
+      >
+        <mat-icon [attr.aria-label]="'Fullscreen' | translate">select_all</mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        (click)="deleteAnnotation()"
+        matTooltip="{{ 'Delete' | translate }}"
+        matTooltipPosition="above"
+        type="button"
+      >
+        <mat-icon [attr.aria-label]="'Delete' | translate">delete</mat-icon>
+      </button>
+      } @if (annotation._id !== 'DefaultAnnotation') {
+      <button
+        mat-icon-button
         (click)="shareAnnotation()"
         matTooltip="{{ 'Copy to collection' | translate }}"
         matTooltipPosition="above"
@@ -130,6 +119,8 @@
       >
         <mat-icon [attr.aria-label]="'Copy to collection' | translate">file_copy</mat-icon>
       </button>
+      }
     </mat-card-actions>
   </form>
 </mat-card>
+}

@@ -1,17 +1,18 @@
-<div class="bottom" *ngIf="entity$ | async as entity">
+@if (entity$ | async; as entity) {
+<div class="bottom">
   <div class="anchor">
+    @if (entity.mediaType !== 'audio') {
     <button
       mat-icon-button
-      *ngIf="entity.mediaType !== 'audio'"
       matTooltip="{{ 'Camera settings' | translate }}"
       matTooltipPosition="above"
       (click)="cameraSettings.toggle()"
     >
       <mat-icon>videocam</mat-icon>
     </button>
+    }
     <app-camera-settings #cameraSettings></app-camera-settings>
   </div>
-
   <!--   <ng-container *ngIf="userData">
     <button
       mat-icon-button
@@ -20,63 +21,59 @@
       matTooltip="Login required"
       matTooltipPosition="above"
       [ngClass]="'alert'"
-    >
+      >
       <mat-icon>sentiment_very_dissatisfied</mat-icon>
     </button>
   </ng-container>
-
   <button
     mat-icon-button
     *ngIf="loginRequired && isAuthenticated"
     (click)="openLoginExplanation()"
     matTooltip="Authenticated"
     matTooltipPosition="above"
-  >
+    >
     <mat-icon>sentiment_very_satisfied</mat-icon>
   </button> -->
-
-  <ng-container *ngIf="qualities$ | async as qualities">
+  @if (qualities$ | async; as qualities) { @if (qualities.high && qualities.medium) {
+  <button
+    mat-icon-button
+    [matMenuTriggerFor]="quality"
+    matTooltip="{{ 'Quality' | translate }}"
+    matTooltipPosition="above"
+  >
+    <mat-icon>high_quality</mat-icon>
+  </button>
+  }
+  <!-- Quality Submenu -->
+  <mat-menu #quality="matMenu">
+    @if (processing.quality$ | async; as currentQuality) { @if (qualities.high) {
     <button
-      mat-icon-button
-      *ngIf="qualities.high && qualities.medium"
-      [matMenuTriggerFor]="quality"
-      matTooltip="{{ 'Quality' | translate }}"
-      matTooltipPosition="above"
+      mat-menu-item
+      (click)="updateEntityQuality('high')"
+      [class.is-active]="currentQuality === 'high'"
     >
-      <mat-icon>high_quality</mat-icon>
+      {{ 'High' | translate }}
     </button>
-    <!-- Quality Submenu -->
-    <mat-menu #quality="matMenu">
-      <ng-container *ngIf="processing.quality$ | async as currentQuality">
-        <button
-          mat-menu-item
-          *ngIf="qualities.high"
-          (click)="updateEntityQuality('high')"
-          [class.is-active]="currentQuality === 'high'"
-        >
-        {{ 'High' | translate }}
-        </button>
-        <button
-          mat-menu-item
-          *ngIf="qualities.medium"
-          (click)="updateEntityQuality('medium')"
-          [class.is-active]="currentQuality === 'medium'"
-        >
-        {{ 'Medium' | translate }}
-        </button>
-        <button
-          mat-menu-item
-          *ngIf="qualities.low"
-          (click)="updateEntityQuality('low')"
-          [class.is-active]="currentQuality === 'low'"
-        >
-        {{ 'Low' | translate }}
-        </button>
-      </ng-container>
-    </mat-menu>
-    <!-- / Quality Submenu -->
-  </ng-container>
-
+    } @if (qualities.medium) {
+    <button
+      mat-menu-item
+      (click)="updateEntityQuality('medium')"
+      [class.is-active]="currentQuality === 'medium'"
+    >
+      {{ 'Medium' | translate }}
+    </button>
+    } @if (qualities.low) {
+    <button
+      mat-menu-item
+      (click)="updateEntityQuality('low')"
+      [class.is-active]="currentQuality === 'low'"
+    >
+      {{ 'Low' | translate }}
+    </button>
+    } }
+  </mat-menu>
+  <!-- / Quality Submenu -->
+  }
   <button
     mat-icon-button
     (click)="babylon.createScreenshot()"
@@ -85,7 +82,6 @@
   >
     <mat-icon>camera</mat-icon>
   </button>
-
   <button
     mat-icon-button
     matTooltip="{{ 'Select your language' | translate }}"
@@ -94,23 +90,24 @@
   >
     <mat-icon>translate</mat-icon>
   </button>
-
   <mat-menu #languageMenu="matMenu">
-    <button mat-menu-item *ngFor="let language of languages | keyvalue" (click)="translateService.requestLanguage(language.key)">
+    @for (language of languages | keyvalue; track language) {
+    <button mat-menu-item (click)="translateService.requestLanguage(language.key)">
       {{ language.value }}
     </button>
+    }
   </mat-menu>
-
-
+  @if (fullscreenCapable) {
   <button
-    *ngIf="fullscreenCapable"
     mat-icon-button
     (click)="toggleFullscreen()"
-    matTooltip="{{ ( fullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen' ) | translate }}"
+    matTooltip="{{ (fullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen') | translate }}"
     matTooltipPosition="above"
   >
     <mat-icon [attr.aria-label]="'Exit fullscreen mode' | translate">{{
       fullscreen ? 'fullscreen_exit' : 'fullscreen'
     }}</mat-icon>
   </button>
+  }
 </div>
+}

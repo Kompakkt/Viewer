@@ -2,6 +2,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
   name: 'mediaType',
+  standalone: true,
 })
 export class MediaTypePipe implements PipeTransform {
   // cases: entity, image, audio, video, text

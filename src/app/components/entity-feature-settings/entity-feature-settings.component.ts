@@ -1,6 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { MatStepper } from '@angular/material/stepper';
+import { MatStepper, MatStep, MatStepLabel, MatStepperPrevious } from '@angular/material/stepper';
 import { saveAs } from 'file-saver';
 import { combineLatest, firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -13,11 +13,44 @@ import { ProcessingService } from '../../services/processing/processing.service'
 import { UserdataService } from '../../services/userdata/userdata.service';
 // tslint:disable-next-line:max-line-length
 import { DialogMeshsettingsComponent } from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { AsyncPipe } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { EntityFeatureSettingsMeshComponent } from './entity-feature-settings-mesh/entity-feature-settings-mesh.component';
+import { EntityFeatureSettingsLightsComponent } from './entity-feature-settings-lights/entity-feature-settings-lights.component';
+import { FormsModule } from '@angular/forms';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { ColorChromeModule } from 'ngx-color/chrome';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 
 @Component({
   selector: 'app-entity-feature-settings',
   templateUrl: './entity-feature-settings.component.html',
   styleUrls: ['./entity-feature-settings.component.scss'],
+  standalone: true,
+  imports: [
+    MatCard,
+    MatCardContent,
+    MatButton,
+    MatCardHeader,
+    MatCardTitle,
+    ColorChromeModule,
+    MatSlideToggle,
+    FormsModule,
+    EntityFeatureSettingsLightsComponent,
+    MatStepper,
+    MatStep,
+    EntityFeatureSettingsMeshComponent,
+    MatStepLabel,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    MatStepperPrevious,
+    AsyncPipe,
+    TranslatePipe,
+  ],
 })
 export class EntityFeatureSettingsComponent {
   @ViewChild('stepper') stepper: MatStepper | undefined;

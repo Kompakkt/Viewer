@@ -2,14 +2,59 @@ import { Component } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { AnnotationComponent } from './annotation.component';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { AsyncPipe, UpperCasePipe } from '@angular/common';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-preview.component';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton } from '@angular/material/button';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { MatInput } from '@angular/material/input';
+import { MatFormField } from '@angular/material/form-field';
+import { FormsModule } from '@angular/forms';
+import {
+  MatCard,
+  MatCardHeader,
+  MatCardAvatar,
+  MatCardTitle,
+  MatCardSubtitle,
+  MatCardImage,
+  MatCardContent,
+  MatCardActions,
+} from '@angular/material/card';
 
 @Component({
   selector: 'app-annotation-for-editor',
   templateUrl: './annotation-for-editor.component.html',
   styleUrls: ['./annotation-for-editor.component.scss'],
+  standalone: true,
+  imports: [
+    MatCard,
+    FormsModule,
+    MatCardHeader,
+    MatCardAvatar,
+    MatCardTitle,
+    MatFormField,
+    MatInput,
+    MatCardSubtitle,
+    MatCardImage,
+    MatCardContent,
+    CdkTextareaAutosize,
+    MatCheckbox,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    MarkdownPreviewComponent,
+    MatCardActions,
+    MatSlideToggle,
+    AsyncPipe,
+    UpperCasePipe,
+    TranslatePipe,
+  ],
 })
 export class AnnotationComponentForEditorComponent extends AnnotationComponent {
-  
   public async toggleVisibility() {
     const [{ _id }, showAnnotation, isSelectedAnnotation] = await Promise.all([
       firstValueFrom(this.annotation$),

@@ -23,12 +23,12 @@ $max-width: 500px;
   transition: all 0s ease-in-out, opacity 280ms;
 }
 
-.single-annotation-card.resizable .mat-card-content {
+.single-annotation-card.resizable .mat-mdc-card-content {
   overflow-y: scroll;
   height: 100% !important;
 }
 
-.mat-form-field {
+.mat-mdc-form-field {
   width: 100% !important;
   font-weight: lighter;
   font-size: 1.2rem;
@@ -43,7 +43,7 @@ $max-width: 500px;
   transition: opacity 280ms;
 }
 
-.mat-card {
+.mat-mdc-card {
   background-color: $cardbgr;
   border-radius: 0.25rem;
   color: #fff;
@@ -59,7 +59,7 @@ $max-width: 500px;
   }
 }
 
-.mat-card .mat-input-element {
+.mat-mdc-card .mat-mdc-input-element {
   color: #fff;
 }
 
@@ -68,7 +68,7 @@ $max-width: 500px;
   font-size: 1.5rem;
 }
 
-.mat-card-title {
+.mat-mdc-card-title {
   font-weight: lighter;
   margin: 0;
 
@@ -76,7 +76,7 @@ $max-width: 500px;
   justify-content: center;
 }
 
-.mat-card-content {
+.mat-mdc-card-content {
   overflow-y: auto;
   margin-bottom: 0;
   font-size: 1.1rem;
@@ -84,7 +84,7 @@ $max-width: 500px;
   max-height: 30vh;
 }
 
-.mat-card-actions {
+.mat-mdc-card-actions {
   margin: 0;
   padding: 0;
 

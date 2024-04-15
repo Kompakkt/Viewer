@@ -27,57 +27,65 @@ a {
   text-decoration: none;
 }
 
-.mat-card {
+.mat-mdc-card {
   border-radius: 1px !important;
 }
 
 /* Material Design Tabs */
-.mat-tab-header,
-.mat-tab-nav-bar {
+.mat-mdc-tab-header,
+.mat-mdc-tab-nav-bar {
   border-bottom: none;
 }
 
-.mat-tab-group .mat-tab-label-active {
+/* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
+.mat-mdc-tab-group .mat-tab-label-active {
   background-color: #555;
 }
 
-.mat-tab-group.mat-primary .mat-ink-bar,
-.mat-tab-nav-bar.mat-primary .mat-ink-bar {
+.mat-mdc-tab-group.mat-primary .mat-ink-bar,
+.mat-mdc-tab-nav-bar.mat-primary .mat-ink-bar {
   background-color: #333;
 }
 
-.mat-tab-group .mat-tab-label {
+/* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
+.mat-mdc-tab-group .mat-tab-label {
   min-width: 50px !important;
   padding: 0;
 }
 
-.mat-tab-body {
+.mat-mdc-tab-body {
   /* background-color: #333; */
 }
 
+/* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
 .mat-tab-body-wrapper {
   height: 100%;
 }
 
 /* / Material Design Tabs */
 
+/* TODO(mdc-migration): The following rule targets internal classes of card that may no longer apply for the MDC version. */
 .single-annotation-card .mat-card-header-text {
   margin: 0 !important;
   width: 100% !important;
 }
 
+/* TODO(mdc-migration): The following rule targets internal classes of input that may no longer apply for the MDC version. */
 .mat-input-underline {
   background-color: white !important;
 }
 
+/* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
 .mat-form-field-label {
   color: #fff !important;
 }
 
-.mat-form-field.mat-focused .mat-form-field-ripple {
+/* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
+.mat-mdc-form-field.mat-focused .mat-form-field-ripple {
   background-color: #aaa;
 }
 
+/* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
 .mat-form-field-infix {
   width: 100% !important;
 }
@@ -104,40 +112,43 @@ a {
   font-size: 20px;
 }
 
-#editor .mat-card,
+#editor .mat-mdc-card,
 #compilationBrowser .mat-card {
   background-color: rgba(0, 0, 0, 0);
 }
 
-#editor .mat-card:not(:last-child),
+#editor .mat-mdc-card:not(:last-child),
 #compilationBrowser .mat-card:not(:last-child) {
   border-bottom: 1px solid #333;
 }
 
-#editor .mat-tab-group .mat-tab-label-active {
+/* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
+#editor .mat-mdc-tab-group .mat-tab-label-active {
   background-color: rgba(0, 0, 0, 0.3);
 }
 
-#editor .mat-raised-button:not([disabled]),
+#editor .mat-mdc-raised-button:not([disabled]),
 #compilationBrowser .mat-raised-button:not([disabled]) {
   background-color: #333;
 }
 
-#editor .mat-card-avatar {
+#editor .mat-mdc-card-avatar {
   height: 25px;
   width: 25px;
 }
 
-.mat-card-header .mat-card-title {
+.mat-mdc-card-header .mat-mdc-card-title {
   font-size: 15px;
   font-weight: normal;
   word-wrap: break-word;
 }
 
+/* TODO(mdc-migration): The following rule targets internal classes of card that may no longer apply for the MDC version. */
 #editor .annotations-list .mat-card-header-text {
   margin: 0 0 0 15px;
 }
 
+/* TODO(mdc-migration): The following rule targets internal classes of card that may no longer apply for the MDC version. */
 #editor-metadata .mat-card-header-text,
 #editor-modelsettings .mat-card-header-text,
 #editor-about .mat-card-header-text,
@@ -145,14 +156,14 @@ a {
   margin: 0;
 }
 
-#editor-metadata .mat-card,
+#editor-metadata .mat-mdc-card,
 #editor-modelsettings .mat-card,
 #editor-about .mat-card,
 #compilationBrowser .mat-card {
   margin-bottom: 1px;
 }
 
-#editor-metadata .mat-card-content,
+#editor-metadata .mat-mdc-card-content,
 #editor-modelsettings .mat-card-content,
 #editor-about .mat-card-content,
 #compilationBrowser .mat-card-content {
@@ -163,7 +174,7 @@ a {
   width: 100%;
 }
 
-#compilationBrowser .mat-raised-button:not([disabled]) .mat-icon {
+#compilationBrowser .mat-mdc-raised-button:not([disabled]) .mat-icon {
   margin-right: 10px;
 }
 
@@ -171,13 +182,13 @@ a {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
-.mat-dialog-container {
+.mat-mdc-dialog-container {
   background: #333;
 }
 
 #annotation-content img,
-.mat-dialog-content img,
-.mat-card-content img {
+.mat-mdc-dialog-content img,
+.mat-mdc-card-content img {
   max-width: 100%;
 }
 
@@ -186,6 +197,7 @@ a {
   border-bottom: 1px solid;
 }
 
+/* TODO(mdc-migration): The following rule targets internal classes of card that may no longer apply for the MDC version. */
 mat-card-content {
   position: relative;
 }
