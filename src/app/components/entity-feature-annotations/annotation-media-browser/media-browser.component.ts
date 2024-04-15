@@ -2,7 +2,7 @@ import { AsyncPipe } from '@angular/common';
 import { Component, EventEmitter, Output } from '@angular/core';
 import { MatIconButton } from '@angular/material/button';
 import { MatCard, MatCardFooter, MatCardImage } from '@angular/material/card';
-import { MatFormField } from '@angular/material/form-field';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -25,6 +25,7 @@ type BrowsedMedia = IEntity | { mediaType: string; url: string; description: str
     MatIcon,
     MatFormField,
     MatInput,
+    MatLabel,
     MatCard,
     MatCardImage,
     MatCardFooter,

@@ -2,17 +2,12 @@
 <mat-dialog-content>
   <h3>{{ 'Please authenticate for deleting' | translate }}</h3>
   <mat-form-field>
-    <input
-      matInput
-      name="username"
-      type="text"
-      placeholder="{{ 'username' | translate }}"
-      [(ngModel)]="username"
-      cdkFocusInitial
-    />
+    <mat-label>{{ 'Username' | translate }}</mat-label>
+    <input matInput name="username" type="text" [(ngModel)]="username" cdkFocusInitial />
   </mat-form-field>
   <mat-form-field>
-    <input matInput name="password" type="password" placeholder="password" [(ngModel)]="password" />
+    <mat-label>{{ 'Password' | translate }}</mat-label>
+    <input matInput name="password" type="password" placeholder="" [(ngModel)]="password" />
   </mat-form-field>
 </mat-dialog-content>
 <mat-dialog-actions align="end">

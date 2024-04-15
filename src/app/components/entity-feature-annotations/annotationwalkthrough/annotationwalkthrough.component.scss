@@ -10,6 +10,8 @@
   text-align: center;
   z-index: 1;
   padding: 5px;
+  display: flex;
+  align-items: center;
 }
 
 #annotationwalkthrough a {
@@ -18,10 +20,10 @@
 }
 
 #annotationwalkthrough #walktertitle {
+  line-height: 1;
   display: inline-block;
   text-overflow: ellipsis;
   text-transform: uppercase;
-  margin-bottom: -5px;
   white-space: nowrap;
   overflow: hidden;
   width: 230px;
@@ -35,4 +37,5 @@
   width: 30px;
   height: 30px;
   line-height: 30px;
+  padding: 0px;
 }

@@ -13,7 +13,7 @@ import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { MatFormField } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
-import { MatInput } from '@angular/material/input';
+import { MatInput, MatLabel } from '@angular/material/input';
 import { IEntity } from 'src/common';
 import { environment } from 'src/environment';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
@@ -40,6 +40,7 @@ interface IExternalImage {
     MatDialogTitle,
     MatFormField,
     MatInput,
+    MatLabel,
     FormsModule,
     MatDialogContent,
     MarkdownPreviewComponent,

@@ -1,14 +1,14 @@
-import { Component } from '@angular/core';
-import { ProcessingService } from '../../../services/processing/processing.service';
-import { TranslatePipe } from '../../../pipes/translate.pipe';
-import { AsyncPipe } from '@angular/common';
-import { MatIcon } from '@angular/material/icon';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatIconButton, MatButton } from '@angular/material/button';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { AsyncPipe } from '@angular/common';
+import { Component } from '@angular/core';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatDialogActions, MatDialogClose, MatDialogContent } from '@angular/material/dialog';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
-import { MatFormField } from '@angular/material/form-field';
-import { MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
+import { MatTooltip } from '@angular/material/tooltip';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { ProcessingService } from '../../../services/processing/processing.service';
 
 @Component({
   selector: 'app-dialog-invite-broadcasting',
@@ -19,6 +19,7 @@ import { MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/mat
     MatDialogContent,
     MatFormField,
     MatInput,
+    MatLabel,
     CdkTextareaAutosize,
     MatDialogActions,
     MatIconButton,

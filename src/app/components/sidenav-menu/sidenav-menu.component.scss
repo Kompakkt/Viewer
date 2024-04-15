@@ -13,8 +13,9 @@
 
 :host .mat-mdc-icon-button {
   padding: 5px 0 5px 5px !important;
-  width: auto;
-  height: auto;
+  display: flex !important;
+  height: 48px !important;
+  width: 48px !important;
 }
 
 :host a {

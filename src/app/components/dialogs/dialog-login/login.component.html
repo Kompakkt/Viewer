@@ -2,9 +2,9 @@
   <h1 mat-dialog-title>{{ (concern && concern !== '' ? concern : 'Login') | translate }}</h1>
   <div mat-dialog-content>
     <mat-form-field>
+      <mat-label>{{ 'Username' | translate }}</mat-label>
       <input
         autocomplete="username"
-        placeholder="{{ 'Username' | translate }}"
         type="username"
         matInput
         [(ngModel)]="data.username"
@@ -13,10 +13,10 @@
     </mat-form-field>
   </div>
   <div mat-dialog-content>
-    <mat-form-field
-      ><input
+    <mat-form-field>
+      <mat-label>{{ 'Password' | translate }}</mat-label>
+      <input
         autocomplete="password"
-        placeholder="{{ 'Password' | translate }}"
         type="password"
         matInput
         [(ngModel)]="data.password"

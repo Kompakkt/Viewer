@@ -28,16 +28,12 @@
   <div id="external-image">
     <h3>{{ 'Embed an external image at cursor position:' | translate }}</h3>
     <mat-form-field>
-      <input matInput #url placeholder="{{ 'URL' | translate }}" name="URL" type="text" />
+      <mat-label>{{ 'URL' | translate }}</mat-label>
+      <input matInput #url name="URL" type="text" />
     </mat-form-field>
     <mat-form-field>
-      <input
-        matInput
-        #description
-        placeholder="{{ 'Image Description' | translate }}"
-        name="Image Description"
-        type="text"
-      />
+      <mat-label>{{ 'Image Description' | translate }}</mat-label>
+      <input matInput #description name="Image Description" type="text" />
     </mat-form-field>
     <button
       mat-icon-button

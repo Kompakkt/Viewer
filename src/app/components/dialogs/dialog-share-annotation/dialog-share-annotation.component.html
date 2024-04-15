@@ -4,11 +4,11 @@
   <mat-dialog-content class="mat-typography">
     <h3>{{ 'Please enter the ID of the target Collection' | translate }}</h3>
     <mat-form-field>
+      <mat-label>{{ 'Collection identifier' | translate }}</mat-label>
       <input
         matInput
         name="targetCollectionId"
         type="text"
-        placeholder="{{ 'Collection ID' | translate }}"
         [(ngModel)]="targetCollectionId"
         cdkFocusInitial
       />
@@ -26,12 +26,12 @@
     <p>{{ 'Type in the password to load this collection.' | translate }}</p>
     <h3>{{ 'Password' | translate }}</h3>
     <mat-form-field>
+      <mat-label>{{ 'Password' | translate }}</mat-label>
       <input
         matInput
         name="password"
         #description="ngModel"
         type="password"
-        placeholder="{{ 'password' | translate }}"
         [(ngModel)]="passwordCollection"
       />
     </mat-form-field>

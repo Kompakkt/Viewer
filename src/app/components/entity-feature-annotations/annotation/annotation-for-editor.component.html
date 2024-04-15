@@ -8,12 +8,12 @@
       <mat-card-title>
         @if (isEditMode$ | async) {
         <mat-form-field>
+          <mat-label>{{ 'Title' | translate }}</mat-label>
           <input
             matInput
             name="title"
             #title="ngModel"
             type="text"
-            placeholder="{{ 'Title' | translate }}"
             [(ngModel)]="annotation.body.content.title"
           />
         </mat-form-field>

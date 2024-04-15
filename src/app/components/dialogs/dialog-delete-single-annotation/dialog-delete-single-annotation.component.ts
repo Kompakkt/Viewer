@@ -1,15 +1,15 @@
 import { Component } from '@angular/core';
-import { TranslatePipe } from '../../../pipes/translate.pipe';
-import { MatButton } from '@angular/material/button';
 import { FormsModule } from '@angular/forms';
-import { MatInput } from '@angular/material/input';
-import { MatFormField } from '@angular/material/form-field';
+import { MatButton } from '@angular/material/button';
 import {
-  MatDialogTitle,
-  MatDialogContent,
   MatDialogActions,
   MatDialogClose,
+  MatDialogContent,
+  MatDialogTitle,
 } from '@angular/material/dialog';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-dialog-delete-single-annotation',
@@ -21,6 +21,7 @@ import {
     MatDialogContent,
     MatFormField,
     MatInput,
+    MatLabel,
     FormsModule,
     MatDialogActions,
     MatButton,

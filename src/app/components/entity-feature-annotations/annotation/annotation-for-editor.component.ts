@@ -1,29 +1,29 @@
 import { Component } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-import { AnnotationComponent } from './annotation.component';
-import { TranslatePipe } from '../../../pipes/translate.pipe';
-import { AsyncPipe, UpperCasePipe } from '@angular/common';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
-import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-preview.component';
-import { MatIcon } from '@angular/material/icon';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatIconButton } from '@angular/material/button';
-import { MatCheckbox } from '@angular/material/checkbox';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
-import { MatInput } from '@angular/material/input';
-import { MatFormField } from '@angular/material/form-field';
+import { AsyncPipe, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatIconButton } from '@angular/material/button';
 import {
   MatCard,
-  MatCardHeader,
-  MatCardAvatar,
-  MatCardTitle,
-  MatCardSubtitle,
-  MatCardImage,
-  MatCardContent,
   MatCardActions,
+  MatCardAvatar,
+  MatCardContent,
+  MatCardHeader,
+  MatCardImage,
+  MatCardSubtitle,
+  MatCardTitle,
 } from '@angular/material/card';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatIcon } from '@angular/material/icon';
+import { MatInput } from '@angular/material/input';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatTooltip } from '@angular/material/tooltip';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-preview.component';
+import { AnnotationComponent } from './annotation.component';
 
 @Component({
   selector: 'app-annotation-for-editor',
@@ -38,6 +38,7 @@ import {
     MatCardTitle,
     MatFormField,
     MatInput,
+    MatLabel,
     MatCardSubtitle,
     MatCardImage,
     MatCardContent,

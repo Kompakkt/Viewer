@@ -3,13 +3,8 @@
   <span [innerHTML]="data.title"></span>
   } @if (editMode) {
   <mat-form-field>
-    <input
-      matInput
-      name="title"
-      type="text"
-      placeholder="{{ 'Title' | translate }}"
-      [(ngModel)]="data.title"
-    />
+    <mat-label>{{ 'Title' | translate }}</mat-label>
+    <input matInput name="title" type="text" [(ngModel)]="data.title" />
   </mat-form-field>
   }
 </h1>
@@ -21,6 +16,7 @@
   <app-media-browser (addMedia)="addEntitySwitch($event)"></app-media-browser>
   } @if (editMode) {
   <mat-form-field>
+    <mat-label>placeholder="{{ 'Description' | translate }}"</mat-label>
     <textarea
       id="annotation-content"
       #annotationContent
@@ -29,7 +25,6 @@
       cdkAutosizeMinRows="1"
       name="description"
       type="text"
-      placeholder="{{ 'Description' | translate }}"
       [(ngModel)]="data.content"
     >
     </textarea>

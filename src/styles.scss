@@ -213,6 +213,12 @@ mat-card-content {
   width: 100% !important;
 }
 
+// MARK: Angular 17 Material Fixes
+.mat-mdc-icon-button {
+  display: grid !important;
+  place-items: center !important;
+}
+
 /* Scrollbar style */
 * {
   scrollbar-width: thin;

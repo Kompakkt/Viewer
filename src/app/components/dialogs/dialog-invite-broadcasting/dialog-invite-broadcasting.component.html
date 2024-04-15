@@ -1,10 +1,10 @@
 @if (compilation$ | async; as compilation) {
 <mat-dialog-content>
+  <h3>{{ 'Invitation for Collaborators' | translate }}</h3>
   <mat-form-field>
-    <h3>{{ 'Invitation for Collaborators' | translate }}</h3>
+    <mat-label>{{ 'You can edit this text' | translate }}</mat-label>
     <textarea
       matInput
-      placeholder="{{ 'You can edit this Text' | translate }}"
       [value]="
         text + ((processing.defaultEntityLoaded$ | async) ? defaultURL : baseURL + compilation._id)
       "
