@@ -131,10 +131,10 @@ export class BabylonService {
     color: RGBA;
     layer: Layer | undefined;
   } = {
-    url: 'assets/textures/backgrounds/darkgrey.jpg',
-    color: { r: 0, g: 0, b: 0, a: 0 },
-    layer: undefined,
-  };
+      url: 'assets/textures/backgrounds/darkgrey.jpg',
+      color: { r: 0, g: 0, b: 0, a: 0 },
+      layer: undefined,
+    };
 
   constructor(private factoryResolver: ComponentFactoryResolver, private injector: Injector) {
     this.canvas.id = 'renderCanvas';

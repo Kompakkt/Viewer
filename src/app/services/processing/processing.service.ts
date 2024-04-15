@@ -24,7 +24,7 @@ import { environment } from '../../../environments/environment';
 // tslint:disable-next-line:max-line-length
 import { DialogPasswordComponent } from '../../components/dialogs/dialog-password/dialog-password.component';
 import { decodeBase64 } from '../../helpers';
-import { getIIIFItem, isIIIFManifest } from '../../helpers/iiif-data-helper';
+import { getIIIFItems, isIIIFManifest } from '../../helpers/iiif-data-helper';
 import { BabylonService } from '../babylon/babylon.service';
 import { LoadingScreenService } from '../babylon/loadingscreen';
 import { BackendService } from '../backend/backend.service';
@@ -348,31 +348,7 @@ export class ProcessingService {
 
   private async loadStandaloneEntity(entries: IQueryParams) {
     const { manifest } = entries;
-    let url = "";
     let scene;
-    console.log('loadStandaloneEntity', entries);
-
-    // Extract endpoint from url, so we can load settings and annotations
-    // tslint:disable-next-line:newline-per-chained-call
-
-
-    if (manifest) {
-      const decodedManifest = decodeBase64(manifest);
-
-      if (!decodedManifest) return;
-
-      const manifestData = JSON.parse(decodedManifest);
-
-      console.log('Attempting to load manifest', manifestData);
-      if (isIIIFManifest(manifestData)) {
-        console.log('Loaded manifest', manifestData);
-        const model = getIIIFItem(manifestData, 'Annotation');
-        scene = getIIIFItem(manifestData, "Scene") as any;
-        console.log("Scene", scene);
-        url = model?.body?.id ?? "";
-        console.log('Loaded model url', url);
-      }
-    }
     //scene.backgroundColor is hex and should be stored in iColor rgb
     // Function to convert hex color to RGB
     function hexToRgb(hex: string): IColor {
@@ -388,113 +364,116 @@ export class ProcessingService {
       // Return an object containing the RGB values
       return { r, g, b, a };
     }
-    if (scene) {
-      if (scene.backgroundColor) {
-        minimalSettings.background = {
-          color: hexToRgb(scene.backgroundColor),
-          effect: true,
-        }
-      }
-    }
 
-    const entity = {
-      ...baseEntity(),
-      _id: 'standalone_entity',
-      name: 'Standalone Entity',
-      relatedDigitalEntity: { _id: 'standalone_entity' },
-      settings: minimalSettings
-    };
+    // Extract endpoint from url, so we can load settings and annotations
+    // tslint:disable-next-line:newline-per-chained-call
 
-    console.log('Attempting to load standalone entity', entity);
-    console.log('Attempting to load standalone manifest', manifest);
-
-
-    /* const getResource = async <T extends unknown>(
-      resource: string,
-      parseJson = false,
-    ): Promise<T | undefined> => {
-      console.log('Attempting to load resource', resource);
-      if (resource.startsWith('http://') || resource.startsWith('https://')) {
-        console.log('Attempting to load remote resource', resource);
-        const request = this.http.get<T>(resource);
-        const loaded = await firstValueFrom(request);
-        return loaded as T;
-      }
-      if (resource.endsWith('.json')) {
-        const request = this.http.get<T>(`${endpoint}/${resource}`);
-        const loaded = await firstValueFrom(request);
-        return loaded as T;
-      }
-      if (isBase64(resource)) {
-        const decoded = decodeBase64(resource);
-        if (!decoded) return undefined;
-        return parseJson ? (JSON.parse(decoded) as T) : (decoded as T);
-      }
-      return undefined;
-    };
-
-    const url = "tes";
-
-    /* if (settings) {
-      console.log('Attempting to load settings', settings);
-      const loadedSettings = await getResource<IEntitySettings>(settings, true);
-      if (loadedSettings) {
-        entity.settings = loadedSettings;
-        console.log('Loaded settings', loadedSettings);
-      }
-    }
 
     if (manifest) {
-      console.log('Attempting to load manifest', manifest);
-      let loadedManifest = await getResource<IAnnotation[] | IIIFData | {}>(manifest, true);
-      console.log('Loaded manifest', loadedManifest);
-      if (loadedManifest) {
-        if (isIIIFManifest(loadedManifest)) {
-          // load manifest
-        }
+      const decodedManifest = decodeBase64(manifest);
 
-        if (Array.isArray(loadedManifest)) {
-          const patchedManifest: { [id: string]: IAnnotation } = {};
-          for (const anno of loadedManifest) patchedManifest[anno._id.toString()] = anno;
-          console.log('Loaded manifest', patchedManifest);
+      if (!decodedManifest) return;
 
-          entity.manifest = patchedManifest;
-        } else {
-          console.log('Unknown manifest format', loadedManifest);
-        }
+      const manifestData = JSON.parse(decodedManifest);
+
+      console.log('Attempting to load manifest', manifestData);
+      if (isIIIFManifest(manifestData)) {
+        scene = getIIIFItems(manifestData, "Scene")[0];
+        console.log("Scene", scene);
       }
     }
-    */
 
-    return this.babylon
-      .loadEntity(true, url)
-      .then(meshes => {
-        this.updateActiveEntity(entity, meshes);
-        this.settings$.next({
-          localSettings: entity.settings,
-          serverSettings: entity.settings,
-        });
-      })
-      .catch(error => {
-        console.error(error);
-        this.message.error('Connection to entity server to load entity refused.');
-        this.loadFallbackEntity();
-      })
-      .then(() => {
-        if (!!entries.minimal) {
-          this.showAnnotationEditor$.next(false);
-          this.showSettingsEditor$.next(true);
-          this.showSidenav$.next(false);
-        } else {
-          this.showAnnotationEditor$.next(false);
-          this.showSettingsEditor$.next(true);
-          this.showSidenav$.next(false);
+    if (!scene) {
+      return this.message.error('Unable to load standalone Scene');
+    }
+    const entitySettings = minimalSettings;
+    if (scene.backgroundColor) {
+      entitySettings.background = {
+        color: hexToRgb(scene.backgroundColor),
+        effect: true,
+      }
+    }
+    const models = getIIIFItems(scene, "Annotation");
+    models.forEach((model, index) => {
+      //get a copy oof minimal settings
+      const entity: IEntity = {
+        ...baseEntity(),
+        _id: 'standalone_entity',
+        name: 'Standalone Entity',
+        relatedDigitalEntity: { _id: 'standalone_entity' },
+        settings: entitySettings
+      };
+      console.log(index);
+      //check for every except last
+      /* if (index !== models.length - 1) {
+        entity.settings.background.color = { r: 0, g: 0, b: 0, a: 0 };
+        entity.settings.background.effect = false;
+      } */
+      entity.settings.position = { x: 0, y: 0, z: 0 };
+      const url = Array.isArray(model.body?.source) ? model.body?.source[0].id : model.body?.id ?? null;
+      const transforms = model.body?.transform ?? [];
+      const target = model.target as any ?? [];
+      console.log("Model", model);
+      if (target) {
+        entity.settings.position = target.selector[0];
+        console.log("Target in settings", entity.settings.position);
+      }
+
+      transforms.forEach((transform: any) => {
+        console.log("Transform", transform);
+        if (transform["type"] === "ScaleTransform") {
+          entity.settings.scale = transform.x;
         }
-        this.bootstrapped$.next(true);
-      })
-      .finally(() => {
-        this.loadingScreen.hide();
+        if (transform["type"] === "RotateTransform") {
+          entity.settings.rotation = transform;
+        }
+        if (transform["type"] === "TranslateTransform") {
+          entity.settings.translate = transform;
+        }
       });
+
+      if (!url) {
+        console.error('No url in scene', model);
+        this.message.error('No url in scene');
+        return;
+      }
+
+      this.babylon
+        .loadEntity(true, url)
+        .then((meshList) => {
+          const meshes: Mesh[] = meshList.flatMap((list) => list);
+          this.updateActiveEntity(entity, meshes);
+          this.settings$.next({
+            localSettings: entity.settings,
+            serverSettings: entity.settings,
+          });
+        })
+        .catch(error => {
+          console.error(error);
+          this.message.error('Connection to entity server to load entity refused.');
+          this.loadFallbackEntity();
+        })
+        .then(() => {
+          if (!!entries.minimal) {
+            this.showAnnotationEditor$.next(false);
+            this.showSettingsEditor$.next(true);
+            this.showSidenav$.next(false);
+          } else {
+            this.showAnnotationEditor$.next(false);
+            this.showSettingsEditor$.next(true);
+            this.showSidenav$.next(false);
+          }
+          this.bootstrapped$.next(true);
+        })
+        .finally(() => {
+          this.loadingScreen.hide();
+        });
+    });
+
+
+
+
+    return true;
   }
 
   public loadDefaultEntityData() {

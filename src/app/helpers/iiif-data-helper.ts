@@ -19,11 +19,18 @@ export interface IIIFItem {
     label: { [key: string]: string[] };
     items?: IIIFItem[];
     motivation?: string[];
+    backgroundColor?: string;
     body?: {
         id: string;
+        source?: any[];
         type: string;
+        transform: any[];
     };
-    target?: string;
+    target?: {
+        selector?: any;
+        source?: any;
+        type?: string;
+    }
 }
 
 function hasKeys(obj: any, keys: string[]): boolean {
@@ -98,19 +105,39 @@ export const convertIIIFAnnotation = ({ id, normal, position, value }: IIIFAnnot
 };
 
 /* 
-    * Recursively search for an item of a specific type in a IIIF manifest
+    * Recursively search for all items of a specific type in a IIIF manifest
     * @param item The item to search in
     * @param type The type of item to search for
-    * @returns The first item of the specified type found in the manifest, or null if no such item was found
+    * @returns All items of the specified type found in the manifest
 
 */
-export function getIIIFItem(item: IIIFItem, type: string): IIIFItem | null {
+export function getIIIFItems(item: IIIFItem, type: string): IIIFItem[] {
+    const results: IIIFItem[] = [];
+    if (item.type === type) {
+        results.push(item);
+    }
+    if (item.items) {
+        for (const subItem of item.items) {
+            results.push(...getIIIFItems(subItem, type));
+        }
+    }
+    return results;
+}
+
+/*
+    * Serach for a specific Keyword in an object
+    * @param item The item to search in
+    * @param type The type of item to search for
+    * @returns All items of the specified type found in the object
+*/
+
+export function findItemInObject(item: any, type: string): any {
     if (item.type === type) {
         return item;
     }
     if (item.items) {
         for (const subItem of item.items) {
-            const result = getIIIFItem(subItem, type);
+            const result = findItemInObject(subItem, type);
             if (result) {
                 return result;
             }
