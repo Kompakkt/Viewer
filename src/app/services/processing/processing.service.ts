@@ -415,7 +415,9 @@ export class ProcessingService {
       const target = model.target as any ?? [];
       console.log("Model", model);
       if (target) {
-        entity.settings.position = target.selector[0];
+        if (target.selector) {
+          entity.settings.position = target.selector[0];
+        }
         console.log("Target in settings", entity.settings.position);
       }
 
