@@ -1,4 +1,17 @@
-@import '@angular/material/prebuilt-themes/pink-bluegrey.css';
+@use '@angular/material' as mat;
+
+// TODO(v15): As of v15 mat.legacy-core no longer includes default typography styles.
+//  The following line adds:
+//    1. Default typography styles for all components
+//    2. Styles for typography hierarchy classes (e.g. .mat-headline-1)
+//  If you specify typography styles for the components you use elsewhere, you should delete this line.
+//  If you don't need the default component typographies but still want the hierarchy styles,
+//  you can delete this line and instead use:
+//    `@include mat.legacy-typography-hierarchy(mat.define-typography-config());`
+// @include mat.all-component-typographies();
+@include mat.core();
+
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
 @import url('./assets/fonts/OpenSans.css');
 @import url('./assets/fonts/MaterialIcons.css');
 
@@ -7,6 +20,9 @@
     'Gill Sans MT', 'Myriad Pro', Myriad, 'DejaVu Sans Condensed', 'Liberation Sans',
     'Nimbus Sans L', Tahoma, Geneva, 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --brand-color: #00afe7;
+
+  /* Material styles override */
+  --mat-dialog-headline-padding: 16px 24px 9px;
 }
 
 html,

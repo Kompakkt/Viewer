@@ -16,7 +16,7 @@
   <app-media-browser (addMedia)="addEntitySwitch($event)"></app-media-browser>
   } @if (editMode) {
   <mat-form-field>
-    <mat-label>placeholder="{{ 'Description' | translate }}"</mat-label>
+    <mat-label>{{ 'Description' | translate }}</mat-label>
     <textarea
       id="annotation-content"
       #annotationContent

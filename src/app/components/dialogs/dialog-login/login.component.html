@@ -11,8 +11,6 @@
         [ngModelOptions]="{ standalone: true }"
       />
     </mat-form-field>
-  </div>
-  <div mat-dialog-content>
     <mat-form-field>
       <mat-label>{{ 'Password' | translate }}</mat-label>
       <input
@@ -24,6 +22,7 @@
       />
     </mat-form-field>
   </div>
+
   @if (loginFailed) {
   <div mat-dialog-content>
     <span style="color: red">{{ 'Login failed' | translate }}</span>

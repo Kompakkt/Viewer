@@ -53,7 +53,8 @@
       </mat-checkbox>
       }
       <button
-        mat-icon-button
+        mat-stroked-button
+        color="primary"
         (click)="selectPerspective()"
         matTooltip="{{ 'Select Perspective' | translate }}"
         matTooltipPosition="right"
@@ -71,7 +72,7 @@
       }
     </mat-card-content>
     }
-    <mat-card-actions>
+    <mat-card-actions style="color: white">
       <mat-slide-toggle [checked]="showAnnotation$ | async" (change)="toggleVisibility()">
         {{ ((showAnnotation$ | async) ? 'Hide' : 'Show') | translate }}
       </mat-slide-toggle>

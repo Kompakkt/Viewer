@@ -38,13 +38,7 @@
             "polyfills": ["zone.js", "src/global-shim.ts"],
             "scripts": ["node_modules/pepjs/dist/pep.js"],
             "sourceMap": true,
-            "styles": [
-              {
-                "inject": true,
-                "input": "node_modules/@angular/material/prebuilt-themes/indigo-pink.css"
-              },
-              "src/styles.scss"
-            ],
+            "styles": ["src/styles.scss", "src/theme.scss"],
             "tsConfig": "tsconfig.app.json"
           }
         },

@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { AsyncPipe, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatIconButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import {
   MatCard,
   MatCardActions,
@@ -45,6 +45,7 @@ import { AnnotationComponent } from './annotation.component';
     CdkTextareaAutosize,
     MatCheckbox,
     MatIconButton,
+    MatButton,
     MatTooltip,
     MatIcon,
     MarkdownPreviewComponent,

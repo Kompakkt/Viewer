@@ -2,6 +2,12 @@
   font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
 .annotation-card {
   width: 100%;
   padding: 0.8rem;
@@ -37,8 +43,8 @@
 }
 
 .annotation-card .perspective {
-  cursor: pointer;
-  margin-left: -4px;
+  width: 100%;
+  color: white;
 }
 
 img {
