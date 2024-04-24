@@ -3,14 +3,12 @@ import { MatDialog } from '@angular/material/dialog';
 import { Mesh, Quaternion } from '@babylonjs/core';
 import { BehaviorSubject, combineLatest, debounceTime, filter, firstValueFrom, map } from 'rxjs';
 import {
-  IColor,
   ICompilation,
   IEntity,
   IEntitySettings,
   isEntity,
   ObjectId,
 } from 'src/common';
-import { baseEntity } from '../../../assets/defaults';
 import { defaultEntity, fallbackEntity } from '../../../assets/entities/entities';
 import {
   minimalSettings,
@@ -24,13 +22,13 @@ import { environment } from '../../../environments/environment';
 // tslint:disable-next-line:max-line-length
 import { DialogPasswordComponent } from '../../components/dialogs/dialog-password/dialog-password.component';
 import { decodeBase64 } from '../../helpers';
-import { getIIIFItems, isIIIFManifest } from '../../helpers/iiif-data-helper';
 import { BabylonService } from '../babylon/babylon.service';
 import { LoadingScreenService } from '../babylon/loadingscreen';
 import { BackendService } from '../backend/backend.service';
 import { MessageService } from '../message/message.service';
 import { OverlayService } from '../overlay/overlay.service';
 import { UserdataService } from '../userdata/userdata.service';
+import { Annotation, AnnotationBody, Manifest, Scene, SpecificResource, parseManifest } from 'manifesto.js';
 
 export type QualitySetting = 'low' | 'medium' | 'high' | 'raw';
 const isQualitySetting = (setting: any): setting is QualitySetting => {
@@ -348,52 +346,50 @@ export class ProcessingService {
 
   private async loadStandaloneEntity(entries: IQueryParams) {
     const { manifest } = entries;
-    let scene;
-    //scene.backgroundColor is hex and should be stored in iColor rgb
-    // Function to convert hex color to RGB
-    function hexToRgb(hex: string): IColor {
-      // Remove the # if present
-      hex = hex.replace(/^#/, '');
-
-      // Parse the hex values to separate R, G, and B values
-      let bigint = parseInt(hex, 16);
-      let r = (bigint >> 16) & 255;
-      let g = (bigint >> 8) & 255;
-      let b = bigint & 255;
-      let a = 1;
-      // Return an object containing the RGB values
-      return { r, g, b, a };
+    let scene: Scene;
+    if (!manifest) {
+      return this.message.error('Unable to load standalone Scene');
     }
+    const decodedManifest = decodeBase64(manifest);
 
-    // Extract endpoint from url, so we can load settings and annotations
-    // tslint:disable-next-line:newline-per-chained-call
+    if (!decodedManifest) return;
 
 
-    if (manifest) {
-      const decodedManifest = decodeBase64(manifest);
+    const loadedManifest = parseManifest(decodedManifest) as Manifest
 
-      if (!decodedManifest) return;
+    const scenes = loadedManifest.getSequences()[0].getScenes();
 
-      const manifestData = JSON.parse(decodedManifest);
-
-      console.log('Attempting to load manifest', manifestData);
-      if (isIIIFManifest(manifestData)) {
-        scene = getIIIFItems(manifestData, "Scene")[0];
-        console.log("Scene", scene);
-      }
-    }
+    // lets now assume theres only one scene for now
+    scene = scenes[0];
 
     if (!scene) {
       return this.message.error('Unable to load standalone Scene');
     }
     const entitySettings = minimalSettings;
-    if (scene.backgroundColor) {
+    const bgColor = scene.getBackgroundColor();
+    if (bgColor) {
       entitySettings.background = {
-        color: hexToRgb(scene.backgroundColor),
+        color: {
+          r: bgColor.red,
+          g: bgColor.green,
+          b: bgColor.blue,
+          a: 1,
+        },
         effect: true,
       }
     }
-    const models = getIIIFItems(scene, "Annotation");
+    const isAnnotationBody = (a: Annotation): a is Annotation & { body: [{ type: 'model' }] } =>
+      (a.getBody()[0] as AnnotationBody).getType() !== undefined;
+    const isSpecificResource = (a: Annotation): a is Annotation & { body: [{ source: string }] } =>
+      (a.getBody()[0] as SpecificResource).getSource() !== undefined;
+
+    // a specific resourcde is always a model, but an annotation body is a resourcde if getType is model
+    //@ts-ignore
+    const isModel = (a: Annotation) => isAnnotationBody(a) || isSpecificResource(a);
+    const allAnnotations: Annotation[] = scene.getContent();
+    //@ts-ignore
+    const models = allAnnotations.map((a) => a).filter((a) => isAnnotationBody(a) || isSpecificResource(a));
+    /*
     models.forEach((model, index) => {
       //get a copy oof minimal settings
       const entity: IEntity = {
@@ -408,72 +404,72 @@ export class ProcessingService {
       /* if (index !== models.length - 1) {
         entity.settings.background.color = { r: 0, g: 0, b: 0, a: 0 };
         entity.settings.background.effect = false;
-      } */
-      entity.settings.position = { x: 0, y: 0, z: 0 };
-      const url = Array.isArray(model.body?.source) ? model.body?.source[0].id : model.body?.id ?? null;
-      const transforms = model.body?.transform ?? [];
-      const target = model.target as any ?? [];
-      console.log("Model", model);
-      if (target) {
-        if (target.selector) {
-          entity.settings.position = target.selector[0];
-        }
-        console.log("Target in settings", entity.settings.position);
+      } 
+    entity.settings.position = { x: 0, y: 0, z: 0 };
+    const url = Array.isArray(model.body?.source) ? model.body?.source[0].id : model.body?.id ?? null;
+    const transforms = model.body?.transform ?? [];
+    const target = model.target as any ?? [];
+    console.log("Model", model);
+    if (target) {
+      if (target.selector) {
+        entity.settings.position = target.selector[0];
       }
+      console.log("Target in settings", entity.settings.position);
+    }
 
-      transforms.forEach((transform: any) => {
-        console.log("Transform", transform);
-        if (transform["type"] === "ScaleTransform") {
-          entity.settings.scale = transform.x;
-        }
-        if (transform["type"] === "RotateTransform") {
-          entity.settings.rotation = transform;
-        }
-        if (transform["type"] === "TranslateTransform") {
-          entity.settings.translate = transform;
-        }
-      });
-
-      if (!url) {
-        console.error('No url in scene', model);
-        this.message.error('No url in scene');
-        return;
+    transforms.forEach((transform: any) => {
+      console.log("Transform", transform);
+      if (transform["type"] === "ScaleTransform") {
+        entity.settings.scale = transform.x;
       }
-
-      this.babylon
-        .loadEntity(true, url)
-        .then((meshList) => {
-          const meshes: Mesh[] = meshList.flatMap((list) => list);
-          this.updateActiveEntity(entity, meshes);
-          this.settings$.next({
-            localSettings: entity.settings,
-            serverSettings: entity.settings,
-          });
-        })
-        .catch(error => {
-          console.error(error);
-          this.message.error('Connection to entity server to load entity refused.');
-          this.loadFallbackEntity();
-        })
-        .then(() => {
-          if (!!entries.minimal) {
-            this.showAnnotationEditor$.next(false);
-            this.showSettingsEditor$.next(true);
-            this.showSidenav$.next(false);
-          } else {
-            this.showAnnotationEditor$.next(false);
-            this.showSettingsEditor$.next(true);
-            this.showSidenav$.next(false);
-          }
-          this.bootstrapped$.next(true);
-        })
-        .finally(() => {
-          this.loadingScreen.hide();
-        });
+      if (transform["type"] === "RotateTransform") {
+        entity.settings.rotation = transform;
+      }
+      if (transform["type"] === "TranslateTransform") {
+        entity.settings.translate = transform;
+      }
     });
 
+    if (!url) {
+      console.error('No url in scene', model);
+      this.message.error('No url in scene');
+      return;
+    }
+
+    this.babylon
+      .loadEntity(true, url)
+      .then((meshList) => {
+        const meshes: Mesh[] = meshList.flatMap((list) => list);
+        this.updateActiveEntity(entity, meshes);
+        this.settings$.next({
+          localSettings: entity.settings,
+          serverSettings: entity.settings,
+        });
+      })
+      .catch(error => {
+        console.error(error);
+        this.message.error('Connection to entity server to load entity refused.');
+        this.loadFallbackEntity();
+      })
+      .then(() => {
+        if (!!entries.minimal) {
+          this.showAnnotationEditor$.next(false);
+          this.showSettingsEditor$.next(true);
+          this.showSidenav$.next(false);
+        } else {
+          this.showAnnotationEditor$.next(false);
+          this.showSettingsEditor$.next(true);
+          this.showSidenav$.next(false);
+        }
+        this.bootstrapped$.next(true);
+      })
+      .finally(() => {
+        this.loadingScreen.hide();
+      });
+  });
 
 
+  */
 
     return true;
   }

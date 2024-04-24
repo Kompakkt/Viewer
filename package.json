@@ -50,6 +50,7 @@
     "core-js": "^3.25.5",
     "file-saver": "^2.0.5",
     "fscreen": "^1.2.0",
+    "manifesto.js": "github:luguenth/manifesto#draft3dapi",
     "marked": "^4.1.1",
     "ngx-color": "^8.0.3",
     "pepjs": "^0.5.3",
