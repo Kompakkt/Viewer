@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Mesh, Quaternion } from '@babylonjs/core';
+import { Mesh, Quaternion, TransformNode, Vector3 } from '@babylonjs/core';
 import { BehaviorSubject, combineLatest, debounceTime, filter, firstValueFrom, map } from 'rxjs';
 import {
   ICompilation,
@@ -28,7 +28,7 @@ import { BackendService } from '../backend/backend.service';
 import { MessageService } from '../message/message.service';
 import { OverlayService } from '../overlay/overlay.service';
 import { UserdataService } from '../userdata/userdata.service';
-import { Annotation, AnnotationBody, Manifest, Scene, SpecificResource, parseManifest } from 'manifesto.js';
+import { AnnotationBody, Manifest, Scene, SpecificResource, parseManifest } from 'manifesto.js';
 
 export type QualitySetting = 'low' | 'medium' | 'high' | 'raw';
 const isQualitySetting = (setting: any): setting is QualitySetting => {
@@ -346,7 +346,7 @@ export class ProcessingService {
 
   private async loadStandaloneEntity(entries: IQueryParams) {
     const { manifest } = entries;
-    let scene: Scene;
+    let manifestScene: Scene;
     if (!manifest) {
       return this.message.error('Unable to load standalone Scene');
     }
@@ -357,16 +357,16 @@ export class ProcessingService {
 
     const loadedManifest = parseManifest(decodedManifest) as Manifest
 
-    const scenes = loadedManifest.getSequences()[0].getScenes();
+    const manifestScenes = loadedManifest.getSequences()[0].getScenes();
 
     // lets now assume theres only one scene for now
-    scene = scenes[0];
+    manifestScene = manifestScenes[0];
 
-    if (!scene) {
+    if (!manifestScene) {
       return this.message.error('Unable to load standalone Scene');
     }
     const entitySettings = minimalSettings;
-    const bgColor = scene.getBackgroundColor();
+    const bgColor = manifestScene.getBackgroundColor();
     if (bgColor) {
       entitySettings.background = {
         color: {
@@ -378,17 +378,71 @@ export class ProcessingService {
         effect: true,
       }
     }
-    const isAnnotationBody = (a: Annotation): a is Annotation & { body: [{ type: 'model' }] } =>
-      (a.getBody()[0] as AnnotationBody).getType() !== undefined;
-    const isSpecificResource = (a: Annotation): a is Annotation & { body: [{ source: string }] } =>
-      (a.getBody()[0] as SpecificResource).getSource() !== undefined;
 
-    // a specific resourcde is always a model, but an annotation body is a resourcde if getType is model
-    //@ts-ignore
-    const isModel = (a: Annotation) => isAnnotationBody(a) || isSpecificResource(a);
-    const allAnnotations: Annotation[] = scene.getContent();
-    //@ts-ignore
-    const models = allAnnotations.map((a) => a).filter((a) => isAnnotationBody(a) || isSpecificResource(a));
+    const isSpecificResource = (body: object | AnnotationBody | SpecificResource): body is SpecificResource =>
+      !('getType' in body);
+
+    const isAnnotationBody = (body: object | AnnotationBody | SpecificResource): body is AnnotationBody =>
+      !isSpecificResource(body);
+
+    //const isVectorTransform = (body: object | Transform): body is { x?: number; y?: number; z?: number } => 'x' in body || 'y' in body || 'z' in body;
+
+    for (const anno of manifestScene.getContent()) {
+      console.debug('Annotation', anno);
+      const body = anno.Body[0];
+      const annotationBody = isSpecificResource(body) ? body.getSource() : body.getType() === 'model' ? body : undefined;
+      console.log('Manifest body', { body, annotationBody, anno });
+      const meshes: Mesh[] = [];
+      if (annotationBody && isAnnotationBody(annotationBody)) {
+        const result = await this.babylon.addEntityToScene(annotationBody.id);
+        meshes.push(...result);
+      } else if (typeof annotationBody === 'string') {
+        const result = await this.babylon.addEntityToScene(annotationBody);
+        meshes.push(...result);
+      }
+
+      const transformNode = new TransformNode(`transformNode-${anno.id}`, this.babylon.getScene());
+      for (const mesh of meshes) {
+        if (mesh.parent) continue;
+        mesh.setParent(transformNode);
+      }
+
+      const pointSelector = anno.getTarget().getSelector();
+      if (pointSelector) {
+        const pointVector = new Vector3(
+          Number(pointSelector.getProperty("x") ?? 0) * -1,
+          Number(pointSelector.getProperty("y") ?? 0),
+          Number(pointSelector.getProperty("z") ?? 0)
+        );
+        transformNode.position.addInPlace(pointVector);
+      }
+
+      const transforms = isSpecificResource(body) ? body.getTransform() : [];
+      console.log("Transforms", transforms);
+      for (const transform of transforms) {
+        const vector = new Vector3(
+          Number(transform.getProperty("x") ?? 0) * -1,
+          Number(transform.getProperty("y") ?? 0),
+          Number(transform.getProperty("z") ?? 0)
+        );
+        console.debug("Transvform Vektor:", vector);
+        // Können transform mehrfach vorkommen?
+        if (transform.isScaleTransform) {
+          transformNode.scaling = vector;
+        }
+        if (transform.isRotateTransform) {
+          transformNode.rotation.addInPlace(vector);
+        }
+        if (transform.isTranslateTransform) {
+          transformNode.position.addInPlace(vector);
+        }
+      }
+    }
+
+    this.loadingScreen.hide();
+    this.bootstrapped$.next(true);
+
+
     /*
     models.forEach((model, index) => {
       //get a copy oof minimal settings
@@ -416,7 +470,7 @@ export class ProcessingService {
       }
       console.log("Target in settings", entity.settings.position);
     }
-
+ 
     transforms.forEach((transform: any) => {
       console.log("Transform", transform);
       if (transform["type"] === "ScaleTransform") {
@@ -429,13 +483,13 @@ export class ProcessingService {
         entity.settings.translate = transform;
       }
     });
-
+ 
     if (!url) {
       console.error('No url in scene', model);
       this.message.error('No url in scene');
       return;
     }
-
+ 
     this.babylon
       .loadEntity(true, url)
       .then((meshList) => {
@@ -467,11 +521,14 @@ export class ProcessingService {
         this.loadingScreen.hide();
       });
   });
-
-
+ 
+ 
   */
 
     return true;
+  }
+
+  public loadScene() {
   }
 
   public loadDefaultEntityData() {

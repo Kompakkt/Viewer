@@ -15,6 +15,8 @@ import {
   Tools,
   UniversalCamera,
   Vector3,
+  AxesViewer,
+  MeshBuilder,
 } from '@babylonjs/core';
 import '@babylonjs/core/Debug/debugLayer';
 import '@babylonjs/inspector';
@@ -209,6 +211,14 @@ export class BabylonService {
     (window as any)['enableInspector'] = () => this.enableInspector();
     (window as any)['disableInspector'] = () => this.disableInspector();
     (window as any)['scene'] = () => this.getScene();
+
+    setTimeout(() => {
+      this.enableInspector();
+
+      new AxesViewer(this.scene, 10, 2, undefined, undefined, undefined, 2);
+
+      MeshBuilder.CreateGround('ground', { width: 100, height: 100 }, this.scene);
+    }, 1000);
   }
 
   public enableInspector() {
@@ -346,6 +356,11 @@ export class BabylonService {
           return result.meshes;
         });
     }
+  }
+
+  public async addEntityToScene(entityUrl: string) {
+    console.debug("entity url: ", entityUrl);
+    return this.loadEntity(false, entityUrl, 'entity', false);
   }
 
   public async createScreenshot() {
