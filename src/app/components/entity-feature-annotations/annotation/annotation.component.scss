@@ -1,97 +1,41 @@
-$cardbgr: #111;
-$max-width: 500px;
-
 :host {
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
-}
-
-@keyframes fadein {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 0.9;
-  }
-}
-
-.single-annotation-card {
-  z-index: 0;
   position: absolute;
-  animation: fadein 280ms;
-  opacity: 0.9 !important;
-  border-radius: 5px !important;
-  transition: all 0s ease-in-out, opacity 280ms;
-}
-
-.single-annotation-card.resizable .mat-mdc-card-content {
-  overflow-y: scroll;
-  height: 100% !important;
-}
-
-.mat-mdc-form-field {
-  width: 100% !important;
-  font-weight: lighter;
-  font-size: 1.2rem;
-}
-
-#closeButton {
-  position: absolute;
-  top: 0;
-  right: 0;
-  transform: translate(40%, -40%);
-  opacity: 0;
-  transition: opacity 280ms;
-}
-
-.mat-mdc-card {
-  background-color: $cardbgr;
-  border-radius: 0.25rem;
+  max-width: clamp(200px, 33vw, 400px);
+  --top: 0px;
+  --left: 0px;
+  transform: translate(var(--left), var(--top));
+  z-index: 1;
   color: #fff;
-  word-wrap: break-word;
+  background-color: var(--color-bg-transparent);
+  border-radius: 8px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
 
-  // This is to prevent annotations with
-  // large descriptions from taking up
-  // the whole viewport
-  max-width: 35%;
-
-  &:hover #closeButton {
+  opacity: 0;
+  &.selected {
     opacity: 1;
   }
-}
 
-.mat-mdc-card .mat-mdc-input-element {
-  color: #fff;
-}
+  div.header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
 
-.bigger-font {
-  line-height: 1.5rem;
-  font-size: 1.5rem;
-}
+    h2 {
+      margin: 0;
+    }
+  }
 
-.mat-mdc-card-title {
-  font-weight: lighter;
-  margin: 0;
+  k-button-row:empty {
+    display: none;
+  }
 
-  display: flex;
-  justify-content: center;
-}
-
-.mat-mdc-card-content {
-  overflow-y: auto;
-  margin-bottom: 0;
-  font-size: 1.1rem;
-  font-weight: lighter;
-  max-height: 30vh;
-}
-
-.mat-mdc-card-actions {
-  margin: 0;
-  padding: 0;
-
-  display: flex;
-  justify-content: center;
-}
-
-#annotation-content {
-  white-space: pre-wrap;
+  h2 {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0;
+  }
 }

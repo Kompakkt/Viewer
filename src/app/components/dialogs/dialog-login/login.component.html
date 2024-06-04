@@ -1,49 +1,30 @@
 <form action="auth-dialog_submit" method="get" accept-charset="utf-8">
-  <h1 mat-dialog-title>{{ (concern && concern !== '' ? concern : 'Login') | translate }}</h1>
-  <div mat-dialog-content>
-    <mat-form-field>
-      <mat-label>{{ 'Username' | translate }}</mat-label>
-      <input
-        autocomplete="username"
-        type="username"
-        matInput
-        [(ngModel)]="data.username"
-        [ngModelOptions]="{ standalone: true }"
-      />
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>{{ 'Password' | translate }}</mat-label>
-      <input
-        autocomplete="password"
-        type="password"
-        matInput
-        [(ngModel)]="data.password"
-        [ngModelOptions]="{ standalone: true }"
-      />
-    </mat-form-field>
-  </div>
+  <h1>{{ (concern && concern !== '' ? concern : 'Login') | translate }}</h1>
+
+  <k-input
+    [label]="'Username' | translate"
+    type="username"
+    (valueChanged)="data.username = $event.value"
+  />
+  <k-input
+    [label]="'Password' | translate"
+    type="password"
+    (valueChanged)="data.password = $event.value"
+  />
 
   @if (loginFailed) {
-  <div mat-dialog-content>
-    <span style="color: red">{{ 'Login failed' | translate }}</span>
-  </div>
+  <p style="color: red">{{ 'Login failed' | translate }}</p>
   }
-  <div mat-dialog-actions>
-    <button
-      mat-button
-      type="button"
-      (click)="dialogRef.close(false)"
-      [disabled]="waitingForResponse"
-    >
-      {{ 'Cancel' | translate }}
-    </button>
-    <button
-      mat-button
-      type="submit"
+
+  <k-button-row>
+    <k-button (click)="dialogRef.close(false)" [disabled]="waitingForResponse" type="outlined">{{
+      'Cancel' | translate
+    }}</k-button>
+    <k-button
       (click)="login()"
       [disabled]="data.username.length === 0 || data.password.length === 0 || waitingForResponse"
     >
       {{ 'Login' | translate }}
-    </button>
-  </div>
+    </k-button>
+  </k-button-row>
 </form>

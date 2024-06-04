@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, HostBinding, Input, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Matrix, Vector3 } from '@babylonjs/core';
 import { BehaviorSubject, ReplaySubject, combineLatest, firstValueFrom, interval, map } from 'rxjs';
@@ -24,6 +24,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { MatTooltip } from '@angular/material/tooltip';
+import { ButtonComponent, ButtonRowComponent } from 'projects/komponents/src';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { DialogAnnotationEditorComponent } from '../../dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
 import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-preview.component';
@@ -50,6 +51,8 @@ import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-previe
     MatTooltip,
     AsyncPipe,
     TranslatePipe,
+    ButtonComponent,
+    ButtonRowComponent,
   ],
 })
 export class AnnotationComponent {
@@ -65,11 +68,24 @@ export class AnnotationComponent {
   }
   public annotation$ = new ReplaySubject<IAnnotation>(1);
 
-  @ViewChild('annotationForm')
-  private annotationForm: ElementRef<HTMLFormElement> | undefined;
-
   public positionTop = 0;
   public positionLeft = 0;
+
+  @HostBinding('style.--top')
+  get __positionTop() {
+    return `${this.positionTop}px`;
+  }
+
+  @HostBinding('style.--left')
+  get __positionLeft() {
+    return `${this.positionLeft}px`;
+  }
+
+  #isSelected = false;
+  @HostBinding('class.selected')
+  get isSelected() {
+    return this.#isSelected;
+  }
 
   public showAnnotation$ = new BehaviorSubject(false);
   public collapsed$ = new BehaviorSubject(false);
@@ -102,6 +118,9 @@ export class AnnotationComponent {
     combineLatest([interval(15), this.annotation$])
       .pipe(map(([_, annotation]) => annotation))
       .subscribe(annotation => this.setPosition(annotation));
+    this.isSelectedAnnotation$.subscribe(isSelected => {
+      this.#isSelected = isSelected;
+    });
   }
 
   get previewImage$() {
@@ -133,9 +152,9 @@ export class AnnotationComponent {
     this.annotationService.deleteAnnotation(annotation);
   }
 
-  private setPosition(annotation: IAnnotation) {
-    if (!this.annotationForm?.nativeElement.parentElement) return;
+  #ref = inject<ElementRef<HTMLElement>>(ElementRef);
 
+  private setPosition(annotation: IAnnotation) {
     const scene = this.babylon.getScene();
     if (!scene || !scene.activeCamera) return;
 
@@ -152,7 +171,7 @@ export class AnnotationComponent {
       scene.activeCamera.viewport.toGlobal(width, height),
     );
 
-    const parent = this.annotationForm.nativeElement.parentElement;
+    const parent = this.#ref.nativeElement;
     const [left, top] = [Math.round(p.x), Math.round(p.y)];
     const [elHeight, elWidth] = [parent.clientHeight, parent.clientWidth];
 

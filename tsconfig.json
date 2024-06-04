@@ -23,7 +23,12 @@
     "noUnusedParameters": true,
     "outDir": "./dist/out-tsc",
     "paths": {
-      "core-js/es7/reflect": ["node_modules/core-js/proposals/reflect-metadata"]
+      "core-js/es7/reflect": [
+        "node_modules/core-js/proposals/reflect-metadata"
+      ],
+      "komponents": [
+        "./dist/komponents"
+      ]
     },
     "skipLibCheck": true,
     "sourceMap": true,

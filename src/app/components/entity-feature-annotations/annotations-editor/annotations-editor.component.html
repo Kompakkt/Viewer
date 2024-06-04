@@ -1,26 +1,38 @@
 @if (processing.isInUpload$ | async) {
-<mat-card appearance="outlined">
-  {{ 'Please set and save the settings before you add annotations.' | translate }}
-</mat-card>
+<div class="note">
+  <mat-icon>info</mat-icon>
+  <span>{{ 'Info' | translate }}</span>
+  <p>{{ 'Please set and save the settings before you add annotations.' | translate }}</p>
+</div>
 } @if (isDefault$ | async) {
-<mat-card appearance="outlined">
-  {{
-    'All annotations you create are default annotations and visible for everyone who can access the
-    entity.' | translate
-  }}
-</mat-card>
+<div class="note">
+  <mat-icon>info</mat-icon>
+  <span>{{ 'Info' | translate }}</span>
+  <p>
+    {{
+      'All annotations you create are default annotations and visible for everyone who can access the
+      entity.' | translate
+    }}
+  </p>
+</div>
 } @if (isForbidden$ | async) {
-<mat-card appearance="outlined">
-  {{
-    'Default Annotations are not editable for foreign entities. Load entity from a collection to save
-    your annotations to make them visible for others. If you are the owner of this entity do not load
-    it from a collection to edit the default Annotations.' | translate
-  }}
-</mat-card>
+<div class="note">
+  <mat-icon>info</mat-icon>
+  <span>{{ 'Info' | translate }}</span>
+  <p>
+    {{
+      'Default Annotations are not editable for foreign entities. Load entity from a collection to save
+      your annotations to make them visible for others. If you are the owner of this entity do not load
+      it from a collection to edit the default Annotations.' | translate
+    }}
+  </p>
+</div>
 } @if (isAnnotatingAllowed$ | async) {
-<mat-card appearance="outlined">
-  {{ 'To add annotations, simply double-click on the entity.' | translate }}
-</mat-card>
+<div class="note">
+  <mat-icon>info</mat-icon>
+  <span>{{ 'Info' | translate }}</span>
+  <p>{{ 'To add annotations, simply double-click on the entity.' | translate }}</p>
+</div>
 }
 
 <div
@@ -29,7 +41,7 @@
   class="annotations-list"
   (cdkDropListDropped)="drop($event)"
 >
-  @for (annotation of currentAnnotations$ | async; track annotation) {
+  @for (annotation of currentAnnotations$ | async; track annotation; let last = $last) {
   <app-annotation-for-editor
     class="annotation-box"
     [annotation]="annotation"
@@ -37,7 +49,9 @@
     cdkDrag
     cdkDragLockAxis="y"
   ></app-annotation-for-editor>
-  }
+  @if (!last) {
+  <hr />
+  } }
 </div>
 
 @if (annotationCount$ | async; as count) {
