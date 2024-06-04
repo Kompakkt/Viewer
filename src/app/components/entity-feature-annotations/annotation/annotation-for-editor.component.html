@@ -1,3 +1,29 @@
+@if (annotation$ | async; as annotation) { @if (previewImage$ | async; as previewImage) {
+<img class="preview-image" [src]="previewImage" appFallbackImage />
+}
+<div class="header">
+  <span class="ranking">{{ annotation.ranking }}</span>
+  <span class="title">{{ annotation.body.content.title }}</span>
+  <small>{{ (annotation.validated ? 'validated' : 'not validated') | translate }}</small>
+</div>
+<app-markdown-preview
+  id="annotation-content"
+  [data]="annotation.body.content.description"
+></app-markdown-preview>
+<k-button-row justify="end" gap="4">
+  <k-button icon-button color="transparent"><mat-icon>edit</mat-icon></k-button>
+  <k-button icon-button color="transparent"><mat-icon>file_copy</mat-icon></k-button>
+  <k-button icon-button color="transparent"><mat-icon>file_download</mat-icon></k-button>
+  <k-button icon-button color="transparent"><mat-icon>select_all</mat-icon></k-button>
+  <k-button icon-button color="transparent"><mat-icon>visibility</mat-icon></k-button>
+  <k-button icon-button color="transparent"><mat-icon>delete</mat-icon></k-button>
+  <!--<k-slide-toggle [label]="((showAnnotation$ | async) ? 'Hide' : 'Show') | translate" />-->
+  <!--<mat-slide-toggle [checked]="showAnnotation$ | async" (change)="toggleVisibility()">
+  </mat-slide-toggle>-->
+</k-button-row>
+}
+
+<!--
 @if (annotation$ | async; as annotation) {
 <mat-card appearance="outlined" class="annotation-card">
   <form class="annotation-form">
@@ -125,3 +151,4 @@
   </form>
 </mat-card>
 }
+-->

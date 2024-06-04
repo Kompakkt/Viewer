@@ -1,4 +1,16 @@
 @if (annotation$ | async; as annotation) { @if (isSelectedAnnotation$ | async) {
+<div class="header">
+  <h2>{{ annotation.body.content.title }}</h2>
+  <k-button icon-button color="transparent"><mat-icon>close</mat-icon></k-button>
+</div>
+
+<app-markdown-preview [data]="annotation.body.content.description" />
+
+<k-button-row justify="end" gap="4"></k-button-row>
+}}
+
+<!--
+@if (annotation$ | async; as annotation) { @if (isSelectedAnnotation$ | async) {
 <mat-card
   appearance="outlined"
   class="single-annotation-card resizable"
@@ -93,3 +105,4 @@
   </form>
 </mat-card>
 } }
+-->

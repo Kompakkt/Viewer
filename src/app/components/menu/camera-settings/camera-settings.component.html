@@ -11,7 +11,23 @@
     {{ 'Switching the camera type is not supported while annotating' | translate }}
   </p>
   } @else {
-  <div class="button-pair" [class.disabled]="annotationService.isAnnotationMode$ | async">
+  <k-button-row>
+    <k-button
+      (click)="babylon.cameraManager.setCameraType('ArcRotateCamera')"
+      [type]="
+        (babylon.cameraManager.cameraType$ | async) === 'ArcRotateCamera' ? 'default' : 'outlined'
+      "
+      >{{ 'Orbit' | translate }}</k-button
+    >
+    <k-button
+      (click)="babylon.cameraManager.setCameraType('UniversalCamera')"
+      [type]="
+        (babylon.cameraManager.cameraType$ | async) === 'UniversalCamera' ? 'default' : 'outlined'
+      "
+      >{{ 'Free' | translate }}</k-button
+    >
+  </k-button-row>
+  <!--<div class="button-pair" [class.disabled]="annotationService.isAnnotationMode$ | async">
     <button
       mat-flat-button
       (click)="babylon.cameraManager.setCameraType('ArcRotateCamera')"
@@ -28,29 +44,20 @@
     >
       {{ 'Free' | translate }}
     </button>
-  </div>
+  </div>-->
   }
 
-  <h3>{{ 'Speed' | translate }} ({{ cameraSpeed.value }}x)</h3>
-  <mat-slider
-    min="0.25"
-    max="2"
-    step="0.25"
-    discrete
-    showTickMarks
-    [formControl]="cameraSpeed"
-    #ngSlider
-    ><input
-      matSliderThumb
-      (input)="
-        cameraSpeed.setValue(
-          { source: ngSliderThumb, parent: ngSlider, value: ngSliderThumb.value }.value!
-        )
-      "
-      #ngSliderThumb="matSliderThumb"
-    />
-    <input matSliderThumb />
-  </mat-slider>
+  <h3>{{ 'Speed' | translate }} ({{ cameraSpeed() }}x)</h3>
+
+  <k-slider
+    [min]="25"
+    [max]="200"
+    [showInfo]="false"
+    [showTooltip]="false"
+    [startingValue]="cameraSpeed() * 100"
+    (valueChanged)="cameraSpeed.set($event / 100)"
+  />
+
   <hr />
-  <button mat-flat-button (click)="resetCamera()">{{ 'Reset camera' | translate }}</button>
+  <k-button (click)="resetCamera()">{{ 'Reset camera' | translate }}</k-button>
 </div>

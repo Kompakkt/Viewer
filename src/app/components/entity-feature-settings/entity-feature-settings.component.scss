@@ -1,4 +1,12 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .previewimage {
   width: 100%;
   cursor: pointer;
+  height: 140px;
+  object-fit: scale-down;
 }

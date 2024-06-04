@@ -5,7 +5,7 @@
   transition: 280ms;
   z-index: 99;
   color: #fff;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: var(--color-bg-transparent);
   border-top-right-radius: 0.75rem;
   border-bottom-right-radius: 0.75rem;
   box-shadow: 1px 1px #333;

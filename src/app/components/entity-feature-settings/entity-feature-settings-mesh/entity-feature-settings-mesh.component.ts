@@ -1,22 +1,29 @@
+import { AsyncPipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatFormField } from '@angular/material/form-field';
+import { MatIcon } from '@angular/material/icon';
+import { MatInput } from '@angular/material/input';
+import { MatSlider, MatSliderThumb } from '@angular/material/slider';
+import { MatStepLabel } from '@angular/material/stepper';
+import { MatTooltip } from '@angular/material/tooltip';
 import { Vector3 } from '@babylonjs/core';
+import { ColorChromeModule } from 'ngx-color/chrome';
+import {
+  ButtonComponent,
+  DetailsComponent,
+  InputComponent,
+  LabelledCheckboxComponent,
+  SliderComponent,
+} from 'projects/komponents/src';
 import { firstValueFrom } from 'rxjs';
 import { IColor } from 'src/common';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { BabylonService } from '../../../services/babylon/babylon.service';
 import { EntitySettingsService } from '../../../services/entitysettings/entitysettings.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
-import { TranslatePipe } from '../../../pipes/translate.pipe';
-import { AsyncPipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { MatInput } from '@angular/material/input';
-import { MatFormField } from '@angular/material/form-field';
-import { MatSlider, MatSliderThumb } from '@angular/material/slider';
-import { ColorChromeModule } from 'ngx-color/chrome';
-import { MatCheckbox } from '@angular/material/checkbox';
-import { MatIcon } from '@angular/material/icon';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatIconButton, MatButton } from '@angular/material/button';
-import { MatStepLabel } from '@angular/material/stepper';
 
 @Component({
   selector: 'app-entity-feature-settings-mesh',
@@ -38,6 +45,11 @@ import { MatStepLabel } from '@angular/material/stepper';
     FormsModule,
     AsyncPipe,
     TranslatePipe,
+    ButtonComponent,
+    DetailsComponent,
+    LabelledCheckboxComponent,
+    SliderComponent,
+    InputComponent,
   ],
 })
 export class EntityFeatureSettingsMeshComponent implements OnInit {
@@ -84,30 +96,35 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
 
   // Scaling
   public async handleChangeDimension(dimension: string, value?: number | null) {
+    console.log('Changing dimension', dimension, value);
     const { localSettings } = await firstValueFrom(this.processing.settings$);
     let factor;
-    switch (dimension) {
-      case 'height':
-        factor = +this.processing.entityHeight / this.entitySettings.initialSize.y;
-        localSettings.scale = parseFloat(factor.toFixed(2));
-        this.entitySettings.loadScaling();
-        break;
-      case 'width':
-        factor = +this.processing.entityWidth / this.entitySettings.initialSize.x;
-        localSettings.scale = parseFloat(factor.toFixed(2));
-        this.entitySettings.loadScaling();
-        break;
-      case 'depth':
-        factor = +this.processing.entityDepth / this.entitySettings.initialSize.z;
-        localSettings.scale = parseFloat(factor.toFixed(2));
-        this.entitySettings.loadScaling();
-        break;
-      case 'scale':
-        if (value) localSettings.scale = value;
-        this.entitySettings.loadScaling();
-        break;
-      default:
-        console.log('I do not know this dimension: ', dimension);
+    try {
+      switch (dimension) {
+        case 'height':
+          factor = +this.processing.entityHeight / this.entitySettings.initialSize.y;
+          localSettings.scale = parseFloat(factor.toFixed(2));
+          this.entitySettings.loadScaling();
+          break;
+        case 'width':
+          factor = +this.processing.entityWidth / this.entitySettings.initialSize.x;
+          localSettings.scale = parseFloat(factor.toFixed(2));
+          this.entitySettings.loadScaling();
+          break;
+        case 'depth':
+          factor = +this.processing.entityDepth / this.entitySettings.initialSize.z;
+          localSettings.scale = parseFloat(factor.toFixed(2));
+          this.entitySettings.loadScaling();
+          break;
+        case 'scale':
+          if (value) localSettings.scale = value;
+          this.entitySettings.loadScaling();
+          break;
+        default:
+          console.log('I do not know this dimension: ', dimension);
+      }
+    } catch (err) {
+      console.error(err);
     }
   }
 
@@ -141,8 +158,7 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
   public async resetVisualUIMeshSettingsHelper() {
     const meshes = await firstValueFrom(this.meshes$);
     if (!meshes) {
-      throw new Error('Center missing');
-      console.error(this);
+      console.error('Center missing', this);
       return;
     }
     this.toggleBoundingBoxEntityVisibility(false);
@@ -194,8 +210,7 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
   public setScalingFactorGround(factor: number | null) {
     if (!factor) factor = 1;
     if (!this.entitySettings.ground) {
-      throw new Error('Ground missing');
-      console.error(this);
+      console.error('Ground missing', this);
       return;
     }
     this.groundScalingFactor = factor;
@@ -204,8 +219,7 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
 
   public toggleBoundingBoxEntityVisibility(value?: boolean) {
     if (!this.entitySettings.boundingBox) {
-      throw new Error('BoundingBox missing');
-      console.error(this);
+      console.error('BoundingBox missing', this);
       return;
     }
     this.boundingBoxVisibility = value !== undefined ? value : !this.boundingBoxVisibility;
@@ -215,8 +229,7 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
   public async toggleBoundingBoxMeshesVisibility(value?: boolean) {
     const meshes = await firstValueFrom(this.meshes$);
     if (!meshes) {
-      throw new Error('Meshes missing');
-      console.error(this);
+      console.error('Meshes missing', this);
       return;
     }
     this.boundingBoxMeshesVisibility =

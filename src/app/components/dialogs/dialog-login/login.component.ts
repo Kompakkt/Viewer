@@ -14,6 +14,7 @@ import { MatInput } from '@angular/material/input';
 import { IUserData } from 'src/common';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { BackendService } from '../../../services/backend/backend.service';
+import { InputComponent, ButtonComponent, ButtonRowComponent } from 'projects/komponents/src';
 
 @Component({
   selector: 'app-login',
@@ -30,6 +31,9 @@ import { BackendService } from '../../../services/backend/backend.service';
     MatDialogActions,
     MatButton,
     TranslatePipe,
+    InputComponent,
+    ButtonComponent,
+    ButtonRowComponent,
   ],
 })
 export class LoginComponent {

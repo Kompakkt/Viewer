@@ -1,71 +1,43 @@
 :host {
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
-}
-
-form {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-}
+  gap: 16px;
+  padding: 16px 0px;
 
-.annotation-card {
-  width: 100%;
-  padding: 0.8rem;
-}
+  img.preview-image {
+    width: 100%;
+    max-height: 200px;
+    object-fit: scale-down;
+    background-color: var(--color-bg-transparent);
+    border-radius: 4px;
+  }
 
-.mat-mdc-card-content {
-  max-height: 20vh;
-  overflow-y: auto;
-  margin: 0;
-}
+  div.header {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 8px;
 
-.mat-mdc-card-actions {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+    font-size: 16px;
+    span,
+    small {
+      font-size: inherit;
+    }
 
-.annotation-card .mat-mdc-card-actions {
-  padding: 0;
-  margin: 0;
-  float: right;
-}
+    span.ranking {
+      grid-row: span 2;
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      text-align: center;
+      border-radius: 50%;
 
-.annotation-card .material-icons {
-  font-size: 20px;
-}
+      background-color: var(--color-primary);
+      color: white;
+    }
 
-.annotation-card .description,
-.annotation-card .validation,
-.annotation-card .perspective {
-  display: block;
-}
-
-.annotation-card .perspective {
-  width: 100%;
-  color: white;
-}
-
-img {
-  margin-bottom: 0;
-}
-
-.annotation-header-image {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 16px;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.8);
-}
-
-span {
-  display: inline-block;
-  vertical-align: middle;
-}
-
-#number {
-  position: absolute;
-  z-index: -1;
+    small {
+      color: var(--color-gray-3);
+    }
+  }
 }

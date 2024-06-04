@@ -1,0 +1,63 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+
+  margin: 8px 0px;
+
+  font-family: 'Open Sans';
+  color: white;
+
+  span {
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 16px;
+
+    color: inherit;
+
+    &.prefix,
+    &.suffix {
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 14px;
+
+      &:empty {
+        display: none;
+      }
+    }
+  }
+
+  input {
+    width: 100%;
+    height: 100%;
+    outline: none;
+    border: unset;
+    appearance: none;
+    color: inherit;
+    background: transparent;
+  }
+
+  div.input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 12px 8px;
+
+    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+
+    background: var(--grey4, rgba(0, 0, 0, 0.04));
+
+    transition: border-color 0.2s ease-in-out;
+
+    &:focus,
+    &:hover,
+    &:focus-within,
+    &:active {
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+  }
+}

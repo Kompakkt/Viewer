@@ -23,6 +23,21 @@
 
   /* Material styles override */
   --mat-dialog-headline-padding: 16px 24px 9px;
+  --mat-menu-container-color: var(--color-bg-transparent);
+
+  /* Colors */
+  --color-primary: #00afe7;
+  --color-secondary: #cccccc;
+  --color-accent: #e91e63;
+  --color-warn: #f77159;
+
+  --color-bg-transparent: rgba(0, 0, 0, 0.7);
+
+  --color-gray-1: #333;
+  --color-gray-2: #555;
+  --color-gray-3: #999;
+  --color-gray-4: #ccc;
+  --color-gray-5: #eee;
 }
 
 html,
@@ -36,6 +51,30 @@ body {
 
 * {
   font-family: var(--font-stack);
+}
+
+app-markdown-preview {
+  > * {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: scale-down;
+    background: var(--color-bg-transparent);
+    border-radius: 4px;
+  }
+
+  * {
+    font-family: var(--font-stack);
+    font-size: 16px;
+    margin: 0;
+  }
 }
 
 a {
@@ -117,7 +156,7 @@ a {
   width: 300px;
   height: 100%;
   z-index: auto;
-  background: rgba(0, 0, 0, 0.9);
+  background: var(--color-bg-transparent);
   box-sizing: border-box;
   border: 0;
   padding: 0;
@@ -130,7 +169,7 @@ a {
 
 #editor .mat-mdc-card,
 #compilationBrowser .mat-card {
-  background-color: rgba(0, 0, 0, 0);
+  background-color: var(--color-bg-transparent);
 }
 
 #editor .mat-mdc-card:not(:last-child),
@@ -140,7 +179,7 @@ a {
 
 /* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
 #editor .mat-mdc-tab-group .mat-tab-label-active {
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: var(--color-bg-transparent);
 }
 
 #editor .mat-mdc-raised-button:not([disabled]),

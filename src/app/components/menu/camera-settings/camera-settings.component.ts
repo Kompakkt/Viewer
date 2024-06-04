@@ -1,13 +1,14 @@
-import { Component, OnInit } from '@angular/core';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { AsyncPipe } from '@angular/common';
+import { Component, OnInit, effect, signal } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatButton } from '@angular/material/button';
+import { MatSlider, MatSliderThumb } from '@angular/material/slider';
+import { MatTooltip } from '@angular/material/tooltip';
+import { ButtonComponent, ButtonRowComponent, SliderComponent } from 'projects/komponents/src';
 import { BehaviorSubject, combineLatestWith, debounceTime, filter, skip } from 'rxjs';
 import { AnnotationService } from 'src/app/services/annotation/annotation.service';
 import { BabylonService } from 'src/app/services/babylon/babylon.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
-import { AsyncPipe } from '@angular/common';
-import { MatSlider, MatSliderThumb } from '@angular/material/slider';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton } from '@angular/material/button';
 
 @Component({
   selector: 'app-camera-settings',
@@ -23,16 +24,20 @@ import { MatButton } from '@angular/material/button';
     MatSliderThumb,
     AsyncPipe,
     TranslatePipe,
+    SliderComponent,
+    ButtonComponent,
+    ButtonRowComponent,
   ],
 })
 export class CameraSettingsComponent implements OnInit {
-  public cameraSpeed = new FormControl(1.0, { nonNullable: true });
+  public cameraSpeed = signal(1.0);
 
   public opened$ = new BehaviorSubject(false);
   public showNotification$ = new BehaviorSubject<string | undefined>(undefined);
 
   constructor(public babylon: BabylonService, public annotationService: AnnotationService) {
-    this.cameraSpeed.valueChanges.subscribe(cameraSpeed => {
+    effect(() => {
+      const cameraSpeed = this.cameraSpeed();
       this.babylon.cameraManager.cameraSpeed = cameraSpeed;
     });
     this.babylon.cameraManager.cameraType$.pipe(skip(1)).subscribe(type => {

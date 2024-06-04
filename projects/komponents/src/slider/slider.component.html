@@ -1,0 +1,18 @@
+@if (showInfo()) {
+<span class="info-value min">{{ min() }}</span>
+}
+<div class="slider-rail" #rail>
+  <div
+    #handle
+    class="slider-handle"
+    [style.left.%]="handlePosition()"
+    [class.dragging]="isDragging$ | async"
+  >
+    @if (showTooltip()) {
+    <span class="slider-value-tooltip">{{ value() }}</span>
+    }
+  </div>
+</div>
+@if (showInfo()) {
+<span class="info-value max">{{ max() }}</span>
+}
