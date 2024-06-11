@@ -22,7 +22,8 @@ export class ButtonRowComponent implements AfterContentInit {
   gap = input<number | string>(8);
 
   ngAfterContentInit(): void {
-    this.buttonCount.set(this.el.nativeElement.children.length);
+    const children = Array.from(this.el.nativeElement.children);
+    this.buttonCount.set(children.length);
   }
 
   @HostBinding('style.--justify')
