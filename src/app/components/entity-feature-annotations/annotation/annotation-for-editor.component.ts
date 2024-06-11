@@ -21,7 +21,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatTooltip } from '@angular/material/tooltip';
-import { ButtonComponent, ButtonRowComponent, SlideToggleComponent } from 'projects/komponents/src';
+import { ButtonComponent, ButtonRowComponent, SlideToggleComponent, TooltipDirective } from 'projects/komponents/src';
 import { FallbackImageDirective } from 'src/app/directives/fallback-image.directive';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-preview.component';
@@ -60,6 +60,7 @@ import { AnnotationComponent } from './annotation.component';
     SlideToggleComponent,
     ButtonComponent,
     ButtonRowComponent,
+    TooltipDirective,
   ],
 })
 export class AnnotationComponentForEditorComponent extends AnnotationComponent {

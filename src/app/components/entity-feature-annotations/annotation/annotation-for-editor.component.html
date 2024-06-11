@@ -11,12 +11,12 @@
   [data]="annotation.body.content.description"
 ></app-markdown-preview>
 <k-button-row justify="end" gap="4">
-  <k-button icon-button color="transparent"><mat-icon>edit</mat-icon></k-button>
-  <k-button icon-button color="transparent"><mat-icon>file_copy</mat-icon></k-button>
-  <k-button icon-button color="transparent"><mat-icon>file_download</mat-icon></k-button>
-  <k-button icon-button color="transparent"><mat-icon>select_all</mat-icon></k-button>
-  <k-button icon-button color="transparent"><mat-icon>visibility</mat-icon></k-button>
-  <k-button icon-button color="transparent"><mat-icon>delete</mat-icon></k-button>
+  <k-button icon-button color="transparent" tooltip="Edit annotation"><mat-icon>edit</mat-icon></k-button>
+  <k-button icon-button color="transparent" tooltip="Copy annotation to collection"><mat-icon>file_copy</mat-icon></k-button>
+  <k-button icon-button color="transparent" tooltip="Download annotation (JSON)"><mat-icon>file_download</mat-icon></k-button>
+  <k-button icon-button color="transparent" tooltip="Show in fullscreen view"><mat-icon>select_all</mat-icon></k-button>
+  <k-button icon-button color="transparent" tooltip="Show annotation"><mat-icon>visibility</mat-icon></k-button>
+  <k-button icon-button color="transparent" tooltip="Delete annotation"><mat-icon>delete</mat-icon></k-button>
   <!--<k-slide-toggle [label]="((showAnnotation$ | async) ? 'Hide' : 'Show') | translate" />-->
   <!--<mat-slide-toggle [checked]="showAnnotation$ | async" (change)="toggleVisibility()">
   </mat-slide-toggle>-->
