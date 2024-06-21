@@ -35,6 +35,8 @@
 </div>
 }
 
+<h2>{{ objectName$ | async }}</h2>
+
 <div
   cdkDropList
   id="annotations-droplist"
@@ -57,14 +59,7 @@
 @if (annotationCount$ | async; as count) {
 <div id="editor-footermenu">
   @if (count > 0) {
-  <button
-    mat-icon-button
-    matTooltip="{{ 'Export Annotations to JSON' | translate }}"
-    matTooltipPosition="below"
-    (click)="exportAnnotations()"
-  >
-    <mat-icon [attr.aria-label]="'Export Annotations to JSON' | translate">save</mat-icon>
-  </button>
+    <k-button icon-button color="transparent" tooltip="Export all annotations as JSON" (click)="exportAnnotations()"><mat-icon>file_download</mat-icon></k-button>
   }
   <!--app-broadcast [style.visibility]="isBroadcastingAllowed ? 'visible' : 'hidden'"></app-broadcast-->
 </div>

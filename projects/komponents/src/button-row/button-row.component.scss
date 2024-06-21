@@ -2,13 +2,13 @@
   --button-count: 2;
   --justify: space-evenly;
   --gap: 8px;
-  display: grid;
-  grid-template-columns: repeat(var(--button-count), 1fr);
-  justify-items: var(--justify);
+  display: flex;
+  justify-content: var(--justify);
   gap: var(--gap);
 
   width: 100%;
   @supports (width: stretch) {
     width: stretch;
   }
+
 }

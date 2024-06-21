@@ -33,7 +33,7 @@ export class ButtonRowComponent implements AfterContentInit {
 
   @HostBinding('style.--gap')
   get _gap() {
-    return +this.gap();
+    return +this.gap() + 'px';
   }
 
   @HostBinding('style.--button-count')

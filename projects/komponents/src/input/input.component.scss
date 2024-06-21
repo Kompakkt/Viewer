@@ -47,17 +47,7 @@
     padding: 12px 8px;
 
     border-radius: 4px;
-    border: 1px solid rgba(0, 0, 0, 0.12);
-
-    background: var(--grey4, rgba(0, 0, 0, 0.04));
-
-    transition: border-color 0.2s ease-in-out;
-
-    &:focus,
-    &:hover,
-    &:focus-within,
-    &:active {
-      border: 1px solid rgba(255, 255, 255, 0.5);
-    }
+    border: 1px solid var(--color-grey-12);
+    background: var(--color-grey-dark);
   }
 }

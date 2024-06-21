@@ -1,7 +1,7 @@
 :host {
   position: absolute;
   top: 0;
-  left: -300px;
+  left: calc(-1 * var(--sidebar-width));
   height: 100vh;
   transition: 280ms;
   z-index: 99;

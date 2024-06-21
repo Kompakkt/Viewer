@@ -65,11 +65,13 @@ import { AnnotationComponent } from './annotation.component';
 })
 export class AnnotationComponentForEditorComponent extends AnnotationComponent {
   public async toggleVisibility() {
+    console.log('Toggling')
     const [{ _id }, showAnnotation, isSelectedAnnotation] = await Promise.all([
       firstValueFrom(this.annotation$),
       firstValueFrom(this.showAnnotation$),
       firstValueFrom(this.isSelectedAnnotation$),
     ]);
+    console.log({ _id, showAnnotation, isSelectedAnnotation });
 
     this.showAnnotation$.next(!showAnnotation);
     this.annotationService.setSelectedAnnotation(isSelectedAnnotation ? '' : _id.toString());

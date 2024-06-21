@@ -1,19 +1,20 @@
 import { Component, HostBinding, OnInit } from '@angular/core';
 
-import { OverlayService } from '../../services/overlay/overlay.service';
-import { ProcessingService } from '../../services/processing/processing.service';
-import { TranslatePipe } from '../../pipes/translate.pipe';
 import { AsyncPipe } from '@angular/common';
+import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatIconButton } from '@angular/material/button';
+import { TooltipDirective } from 'projects/komponents/src';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { OverlayService } from '../../services/overlay/overlay.service';
+import { ProcessingService } from '../../services/processing/processing.service';
 
 @Component({
   selector: 'app-sidenav-menu',
   templateUrl: './sidenav-menu.component.html',
   styleUrls: ['./sidenav-menu.component.scss'],
   standalone: true,
-  imports: [MatIconButton, MatTooltip, MatIcon, AsyncPipe, TranslatePipe],
+  imports: [MatIconButton, MatTooltip, MatIcon, AsyncPipe, TranslatePipe, TooltipDirective],
 })
 export class SidenavMenuComponent implements OnInit {
   @HostBinding('class.is-open')

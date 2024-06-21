@@ -15,6 +15,8 @@
 @import url('./assets/fonts/OpenSans.css');
 @import url('./assets/fonts/MaterialIcons.css');
 
+@import 'quill/dist/quill.snow.css';
+
 :root {
   --font-stack: 'Open Sans', Frutiger, 'Frutiger Linotype', Univers, Calibri, 'Gill Sans',
     'Gill Sans MT', 'Myriad Pro', Myriad, 'DejaVu Sans Condensed', 'Liberation Sans',
@@ -24,20 +26,27 @@
   /* Material styles override */
   --mat-dialog-headline-padding: 16px 24px 9px;
   --mat-menu-container-color: var(--color-bg-transparent);
+  --mdc-dialog-container-color: var(--color-bg-transparent);
+
+  --sidebar-width: clamp(320px, 27vw, 400px);
 
   /* Colors */
+  --color-bg-transparent: rgba(0, 0, 0, 0.7);
+  --color-bg-solid: black;
+
+  --color-grey-dark: #212121;
+  --color-grey-font: #555555;
+  --color-gray-font: var(--color-grey-font);
+  --color-grey-12: #d9d9d9;
+  --color-gray-12: var(--color-grey-12);
+  --color-grey-4: #f5f5f5;
+  --color-gray-4: var(--color-grey-4);
+  
+
   --color-primary: #00afe7;
-  --color-secondary: #cccccc;
+  --color-secondary: var(--color-grey-12);
   --color-accent: #e91e63;
   --color-warn: #f77159;
-
-  --color-bg-transparent: rgba(0, 0, 0, 0.7);
-
-  --color-gray-1: #333;
-  --color-gray-2: #555;
-  --color-gray-3: #999;
-  --color-gray-4: #ccc;
-  --color-gray-5: #eee;
 }
 
 html,
@@ -54,11 +63,8 @@ body {
 }
 
 app-markdown-preview {
-  > * {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 16px;
+  > * > a {
+    display: inline;
   }
 
   img {
@@ -68,18 +74,49 @@ app-markdown-preview {
     object-fit: scale-down;
     background: var(--color-bg-transparent);
     border-radius: 4px;
+    margin: 12px 0px;
   }
 
   * {
     font-family: var(--font-stack);
     font-size: 16px;
     margin: 0;
+    text-wrap: balance;
+  }
+}
+
+quill-editor {
+  background-color: var(--color-grey-dark);
+  *, *::before {
+    color: white !important;
+  }
+  .ql-stroke {
+    fill: none !important;
+    stroke: white !important;
+  }
+  .ql-fill {
+    fill: white !important;
+    stroke: none !important;
+  }
+  .ql-toolbar {
+    border-radius: 4px 4px 0 0;
+  }
+  .ql-container {
+    border-radius: 0 0 4px 4px;
+  }
+  .ql-toolbar, .ql-container {
+    border-color: var(--color-gray-4);
   }
 }
 
 a {
   color: #fff;
   text-decoration: none;
+}
+
+hr {
+  border: solid 1px var(--color-grey-12);
+  border-top: 0px;
 }
 
 .mat-mdc-card {
@@ -153,7 +190,7 @@ a {
 #editor,
 #compilationBrowser {
   color: #fff;
-  width: 300px;
+  width: var(--sidebar-width);
   height: 100%;
   z-index: auto;
   background: var(--color-bg-transparent);
@@ -238,7 +275,7 @@ a {
 }
 
 .mat-mdc-dialog-container {
-  background: #333;
+  // background: #333;
 }
 
 #annotation-content img,
