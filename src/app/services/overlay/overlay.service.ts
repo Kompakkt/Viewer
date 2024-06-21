@@ -7,6 +7,10 @@ import { BehaviorSubject } from 'rxjs';
 export class OverlayService {
   public sidenav$ = new BehaviorSubject({ mode: '', open: true });
 
+  public closeSidenav() {
+    this.sidenav$.next({ mode: '', open: false });
+  }
+
   public toggleSidenav(mode: string, open?: boolean) {
     const sidenavState = this.sidenav$.getValue();
 
@@ -15,7 +19,6 @@ export class OverlayService {
       return this.sidenav$.next({ mode, open: shouldOpen });
     }
 
-    setTimeout(() => this.sidenav$.next({ mode, open: true }), sidenavState.open ? 300 : 0);
-    this.sidenav$.next({ mode, open: false });
+    this.sidenav$.next({ mode, open: true });
   }
 }

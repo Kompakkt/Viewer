@@ -24,7 +24,8 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { MatTooltip } from '@angular/material/tooltip';
-import { ButtonComponent, ButtonRowComponent } from 'projects/komponents/src';
+import { QuillEditorComponent } from 'ngx-quill';
+import { ButtonComponent, ButtonRowComponent, InputComponent } from 'projects/komponents/src';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { DialogAnnotationEditorComponent } from '../../dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
 import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-preview.component';
@@ -53,6 +54,8 @@ import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-previe
     TranslatePipe,
     ButtonComponent,
     ButtonRowComponent,
+    InputComponent,
+    QuillEditorComponent,
   ],
 })
 export class AnnotationComponent {
@@ -61,6 +64,23 @@ export class AnnotationComponent {
   public dialog = inject(MatDialog);
   public userdata = inject(UserdataService);
   public processing = inject(ProcessingService);
+
+  public fullscreen = false;
+  @HostBinding('class.fullscreen')
+  get __fullscreen() {
+    return this.fullscreen;
+  }
+
+  public toggleFullscreen() {
+    this.fullscreen = !this.fullscreen;
+  }
+
+  public enableEditMode() {
+    firstValueFrom(this.annotation$).then(annotation => {
+      this.fullscreen = true;
+      this.annotationService.setEditModeAnnotation(annotation._id.toString());
+    });
+  }
 
   @Input() entityFileName: string | undefined;
   @Input('annotation') set setAnnotation(annotation: IAnnotation) {

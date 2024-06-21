@@ -6,6 +6,7 @@ import { MatCard } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { saveAs } from 'file-saver';
+import { ButtonComponent, TooltipDirective } from 'projects/komponents/src';
 import { combineLatest, firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
@@ -30,6 +31,8 @@ import { AnnotationComponent } from '../annotation/annotation.component';
     MatIcon,
     AsyncPipe,
     TranslatePipe,
+    TooltipDirective,
+    ButtonComponent,
   ],
 })
 export class AnnotationsEditorComponent {
@@ -47,6 +50,10 @@ export class AnnotationsEditorComponent {
 
   get annotationCount$() {
     return this.currentAnnotations$.pipe(map(arr => arr.length));
+  }
+
+  get objectName$() {
+    return this.processing.entity$.pipe(map(entity => entity?.name));
   }
 
   get isDefault$() {

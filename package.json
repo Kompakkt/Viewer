@@ -57,10 +57,12 @@
     "fscreen": "^1.2.0",
     "marked": "^4.3.0",
     "ngx-color": "^8.0.3",
+    "ngx-quill": "25",
     "pepjs": "^0.5.3",
     "pouchdb": "^7.3.1",
     "pouchdb-find": "^7.3.1",
     "pouchdb-upsert": "^2.2.0",
+    "quill": "^2.0.2",
     "rxjs": "^7.8.1",
     "tslib": "^2.6.2",
     "zone.js": "~0.14.4"

@@ -1,4 +1,20 @@
-import { Component, HostBinding, input } from '@angular/core';
+import { Component, HostBinding, computed, input } from '@angular/core';
+
+type ColorInput = 'primary' | 'secondary' | 'accent' | 'warn' | 'transparent' | `--color-${string}` | `rgb${string}` | `#${string}`;
+
+const getColor = (color?: ColorInput) => {
+  if (!color) return 'currentColor';
+  
+  if (color.startsWith('rgb') || color.startsWith('#') || color === 'transparent') {
+    return color;
+  }
+
+  if (color.startsWith('--color')) {
+    return `var(${color}, currentColor)`;
+  }
+
+  return `var(--color-${color}, currentColor)`;
+}
 
 @Component({
   selector: 'k-button',
@@ -8,16 +24,23 @@ import { Component, HostBinding, input } from '@angular/core';
 })
 export class ButtonComponent {
   type = input<'default' | 'outlined' | 'raised'>('default');
-  color = input<
-    'primary' | 'secondary' | 'accent' | 'warn' | 'transparent' | `rgb${string}` | `#${string}`
-  >('primary');
-  bgColor = input<`rgb${string}` | `#${string}` | 'transparent'>();
+  color = input<ColorInput>('primary');
+  bgColor = input<ColorInput>();
   disabled = input(false);
   iconButton = input<string | undefined>(undefined, { alias: 'icon-button' });
+  fullWidth = input<string | undefined>(undefined, { alias: 'full-width' });
+
+  #computedColor = computed(() => getColor(this.color()));
+  #computedBgColor = computed(() => getColor(this.bgColor()));
 
   @HostBinding('class.icon-button')
   get isIconButton() {
     return this.iconButton() !== undefined;
+  }
+
+  @HostBinding('class.full-width')
+  get isFullWidth() {
+    return this.fullWidth() !== undefined;
   }
 
   @HostBinding('class.default')
@@ -42,14 +65,11 @@ export class ButtonComponent {
 
   @HostBinding('style.--color')
   get hostColor() {
-    const color = this.color();
-    return color.startsWith('rgb') || color.startsWith('#') || color === 'transparent'
-      ? color
-      : `var(--color-${this.color()}, currentColor)`;
+    return this.#computedColor();
   }
 
   @HostBinding('style.--bg-color')
   get hostBgColor() {
-    return this.bgColor() || this.hostColor;
+    return this.#computedBgColor();
   }
 }

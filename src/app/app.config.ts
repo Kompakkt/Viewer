@@ -29,6 +29,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { ColorChromeModule } from 'ngx-color/chrome';
+import { provideQuillConfig } from 'ngx-quill';
 import { TranslatePipe } from './pipes/translate.pipe';
 import { TranslateService } from './services/translate/translate.service';
 
@@ -74,5 +75,16 @@ export const appConfig: ApplicationConfig = {
     provideRouter([]),
     provideAnimations(),
     provideHttpClient(withInterceptorsFromDi()),
+    provideQuillConfig({
+      modules: {
+        toolbar: [
+          ['bold', 'italic', 'underline', 'strike'],
+          ['blockquote'],
+          ['link', 'image', 'video', 'formula'],
+          [{ 'list': 'ordered'}, { 'list': 'bullet' }, { 'list': 'check' }],
+          [{ 'direction': 'rtl' }],                 
+        ],
+      }
+    }),
   ],
 };
