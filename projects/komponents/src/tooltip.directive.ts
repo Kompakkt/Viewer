@@ -9,10 +9,20 @@ import {
   ViewContainerRef,
   inject,
   input,
-  signal
+  signal,
 } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { filter, fromEvent } from 'rxjs';
+
+type TooltipPosition = 'above' | 'below' | 'left' | 'right';
+type State = {
+  x1: number;
+  x2: number;
+  y1: number;
+  y2: number;
+  text: string;
+  position: TooltipPosition;
+};
 
 @Component({
   selector: 'k-tooltip',
@@ -21,7 +31,8 @@ import { filter, fromEvent } from 'rxjs';
   styles: [
     `
       :host {
-        position: absolute;
+        --padding: 8px;
+        position: fixed;
         text-align: center;
         background-color: var(--color-bg-transparent);
         color: #fff;
@@ -30,44 +41,60 @@ import { filter, fromEvent } from 'rxjs';
         font-size: 12px;
         z-index: 1000;
         pointer-events: none;
-        transform: translateX(-50%) translateY(calc(-150% + 12px));
-        transition-property: opacity, transform;
+        transition-property: opacity;
         transition-duration: 0.2s;
         transition-timing-function: ease-in-out;
         opacity: 0;
 
         &.visible {
           opacity: 1;
-          transform: translateX(-50%) translateY(-150%);
         }
       }
     `,
   ],
 })
 export class TooltipComponent implements AfterViewInit {
-  state = input<{
-    x: number;
-    y: number;
-    text: string;
-  }>();
+  state = input<State>();
   visible = signal<boolean>(false);
-  
+
   #elRef = inject<ElementRef<HTMLElement>>(ElementRef);
   #firstStateChange$ = toObservable(this.state).pipe(
-    filter((state): state is { x: number; y: number; text: string } => state !== undefined),
+    filter((state): state is State => state !== undefined),
   );
-  transitionEnd$ = fromEvent(this.#elRef.nativeElement, 'transitionend').pipe(filter(() => !this.visible()));
+  transitionEnd$ = fromEvent(this.#elRef.nativeElement, 'transitionend').pipe(
+    filter(() => !this.visible()),
+  );
 
   @HostBinding('class.visible') get isVisible() {
     return this.visible() && this.state()?.text;
   }
 
   @HostBinding('style.left.px') get left() {
-    return this.state()?.x ?? 0;
+    const state = this.state();
+    if (!state) return 0;
+    const tooltipWidth = this.#elRef.nativeElement.offsetWidth;
+    switch (state.position) {
+      case 'left':
+        return state.x1 - tooltipWidth;
+      case 'right':
+        return state.x2;
+      default:
+        return state.x1 + (state.x2 - state.x1) / 2 - tooltipWidth / 2;
+    }
   }
 
   @HostBinding('style.top.px') get top() {
-    return this.state()?.y ?? 0;
+    const state = this.state();
+    if (!state) return 0;
+    const tooltipHeight = this.#elRef.nativeElement.offsetHeight;
+    switch (state.position) {
+      case 'above':
+        return state.y1 - tooltipHeight;
+      case 'below':
+        return state.y2;
+      default:
+        return state.y1 + (state.y2 - state.y1) / 2 - tooltipHeight / 2;
+    }
   }
 
   ngAfterViewInit(): void {
@@ -83,25 +110,31 @@ export class TooltipComponent implements AfterViewInit {
 })
 export class TooltipDirective {
   tooltip = input.required<string>();
+  tooltipPosition = input<TooltipPosition>('above');
 
+  // #appRef = inject(ApplicationRef);
   #elRef = inject<ElementRef<HTMLElement>>(ElementRef);
   #viewContainerRef = inject(ViewContainerRef);
   #tooltipComponentRef?: ComponentRef<TooltipComponent>;
 
   constructor() {
-    this.#tooltipComponentRef = this.#viewContainerRef.createComponent(TooltipComponent);    
+    // Move the tooltip component to the root of the app, so it can be positioned absolutely
+    // const appRoot = this.#appRef.components[0].location.nativeElement as HTMLElement;
+    this.#tooltipComponentRef = this.#viewContainerRef.createComponent(TooltipComponent);
+    // appRoot.append(this.#tooltipComponentRef.location.nativeElement);
   }
 
   @HostListener('mouseenter') onMouseEnter() {
-    const parent = this.#elRef.nativeElement;
-    const { left, top, width, height } = parent.getBoundingClientRect();
-    const position = { x: left + width / 2, y: top + height / 2 };
+    const { left, top, width, height } = this.#elRef.nativeElement.getBoundingClientRect();
 
     this.#tooltipComponentRef?.setInput('state', {
       text: this.tooltip(),
-      x: position.x,
-      y: position.y,
-    });
+      position: this.tooltipPosition(),
+      x1: left,
+      x2: left + width,
+      y1: top,
+      y2: top + height,
+    } satisfies State);
     this.#tooltipComponentRef?.instance.visible.set(true);
   }
 

@@ -4,6 +4,7 @@
       mat-icon-button
       (click)="overlay.closeSidenav()"
       [tooltip]="'Close Sidebar' | translate"
+      tooltipPosition="right"
     >
       <mat-icon [attr.aria-label]="'Close Sidebar' | translate">chevron_left</mat-icon>
     </button>
@@ -14,6 +15,7 @@
       mat-icon-button
       (click)="overlay.toggleSidenav('annotation')"
       [tooltip]="'Annotations' | translate"
+      tooltipPosition="right"
     >
       <mat-icon [attr.aria-label]="'Toggle Annotation' | translate">place</mat-icon>
     </button>
@@ -24,6 +26,7 @@
       mat-icon-button
       (click)="overlay.toggleSidenav('settings')"
       [tooltip]="'Settings' | translate"
+      tooltipPosition="right"
     >
       <mat-icon [attr.aria-label]="'Toggle Settings' | translate">settings</mat-icon>
     </button>

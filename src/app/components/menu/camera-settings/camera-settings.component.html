@@ -15,14 +15,18 @@
     <k-button
       (click)="babylon.cameraManager.setCameraType('ArcRotateCamera')"
       [type]="
-        (babylon.cameraManager.cameraType$ | async) === 'ArcRotateCamera' ? 'default' : 'outlined'
+        (babylon.cameraManager.cameraType$ | async) === 'ArcRotateCamera'
+          ? 'solid-primary'
+          : 'outlined-primary'
       "
       >{{ 'Orbit' | translate }}</k-button
     >
     <k-button
       (click)="babylon.cameraManager.setCameraType('UniversalCamera')"
       [type]="
-        (babylon.cameraManager.cameraType$ | async) === 'UniversalCamera' ? 'default' : 'outlined'
+        (babylon.cameraManager.cameraType$ | async) === 'UniversalCamera'
+          ? 'solid-primary'
+          : 'outlined-primary'
       "
       >{{ 'Free' | translate }}</k-button
     >

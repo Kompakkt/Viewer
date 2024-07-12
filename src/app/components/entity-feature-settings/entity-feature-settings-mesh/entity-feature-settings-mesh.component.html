@@ -1,6 +1,6 @@
 @if (processing.settings$ | async; as settings) {
 <k-details [title]="'Information & Helpers' | translate">
-  <k-button (click)="resetVisualUIMeshSettingsHelper()" type="outlined" bgColor="--color-grey-4">
+  <k-button (click)="resetVisualUIMeshSettingsHelper()" type="outlined---color-grey-4">
     {{ 'Reset Helper' | translate }}
   </k-button>
   @if (meshes$ | async; as meshes) {
@@ -69,13 +69,13 @@
   <color-chrome (onChange)="entitySettings.setGroundMaterial($event.color.rgb)"></color-chrome>
   }
 
-  <k-button (click)="resetVisualUIMeshSettingsHelper()" type="outlined" bgColor="--color-grey-4">
+  <k-button (click)="resetVisualUIMeshSettingsHelper()" type="outlined---color-grey-4">
     {{ 'Reset Helper' | translate }}
   </k-button>
 </k-details>
 
 <k-details [title]="'Scale' | translate">
-  <k-button (click)="handleChangeDimension('scale', 1)" type="outlined" bgColor="--color-grey-4">
+  <k-button (click)="handleChangeDimension('scale', 1)" type="outlined---color-grey-4">
     {{ 'Reset Size' | translate }}
   </k-button>
 
@@ -118,7 +118,7 @@
 </k-details>
 
 <k-details [title]="'Orientation' | translate">
-  <k-button (click)="setRotation('xyz_reset', 0)" type="outlined" bgColor="--color-grey-4">
+  <k-button (click)="setRotation('xyz_reset', 0)" type="outlined---color-grey-4">
     {{ 'Reset Rotation' | translate }}
   </k-button>
   <h5>X</h5>

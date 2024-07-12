@@ -1,10 +1,8 @@
 import { Component, HostBinding, computed, input } from '@angular/core';
 
-type ColorInput = 'primary' | 'secondary' | 'accent' | 'warn' | 'transparent' | `--color-${string}` | `rgb${string}` | `#${string}`;
-
-const getColor = (color?: ColorInput) => {
+const getColor = (color?: ButtonColor) => {
   if (!color) return 'currentColor';
-  
+
   if (color.startsWith('rgb') || color.startsWith('#') || color === 'transparent') {
     return color;
   }
@@ -14,7 +12,20 @@ const getColor = (color?: ColorInput) => {
   }
 
   return `var(--color-${color}, currentColor)`;
-}
+};
+
+type ButtonStyle = 'solid' | 'outlined';
+type ButtonColor =
+  | 'primary'
+  | 'secondary'
+  | 'accent'
+  | 'warn'
+  | 'transparent'
+  | `--color-${string}`
+  | `rgb${string}`
+  | `#${string}`;
+
+type ButtonType = `${ButtonStyle}-${ButtonColor}`;
 
 @Component({
   selector: 'k-button',
@@ -23,15 +34,20 @@ const getColor = (color?: ColorInput) => {
   styleUrl: './button.component.scss',
 })
 export class ButtonComponent {
-  type = input<'default' | 'outlined' | 'raised'>('default');
-  color = input<ColorInput>('primary');
-  bgColor = input<ColorInput>();
+  type = input<ButtonType>('solid-transparent');
   disabled = input(false);
   iconButton = input<string | undefined>(undefined, { alias: 'icon-button' });
   fullWidth = input<string | undefined>(undefined, { alias: 'full-width' });
 
-  #computedColor = computed(() => getColor(this.color()));
-  #computedBgColor = computed(() => getColor(this.bgColor()));
+  #splitType = computed(() => {
+    const type = this.type();
+    const firstDashIndex = type.indexOf('-');
+    const style = type.slice(0, firstDashIndex) as ButtonStyle;
+    const color = type.slice(firstDashIndex + 1) as ButtonColor;
+    return [style, color] as const;
+  });
+  #computedStyle = computed(() => this.#splitType().at(0) as ButtonStyle);
+  #computedColor = computed(() => getColor(this.#splitType().at(1)! as ButtonColor));
 
   @HostBinding('class.icon-button')
   get isIconButton() {
@@ -43,19 +59,14 @@ export class ButtonComponent {
     return this.fullWidth() !== undefined;
   }
 
-  @HostBinding('class.default')
-  get isDefault() {
-    return this.type() === 'default';
+  @HostBinding('class.solid')
+  get isSolid() {
+    return this.#computedStyle() === 'solid';
   }
 
   @HostBinding('class.outlined')
   get isOutlined() {
-    return this.type() === 'outlined';
-  }
-
-  @HostBinding('class.raised')
-  get isRaised() {
-    return this.type() === 'raised';
+    return this.#computedStyle() === 'outlined';
   }
 
   @HostBinding('class.disabled')
@@ -66,10 +77,5 @@ export class ButtonComponent {
   @HostBinding('style.--color')
   get hostColor() {
     return this.#computedColor();
-  }
-
-  @HostBinding('style.--bg-color')
-  get hostBgColor() {
-    return this.#computedBgColor();
   }
 }

@@ -41,7 +41,6 @@
   --color-gray-12: var(--color-grey-12);
   --color-grey-4: #f5f5f5;
   --color-gray-4: var(--color-grey-4);
-  
 
   --color-primary: #00afe7;
   --color-secondary: var(--color-grey-12);
@@ -75,6 +74,9 @@ app-markdown-preview {
     background: var(--color-bg-transparent);
     border-radius: 4px;
     margin: 12px 0px;
+
+    // TODO: Discuss with design team @Kai
+    max-width: 240px;
   }
 
   * {
@@ -87,7 +89,8 @@ app-markdown-preview {
 
 quill-editor {
   background-color: var(--color-grey-dark);
-  *, *::before {
+  *,
+  *::before {
     color: white !important;
   }
   .ql-stroke {
@@ -104,7 +107,8 @@ quill-editor {
   .ql-container {
     border-radius: 0 0 4px 4px;
   }
-  .ql-toolbar, .ql-container {
+  .ql-toolbar,
+  .ql-container {
     border-color: var(--color-gray-4);
   }
 }
