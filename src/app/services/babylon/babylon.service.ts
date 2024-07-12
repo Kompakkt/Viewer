@@ -16,6 +16,7 @@ import {
   Layer,
   Mesh,
   PostProcess,
+  Ray,
   Scene,
   SharpenPostProcess,
   Tools,
@@ -26,6 +27,7 @@ import '@babylonjs/core/Debug/debugLayer';
 import '@babylonjs/inspector';
 // tslint:disable-next-line:no-import-side-effect
 import '@babylonjs/loaders';
+import { interval } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { RenderCanvasComponent } from '../../components/render-canvas/render-canvas.component';
 import {
@@ -191,7 +193,7 @@ export class BabylonService {
       this.scene.registerBeforeRender(renderVideo);
     });
 
-    this.scene.registerBeforeRender(() => {
+    interval(50).subscribe(() => {
       const camera = this.getActiveCamera();
       if (!camera) return;
       camera.panningSensibility =
@@ -200,12 +202,25 @@ export class BabylonService {
       camera.speed = this.cameraManager.cameraSpeed;
 
       this.scene.getMeshesByTags('marker', mesh => {
-        const dist = Vector3.Distance(mesh.position, camera.position);
-        const scale = Math.min(2, dist / 50);
-        // Scale based on distance
-        mesh.scaling = new Vector3(scale, scale, scale);
-        // Fade out markers with distance < 50
-        mesh.material!.alpha = Math.max(Math.min(1, scale), 0.5);
+        // Scale marker to fixed size
+        const distance = Vector3.Distance(camera.position, mesh.position);
+        const scaleFactor = (distance / camera.fov) * 0.005;
+        mesh.scaling.setAll(scaleFactor);
+        mesh.material!.alpha = Math.max(Math.min(1, distance * 0.01), 0.5);
+
+        // Check if marker is behind other mesh
+        const direction = mesh.position.subtract(camera.position);
+        const ray = new Ray(camera.position, direction, distance);
+        const pickInfo = this.scene.pickWithRay(
+          ray,
+          pickedMesh => pickedMesh !== mesh && !pickedMesh.isDescendantOf(mesh),
+        );
+
+        // Animate visibility
+        const isHitWithinThreshold = pickInfo?.hit && Math.abs(pickInfo.distance - distance) < 0.1;
+        mesh.visibility = isHitWithinThreshold
+          ? Math.min(mesh.visibility + 0.1, 1)
+          : Math.max(mesh.visibility - 0.1, 0.3);
       });
     });
 

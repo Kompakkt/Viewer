@@ -36,8 +36,6 @@ export const createMarker = (
   scene: Scene,
   ranking: string,
   id: string,
-  transparent: boolean,
-  color?: string,
   position?: Vector3,
   normal?: Vector3,
 ) => {
@@ -46,30 +44,30 @@ export const createMarker = (
   // Create dynamic texture and write the text
   const resolution = 256;
   const dynamicTexture = new DynamicTexture(
-    `${id}_texture${transparent ? '_transparent' : ''}`,
+    `${id}_texture`,
     { width: resolution, height: resolution },
     scene,
     true,
   );
   const ctx = dynamicTexture.getContext();
-  ctx.font = `bold 16px Roboto, "Helvetica Neue", sans-serif`;
+  ctx.font = `bold 16px "Open Sans", Roboto, "Helvetica Neue", sans-serif`;
   const textWidth = ctx.measureText('00').width;
   const ratio = textWidth / 16;
   const fontSize = Math.floor(resolution / (ratio * 1.5));
-  const font = `bold ${fontSize}px Roboto, "Helvetica Neue", sans-serif`;
+  const font = `bold ${fontSize}px "Open Sans", Roboto, "Helvetica Neue", sans-serif`;
 
-  const mat = new StandardMaterial(`${id}_material${transparent ? '_transparent' : ''}`, scene);
+  const mat = new StandardMaterial(`${id}_material`, scene);
   mat.diffuseTexture = dynamicTexture;
-  mat.alpha = transparent ? 0.5 : 1;
+  mat.alpha = 1;
   mat.emissiveColor = new Color3(1, 1, 1);
   mat.specularColor = new Color3(0, 0, 0);
 
-  dynamicTexture.drawText(ranking, null, 180, font, '#ffffff', color ?? '#000000', false, true);
+  dynamicTexture.drawText(ranking, null, 180, font, '#ffffff', '#000000', false, true);
 
-  const markerName = `${id}_marker${transparent ? '_transparent' : ''}`;
+  const markerName = `${id}_marker`;
   const marker = MeshBuilder.CreateDisc(markerName, { radius }, scene);
   Tags.AddTagsTo(marker, 'marker');
-  Tags.AddTagsTo(marker, transparent ? 'transparent_marker' : 'solid_marker');
+  Tags.AddTagsTo(marker, 'solid_marker');
   Tags.AddTagsTo(marker, id);
   Tags.AddTagsTo(marker, markerName);
   if (position && normal) {
@@ -81,7 +79,7 @@ export const createMarker = (
   }
   marker.billboardMode = Mesh.BILLBOARDMODE_ALL;
   marker.material = mat;
-  marker.renderingGroupId = transparent ? 3 : 2;
+  marker.renderingGroupId = 3;
 
   return marker;
 };

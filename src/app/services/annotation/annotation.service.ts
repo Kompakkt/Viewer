@@ -594,38 +594,24 @@ export class AnnotationService {
     const positionVector = getVector(referencePoint);
     const normalVector = getVector(referenceNormal);
 
-    const color = 'black';
     const scene = this.babylon.getScene();
     const id = newAnnotation._id.toString();
     const marker = createMarker(
       scene,
       newAnnotation.ranking.toString(),
       id,
-      false,
-      color,
       positionVector,
       normalVector,
     );
-    marker.isPickable = false;
-
-    const markertransparent = createMarker(
-      scene,
-      newAnnotation.ranking.toString(),
-      id,
-      true,
-      color,
-      positionVector,
-      normalVector,
-    );
+    marker.isPickable = true;
 
     // Parent markers to center to fix offset
     const center = scene.getMeshesByTags('center')[0];
     marker.parent = center;
-    markertransparent.parent = center;
 
-    markertransparent.actionManager = new ActionManager(scene);
+    marker.actionManager = new ActionManager(scene);
     // register 'pickCylinder' as the handler function for cylinder picking action.
-    markertransparent.actionManager.registerAction(
+    marker.actionManager.registerAction(
       new ExecuteCodeAction(ActionManager.OnPickTrigger, () => {
         this.setSelectedAnnotation(id);
       }),
