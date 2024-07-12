@@ -596,13 +596,7 @@ export class AnnotationService {
 
     const scene = this.babylon.getScene();
     const id = newAnnotation._id.toString();
-    const marker = createMarker(
-      scene,
-      newAnnotation.ranking.toString(),
-      id,
-      positionVector,
-      normalVector,
-    );
+    const marker = createMarker(scene, id, positionVector, normalVector);
     marker.isPickable = true;
 
     // Parent markers to center to fix offset

@@ -248,7 +248,6 @@ export class ProcessingService {
 
     const isPickableMode = ['upload', 'annotation'].includes(this.mode$.getValue());
     meshes.forEach(mesh => (mesh.isPickable = isPickableMode));
-    meshes.forEach(mesh => (mesh.renderingGroupId = 2));
     this.babylon.getScene().getMeshesByTags('videoPlane', mesh => (mesh.renderingGroupId = 3));
     this.meshes$.next(meshes);
     this.babylon.resize();

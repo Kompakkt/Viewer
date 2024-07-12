@@ -1,15 +1,17 @@
-@if (processing.bootstrapped$ | async) { @for (annotation of annotations.currentAnnotations$ |
-async; track annotation) {
-<div>
-  <app-annotation [annotation]="annotation"></app-annotation>
-</div>
-}
-<app-annotationwalkthrough></app-annotationwalkthrough>
-@if (processing.showMenu$ | async) {
-<app-menu></app-menu>
-} @if (processing.showSidenav$ | async) {
-<app-sidenav-menu></app-sidenav-menu>
-}
-<app-sidenav></app-sidenav>
+@if (processing.bootstrapped$ | async) {
+  @for (annotation of annotations.currentAnnotations$ | async; track annotation) {
+    <div>
+      <app-annotation-marker [annotation]="annotation"></app-annotation-marker>
+      <app-annotation [annotation]="annotation"></app-annotation>
+    </div>
+  }
+  <app-annotationwalkthrough></app-annotationwalkthrough>
+  @if (processing.showMenu$ | async) {
+    <app-menu></app-menu>
+  }
+  @if (processing.showSidenav$ | async) {
+    <app-sidenav-menu></app-sidenav-menu>
+  }
+  <app-sidenav></app-sidenav>
 }
 <!-- app-render-canvas will be dynamically added to this -->
