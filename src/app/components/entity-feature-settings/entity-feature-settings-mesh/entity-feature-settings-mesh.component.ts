@@ -1,14 +1,7 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatCheckbox } from '@angular/material/checkbox';
-import { MatFormField } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
-import { MatInput } from '@angular/material/input';
-import { MatSlider, MatSliderThumb } from '@angular/material/slider';
-import { MatStepLabel } from '@angular/material/stepper';
-import { MatTooltip } from '@angular/material/tooltip';
 import { Vector3 } from '@babylonjs/core';
 import { ColorChromeModule } from 'ngx-color/chrome';
 import {
@@ -31,17 +24,8 @@ import { ProcessingService } from '../../../services/processing/processing.servi
   styleUrls: ['./entity-feature-settings-mesh.component.scss'],
   standalone: true,
   imports: [
-    MatStepLabel,
-    MatIconButton,
-    MatTooltip,
     MatIcon,
-    MatButton,
-    MatCheckbox,
     ColorChromeModule,
-    MatSlider,
-    MatSliderThumb,
-    MatFormField,
-    MatInput,
     FormsModule,
     AsyncPipe,
     TranslatePipe,
@@ -95,29 +79,32 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
   // ________Mesh Settings__________
 
   // Scaling
-  public async handleChangeDimension(dimension: string, value?: number | null) {
+  public async handleChangeDimension(dimension: string, value: number) {
     console.log('Changing dimension', dimension, value);
     const { localSettings } = await firstValueFrom(this.processing.settings$);
     let factor;
     try {
       switch (dimension) {
         case 'height':
-          factor = +this.processing.entityHeight / this.entitySettings.initialSize.y;
+          factor = value / this.entitySettings.initialSize.y;
           localSettings.scale = parseFloat(factor.toFixed(2));
+          this.processing.entityHeight = value.toFixed(2);
           this.entitySettings.loadScaling();
           break;
         case 'width':
-          factor = +this.processing.entityWidth / this.entitySettings.initialSize.x;
+          factor = value / this.entitySettings.initialSize.x;
           localSettings.scale = parseFloat(factor.toFixed(2));
+          this.processing.entityWidth = value.toFixed(2);
           this.entitySettings.loadScaling();
           break;
         case 'depth':
-          factor = +this.processing.entityDepth / this.entitySettings.initialSize.z;
+          factor = value / this.entitySettings.initialSize.z;
           localSettings.scale = parseFloat(factor.toFixed(2));
+          this.processing.entityDepth = value.toFixed(2);
           this.entitySettings.loadScaling();
           break;
         case 'scale':
-          if (value) localSettings.scale = value;
+          localSettings.scale = value;
           this.entitySettings.loadScaling();
           break;
         default:
@@ -133,15 +120,15 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
     const { localSettings } = await firstValueFrom(this.processing.settings$);
     switch (axis) {
       case 'x':
-        localSettings.rotation.x = localSettings.rotation.x + degree;
+        localSettings.rotation.x = degree;
         this.entitySettings.loadRotation();
         break;
       case 'y':
-        localSettings.rotation.y = localSettings.rotation.y + degree;
+        localSettings.rotation.y = degree;
         this.entitySettings.loadRotation();
         break;
       case 'z':
-        localSettings.rotation.z = localSettings.rotation.z + degree;
+        localSettings.rotation.z = degree;
         this.entitySettings.loadRotation();
         break;
       case 'xyz_reset':
@@ -164,9 +151,9 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
     this.toggleBoundingBoxEntityVisibility(false);
     this.toggleBoundingBoxMeshesVisibility(false);
     this.toggleAxesVisibility('worldAxis', false);
-    this.setScalingFactorAxis(1, true);
+    this.setScalingFactorAxis(1, 'world');
     this.toggleAxesVisibility('localAxis', false);
-    this.setScalingFactorAxis(1, false);
+    this.setScalingFactorAxis(1, 'local');
     this.toggleGroundVisibility(false);
     this.setScalingFactorGround(1);
     this.entitySettings.setGroundMaterial();
@@ -179,21 +166,20 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
     this.entitySettings.setGroundMaterial(color);
   }
 
-  public setScalingFactorAxis(factor: number | null, world: boolean) {
-    if (!factor) factor = 1;
-    world ? (this.worldAxisScalingFactor = factor) : (this.localAxisScalingFactor = factor);
-    const pos =
-      factor *
-      0.9 *
-      (world ? this.entitySettings.worldAxisInitialSize : this.entitySettings.localAxisInitialSize);
-    this.babylon
-      .getScene()
-      .getMeshesByTags(world ? 'worldAxis' : 'localAxis')
-      .map(mesh => {
-        if (!factor) factor = 1;
-        mesh.scaling = new Vector3(factor, factor, factor);
-      });
-    this.babylon
+  public setScalingFactorAxis(factor: number, space: 'world' | 'local') {
+    if (space === 'world') {
+      this.worldAxisScalingFactor = factor;
+      //const pos = factor * 0.9 * this.entitySettings.worldAxisInitialSize;
+      const transformNode = this.babylon.getScene().getTransformNodesByTags('worldAxis')[0];
+      transformNode.scaling = new Vector3(factor, factor, factor);
+    } else {
+      this.localAxisScalingFactor = factor;
+      //const pos = factor * 0.9 * this.entitySettings.localAxisInitialSize;
+      const transformNode = this.babylon.getScene().getTransformNodesByTags('localAxis')[0];
+      transformNode.scaling = new Vector3(factor, factor, factor);
+    }
+
+    /*this.babylon
       .getScene()
       .getMeshesByTags(world ? 'worldAxisX' : 'localAxisX')
       .map(mesh => (mesh.position = new Vector3(pos * 0.9, pos * -0.05, 0)));
@@ -204,7 +190,7 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
     this.babylon
       .getScene()
       .getMeshesByTags(world ? 'worldAxisZ' : 'localAxisZ')
-      .map(mesh => (mesh.position = new Vector3(0, pos * 0.05, pos * 0.9)));
+      .map(mesh => (mesh.position = new Vector3(0, pos * 0.05, pos * 0.9)));*/
   }
 
   public setScalingFactorGround(factor: number | null) {
@@ -256,10 +242,12 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
   }
 
   private visibilityMesh(tag: string, visibility: boolean) {
-    const setVisibility = visibility ? 1 : 0;
-    this.babylon
-      .getScene()
-      .getMeshesByTags(tag)
-      .map(mesh => (mesh.visibility = setVisibility));
+    const scene = this.babylon.getScene();
+    const nodes = scene.getTransformNodesByTags(tag);
+    const meshes = scene.getMeshesByTags(tag);
+    console.log({ nodes, meshes, tag, visibility });
+    for (const el of [...nodes, ...meshes]) {
+      el.setEnabled(visibility);
+    }
   }
 }

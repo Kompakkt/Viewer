@@ -164,7 +164,11 @@ export class EntitySettingsService {
     if (!meshes) {
       throw new Error('No meshes available.');
     }
+    if (this.center) {
+      return;
+    }
     this.center = MeshBuilder.CreateBox('center', { size: 0.01 }, this.babylon.getScene());
+    this.center.isPickable = false;
     Tags.AddTagsTo(this.center, 'center');
     this.center.isVisible = false;
 
@@ -423,6 +427,7 @@ export class EntitySettingsService {
       createWorldAxis(scene, this.worldAxisInitialSize);
       createlocalAxes(scene, this.localAxisInitialSize, this.center, this.initialCenterPoint);
       this.ground = createGround(scene, this.groundInitialSize);
+      this.ground.position = this.center.position.clone();
       this.setGroundMaterial();
     }
   }

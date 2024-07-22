@@ -1,45 +1,46 @@
-<h1 mat-dialog-title>
-  @if (!editMode) {
-  <span [innerHTML]="data.title"></span>
-  } @if (editMode) {
-  <mat-form-field>
-    <mat-label>{{ 'Title' | translate }}</mat-label>
-    <input matInput name="title" type="text" [(ngModel)]="data.title" />
-  </mat-form-field>
-  }
-</h1>
+@if (currentMode(); as mode) { @if (mode == 'edit') {
+<div class="side-by-side">
+  <div class="left">
+    <h2>{{ 'Edit annotation' | translate }}</h2>
 
-<div mat-dialog-content>
-  @if (!editMode) {
-  <app-markdown-preview [data]="data.content"></app-markdown-preview>
-  } @if (editMode) {
-  <app-media-browser (addMedia)="addEntitySwitch($event)"></app-media-browser>
-  } @if (editMode) {
-  <mat-form-field>
-    <mat-label>{{ 'Description' | translate }}</mat-label>
-    <textarea
-      id="annotation-content"
+    <k-input
+      [label]="'Title' | translate"
+      [startingValue]="data().title"
+      (valueChanged)="onTitleChange($event.value)"
+    />
+
+    <k-textarea
       #annotationContent
-      matInput
-      cdkTextareaAutosize
-      cdkAutosizeMinRows="1"
-      name="description"
-      type="text"
-      [(ngModel)]="data.content"
-    >
-    </textarea>
-  </mat-form-field>
-  }
+      [label]="'Content' | translate"
+      [startingValue]="data().description"
+      (valueChanged)="onTextAreaChange($event.value)"
+      resize="both"
+    />
+  </div>
+  <div class="right">
+    <h2>{{ 'Live preview' | translate }}</h2>
+
+    <p>
+      <strong>{{ data().title }}</strong>
+    </p>
+
+    <app-markdown-preview [data]="data().description" />
+  </div>
 </div>
 
-<div mat-dialog-actions>
-  <button mat-button (click)="toggleEditViewMode()" [attr.aria-label]="labelModeText">
-    <mat-icon>{{ labelMode }}</mat-icon>
-  </button>
-  <button mat-button [mat-dialog-close]="data">
-    <mat-icon [attr.aria-label]="'Save' | translate">save</mat-icon>
-  </button>
-  <button mat-button (click)="cancel()">
-    <mat-icon [attr.aria-label]="'Cancel' | translate">cancel</mat-icon>
-  </button>
-</div>
+<app-media-browser (addMedia)="addEntitySwitch($event)" />
+
+<k-button-row justify="end">
+  <k-button type="outlined-secondary" (click)="close(false)">
+    <span>{{ 'Cancel' | translate }}</span>
+  </k-button>
+  <k-button type="solid-primary" (click)="close(true)">
+    <span>{{ 'Save annotation' | translate }}</span>
+  </k-button>
+</k-button-row>
+
+} @else {
+<h2>{{ data().title }}</h2>
+
+<app-markdown-preview [data]="data().description" />
+} }

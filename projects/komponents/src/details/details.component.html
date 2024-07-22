@@ -20,6 +20,7 @@
   class="details-content"
   [class.opened]="expanded()"
   [style.--inner-height]="contentHeight()"
+  [style.--gap.px]="gap()"
   #detailsContent
 >
   <ng-content />

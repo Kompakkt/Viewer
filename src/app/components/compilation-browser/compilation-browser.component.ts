@@ -2,8 +2,8 @@ import { AsyncPipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { MatCard, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { filter, map } from 'rxjs';
+import { FixImageUrlPipe } from 'src/app/pipes/fix-image-url.pipe';
 import { isCompilation, isEntity } from 'src/common';
-import { environment } from 'src/environment';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ProcessingService } from '../../services/processing/processing.service';
 
@@ -12,10 +12,12 @@ import { ProcessingService } from '../../services/processing/processing.service'
   templateUrl: './compilation-browser.component.html',
   styleUrls: ['./compilation-browser.component.scss'],
   standalone: true,
-  imports: [MatCard, MatCardHeader, MatCardTitle, AsyncPipe, TranslatePipe],
+  imports: [MatCard, MatCardHeader, MatCardTitle, AsyncPipe, TranslatePipe, FixImageUrlPipe],
 })
 export class CompilationBrowserComponent {
-  public server_url = environment.server_url;
+  public colorToRGBA = (colorString: { r: number; g: number; b: number; a: number }) => {
+    return `rgba(${colorString.r}, ${colorString.g}, ${colorString.b}, ${colorString.a})`;
+  };
 
   constructor(public processing: ProcessingService) {}
 

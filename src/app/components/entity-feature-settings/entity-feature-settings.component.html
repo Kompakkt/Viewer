@@ -1,5 +1,5 @@
-@if (settingsReady$ | async) { @if (processing.settings$ | async; as settings) {
-<!--@if ((processing.isInUpload$ | async) === false) {
+@if (settingsReady$ | async) { @if (processing.settings$ | async; as settings) { @if
+((processing.isInUpload$ | async) === false) {
 <k-details [title]="'Background' | translate">
   <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
   <br />
@@ -8,87 +8,127 @@
     (checkedChange)="
       settings.localSettings.background.effect = $event; entitySettings.loadBackgroundEffect()
     "
+    [startingValue]="settings.localSettings.background.effect"
   ></k-labelled-checkbox>
 </k-details>
 <k-details [title]="'Lights' | translate">
   <app-entity-feature-settings-lights></app-entity-feature-settings-lights>
 </k-details>
 <k-details [title]="'Preview & Initial Perspective' | translate">
-  <p>{{ 'Click on this image to set actual view as initial perspective.' | translate }}</p>
+  <p>{{ 'Click on this image to set a nice and fitting camera perspective' | translate }}</p>
   <img
     class="previewimage"
-    [src]="settings.localSettings.preview"
+    [src]="settings.localSettings.preview | fixImageUrl"
     (click)="setInitialPerspectivePreview()"
   />
 </k-details>
 
-<k-button (click)="backToDefaultSettings()" type="outlined" color="secondary">
+<k-button (click)="backToDefaultSettings()" type="outlined---color-grey-4">
   {{ 'Back to Default' | translate }}
 </k-button>
 @if (canSaveSettings$ | async) {
-<k-button (click)="saveSettings()" type="outlined" color="secondary">
+<k-button (click)="saveSettings()" type="solid-primary">
   {{ 'Save as default' | translate }}
 </k-button>
-} } @if (processing.isInUpload$ | async) { -->
+} } @if (processing.isInUpload$ | async) {
 <k-wizard direction="vertical" [linear]="true" #stepper>
   @if (processing.hasMeshSettings$ | async) {
   <k-wizard-step [label]="'Set Mesh Settings' | translate">
     <app-entity-feature-settings-mesh></app-entity-feature-settings-mesh>
-    <k-button (click)="showNextAlertFirstStep()">{{ 'Next' | translate }}</k-button>
+    <k-button type="solid-primary" (click)="showNextAlertFirstStep()">{{
+      'Next' | translate
+    }}</k-button>
   </k-wizard-step>
   }
   <k-wizard-step [label]="'Set Initial Settings' | translate">
-    <k-details [title]="'Background' | translate">
-      <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
-      <br />
-      <k-labelled-checkbox
-        [label]="'Gradient-Brightness Effect' | translate"
-        (checkedChange)="
-          settings.localSettings.background.effect = $event; entitySettings.loadBackgroundEffect()
-        "
-      ></k-labelled-checkbox>
-    </k-details>
+    <div
+      style="
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        margin: 8px 0px 16px;
+      "
+    >
+      <k-details [title]="'Background' | translate">
+        <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
+        <br />
+        <k-labelled-checkbox
+          [label]="'Gradient-Brightness Effect' | translate"
+          (checkedChange)="
+            settings.localSettings.background.effect = $event; entitySettings.loadBackgroundEffect()
+          "
+          [startingValue]="settings.localSettings.background.effect"
+        ></k-labelled-checkbox>
+      </k-details>
 
-    <k-details [title]="'Lights' | translate">
-      <app-entity-feature-settings-lights></app-entity-feature-settings-lights>
-    </k-details>
+      <k-details [title]="'Lights' | translate">
+        <app-entity-feature-settings-lights></app-entity-feature-settings-lights>
+      </k-details>
 
-    @if ((processing.mediaType$ | async) !== 'audio') {
-    <k-details [title]="'Preview & Initial Perspective' | translate">
-      {{
-        'Please select a nice and fitting camera perspective before you go on to the next
+      @if ((processing.mediaType$ | async) !== 'audio') {
+      <k-details [title]="'Preview & Initial Perspective' | translate">
+        {{
+          'Please select a nice and fitting camera perspective before you go on to the next
                       step. By clicking on the next button the actual view will be set as initial
                       perspective. And I will automatically produce a preview - smile!' | translate
-      }}
-    </k-details>
-
-    }
-    <k-button (click)="nextSecondStep()" color="primary">{{ 'Next' | translate }}</k-button>
+        }}
+      </k-details>
+      }
+    </div>
+    <k-button type="solid-primary" (click)="nextSecondStep()">{{ 'Next' | translate }}</k-button>
   </k-wizard-step>
   @if (!(isStandalone$ | async)) {
   <k-wizard-step [label]="'Done' | translate">
-    <img class="previewimage" [src]="settings.localSettings.preview" />
-    <p>{{ 'You set all settings and I celebrate it with this preview.' | translate }}</p>
-    <br />
-    <p>{{ 'Please save them if you are done. Afterwards you may add annotations.' | translate }}</p>
-    // TODO: Hook up back button to k-wizard
-    <k-button>{{ 'Back' | translate }}</k-button>
-    <k-button (click)="saveSettings()">{{ 'Save' | translate }}</k-button>
+    <div
+      style="
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        margin: 8px 0px 16px;
+      "
+    >
+      <img class="previewimage" [src]="settings.localSettings.preview | fixImageUrl" />
+      <p>{{ 'You set all settings and I celebrate it with this preview.' | translate }}</p>
+      <br />
+      <p>
+        {{ 'Please save them if you are done. Afterwards you may add annotations.' | translate }}
+      </p>
+
+      <k-button type="outlined-accent" (click)="stepper.prevStep()">{{
+        'Back' | translate
+      }}</k-button>
+      <k-button type="solid-primary" (click)="saveSettings()">{{ 'Save' | translate }}</k-button>
+    </div>
   </k-wizard-step>
   } @else {
   <k-wizard-step [label]="'Export' | translate">
-    <img class="previewimage" [src]="settings.localSettings.preview" />
-    <p>
-      {{
-        'Your settings can now be exported and loaded in the standalone Kompakkt viewer.'
-          | translate
-      }}
-    </p>
-    // TODO: Hook up back button to k-wizard
-    <k-button matStepperPrevious>{{ 'Back' | translate }}</k-button>
-    <k-button (click)="exportSettings()">{{ 'Export' | translate }}</k-button>
+    <div
+      style="
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        margin: 8px 0px 16px;
+      "
+    >
+      <img class="previewimage" [src]="settings.localSettings.preview | fixImageUrl" />
+      <p>
+        {{
+          'Your settings can now be exported and loaded in the standalone Kompakkt viewer.'
+            | translate
+        }}
+      </p>
+
+      <k-button type="outlined-accent" (click)="stepper.prevStep()">{{
+        'Back' | translate
+      }}</k-button>
+      <k-button type="solid-primary" (click)="exportSettings()">{{
+        'Export' | translate
+      }}</k-button>
+    </div>
   </k-wizard-step>
   }
 </k-wizard>
-} }
-<!--} -->
+} } }

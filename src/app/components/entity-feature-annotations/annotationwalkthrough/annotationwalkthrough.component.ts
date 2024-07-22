@@ -1,8 +1,8 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
-import { MatIconButton } from '@angular/material/button';
+import { Component, HostBinding, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIcon } from '@angular/material/icon';
-import { MatTooltip } from '@angular/material/tooltip';
+import { ButtonComponent, TooltipDirective } from 'projects/komponents/src';
 import { BehaviorSubject, combineLatest, firstValueFrom, map } from 'rxjs';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
@@ -12,9 +12,9 @@ import { AnnotationService } from '../../../services/annotation/annotation.servi
   templateUrl: './annotationwalkthrough.component.html',
   styleUrls: ['./annotationwalkthrough.component.scss'],
   standalone: true,
-  imports: [MatIconButton, MatTooltip, MatIcon, AsyncPipe, TranslatePipe],
+  imports: [MatIcon, AsyncPipe, TranslatePipe, TooltipDirective, ButtonComponent],
 })
-export class AnnotationwalkthroughComponent {
+export class AnnotationwalkthroughComponent  {
   public annotationService = inject(AnnotationService);
 
   public ranking$ = new BehaviorSubject(-1);
@@ -33,6 +33,13 @@ export class AnnotationwalkthroughComponent {
   public showWalkthrough$ = this.annotationService.currentAnnotations$.pipe(
     map(annotations => annotations.length > 1),
   );
+
+  public showWalkthrough = toSignal(this.showWalkthrough$);
+
+  @HostBinding('class.hidden') get hidden() {
+    return !this.showWalkthrough();
+  }
+
 
   public async previousAnnotation() {
     const [ranking, annotations] = await Promise.all([

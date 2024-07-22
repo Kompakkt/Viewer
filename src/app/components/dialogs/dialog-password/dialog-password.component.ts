@@ -8,9 +8,7 @@ import {
 } from '@angular/material/dialog';
 
 import { FormsModule } from '@angular/forms';
-import { MatButton } from '@angular/material/button';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
+import { ButtonComponent, ButtonRowComponent, InputComponent } from 'projects/komponents/src';
 import { ICompilation } from 'src/common';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { BackendService } from '../../../services/backend/backend.service';
@@ -24,13 +22,12 @@ import { MessageService } from '../../../services/message/message.service';
   imports: [
     MatDialogTitle,
     MatDialogContent,
-    MatFormField,
-    MatInput,
-    MatLabel,
     FormsModule,
     MatDialogActions,
-    MatButton,
     TranslatePipe,
+    InputComponent,
+    ButtonComponent,
+    ButtonRowComponent,
   ],
 })
 export class DialogPasswordComponent {

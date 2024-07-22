@@ -3,7 +3,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { Matrix, Vector3 } from '@babylonjs/core';
 import { BehaviorSubject, ReplaySubject, combineLatest, firstValueFrom, interval, map } from 'rxjs';
 import { IAnnotation } from 'src/common';
-import { environment } from 'src/environment';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
 import { BabylonService } from '../../../services/babylon/babylon.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
@@ -12,7 +11,6 @@ import { UserdataService } from '../../../services/userdata/userdata.service';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { AsyncPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatIconButton } from '@angular/material/button';
 import {
   MatCard,
   MatCardActions,
@@ -20,12 +18,8 @@ import {
   MatCardHeader,
   MatCardTitle,
 } from '@angular/material/card';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
-import { MatInput } from '@angular/material/input';
-import { MatTooltip } from '@angular/material/tooltip';
-import { QuillEditorComponent } from 'ngx-quill';
-import { ButtonComponent, ButtonRowComponent, InputComponent } from 'projects/komponents/src';
+import { ButtonComponent, ButtonRowComponent, InputComponent, TooltipDirective } from 'projects/komponents/src';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { DialogAnnotationEditorComponent } from '../../dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
 import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-preview.component';
@@ -40,22 +34,17 @@ import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-previe
     FormsModule,
     MatCardHeader,
     MatCardTitle,
-    MatFormField,
-    MatLabel,
-    MatInput,
-    MatIconButton,
     MatIcon,
     MatCardContent,
     CdkTextareaAutosize,
     MarkdownPreviewComponent,
     MatCardActions,
-    MatTooltip,
     AsyncPipe,
     TranslatePipe,
     ButtonComponent,
     ButtonRowComponent,
     InputComponent,
-    QuillEditorComponent,
+    TooltipDirective,
   ],
 })
 export class AnnotationComponent {
@@ -64,23 +53,6 @@ export class AnnotationComponent {
   public dialog = inject(MatDialog);
   public userdata = inject(UserdataService);
   public processing = inject(ProcessingService);
-
-  public fullscreen = false;
-  @HostBinding('class.fullscreen')
-  get __fullscreen() {
-    return this.fullscreen;
-  }
-
-  public toggleFullscreen() {
-    this.fullscreen = !this.fullscreen;
-  }
-
-  public enableEditMode() {
-    firstValueFrom(this.annotation$).then(annotation => {
-      this.fullscreen = true;
-      this.annotationService.setEditModeAnnotation(annotation._id.toString());
-    });
-  }
 
   @Input() entityFileName: string | undefined;
   @Input('annotation') set setAnnotation(annotation: IAnnotation) {
@@ -143,23 +115,8 @@ export class AnnotationComponent {
     });
   }
 
-  get previewImage$() {
-    return this.annotation$.pipe(
-      map(annotation => annotation.body.content.relatedPerspective.preview),
-      map(preview =>
-        preview.startsWith('data:image') ? preview : environment.server_url + preview,
-      ),
-    );
-  }
-
   public closeAnnotation(): void {
     this.annotationService.setSelectedAnnotation('');
-  }
-
-  public async toggleEditViewMode() {
-    const annotation = await firstValueFrom(this.annotation$);
-    const isEditMode = await firstValueFrom(this.isEditMode$);
-    this.annotationService.setEditModeAnnotation(isEditMode ? '' : annotation._id.toString());
   }
 
   public async shareAnnotation() {
@@ -199,14 +156,11 @@ export class AnnotationComponent {
     this.positionLeft = left < 0 ? 0 : left + elWidth > width ? width - elWidth : left;
   }
 
-  public async editFullscreen() {
+  public async toggleFullscreen(mode: 'edit' | 'preview') {
     const annotation = await firstValueFrom(this.annotation$);
     const dialogRef = this.dialog.open(DialogAnnotationEditorComponent, {
-      width: '75%',
-      data: {
-        title: annotation.body.content.title,
-        content: annotation.body.content.description,
-      },
+      width: 'min(75vw, 860px)',
+      data: { annotation, mode },
     });
 
     dialogRef.afterClosed().subscribe(result => {

@@ -1,0 +1,12 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 32px;
+
+  color: white;
+  h1 {
+    font-size: 20px;
+    margin: 0;
+  }
+}

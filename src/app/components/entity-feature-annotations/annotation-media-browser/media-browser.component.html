@@ -1,60 +1,30 @@
-<div id="media-browser">
-  <div id="menu">
-    <button
-      mat-icon-button
-      (click)="addExternalImage = !addExternalImage"
-      matTooltip="{{ 'Add External Image' | translate }}"
-      matTooltipPosition="above"
-      type="mat-icon-button"
-      class="btn-add-medium"
-    >
-      <mat-icon [attr.aria-label]="'Add External Image' | translate">image</mat-icon>
-    </button>
-    @if (compilation$ | async) {
-    <button
-      mat-icon-button
-      (click)="addCompilationEntity = !addCompilationEntity"
-      matTooltip="{{ 'Add Entity From Collection' | translate }}"
-      matTooltipPosition="above"
-      type="mat-icon-button"
-      class="btn-add-medium"
-    >
-      <mat-icon [attr.aria-label]="'Add Entity From Collection' | translate">folder_open</mat-icon>
-    </button>
-    }
+<k-details [title]="'Embed media into the content of the annotation' | translate" [startCollapsed]="true">
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+    <k-input [label]="'URL' | translate" #url />
+    <k-input [label]="'Fallback media description' | translate" #description />
   </div>
 
-  @if (addExternalImage) {
-  <div id="external-image">
-    <h3>{{ 'Embed an external image at cursor position:' | translate }}</h3>
-    <mat-form-field>
-      <mat-label>{{ 'URL' | translate }}</mat-label>
-      <input matInput #url name="URL" type="text" />
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>{{ 'Image Description' | translate }}</mat-label>
-      <input matInput #description name="Image Description" type="text" />
-    </mat-form-field>
-    <button
-      mat-icon-button
-      (click)="addImage(url.value, description.value)"
-      matTooltip="{{ 'Add Image at Cursor Position' | translate }}"
-      matTooltipPosition="above"
-      type="button"
-    >
-      <mat-icon [attr.aria-label]="'Add Image' | translate">add</mat-icon>
-      {{ 'Add Image' | translate }}
-    </button>
-  </div>
-  } @if (addCompilationEntity) {
-  <div id="collection-entities">
-    <h3>{{ 'Or embed an entity of your collection:' | translate }}</h3>
-    @for (entity of entities$ | async; track entity; let i = $index) {
-    <mat-card appearance="outlined" (click)="addEntity(i)" class="compilation-entity">
-      <img mat-card-image [src]="server_url + entity.settings.preview" [alt]="entity.name" />
-      <mat-card-footer>{{ entity.name }}</mat-card-footer>
-    </mat-card>
-    }
-  </div>
+  <k-button-row justify="end">
+    <k-button type="outlined---color-grey-4" (click)="addImage(url.value(), description.value())">
+      <span>{{ 'Embed media in content' | translate }}</span>
+    </k-button>
+  </k-button-row>
+</k-details>
+
+<!--
+TODO: Die Funktion muss noch mal überdacht/ausgereift werden. Wenn man hier drauf drückt,
+wird im DialogannotationEditor eine Methode getriggert, die rohes HTML in den Annotationscontent einsetzt.
+Zusammen mit dem Markdown Compiler könnte man aber z.B. festlegen, dass eine echte Entity-Card als Component eingesetzt wird, etc pp.
+
+@if (compilation$ | async) {
+<k-details [title]="'Add Entity From Collection' | translate" [startCollapsed]="true">
+  <p>{{ 'Click on an entity to add it to the annotation' | translate }}</p>
+  @for (entity of entities$ | async; track entity; let i = $index) {
+  <mat-card appearance="outlined" (click)="addEntity(i)" class="compilation-entity">
+    <img mat-card-image [src]="server_url + entity.settings.preview" [alt]="entity.name" />
+    <mat-card-footer>{{ entity.name }}</mat-card-footer>
+  </mat-card>
   }
-</div>
+</k-details>
+}
+-->

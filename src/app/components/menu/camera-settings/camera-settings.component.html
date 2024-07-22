@@ -19,6 +19,7 @@
           ? 'solid-primary'
           : 'outlined-primary'
       "
+      full-width
       >{{ 'Orbit' | translate }}</k-button
     >
     <k-button
@@ -28,32 +29,16 @@
           ? 'solid-primary'
           : 'outlined-primary'
       "
+      full-width
       >{{ 'Free' | translate }}</k-button
     >
   </k-button-row>
-  <!--<div class="button-pair" [class.disabled]="annotationService.isAnnotationMode$ | async">
-    <button
-      mat-flat-button
-      (click)="babylon.cameraManager.setCameraType('ArcRotateCamera')"
-      [class.active]="(babylon.cameraManager.cameraType$ | async) === 'ArcRotateCamera'"
-      matTooltip="{{ 'Orbit around an anchor point on the object' | translate }}"
-    >
-      {{ 'Orbit' | translate }}
-    </button>
-    <button
-      mat-flat-button
-      (click)="babylon.cameraManager.setCameraType('UniversalCamera')"
-      [class.active]="(babylon.cameraManager.cameraType$ | async) === 'UniversalCamera'"
-      matTooltip="{{ 'Move freely with the arrow keys' | translate }}"
-    >
-      {{ 'Free' | translate }}
-    </button>
-  </div>-->
   }
 
   <h3>{{ 'Speed' | translate }} ({{ cameraSpeed() }}x)</h3>
 
   <k-slider
+    [label]="('Speed' | translate) + ' (' + cameraSpeed() + 'x)'"
     [min]="25"
     [max]="200"
     [showInfo]="false"

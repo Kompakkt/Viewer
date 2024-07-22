@@ -6,6 +6,7 @@ import {
   Scene,
   StandardMaterial,
   Tags,
+  TransformNode,
   Vector3,
 } from '@babylonjs/core';
 
@@ -31,65 +32,84 @@ export const createBoundingBox = (
   boundingBox.position = centerPoint;
   boundingBox.visibility = 0;
   boundingBox.parent = center;
+  boundingBox.isPickable = false;
   return boundingBox;
 };
 
-// Ground
-
 export const createGround = (scene: Scene, size: number) => {
+  const existingGround = scene.getMeshByName('ground');
+  if (existingGround) return existingGround as Mesh;
+
   const ground = MeshBuilder.CreateGround(
     'ground',
-    { height: size, width: size, subdivisions: 20 },
+    { height: size, width: size, subdivisions: 20, updatable: true },
     scene,
   );
   Tags.AddTagsTo(ground, 'ground');
-  ground.visibility = 0;
+  ground.setEnabled(false);
+  ground.isPickable = false;
   return ground;
 };
 
-// Axis (world and local)
+const createAxis = (
+  scene: Scene,
+  name: string,
+  color: Color3,
+  size: number,
+  direction: Vector3,
+  parent: TransformNode
+) => {
+  const points = [
+    Vector3.Zero(),
+    direction.scale(size),
+    direction.scale(size * 0.95).add(new Vector3(size * 0.05, size * 0.05, size * 0.05).subtract(direction.scale(size * 0.05))),
+    direction.scale(size),
+    direction.scale(size * 0.95).add(new Vector3(size * -0.05, size * -0.05, size * -0.05).subtract(direction.scale(size * 0.05)))
+  ];
+  
+  const axis = MeshBuilder.CreateLines(name, { points, updatable: true }, scene);
+  axis.color = color;
+  axis.parent = parent;
+  axis.isPickable = false;
+  axis.renderingGroupId = 2;
+  return axis;
+};
+
+const createAxisLabel = (
+  scene: Scene,
+  text: string,
+  color: Color3,
+  size: number,
+  direction: Vector3,
+  parent: TransformNode
+) => {
+  const label = createTextPlane(text, color.toHexString(), size / 10, 'axis', `axis${text}`, scene);
+  label.position = direction.scale(size * 1.1);
+  label.billboardMode = Mesh.BILLBOARDMODE_ALL;
+  label.parent = parent;
+  label.isPickable = false;
+  label.renderingGroupId = 2;
+  return label;
+};
+
 export const createWorldAxis = (scene: Scene, size: number) => {
-  const sizeWorldAxis = size;
+  if (scene.getTransformNodeByName('worldAxisRoot')) return;
 
-  const vecOneX = new Vector3(sizeWorldAxis, 0, 0);
-  const vecTwoX = new Vector3(sizeWorldAxis * 0.95, sizeWorldAxis * 0.05, 0);
-  const vecThreeX = new Vector3(sizeWorldAxis, 0, 0);
-  const vecFourX = new Vector3(sizeWorldAxis * 0.95, sizeWorldAxis * -0.05, 0);
-  const pointsX = [Vector3.Zero(), vecOneX, vecTwoX, vecThreeX, vecFourX];
-  // TODO: Replace CreateLines with MeshBuilder
-  const axisX = MeshBuilder.CreateLines('axisX', { points: pointsX, updatable: true }, scene);
-  Tags.AddTagsTo(axisX, 'worldAxis');
-  axisX.color = new Color3(1, 0, 0);
-  axisX.visibility = 0;
-  const xChar = createTextPlane('X', 'red', sizeWorldAxis / 10, 'worldAxis', 'worldAxisX', scene);
-  xChar.position = new Vector3(sizeWorldAxis * 0.9, sizeWorldAxis * -0.05, 0);
-  xChar.visibility = 0;
+  const worldAxisRoot = new TransformNode('worldAxisRoot', scene);
 
-  const vecOneY = new Vector3(0, sizeWorldAxis, 0);
-  const vecTwoY = new Vector3(sizeWorldAxis * -0.05, sizeWorldAxis * 0.95, 0);
-  const vecThreeY = new Vector3(0, sizeWorldAxis, 0);
-  const vecFourY = new Vector3(sizeWorldAxis * 0.05, sizeWorldAxis * 0.95, 0);
-  const pointsY = [Vector3.Zero(), vecOneY, vecTwoY, vecThreeY, vecFourY];
-  const axisY = MeshBuilder.CreateLines('axisY', { points: pointsY, updatable: true }, scene);
-  Tags.AddTagsTo(axisY, 'worldAxis');
-  axisY.color = new Color3(0, 1, 0);
-  axisY.visibility = 0;
-  const yChar = createTextPlane('Y', 'green', sizeWorldAxis / 10, 'worldAxis', 'worldAxisY', scene);
-  yChar.position = new Vector3(0, sizeWorldAxis * 0.9, sizeWorldAxis * -0.05);
-  yChar.visibility = 0;
+  const axes = [
+    { name: 'X', color: new Color3(1, 0, 0), direction: new Vector3(1, 0, 0) },
+    { name: 'Y', color: new Color3(0, 1, 0), direction: new Vector3(0, 1, 0) },
+    { name: 'Z', color: new Color3(0, 0, 1), direction: new Vector3(0, 0, 1) }
+  ];
 
-  const vecOneZ = new Vector3(0, 0, sizeWorldAxis);
-  const vecTwoZ = new Vector3(0, sizeWorldAxis * -0.05, sizeWorldAxis * 0.95);
-  const vecThreeZ = new Vector3(0, 0, sizeWorldAxis);
-  const vecFourZ = new Vector3(0, sizeWorldAxis * 0.05, sizeWorldAxis * 0.95);
-  const pointsZ = [Vector3.Zero(), vecOneZ, vecTwoZ, vecThreeZ, vecFourZ];
-  const axisZ = MeshBuilder.CreateLines('axisZ', { points: pointsZ, updatable: true }, scene);
-  Tags.AddTagsTo(axisZ, 'worldAxis');
-  axisZ.color = new Color3(0, 0, 1);
-  axisZ.visibility = 0;
-  const zChar = createTextPlane('Z', 'blue', sizeWorldAxis / 10, 'worldAxis', 'worldAxisZ', scene);
-  zChar.position = new Vector3(0, sizeWorldAxis * 0.05, sizeWorldAxis * 0.9);
-  zChar.visibility = 0;
+  axes.forEach(({ name, color, direction }) => {
+    createAxis(scene, `axis${name}`, color, size, direction, worldAxisRoot);
+    createAxisLabel(scene, name, color, size, direction, worldAxisRoot);
+  });
+
+  Tags.AddTagsTo(worldAxisRoot, 'worldAxis');
+  worldAxisRoot.setEnabled(false);
 };
 
 export const createTextPlane = (
@@ -104,7 +124,7 @@ export const createTextPlane = (
   dynamicTexture.hasAlpha = true;
   dynamicTexture.drawText(text, 5, 40, 'bold 36px Arial', color, 'transparent', true);
 
-  const plane = Mesh.CreatePlane(tag, size, scene, true);
+  const plane = MeshBuilder.CreatePlane(tag, { size, updatable: true }, scene);
   Tags.AddTagsTo(plane, tag);
   Tags.AddTagsTo(plane, tagIndividual);
 
@@ -118,75 +138,23 @@ export const createTextPlane = (
 };
 
 export const createlocalAxes = (scene: Scene, size: number, center: Mesh, pivot: Vector3) => {
-  const sizeLocalAxis = size;
+  if (scene.getTransformNodeByName('localAxisRoot')) return;
 
-  const vecOneX = new Vector3(sizeLocalAxis, 0, 0);
-  const vecTwoX = new Vector3(sizeLocalAxis * 0.95, 0.05 * sizeLocalAxis, 0);
-  const vecThreeX = new Vector3(sizeLocalAxis, 0, 0);
-  const vecFourX = new Vector3(sizeLocalAxis * 0.95, -0.05 * sizeLocalAxis, 0);
-  const local_axisX = Mesh.CreateLines(
-    'local_axisX',
-    [Vector3.Zero(), vecOneX, vecTwoX, vecThreeX, vecFourX],
-    scene,
-    true,
-  );
-  Tags.AddTagsTo(local_axisX, 'localAxis');
-  local_axisX.color = new Color3(1, 0, 0);
-  local_axisX.visibility = 0;
-  local_axisX.position = pivot;
-  local_axisX.renderingGroupId = 2;
-  const xChar = createTextPlane('X', 'red', sizeLocalAxis / 10, 'localAxis', 'localAxisX', scene);
-  xChar.position = new Vector3(0.9 * sizeLocalAxis, -0.05 * sizeLocalAxis, 0);
-  xChar.visibility = 0;
-  xChar.renderingGroupId = 2;
+  const localAxisRoot = new TransformNode('localAxisRoot', scene);
+  localAxisRoot.position = pivot;
 
-  const vecOneY = new Vector3(0, sizeLocalAxis, 0);
-  const vecTwoY = new Vector3(-0.05 * sizeLocalAxis, sizeLocalAxis * 0.95, 0);
-  const vecThreeY = new Vector3(0, sizeLocalAxis, 0);
-  const vecFourY = new Vector3(0.05 * sizeLocalAxis, sizeLocalAxis * 0.95, 0);
-  const local_axisY = Mesh.CreateLines(
-    'local_axisY',
-    [Vector3.Zero(), vecOneY, vecTwoY, vecThreeY, vecFourY],
-    scene,
-    true,
-  );
-  Tags.AddTagsTo(local_axisY, 'localAxis');
-  local_axisY.color = new Color3(0, 1, 0);
-  local_axisY.visibility = 0;
-  local_axisY.position = pivot;
-  local_axisY.renderingGroupId = 2;
-  const yChar = createTextPlane('Y', 'green', sizeLocalAxis / 10, 'localAxis', 'localAxisY', scene);
-  yChar.position = new Vector3(0, 0.9 * sizeLocalAxis, -0.05 * sizeLocalAxis);
-  yChar.visibility = 0;
-  yChar.renderingGroupId = 2;
+  const axes = [
+    { name: 'X', color: new Color3(1, 0, 0), direction: new Vector3(1, 0, 0) },
+    { name: 'Y', color: new Color3(0, 1, 0), direction: new Vector3(0, 1, 0) },
+    { name: 'Z', color: new Color3(0, 0, 1), direction: new Vector3(0, 0, 1) }
+  ];
 
-  const vecOneZ = new Vector3(0, 0, sizeLocalAxis);
-  const vecTwoZ = new Vector3(0, -0.05 * sizeLocalAxis, sizeLocalAxis * 0.95);
-  const vecThreeZ = new Vector3(0, 0, sizeLocalAxis);
-  const vecFourZ = new Vector3(0, 0.05 * sizeLocalAxis, sizeLocalAxis * 0.95);
-  const local_axisZ = Mesh.CreateLines(
-    'local_axisZ',
-    [Vector3.Zero(), vecOneZ, vecTwoZ, vecThreeZ, vecFourZ],
-    scene,
-    true,
-  );
-  Tags.AddTagsTo(local_axisZ, 'localAxis');
-  local_axisZ.color = new Color3(0, 0, 1);
-  local_axisZ.visibility = 0;
-  local_axisZ.position = pivot;
-  local_axisZ.renderingGroupId = 2;
-  const zChar = createTextPlane('Z', 'blue', sizeLocalAxis / 10, 'localAxis', 'localAxisZ', scene);
-  zChar.position = new Vector3(0, 0.05 * sizeLocalAxis, 0.9 * sizeLocalAxis);
-  zChar.visibility = 0;
-  zChar.renderingGroupId = 2;
+  axes.forEach(({ name, color, direction }) => {
+    createAxis(scene, `local_axis${name}`, color, size, direction, localAxisRoot);
+    createAxisLabel(scene, name, color, size, direction, localAxisRoot);
+  });
 
-  // TODO
-  local_axisX.parent = center;
-  xChar.parent = center;
-  local_axisY.parent = center;
-  yChar.parent = center;
-  local_axisZ.parent = center;
-  zChar.parent = center;
+  localAxisRoot.parent = center;
+  Tags.AddTagsTo(localAxisRoot, 'localAxis');
+  localAxisRoot.setEnabled(false);
 };
-
-// End of Axis

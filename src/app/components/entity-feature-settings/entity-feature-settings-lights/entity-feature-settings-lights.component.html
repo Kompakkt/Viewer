@@ -1,8 +1,7 @@
-<h4>{{ 'Brightness' | translate }}</h4>
-<p>{{ 'Ambient environment lights' | translate }}</p>
-<h5>{{ 'Fabulous' | translate }} ({{ 'down towards the ground' | translate }})</h5>
+<h4>{{ 'Ambient environment lights' | translate }}</h4>
 
 <k-slider
+  [label]="'Ambient Light Up Intensity' | translate"
   [min]="0"
   [max]="50"
   [startingValue]="getLightIntensity('ambientlightUp')"
@@ -11,9 +10,8 @@
   [showTooltip]="false"
 ></k-slider>
 
-<h5>{{ 'Sunny' | translate }} ({{ 'up towards the sky' | translate }})</h5>
-
 <k-slider
+  [label]="'Ambient Light Down Intensity' | translate"
   [min]="0"
   [max]="50"
   [startingValue]="getLightIntensity('ambientlightDown')"
@@ -22,9 +20,10 @@
   [showTooltip]="false"
 ></k-slider>
 
-<p>{{ 'Pointlight' | translate }}</p>
+<h4>{{ 'Pointlight' | translate }}</h4>
 
 <k-slider
+  [label]="'Pointlight Intensity' | translate"
   [min]="0"
   [max]="50"
   [startingValue]="getLightIntensity('pointLight')"
@@ -33,29 +32,31 @@
   [showTooltip]="false"
 ></k-slider>
 
-<h5>{{ 'Pointlight Dimensions:' | translate }} X Y Z</h5>
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px">
+  <k-input
+    [label]="'X Axis' | translate"
+    [min]="0"
+    [max]="5"
+    type="number"
+    [startingValue]="pointLightX"
+    (valueChanged)="setPointlightPosition('x', $event.valueAsNumber)"
+  />
 
-<k-slider
-  [min]="0"
-  [max]="5"
-  [startingValue]="pointLightX"
-  (valueChanged)="setPointlightPosition('x', $event)"
-  [showInfo]="false"
-  [showTooltip]="false"
-></k-slider>
-<k-slider
-  [min]="0"
-  [max]="5"
-  [startingValue]="pointLightY"
-  (valueChanged)="setPointlightPosition('y', $event)"
-  [showInfo]="false"
-  [showTooltip]="false"
-></k-slider>
-<k-slider
-  [min]="0"
-  [max]="5"
-  [startingValue]="pointLightZ"
-  (valueChanged)="setPointlightPosition('z', $event)"
-  [showInfo]="false"
-  [showTooltip]="false"
-></k-slider>
+  <k-input
+    [label]="'Y Axis' | translate"
+    [min]="0"
+    [max]="5"
+    type="number"
+    [startingValue]="pointLightY"
+    (valueChanged)="setPointlightPosition('y', $event.valueAsNumber)"
+  />
+
+  <k-input
+    [label]="'Z Axis' | translate"
+    [min]="0"
+    [max]="5"
+    type="number"
+    [startingValue]="pointLightZ"
+    (valueChanged)="setPointlightPosition('z', $event.valueAsNumber)"
+  />
+</div>

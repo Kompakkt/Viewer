@@ -1,4 +1,21 @@
 :host {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+
+  margin: 8px 0px;
+
+  font-family: 'Open Sans';
+  color: white;
+}
+
+.label {
+  font-style: normal;
+  font-weight: 400;
+}
+
+.slider-container {
   box-sizing: border-box;
   display: flex;
   justify-content: space-between;

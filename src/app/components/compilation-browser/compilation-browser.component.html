@@ -1,37 +1,15 @@
-<div id="compilationBrowser">
-  @if (compilation$ | async; as compilation) {
-  <div>
-    @if (entity$ | async; as entity) {
-    <div id="entity-overview">
-      <mat-card appearance="outlined" class="entity-card">
-        <mat-card-header>
-          <mat-card-title> {{ 'Selected Object:' | translate }} {{ entity.name }} </mat-card-title>
-        </mat-card-header>
-        @if (entity.settings && entity.settings.preview) {
-        <img [src]="server_url + entity.settings.preview" />
-        }
-      </mat-card>
-    </div>
-    } @if (entities$ | async; as entities) {
-    <div class="category">
-      {{ (entities.length > 1 ? 'Objects' : 'Object') | translate }} {{ 'in' | translate }}
-      {{ compilation.name }}:
-    </div>
-    @for (entity of entities; track entity) {
-    <mat-card appearance="outlined" class="entity-card">
-      <mat-card-header>
-        <mat-card-title>
-          {{ entity.name }}
-        </mat-card-title>
-      </mat-card-header>
-      @if (entity.settings && entity.settings.preview) {
-      <img
-        [src]="server_url + entity.settings.preview"
-        (click)="processing.fetchAndLoad(entity._id, undefined)"
-      />
-      }
-    </mat-card>
-    } }
-  </div>
-  }
+@if (compilation$ | async; as compilation) { @if (entities$ | async; as entities) {
+<h2>{{ compilation.name }}</h2>
+@if (entity$ | async; as selectedEntity) { @for (entity of entities; track entity) {
+<div
+  class="entity-card"
+  [class.selected]="entity._id === selectedEntity._id"
+  (click)="processing.fetchAndLoad(entity._id, undefined)"
+>
+  <img
+    [src]="entity.settings.preview | fixImageUrl"
+    [style.--bg]="colorToRGBA(entity.settings.background.color)"
+  />
+  <span>{{ entity.name }}</span>
 </div>
+} } } }

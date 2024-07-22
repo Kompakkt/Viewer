@@ -1,10 +1,8 @@
 import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { AsyncPipe } from '@angular/common';
 import { Component, QueryList, ViewChildren, inject } from '@angular/core';
-import { MatIconButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
-import { MatTooltip } from '@angular/material/tooltip';
 import { saveAs } from 'file-saver';
 import { ButtonComponent, TooltipDirective } from 'projects/komponents/src';
 import { combineLatest, firstValueFrom } from 'rxjs';
@@ -26,8 +24,6 @@ import { AnnotationComponent } from '../annotation/annotation.component';
     CdkDropList,
     AnnotationComponentForEditorComponent,
     CdkDrag,
-    MatIconButton,
-    MatTooltip,
     MatIcon,
     AsyncPipe,
     TranslatePipe,

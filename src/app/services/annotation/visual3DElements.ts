@@ -15,7 +15,7 @@ export const createMarker = (scene: Scene, id: string, position?: Vector3, norma
     // TODO: Discuss if this is needed
     // When uncommented, this breaks the IIIF example
     // If its needed, the distance parameter should be relative to the model size
-    marker.translate(normal, 0.1, Space.LOCAL);
+    marker.translate(normal, 1 / 1_000, Space.LOCAL);
   }
   marker.billboardMode = Mesh.BILLBOARDMODE_ALL;
   marker.material = mat;

@@ -4,7 +4,6 @@ import { firstValueFrom } from 'rxjs';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { AsyncPipe, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatButton, MatIconButton } from '@angular/material/button';
 import {
   MatCard,
   MatCardActions,
@@ -15,14 +14,9 @@ import {
   MatCardSubtitle,
   MatCardTitle,
 } from '@angular/material/card';
-import { MatCheckbox } from '@angular/material/checkbox';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
-import { MatInput } from '@angular/material/input';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
-import { MatTooltip } from '@angular/material/tooltip';
 import { ButtonComponent, ButtonRowComponent, SlideToggleComponent, TooltipDirective } from 'projects/komponents/src';
-import { FallbackImageDirective } from 'src/app/directives/fallback-image.directive';
+import { FixImageUrlPipe } from 'src/app/pipes/fix-image-url.pipe';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-preview.component';
 import { AnnotationComponent } from './annotation.component';
@@ -38,29 +32,21 @@ import { AnnotationComponent } from './annotation.component';
     MatCardHeader,
     MatCardAvatar,
     MatCardTitle,
-    MatFormField,
-    MatInput,
-    MatLabel,
     MatCardSubtitle,
     MatCardImage,
     MatCardContent,
     CdkTextareaAutosize,
-    MatCheckbox,
-    MatIconButton,
-    MatButton,
-    MatTooltip,
     MatIcon,
     MarkdownPreviewComponent,
     MatCardActions,
-    MatSlideToggle,
     AsyncPipe,
     UpperCasePipe,
     TranslatePipe,
-    FallbackImageDirective,
     SlideToggleComponent,
     ButtonComponent,
     ButtonRowComponent,
     TooltipDirective,
+    FixImageUrlPipe,
   ],
 })
 export class AnnotationComponentForEditorComponent extends AnnotationComponent {

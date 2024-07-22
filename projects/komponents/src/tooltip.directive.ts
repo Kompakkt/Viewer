@@ -22,6 +22,7 @@ type State = {
   y2: number;
   text: string;
   position: TooltipPosition;
+  padding: number;
 };
 
 @Component({
@@ -72,28 +73,30 @@ export class TooltipComponent implements AfterViewInit {
   @HostBinding('style.left.px') get left() {
     const state = this.state();
     if (!state) return 0;
+    const { x1, x2, padding, position } = state;
     const tooltipWidth = this.#elRef.nativeElement.offsetWidth;
-    switch (state.position) {
+    switch (position) {
       case 'left':
-        return state.x1 - tooltipWidth;
+        return x1 - tooltipWidth - padding;
       case 'right':
-        return state.x2;
+        return x2 + padding;
       default:
-        return state.x1 + (state.x2 - state.x1) / 2 - tooltipWidth / 2;
+        return x1 + (x2 - x1) / 2 - tooltipWidth / 2;
     }
   }
 
   @HostBinding('style.top.px') get top() {
     const state = this.state();
     if (!state) return 0;
+    const { y1, y2, padding, position } = state;
     const tooltipHeight = this.#elRef.nativeElement.offsetHeight;
-    switch (state.position) {
+    switch (position) {
       case 'above':
-        return state.y1 - tooltipHeight;
+        return y1 - tooltipHeight - padding;
       case 'below':
-        return state.y2;
+        return y2 + padding;
       default:
-        return state.y1 + (state.y2 - state.y1) / 2 - tooltipHeight / 2;
+        return y1 + (y2 - y1) / 2 - tooltipHeight / 2;
     }
   }
 
@@ -111,6 +114,7 @@ export class TooltipComponent implements AfterViewInit {
 export class TooltipDirective {
   tooltip = input.required<string>();
   tooltipPosition = input<TooltipPosition>('above');
+  tooltipPadding = input(12);
 
   // #appRef = inject(ApplicationRef);
   #elRef = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -134,6 +138,7 @@ export class TooltipDirective {
       x2: left + width,
       y1: top,
       y2: top + height,
+      padding: this.tooltipPadding(),
     } satisfies State);
     this.#tooltipComponentRef?.instance.visible.set(true);
   }

@@ -1,12 +1,13 @@
-import { Component } from '@angular/core';
-import { TranslatePipe } from '../../../pipes/translate.pipe';
-import { MatButton } from '@angular/material/button';
+import { Component, inject } from '@angular/core';
 import {
-  MatDialogTitle,
-  MatDialogContent,
   MatDialogActions,
   MatDialogClose,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
 } from '@angular/material/dialog';
+import { ButtonComponent, ButtonRowComponent } from 'projects/komponents/src';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-dialog-meshsettings',
@@ -17,9 +18,16 @@ import {
     MatDialogTitle,
     MatDialogContent,
     MatDialogActions,
-    MatButton,
     MatDialogClose,
     TranslatePipe,
+    ButtonComponent,
+    ButtonRowComponent,
   ],
 })
-export class DialogMeshsettingsComponent {}
+export class DialogMeshsettingsComponent {
+  #ref = inject(MatDialogRef);
+
+  public close(choice: boolean) {
+    this.#ref.close(choice);
+  }
+}

@@ -1,44 +1,37 @@
-<h2 mat-dialog-title>{{ 'Share Annotation to Collection' | translate }}</h2>
-@if (!checkPwdMode) {
-<div>
-  <mat-dialog-content class="mat-typography">
-    <h3>{{ 'Please enter the ID of the target Collection' | translate }}</h3>
-    <mat-form-field>
-      <mat-label>{{ 'Collection identifier' | translate }}</mat-label>
-      <input
-        matInput
-        name="targetCollectionId"
-        type="text"
-        [(ngModel)]="targetCollectionId"
-        cdkFocusInitial
-      />
-    </mat-form-field>
-  </mat-dialog-content>
-  <mat-dialog-actions align="end">
-    <button mat-button (click)="share()">{{ 'Share' | translate }}</button>
-    <button mat-button mat-dialog-close (click)="cancel()">{{ 'Cancel' | translate }}</button>
-  </mat-dialog-actions>
-</div>
-} @if (checkPwdMode) {
-<div>
-  <mat-dialog-content class="mat-typography">
-    <h3>{{ 'This collection is protected by a password.' | translate }}</h3>
-    <p>{{ 'Type in the password to load this collection.' | translate }}</p>
-    <h3>{{ 'Password' | translate }}</h3>
-    <mat-form-field>
-      <mat-label>{{ 'Password' | translate }}</mat-label>
-      <input
-        matInput
-        name="password"
-        #description="ngModel"
-        type="password"
-        [(ngModel)]="passwordCollection"
-      />
-    </mat-form-field>
-  </mat-dialog-content>
-  <mat-dialog-actions align="end">
-    <button mat-button mat-dialog-close (click)="cancel()">{{ 'Cancel' | translate }}</button>
-    <button mat-button cdkFocusInitial (click)="checkPwd()">{{ 'Check' | translate }}</button>
-  </mat-dialog-actions>
-</div>
-}
+<form action="auth-dialog_submit" method="get" accept-charset="utf-8">
+  <h1>{{ 'Share Annotation to Collection' | translate }}</h1>
+
+  <p>
+    {{
+      'To transfer this annotation to a collection, enter the identifier of the target collection.'
+        | translate
+    }}
+  </p>
+
+  <k-input
+    [label]="'Collection identifier' | translate"
+    type="text"
+    (valueChanged)="targetCollectionId = $event.value"
+  />
+
+  <k-button-row align="end">
+    <k-button (click)="share()">{{ 'Share' | translate }}</k-button>
+    <k-button (click)="cancel()">{{ 'Cancel' | translate }}</k-button>
+  </k-button-row>
+
+  @if (checkPwdMode) {
+  <p>{{ 'The target collection is protected by a password.' | translate }}</p>
+  <p>{{ 'Enter the password to continue.' | translate }}</p>
+  }
+
+  <k-input
+    [label]="'Password' | translate"
+    type="password"
+    (valueChanged)="passwordCollection = $event.value"
+  />
+
+  <k-button-row align="end">
+    <k-button (click)="cancel()">{{ 'Cancel' | translate }}</k-button>
+    <k-button (click)="checkPwd()">{{ 'Check' | translate }}</k-button>
+  </k-button-row>
+</form>

@@ -1,9 +1,6 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, OnInit, effect, signal } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatButton } from '@angular/material/button';
-import { MatSlider, MatSliderThumb } from '@angular/material/slider';
-import { MatTooltip } from '@angular/material/tooltip';
 import { ButtonComponent, ButtonRowComponent, SliderComponent } from 'projects/komponents/src';
 import { BehaviorSubject, combineLatestWith, debounceTime, filter, skip } from 'rxjs';
 import { AnnotationService } from 'src/app/services/annotation/annotation.service';
@@ -16,12 +13,8 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
   styleUrls: ['./camera-settings.component.scss'],
   standalone: true,
   imports: [
-    MatButton,
-    MatTooltip,
-    MatSlider,
     FormsModule,
     ReactiveFormsModule,
-    MatSliderThumb,
     AsyncPipe,
     TranslatePipe,
     SliderComponent,

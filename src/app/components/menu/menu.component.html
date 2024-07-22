@@ -1,113 +1,118 @@
 @if (entity$ | async; as entity) {
-<div class="bottom">
-  <div class="anchor">
-    @if (entity.mediaType !== 'audio') {
-    <button
-      mat-icon-button
-      matTooltip="{{ 'Camera settings' | translate }}"
-      matTooltipPosition="above"
-      (click)="cameraSettings.toggle()"
-    >
-      <mat-icon>videocam</mat-icon>
-    </button>
-    }
-    <app-camera-settings #cameraSettings></app-camera-settings>
-  </div>
-  <!--   <ng-container *ngIf="userData">
-    <button
-      mat-icon-button
+  <div class="bottom">
+    <div class="anchor">
+      @if (entity.mediaType !== 'audio') {
+        <k-button
+          icon-button
+          tooltip="{{ 'Camera settings' | translate }}"
+          tooltipPosition="above"
+          (click)="cameraSettings.toggle()"
+        >
+          <mat-icon>videocam</mat-icon>
+        </k-button>
+      }
+      <app-camera-settings #cameraSettings></app-camera-settings>
+    </div>
+    <!--   <ng-container *ngIf="userData">
+    <k-button
+      icon-button
       *ngIf="loginRequired && !isAuthenticated"
       (click)="userdata.openLoginDialog()"
-      matTooltip="Login required"
-      matTooltipPosition="above"
+      tooltip="Login required"
+      tooltipPosition="above"
       [ngClass]="'alert'"
       >
       <mat-icon>sentiment_very_dissatisfied</mat-icon>
-    </button>
+    </k-button>
   </ng-container>
-  <button
-    mat-icon-button
+  <k-button
+    icon-button
     *ngIf="loginRequired && isAuthenticated"
     (click)="openLoginExplanation()"
-    matTooltip="Authenticated"
-    matTooltipPosition="above"
+    tooltip="Authenticated"
+    tooltipPosition="above"
     >
     <mat-icon>sentiment_very_satisfied</mat-icon>
-  </button> -->
-  @if (qualities$ | async; as qualities) { @if (qualities.high && qualities.medium) {
-  <button
-    mat-icon-button
-    [matMenuTriggerFor]="quality"
-    matTooltip="{{ 'Quality' | translate }}"
-    matTooltipPosition="above"
-  >
-    <mat-icon>high_quality</mat-icon>
-  </button>
-  }
-  <!-- Quality Submenu -->
-  <mat-menu #quality="matMenu">
-    @if (processing.quality$ | async; as currentQuality) { @if (qualities.high) {
-    <button
-      mat-menu-item
-      (click)="updateEntityQuality('high')"
-      [class.is-active]="currentQuality === 'high'"
-    >
-      {{ 'High' | translate }}
-    </button>
-    } @if (qualities.medium) {
-    <button
-      mat-menu-item
-      (click)="updateEntityQuality('medium')"
-      [class.is-active]="currentQuality === 'medium'"
-    >
-      {{ 'Medium' | translate }}
-    </button>
-    } @if (qualities.low) {
-    <button
-      mat-menu-item
-      (click)="updateEntityQuality('low')"
-      [class.is-active]="currentQuality === 'low'"
-    >
-      {{ 'Low' | translate }}
-    </button>
-    } }
-  </mat-menu>
-  <!-- / Quality Submenu -->
-  }
-  <button
-    mat-icon-button
-    (click)="babylon.createScreenshot()"
-    matTooltip="{{ 'Screenshot' | translate }}"
-    matTooltipPosition="above"
-  >
-    <mat-icon>camera</mat-icon>
-  </button>
-  <button
-    mat-icon-button
-    matTooltip="{{ 'Select your language' | translate }}"
-    matTooltipPosition="above"
-    [matMenuTriggerFor]="languageMenu"
-  >
-    <mat-icon>translate</mat-icon>
-  </button>
-  <mat-menu #languageMenu="matMenu">
-    @for (language of languages | keyvalue; track language) {
-    <button mat-menu-item (click)="translateService.requestLanguage(language.key)">
-      {{ language.value }}
-    </button>
+  </k-button> -->
+    @if (qualities$ | async; as qualities) {
+      @if (qualities.high && qualities.medium) {
+        <k-button
+          icon-button
+          [matMenuTriggerFor]="quality"
+          tooltip="{{ 'Quality' | translate }}"
+          tooltipPosition="above"
+        >
+          <mat-icon>high_quality</mat-icon>
+        </k-button>
+      }
+      <!-- Quality Submenu -->
+      <mat-menu #quality="matMenu">
+        @if (processing.quality$ | async; as currentQuality) {
+          @if (qualities.high) {
+            <button
+              mat-menu-item
+              (click)="updateEntityQuality('high')"
+              [class.is-active]="currentQuality === 'high'"
+            >
+              {{ 'High' | translate }}
+            </button>
+          }
+          @if (qualities.medium) {
+            <button
+              mat-menu-item
+              (click)="updateEntityQuality('medium')"
+              [class.is-active]="currentQuality === 'medium'"
+            >
+              {{ 'Medium' | translate }}
+            </button>
+          }
+          @if (qualities.low) {
+            <button
+              mat-menu-item
+              (click)="updateEntityQuality('low')"
+              [class.is-active]="currentQuality === 'low'"
+            >
+              {{ 'Low' | translate }}
+            </button>
+          }
+        }
+      </mat-menu>
+      <!-- / Quality Submenu -->
     }
-  </mat-menu>
-  @if (fullscreenCapable) {
-  <button
-    mat-icon-button
-    (click)="toggleFullscreen()"
-    matTooltip="{{ (fullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen') | translate }}"
-    matTooltipPosition="above"
-  >
-    <mat-icon [attr.aria-label]="'Exit fullscreen mode' | translate">{{
-      fullscreen ? 'fullscreen_exit' : 'fullscreen'
-    }}</mat-icon>
-  </button>
-  }
-</div>
+    <k-button
+      icon-button
+      (click)="babylon.createScreenshot()"
+      tooltip="{{ 'Screenshot' | translate }}"
+      tooltipPosition="above"
+    >
+      <mat-icon>camera</mat-icon>
+    </k-button>
+    <k-button
+      icon-button
+      tooltip="{{ 'Select your language' | translate }}"
+      tooltipPosition="above"
+      [matMenuTriggerFor]="languageMenu"
+    >
+      <mat-icon>translate</mat-icon>
+    </k-button>
+    <mat-menu #languageMenu="matMenu">
+      @for (language of languages | keyvalue; track language) {
+        <button mat-menu-item (click)="translateService.requestLanguage(language.key)">
+          {{ language.value }}
+        </button>
+      }
+    </mat-menu>
+    @if (fullscreenCapable) {
+      <k-button
+        icon-button
+        (click)="toggleFullscreen()"
+        tooltip="{{ (fullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen') | translate }}"
+        tooltipPosition="above"
+      >
+        <mat-icon [attr.aria-label]="'Exit fullscreen mode' | translate">{{
+          fullscreen ? 'fullscreen_exit' : 'fullscreen'
+        }}</mat-icon>
+      </k-button>
+    }
+  </div>
 }

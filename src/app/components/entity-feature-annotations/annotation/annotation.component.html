@@ -1,133 +1,37 @@
-@if (annotation$ | async; as annotation) { @if (isSelectedAnnotation$ | async) { @if (isEditMode$
-|async) {
-<h2>Edit Annotation</h2>
-
-<k-input [label]="'Title' | translate" type="text" />
-
-<div style="display: flex; flex-direction: column; align-items: stretch; gap: 8px">
-  <span
-    style="font-size: 16px; font-style: normal; font-weight: 400; line-height: 16px; color: inherit"
-    >Description</span
-  >
-  <quill-editor />
-</div>
-
-<k-button-row justify="end" gap="4">
-  <k-button type="outlined-primary" tooltip="Edit annotation">Cancel</k-button>
-  <k-button type="solid-primary" tooltip="Toggle fullscreen">Save</k-button>
-</k-button-row>
-} @else {
+@if (annotation$ | async; as annotation) { @if (isSelectedAnnotation$ | async) {
 <div class="header">
   <h2>{{ annotation.body.content.title }}</h2>
-  <k-button icon-button color="transparent"><mat-icon>close</mat-icon></k-button>
+  <k-button icon-button color="transparent" (click)="closeAnnotation()"
+    ><mat-icon>close</mat-icon></k-button
+  >
 </div>
 
 <app-markdown-preview [data]="annotation.body.content.description" />
 
 <k-button-row justify="end" gap="4">
-  <k-button icon-button color="transparent" tooltip="Edit annotation" (click)="enableEditMode()"
+  @if ((isAnnotationOwner$ | async)) {
+  <k-button
+    icon-button
+    color="transparent"
+    [tooltip]="'Delete annotation' | translate"
+    (click)="deleteAnnotation()"
+    ><mat-icon>delete</mat-icon></k-button
+  >
+  @if ((isAnnotatingAllowed$ | async)) {
+  <k-button
+    icon-button
+    color="transparent"
+    [tooltip]="'Edit annotation' | translate"
+    (click)="toggleFullscreen('edit')"
     ><mat-icon>edit</mat-icon></k-button
   >
-  <k-button icon-button color="transparent" tooltip="Toggle fullscreen" (click)="toggleFullscreen()"
+  } }
+  <k-button
+    icon-button
+    color="transparent"
+    tooltip="Toggle fullscreen"
+    (click)="toggleFullscreen('preview')"
     ><mat-icon>select_all</mat-icon></k-button
   >
 </k-button-row>
-} }}
-
-<!--
-@if (annotation$ | async; as annotation) { @if (isSelectedAnnotation$ | async) {
-<mat-card
-  appearance="outlined"
-  class="single-annotation-card resizable"
-  [class.editmode]="isEditMode$ | async"
-  [style.top.px]="positionTop"
-  [style.left.px]="positionLeft"
-  [style.background-color]="'$cardbgr'"
-  [id]="annotation._id"
->
-  <form class="annotation-form" #annotationForm>
-    <mat-card-header>
-      <mat-card-title>
-        @if (isEditMode$ | async) {
-        <mat-form-field>
-          <mat-label>{{ 'Title' | translate }}</mat-label>
-          <input
-            matInput
-            name="title"
-            #title="ngModel"
-            type="text"
-            [(ngModel)]="annotation.body.content.title"
-          />
-        </mat-form-field>
-        } @else {
-        <span class="bigger-font">{{ annotation.body.content.title }}</span>
-        }
-      </mat-card-title>
-      <button id="closeButton" mat-icon-button (click)="closeAnnotation()" type="button">
-        <mat-icon [attr.aria-label]="'Close' | translate">cancel</mat-icon>
-      </button>
-    </mat-card-header>
-    <mat-card-content>
-      @if (isEditMode$ | async) {
-      <div>
-        <mat-form-field>
-          <mat-label>{{ 'Description' | translate }}</mat-label>
-          <textarea
-            #annotationContent
-            matInput
-            cdkTextareaAutosize
-            cdkAutosizeMinRows="1"
-            name="description"
-            type="text"
-            [(ngModel)]="annotation.body.content.description"
-          ></textarea>
-        </mat-form-field>
-      </div>
-      } @else {
-      <app-markdown-preview
-        id="annotation-content"
-        [data]="annotation.body.content.description"
-      ></app-markdown-preview>
-      }
-    </mat-card-content>
-    @if ((isAnnotatingAllowed$ | async) && (isAnnotationOwner$ | async)) {
-    <mat-card-actions style="color: white">
-      <button
-        mat-icon-button
-        (click)="editFullscreen()"
-        matTooltip="{{ 'Edit in Fullscreen Mode' | translate }}"
-        matTooltipPosition="above"
-        type="button"
-      >
-        <mat-icon [attr.aria-label]="'Fullscreen' | translate">select_all</mat-icon>
-      </button>
-      <button
-        mat-icon-button
-        (click)="toggleEditViewMode()"
-        [matTooltip]="((isEditMode$ | async) ? 'Save Annotation' : 'Edit Annotation') | translate"
-        matTooltipPosition="above"
-        type="button"
-      >
-        <mat-icon
-          [attr.aria-label]="
-            ((isEditMode$ | async) ? 'Save Annotation' : 'Edit Annotation') | translate
-          "
-        >
-          {{ (isEditMode$ | async) ? 'save' : 'edit' }}
-        </mat-icon>
-      </button>
-      <button
-        mat-icon-button
-        (click)="deleteAnnotation()"
-        matTooltip="{{ 'Delete' | translate }}"
-        matTooltipPosition="above"
-        type="button"
-      >
-        <mat-icon [attr.aria-label]="'Delete' | translate">delete</mat-icon>
-      </button>
-    </mat-card-actions>
-    }
-  </form>
-</mat-card>
 } }
--->

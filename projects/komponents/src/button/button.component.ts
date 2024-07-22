@@ -37,6 +37,7 @@ export class ButtonComponent {
   type = input<ButtonType>('solid-transparent');
   disabled = input(false);
   iconButton = input<string | undefined>(undefined, { alias: 'icon-button' });
+  iconSize = input<number | undefined>(undefined, { alias: 'icon-size' });
   fullWidth = input<string | undefined>(undefined, { alias: 'full-width' });
 
   #splitType = computed(() => {
@@ -52,6 +53,11 @@ export class ButtonComponent {
   @HostBinding('class.icon-button')
   get isIconButton() {
     return this.iconButton() !== undefined;
+  }
+
+  @HostBinding('style.--icon-size.px')
+  get hostIconSize() {
+    return this.iconSize() !== undefined ? this.iconSize() : undefined;
   }
 
   @HostBinding('class.full-width')

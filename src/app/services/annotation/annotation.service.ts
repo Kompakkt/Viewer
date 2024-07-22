@@ -4,12 +4,15 @@ import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ActionManager, ExecuteCodeAction, PickingInfo, Tags, Vector3 } from '@babylonjs/core';
 import { BehaviorSubject, ReplaySubject, combineLatest, firstValueFrom, fromEvent } from 'rxjs';
-import { distinct, map } from 'rxjs/operators';
+import { distinct, filter, map, switchMap } from 'rxjs/operators';
 import { IAnnotation, IVector3, isAnnotation } from 'src/common';
 import { annotationFallback, annotationLogo } from '../../../assets/annotations/annotations';
 // tslint:disable-next-line:max-line-length
-import { DialogGetUserDataComponent } from '../../components/dialogs/dialog-get-user-data/dialog-get-user-data.component';
-// tslint:disable-next-line:max-line-length
+import {
+  AuthConcern,
+  AuthResult,
+  LoginComponent,
+} from 'src/app/components/dialogs/dialog-login/login.component';
 import { DialogShareAnnotationComponent } from '../../components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
 import { BabylonService } from '../babylon/babylon.service';
 import { BackendService } from '../backend/backend.service';
@@ -53,7 +56,9 @@ export class AnnotationService {
   private defaultOffset = 0;
 
   public picked$ = new ReplaySubject<PickingInfo>();
-  public debouncedPicked$ = this.picked$.pipe(
+  public debouncedPicked$ = this.isAnnotationMode$.pipe(
+    filter(isAnnotationMode => isAnnotationMode),
+    switchMap(() => this.picked$),
     distinct(({ pickedPoint }) => JSON.stringify(pickedPoint)),
   );
 
@@ -339,16 +344,11 @@ export class AnnotationService {
   private async setAnnotationMode(value: boolean) {
     const mediaType = await firstValueFrom(this.processing.mediaType$);
     if (mediaType === 'video' || mediaType === 'audio') return;
-    const meshes = await firstValueFrom(this.processing.meshes$);
     this.isAnnotationMode$.next(value);
     if (value) {
       this.babylon.getCanvas().classList.add('annotation-mode');
     } else {
       this.babylon.getCanvas().classList.remove('annotation-mode');
-    }
-    for (const mesh of meshes) {
-      if (mesh.name === '__root__') continue; // Skip GlTF root node
-      mesh.isPickable = value;
     }
   }
 
@@ -532,21 +532,35 @@ export class AnnotationService {
       });
   }
 
-  public passwordDialog(annotationId: string) {
-    const dialogConfig = new MatDialogConfig();
-    dialogConfig.disableClose = true;
-    dialogConfig.autoFocus = true;
-    dialogConfig.data = {
-      id: annotationId,
-    };
-    const dialogRef = this.dialog.open(DialogGetUserDataComponent, dialogConfig);
-    dialogRef.afterClosed().subscribe(data => {
-      if (data === true) {
-        this.message.info('Deleted from Server');
-      } else {
-        this.message.info('Not deleted from Server');
-      }
+  public async passwordDialog(annotationId: string) {
+    const dialogRef = this.dialog.open<LoginComponent, AuthConcern, AuthResult>(LoginComponent, {
+      width: '360px',
+      disableClose: true,
+      autoFocus: true,
+      data: 'delete-annotation',
     });
+
+    const authResult = await firstValueFrom(dialogRef.afterClosed());
+
+    if (!authResult) {
+      this.message.info('Annotation was not deleted.');
+      return;
+    }
+
+    const deleteResult = await this.backend
+      .deleteRequest(annotationId, 'annotation', authResult.username, authResult.password)
+      .catch(err => {
+        this.message.error('Error deleting annotation.');
+        console.error(err);
+        return undefined;
+      });
+    console.info(deleteResult);
+
+    if (!!deleteResult) {
+      this.message.info('Annotation was deleted.');
+    } else {
+      this.message.error('Error deleting annotation.');
+    }
   }
 
   private async changedRankingPositions() {

@@ -1,6 +1,6 @@
-import { Component, OnDestroy, OnInit, effect, input, output, signal } from '@angular/core';
+import { Component, input, OnDestroy, OnInit, output, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Subscription, skip } from 'rxjs';
+import { skip, Subscription } from 'rxjs';
 
 export type InputType = 'text' | 'number' | 'username' | 'password' | 'email' | 'tel' | 'url';
 
@@ -20,21 +20,20 @@ export class InputComponent implements OnInit, OnDestroy {
   placeholder = input('');
 
   startingValue = input<string | number>();
+  #startingValue$ = toObservable(this.startingValue);
   value = signal('');
-  value$ = toObservable(this.value).pipe(skip(2));
+  #value$ = toObservable(this.value).pipe(skip(1));
   valueChanged = output<{ value: string; valueAsNumber: number }>();
 
   prefix = input('');
   suffix = input('');
 
-  startingValueChangedEffect = effect(() => this.#updateValue(this.startingValue() ?? ''), {
-    allowSignalWrites: true,
-  });
-
   #updateValue(value: string | number) {
     if (this.type() === 'number') {
       const cleanedValue = value.toString().replace(/[^0-9.]/g, '');
-      this.value.set(cleanedValue);
+      const valueAsNumber = Number(cleanedValue);
+      const clampedNumber = Math.min(Math.max(this.min(), valueAsNumber));
+      this.value.set(clampedNumber.toString());
     } else {
       this.value.set(value.toString());
     }
@@ -42,11 +41,21 @@ export class InputComponent implements OnInit, OnDestroy {
 
   valueSubscription?: Subscription;
   ngOnInit(): void {
-    this.valueSubscription = this.value$.subscribe(value => {
+    this.valueSubscription = this.#value$.subscribe(value => {
       this.valueChanged.emit({
         value,
         valueAsNumber: Number(value),
       });
+    });
+
+    this.#startingValue$.subscribe(value => {
+      if (value === this.value()) return;
+
+      if (value !== undefined) {
+        this.#updateValue(value);
+      } else {
+        this.#updateValue(this.type() === 'number' ? this.min() : '');
+      }
     });
   }
 

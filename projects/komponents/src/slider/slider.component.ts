@@ -11,7 +11,7 @@ import {
   input,
   output,
   signal,
-  viewChild,
+  viewChild
 } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import {
@@ -33,6 +33,7 @@ import {
   styleUrl: './slider.component.scss',
 })
 export class SliderComponent implements AfterViewInit, OnInit, OnDestroy {
+  label = input.required<string>();
   min = input(0);
   max = input(100);
   startingValue = input(0);

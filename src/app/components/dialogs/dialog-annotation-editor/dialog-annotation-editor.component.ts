@@ -1,4 +1,4 @@
-import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, effect, inject, signal } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
@@ -10,19 +10,22 @@ import {
 
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { FormsModule } from '@angular/forms';
-import { MatButton } from '@angular/material/button';
-import { MatFormField } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
-import { MatInput, MatLabel } from '@angular/material/input';
-import { IEntity } from 'src/common';
+import {
+  ButtonComponent,
+  ButtonRowComponent,
+  InputComponent,
+  TextareaComponent,
+} from 'projects/komponents/src';
+import { IAnnotation, IEntity } from 'src/common';
 import { environment } from 'src/environment';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { MediaBrowserComponent } from '../../entity-feature-annotations/annotation-media-browser/media-browser.component';
 import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-preview.component';
 
 export interface IDialogData {
-  title: string;
-  content: string;
+  annotation: IAnnotation;
+  mode: 'edit' | 'preview';
 }
 
 interface IExternalImage {
@@ -38,35 +41,56 @@ interface IExternalImage {
   standalone: true,
   imports: [
     MatDialogTitle,
-    MatFormField,
-    MatInput,
-    MatLabel,
     FormsModule,
     MatDialogContent,
     MarkdownPreviewComponent,
     MediaBrowserComponent,
     CdkTextareaAutosize,
     MatDialogActions,
-    MatButton,
     MatIcon,
     MatDialogClose,
     TranslatePipe,
+    TextareaComponent,
+    InputComponent,
+    ButtonComponent,
+    ButtonRowComponent,
   ],
 })
-export class DialogAnnotationEditorComponent {
+export class DialogAnnotationEditorComponent implements OnInit {
   @ViewChild('annotationContent')
-  private annotationContent: ElementRef<HTMLTextAreaElement> | undefined;
+  private annotationContent?: TextareaComponent;
 
-  public editMode = false;
-  public labelMode = 'edit';
-  public labelModeText = 'Edit';
+  public modes = {
+    edit: 'Edit',
+    preview: 'Preview',
+  };
+  public currentMode = signal<keyof typeof this.modes>('preview');
+  public data = signal({ title: '', description: '' });
 
   private serverUrl = environment.server_url;
 
-  constructor(
-    public dialogRef: MatDialogRef<DialogAnnotationEditorComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: IDialogData,
-  ) {}
+  public dialogRef = inject(MatDialogRef<DialogAnnotationEditorComponent>);
+  public dialogData = inject<IDialogData>(MAT_DIALOG_DATA);
+
+  constructor() {
+    effect(() => {
+      const mode = this.currentMode();
+      this.dialogRef.disableClose = mode === 'edit';
+    });
+  }
+
+  ngOnInit(): void {
+    this.currentMode.set(this.dialogData.mode);
+    this.data.update(state => ({
+      ...state,
+      title: this.dialogData.annotation.body.content.title,
+      description: this.dialogData.annotation.body.content.description,
+    }));
+  }
+
+  public updateDescription(content: string) {
+    this.data.update(state => ({ ...state, description: content }));
+  }
 
   public addEntitySwitch(entity: IEntity | IExternalImage) {
     switch (entity.mediaType) {
@@ -88,12 +112,14 @@ export class DialogAnnotationEditorComponent {
   }
 
   private getCaretPosition() {
-    if (!this.annotationContent) return { start: 0, value: '' };
-    this.annotationContent.nativeElement.focus();
+    const textarea = this.annotationContent?.textarea();
+
+    if (!textarea) return { start: 0, value: '' };
+    textarea.nativeElement.focus();
 
     return {
-      start: this.annotationContent.nativeElement.selectionStart,
-      value: this.annotationContent.nativeElement.value,
+      start: textarea.nativeElement.selectionStart,
+      value: textarea.nativeElement.value,
     };
   }
 
@@ -106,7 +132,7 @@ export class DialogAnnotationEditorComponent {
   }
 
   private addExternalImage(image: IExternalImage) {
-    this.data.content = this.createMarkdown(`![alt ${image.description}](${image.url})`);
+    this.updateDescription(this.createMarkdown(`![alt ${image.description}](${image.url})`));
   }
 
   private addEntity(entity: IEntity) {
@@ -140,22 +166,26 @@ export class DialogAnnotationEditorComponent {
         </a>`;
     }
 
-    this.data.content = this.createMarkdown(markdown);
+    this.updateDescription(this.createMarkdown(markdown));
+  }
+
+  public onTextAreaChange(value: string) {
+    this.data.update(state => ({ ...state, description: value }));
+  }
+
+  public onTitleChange(value: string) {
+    this.data.update(state => ({ ...state, title: value }));
   }
 
   public toggleEditViewMode() {
-    if (this.editMode) {
-      this.editMode = false;
-      this.labelMode = 'edit';
-      this.labelModeText = 'Edit';
+    if (this.currentMode() === 'edit') {
+      this.currentMode.set('preview');
     } else {
-      this.editMode = true;
-      this.labelMode = 'remove_red_eye';
-      this.labelModeText = 'View';
+      this.currentMode.set('edit');
     }
   }
 
-  cancel(): void {
-    this.dialogRef.close();
+  public close(withData?: boolean) {
+    this.dialogRef.close(withData ? this.data() : undefined);
   }
 }

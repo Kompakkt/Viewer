@@ -12,7 +12,9 @@ import { interval } from 'rxjs';
 export class DetailsComponent implements AfterViewInit {
   title = input.required<string>();
   startCollapsed = input(false);
-  expanded = signal(!this.startCollapsed());
+  expanded = signal(true);
+
+  gap = input(8);
 
   contentDiv = viewChild<ElementRef<HTMLDivElement>>('detailsContent');
   contentHeight = signal('auto');
@@ -36,6 +38,10 @@ export class DetailsComponent implements AfterViewInit {
       });
 
     resize();
+
+    if (this.startCollapsed()) {
+      this.expanded.set(false);
+    }
 
     interval(100).subscribe(() => resize());
   }

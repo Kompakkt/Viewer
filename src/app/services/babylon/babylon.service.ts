@@ -247,13 +247,12 @@ export class BabylonService {
   }
 
   public setBackgroundImage(setBackground: boolean): void {
+    this.background.layer?.dispose();
     if (setBackground) {
       const layer = new Layer('background', this.background.url, this.scene, true);
       layer.alphaBlendingMode = Engine.ALPHA_ADD;
       layer.isBackground = true;
       this.background.layer = layer;
-    } else {
-      this.background.layer?.dispose();
     }
   }
 
