@@ -19,17 +19,19 @@ export class WizardComponent implements AfterViewInit {
     return this.steps().length % index;
   });
   selectedStep = computed(() => {
-    return this.steps().at(this.stepIndex());
+    const index = this.#stepIndex();
+    const length = this.steps().length;
+    return this.steps().at(index % length)!;
   });
 
-  #setSelectedStep(step?: WizardStepComponent) {
-    const selectedStep = step ?? this.selectedStep();
+  #setSelectedStep(nextStep: WizardStepComponent) {
     const steps = this.steps();
-    console.log(steps, selectedStep);
     for (const step of steps) {
-      step.active.set(step.label() === selectedStep?.label());
-      console.log(step.active());
+      step.active.set(false);
     }
+    const nextStepIndex = steps.findIndex(step => step.label() === nextStep.label());
+    nextStep.active.set(true);
+    this.#stepIndex.set(nextStepIndex);
   }
 
   #updateStepCounters() {
@@ -43,29 +45,32 @@ export class WizardComponent implements AfterViewInit {
     const steps = this.steps();
     for (let i = 0; i < steps.length; i++) {
       steps[i].headerClicked.subscribe(() => {
-        console.log('Header clicked', i, steps[i], steps[i].label());
-        this.#setSelectedStep(steps[i]);
+        // console.log('Header clicked', i, steps[i], steps[i].label());
+        if (!this.linear()) {
+          this.#setSelectedStep(steps[i]);
+        }
       });
     }
   }
 
   nextStep() {
-    this.#stepIndex.set(this.#stepIndex() + 1);
-    const step = this.selectedStep();
-    this.#setSelectedStep(step);
+    if (this.#stepIndex() < this.steps().length - 1) {
+      this.#stepIndex.update(step => step + 1);
+      this.#setSelectedStep(this.selectedStep());
+    }
   }
   prevStep() {
-    this.#stepIndex.set(this.#stepIndex() - 1);
-    const step = this.selectedStep();
-    this.#setSelectedStep(step);
+    if (this.#stepIndex() > 0) {
+      this.#stepIndex.update(step => step - 1);
+      this.#setSelectedStep(this.selectedStep());
+    }
   }
 
   ngAfterViewInit(): void {
-    console.log('Wizard', this.steps());
     setTimeout(() => {
-      this.#setSelectedStep();
       this.#updateStepCounters();
       this.#setupListeners();
-    }, 100);
+      this.#setSelectedStep(this.selectedStep());
+    }, 0);
   }
 }

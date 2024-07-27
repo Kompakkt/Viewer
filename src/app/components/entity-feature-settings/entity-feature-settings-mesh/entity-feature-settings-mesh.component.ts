@@ -80,7 +80,6 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
 
   // Scaling
   public async handleChangeDimension(dimension: string, value: number) {
-    console.log('Changing dimension', dimension, value);
     const { localSettings } = await firstValueFrom(this.processing.settings$);
     let factor;
     try {
@@ -148,13 +147,13 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
       console.error('Center missing', this);
       return;
     }
-    this.toggleBoundingBoxEntityVisibility(false);
-    this.toggleBoundingBoxMeshesVisibility(false);
-    this.toggleAxesVisibility('worldAxis', false);
+    this.setBoundingBoxEntityVisibility(false);
+    this.setBoundingBoxMeshesVisibility(false);
+    this.setAxesVisibility('worldAxis', false);
     this.setScalingFactorAxis(1, 'world');
-    this.toggleAxesVisibility('localAxis', false);
+    this.setAxesVisibility('localAxis', false);
     this.setScalingFactorAxis(1, 'local');
-    this.toggleGroundVisibility(false);
+    this.setGroundVisibility(false);
     this.setScalingFactorGround(1);
     this.entitySettings.setGroundMaterial();
     this.resetBackgroundColor();
@@ -203,41 +202,37 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
     this.entitySettings.ground.scaling = new Vector3(factor, factor, factor);
   }
 
-  public toggleBoundingBoxEntityVisibility(value?: boolean) {
+  public setBoundingBoxEntityVisibility(enabled: boolean) {
     if (!this.entitySettings.boundingBox) {
       console.error('BoundingBox missing', this);
       return;
     }
-    this.boundingBoxVisibility = value !== undefined ? value : !this.boundingBoxVisibility;
+    this.boundingBoxVisibility = enabled;
     this.entitySettings.boundingBox.visibility = this.boundingBoxVisibility ? 1 : 0;
   }
 
-  public async toggleBoundingBoxMeshesVisibility(value?: boolean) {
+  public async setBoundingBoxMeshesVisibility(enabled: boolean) {
     const meshes = await firstValueFrom(this.meshes$);
     if (!meshes) {
       console.error('Meshes missing', this);
       return;
     }
-    this.boundingBoxMeshesVisibility =
-      value !== undefined ? value : !this.boundingBoxMeshesVisibility;
+    this.boundingBoxMeshesVisibility = enabled;
     meshes.forEach(mesh => (mesh.showBoundingBox = this.boundingBoxMeshesVisibility));
   }
 
-  public toggleAxesVisibility(axis: string, value?: boolean) {
-    let axisVisibility = false;
+  public setAxesVisibility(axis: string, enabled: boolean) {
     if (axis === 'localAxis') {
-      axisVisibility = value !== undefined ? value : !this.localAxisVisibility;
-      this.localAxisVisibility = axisVisibility;
+      this.localAxisVisibility = enabled;
     }
     if (axis === 'worldAxis') {
-      axisVisibility = value !== undefined ? value : !this.worldAxisVisibility;
-      this.worldAxisVisibility = axisVisibility;
+      this.worldAxisVisibility = enabled;
     }
-    this.visibilityMesh(axis, axisVisibility);
+    this.visibilityMesh(axis, enabled);
   }
 
-  public toggleGroundVisibility(value?: boolean) {
-    this.groundVisibility = value !== undefined ? value : !this.groundVisibility;
+  public setGroundVisibility(enabled: boolean) {
+    this.groundVisibility = enabled;
     this.visibilityMesh('ground', this.groundVisibility);
   }
 
@@ -245,7 +240,6 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
     const scene = this.babylon.getScene();
     const nodes = scene.getTransformNodesByTags(tag);
     const meshes = scene.getMeshesByTags(tag);
-    console.log({ nodes, meshes, tag, visibility });
     for (const el of [...nodes, ...meshes]) {
       el.setEnabled(visibility);
     }

@@ -1,12 +1,15 @@
 :host {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   padding: 32px;
 
   color: white;
   h1 {
     font-size: 20px;
+  }
+
+  h1, p, ul {
     margin: 0;
   }
 }

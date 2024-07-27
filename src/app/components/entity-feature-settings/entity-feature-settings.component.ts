@@ -203,8 +203,11 @@ export class EntityFeatureSettingsComponent {
 
   // ___________ Stepper for initial Setting during upload ___________
   public async showNextAlertFirstStep() {
-    const dialogRef = this.dialog.open(DialogMeshsettingsComponent);
+    const dialogRef = this.dialog.open<DialogMeshsettingsComponent, void, boolean>(
+      DialogMeshsettingsComponent,
+    );
     const result = await firstValueFrom(dialogRef.afterClosed());
+    console.log('Result', result, this.stepper());
     if (!result) return false;
     this.entitySettings.meshSettingsCompleted.emit(true);
     this.stepper()?.nextStep();

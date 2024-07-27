@@ -3,9 +3,9 @@
     {{ showNotification$ | async }}
   </div>
 
-  <h2>{{ 'Camera settings' | translate }}</h2>
+  <h1>{{ 'Camera settings' | translate }}</h1>
 
-  <h3>{{ 'Type' | translate }}</h3>
+  <p>{{ 'Type' | translate }}</p>
   @if (annotationService.isAnnotationMode$ | async) {
   <p>
     {{ 'Switching the camera type is not supported while annotating' | translate }}
@@ -35,8 +35,6 @@
   </k-button-row>
   }
 
-  <h3>{{ 'Speed' | translate }} ({{ cameraSpeed() }}x)</h3>
-
   <k-slider
     [label]="('Speed' | translate) + ' (' + cameraSpeed() + 'x)'"
     [min]="25"
@@ -48,5 +46,5 @@
   />
 
   <hr />
-  <k-button (click)="resetCamera()">{{ 'Reset camera' | translate }}</k-button>
+  <k-button (click)="resetCamera()" type="outlined-secondary">{{ 'Reset camera' | translate }}</k-button>
 </div>

@@ -31,6 +31,6 @@ export class MarkdownPreviewComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.markdown) this.sanitize(changes.markdown.currentValue.trim());
+    if (changes.markdown?.currentValue) this.sanitize(changes.markdown.currentValue.trim());
   }
 }

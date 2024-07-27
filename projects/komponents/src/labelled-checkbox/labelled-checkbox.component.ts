@@ -33,8 +33,4 @@ export class LabelledCheckboxComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.checkedSubscription?.unsubscribe();
   }
-
-  toggle() {
-    this.checked.update(value => !value);
-  }
 }

@@ -89,16 +89,16 @@
         margin: 8px 0px 16px;
       "
     >
+      <k-button type="outlined-secondary" (click)="stepper.prevStep()">{{
+        'Back' | translate
+      }}</k-button>
+
       <img class="previewimage" [src]="settings.localSettings.preview | fixImageUrl" />
-      <p>{{ 'You set all settings and I celebrate it with this preview.' | translate }}</p>
-      <br />
+      <p>{{ 'You set all settings and we celebrate it with this preview.' | translate }}</p>
       <p>
         {{ 'Please save them if you are done. Afterwards you may add annotations.' | translate }}
       </p>
 
-      <k-button type="outlined-accent" (click)="stepper.prevStep()">{{
-        'Back' | translate
-      }}</k-button>
       <k-button type="solid-primary" (click)="saveSettings()">{{ 'Save' | translate }}</k-button>
     </div>
   </k-wizard-step>

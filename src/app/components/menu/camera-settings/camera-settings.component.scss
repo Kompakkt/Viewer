@@ -1,5 +1,6 @@
 :host {
   position: relative;
+  color: white;
 }
 
 div#camera-settings {
@@ -13,6 +14,7 @@ div#camera-settings {
   bottom: 36px;
   right: 8px;
   white-space: nowrap; // Fix width of absolutely positioned element
+  width: 320px;
 
   background: var(--color-bg-transparent);
   color: white;
@@ -23,6 +25,12 @@ div#camera-settings {
   transform: scale(0);
   filter: opacity(0);
   transition: all 250ms cubic-bezier(0.25, 1, 0.5, 1);
+
+  h1 {
+    font-size: 20px;
+    margin: 0;
+  }
+
   &.opened {
     transform: scale(1);
     filter: opacity(1);
