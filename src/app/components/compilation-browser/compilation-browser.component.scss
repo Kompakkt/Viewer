@@ -5,8 +5,8 @@
   align-items: stretch;
 
   h2 {
-    font-size: 16px;
-    font-weight: bold;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-bold);
   }
 
   .entity-card {
@@ -19,7 +19,7 @@
     transition: border 120ms ease-out;
 
     &:hover, &:focus, &:focus-within {
-      border: solid 2px var(--color-grey-4);
+      border: solid 2px var(--color-gray-4);
     }
 
     &.selected {

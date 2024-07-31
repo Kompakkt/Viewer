@@ -12,6 +12,7 @@ import { interval } from 'rxjs';
 export class DetailsComponent implements AfterViewInit {
   title = input.required<string>();
   startCollapsed = input(false);
+  alwaysExpanded = input(false);
   expanded = signal(true);
 
   gap = input(8);
@@ -20,7 +21,9 @@ export class DetailsComponent implements AfterViewInit {
   contentHeight = signal('auto');
 
   toggle() {
-    this.expanded.set(!this.expanded());
+    if (!this.alwaysExpanded()) {
+      this.expanded.set(!this.expanded());
+    }
   }
 
   ngAfterViewInit(): void {
@@ -39,7 +42,9 @@ export class DetailsComponent implements AfterViewInit {
 
     resize();
 
-    if (this.startCollapsed()) {
+    if (this.alwaysExpanded()) {
+      this.expanded.set(true);
+    } else if (this.startCollapsed()) {
       this.expanded.set(false);
     }
 

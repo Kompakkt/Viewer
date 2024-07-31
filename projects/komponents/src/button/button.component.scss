@@ -12,7 +12,7 @@ $transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out,
   border-radius: 4px;
   padding: 8px 16px;
   // padding: 12px 16px;
-  font-size: 16px;
+  font-size: var(--font-size-base);
   box-sizing: border-box;
   cursor: pointer;
   user-select: none;

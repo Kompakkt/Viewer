@@ -32,13 +32,13 @@
   }
 
   <k-button-row>
-    <k-button
+    <!--<k-button
       (click)="dialogRef.close(false)"
       [disabled]="waitingForResponse"
       type="outlined-secondary"
       full-width
       >{{ 'Cancel' | translate }}</k-button
-    >
+    >-->
     <k-button
       (click)="login()"
       [disabled]="data.username.length === 0 || data.password.length === 0 || waitingForResponse"

@@ -3,7 +3,7 @@
   flex-direction: column;
   align-items: stretch;
 
-  background-color: rgba(255, 255, 255, 0.04);
+  background-color: var(--color-gray-dark);
   box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.2);
   border-radius: 4px;
 
@@ -23,16 +23,6 @@
     &:hover {
       background-color: rgba(255, 255, 255, 0.1);
     }
-
-    svg {
-      transform-origin: center;
-      rotate: 0deg;
-      transition: rotate var(--transition-duration) var(--transition-easing);
-
-      &.opened {
-        rotate: 90deg;
-      }
-    }
   }
 
   .details-content {
@@ -49,7 +39,7 @@
 
     &.opened {
       max-height: var(--inner-height, auto);
-      padding: 12px;
+      padding: 16px;
     }
   }
 }

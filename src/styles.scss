@@ -28,20 +28,25 @@
 
   --sidebar-width: clamp(320px, 27vw, 400px);
 
-  /* Colors */
-  --color-bg-transparent: rgba(0, 0, 0, 0.7);
-  --color-bg-solid: black;
+  /* Sizes */
+  --font-size-base: 16px;
+  --font-size-small: 14px;
+  --font-size-large: 24px;
+  --font-size-xlarge: 32px;
+  --font-weight-normal: 400;
+  --font-weight-bold: 700;
 
-  --color-grey-dark: #212121;
-  --color-grey-font: #555555;
-  --color-gray-font: var(--color-grey-font);
-  --color-grey-12: #d9d9d9;
-  --color-gray-12: var(--color-grey-12);
-  --color-grey-4: #f5f5f5;
-  --color-gray-4: var(--color-grey-4);
+  /* Colors */
+  --color-bg-transparent: #212121f0;
+  --color-bg-solid: #212121;
+
+  --color-gray-dark: #2d2d2d;  
+  --color-gray-font: #555555;
+  --color-gray-12: #d9d9d9;
+  --color-gray-4: #f5f5f5;
 
   --color-primary: #00afe7;
-  --color-secondary: var(--color-grey-12);
+  --color-secondary: var(--color-gray-12);
   --color-accent: #e91e63;
   --color-warn: #f77159;
 }
@@ -59,14 +64,26 @@ h1,h2,h3,h4,h5,h6 {
   text-wrap: balance;
 }
 
+h1 {
+  font-size: var(--font-size-large);
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+}
+
+h2 {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+}
+
 * {
   font-family: var(--font-stack);
 }
 
 small {
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 14px;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--font-size-base);
 }
 
 app-markdown-preview {
@@ -89,7 +106,7 @@ app-markdown-preview {
 
   * {
     font-family: var(--font-stack);
-    font-size: 16px;
+    font-size: var(--font-size-base);
     margin: 0;
     text-wrap: balance;
   }
@@ -101,7 +118,7 @@ a {
 }
 
 hr {
-  border: solid 1px var(--color-grey-12);
+  border: solid 1px var(--color-gray-12);
   border-top: 0px;
 }
 
@@ -144,12 +161,6 @@ hr {
 #editor .mat-mdc-card-avatar {
   height: 25px;
   width: 25px;
-}
-
-.mat-mdc-card-header .mat-mdc-card-title {
-  font-size: 15px;
-  font-weight: normal;
-  word-wrap: break-word;
 }
 
 /* TODO(mdc-migration): The following rule targets internal classes of card that may no longer apply for the MDC version. */

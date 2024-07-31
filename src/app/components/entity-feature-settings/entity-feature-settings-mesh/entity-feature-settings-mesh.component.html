@@ -1,81 +1,79 @@
 @if (processing.settings$ | async; as settings) {
-<k-details [title]="'Information & Helpers' | translate">
-  <k-button (click)="resetVisualUIMeshSettingsHelper()" type="outlined---color-grey-4">
-    {{ 'Reset Helper' | translate }}
+<k-details [title]="'Information and helpers' | translate">
+  <h3 style="margin-top: 0px;">{{ 'Bounding boxes' | translate }}</h3>
+
+  <k-labelled-checkbox
+    [label]="'Show entity bounding boxes' | translate"
+    (checkedChange)="setBoundingBoxEntityVisibility($event)"
+  />
+
+  <k-labelled-checkbox
+    [label]="'Show mesh bounding boxes' | translate"
+    (checkedChange)="setBoundingBoxMeshesVisibility($event)"
+  />
+
+  @if (meshes$ | async; as meshes) {
+  <small>{{ 'Number of meshes:' | translate }} {{ meshes.length }}</small>
+  }
+
+  <h3>{{ 'Background' | translate }}</h3>
+
+  <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
+
+  <h3>{{ 'Axes' | translate }}</h3>
+
+  <k-labelled-checkbox
+    [label]="'Show world axes' | translate"
+    (checkedChange)="setAxesVisibility('worldAxis', $event)"
+  />
+
+  <k-slider
+    [label]="('World axes size:' | translate) + ' ' + (worldAxisScalingFactor)"
+    [min]="1"
+    [max]="3"
+    [startingValue]="worldAxisScalingFactor"
+    (valueChanged)="setScalingFactorAxis($event, 'world')"
+  />
+
+  <k-labelled-checkbox
+    [label]="'Show local axes' | translate"
+    (checkedChange)="setAxesVisibility('localAxis', $event)"
+  />
+
+  <k-slider
+    [label]="('Local axes size:' | translate) + ' ' + (localAxisScalingFactor)"
+    [min]="1"
+    [max]="3"
+    [startingValue]="localAxisScalingFactor"
+    (valueChanged)="setScalingFactorAxis($event, 'local')"
+  />
+
+  <h3>{{ 'Ground' | translate }}</h3>
+
+  <k-labelled-checkbox
+    [label]="'Show ground' | translate"
+    (checkedChange)="setGroundVisibility($event)"
+  />
+
+  <k-slider
+    [label]="('Ground scale:' | translate) + ' ' + (groundScalingFactor)"
+    [min]="1"
+    [max]="10"
+    [startingValue]="groundScalingFactor"
+    (valueChanged)="setScalingFactorGround($event)"
+  />
+
+  <p>{{ 'Ground color' | translate }}</p>
+  <color-chrome (onChange)="entitySettings.setGroundMaterial($event.color.rgb)"></color-chrome>
+
+  <k-button (click)="resetVisualUIMeshSettingsHelper()" type="outlined-primary">
+    {{ 'Reset helpers' | translate }}
   </k-button>
-
-  <k-details [title]="'Bounding Boxes' | translate">
-    <k-labelled-checkbox
-      [label]="'Show entity bounding boxes' | translate"
-      (checkedChange)="setBoundingBoxEntityVisibility($event)"
-    />
-
-    <k-labelled-checkbox
-      [label]="'Show mesh bounding boxes' | translate"
-      (checkedChange)="setBoundingBoxMeshesVisibility($event)"
-    />
-
-    @if (meshes$ | async; as meshes) {
-    <small>{{ 'Number of meshes:' | translate }} {{ meshes.length }}</small>
-    }
-  </k-details>
-
-  <k-details [title]="'Background' | translate">
-    <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
-  </k-details>
-
-  <k-details [title]="'Axis' | translate">
-    <k-labelled-checkbox
-      [label]="'Show World Axis' | translate"
-      (checkedChange)="setAxesVisibility('worldAxis', $event)"
-    />
-
-    <k-slider
-      [label]="'World Axis Size' | translate"
-      [min]="0.1"
-      [max]="3"
-      [startingValue]="worldAxisScalingFactor"
-      (valueChanged)="setScalingFactorAxis($event, 'world')"
-    />
-
-    <k-labelled-checkbox
-      [label]="'Show Local Axis' | translate"
-      (checkedChange)="setAxesVisibility('localAxis', $event)"
-    />
-
-    <k-slider
-      [label]="'Local Axis Size' | translate"
-      [min]="0.1"
-      [max]="3"
-      [startingValue]="localAxisScalingFactor"
-      (valueChanged)="setScalingFactorAxis($event, 'local')"
-    />
-  </k-details>
-
-  <k-details [title]="'Ground' | translate">
-    <k-labelled-checkbox
-      [label]="'Show Ground' | translate"
-      (checkedChange)="setGroundVisibility($event)"
-    />
-
-    <k-slider
-      [label]="'Ground Size' | translate"
-      [min]="0"
-      [max]="10"
-      [startingValue]="groundScalingFactor"
-      (valueChanged)="setScalingFactorGround($event)"
-    />
-
-    <small>{{ 'Ground Color' | translate }}</small>
-    <color-chrome (onChange)="entitySettings.setGroundMaterial($event.color.rgb)"></color-chrome>
-  </k-details>
 </k-details>
 
 <k-details [title]="'Scale' | translate">
-  <k-button (click)="handleChangeDimension('scale', 1)" type="outlined---color-grey-4">
-    {{ 'Reset Size' | translate }}
-  </k-button>
-
+  <!-- NOTE: We decided to comment out the centimeter sliders, as they are not representative of the real world size of any given object - Kai N & Senya B -->
+  <!--
   <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px">
     <k-input
       [label]="'Height:' | translate"
@@ -105,6 +103,7 @@
       suffix="cm"
     />
   </div>
+  -->
 
   <k-slider
     [label]="('Scale factor:' | translate) + ' ' + (settings.localSettings.scale || 1)"
@@ -114,16 +113,16 @@
     [startingValue]="settings.localSettings.scale || 1"
     (valueChanged)="handleChangeDimension('scale', $event)"
   />
+
+  <k-button (click)="handleChangeDimension('scale', 1)" type="outlined-primary">
+    {{ 'Reset size' | translate }}
+  </k-button>
 </k-details>
 
 <k-details [title]="'Rotation' | translate">
-  <k-button (click)="setRotation('xyz_reset', 0)" type="outlined---color-grey-4">
-    {{ 'Reset Rotation' | translate }}
-  </k-button>
-
   <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px">
     <k-input
-      [label]="'X Axis' | translate"
+      [label]="'X-axis' | translate"
       [min]="0"
       [max]="360"
       type="number"
@@ -133,7 +132,7 @@
     />
 
     <k-input
-      [label]="'Y Axis' | translate"
+      [label]="'Y-axis' | translate"
       [min]="0"
       [max]="360"
       type="number"
@@ -143,7 +142,7 @@
     />
 
     <k-input
-      [label]="'Z Axis' | translate"
+      [label]="'Z-axis' | translate"
       [min]="0"
       [max]="360"
       type="number"
@@ -152,6 +151,10 @@
       (valueChanged)="setRotation('z', $event.valueAsNumber)"
     />
   </div>
+
+  <k-button (click)="setRotation('xyz_reset', 0)" type="outlined-primary">
+    {{ 'Reset rotation' | translate }}
+  </k-button>
 </k-details>
 
 }

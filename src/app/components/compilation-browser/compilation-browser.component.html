@@ -1,3 +1,5 @@
+<h1>{{ 'Collection browser' | translate }}</h1>
+
 @if (compilation$ | async; as compilation) { @if (entities$ | async; as entities) {
 <h2>{{ compilation.name }}</h2>
 @if (entity$ | async; as selectedEntity) { @for (entity of entities; track entity) {

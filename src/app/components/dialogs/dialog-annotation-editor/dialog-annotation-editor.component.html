@@ -1,8 +1,8 @@
+<h1>{{ 'Edit annotation' | translate }}</h1>
+
 @if (currentMode(); as mode) { @if (mode == 'edit') {
 <div class="side-by-side">
-  <div class="left">
-    <h2>{{ 'Edit annotation' | translate }}</h2>
-
+  <div class="left card">
     <k-input
       [label]="'Title' | translate"
       [startingValue]="data().title"
@@ -17,8 +17,8 @@
       resize="both"
     />
   </div>
-  <div class="right">
-    <h2>{{ 'Live preview' | translate }}</h2>
+  <div class="right card">
+    <h2 style="color: var(--color-gray-12)">{{ 'Preview' | translate }}</h2>
 
     <p>
       <strong>{{ data().title }}</strong>
@@ -28,7 +28,9 @@
   </div>
 </div>
 
-<app-media-browser (addMedia)="addEntitySwitch($event)" />
+<div class="card">
+  <app-media-browser (addMedia)="addEntitySwitch($event)" />
+</div>
 
 <k-button-row justify="end">
   <k-button type="outlined-secondary" (click)="close(false)">

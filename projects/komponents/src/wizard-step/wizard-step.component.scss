@@ -49,9 +49,9 @@
     height: 24px;
     background-color: #ccc;
     color: white;
-    font-weight: 700;
+    font-weight: var(--font-weight-normal);
     font-family: monospace;
-    font-size: 14px;
+    font-size: var(--font-size-base);
     line-height: 1;
     border-radius: 50%;
     display: flex;

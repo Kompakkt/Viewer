@@ -6,7 +6,8 @@
 
   color: white;
   h1 {
-    font-size: 20px;
+    font-size: var(--font-size-large);
+    font-weight: var(--font-weight-bold);
   }
 
   h1, p, ul {

@@ -1,3 +1,5 @@
+<h1>{{ 'Annotations' | translate }}</h1>
+
 @if (processing.isInUpload$ | async) {
 <div class="note">
   <mat-icon>info</mat-icon>
@@ -43,7 +45,7 @@
   class="annotations-list"
   (cdkDropListDropped)="drop($event)"
 >
-  @for (annotation of currentAnnotations$ | async; track annotation; let last = $last) {
+  @for (annotation of currentAnnotations$ | async; track annotation._id; let last = $last) {
   <app-annotation-for-editor
     class="annotation-box"
     [annotation]="annotation"
@@ -53,7 +55,9 @@
   ></app-annotation-for-editor>
   @if (!last) {
   <hr />
-  } }
+  } } @empty {
+    <p style="margin: 0">{{ 'This object has no annotations yet.' | translate }}</p>
+  }
 </div>
 
 @if (annotationCount$ | async; as count) {

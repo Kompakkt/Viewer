@@ -39,7 +39,7 @@ type State = {
         color: #fff;
         padding: 5px 10px;
         border-radius: 4px;
-        font-size: 12px;
+        font-size: var(--font-size-small);
         z-index: 1000;
         pointer-events: none;
         transition-property: opacity;

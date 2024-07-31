@@ -21,14 +21,14 @@
     pointer-events: all;
     cursor: pointer;
 
-    font-size: 16px;
+    font-size: var(--font-size-base);
     span,
     small {
       font-size: inherit;
     }
 
     span.title {
-      font-weight: 600;
+      font-weight: var(--font-weight-bold);
       text-wrap: balance;
     }
 
@@ -45,7 +45,7 @@
     }
 
     small {
-      color: var(--color-grey-12);
+      color: var(--color-gray-12);
     }
   }
 }

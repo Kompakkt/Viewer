@@ -1,7 +1,7 @@
 <h4>{{ 'Ambient environment lights' | translate }}</h4>
 
 <k-slider
-  [label]="'Ambient Light Up Intensity' | translate"
+  [label]="'Ambient light up intensity' | translate"
   [min]="0"
   [max]="50"
   [startingValue]="getLightIntensity('ambientlightUp')"
@@ -11,7 +11,7 @@
 ></k-slider>
 
 <k-slider
-  [label]="'Ambient Light Down Intensity' | translate"
+  [label]="'Ambient light down intensity' | translate"
   [min]="0"
   [max]="50"
   [startingValue]="getLightIntensity('ambientlightDown')"
@@ -23,7 +23,7 @@
 <h4>{{ 'Pointlight' | translate }}</h4>
 
 <k-slider
-  [label]="'Pointlight Intensity' | translate"
+  [label]="'Pointlight intensity' | translate"
   [min]="0"
   [max]="50"
   [startingValue]="getLightIntensity('pointLight')"
@@ -34,7 +34,7 @@
 
 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px">
   <k-input
-    [label]="'X Axis' | translate"
+    [label]="'X-axis' | translate"
     [min]="0"
     [max]="5"
     type="number"
@@ -43,7 +43,7 @@
   />
 
   <k-input
-    [label]="'Y Axis' | translate"
+    [label]="'Y-axis' | translate"
     [min]="0"
     [max]="5"
     type="number"
@@ -52,7 +52,7 @@
   />
 
   <k-input
-    [label]="'Z Axis' | translate"
+    [label]="'Z-axis' | translate"
     [min]="0"
     [max]="5"
     type="number"
