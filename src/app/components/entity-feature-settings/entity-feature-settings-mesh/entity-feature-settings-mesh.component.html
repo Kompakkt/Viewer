@@ -1,6 +1,6 @@
 @if (processing.settings$ | async; as settings) {
 <k-details [title]="'Information and helpers' | translate">
-  <h3 style="margin-top: 0px;">{{ 'Bounding boxes' | translate }}</h3>
+  <h3 style="margin-top: 0px">{{ 'Bounding boxes' | translate }}</h3>
 
   <k-labelled-checkbox
     [label]="'Show entity bounding boxes' | translate"
@@ -16,11 +16,6 @@
   <small>{{ 'Number of meshes:' | translate }} {{ meshes.length }}</small>
   }
 
-  <!-- NOTE: Does it really make sense to have this here? We set the real background color in step 2 anyways - KN -->
-  <h3>{{ 'Background' | translate }}</h3>
-
-  <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
-
   <h3>{{ 'Axes' | translate }}</h3>
 
   <k-labelled-checkbox
@@ -29,7 +24,7 @@
   />
 
   <k-slider
-    [label]="('World axes size:' | translate) + ' ' + (worldAxisScalingFactor)"
+    [label]="('World axes size:' | translate) + ' ' + worldAxisScalingFactor"
     [min]="1"
     [max]="3"
     [startingValue]="worldAxisScalingFactor"
@@ -42,7 +37,7 @@
   />
 
   <k-slider
-    [label]="('Local axes size:' | translate) + ' ' + (localAxisScalingFactor)"
+    [label]="('Local axes size:' | translate) + ' ' + localAxisScalingFactor"
     [min]="1"
     [max]="3"
     [startingValue]="localAxisScalingFactor"
@@ -57,7 +52,7 @@
   />
 
   <k-slider
-    [label]="('Ground scale:' | translate) + ' ' + (groundScalingFactor)"
+    [label]="('Ground scale:' | translate) + ' ' + groundScalingFactor"
     [min]="1"
     [max]="10"
     [startingValue]="groundScalingFactor"
