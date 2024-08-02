@@ -1,15 +1,17 @@
 @if (annotation$ | async; as annotation) { @if (isSelectedAnnotation$ | async) {
 <div class="header">
-  <h2>{{ annotation.body.content.title }}</h2>
+  <h2>{{ annotation.body.content.title || ('No title' | translate) }}</h2>
   <k-button icon-button color="transparent" (click)="closeAnnotation()"
     ><mat-icon>close</mat-icon></k-button
   >
 </div>
 
-<app-markdown-preview [data]="annotation.body.content.description" />
+<app-markdown-preview
+  [data]="annotation.body.content.description || ('No description' | translate)"
+/>
 
 <k-button-row justify="end" gap="4">
-  @if ((isAnnotationOwner$ | async)) {
+  @if ((canUserDelete$ | async)) {
   <k-button
     icon-button
     color="transparent"
@@ -17,7 +19,7 @@
     (click)="deleteAnnotation()"
     ><mat-icon>delete</mat-icon></k-button
   >
-  @if ((isAnnotatingAllowed$ | async)) {
+  } @if ((canUserEdit$ | async)) {
   <k-button
     icon-button
     color="transparent"
@@ -25,7 +27,7 @@
     (click)="toggleFullscreen('edit')"
     ><mat-icon>edit</mat-icon></k-button
   >
-  } }
+  }
   <k-button
     icon-button
     color="transparent"

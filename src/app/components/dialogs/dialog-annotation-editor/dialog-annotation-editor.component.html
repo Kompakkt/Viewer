@@ -1,6 +1,7 @@
+
+@if (currentMode(); as mode) { @switch (mode) { @case ('edit') {
 <h1>{{ 'Edit annotation' | translate }}</h1>
 
-@if (currentMode(); as mode) { @if (mode == 'edit') {
 <div class="side-by-side">
   <div class="left card">
     <k-input
@@ -33,16 +34,25 @@
 </div>
 
 <k-button-row justify="end">
-  <k-button type="outlined-secondary" (click)="close(false)">
+  <k-button
+    type="solid-transparent"
+    icon-button
+    style="margin-right: auto"
+    (click)="deleteAnnotation()"
+  >
+    <mat-icon>delete</mat-icon>
+  </k-button>
+
+  <k-button type="outlined-primary" (click)="close(false)">
     <span>{{ 'Cancel' | translate }}</span>
   </k-button>
   <k-button type="solid-primary" (click)="close(true)">
-    <span>{{ 'Save annotation' | translate }}</span>
+    <span>{{ 'Save' | translate }}</span>
   </k-button>
 </k-button-row>
 
-} @else {
+} @case ('preview') {
 <h2>{{ data().title }}</h2>
 
 <app-markdown-preview [data]="data().description" />
-} }
+} } }

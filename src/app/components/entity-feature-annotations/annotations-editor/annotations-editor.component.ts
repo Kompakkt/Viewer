@@ -100,4 +100,9 @@ export class AnnotationsEditorComponent {
       );
     });
   }
+
+  closeNote(event: Event) {
+    const target = event.target as HTMLElement;
+    if (target) target.parentElement?.remove();
+  }
 }

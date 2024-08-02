@@ -17,6 +17,7 @@ import {
   InputComponent,
   TextareaComponent,
 } from 'projects/komponents/src';
+import { AnnotationService } from 'src/app/services/annotation/annotation.service';
 import { IAnnotation, IEntity } from 'src/common';
 import { environment } from 'src/environment';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
@@ -71,6 +72,7 @@ export class DialogAnnotationEditorComponent implements OnInit {
 
   public dialogRef = inject(MatDialogRef<DialogAnnotationEditorComponent>);
   public dialogData = inject<IDialogData>(MAT_DIALOG_DATA);
+  public annotationService = inject(AnnotationService);
 
   constructor() {
     effect(() => {
@@ -187,5 +189,10 @@ export class DialogAnnotationEditorComponent implements OnInit {
 
   public close(withData?: boolean) {
     this.dialogRef.close(withData ? this.data() : undefined);
+  }
+
+  public async deleteAnnotation() {
+    await this.annotationService.deleteAnnotation(this.dialogData.annotation);
+    this.close(false);
   }
 }

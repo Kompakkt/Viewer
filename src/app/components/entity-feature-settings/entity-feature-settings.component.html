@@ -3,15 +3,20 @@
 @if (settingsReady$ | async) { @if (processing.settings$ | async; as settings) { @if
 ((processing.isInUpload$ | async) === false) {
 <k-details [title]="'Background' | translate">
-  <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
-  <br />
+  <color-chrome
+    (onChange)="setBackgroundColor($event.color.rgb)"
+    [color]="settings.localSettings.background.color"
+  />
+
   <k-labelled-checkbox
     [label]="'Gradient-brightness effect' | translate"
-    (checkedChange)="
-      settings.localSettings.background.effect = $event; entitySettings.loadBackgroundEffect()
-    "
+    (checkedChange)="setBackgroundEffect($event)"
     [startingValue]="settings.localSettings.background.effect"
-  ></k-labelled-checkbox>
+  />
+
+  <k-button (click)="resetBackground()" type="outlined-primary">
+    {{ 'Reset background' | translate }}
+  </k-button>
 </k-details>
 <k-details [title]="'Lights' | translate">
   <app-entity-feature-settings-lights></app-entity-feature-settings-lights>
@@ -47,15 +52,20 @@
   <k-wizard-step [label]="'Background and lights' | translate">
     <div class="wizard-step-content">
       <k-details [title]="'Background' | translate">
-        <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
-        <br />
+        <color-chrome
+          (onChange)="setBackgroundColor($event.color.rgb)"
+          [color]="settings.localSettings.background.color"
+        />
+
         <k-labelled-checkbox
           [label]="'Gradient-brightness effect' | translate"
-          (checkedChange)="
-            settings.localSettings.background.effect = $event; entitySettings.loadBackgroundEffect()
-          "
+          (checkedChange)="setBackgroundEffect($event)"
           [startingValue]="settings.localSettings.background.effect"
-        ></k-labelled-checkbox>
+        />
+
+        <k-button (click)="resetBackground()" type="outlined-primary">
+          {{ 'Reset background' | translate }}
+        </k-button>
       </k-details>
 
       <k-details [title]="'Lights' | translate">

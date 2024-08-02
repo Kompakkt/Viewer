@@ -151,6 +151,12 @@ export class EntityFeatureSettingsComponent {
     this.entitySettings.loadBackgroundColor();
   }
 
+  public async setBackgroundEffect(enabled: boolean) {
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
+    localSettings.background.effect = enabled;
+    this.entitySettings.loadBackgroundEffect();
+  }
+
   public async saveSettings() {
     const entity = await firstValueFrom(this.entity$);
     const { localSettings } = await firstValueFrom(this.processing.settings$);
@@ -197,6 +203,11 @@ export class EntityFeatureSettingsComponent {
     const { serverSettings } = await firstValueFrom(this.processing.settings$);
     this.processing.settings$.next({ serverSettings, localSettings: serverSettings });
     this.entitySettings.restoreSettings();
+  }
+
+  public resetBackground() {
+    this.setBackgroundColor({ r: 127, g: 127, b: 127, a: 1 });
+    this.setBackgroundEffect(true);
   }
 
   // _______Only used during Upload ________

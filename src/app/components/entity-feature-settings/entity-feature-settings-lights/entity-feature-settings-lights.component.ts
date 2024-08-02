@@ -6,14 +6,14 @@ import { EntitySettingsService } from '../../../services/entitysettings/entityse
 import { LightService } from '../../../services/light/light.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
 
-import { InputComponent, SliderComponent } from 'projects/komponents/src';
+import { ButtonComponent, InputComponent, SliderComponent } from 'projects/komponents/src';
 
 @Component({
   selector: 'app-entity-feature-settings-lights',
   templateUrl: './entity-feature-settings-lights.component.html',
   styleUrls: ['./entity-feature-settings-lights.component.scss'],
   standalone: true,
-  imports: [TranslatePipe, SliderComponent, InputComponent],
+  imports: [TranslatePipe, SliderComponent, InputComponent, ButtonComponent],
 })
 export class EntityFeatureSettingsLightsComponent {
   constructor(
@@ -30,6 +30,15 @@ export class EntityFeatureSettingsLightsComponent {
   }
   get pointLightZ() {
     return this.lights.getLightByType('pointLight')?.position?.z ?? 0;
+  }
+
+  public resetLights() {
+    ['pointLight', 'ambientlightUp', 'ambientlightDown'].forEach(lightType => {
+      this.setLightIntensity(0, lightType);
+    });
+    ['x', 'y', 'z'].forEach(dimension => {
+      this.setPointlightPosition(dimension, 0);
+    });
   }
 
   // Lights

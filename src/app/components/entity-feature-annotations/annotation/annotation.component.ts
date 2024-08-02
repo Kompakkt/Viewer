@@ -19,7 +19,12 @@ import {
   MatCardTitle,
 } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
-import { ButtonComponent, ButtonRowComponent, InputComponent, TooltipDirective } from 'projects/komponents/src';
+import {
+  ButtonComponent,
+  ButtonRowComponent,
+  InputComponent,
+  TooltipDirective,
+} from 'projects/komponents/src';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { DialogAnnotationEditorComponent } from '../../dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
 import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-preview.component';
@@ -88,6 +93,10 @@ export class AnnotationComponent {
   public userOwnsCompilation$ = this.processing.compilation$.pipe(
     map(compilation => this.userdata.doesUserOwn(compilation)),
   );
+  public canUserEdit$ = this.isAnnotatingAllowed$;
+  public canUserDelete$ = combineLatest([this.isAnnotatingAllowed$, this.isAnnotationOwner$]).pipe(
+    map(([isAnnotatingAllowed, isAnnotationOwner]) => isAnnotatingAllowed && isAnnotationOwner),
+  );
 
   public isSelectedAnnotation$ = combineLatest([
     this.annotation$,
@@ -104,6 +113,13 @@ export class AnnotationComponent {
       if (!isEditAnno) this.annotationService.updateAnnotation(annotation);
       return isEditAnno;
     }),
+  );
+
+  public isAnnotationHidden$ = combineLatest([
+    this.annotation$,
+    this.annotationService.hiddenAnnotations$,
+  ]).pipe(
+    map(([annotation, hiddenAnnotations]) => hiddenAnnotations.includes(annotation._id.toString())),
   );
 
   constructor() {
@@ -158,17 +174,28 @@ export class AnnotationComponent {
 
   public async toggleFullscreen(mode: 'edit' | 'preview') {
     const annotation = await firstValueFrom(this.annotation$);
-    const dialogRef = this.dialog.open(DialogAnnotationEditorComponent, {
+    const dialogRef = this.dialog.open<
+      DialogAnnotationEditorComponent,
+      any,
+      { title: string; description: string } | undefined
+    >(DialogAnnotationEditorComponent, {
       width: 'min(75vw, 860px)',
       data: { annotation, mode },
     });
+    if (mode !== 'edit') return;
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result && annotation) {
-        annotation.body.content.title = result.title;
-        annotation.body.content.description = result.content;
-      }
-      console.log(result);
-    });
+    // Save changes only if edited
+    const result = await firstValueFrom(dialogRef.afterClosed());
+    if (!result) return;
+    if (
+      result.title === annotation.body.content.title &&
+      result.description === annotation.body.content.description
+    )
+      return;
+
+    annotation.body.content.title = result.title;
+    annotation.body.content.description = result.description;
+
+    this.annotationService.updateAnnotation(annotation);
   }
 }

@@ -16,6 +16,7 @@
   <small>{{ 'Number of meshes:' | translate }} {{ meshes.length }}</small>
   }
 
+  <!-- NOTE: Does it really make sense to have this here? We set the real background color in step 2 anyways - KN -->
   <h3>{{ 'Background' | translate }}</h3>
 
   <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>

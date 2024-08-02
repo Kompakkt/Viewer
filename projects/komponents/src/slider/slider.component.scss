@@ -13,6 +13,7 @@
 .label {
   font-style: normal;
   font-weight: var(--font-weight-normal);
+  user-select: none;
 }
 
 .slider-container {
@@ -82,6 +83,7 @@
     border-radius: 50%;
     overflow: hidden;
     pointer-events: none;
+    user-select: none;
   }
 
   &:not(.dragging) .slider-value-tooltip {

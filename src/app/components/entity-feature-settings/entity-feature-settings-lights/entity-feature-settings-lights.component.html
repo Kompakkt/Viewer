@@ -1,35 +1,35 @@
-<h4>{{ 'Ambient environment lights' | translate }}</h4>
+<h2>{{ 'Ambient environment lights' | translate }}</h2>
 
 <k-slider
-  [label]="'Ambient light up intensity' | translate"
+  [label]="('Light intensity from above' | translate) + ': ' + getLightIntensity('ambientlightUp')"
   [min]="0"
   [max]="50"
   [startingValue]="getLightIntensity('ambientlightUp')"
   (valueChanged)="setLightIntensity($event, 'ambientlightUp')"
-  [showInfo]="false"
-  [showTooltip]="false"
+  [showInfo]="true"
+  [showTooltip]="true"
 ></k-slider>
 
 <k-slider
-  [label]="'Ambient light down intensity' | translate"
+  [label]="('Light intensity from below' | translate) + ': ' + getLightIntensity('ambientlightDown')"
   [min]="0"
   [max]="50"
   [startingValue]="getLightIntensity('ambientlightDown')"
   (valueChanged)="setLightIntensity($event, 'ambientlightDown')"
-  [showInfo]="false"
-  [showTooltip]="false"
+  [showInfo]="true"
+  [showTooltip]="true"
 ></k-slider>
 
-<h4>{{ 'Pointlight' | translate }}</h4>
+<h2>{{ 'Pointlight' | translate }}</h2>
 
 <k-slider
-  [label]="'Pointlight intensity' | translate"
+  [label]="('Pointlight intensity' | translate) + ': ' + getLightIntensity('pointLight')"
   [min]="0"
   [max]="50"
   [startingValue]="getLightIntensity('pointLight')"
   (valueChanged)="setLightIntensity($event, 'pointLight')"
-  [showInfo]="false"
-  [showTooltip]="false"
+  [showInfo]="true"
+  [showTooltip]="true"
 ></k-slider>
 
 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px">
@@ -60,3 +60,7 @@
     (valueChanged)="setPointlightPosition('z', $event.valueAsNumber)"
   />
 </div>
+
+<k-button (click)="resetLights()" type="outlined-primary">
+  {{ 'Reset lights' | translate }}
+</k-button>

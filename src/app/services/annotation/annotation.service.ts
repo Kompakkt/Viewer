@@ -17,10 +17,10 @@ import { DialogShareAnnotationComponent } from '../../components/dialogs/dialog-
 import { BabylonService } from '../babylon/babylon.service';
 import { BackendService } from '../backend/backend.service';
 import { MessageService } from '../message/message.service';
+import { PouchService } from '../pouch/pouch.service';
 import { ProcessingService } from '../processing/processing.service';
 import { UserdataService } from '../userdata/userdata.service';
 import { createMarker } from './visual3DElements';
-import { LocalForageService } from '../localforage/localforage.service';
 
 const isDefaultAnnotation = (annotation: IAnnotation) =>
   !annotation.target.source.relatedCompilation ||
@@ -50,6 +50,7 @@ export class AnnotationService {
   public selectedAnnotation$ = new BehaviorSubject('');
   public editModeAnnotation$ = new BehaviorSubject('');
   public annotations$ = new BehaviorSubject<IAnnotation[]>([]);
+  public hiddenAnnotations$ = new BehaviorSubject<string[]>([]);
 
   public isAnnotationMode$ = new BehaviorSubject(false);
 
@@ -63,7 +64,7 @@ export class AnnotationService {
   );
 
   constructor(
-    private local: LocalForageService,
+    private pouch: PouchService,
     private babylon: BabylonService,
     private backend: BackendService,
     private message: MessageService,
@@ -149,15 +150,15 @@ export class AnnotationService {
       const serverAnnotations = (await this.getAnnotationsfromServerDB()).filter(
         annotation => annotation && annotation._id && annotation.lastModificationDate,
       );
-      const localAnnotations = (await this.getAnnotationsfromLocalDB()).filter(
+      const pouchAnnotations = (await this.getAnnotationsfromLocalDB()).filter(
         annotation => annotation && annotation._id && annotation.lastModificationDate,
       );
       // Update and sort local
-      await this.updateLocalDB(localAnnotations, serverAnnotations);
-      const updated = await this.updateAnnotationList(localAnnotations, serverAnnotations);
+      await this.updateLocalDB(pouchAnnotations, serverAnnotations);
+      const updated = await this.updateAnnotationList(pouchAnnotations, serverAnnotations);
       this.annotations$.next(updated);
 
-      // above updateAnnotationList call already checks if values in localAnnotations changed
+      // above updateAnnotationList call already checks if values in pouchAnnotations changed
       // and sends update requests to server.
       // we still need to check if the order changed for which _id comparisons are sufficient
       let unchanged =
@@ -214,20 +215,20 @@ export class AnnotationService {
     const entity = await firstValueFrom(this.processing.entity$);
     const compilation = await firstValueFrom(this.processing.compilation$);
     const isCompilationLoaded = await firstValueFrom(this.processing.compilationLoaded$);
-    let localAnnotations: IAnnotation[] = entity
+    let pouchAnnotations: IAnnotation[] = entity
       ? await this.fetchAnnotations(entity._id.toString())
       : [];
-    // Annotationen aus localDB des aktuellen Entityls und der aktuellen Compilation (if existing)
+    // Annotationen aus PouchDB des aktuellen Entityls und der aktuellen Compilation (if existing)
 
     if (isCompilationLoaded) {
       const _compilationAnnotations =
         entity && compilation
           ? await this.fetchAnnotations(entity._id.toString(), compilation._id.toString())
           : [];
-      localAnnotations = localAnnotations.concat(_compilationAnnotations);
+      pouchAnnotations = pouchAnnotations.concat(_compilationAnnotations);
     }
-    console.log('getAnnotationsfromLocalDB', localAnnotations);
-    return localAnnotations;
+    console.log('getAnnotationsfromLocalDB', pouchAnnotations);
+    return pouchAnnotations;
   }
 
   private async updateLocalDB(localAnnotations: IAnnotation[], serverAnnotations: IAnnotation[]) {
@@ -236,7 +237,7 @@ export class AnnotationService {
         _localAnnotation => _localAnnotation._id === annotation._id,
       );
       if (!localAnnotation) {
-        await this.local.updateAnnotation(annotation);
+        await this.pouch.updateAnnotation(annotation);
         localAnnotations.push(annotation);
       }
     }
@@ -281,7 +282,7 @@ export class AnnotationService {
           unsorted.push(annotation);
         } else {
           // Update local DB
-          await this.local.updateAnnotation(serverAnnotation);
+          await this.pouch.updateAnnotation(serverAnnotation);
           localAnnotations.splice(
             localAnnotations.findIndex(ann => ann._id === annotation._id),
             1,
@@ -305,7 +306,7 @@ export class AnnotationService {
         } else {
           // Nicht local last editor === creator === ich
           // Annotation local löschen
-          await this.local.deleteAnnotation(annotation._id.toString());
+          await this.pouch.deleteAnnotation(annotation._id.toString());
           localAnnotations.splice(localAnnotations.findIndex(ann => ann._id === annotation._id));
         }
       }
@@ -360,73 +361,72 @@ export class AnnotationService {
     const isCompilationLoaded = await firstValueFrom(this.processing.compilationLoaded$);
     const userdata = await firstValueFrom(this.userdata.userData$);
 
-    this.babylon.createPreviewScreenshot().then(detailScreenshot => {
-      if (!entity) {
-        throw new Error(`this.entity not defined: ${entity}`);
-      }
-      const generatedId = this.backend.generateEntityId();
+    const detailScreenshot = await this.babylon.createPreviewScreenshot();
+    if (!entity) {
+      throw new Error(`this.entity not defined: ${entity}`);
+    }
+    const generatedId = this.backend.generateEntityId();
 
-      const personName = userdata ? userdata.fullname : 'guest';
-      const personID = userdata ? userdata._id : 'guest';
+    const personName = userdata ? userdata.fullname : 'guest';
+    const personID = userdata ? userdata._id : 'guest';
 
-      const referencePoint = result.pickedPoint!;
-      const referenceNormal = result.getNormal(true, true)!;
+    const referencePoint = result.pickedPoint!;
+    const referenceNormal = result.getNormal(true, true)!;
 
-      const relatedCompilation =
-        isCompilationLoaded && compilation ? compilation._id.toString() : '';
+    const relatedCompilation =
+      isCompilationLoaded && compilation ? compilation._id.toString() : '';
 
-      const { position, target, cameraType } = camera;
+    const { position, target, cameraType } = camera;
 
-      const newAnnotation: IAnnotation = {
-        validated: !isCompilationLoaded,
-        _id: generatedId,
-        identifier: generatedId,
-        ranking: currentAnnotations.length + 1,
-        creator: {
-          type: 'person',
-          name: personName,
-          _id: personID,
-        },
-        created: new Date().toISOString(),
-        generator: {
-          type: 'software',
-          name: 'Kompakkt',
-          _id: personID,
-          homepage: 'https://github.com/Kompakkt/Kompakkt',
-        },
-        motivation: 'defaultMotivation',
-        lastModifiedBy: {
-          type: 'person',
-          name: personName,
-          _id: personID,
-        },
-        body: {
-          type: 'annotation',
-          content: {
-            type: 'text',
-            title: '',
-            description: '',
-            relatedPerspective: {
-              cameraType,
-              position,
-              target,
-              preview: detailScreenshot,
-            },
+    const newAnnotation: IAnnotation = {
+      validated: !isCompilationLoaded,
+      _id: generatedId,
+      identifier: generatedId,
+      ranking: currentAnnotations.length + 1,
+      creator: {
+        type: 'person',
+        name: personName,
+        _id: personID,
+      },
+      created: new Date().toISOString(),
+      generator: {
+        type: 'software',
+        name: 'Kompakkt',
+        _id: personID,
+        homepage: 'https://github.com/Kompakkt/Kompakkt',
+      },
+      motivation: 'defaultMotivation',
+      lastModifiedBy: {
+        type: 'person',
+        name: personName,
+        _id: personID,
+      },
+      body: {
+        type: 'annotation',
+        content: {
+          type: 'text',
+          title: '',
+          description: '',
+          relatedPerspective: {
+            cameraType,
+            position,
+            target,
+            preview: detailScreenshot,
           },
         },
-        target: {
-          source: {
-            relatedEntity: entity._id.toString(),
-            relatedCompilation,
-          },
-          selector: {
-            referencePoint,
-            referenceNormal,
-          },
+      },
+      target: {
+        source: {
+          relatedEntity: entity._id.toString(),
+          relatedCompilation,
         },
-      };
-      this.add(newAnnotation);
-    });
+        selector: {
+          referencePoint,
+          referenceNormal,
+        },
+      },
+    };
+    this.add(newAnnotation);
   }
 
   private async add(_annotation: IAnnotation) {
@@ -445,7 +445,7 @@ export class AnnotationService {
         .catch((errorMessage: any) => {
           console.log(errorMessage);
         });
-      this.local.updateAnnotation(newAnnotation);
+      this.pouch.updateAnnotation(newAnnotation);
     }
     this.drawMarker(newAnnotation);
     this.annotations$.next(this.annotations$.getValue().concat(newAnnotation));
@@ -475,7 +475,7 @@ export class AnnotationService {
             console.log(errorMessage);
           });
       }
-      this.local.updateAnnotation(newAnnotation);
+      this.pouch.updateAnnotation(newAnnotation);
     }
     const arr = this.annotations$.getValue();
     arr.splice(
@@ -489,50 +489,51 @@ export class AnnotationService {
   public async deleteAnnotation(_annotation: IAnnotation) {
     const isDefault = await firstValueFrom(this.processing.defaultEntityLoaded$);
     const isFallback = await firstValueFrom(this.processing.fallbackEntityLoaded$);
-    if (this.userdata.isAnnotationOwner(_annotation)) {
-      this.setSelectedAnnotation('');
-      this.setEditModeAnnotation('');
-      const arr = this.annotations$.getValue();
-      const index = arr.findIndex(ann => ann._id === _annotation._id);
-      if (index !== -1) {
-        arr.splice(
-          arr.findIndex(ann => ann._id === _annotation._id),
-          1,
-        );
-        this.changedRankingPositions();
-        this.redrawMarker();
-        this.annotations$.next(arr);
-        if (!isFallback && !isDefault) {
-          this.local.deleteAnnotation(_annotation._id.toString());
-          this.deleteAnnotationFromServer(_annotation._id.toString());
-        }
-      }
-    } else {
-      this.message.error('You are not the Owner of this Annotation.');
+    if (!this.userdata.isAnnotationOwner(_annotation)) {
+      this.message.error('You are not the owner of this annotation.');
+      return false;
     }
+
+    if (!isFallback && !isDefault) {
+      const success = await this.deleteAnnotationFromServer(_annotation._id.toString());
+      if (!success) {
+        return false;
+      }
+      this.message.info('Annotation has been deleted.');
+      this.pouch.deleteAnnotation(_annotation._id.toString()).catch(() => {});
+    }
+
+    this.setSelectedAnnotation('');
+    this.setEditModeAnnotation('');
+
+    this.annotations$.next(this.annotations$.getValue().filter(ann => ann._id !== _annotation._id));
+    this.changedRankingPositions();
+    this.redrawMarker();
+    return true;
   }
 
   public async deleteAnnotationFromServer(annotationId: string) {
-    const loginData = await firstValueFrom(this.userdata.loginData$);
-    if (!loginData) return this.passwordDialog(annotationId);
-    const { username, password } = loginData;
+    const loginData =
+      (await firstValueFrom(this.userdata.loginData$)) ?? (await this.promptUserData());
+    if (!loginData) {
+      this.message.info('Failed authentication - Annotation can not be deleted from server.');
+      return false;
+    }
 
-    this.backend
-      .deleteRequest(annotationId, 'annotation', username, password)
-      .then(() => {
-        this.message.info('Deleted from Server');
-      })
+    const success = await this.backend
+      .deleteRequest(annotationId, 'annotation', loginData.username, loginData.password)
+      .then(() => true)
       .catch((errorMessage: HttpErrorResponse) => {
         if (errorMessage.status === 401) {
           this.message.info('Permission denied');
-          this.passwordDialog(annotationId);
-        } else {
-          this.message.error('Annotation can not be deleted from Server.');
         }
+        return false;
       });
+
+    return success;
   }
 
-  public async passwordDialog(annotationId: string) {
+  private async promptUserData() {
     const dialogRef = this.dialog.open<LoginComponent, AuthConcern, AuthResult>(LoginComponent, {
       width: '360px',
       disableClose: true,
@@ -540,27 +541,7 @@ export class AnnotationService {
       data: 'delete-annotation',
     });
 
-    const authResult = await firstValueFrom(dialogRef.afterClosed());
-
-    if (!authResult) {
-      this.message.info('Annotation was not deleted.');
-      return;
-    }
-
-    const deleteResult = await this.backend
-      .deleteRequest(annotationId, 'annotation', authResult.username, authResult.password)
-      .catch(err => {
-        this.message.error('Error deleting annotation.');
-        console.error(err);
-        return undefined;
-      });
-    console.info(deleteResult);
-
-    if (!!deleteResult) {
-      this.message.info('Annotation was deleted.');
-    } else {
-      this.message.error('Error deleting annotation.');
-    }
+    return await firstValueFrom(dialogRef.afterClosed());
   }
 
   private async changedRankingPositions() {
@@ -580,7 +561,7 @@ export class AnnotationService {
 
   private async fetchAnnotations(entity: string, compilation?: string): Promise<IAnnotation[]> {
     return new Promise<IAnnotation[]>(async (resolve, _) => {
-      const annotationList: IAnnotation[] = await this.local.findAnnotations(
+      const annotationList: IAnnotation[] = await this.pouch.findAnnotations(
         entity,
         compilation ? compilation : '',
       );
@@ -724,5 +705,13 @@ export class AnnotationService {
         selector: annotation.target.selector,
       },
     };
+  }
+
+  public setAnnotationVisibility(id: string, visible: boolean) {
+    if (visible) {
+      this.hiddenAnnotations$.next(this.hiddenAnnotations$.value.filter(x => x !== id));
+    } else {
+      this.hiddenAnnotations$.next([...this.hiddenAnnotations$.value, id]);
+    }
   }
 }

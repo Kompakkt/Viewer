@@ -51,17 +51,31 @@ import { AnnotationComponent } from './annotation.component';
 })
 export class AnnotationComponentForEditorComponent extends AnnotationComponent {
   public async toggleVisibility() {
-    console.log('Toggling')
-    const [{ _id }, showAnnotation, isSelectedAnnotation] = await Promise.all([
+    const [{ _id }, showAnnotation, isSelectedAnnotation, isAnnotationHidden] = await Promise.all([
       firstValueFrom(this.annotation$),
       firstValueFrom(this.showAnnotation$),
       firstValueFrom(this.isSelectedAnnotation$),
+      firstValueFrom(this.isAnnotationHidden$),
     ]);
-    console.log({ _id, showAnnotation, isSelectedAnnotation });
+
+    if (isAnnotationHidden) return;
 
     this.showAnnotation$.next(!showAnnotation);
     this.annotationService.setSelectedAnnotation(isSelectedAnnotation ? '' : _id.toString());
     this.babylon.hideMesh(_id.toString(), showAnnotation);
+  }
+
+  public async setVisibility(visible: boolean) {
+    const [{ _id }, isSelectedAnnotation] = await Promise.all([
+      firstValueFrom(this.annotation$),
+      firstValueFrom(this.isSelectedAnnotation$),
+    ]);
+
+    if (isSelectedAnnotation) {
+      this.annotationService.setSelectedAnnotation(visible ? _id.toString() : '');
+    }
+
+    this.annotationService.setAnnotationVisibility(_id.toString(), visible);
   }
 
   // TODO: set perspective in annotation Service and make it not async and public and save!
