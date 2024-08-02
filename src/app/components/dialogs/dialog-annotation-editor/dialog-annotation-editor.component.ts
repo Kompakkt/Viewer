@@ -103,7 +103,7 @@ export class DialogAnnotationEditorComponent implements OnInit {
     }));
   }
 
-  public updateDescription(content: string) {
+  private updateDescription(content: string) {
     this.data.update(state => ({ ...state, description: content }));
   }
 
@@ -138,12 +138,21 @@ export class DialogAnnotationEditorComponent implements OnInit {
     };
   }
 
-  private createMarkdown(mdElement: any) {
-    const caret = this.getCaretPosition();
-    const start = caret.start;
-    const value = caret.value;
+  private createMarkdown(mdElement: string) {
+    const { start, value } = this.getCaretPosition();
+    const previous = value.substring(0, start);
+    const following = value.substring(start);
 
-    return `${value.substring(0, start)}${mdElement}${value.substring(start, value.length)}`;
+    const prependNewline = !previous.endsWith('\n');
+    const appendNewline = !following.startsWith('\n');
+
+    let combined = previous;
+    if (prependNewline) combined += '\n\n';
+    combined += mdElement;
+    if (appendNewline) combined += '\n\n';
+    combined += following;
+
+    return combined.trim();
   }
 
   private addExternalImage(image: IExternalImage) {

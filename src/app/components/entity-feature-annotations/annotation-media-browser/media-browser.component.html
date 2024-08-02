@@ -6,7 +6,12 @@
 </div>
 
 <k-button-row justify="end">
-  <k-button type="solid-primary" (click)="addImage(url.value(), description.value())">
+  <k-button
+    type="solid-primary"
+    (click)="
+      addImage(url.value(), description.value()); url.value.set(''); description.value.set('')
+    "
+  >
     <span>{{ 'Add' | translate }}</span>
   </k-button>
 </k-button-row>
