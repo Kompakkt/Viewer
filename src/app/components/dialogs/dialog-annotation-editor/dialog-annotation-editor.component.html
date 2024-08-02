@@ -1,48 +1,46 @@
+@if (currentMode(); as mode) {
 
-@if (currentMode(); as mode) { @switch (mode) { @case ('edit') {
+<!-- Switch -->
+@if (canUserEdit()) {
 <h1>{{ 'Edit annotation' | translate }}</h1>
 
-<div class="side-by-side">
-  <div class="left card">
-    <k-input
-      [label]="'Title' | translate"
-      [startingValue]="data().title"
-      (valueChanged)="onTitleChange($event.value)"
-    />
-
-    <k-textarea
-      #annotationContent
-      [label]="'Content' | translate"
-      [startingValue]="data().description"
-      (valueChanged)="onTextAreaChange($event.value)"
-      resize="both"
-    />
+<div class="tab-selection">
+  <div class="tab" [class.active]="mode === 'edit'" (click)="currentMode.set('edit')">
+    <span>Edit</span>
   </div>
-  <div class="right card">
-    <h2 style="color: var(--color-gray-12)">{{ 'Preview' | translate }}</h2>
-
-    <p>
-      <strong>{{ data().title }}</strong>
-    </p>
-
-    <app-markdown-preview [data]="data().description" />
+  <div class="tab" [class.active]="mode === 'preview'" (click)="currentMode.set('preview')">
+    <span>Preview</span>
   </div>
 </div>
+} @switch (mode) { @case ('edit') {
+<div>
+  <k-input
+    [label]="'Title' | translate"
+    [startingValue]="data().title"
+    (valueChanged)="onTitleChange($event.value)"
+  />
 
-<div class="card">
+  <k-textarea
+    #annotationContent
+    [label]="'Content' | translate"
+    [startingValue]="data().description"
+    (valueChanged)="onTextAreaChange($event.value)"
+    resize="both"
+  />
+</div>
+
+} @case ('preview') {
+<h2>{{ data().title }}</h2>
+
+<app-markdown-preview [data]="data().description" />
+} }
+<!-- /Switch -->
+@if (mode === 'edit') {
+<div class="embeddables">
   <app-media-browser (addMedia)="addEntitySwitch($event)" />
 </div>
-
+} } @if (canUserEdit()) {
 <k-button-row justify="end">
-  <k-button
-    type="solid-transparent"
-    icon-button
-    style="margin-right: auto"
-    (click)="deleteAnnotation()"
-  >
-    <mat-icon>delete</mat-icon>
-  </k-button>
-
   <k-button type="outlined-primary" (click)="close(false)">
     <span>{{ 'Cancel' | translate }}</span>
   </k-button>
@@ -50,9 +48,4 @@
     <span>{{ 'Save' | translate }}</span>
   </k-button>
 </k-button-row>
-
-} @case ('preview') {
-<h2>{{ data().title }}</h2>
-
-<app-markdown-preview [data]="data().description" />
-} } }
+}

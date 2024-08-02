@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, effect, inject, signal } from '@angular/core';
+import { Component, OnInit, ViewChild, computed, effect, inject, signal } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
@@ -23,6 +23,9 @@ import { environment } from 'src/environment';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { MediaBrowserComponent } from '../../entity-feature-annotations/annotation-media-browser/media-browser.component';
 import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-preview.component';
+import { ProcessingService } from 'src/app/services/processing/processing.service';
+import { UserdataService } from 'src/app/services/userdata/userdata.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 export interface IDialogData {
   annotation: IAnnotation;
@@ -73,6 +76,16 @@ export class DialogAnnotationEditorComponent implements OnInit {
   public dialogRef = inject(MatDialogRef<DialogAnnotationEditorComponent>);
   public dialogData = inject<IDialogData>(MAT_DIALOG_DATA);
   public annotationService = inject(AnnotationService);
+  public processing = inject(ProcessingService);
+  public userdata = inject(UserdataService);
+
+  public canUserEdit = toSignal(this.processing.hasAnnotationAllowance$);
+  public canUserDelete = computed(() => {
+    if (!this.canUserEdit()) return false;
+    const annotation = this.dialogData.annotation;
+    if (!this.userdata.isAnnotationOwner(annotation)) return false;
+    return true;
+  });
 
   constructor() {
     effect(() => {
