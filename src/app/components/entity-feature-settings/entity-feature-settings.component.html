@@ -73,7 +73,7 @@
       </k-details>
     </div>
 
-    <k-button type="solid-primary" (click)="nextSecondStep()">{{
+    <k-button type="solid-primary" (click)="stepper.nextStep()">{{
       'Save background and lights' | translate
     }}</k-button>
   </k-wizard-step>
@@ -88,7 +88,7 @@
       </p>
     </div>
 
-    <k-button type="solid-primary" (click)="stepper.nextStep()">{{
+    <k-button type="solid-primary" (click)="setPerspectiveStep()">{{
       'Save preview and initial perspective' | translate
     }}</k-button>
   </k-wizard-step>

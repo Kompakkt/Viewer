@@ -224,7 +224,7 @@ export class EntityFeatureSettingsComponent {
     this.stepper()?.nextStep();
   }
 
-  public nextSecondStep() {
+  public setPerspectiveStep() {
     this.setInitialPerspectivePreview();
     this.stepper()?.nextStep();
   }
