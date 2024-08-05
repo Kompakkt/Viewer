@@ -36,18 +36,18 @@ $grey: (
   ),
 );
 
-$kompakkt-primary: mat.define-palette($grey);
-$kompakkt-accent: mat.define-palette(mat.$pink-palette, 500, 900, A100);
-$kompakkt-warn: mat.define-palette(mat.$deep-orange-palette);
+$kompakkt-primary: mat.m2-define-palette($grey);
+$kompakkt-accent: mat.m2-define-palette(mat.$m2-pink-palette, 500, 900, A100);
+$kompakkt-warn: mat.m2-define-palette(mat.$m2-deep-orange-palette);
 
-$kompakkt-theme: mat.define-dark-theme(
+$kompakkt-theme: mat.m2-define-dark-theme(
   (
     color: (
       primary: $kompakkt-primary,
       accent: $kompakkt-accent,
       warn: $kompakkt-warn,
     ),
-    typography: mat.define-typography-config(),
+    typography: mat.m2-define-typography-config(),
     density: 0,
   )
 );

@@ -9,9 +9,9 @@
   },
   "compileOnSave": false,
   "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
     "baseUrl": "./",
     "declaration": false,
+    "esModuleInterop": true,
     "experimentalDecorators": true,
     "importHelpers": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
