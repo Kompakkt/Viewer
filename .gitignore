@@ -139,3 +139,7 @@ modules.xml
 .idea/sonarlint
 
 /src/common
+
+.angular
+
+.eslintcache

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { fromEvent } from 'rxjs';
-import { IEntitySettings } from '~common/interfaces';
+import { IEntitySettings } from 'src/common/interfaces';
 
 type Message = { type: string; data: unknown; settings?: IEntitySettings };
 const isMessage = (message: any): message is Message => {

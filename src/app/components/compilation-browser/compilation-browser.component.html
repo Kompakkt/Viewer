@@ -1,34 +1,37 @@
 <div id="compilationBrowser">
-  <div *ngIf="compilation$ | async as compilation">
-    <div id="entity-overview" *ngIf="entity$ | async as entity">
-      <mat-card class="entity-card">
+  @if (compilation$ | async; as compilation) {
+  <div>
+    @if (entity$ | async; as entity) {
+    <div id="entity-overview">
+      <mat-card appearance="outlined" class="entity-card">
         <mat-card-header>
           <mat-card-title> {{ 'Selected Object:' | translate }} {{ entity.name }} </mat-card-title>
         </mat-card-header>
-        <img
-          *ngIf="entity.settings && entity.settings.preview"
-          [src]="server_url + entity.settings.preview"
-        />
+        @if (entity.settings && entity.settings.preview) {
+        <img [src]="server_url + entity.settings.preview" />
+        }
       </mat-card>
     </div>
-
-    <ng-container *ngIf="entities$ | async as entities">
-      <div class="category">
-        {{ ( entities.length > 1 ? 'Objects' : 'Object' ) | translate }} {{ 'in' | translate }} {{ compilation.name }}:
-      </div>
-
-      <mat-card class="entity-card" *ngFor="let entity of entities">
-        <mat-card-header>
-          <mat-card-title>
-            {{ entity.name }}
-          </mat-card-title>
-        </mat-card-header>
-        <img
-          *ngIf="entity.settings && entity.settings.preview"
-          [src]="server_url + entity.settings.preview"
-          (click)="processing.fetchAndLoad(entity._id, undefined)"
-        />
-      </mat-card>
-    </ng-container>
+    } @if (entities$ | async; as entities) {
+    <div class="category">
+      {{ (entities.length > 1 ? 'Objects' : 'Object') | translate }} {{ 'in' | translate }}
+      {{ compilation.name }}:
+    </div>
+    @for (entity of entities; track entity) {
+    <mat-card appearance="outlined" class="entity-card">
+      <mat-card-header>
+        <mat-card-title>
+          {{ entity.name }}
+        </mat-card-title>
+      </mat-card-header>
+      @if (entity.settings && entity.settings.preview) {
+      <img
+        [src]="server_url + entity.settings.preview"
+        (click)="processing.fetchAndLoad(entity._id, undefined)"
+      />
+      }
+    </mat-card>
+    } }
   </div>
+  }
 </div>

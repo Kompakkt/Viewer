@@ -10,8 +10,8 @@
     >
       <mat-icon [attr.aria-label]="'Add External Image' | translate">image</mat-icon>
     </button>
+    @if (compilation$ | async) {
     <button
-      *ngIf="compilation$ | async"
       mat-icon-button
       (click)="addCompilationEntity = !addCompilationEntity"
       matTooltip="{{ 'Add Entity From Collection' | translate }}"
@@ -21,25 +21,20 @@
     >
       <mat-icon [attr.aria-label]="'Add Entity From Collection' | translate">folder_open</mat-icon>
     </button>
+    }
   </div>
 
-  <div *ngIf="addExternalImage" id="external-image">
+  @if (addExternalImage) {
+  <div id="external-image">
     <h3>{{ 'Embed an external image at cursor position:' | translate }}</h3>
-
     <mat-form-field>
-      <input matInput #url placeholder="{{ 'URL' | translate }}" name="URL" type="text" />
+      <mat-label>{{ 'URL' | translate }}</mat-label>
+      <input matInput #url name="URL" type="text" />
     </mat-form-field>
-
     <mat-form-field>
-      <input
-        matInput
-        #description
-        placeholder="{{ 'Image Description' | translate }}"
-        name="Image Description"
-        type="text"
-      />
+      <mat-label>{{ 'Image Description' | translate }}</mat-label>
+      <input matInput #description name="Image Description" type="text" />
     </mat-form-field>
-
     <button
       mat-icon-button
       (click)="addImage(url.value, description.value)"
@@ -51,17 +46,15 @@
       {{ 'Add Image' | translate }}
     </button>
   </div>
-
-  <div *ngIf="addCompilationEntity" id="collection-entities">
+  } @if (addCompilationEntity) {
+  <div id="collection-entities">
     <h3>{{ 'Or embed an entity of your collection:' | translate }}</h3>
-
-    <mat-card
-      *ngFor="let entity of entities$ | async; let i = index"
-      (click)="addEntity(i)"
-      class="compilation-entity"
-    >
+    @for (entity of entities$ | async; track entity; let i = $index) {
+    <mat-card appearance="outlined" (click)="addEntity(i)" class="compilation-entity">
       <img mat-card-image [src]="server_url + entity.settings.preview" [alt]="entity.name" />
       <mat-card-footer>{{ entity.name }}</mat-card-footer>
     </mat-card>
+    }
   </div>
+  }
 </div>

@@ -11,10 +11,11 @@
   box-shadow: 1px 1px #333;
 }
 
-:host .mat-icon-button {
+:host .mat-mdc-icon-button {
   padding: 5px 0 5px 5px !important;
-  width: auto;
-  height: auto;
+  display: flex !important;
+  height: 48px !important;
+  width: 48px !important;
 }
 
 :host a {
@@ -31,6 +32,6 @@ mat-icon.arrow {
   margin-left: -5px;
 }
 
-.mat-icon-button.active {
+.mat-mdc-icon-button.active {
   background-color: rgba(255, 255, 255, 0.2);
 }

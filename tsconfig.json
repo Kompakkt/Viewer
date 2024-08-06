@@ -1,35 +1,35 @@
 {
-  "compileOnSave": false,
-  "compilerOptions": {
-    "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true,
-    "baseUrl": "./",
-    "importHelpers": true,
-    "outDir": "./dist/out-tsc",
-    "sourceMap": true,
-    "declaration": false,
-    "module": "es2020",
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": false,
-    "noImplicitAny": true,
-    "target": "es2020",
-    "typeRoots": ["node_modules/@types", "src/@types"],
-    "types": ["babylonjs", "babylonjs-gui"],
-    "lib": ["es2017", "dom", "es2019", "es2022", "dom.iterable"],
-    "paths": {
-      "core-js/es7/reflect": ["node_modules/core-js/proposals/reflect-metadata"],
-      "~common/*": ["./src/common/*"]
-    }
-  },
   "angularCompilerOptions": {
-    "enableIvy": true,
     "disableTypeScriptVersionCheck": true,
     "fullTemplateTypeCheck": true,
     "strictInjectionParameters": true,
-    "strictTemplates": true
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true,
+    "trace": true
+  },
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": "./",
+    "declaration": false,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ES2022",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "noImplicitReturns": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "outDir": "./dist/out-tsc",
+    "paths": {
+      "core-js/es7/reflect": ["node_modules/core-js/proposals/reflect-metadata"]
+    },
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "ES2022",
+    "typeRoots": ["node_modules/@types", "src/@types"],
+    "types": ["babylonjs", "babylonjs-gui"]
   }
 }

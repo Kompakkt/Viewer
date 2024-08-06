@@ -2,25 +2,31 @@
   font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
 .annotation-card {
   width: 100%;
   padding: 0.8rem;
 }
 
-.mat-card-content {
+.mat-mdc-card-content {
   max-height: 20vh;
   overflow-y: auto;
   margin: 0;
 }
 
-.mat-card-actions {
+.mat-mdc-card-actions {
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.annotation-card .mat-card-actions {
+.annotation-card .mat-mdc-card-actions {
   padding: 0;
   margin: 0;
   float: right;
@@ -37,8 +43,8 @@
 }
 
 .annotation-card .perspective {
-  cursor: pointer;
-  margin-left: -4px;
+  width: 100%;
+  color: white;
 }
 
 img {

@@ -1,4 +1,4 @@
-import { IEntity } from '~common/interfaces';
+import { IEntity } from 'src/common/interfaces';
 
 // Creates a basic entity to be used as a building block
 export const baseEntity = (): IEntity => ({

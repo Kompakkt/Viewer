@@ -6,6 +6,7 @@ import { marked } from 'marked';
   selector: 'app-markdown-preview',
   templateUrl: './markdown-preview.component.html',
   styleUrls: ['./markdown-preview.component.scss'],
+  standalone: true,
 })
 export class MarkdownPreviewComponent implements OnChanges {
   @Input('data')

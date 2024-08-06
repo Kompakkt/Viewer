@@ -8,9 +8,10 @@ import {
   ICompilation,
   IEntity,
   IEntitySettings,
-  isEntity,
   ObjectId,
+  isEntity,
 } from 'src/common';
+import { environment } from 'src/environment';
 import { baseEntity } from '../../../assets/defaults';
 import { defaultEntity, fallbackEntity } from '../../../assets/entities/entities';
 import {
@@ -21,11 +22,10 @@ import {
   settingsFallback,
   settingsKompakktLogo,
 } from '../../../assets/settings/settings';
-import { environment } from '../../../environments/environment';
 // tslint:disable-next-line:max-line-length
 import { DialogPasswordComponent } from '../../components/dialogs/dialog-password/dialog-password.component';
 import { decodeBase64, decodeURIUntilStable, isBase64 } from '../../helpers';
-import { convertIIIFAnnotation, IIIFData, isIIIFData } from '../../helpers/iiif-data-helper';
+import { IIIFData, convertIIIFAnnotation, isIIIFData } from '../../helpers/iiif-data-helper';
 import { BabylonService } from '../babylon/babylon.service';
 import { LoadingScreenService } from '../babylon/loadingscreen';
 import { BackendService } from '../backend/backend.service';

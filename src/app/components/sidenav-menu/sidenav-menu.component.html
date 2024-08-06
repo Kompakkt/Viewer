@@ -1,9 +1,10 @@
 <div [class.active]="isOpen">
-  <div *ngIf="processing.showAnnotationEditor$ | async">
+  @if (processing.showAnnotationEditor$ | async) {
+  <div>
     <button
       mat-icon-button
       (click)="overlay.toggleSidenav('annotation')"
-      [matTooltip]="( isOpen && isAnnotation ? 'Close' : 'Annotation' ) | translate"
+      [matTooltip]="(isOpen && isAnnotation ? 'Close' : 'Annotation') | translate"
       matTooltipPosition="right"
     >
       <mat-icon [attr.aria-label]="'Toggle Annotation' | translate">place</mat-icon>
@@ -12,11 +13,12 @@
       </mat-icon>
     </button>
   </div>
-  <div *ngIf="processing.showSettingsEditor$ | async">
+  } @if (processing.showSettingsEditor$ | async) {
+  <div>
     <button
       mat-icon-button
       (click)="overlay.toggleSidenav('settings')"
-      [matTooltip]="( isOpen && isSettings ? 'Close' : 'Settings' ) | translate"
+      [matTooltip]="(isOpen && isSettings ? 'Close' : 'Settings') | translate"
       matTooltipPosition="right"
     >
       <mat-icon [attr.aria-label]="'Toggle Settings' | translate">settings</mat-icon>
@@ -25,11 +27,12 @@
       </mat-icon>
     </button>
   </div>
-  <div *ngIf="processing.compilationLoaded$ | async">
+  } @if (processing.compilationLoaded$ | async) {
+  <div>
     <button
       mat-icon-button
       (click)="overlay.toggleSidenav('compilationBrowser')"
-      [matTooltip]="( isOpen && isCompilationBrowser ? 'Close' : 'Browse in Collection' ) | translate"
+      [matTooltip]="(isOpen && isCompilationBrowser ? 'Close' : 'Browse in Collection') | translate"
       matTooltipPosition="right"
     >
       <mat-icon [attr.aria-label]="'Toggle Collection Browser' | translate">folder_open</mat-icon>
@@ -38,4 +41,5 @@
       </mat-icon>
     </button>
   </div>
+  }
 </div>

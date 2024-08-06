@@ -1,8 +1,24 @@
-import { Component, Inject, ViewChild, ElementRef } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogClose,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+} from '@angular/material/dialog';
 
-import { environment } from '../../../../environments/environment';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { FormsModule } from '@angular/forms';
+import { MatButton } from '@angular/material/button';
+import { MatFormField } from '@angular/material/form-field';
+import { MatIcon } from '@angular/material/icon';
+import { MatInput, MatLabel } from '@angular/material/input';
 import { IEntity } from 'src/common';
+import { environment } from 'src/environment';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { MediaBrowserComponent } from '../../entity-feature-annotations/annotation-media-browser/media-browser.component';
+import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-preview.component';
 
 export interface IDialogData {
   title: string;
@@ -19,6 +35,23 @@ interface IExternalImage {
   selector: 'app-dialog-annotation-editor',
   templateUrl: './dialog-annotation-editor.component.html',
   styleUrls: ['./dialog-annotation-editor.component.scss'],
+  standalone: true,
+  imports: [
+    MatDialogTitle,
+    MatFormField,
+    MatInput,
+    MatLabel,
+    FormsModule,
+    MatDialogContent,
+    MarkdownPreviewComponent,
+    MediaBrowserComponent,
+    CdkTextareaAutosize,
+    MatDialogActions,
+    MatButton,
+    MatIcon,
+    MatDialogClose,
+    TranslatePipe,
+  ],
 })
 export class DialogAnnotationEditorComponent {
   @ViewChild('annotationContent')

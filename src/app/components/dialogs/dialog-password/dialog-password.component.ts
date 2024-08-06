@@ -1,14 +1,37 @@
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+} from '@angular/material/dialog';
 
+import { FormsModule } from '@angular/forms';
+import { MatButton } from '@angular/material/button';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
 import { ICompilation } from 'src/common';
-import { MessageService } from '../../../services/message/message.service';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { BackendService } from '../../../services/backend/backend.service';
+import { MessageService } from '../../../services/message/message.service';
 
 @Component({
   selector: 'app-password',
   templateUrl: './dialog-password.component.html',
   styleUrls: ['./dialog-password.component.scss'],
+  standalone: true,
+  imports: [
+    MatDialogTitle,
+    MatDialogContent,
+    MatFormField,
+    MatInput,
+    MatLabel,
+    FormsModule,
+    MatDialogActions,
+    MatButton,
+    TranslatePipe,
+  ],
 })
 export class DialogPasswordComponent {
   public password = '';

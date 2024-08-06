@@ -1,11 +1,20 @@
 import { Component, HostBinding, OnInit } from '@angular/core';
 
 import { OverlayService } from '../../services/overlay/overlay.service';
+import { CompilationBrowserComponent } from '../compilation-browser/compilation-browser.component';
+import { EntityFeatureSettingsComponent } from '../entity-feature-settings/entity-feature-settings.component';
+import { AnnotationsEditorComponent } from '../entity-feature-annotations/annotations-editor/annotations-editor.component';
 
 @Component({
   selector: 'app-sidenav',
   templateUrl: './sidenav.component.html',
   styleUrls: ['./sidenav.component.scss'],
+  standalone: true,
+  imports: [
+    AnnotationsEditorComponent,
+    EntityFeatureSettingsComponent,
+    CompilationBrowserComponent,
+  ],
 })
 export class SidenavComponent implements OnInit {
   @HostBinding('class.is-open')

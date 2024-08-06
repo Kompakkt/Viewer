@@ -1,15 +1,15 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-import { environment } from '../../../environments/environment';
 import {
   IAnnotation,
   ICompilation,
-  IUserData,
   IDigitalEntity,
   IEntity,
+  IUserData,
   ObjectId,
 } from 'src/common';
+import { environment } from 'src/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -19,10 +19,7 @@ export class BackendService {
   /* tslint:disable:no-magic-numbers */
   private genIndex = parseInt((Math.random() * 0xffffff).toString(), 10);
   private MACHINE_ID = Math.floor(Math.random() * 0xffffff);
-  private pid =
-    (typeof process === 'undefined' || typeof process.pid !== 'number'
-      ? Math.floor(Math.random() * 100000)
-      : process.pid) % 0xffff;
+  private pid = Math.floor(Math.random() * 100000) % 0xffff;
   /* tslint:enable:no-magic-numbers */
   //
   private endpoint = environment.server_url;

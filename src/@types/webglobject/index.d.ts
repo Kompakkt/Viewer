@@ -1,7 +1,6 @@
-interface WebGLObject {
-}
+interface WebGLObject {}
 
 declare var WebGLObject: {
-    prototype: WebGLObject;
-    new(): WebGLObject;
+  prototype: WebGLObject;
+  new (): WebGLObject;
 };

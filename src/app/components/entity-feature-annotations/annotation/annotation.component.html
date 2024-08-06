@@ -1,95 +1,95 @@
-<ng-container *ngIf="annotation$ | async as annotation">
-  <mat-card
-    *ngIf="isSelectedAnnotation$ | async"
-    class="single-annotation-card resizable"
-    [class.editmode]="isEditMode$ | async"
-    [style.top.px]="positionTop"
-    [style.left.px]="positionLeft"
-    [style.background-color]="'$cardbgr'"
-    [id]="annotation._id"
-  >
-    <form class="annotation-form" #annotationForm>
-      <mat-card-header>
-        <mat-card-title>
-          <mat-form-field *ngIf="isEditMode$ | async; else showTitle">
-            <mat-label>{{ 'Title' | translate }}</mat-label>
-            <input
-              matInput
-              name="title"
-              #title="ngModel"
-              type="text"
-              [(ngModel)]="annotation.body.content.title"
-            />
-          </mat-form-field>
-          <ng-template #showTitle>
-            <span class="bigger-font">{{ annotation.body.content.title }}</span>
-          </ng-template>
-        </mat-card-title>
-
-        <button id="closeButton" mat-icon-button (click)="closeAnnotation()" type="button">
-          <mat-icon [attr.aria-label]="'Close' | translate">cancel</mat-icon>
-        </button>
-      </mat-card-header>
-
-      <mat-card-content>
-        <div *ngIf="isEditMode$ | async; else showContent">
-          <mat-form-field>
-            <mat-label>{{ 'Description' | translate }}</mat-label>
-            <textarea
-              #annotationContent
-              matInput
-              cdkTextareaAutosize
-              cdkAutosizeMinRows="1"
-              name="description"
-              type="text"
-              [(ngModel)]="annotation.body.content.description"
-            ></textarea>
-          </mat-form-field>
-        </div>
-
-        <ng-template #showContent>
-          <app-markdown-preview
-            id="annotation-content"
-            [data]="annotation.body.content.description"
-          ></app-markdown-preview>
-        </ng-template>
-      </mat-card-content>
-
-      <mat-card-actions *ngIf="(isAnnotatingAllowed$ | async) && (isAnnotationOwner$ | async)">
-        <button
-          mat-icon-button
-          (click)="editFullscreen()"
-          matTooltip="{{ 'Edit in Fullscreen Mode' | translate }}"
-          matTooltipPosition="above"
-          type="button"
+@if (annotation$ | async; as annotation) { @if (isSelectedAnnotation$ | async) {
+<mat-card
+  appearance="outlined"
+  class="single-annotation-card resizable"
+  [class.editmode]="isEditMode$ | async"
+  [style.top.px]="positionTop"
+  [style.left.px]="positionLeft"
+  [style.background-color]="'$cardbgr'"
+  [id]="annotation._id"
+>
+  <form class="annotation-form" #annotationForm>
+    <mat-card-header>
+      <mat-card-title>
+        @if (isEditMode$ | async) {
+        <mat-form-field>
+          <mat-label>{{ 'Title' | translate }}</mat-label>
+          <input
+            matInput
+            name="title"
+            #title="ngModel"
+            type="text"
+            [(ngModel)]="annotation.body.content.title"
+          />
+        </mat-form-field>
+        } @else {
+        <span class="bigger-font">{{ annotation.body.content.title }}</span>
+        }
+      </mat-card-title>
+      <button id="closeButton" mat-icon-button (click)="closeAnnotation()" type="button">
+        <mat-icon [attr.aria-label]="'Close' | translate">cancel</mat-icon>
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+      @if (isEditMode$ | async) {
+      <div>
+        <mat-form-field>
+          <mat-label>{{ 'Description' | translate }}</mat-label>
+          <textarea
+            #annotationContent
+            matInput
+            cdkTextareaAutosize
+            cdkAutosizeMinRows="1"
+            name="description"
+            type="text"
+            [(ngModel)]="annotation.body.content.description"
+          ></textarea>
+        </mat-form-field>
+      </div>
+      } @else {
+      <app-markdown-preview
+        id="annotation-content"
+        [data]="annotation.body.content.description"
+      ></app-markdown-preview>
+      }
+    </mat-card-content>
+    @if ((isAnnotatingAllowed$ | async) && (isAnnotationOwner$ | async)) {
+    <mat-card-actions style="color: white">
+      <button
+        mat-icon-button
+        (click)="editFullscreen()"
+        matTooltip="{{ 'Edit in Fullscreen Mode' | translate }}"
+        matTooltipPosition="above"
+        type="button"
+      >
+        <mat-icon [attr.aria-label]="'Fullscreen' | translate">select_all</mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        (click)="toggleEditViewMode()"
+        [matTooltip]="((isEditMode$ | async) ? 'Save Annotation' : 'Edit Annotation') | translate"
+        matTooltipPosition="above"
+        type="button"
+      >
+        <mat-icon
+          [attr.aria-label]="
+            ((isEditMode$ | async) ? 'Save Annotation' : 'Edit Annotation') | translate
+          "
         >
-          <mat-icon [attr.aria-label]="'Fullscreen' | translate">select_all</mat-icon>
-        </button>
-
-        <button
-          mat-icon-button
-          (click)="toggleEditViewMode()"
-          [matTooltip]="( (isEditMode$ | async) ? 'Save Annotation' : 'Edit Annotation' ) | translate"
-          matTooltipPosition="above"
-          type="button"
-        >
-          <mat-icon
-            [attr.aria-label]="( (isEditMode$ | async) ? 'Save Annotation' : 'Edit Annotation' ) | translate"
-          >
-            {{ (isEditMode$ | async) ? 'save' : 'edit' }}
-          </mat-icon>
-        </button>
-
-        <button
-          mat-icon-button
-          (click)="deleteAnnotation()"
-          matTooltip="{{ 'Delete' | translate }}"
-          matTooltipPosition="above"
-          type="button"
-        >
-          <mat-icon [attr.aria-label]="'Delete' | translate">delete</mat-icon>
-        </button>
-      </mat-card-actions>
-    </form>
-  </mat-card>
-</ng-container>
+          {{ (isEditMode$ | async) ? 'save' : 'edit' }}
+        </mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        (click)="deleteAnnotation()"
+        matTooltip="{{ 'Delete' | translate }}"
+        matTooltipPosition="above"
+        type="button"
+      >
+        <mat-icon [attr.aria-label]="'Delete' | translate">delete</mat-icon>
+      </button>
+    </mat-card-actions>
+    }
+  </form>
+</mat-card>
+} }

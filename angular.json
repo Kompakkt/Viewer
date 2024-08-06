@@ -1,130 +1,102 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
-  "version": 1,
   "newProjectRoot": "projects",
   "projects": {
     "Kompakkt": {
-      "root": "",
-      "sourceRoot": "src",
-      "projectType": "application",
-      "prefix": "app",
-      "schematics": {},
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
-          "options": {
-            "outputPath": "dist/Kompakkt",
-            "index": "src/index.html",
-            "main": "src/main.ts",
-            "polyfills": "src/polyfills.ts",
-            "tsConfig": "tsconfig.app.json",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
-            "styles": [
-              {
-                "input": "node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
-                "inject": true
-              },
-              "src/styles.scss"
-            ],
-            "scripts": [
-              "node_modules/pepjs/dist/pep.js"
-            ],
-            "aot": false,
-            "vendorChunk": true,
-            "extractLicenses": false,
-            "buildOptimizer": false,
-            "sourceMap": true,
-            "optimization": false,
-            "namedChunks": true
-          },
+          "builder": "@angular/build:application",
           "configurations": {
+            "development": {
+              "extractLicenses": false,
+              "optimization": false,
+              "sourceMap": true
+            },
             "production": {
               "budgets": [
                 {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "6kb"
-                }
-              ],
-              "fileReplacements": [
+                  "maximumWarning": "10mb",
+                  "type": "initial"
+                },
                 {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
+                  "maximumWarning": "6kb",
+                  "type": "anyComponentStyle"
                 }
               ],
-              "optimization": true,
-              "outputHashing": "all",
-              "aot": true,
-              "extractLicenses": true,
-              "commonChunk": true,
-              "buildOptimizer": true,
-              "statsJson": true
+              "outputHashing": "all"
             }
           },
-          "defaultConfiguration": ""
-        },
-        "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
+          "defaultConfiguration": "production",
           "options": {
-            "browserTarget": "Kompakkt:build"
-          },
-          "configurations": {
-            "production": {
-              "browserTarget": "Kompakkt:build:production"
-            }
+            "assets": ["src/favicon.ico", "src/assets"],
+            "index": "src/index.html",
+            "inlineStyleLanguage": "scss",
+            "namedChunks": true,
+            "optimization": false,
+            "outputPath": {
+              "base": "dist/Kompakkt"
+            },
+            "polyfills": ["zone.js", "src/global-shim.ts"],
+            "scripts": ["node_modules/pepjs/dist/pep.js"],
+            "sourceMap": true,
+            "styles": ["src/styles.scss", "src/theme.scss"],
+            "tsConfig": "tsconfig.app.json",
+            "browser": "src/main.ts"
           }
         },
         "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "builder": "@angular/build:extract-i18n",
           "options": {
-            "browserTarget": "Kompakkt:build"
+            "buildTarget": "Kompakkt:build"
           }
         },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "src/test.ts",
-            "polyfills": "src/polyfills.ts",
-            "tsConfig": "tsconfig.spec.json",
-            "karmaConfig": "src/karma.conf.js",
-            "styles": [
-              {
-                "input": "node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
-                "inject": true
-              },
-              "src/styles.scss"
-            ],
-            "scripts": [
-              "node_modules/pepjs/dist/pep.js",
-              "node_modules/marked/lib/marked.js"
-            ],
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ]
-          }
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "development": {
+              "buildTarget": "Kompakkt:build:development"
+            },
+            "production": {
+              "buildTarget": "Kompakkt:build:production"
+            }
+          },
+          "defaultConfiguration": "development",
+          "options": {}
         }
-      }
-    },
-    "Kompakkt-e2e": {
-      "root": "e2e/",
+      },
+      "prefix": "app",
       "projectType": "application",
-      "architect": {
-        "e2e": {
-          "builder": "@angular-devkit/build-angular:protractor",
-          "options": {
-            "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "Kompakkt:serve"
-          }
+      "root": "",
+      "schematics": {
+        "@schematics/angular:application": {
+          "strict": true
+        },
+        "@schematics/angular:class": {
+          "skipTests": true
+        },
+        "@schematics/angular:component": {
+          "skipTests": true,
+          "style": "scss"
+        },
+        "@schematics/angular:directive": {
+          "skipTests": true
+        },
+        "@schematics/angular:guard": {
+          "skipTests": true
+        },
+        "@schematics/angular:interceptor": {
+          "skipTests": true
+        },
+        "@schematics/angular:module": {},
+        "@schematics/angular:pipe": {
+          "skipTests": true
+        },
+        "@schematics/angular:service": {
+          "skipTests": true
         }
-        }
-      }
-  },
-  "schematics": {
-    "@schematics/angular:component": {
-      "style": "scss"
+      },
+      "sourceRoot": "src"
     }
-  }
+  },
+  "version": 1
 }

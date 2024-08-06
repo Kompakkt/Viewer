@@ -1,13 +1,22 @@
-import { Component } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+import { Component, inject } from '@angular/core';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
 import { BehaviorSubject, combineLatest, firstValueFrom, map } from 'rxjs';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
 
 @Component({
   selector: 'app-annotationwalkthrough',
   templateUrl: './annotationwalkthrough.component.html',
   styleUrls: ['./annotationwalkthrough.component.scss'],
+  standalone: true,
+  imports: [MatIconButton, MatTooltip, MatIcon, AsyncPipe, TranslatePipe],
 })
 export class AnnotationwalkthroughComponent {
+  public annotationService = inject(AnnotationService);
+
   public ranking$ = new BehaviorSubject(-1);
   public selectedAnnotation$ = combineLatest([
     this.annotationService.currentAnnotations$,
@@ -24,8 +33,6 @@ export class AnnotationwalkthroughComponent {
   public showWalkthrough$ = this.annotationService.currentAnnotations$.pipe(
     map(annotations => annotations.length > 1),
   );
-
-  constructor(public annotationService: AnnotationService) {}
 
   public async previousAnnotation() {
     const [ranking, annotations] = await Promise.all([

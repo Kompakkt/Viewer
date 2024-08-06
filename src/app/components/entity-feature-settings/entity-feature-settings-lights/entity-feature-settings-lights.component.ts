@@ -4,11 +4,15 @@ import { firstValueFrom } from 'rxjs';
 import { EntitySettingsService } from '../../../services/entitysettings/entitysettings.service';
 import { LightService } from '../../../services/light/light.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { MatSlider, MatSliderThumb } from '@angular/material/slider';
 
 @Component({
   selector: 'app-entity-feature-settings-lights',
   templateUrl: './entity-feature-settings-lights.component.html',
   styleUrls: ['./entity-feature-settings-lights.component.scss'],
+  standalone: true,
+  imports: [MatSlider, MatSliderThumb, TranslatePipe],
 })
 export class EntityFeatureSettingsLightsComponent {
   constructor(

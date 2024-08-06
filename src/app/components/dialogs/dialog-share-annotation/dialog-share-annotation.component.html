@@ -1,13 +1,14 @@
 <h2 mat-dialog-title>{{ 'Share Annotation to Collection' | translate }}</h2>
-<div *ngIf="!checkPwdMode">
+@if (!checkPwdMode) {
+<div>
   <mat-dialog-content class="mat-typography">
     <h3>{{ 'Please enter the ID of the target Collection' | translate }}</h3>
     <mat-form-field>
+      <mat-label>{{ 'Collection identifier' | translate }}</mat-label>
       <input
         matInput
         name="targetCollectionId"
         type="text"
-        placeholder="{{ 'Collection ID' | translate }}"
         [(ngModel)]="targetCollectionId"
         cdkFocusInitial
       />
@@ -18,18 +19,19 @@
     <button mat-button mat-dialog-close (click)="cancel()">{{ 'Cancel' | translate }}</button>
   </mat-dialog-actions>
 </div>
-<div *ngIf="checkPwdMode">
+} @if (checkPwdMode) {
+<div>
   <mat-dialog-content class="mat-typography">
     <h3>{{ 'This collection is protected by a password.' | translate }}</h3>
     <p>{{ 'Type in the password to load this collection.' | translate }}</p>
     <h3>{{ 'Password' | translate }}</h3>
     <mat-form-field>
+      <mat-label>{{ 'Password' | translate }}</mat-label>
       <input
         matInput
         name="password"
         #description="ngModel"
         type="password"
-        placeholder="{{ 'password' | translate }}"
         [(ngModel)]="passwordCollection"
       />
     </mat-form-field>
@@ -39,3 +41,4 @@
     <button mat-button cdkFocusInitial (click)="checkPwd()">{{ 'Check' | translate }}</button>
   </mat-dialog-actions>
 </div>
+}

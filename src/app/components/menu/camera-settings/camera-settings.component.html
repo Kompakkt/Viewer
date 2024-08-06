@@ -6,29 +6,30 @@
   <h2>{{ 'Camera settings' | translate }}</h2>
 
   <h3>{{ 'Type' | translate }}</h3>
-  <p *ngIf="annotationService.isAnnotationMode$ | async; else cameraTypeButtons">
+  @if (annotationService.isAnnotationMode$ | async) {
+  <p>
     {{ 'Switching the camera type is not supported while annotating' | translate }}
   </p>
-  <ng-template #cameraTypeButtons>
-    <div class="button-pair" [class.disabled]="annotationService.isAnnotationMode$ | async">
-      <button
-        mat-flat-button
-        (click)="babylon.cameraManager.setCameraType('ArcRotateCamera')"
-        [class.active]="(babylon.cameraManager.cameraType$ | async) === 'ArcRotateCamera'"
-        matTooltip="{{ 'Orbit around an anchor point on the object' | translate }}"
-      >
-        {{ 'Orbit' | translate }}
-      </button>
-      <button
-        mat-flat-button
-        (click)="babylon.cameraManager.setCameraType('UniversalCamera')"
-        [class.active]="(babylon.cameraManager.cameraType$ | async) === 'UniversalCamera'"
-        matTooltip="{{ 'Move freely with the arrow keys' | translate }}"
-      >
-        {{ 'Free' | translate }}
-      </button>
-    </div>
-  </ng-template>
+  } @else {
+  <div class="button-pair" [class.disabled]="annotationService.isAnnotationMode$ | async">
+    <button
+      mat-flat-button
+      (click)="babylon.cameraManager.setCameraType('ArcRotateCamera')"
+      [class.active]="(babylon.cameraManager.cameraType$ | async) === 'ArcRotateCamera'"
+      matTooltip="{{ 'Orbit around an anchor point on the object' | translate }}"
+    >
+      {{ 'Orbit' | translate }}
+    </button>
+    <button
+      mat-flat-button
+      (click)="babylon.cameraManager.setCameraType('UniversalCamera')"
+      [class.active]="(babylon.cameraManager.cameraType$ | async) === 'UniversalCamera'"
+      matTooltip="{{ 'Move freely with the arrow keys' | translate }}"
+    >
+      {{ 'Free' | translate }}
+    </button>
+  </div>
+  }
 
   <h3>{{ 'Speed' | translate }} ({{ cameraSpeed.value }}x)</h3>
   <mat-slider
@@ -38,8 +39,16 @@
     discrete
     showTickMarks
     [formControl]="cameraSpeed"
-    (input)="cameraSpeed.setValue($event.value!)"
-  >
+    #ngSlider
+    ><input
+      matSliderThumb
+      (input)="
+        cameraSpeed.setValue(
+          { source: ngSliderThumb, parent: ngSlider, value: ngSliderThumb.value }.value!
+        )
+      "
+      #ngSliderThumb="matSliderThumb"
+    />
     <input matSliderThumb />
   </mat-slider>
   <hr />
