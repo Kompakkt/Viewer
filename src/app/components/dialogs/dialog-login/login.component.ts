@@ -8,12 +8,18 @@ import {
 } from '@angular/material/dialog';
 
 import { FormsModule } from '@angular/forms';
-import { MatButton } from '@angular/material/button';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
+import { ButtonComponent, ButtonRowComponent, InputComponent } from 'projects/komponents/src';
 import { IUserData } from 'src/common';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { BackendService } from '../../../services/backend/backend.service';
+
+export type AuthConcern = 'login' | 'delete-annotation';
+
+export type AuthResult = {
+  username: string;
+  password: string;
+  userData: IUserData | undefined;
+};
 
 @Component({
   selector: 'app-login',
@@ -24,20 +30,15 @@ import { BackendService } from '../../../services/backend/backend.service';
     FormsModule,
     MatDialogTitle,
     MatDialogContent,
-    MatFormField,
-    MatInput,
-    MatLabel,
     MatDialogActions,
-    MatButton,
     TranslatePipe,
+    InputComponent,
+    ButtonComponent,
+    ButtonRowComponent,
   ],
 })
 export class LoginComponent {
-  public data: {
-    username: string;
-    password: string;
-    userData: IUserData | undefined;
-  } = {
+  public data: AuthResult = {
     username: '',
     password: '',
     userData: undefined,
@@ -49,7 +50,7 @@ export class LoginComponent {
   constructor(
     public dialogRef: MatDialogRef<LoginComponent>,
     public backend: BackendService,
-    @Inject(MAT_DIALOG_DATA) public concern: string,
+    @Inject(MAT_DIALOG_DATA) public concern: AuthConcern,
   ) {}
 
   public login() {
@@ -62,7 +63,7 @@ export class LoginComponent {
         this.loginFailed = false;
         this.dialogRef.disableClose = false;
         this.data.userData = result;
-        this.dialogRef.close({ result: true, data: this.data });
+        this.dialogRef.close(this.data);
       })
       .catch(error => {
         console.error(error);

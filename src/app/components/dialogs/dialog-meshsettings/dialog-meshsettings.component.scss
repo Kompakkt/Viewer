@@ -1,0 +1,16 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 32px;
+
+  color: white;
+  h1 {
+    font-size: var(--font-size-large);
+    font-weight: var(--font-weight-bold);
+  }
+
+  h1, p, ul {
+    margin: 0;
+  }
+}

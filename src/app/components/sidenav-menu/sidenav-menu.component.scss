@@ -1,37 +1,38 @@
 :host {
+  --transition-duration: 280ms;
   position: absolute;
-  top: 25px;
+  top: 16px;
   left: 0;
-  transition: 280ms;
+  transition: var(--transition-duration);
   z-index: 99;
   color: #fff;
-  background-color: rgba(0, 0, 0, 0.7);
-  border-top-right-radius: 0.75rem;
-  border-bottom-right-radius: 0.75rem;
-  box-shadow: 1px 1px #333;
-}
 
-:host .mat-mdc-icon-button {
-  padding: 5px 0 5px 5px !important;
-  display: flex !important;
-  height: 48px !important;
-  width: 48px !important;
-}
+  div.button-wrapper {
+    background-color: var(--color-bg-transparent);
+    border-radius: 0 8px 8px 0;
+    padding: 8px;
 
-:host a {
-  text-decoration: none;
-  color: #fff;
-}
+    transition: background-color 0.3s, border-color 0.3s;
+    &.selected {
+      background-color: var(--color-primary);
+    }
+    &:hover {
+      background-color: var(--color-gray-12);
+    }
+  }
 
-:host.is-open {
-  transition: 280ms;
-  left: 300px;
-}
+  .mat-mdc-icon-button {
+    display: flex !important;
+    height: 48px !important;
+    width: 48px !important;
+  }
+  
+  &.is-open {
+    left: var(--sidebar-width);
+  }
 
-mat-icon.arrow {
-  margin-left: -5px;
-}
-
-.mat-mdc-icon-button.active {
-  background-color: rgba(255, 255, 255, 0.2);
+  &:not(.is-open) div.button-close {
+    transition: var(--transition-duration);
+    transform: translateX(-100%);
+  }
 }

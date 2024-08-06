@@ -1,0 +1,90 @@
+$transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out,
+  color 0.2s ease-in-out;
+:host {
+  --color: white;
+  --icon-size: 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-wrap: balance;
+  border-radius: 4px;
+  padding: 8px 16px;
+  // padding: 12px 16px;
+  font-size: var(--font-size-base);
+  box-sizing: border-box;
+  cursor: pointer;
+  user-select: none;
+  line-height: 1;
+
+  transition: $transition;
+
+  // box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14);
+
+  &.solid {
+    background: var(--color);
+    color: white;
+    border: solid 2px var(--color);
+  }
+
+  &.outlined {
+    background: transparent;
+    color: var(--color);
+    border: solid 2px var(--color);
+  }
+
+  &.disabled::before {
+    cursor: not-allowed;
+    pointer-events: none;
+    background-color: rgba(127, 127, 127, 0.5);
+  }
+
+  &:not(.icon-button) mat-icon {
+    margin-right: 8px;
+  }
+
+  &.icon-button {
+    width: calc(var(--icon-size) * 2);
+    height: calc(var(--icon-size) * 2);
+    padding: 0;
+    border-radius: 50%;
+    font-size: var(--icon-size);
+
+    .mat-icon {
+      width: var(--icon-size);
+      height: var(--icon-size);
+      font-size: var(--icon-size);
+      line-height: var(--icon-size);
+    }
+  }
+
+  &.full-width {
+    width: 100%;
+    padding: 8px;
+  }
+
+  position: relative;
+
+  &::before,
+  &::after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    background-color: transparent;
+    border-radius: inherit;
+    transition: $transition;
+  }
+
+  &.icon-button::after {
+    border-radius: 50%;
+  }
+
+  &:hover::after {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+}

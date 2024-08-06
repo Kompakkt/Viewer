@@ -1,7 +1,6 @@
-import { Component, ViewChild, ChangeDetectorRef, AfterContentChecked } from '@angular/core';
-import { MatSidenav } from '@angular/material/sidenav';
-import { SceneComponent } from './components/scene/scene.component';
+import { AfterContentChecked, ChangeDetectorRef, Component } from '@angular/core';
 import { LoadingscreenComponent } from './components/loadingscreen/loadingscreen.component';
+import { SceneComponent } from './components/scene/scene.component';
 
 @Component({
   selector: 'app-root',
@@ -11,8 +10,6 @@ import { LoadingscreenComponent } from './components/loadingscreen/loadingscreen
   imports: [LoadingscreenComponent, SceneComponent],
 })
 export class AppComponent implements AfterContentChecked {
-  @ViewChild('sidenav') public sidenav: MatSidenav | undefined;
-
   constructor(private changeDetector: ChangeDetectorRef) {}
 
   ngAfterContentChecked(): void {

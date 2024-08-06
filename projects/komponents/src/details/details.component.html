@@ -1,0 +1,27 @@
+<div class="details-header" (click)="toggle()">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    height="24px"
+    viewBox="0 0 24 24"
+    width="24px"
+    fill="currentColor"
+    style="color: var(--color-primary)"
+    [class.opened]="expanded()"
+  >
+    <path d="M0 0h24v24H0V0z" fill="none" />
+    <path
+      d="M4 18.99h11c.67 0 1.27-.32 1.63-.83L21 12l-4.37-6.16C16.27 5.33 15.67 5 15 5H4l5 7-5 6.99z"
+    />
+  </svg>
+  <span>{{ title() }}</span>
+</div>
+
+<div
+  class="details-content"
+  [class.opened]="expanded()"
+  [style.--inner-height]="contentHeight()"
+  [style.--gap.px]="gap()"
+  #detailsContent
+>
+  <ng-content />
+</div>

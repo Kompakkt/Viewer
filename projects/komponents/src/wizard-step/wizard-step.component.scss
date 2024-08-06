@@ -1,0 +1,61 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
+  --transition-duration: 0s;
+  --transition-easing: cubic-bezier(0.45, 0, 0.55, 1);
+
+  &.step-completed,
+  &.step-active {
+    .wizard-step-label .wizard-step-counter {
+      background-color: var(--color-primary);
+    }
+  }
+
+  &.step-active .wizard-step-content {
+    max-height: var(--inner-height, auto);
+    padding: 12px;
+  }
+}
+
+.wizard-step-content {
+  max-height: 0px;
+  padding: 0px;
+  overflow: hidden;
+
+  transition: max-height var(--transition-duration) var(--transition-easing),
+    padding var(--transition-duration) var(--transition-easing);
+}
+
+.wizard-step-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+
+  min-height: 32px;
+  padding: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  div.wizard-step-counter {
+    width: 24px;
+    height: 24px;
+    background-color: #ccc;
+    color: white;
+    font-weight: var(--font-weight-normal);
+    font-family: monospace;
+    font-size: var(--font-size-base);
+    line-height: 1;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}

@@ -1,11 +1,17 @@
-<h2 mat-dialog-title>{{ 'Final mesh settings' | translate }}</h2>
-<mat-dialog-content
-  >{{ 'Mesh settings are not (and never again) editable after this step.' | translate }} <br />{{
-    'This will also delete all
-  helpers. Have you finally set all mesh settings (size and orientation)?' | translate
-  }}</mat-dialog-content
->
-<mat-dialog-actions>
-  <button mat-button [mat-dialog-close]="false">{{ 'No' | translate }}</button>
-  <button mat-button [mat-dialog-close]="true">{{ 'Yes' | translate }}</button>
-</mat-dialog-actions>
+<h1>{{ 'Finalize mesh settings' | translate }}</h1>
+<p>
+  {{ 'Finalizing will lock the following settings forever:' | translate }}
+</p>
+<ul>
+  <li>{{ 'Scaling' | translate }}</li>
+  <li>{{ 'Rotation' | translate }}</li>
+</ul>
+<p>
+  {{ 'Are you satisfied with how your object is displayed?' | translate }}
+</p>
+<k-button-row gap="4">
+  <k-button type="outlined-secondary" (click)="close(false)" full-width>{{
+    'No, cancel and adjust' | translate
+  }}</k-button>
+  <k-button type="solid-primary" (click)="close(true)" full-width>{{ 'Yes, finalize' | translate }}</k-button>
+</k-button-row>

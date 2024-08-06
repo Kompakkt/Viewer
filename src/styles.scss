@@ -23,6 +23,32 @@
 
   /* Material styles override */
   --mat-dialog-headline-padding: 16px 24px 9px;
+  --mat-menu-container-color: var(--color-bg-transparent);
+  --mdc-dialog-container-color: var(--color-bg-transparent);
+
+  --sidebar-width: clamp(320px, 27vw, 400px);
+
+  /* Sizes */
+  --font-size-base: 16px;
+  --font-size-small: 14px;
+  --font-size-large: 24px;
+  --font-size-xlarge: 32px;
+  --font-weight-normal: 400;
+  --font-weight-bold: 700;
+
+  /* Colors */
+  --color-bg-transparent: #212121f0;
+  --color-bg-solid: #212121;
+
+  --color-gray-dark: #2d2d2d;  
+  --color-gray-font: #555555;
+  --color-gray-12: #d9d9d9;
+  --color-gray-4: #f5f5f5;
+
+  --color-primary: #00afe7;
+  --color-secondary: var(--color-gray-12);
+  --color-accent: #e91e63;
+  --color-warn: #f77159;
 }
 
 html,
@@ -34,8 +60,56 @@ body {
   font-family: var(--font-stack);
 }
 
+h1,h2,h3,h4,h5,h6 {
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--font-size-large);
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+}
+
+h2 {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+}
+
 * {
   font-family: var(--font-stack);
+}
+
+small {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--font-size-base);
+}
+
+app-markdown-preview {
+  > * > a {
+    display: inline;
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: scale-down;
+    background: var(--color-bg-transparent);
+    border-radius: 4px;
+    margin: 12px 0px;
+
+    // TODO: Discuss with design team @Kai
+    max-width: 240px;
+  }
+
+  * {
+    font-family: var(--font-stack);
+    font-size: var(--font-size-base);
+    margin: 0;
+    text-wrap: balance;
+  }
 }
 
 a {
@@ -43,67 +117,13 @@ a {
   text-decoration: none;
 }
 
+hr {
+  border: solid 1px var(--color-gray-12);
+  border-top: 0px;
+}
+
 .mat-mdc-card {
   border-radius: 1px !important;
-}
-
-/* Material Design Tabs */
-.mat-mdc-tab-header,
-.mat-mdc-tab-nav-bar {
-  border-bottom: none;
-}
-
-/* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
-.mat-mdc-tab-group .mat-tab-label-active {
-  background-color: #555;
-}
-
-.mat-mdc-tab-group.mat-primary .mat-ink-bar,
-.mat-mdc-tab-nav-bar.mat-primary .mat-ink-bar {
-  background-color: #333;
-}
-
-/* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
-.mat-mdc-tab-group .mat-tab-label {
-  min-width: 50px !important;
-  padding: 0;
-}
-
-.mat-mdc-tab-body {
-  /* background-color: #333; */
-}
-
-/* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
-.mat-tab-body-wrapper {
-  height: 100%;
-}
-
-/* / Material Design Tabs */
-
-/* TODO(mdc-migration): The following rule targets internal classes of card that may no longer apply for the MDC version. */
-.single-annotation-card .mat-card-header-text {
-  margin: 0 !important;
-  width: 100% !important;
-}
-
-/* TODO(mdc-migration): The following rule targets internal classes of input that may no longer apply for the MDC version. */
-.mat-input-underline {
-  background-color: white !important;
-}
-
-/* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
-.mat-form-field-label {
-  color: #fff !important;
-}
-
-/* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
-.mat-mdc-form-field.mat-focused .mat-form-field-ripple {
-  background-color: #aaa;
-}
-
-/* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
-.mat-form-field-infix {
-  width: 100% !important;
 }
 
 .chrome-picker {
@@ -114,10 +134,10 @@ a {
 #editor,
 #compilationBrowser {
   color: #fff;
-  width: 300px;
+  width: var(--sidebar-width);
   height: 100%;
   z-index: auto;
-  background: rgba(0, 0, 0, 0.9);
+  background: var(--color-bg-transparent);
   box-sizing: border-box;
   border: 0;
   padding: 0;
@@ -130,7 +150,7 @@ a {
 
 #editor .mat-mdc-card,
 #compilationBrowser .mat-card {
-  background-color: rgba(0, 0, 0, 0);
+  background-color: var(--color-bg-transparent);
 }
 
 #editor .mat-mdc-card:not(:last-child),
@@ -138,25 +158,9 @@ a {
   border-bottom: 1px solid #333;
 }
 
-/* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
-#editor .mat-mdc-tab-group .mat-tab-label-active {
-  background-color: rgba(0, 0, 0, 0.3);
-}
-
-#editor .mat-mdc-raised-button:not([disabled]),
-#compilationBrowser .mat-raised-button:not([disabled]) {
-  background-color: #333;
-}
-
 #editor .mat-mdc-card-avatar {
   height: 25px;
   width: 25px;
-}
-
-.mat-mdc-card-header .mat-mdc-card-title {
-  font-size: 15px;
-  font-weight: normal;
-  word-wrap: break-word;
 }
 
 /* TODO(mdc-migration): The following rule targets internal classes of card that may no longer apply for the MDC version. */
@@ -198,10 +202,6 @@ a {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
-.mat-mdc-dialog-container {
-  background: #333;
-}
-
 #annotation-content img,
 .mat-mdc-dialog-content img,
 .mat-mdc-card-content img {
@@ -238,16 +238,17 @@ mat-card-content {
 /* Scrollbar style */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #4a5b6c rgba(0, 0, 0, 0.3);
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
   -ms-overflow-style: -ms-autohiding-scrollbar;
 
   &::-webkit-scrollbar {
-    width: 0.2rem;
+    width: 4px;
   }
   &::-webkit-scrollbar-track {
     -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
   }
   &::-webkit-scrollbar-thumb {
+    border-radius: 4px;
     background-color: #4a5b6c;
     outline: 1px solid #4a5b6c;
   }

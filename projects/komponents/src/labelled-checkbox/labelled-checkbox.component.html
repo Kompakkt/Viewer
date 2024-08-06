@@ -1,0 +1,7 @@
+<label>
+  <input type="checkbox" hidden #checkbox (change)="checked.set(checkbox.checked)" [checked]="checked()" />
+  <svg viewBox="0 0 100 100">
+    <path class="checkmark" d="M20,50 L40,70 L80,30" />
+  </svg>
+  <span>{{ label() }}</span>
+</label>

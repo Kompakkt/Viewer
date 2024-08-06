@@ -1,5 +1,19 @@
-.mat-mdc-dialog-content {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
+:host {
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 32px;
+  }
+
+  color: white;
+  h1 {
+    font-size: var(--font-size-large);
+    font-weight: var(--font-weight-bold);
+    margin: 0;
+  }
+
+  p {
+    margin: 0;
+  }
 }

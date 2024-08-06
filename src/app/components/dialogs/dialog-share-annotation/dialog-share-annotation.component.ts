@@ -12,9 +12,7 @@ import { BackendService } from '../../../services/backend/backend.service';
 import { MessageService } from '../../../services/message/message.service';
 
 import { FormsModule } from '@angular/forms';
-import { MatButton } from '@angular/material/button';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
+import { ButtonComponent, ButtonRowComponent, InputComponent } from 'projects/komponents/src';
 import { ICompilation } from 'src/common';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 
@@ -26,14 +24,13 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
   imports: [
     MatDialogTitle,
     MatDialogContent,
-    MatFormField,
-    MatInput,
-    MatLabel,
     FormsModule,
     MatDialogActions,
-    MatButton,
     MatDialogClose,
     TranslatePipe,
+    InputComponent,
+    ButtonRowComponent,
+    ButtonComponent,
   ],
 })
 export class DialogShareAnnotationComponent {

@@ -1,13 +1,14 @@
+import { AsyncPipe } from '@angular/common';
 import { AfterViewInit, Component, HostListener, ViewContainerRef } from '@angular/core';
 import { AnnotationService } from '../../services/annotation/annotation.service';
 import { BabylonService } from '../../services/babylon/babylon.service';
 import { ProcessingService } from '../../services/processing/processing.service';
-import { AsyncPipe } from '@angular/common';
-import { SidenavComponent } from '../sidenav/sidenav.component';
-import { SidenavMenuComponent } from '../sidenav-menu/sidenav-menu.component';
-import { MenuComponent } from '../menu/menu.component';
-import { AnnotationwalkthroughComponent } from '../entity-feature-annotations/annotationwalkthrough/annotationwalkthrough.component';
+import { AnnotationMarkerComponent } from '../entity-feature-annotations/annotation/annotation-marker.component';
 import { AnnotationComponent } from '../entity-feature-annotations/annotation/annotation.component';
+import { AnnotationwalkthroughComponent } from '../entity-feature-annotations/annotationwalkthrough/annotationwalkthrough.component';
+import { MenuComponent } from '../menu/menu.component';
+import { SidenavMenuComponent } from '../sidenav-menu/sidenav-menu.component';
+import { SidenavComponent } from '../sidenav/sidenav.component';
 
 @Component({
   selector: 'app-scene',
@@ -16,6 +17,7 @@ import { AnnotationComponent } from '../entity-feature-annotations/annotation/an
   standalone: true,
   imports: [
     AnnotationComponent,
+    AnnotationMarkerComponent,
     AnnotationwalkthroughComponent,
     MenuComponent,
     SidenavMenuComponent,

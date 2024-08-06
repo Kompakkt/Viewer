@@ -1,194 +1,137 @@
-@if (settingsReady$ | async) { @if (processing.settings$ | async; as settings) {
-<div id="editor-entitysettings">
-  @if ((processing.isInUpload$ | async) === false) {
-  <div>
-    <mat-card appearance="outlined">
-      <mat-card-content>
-        <button
-          id="resetDefaultSettings"
-          class="fullwidth-button"
-          mat-raised-button
-          (click)="backToDefaultSettings()"
-        >
-          {{ 'Back to Default' | translate }}
-        </button>
-        @if (canSaveSettings$ | async) {
-        <button
-          id="saveDefaultSettings"
-          class="fullwidth-button"
-          mat-raised-button
-          (click)="saveSettings()"
-        >
-          {{ 'Save as default' | translate }}
-        </button>
-        }
-      </mat-card-content>
-    </mat-card>
-    <mat-card appearance="outlined">
-      <mat-card-header>
-        <mat-card-title> {{ 'Background' | translate }} </mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
-        <br />
-        <mat-slide-toggle
-          [(ngModel)]="settings.localSettings.background.effect"
-          (change)="entitySettings.loadBackgroundEffect()"
-        >
-          {{ 'Gradient-Brightness Effect' | translate }}
-        </mat-slide-toggle>
-      </mat-card-content>
-    </mat-card>
-    <mat-card appearance="outlined">
-      <mat-card-header>
-        <mat-card-title> {{ 'Lights' | translate }} </mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <app-entity-feature-settings-lights></app-entity-feature-settings-lights>
-      </mat-card-content>
-    </mat-card>
-    <mat-card appearance="outlined">
-      <mat-card-header>
-        <mat-card-title> {{ 'Preview & Initial Perspective' | translate }} </mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        {{ 'Click on this image to set actual view as initial perspective.' | translate }}
-        <img
-          class="previewimage"
-          [src]="settings.localSettings.preview"
-          (click)="setInitialPerspectivePreview()"
+<h1>{{ 'Settings' | translate }}</h1>
+
+@if (settingsReady$ | async) { @if (processing.settings$ | async; as settings) { @if
+((processing.isInUpload$ | async) === false) {
+<k-details [title]="'Background' | translate">
+  <color-chrome
+    (onChange)="setBackgroundColor($event.color.rgb)"
+    [color]="settings.localSettings.background.color"
+  />
+
+  <k-labelled-checkbox
+    [label]="'Gradient-brightness effect' | translate"
+    (checkedChange)="setBackgroundEffect($event)"
+    [startingValue]="settings.localSettings.background.effect"
+  />
+
+  <k-button (click)="resetBackground()" type="outlined-primary">
+    {{ 'Reset background' | translate }}
+  </k-button>
+</k-details>
+<k-details [title]="'Lights' | translate">
+  <app-entity-feature-settings-lights></app-entity-feature-settings-lights>
+</k-details>
+<k-details [title]="'Preview and initial perspective' | translate">
+  <p class="wizard-step-text">
+    {{ 'Click on this image to set a nice and fitting camera perspective' | translate }}
+  </p>
+  <img
+    class="previewimage"
+    [src]="settings.localSettings.preview | fixImageUrl"
+    (click)="setInitialPerspectivePreview()"
+  />
+</k-details>
+
+<k-button (click)="backToDefaultSettings()" type="outlined-primary">
+  {{ 'Back to default' | translate }}
+</k-button>
+@if (canSaveSettings$ | async) {
+<k-button (click)="saveSettings()" type="solid-primary">
+  {{ 'Save as default' | translate }}
+</k-button>
+} } @if (processing.isInUpload$ | async) {
+<k-wizard direction="vertical" [linear]="true" #stepper>
+  @if (processing.hasMeshSettings$ | async) {
+  <k-wizard-step [label]="'Mesh settings' | translate">
+    <app-entity-feature-settings-mesh></app-entity-feature-settings-mesh>
+    <k-button type="solid-primary" (click)="showNextAlertFirstStep()">{{
+      'Save mesh settings' | translate
+    }}</k-button>
+  </k-wizard-step>
+  }
+  <k-wizard-step [label]="'Background and lights' | translate">
+    <div class="wizard-step-content">
+      <k-details [title]="'Background' | translate">
+        <color-chrome
+          (onChange)="setBackgroundColor($event.color.rgb)"
+          [color]="settings.localSettings.background.color"
         />
-      </mat-card-content>
-    </mat-card>
-    <mat-card appearance="outlined">
-      <mat-card-content>
-        <button class="fullwidth-button" mat-raised-button (click)="backToDefaultSettings()">
-          {{ 'Back to Default' | translate }}
-        </button>
-        @if (canSaveSettings$ | async) {
-        <button class="fullwidth-button" mat-raised-button (click)="saveSettings()">
-          {{ 'Save as default' | translate }}
-        </button>
-        }
-      </mat-card-content>
-    </mat-card>
-  </div>
-  } @if (processing.isInUpload$ | async) {
-  <div>
-    <mat-vertical-stepper [linear]="true" #stepper>
-      @if (processing.hasMeshSettings$ | async) {
-      <mat-step>
-        <app-entity-feature-settings-mesh></app-entity-feature-settings-mesh>
-        <div>
-          <button mat-button (click)="showNextAlertFirstStep()">{{ 'Next' | translate }}</button>
-        </div>
-      </mat-step>
-      }
-      <mat-step>
-        <ng-template matStepLabel>{{ 'Set Initial Settings' | translate }}</ng-template>
-        <h5>
-          {{ 'Background' | translate }}
-          <button
-            mat-icon-button
-            (click)="backgroundToggle = !backgroundToggle"
-            matTooltip="{{ 'Toggle' | translate }}"
-            matTooltipPosition="above"
-            type="button"
-          >
-            <mat-icon>
-              {{ backgroundToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}
-            </mat-icon>
-          </button>
-        </h5>
-        @if (backgroundToggle) {
-        <div>
-          <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
-          <br />
-          <mat-slide-toggle
-            [(ngModel)]="settings.localSettings.background.effect"
-            (change)="entitySettings.loadBackgroundEffect()"
-          >
-            {{ 'Gradient-Brightness Effect' | translate }}
-          </mat-slide-toggle>
-        </div>
-        }
-        <h5>
-          Lights
-          <button
-            mat-icon-button
-            (click)="lightsToggle = !lightsToggle"
-            matTooltip="{{ 'Toggle' | translate }}"
-            matTooltipPosition="above"
-            type="button"
-          >
-            <mat-icon>
-              {{ lightsToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}
-            </mat-icon>
-          </button>
-        </h5>
-        @if (lightsToggle) {
-        <div>
-          <app-entity-feature-settings-lights></app-entity-feature-settings-lights>
-        </div>
-        } @if ((processing.mediaType$ | async) !== 'audio') {
-        <div>
-          <h5>
-            {{ 'Preview & Initial Perspective' | translate }}
-            <button
-              mat-icon-button
-              (click)="previewToggle = !previewToggle"
-              matTooltip="{{ 'Toggle' | translate }}"
-              matTooltipPosition="above"
-              type="button"
-            >
-              <mat-icon>
-                {{ previewToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}
-              </mat-icon>
-            </button>
-          </h5>
-          @if (previewToggle) {
-          <div>
-            {{
-              'Please select a nice and fitting camera perspective before you go on to the next
-                      step. By clicking on the next button the actual view will be set as initial
-                      perspective. And I will automatically produce a preview - smile!' | translate
-            }}
-          </div>
-          }
-        </div>
-        }
-        <div>
-          <button mat-button (click)="nextSecondStep()">{{ 'Next' | translate }}</button>
-        </div>
-      </mat-step>
-      @if (!(isStandalone$ | async)) {
-      <mat-step>
-        <ng-template matStepLabel>{{ 'Done' | translate }}</ng-template>
-        <img class="previewimage" [src]="settings.localSettings.preview" />
-        {{ 'You set all settings and I celebrate it with this preview.' | translate }}
-        <br />
-        {{ 'Please save them if you are done. Afterwards you may add annotations.' | translate }}
-        <div>
-          <button mat-button matStepperPrevious>{{ 'Back' | translate }}</button>
-          <button mat-button (click)="saveSettings()">{{ 'Save' | translate }}</button>
-        </div>
-      </mat-step>
-      } @else {
-      <mat-step>
-        <ng-template matStepLabel>{{ 'Export' | translate }}</ng-template>
-        <img class="previewimage" [src]="settings.localSettings.preview" />
+
+        <k-labelled-checkbox
+          [label]="'Gradient-brightness effect' | translate"
+          (checkedChange)="setBackgroundEffect($event)"
+          [startingValue]="settings.localSettings.background.effect"
+        />
+
+        <k-button (click)="resetBackground()" type="outlined-primary">
+          {{ 'Reset background' | translate }}
+        </k-button>
+      </k-details>
+
+      <k-details [title]="'Lights' | translate">
+        <app-entity-feature-settings-lights></app-entity-feature-settings-lights>
+      </k-details>
+    </div>
+
+    <k-button type="solid-primary" (click)="stepper.nextStep()">{{
+      'Save background and lights' | translate
+    }}</k-button>
+  </k-wizard-step>
+  @if ((processing.mediaType$ | async) !== 'audio') {
+  <k-wizard-step [label]="'Preview and initial perspective' | translate">
+    <div class="wizard-step-content wizard-step-content-dark">
+      <p class="wizard-step-text">
+        {{
+          'Please select a nice and fitting camera perspective for your object by moving it to the desired position. Click “Save preview” to set the current view as initial perspective. - Smile!'
+            | translate
+        }}
+      </p>
+    </div>
+
+    <k-button type="solid-primary" (click)="setPerspectiveStep()">{{
+      'Save preview and initial perspective' | translate
+    }}</k-button>
+  </k-wizard-step>
+  } @if (!(isStandalone$ | async)) {
+  <k-wizard-step [label]="'Confirm' | translate">
+    <div class="wizard-step-content wizard-step-content-dark">
+      <p class="wizard-step-text">
+        {{ 'You set all settings and we celebrate it with this preview.' | translate }}
+      </p>
+
+      <img class="previewimage" [src]="settings.localSettings.preview | fixImageUrl" />
+
+      <p class="wizard-step-text">
+        {{
+          'Please save the settings if you are done. Or go back to make changes. Afterwards you may add annotations.'
+            | translate
+        }}
+      </p>
+    </div>
+
+    <k-button type="outlined-primary" (click)="stepper.prevStep()">{{
+      'Back' | translate
+    }}</k-button>
+
+    <k-button type="solid-primary" (click)="saveSettings()">{{ 'Save' | translate }}</k-button>
+  </k-wizard-step>
+  } @else {
+  <k-wizard-step [label]="'Export' | translate">
+    <div class="wizard-step-content wizard-step-content-dark">
+      <p class="wizard-step-text">
         {{
           'Your settings can now be exported and loaded in the standalone Kompakkt viewer.'
             | translate
         }}
-        <div>
-          <button mat-button matStepperPrevious>{{ 'Back' | translate }}</button>
-          <button mat-button (click)="exportSettings()">{{ 'Export' | translate }}</button>
-        </div>
-      </mat-step>
-      }
-    </mat-vertical-stepper>
-  </div>
+      </p>
+
+      <img class="previewimage" [src]="settings.localSettings.preview | fixImageUrl" />
+    </div>
+    <k-button type="outlined-primary" (click)="stepper.prevStep()">{{
+      'Back' | translate
+    }}</k-button>
+    <k-button type="solid-primary" (click)="exportSettings()">{{ 'Export' | translate }}</k-button>
+  </k-wizard-step>
   }
-</div>
-} }
+</k-wizard>
+} } }

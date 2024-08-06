@@ -1,18 +1,17 @@
+import { AsyncPipe, KeyValuePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { MatIcon } from '@angular/material/icon';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import fscreen from 'fscreen';
+import { ButtonComponent, TooltipDirective } from 'projects/komponents/src';
 import { firstValueFrom, map } from 'rxjs';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { BabylonService } from '../../services/babylon/babylon.service';
 import { MessageService } from '../../services/message/message.service';
 import { ProcessingService, QualitySetting } from '../../services/processing/processing.service';
 import { TranslateService } from '../../services/translate/translate.service';
 import { UserdataService } from '../../services/userdata/userdata.service';
-import { TranslatePipe } from '../../pipes/translate.pipe';
-import { AsyncPipe, KeyValuePipe } from '@angular/common';
-import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { CameraSettingsComponent } from './camera-settings/camera-settings.component';
-import { MatIcon } from '@angular/material/icon';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatIconButton } from '@angular/material/button';
 
 @Component({
   selector: 'app-menu',
@@ -20,8 +19,6 @@ import { MatIconButton } from '@angular/material/button';
   styleUrls: ['./menu.component.scss'],
   standalone: true,
   imports: [
-    MatIconButton,
-    MatTooltip,
     MatIcon,
     CameraSettingsComponent,
     MatMenuTrigger,
@@ -30,6 +27,8 @@ import { MatIconButton } from '@angular/material/button';
     AsyncPipe,
     KeyValuePipe,
     TranslatePipe,
+    TooltipDirective,
+    ButtonComponent,
   ],
 })
 export class MenuComponent implements OnInit {

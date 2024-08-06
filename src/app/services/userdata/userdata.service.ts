@@ -11,7 +11,11 @@ import {
   IStrippedUserData,
   IUserData,
 } from 'src/common';
-import { LoginComponent } from '../../components/dialogs/dialog-login/login.component';
+import {
+  AuthConcern,
+  AuthResult,
+  LoginComponent,
+} from '../../components/dialogs/dialog-login/login.component';
 import { BackendService } from '../backend/backend.service';
 
 const getWhitelistedPersons = (element: IEntity | ICompilation) => {
@@ -109,11 +113,14 @@ export class UserdataService {
   }
 
   public async openLoginDialog(): Promise<boolean> {
-    const dialogRef = this.dialog.open(LoginComponent);
+    const dialogRef = this.dialog.open<LoginComponent, AuthConcern, AuthResult>(LoginComponent, {
+      width: '360px',
+      data: 'login',
+    });
     const result = await firstValueFrom(dialogRef.afterClosed());
-    if (!result || result === false) return false;
+    if (!result) return false;
 
-    const { username, password, userData } = result.data;
+    const { username, password, userData } = result;
     this.userData$.next(userData);
     this.loginData$.next({ username, password });
     return true;

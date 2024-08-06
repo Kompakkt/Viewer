@@ -4,12 +4,15 @@ import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ActionManager, ExecuteCodeAction, PickingInfo, Tags, Vector3 } from '@babylonjs/core';
 import { BehaviorSubject, ReplaySubject, combineLatest, firstValueFrom, fromEvent } from 'rxjs';
-import { distinct, map } from 'rxjs/operators';
+import { distinct, filter, map, switchMap } from 'rxjs/operators';
 import { IAnnotation, IVector3, isAnnotation } from 'src/common';
 import { annotationFallback, annotationLogo } from '../../../assets/annotations/annotations';
 // tslint:disable-next-line:max-line-length
-import { DialogGetUserDataComponent } from '../../components/dialogs/dialog-get-user-data/dialog-get-user-data.component';
-// tslint:disable-next-line:max-line-length
+import {
+  AuthConcern,
+  AuthResult,
+  LoginComponent,
+} from 'src/app/components/dialogs/dialog-login/login.component';
 import { DialogShareAnnotationComponent } from '../../components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
 import { BabylonService } from '../babylon/babylon.service';
 import { BackendService } from '../backend/backend.service';
@@ -47,13 +50,16 @@ export class AnnotationService {
   public selectedAnnotation$ = new BehaviorSubject('');
   public editModeAnnotation$ = new BehaviorSubject('');
   public annotations$ = new BehaviorSubject<IAnnotation[]>([]);
+  public hiddenAnnotations$ = new BehaviorSubject<string[]>([]);
 
   public isAnnotationMode$ = new BehaviorSubject(false);
 
   private defaultOffset = 0;
 
   public picked$ = new ReplaySubject<PickingInfo>();
-  public debouncedPicked$ = this.picked$.pipe(
+  public debouncedPicked$ = this.isAnnotationMode$.pipe(
+    filter(isAnnotationMode => isAnnotationMode),
+    switchMap(() => this.picked$),
     distinct(({ pickedPoint }) => JSON.stringify(pickedPoint)),
   );
 
@@ -339,16 +345,11 @@ export class AnnotationService {
   private async setAnnotationMode(value: boolean) {
     const mediaType = await firstValueFrom(this.processing.mediaType$);
     if (mediaType === 'video' || mediaType === 'audio') return;
-    const meshes = await firstValueFrom(this.processing.meshes$);
     this.isAnnotationMode$.next(value);
     if (value) {
       this.babylon.getCanvas().classList.add('annotation-mode');
     } else {
       this.babylon.getCanvas().classList.remove('annotation-mode');
-    }
-    for (const mesh of meshes) {
-      if (mesh.name === '__root__') continue; // Skip GlTF root node
-      mesh.isPickable = value;
     }
   }
 
@@ -360,73 +361,72 @@ export class AnnotationService {
     const isCompilationLoaded = await firstValueFrom(this.processing.compilationLoaded$);
     const userdata = await firstValueFrom(this.userdata.userData$);
 
-    this.babylon.createPreviewScreenshot().then(detailScreenshot => {
-      if (!entity) {
-        throw new Error(`this.entity not defined: ${entity}`);
-      }
-      const generatedId = this.backend.generateEntityId();
+    const detailScreenshot = await this.babylon.createPreviewScreenshot();
+    if (!entity) {
+      throw new Error(`this.entity not defined: ${entity}`);
+    }
+    const generatedId = this.backend.generateEntityId();
 
-      const personName = userdata ? userdata.fullname : 'guest';
-      const personID = userdata ? userdata._id : 'guest';
+    const personName = userdata ? userdata.fullname : 'guest';
+    const personID = userdata ? userdata._id : 'guest';
 
-      const referencePoint = result.pickedPoint!;
-      const referenceNormal = result.getNormal(true, true)!;
+    const referencePoint = result.pickedPoint!;
+    const referenceNormal = result.getNormal(true, true)!;
 
-      const relatedCompilation =
-        isCompilationLoaded && compilation ? compilation._id.toString() : '';
+    const relatedCompilation =
+      isCompilationLoaded && compilation ? compilation._id.toString() : '';
 
-      const { position, target, cameraType } = camera;
+    const { position, target, cameraType } = camera;
 
-      const newAnnotation: IAnnotation = {
-        validated: !isCompilationLoaded,
-        _id: generatedId,
-        identifier: generatedId,
-        ranking: currentAnnotations.length + 1,
-        creator: {
-          type: 'person',
-          name: personName,
-          _id: personID,
-        },
-        created: new Date().toISOString(),
-        generator: {
-          type: 'software',
-          name: 'Kompakkt',
-          _id: personID,
-          homepage: 'https://github.com/Kompakkt/Kompakkt',
-        },
-        motivation: 'defaultMotivation',
-        lastModifiedBy: {
-          type: 'person',
-          name: personName,
-          _id: personID,
-        },
-        body: {
-          type: 'annotation',
-          content: {
-            type: 'text',
-            title: '',
-            description: '',
-            relatedPerspective: {
-              cameraType,
-              position,
-              target,
-              preview: detailScreenshot,
-            },
+    const newAnnotation: IAnnotation = {
+      validated: !isCompilationLoaded,
+      _id: generatedId,
+      identifier: generatedId,
+      ranking: currentAnnotations.length + 1,
+      creator: {
+        type: 'person',
+        name: personName,
+        _id: personID,
+      },
+      created: new Date().toISOString(),
+      generator: {
+        type: 'software',
+        name: 'Kompakkt',
+        _id: personID,
+        homepage: 'https://github.com/Kompakkt/Kompakkt',
+      },
+      motivation: 'defaultMotivation',
+      lastModifiedBy: {
+        type: 'person',
+        name: personName,
+        _id: personID,
+      },
+      body: {
+        type: 'annotation',
+        content: {
+          type: 'text',
+          title: '',
+          description: '',
+          relatedPerspective: {
+            cameraType,
+            position,
+            target,
+            preview: detailScreenshot,
           },
         },
-        target: {
-          source: {
-            relatedEntity: entity._id.toString(),
-            relatedCompilation,
-          },
-          selector: {
-            referencePoint,
-            referenceNormal,
-          },
+      },
+      target: {
+        source: {
+          relatedEntity: entity._id.toString(),
+          relatedCompilation,
         },
-      };
-      this.add(newAnnotation);
-    });
+        selector: {
+          referencePoint,
+          referenceNormal,
+        },
+      },
+    };
+    this.add(newAnnotation);
   }
 
   private async add(_annotation: IAnnotation) {
@@ -489,64 +489,59 @@ export class AnnotationService {
   public async deleteAnnotation(_annotation: IAnnotation) {
     const isDefault = await firstValueFrom(this.processing.defaultEntityLoaded$);
     const isFallback = await firstValueFrom(this.processing.fallbackEntityLoaded$);
-    if (this.userdata.isAnnotationOwner(_annotation)) {
-      this.setSelectedAnnotation('');
-      this.setEditModeAnnotation('');
-      const arr = this.annotations$.getValue();
-      const index = arr.findIndex(ann => ann._id === _annotation._id);
-      if (index !== -1) {
-        arr.splice(
-          arr.findIndex(ann => ann._id === _annotation._id),
-          1,
-        );
-        this.changedRankingPositions();
-        this.redrawMarker();
-        this.annotations$.next(arr);
-        if (!isFallback && !isDefault) {
-          this.local.deleteAnnotation(_annotation._id.toString());
-          this.deleteAnnotationFromServer(_annotation._id.toString());
-        }
-      }
-    } else {
-      this.message.error('You are not the Owner of this Annotation.');
+    if (!this.userdata.isAnnotationOwner(_annotation)) {
+      this.message.error('You are not the owner of this annotation.');
+      return false;
     }
+
+    if (!isFallback && !isDefault) {
+      const success = await this.deleteAnnotationFromServer(_annotation._id.toString());
+      if (!success) {
+        return false;
+      }
+      this.message.info('Annotation has been deleted.');
+      this.local.deleteAnnotation(_annotation._id.toString()).catch(() => {});
+    }
+
+    this.setSelectedAnnotation('');
+    this.setEditModeAnnotation('');
+
+    this.annotations$.next(this.annotations$.getValue().filter(ann => ann._id !== _annotation._id));
+    this.changedRankingPositions();
+    this.redrawMarker();
+    return true;
   }
 
   public async deleteAnnotationFromServer(annotationId: string) {
-    const loginData = await firstValueFrom(this.userdata.loginData$);
-    if (!loginData) return this.passwordDialog(annotationId);
-    const { username, password } = loginData;
+    const loginData =
+      (await firstValueFrom(this.userdata.loginData$)) ?? (await this.promptUserData());
+    if (!loginData) {
+      this.message.info('Failed authentication - Annotation can not be deleted from server.');
+      return false;
+    }
 
-    this.backend
-      .deleteRequest(annotationId, 'annotation', username, password)
-      .then(() => {
-        this.message.info('Deleted from Server');
-      })
+    const success = await this.backend
+      .deleteRequest(annotationId, 'annotation', loginData.username, loginData.password)
+      .then(() => true)
       .catch((errorMessage: HttpErrorResponse) => {
         if (errorMessage.status === 401) {
           this.message.info('Permission denied');
-          this.passwordDialog(annotationId);
-        } else {
-          this.message.error('Annotation can not be deleted from Server.');
         }
+        return false;
       });
+
+    return success;
   }
 
-  public passwordDialog(annotationId: string) {
-    const dialogConfig = new MatDialogConfig();
-    dialogConfig.disableClose = true;
-    dialogConfig.autoFocus = true;
-    dialogConfig.data = {
-      id: annotationId,
-    };
-    const dialogRef = this.dialog.open(DialogGetUserDataComponent, dialogConfig);
-    dialogRef.afterClosed().subscribe(data => {
-      if (data === true) {
-        this.message.info('Deleted from Server');
-      } else {
-        this.message.info('Not deleted from Server');
-      }
+  private async promptUserData() {
+    const dialogRef = this.dialog.open<LoginComponent, AuthConcern, AuthResult>(LoginComponent, {
+      width: '360px',
+      disableClose: true,
+      autoFocus: true,
+      data: 'delete-annotation',
     });
+
+    return await firstValueFrom(dialogRef.afterClosed());
   }
 
   private async changedRankingPositions() {
@@ -594,38 +589,18 @@ export class AnnotationService {
     const positionVector = getVector(referencePoint);
     const normalVector = getVector(referenceNormal);
 
-    const color = 'black';
     const scene = this.babylon.getScene();
     const id = newAnnotation._id.toString();
-    const marker = createMarker(
-      scene,
-      newAnnotation.ranking.toString(),
-      id,
-      false,
-      color,
-      positionVector,
-      normalVector,
-    );
-    marker.isPickable = false;
-
-    const markertransparent = createMarker(
-      scene,
-      newAnnotation.ranking.toString(),
-      id,
-      true,
-      color,
-      positionVector,
-      normalVector,
-    );
+    const marker = createMarker(scene, id, positionVector, normalVector);
+    marker.isPickable = true;
 
     // Parent markers to center to fix offset
     const center = scene.getMeshesByTags('center')[0];
     marker.parent = center;
-    markertransparent.parent = center;
 
-    markertransparent.actionManager = new ActionManager(scene);
+    marker.actionManager = new ActionManager(scene);
     // register 'pickCylinder' as the handler function for cylinder picking action.
-    markertransparent.actionManager.registerAction(
+    marker.actionManager.registerAction(
       new ExecuteCodeAction(ActionManager.OnPickTrigger, () => {
         this.setSelectedAnnotation(id);
       }),
@@ -730,5 +705,13 @@ export class AnnotationService {
         selector: annotation.target.selector,
       },
     };
+  }
+
+  public setAnnotationVisibility(id: string, visible: boolean) {
+    if (visible) {
+      this.hiddenAnnotations$.next(this.hiddenAnnotations$.value.filter(x => x !== id));
+    } else {
+      this.hiddenAnnotations$.next([...this.hiddenAnnotations$.value, id]);
+    }
   }
 }

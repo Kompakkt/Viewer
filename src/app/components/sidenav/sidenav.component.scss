@@ -1,34 +1,35 @@
 :host {
   position: absolute;
   top: 0;
-  left: -300px;
+  left: calc(-1 * var(--sidebar-width));
   height: 100vh;
   transition: 280ms;
   z-index: 99;
   font-family: Roboto, 'Helvetica Neue', sans-serif;
-}
 
-:host.is-open {
-  transition: 280ms;
-  left: 0;
+  &.is-open {
+    transition: 280ms;
+    left: 0;
+  }
+
+  h3 {
+    background-color: #222;
+    padding: 15px;
+    margin: 0;
+  }
 }
 
 .mat-icon {
   color: #fff;
 }
 
-:host h3 {
-  background-color: #222;
-  padding: 15px;
-  margin: 0;
-}
-
 #sidenav {
   overflow-x: hidden;
-}
+  padding: 16px;
 
-#sidenav.hidden * {
-  display: none;
+  > *[hidden] {
+    display: none !important;
+  }
 }
 
 .mat-mdc-radio-button {
@@ -43,16 +44,17 @@
 .category {
   margin: 25px 0 0 0;
 }
+
 .entity-card {
   margin-bottom: 25px;
-}
 
-.entity-card .mat-mdc-card-title {
-  text-transform: capitalize;
-}
+  .mat-mdc-card-title {
+    text-transform: capitalize;
+  }
 
-.entity-card img {
-  cursor: pointer;
-  max-height: 150px;
-  width: 100%;
+  img {
+    cursor: pointer;
+    max-height: 150px;
+    width: 100%;
+  }
 }

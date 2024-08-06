@@ -1,49 +1,55 @@
 <form action="auth-dialog_submit" method="get" accept-charset="utf-8">
-  <h1 mat-dialog-title>{{ (concern && concern !== '' ? concern : 'Login') | translate }}</h1>
-  <div mat-dialog-content>
-    <mat-form-field>
-      <mat-label>{{ 'Username' | translate }}</mat-label>
-      <input
-        autocomplete="username"
-        type="username"
-        matInput
-        [(ngModel)]="data.username"
-        [ngModelOptions]="{ standalone: true }"
-      />
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>{{ 'Password' | translate }}</mat-label>
-      <input
-        autocomplete="password"
-        type="password"
-        matInput
-        [(ngModel)]="data.password"
-        [ngModelOptions]="{ standalone: true }"
-      />
-    </mat-form-field>
-  </div>
+  @switch (concern) { @case ('login') {
+  <h1>{{ 'Login' | translate }}</h1>
+
+  <p>
+    {{ 'This content is protected and requires authentication.' | translate }}
+  </p>
+  } @case ('delete-annotation') {
+  <h1>{{ 'Delete annotation' | translate }}</h1>
+
+  <p>
+    {{ 'Are you sure you want to delete this annotation forever?' | translate }}
+  </p>
+  <p>
+    {{ 'If you are sure, enter your username and password to confirm.' | translate }}
+  </p>
+  } }
+
+  <k-input
+    [label]="'Username' | translate"
+    type="username"
+    (valueChanged)="data.username = $event.value"
+  />
+  <k-input
+    [label]="'Password' | translate"
+    type="password"
+    (valueChanged)="data.password = $event.value"
+  />
 
   @if (loginFailed) {
-  <div mat-dialog-content>
-    <span style="color: red">{{ 'Login failed' | translate }}</span>
-  </div>
+  <p style="color: red">{{ 'Login failed' | translate }}</p>
   }
-  <div mat-dialog-actions>
-    <button
-      mat-button
-      type="button"
+
+  <k-button-row>
+    <!--<k-button
       (click)="dialogRef.close(false)"
       [disabled]="waitingForResponse"
-    >
-      {{ 'Cancel' | translate }}
-    </button>
-    <button
-      mat-button
-      type="submit"
+      type="outlined-secondary"
+      full-width
+      >{{ 'Cancel' | translate }}</k-button
+    >-->
+    <k-button
       (click)="login()"
       [disabled]="data.username.length === 0 || data.password.length === 0 || waitingForResponse"
+      full-width
+      type="solid-primary"
     >
+      @switch (concern) { @case ('login') {
       {{ 'Login' | translate }}
-    </button>
-  </div>
+      } @case ('delete-annotation') {
+      {{ 'Delete forever' | translate }}
+      } }
+    </k-button>
+  </k-button-row>
 </form>

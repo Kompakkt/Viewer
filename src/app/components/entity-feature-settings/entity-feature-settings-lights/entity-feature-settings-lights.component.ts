@@ -1,18 +1,19 @@
 import { Component } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { EntitySettingsService } from '../../../services/entitysettings/entitysettings.service';
 import { LightService } from '../../../services/light/light.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
-import { TranslatePipe } from '../../../pipes/translate.pipe';
-import { MatSlider, MatSliderThumb } from '@angular/material/slider';
+
+import { ButtonComponent, InputComponent, SliderComponent } from 'projects/komponents/src';
 
 @Component({
   selector: 'app-entity-feature-settings-lights',
   templateUrl: './entity-feature-settings-lights.component.html',
   styleUrls: ['./entity-feature-settings-lights.component.scss'],
   standalone: true,
-  imports: [MatSlider, MatSliderThumb, TranslatePipe],
+  imports: [TranslatePipe, SliderComponent, InputComponent, ButtonComponent],
 })
 export class EntityFeatureSettingsLightsComponent {
   constructor(
@@ -31,12 +32,21 @@ export class EntityFeatureSettingsLightsComponent {
     return this.lights.getLightByType('pointLight')?.position?.z ?? 0;
   }
 
+  public resetLights() {
+    ['pointLight', 'ambientlightUp', 'ambientlightDown'].forEach(lightType => {
+      this.setLightIntensity(0, lightType);
+    });
+    ['x', 'y', 'z'].forEach(dimension => {
+      this.setPointlightPosition(dimension, 0);
+    });
+  }
+
   // Lights
   public async setLightIntensity(intensity: number | null, lightType: string) {
     if (!intensity) intensity = 0;
     const { localSettings } = await firstValueFrom(this.processing.settings$);
     const indexOfLight = this.lights.getLightIndexByType(lightType);
-    if (indexOfLight !== undefined) {
+    if (indexOfLight !== undefined && localSettings.lights[indexOfLight]) {
       localSettings.lights[indexOfLight].intensity = intensity;
       this.entitySettings.loadLightIntensity(lightType);
     } else {

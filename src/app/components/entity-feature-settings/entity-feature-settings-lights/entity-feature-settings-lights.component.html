@@ -1,82 +1,66 @@
-<h4>{{ 'Brightness' | translate }}</h4>
-<p>{{ 'Ambient environment lights' | translate }}</p>
-<h5>{{ 'Fabulous' | translate }} ({{ 'down towards the ground' | translate }})</h5>
-<mat-slider min="0" max="50" step="0.1" #ngSlider
-  ><input
-    matSliderThumb
-    [value]="getLightIntensity('ambientlightUp')"
-    (input)="
-      setLightIntensity(
-        { source: ngSliderThumb, parent: ngSlider, value: ngSliderThumb.value }.value,
-        'ambientlightUp'
-      )
-    "
-    #ngSliderThumb="matSliderThumb"
-/></mat-slider>
-<h5>{{ 'Sunny' | translate }} ({{ 'up towards the sky' | translate }})</h5>
-<mat-slider min="0" max="50" step="0.1" #ngSlider
-  ><input
-    matSliderThumb
-    [value]="getLightIntensity('ambientlightDown')"
-    (input)="
-      setLightIntensity(
-        { source: ngSliderThumb, parent: ngSlider, value: ngSliderThumb.value }.value,
-        'ambientlightDown'
-      )
-    "
-    #ngSliderThumb="matSliderThumb"
-/></mat-slider>
-<br />
-<p>{{ 'Pointlight' | translate }}</p>
-<mat-slider min="0" max="50" step="0.1" #ngSlider
-  ><input
-    matSliderThumb
-    [value]="getLightIntensity('pointLight')"
-    (input)="
-      setLightIntensity(
-        { source: ngSliderThumb, parent: ngSlider, value: ngSliderThumb.value }.value,
-        'pointLight'
-      )
-    "
-    #ngSliderThumb="matSliderThumb"
-/></mat-slider>
-<h5>{{ 'Pointlight Dimensions:' | translate }} X Y Z</h5>
-<!-- TODO: The 'vertical' property no longer exists -->
-<mat-slider min="-10" max="10" step="1" #ngSlider
-  ><input
-    matSliderThumb
-    [value]="pointLightX"
-    (input)="
-      setPointlightPosition(
-        'x',
-        { source: ngSliderThumb, parent: ngSlider, value: ngSliderThumb.value }.value
-      )
-    "
-    #ngSliderThumb="matSliderThumb"
-/></mat-slider>
-<!-- TODO: The 'vertical' property no longer exists -->
-<mat-slider min="-10" max="10" step="1" #ngSlider
-  ><input
-    matSliderThumb
-    [value]="pointLightY"
-    (input)="
-      setPointlightPosition(
-        'y',
-        { source: ngSliderThumb, parent: ngSlider, value: ngSliderThumb.value }.value
-      )
-    "
-    #ngSliderThumb="matSliderThumb"
-/></mat-slider>
-<!-- TODO: The 'vertical' property no longer exists -->
-<mat-slider min="-10" max="10" step="1" #ngSlider
-  ><input
-    matSliderThumb
-    [value]="pointLightZ"
-    (input)="
-      setPointlightPosition(
-        'z',
-        { source: ngSliderThumb, parent: ngSlider, value: ngSliderThumb.value }.value
-      )
-    "
-    #ngSliderThumb="matSliderThumb"
-/></mat-slider>
+<h2>{{ 'Ambient environment lights' | translate }}</h2>
+
+<k-slider
+  [label]="('Light intensity from above' | translate) + ': ' + getLightIntensity('ambientlightUp')"
+  [min]="0"
+  [max]="50"
+  [startingValue]="getLightIntensity('ambientlightUp')"
+  (valueChanged)="setLightIntensity($event, 'ambientlightUp')"
+  [showInfo]="true"
+  [showTooltip]="true"
+></k-slider>
+
+<k-slider
+  [label]="('Light intensity from below' | translate) + ': ' + getLightIntensity('ambientlightDown')"
+  [min]="0"
+  [max]="50"
+  [startingValue]="getLightIntensity('ambientlightDown')"
+  (valueChanged)="setLightIntensity($event, 'ambientlightDown')"
+  [showInfo]="true"
+  [showTooltip]="true"
+></k-slider>
+
+<h2>{{ 'Pointlight' | translate }}</h2>
+
+<k-slider
+  [label]="('Pointlight intensity' | translate) + ': ' + getLightIntensity('pointLight')"
+  [min]="0"
+  [max]="50"
+  [startingValue]="getLightIntensity('pointLight')"
+  (valueChanged)="setLightIntensity($event, 'pointLight')"
+  [showInfo]="true"
+  [showTooltip]="true"
+></k-slider>
+
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px">
+  <k-input
+    [label]="'X-axis' | translate"
+    [min]="0"
+    [max]="5"
+    type="number"
+    [startingValue]="pointLightX"
+    (valueChanged)="setPointlightPosition('x', $event.valueAsNumber)"
+  />
+
+  <k-input
+    [label]="'Y-axis' | translate"
+    [min]="0"
+    [max]="5"
+    type="number"
+    [startingValue]="pointLightY"
+    (valueChanged)="setPointlightPosition('y', $event.valueAsNumber)"
+  />
+
+  <k-input
+    [label]="'Z-axis' | translate"
+    [min]="0"
+    [max]="5"
+    type="number"
+    [startingValue]="pointLightZ"
+    (valueChanged)="setPointlightPosition('z', $event.valueAsNumber)"
+  />
+</div>
+
+<k-button (click)="resetLights()" type="outlined-primary">
+  {{ 'Reset lights' | translate }}
+</k-button>

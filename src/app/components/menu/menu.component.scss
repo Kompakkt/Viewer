@@ -18,14 +18,15 @@
   align-items: center;
 
   position: absolute;
-  right: 15px;
+  right: 12px;
   height: auto;
   width: auto;
-  bottom: 5px;
+  bottom: 8px;
 
-  background-color: rgba(0, 0, 0, 0.7);
-  border-radius: 0.75rem;
-  box-shadow: 1px 1px #333;
+  background-color: var(--color-bg-transparent);
+  border-radius: 12px;
+  padding: 8px 12px;
+  gap: 8px;
 }
 
 .is-active {

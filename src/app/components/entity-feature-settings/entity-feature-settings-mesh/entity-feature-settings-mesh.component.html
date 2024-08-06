@@ -1,313 +1,156 @@
 @if (processing.settings$ | async; as settings) {
-<ng-template matStepLabel>{{ 'Set Mesh Settings' | translate }}</ng-template>
-<h5>
-  {{ 'Information & Helpers' | translate }}
-  <button
-    mat-icon-button
-    (click)="meshSettingsHelperToggle = !meshSettingsHelperToggle"
-    matTooltip="{{ 'Toggle' | translate }}"
-    matTooltipPosition="above"
-    type="button"
-  >
-    <mat-icon>{{
-      meshSettingsHelperToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down'
-    }}</mat-icon>
-  </button>
-</h5>
-@if (meshSettingsHelperToggle) {
-<div>
-  <button class="fullwidth-button" mat-raised-button (click)="resetVisualUIMeshSettingsHelper()">
-    {{ 'Reset Helper' | translate }}
-  </button>
+<k-details [title]="'Information and helpers' | translate">
+  <h3 style="margin-top: 0px">{{ 'Bounding boxes' | translate }}</h3>
+
+  <k-labelled-checkbox
+    [label]="'Show entity bounding boxes' | translate"
+    (checkedChange)="setBoundingBoxEntityVisibility($event)"
+  />
+
+  <k-labelled-checkbox
+    [label]="'Show mesh bounding boxes' | translate"
+    (checkedChange)="setBoundingBoxMeshesVisibility($event)"
+  />
+
   @if (meshes$ | async; as meshes) {
-  <h5>{{ 'Number of meshes:' | translate }} {{ meshes.length }}</h5>
+  <small>{{ 'Number of meshes:' | translate }} {{ meshes.length }}</small>
   }
-  <mat-checkbox [checked]="boundingBoxVisibility" (change)="toggleBoundingBoxEntityVisibility()">
-    <h5>{{ 'Bounding Box Entity' | translate }}</h5>
-  </mat-checkbox>
-  <mat-checkbox
-    [checked]="boundingBoxMeshesVisibility"
-    (change)="toggleBoundingBoxMeshesVisibility()"
-    ><h5>{{ 'Bounding Box Meshes' | translate }}</h5>
-  </mat-checkbox>
-  <h5>
-    {{ 'Background' | translate }}
-    <button
-      mat-icon-button
-      (click)="backgroundColorPickerToggle = !backgroundColorPickerToggle"
-      matTooltip="{{ 'Toggle' | translate }}"
-      matTooltipPosition="above"
-      type="button"
-    >
-      <mat-icon>{{
-        backgroundColorPickerToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down'
-      }}</mat-icon>
-    </button>
-  </h5>
-  @if (backgroundColorPickerToggle) {
-  <div>
-    <color-chrome (onChange)="setBackgroundColor($event.color.rgb)"></color-chrome>
+
+  <h3>{{ 'Axes' | translate }}</h3>
+
+  <k-labelled-checkbox
+    [label]="'Show world axes' | translate"
+    (checkedChange)="setAxesVisibility('worldAxis', $event)"
+  />
+
+  <k-slider
+    [label]="('World axes size:' | translate) + ' ' + worldAxisScalingFactor"
+    [min]="1"
+    [max]="3"
+    [startingValue]="worldAxisScalingFactor"
+    (valueChanged)="setScalingFactorAxis($event, 'world')"
+  />
+
+  <k-labelled-checkbox
+    [label]="'Show local axes' | translate"
+    (checkedChange)="setAxesVisibility('localAxis', $event)"
+  />
+
+  <k-slider
+    [label]="('Local axes size:' | translate) + ' ' + localAxisScalingFactor"
+    [min]="1"
+    [max]="3"
+    [startingValue]="localAxisScalingFactor"
+    (valueChanged)="setScalingFactorAxis($event, 'local')"
+  />
+
+  <h3>{{ 'Ground' | translate }}</h3>
+
+  <k-labelled-checkbox
+    [label]="'Show ground' | translate"
+    (checkedChange)="setGroundVisibility($event)"
+  />
+
+  <k-slider
+    [label]="('Ground scale:' | translate) + ' ' + groundScalingFactor"
+    [min]="1"
+    [max]="10"
+    [startingValue]="groundScalingFactor"
+    (valueChanged)="setScalingFactorGround($event)"
+  />
+
+  <p>{{ 'Ground color' | translate }}</p>
+  <color-chrome (onChange)="entitySettings.setGroundMaterial($event.color.rgb)"></color-chrome>
+
+  <k-button (click)="resetVisualUIMeshSettingsHelper()" type="outlined-primary">
+    {{ 'Reset helpers' | translate }}
+  </k-button>
+</k-details>
+
+<k-details [title]="'Scale' | translate">
+  <!-- NOTE: We decided to comment out the centimeter sliders, as they are not representative of the real world size of any given object - Kai N & Senya B -->
+  <!--
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px">
+    <k-input
+      [label]="'Height:' | translate"
+      [min]="0"
+      [max]="entitySettings.initialSize.y * 5"
+      [startingValue]="processing.entityHeight"
+      type="number"
+      (valueChanged)="handleChangeDimension('height', $event.valueAsNumber)"
+      suffix="cm"
+    />
+    <k-input
+      [label]="'Width:' | translate"
+      [min]="0"
+      [max]="entitySettings.initialSize.x * 5"
+      [startingValue]="processing.entityWidth"
+      type="number"
+      (valueChanged)="handleChangeDimension('width', $event.valueAsNumber)"
+      suffix="cm"
+    />
+    <k-input
+      [label]="'Depth:' | translate"
+      [min]="0"
+      [max]="entitySettings.initialSize.z * 5"
+      [startingValue]="processing.entityDepth"
+      type="number"
+      (valueChanged)="handleChangeDimension('depth', $event.valueAsNumber)"
+      suffix="cm"
+    />
   </div>
-  }
-  <mat-checkbox [checked]="worldAxisVisibility" (change)="toggleAxesVisibility('worldAxis')"
-    ><h5>{{ 'World Axis' | translate }}</h5>
-  </mat-checkbox>
-  @if (worldAxisVisibility) {
-  <div>
-    <h6>{{ 'Size' | translate }}</h6>
-    <mat-slider min="0.1" max="3" step="0.1" #matslider #ngSlider
-      ><input
-        matSliderThumb
-        [value]="worldAxisScalingFactor"
-        (input)="
-          setScalingFactorAxis(
-            { source: ngSliderThumb, parent: ngSlider, value: ngSliderThumb.value }.value,
-            true
-          )
-        "
-        #ngSliderThumb="matSliderThumb"
-    /></mat-slider>
+  -->
+
+  <k-slider
+    [label]="('Scale factor:' | translate) + ' ' + (settings.localSettings.scale || 1)"
+    [min]="0.1"
+    [max]="5"
+    [step]="0.1"
+    [startingValue]="settings.localSettings.scale || 1"
+    (valueChanged)="handleChangeDimension('scale', $event)"
+  />
+
+  <k-button (click)="handleChangeDimension('scale', 1)" type="outlined-primary">
+    {{ 'Reset size' | translate }}
+  </k-button>
+</k-details>
+
+<k-details [title]="'Rotation' | translate">
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px">
+    <k-input
+      [label]="'X-axis' | translate"
+      [min]="0"
+      [max]="360"
+      type="number"
+      suffix="°"
+      [startingValue]="settings.localSettings.rotation.x"
+      (valueChanged)="setRotation('x', $event.valueAsNumber)"
+    />
+
+    <k-input
+      [label]="'Y-axis' | translate"
+      [min]="0"
+      [max]="360"
+      type="number"
+      suffix="°"
+      [startingValue]="settings.localSettings.rotation.y"
+      (valueChanged)="setRotation('y', $event.valueAsNumber)"
+    />
+
+    <k-input
+      [label]="'Z-axis' | translate"
+      [min]="0"
+      [max]="360"
+      type="number"
+      suffix="°"
+      [startingValue]="settings.localSettings.rotation.z"
+      (valueChanged)="setRotation('z', $event.valueAsNumber)"
+    />
   </div>
-  }
-  <br />
-  <mat-checkbox [checked]="localAxisVisibility" (change)="toggleAxesVisibility('localAxis')"
-    ><h5>{{ 'Local Axis' | translate }}</h5>
-  </mat-checkbox>
-  @if (localAxisVisibility) {
-  <div>
-    <h6>{{ 'Size' | translate }}</h6>
-    <mat-slider min="0.1" max="3" step="0.1" #matslider #ngSlider
-      ><input
-        matSliderThumb
-        [value]="localAxisScalingFactor"
-        (input)="
-          setScalingFactorAxis(
-            { source: ngSliderThumb, parent: ngSlider, value: ngSliderThumb.value }.value,
-            false
-          )
-        "
-        #ngSliderThumb="matSliderThumb"
-    /></mat-slider>
-  </div>
-  }
-  <br />
-  <mat-checkbox [checked]="groundVisibility" (change)="toggleGroundVisibility()"
-    ><h5>{{ 'Ground' | translate }}</h5>
-  </mat-checkbox>
-  @if (groundVisibility) {
-  <div>
-    <h6>{{ 'Size' | translate }}</h6>
-    <mat-slider min="0" max="10" step="1" #matslider #ngSlider
-      ><input
-        matSliderThumb
-        [value]="groundScalingFactor"
-        (input)="
-          setScalingFactorGround(
-            { source: ngSliderThumb, parent: ngSlider, value: ngSliderThumb.value }.value
-          )
-        "
-        #ngSliderThumb="matSliderThumb"
-    /></mat-slider>
-    <h6>{{ 'Color' | translate }}</h6>
-    <color-chrome (onChange)="entitySettings.setGroundMaterial($event.color.rgb)"></color-chrome>
-  </div>
-  }
-  <button class="fullwidth-button" mat-raised-button (click)="resetVisualUIMeshSettingsHelper()">
-    {{ 'Reset Helper' | translate }}
-  </button>
-</div>
+
+  <k-button (click)="setRotation('xyz_reset', 0)" type="outlined-primary">
+    {{ 'Reset rotation' | translate }}
+  </k-button>
+</k-details>
+
 }
-<h5>{{ 'Set Settings' | translate }}</h5>
-<h5 style="padding-left: 1em">
-  {{ 'Scale' | translate }}
-  <button
-    mat-icon-button
-    (click)="meshScaleToggle = !meshScaleToggle"
-    matTooltip="{{ 'Toggle' | translate }}"
-    matTooltipPosition="above"
-    type="button"
-  >
-    <mat-icon>
-      {{ meshScaleToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}
-    </mat-icon>
-  </button>
-</h5>
-@if (meshScaleToggle) {
-<div>
-  <button class="fullwidth-button" mat-raised-button (click)="handleChangeDimension('scale', 1)">
-    {{ 'Reset Size' | translate }}
-  </button>
-  <h6>
-    {{ 'Height:' | translate }}
-    <mat-form-field>
-      <input
-        matInput
-        min="0"
-        max="{{ entitySettings.initialSize.y * 5 }}"
-        [(ngModel)]="processing.entityHeight"
-        type="number"
-        step="0.5"
-        (input)="handleChangeDimension('height')"
-      />
-    </mat-form-field>
-    cm
-  </h6>
-  <h6>
-    {{ 'Width:' | translate }}
-    <mat-form-field>
-      <input
-        matInput
-        min="0"
-        max="{{ entitySettings.initialSize.x * 5 }}"
-        [(ngModel)]="processing.entityWidth"
-        type="number"
-        step="0.5"
-        (input)="handleChangeDimension('width')"
-      />
-    </mat-form-field>
-    cm
-  </h6>
-  <h6>
-    {{ 'Depth:' | translate }}
-    <mat-form-field>
-      <input
-        matInput
-        min="0"
-        max="{{ entitySettings.initialSize.z * 5 }}"
-        [(ngModel)]="processing.entityDepth"
-        type="number"
-        step="0.5"
-        (input)="handleChangeDimension('depth')"
-      />
-    </mat-form-field>
-    cm
-  </h6>
-  <h6>{{ 'Scale factor:' | translate }} {{ settings.localSettings.scale }}</h6>
-  <mat-slider min="0.0" max="5" step="0.05" #matslider #ngSlider
-    ><input
-      matSliderThumb
-      [value]="settings.localSettings.scale"
-      (input)="
-        handleChangeDimension(
-          'scale',
-          { source: ngSliderThumb, parent: ngSlider, value: ngSliderThumb.value }.value
-        )
-      "
-      #ngSliderThumb="matSliderThumb"
-  /></mat-slider>
-</div>
-}
-<h5 style="padding-left: 1em">
-  {{ 'Orientation' | translate }}
-  <button
-    mat-icon-button
-    (click)="meshOrientationToggle = !meshOrientationToggle"
-    matTooltip="{{ 'Toggle' | translate }}"
-    matTooltipPosition="above"
-    type="button"
-  >
-    <mat-icon>
-      {{ meshOrientationToggle ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}
-    </mat-icon>
-  </button>
-</h5>
-@if (meshOrientationToggle) {
-<div>
-  <button class="fullwidth-button" mat-raised-button (click)="setRotation('xyz_reset', 0)">
-    {{ 'Reset Rotation' | translate }}
-  </button>
-  <h5>X</h5>
-  <button
-    mat-icon-button
-    (click)="setRotation('x', -90)"
-    matTooltip="{{ 'Rotate -90°' | translate }}"
-    matTooltipPosition="above"
-    type="button"
-  >
-    <mat-icon [attr.aria-label]="'Rotate -90°' | translate">undo</mat-icon>
-  </button>
-  <mat-form-field>
-    <input
-      matInput
-      min="0"
-      max="360"
-      [(ngModel)]="settings.localSettings.rotation.x"
-      type="number"
-      step="1"
-      (input)="entitySettings.loadRotation()"
-    />
-  </mat-form-field>
-  °
-  <button
-    mat-icon-button
-    (click)="setRotation('x', 90)"
-    matTooltip="{{ 'Rotate 90°' | translate }}"
-    matTooltipPosition="above"
-    type="button"
-  >
-    <mat-icon [attr.aria-label]="'Rotate 90°' | translate">redo</mat-icon>
-  </button>
-  <h5>Y</h5>
-  <button
-    mat-icon-button
-    (click)="setRotation('y', -90)"
-    matTooltip="{{ 'Rotate -90°' | translate }}"
-    matTooltipPosition="above"
-    type="button"
-  >
-    <mat-icon [attr.aria-label]="'Rotate -90°' | translate">undo</mat-icon>
-  </button>
-  <mat-form-field>
-    <input
-      matInput
-      min="0"
-      max="360"
-      [(ngModel)]="settings.localSettings.rotation.y"
-      type="number"
-      step="1"
-      (input)="entitySettings.loadRotation()"
-    />
-  </mat-form-field>
-  °
-  <button
-    mat-icon-button
-    (click)="setRotation('y', 90)"
-    matTooltip="{{ 'Rotate 90°' | translate }}"
-    matTooltipPosition="above"
-    type="button"
-  >
-    <mat-icon [attr.aria-label]="'Rotate 90°' | translate">redo</mat-icon>
-  </button>
-  <h5>Z</h5>
-  <button
-    mat-icon-button
-    (click)="setRotation('z', -90)"
-    matTooltip="{{ 'Rotate -90°' | translate }}"
-    matTooltipPosition="above"
-    type="button"
-  >
-    <mat-icon [attr.aria-label]="'Rotate -90°' | translate">undo</mat-icon>
-  </button>
-  <mat-form-field>
-    <input
-      matInput
-      min="0"
-      max="360"
-      [(ngModel)]="settings.localSettings.rotation.z"
-      type="number"
-      step="1"
-      (input)="entitySettings.loadRotation()"
-    />
-  </mat-form-field>
-  °
-  <button
-    mat-icon-button
-    (click)="setRotation('z', 90)"
-    matTooltip="{{ 'Rotate 90°' | translate }}"
-    matTooltipPosition="above"
-    type="button"
-  >
-    <mat-icon [attr.aria-label]="'Rotate 90°' | translate">redo</mat-icon>
-  </button>
-</div>
-} }

@@ -113,7 +113,10 @@ export const load3DEntity = async (rootUrl: string, scene: Scene, isDefault?: bo
       // Disable Tone-Mapping
       scene.imageProcessingConfiguration.toneMappingEnabled = false;
     }
-    result.meshes.forEach(mesh => patchMeshPBR(mesh, scene));
+    result.meshes.forEach(mesh => {
+      patchMeshPBR(mesh, scene);
+      mesh.renderingGroupId = 1;
+    });
     return result as unknown as I3DEntityContainer;
   });
 };

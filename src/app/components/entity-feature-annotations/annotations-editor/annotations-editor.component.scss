@@ -1,98 +1,68 @@
-.annotation-box {
-  padding: 1px 0 1px 0;
-  color: rgba(0, 0, 0, 0.87);
+:host {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 48px;
+}
+
+div.note {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  justify-content: space-between;
-  box-sizing: border-box;
-  cursor: move;
-  font-size: 13px;
-}
+  row-gap: 8px;
+  column-gap: 4px;
 
-.entity-box {
-  padding: 1px 0 1px 0;
-  color: rgba(0, 0, 0, 0.87);
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  box-sizing: border-box;
-  cursor: move;
-  font-size: 13px;
-}
-
-.cdk-drag-preview {
-  box-sizing: border-box;
-  border-radius: 4px;
-  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14),
-    0 3px 14px 2px rgba(0, 0, 0, 0.12);
-}
-
-.cdk-drag-placeholder {
-  opacity: 0;
-}
-
-.cdk-drag-animating {
-  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-.annotation-box:last-child {
-  border: none;
-}
-
-.annotations-list.cdk-drop-list-dragging .annotation-box:not(.cdk-drag-placeholder) {
-  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-.mat-mdc-card {
   padding: 12px;
+  border-radius: 4px;
+  border: 1px solid var(--color-gray-12);
+
+  span {
+    font-weight: bold;
+    text-transform: uppercase;
+    line-height: 1;
+    font-size: var(--font-size-base);
+    color: var(--color-gray-12);
+  }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    color: var(--color-gray-12);
+
+    &.pointer {
+      cursor: pointer;
+    }
+  }
+
+  p {
+    margin: 0;
+    grid-column: span 3;
+  }
 }
 
-/* TODO(mdc-migration): The following rule targets internal classes of slide-toggle that may no longer apply for the MDC version. */
-::ng-deep .mat-slide-toggle-bar {
-  height: 8px !important;
-  width: 28px !important;
+div#annotations-droplist {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: stretch;
 }
 
-/* TODO(mdc-migration): The following rule targets internal classes of slide-toggle that may no longer apply for the MDC version. */
-::ng-deep .mat-slide-toggle-thumb {
-  height: 11px !important;
-  width: 10px !important;
-}
-
-/* TODO(mdc-migration): The following rule targets internal classes of slide-toggle that may no longer apply for the MDC version. */
-::ng-deep .mat-mdc-slide-toggle.mat-checked .mat-slide-toggle-thumb-container {
-  transform: translate3d(18px, 0, 0) !important;
-}
-
-/* TODO(mdc-migration): The following rule targets internal classes of slide-toggle that may no longer apply for the MDC version. */
-::ng-deep .mat-slide-toggle-thumb-container {
-  width: 12px !important;
-  height: 12px !important;
-  top: -2px !important;
-}
-
-#editor-footermenu {
-  text-align: center;
+div#editor-footermenu {
   position: absolute;
+  padding: 16px;
+  left: 0;
   bottom: 0;
-  width: 100%;
-  padding: 0;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  width: stretch;
   box-sizing: border-box;
-  z-index: 1;
-  background-color: rgba(0, 0, 0, 0.9);
-  border-top: 1px solid #333;
-  height: 75px;
-  font-size: 0.8rem;
+  gap: 8px;
+  background-color: var(--color-bg-solid);
 }
 
-#editor-footermenu .mat-mdc-radio-button {
-  margin: 0 5px;
-}
-
-#annotations-droplist {
-  margin-bottom: 75px;
+h2 {
+  font-size: var(--font-size-base);
+  margin-top: 12px;
 }

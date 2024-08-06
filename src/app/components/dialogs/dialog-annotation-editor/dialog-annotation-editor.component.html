@@ -1,45 +1,51 @@
-<h1 mat-dialog-title>
-  @if (!editMode) {
-  <span [innerHTML]="data.title"></span>
-  } @if (editMode) {
-  <mat-form-field>
-    <mat-label>{{ 'Title' | translate }}</mat-label>
-    <input matInput name="title" type="text" [(ngModel)]="data.title" />
-  </mat-form-field>
-  }
-</h1>
+@if (currentMode(); as mode) {
 
-<div mat-dialog-content>
-  @if (!editMode) {
-  <app-markdown-preview [data]="data.content"></app-markdown-preview>
-  } @if (editMode) {
-  <app-media-browser (addMedia)="addEntitySwitch($event)"></app-media-browser>
-  } @if (editMode) {
-  <mat-form-field>
-    <mat-label>{{ 'Description' | translate }}</mat-label>
-    <textarea
-      id="annotation-content"
-      #annotationContent
-      matInput
-      cdkTextareaAutosize
-      cdkAutosizeMinRows="1"
-      name="description"
-      type="text"
-      [(ngModel)]="data.content"
-    >
-    </textarea>
-  </mat-form-field>
-  }
+<!-- Switch -->
+@if (canUserEdit()) {
+<h1>{{ 'Edit annotation' | translate }}</h1>
+
+<div class="tab-selection">
+  <div class="tab" [class.active]="mode === 'edit'" (click)="currentMode.set('edit')">
+    <span>Edit</span>
+  </div>
+  <div class="tab" [class.active]="mode === 'preview'" (click)="currentMode.set('preview')">
+    <span>Preview</span>
+  </div>
+</div>
+} @switch (mode) { @case ('edit') {
+<div>
+  <k-input
+    [label]="'Title' | translate"
+    [startingValue]="data().title"
+    (valueChanged)="onTitleChange($event.value)"
+  />
+
+  <k-textarea
+    #annotationContent
+    [label]="'Content' | translate"
+    [startingValue]="data().description"
+    (valueChanged)="onTextAreaChange($event.value)"
+    resize="both"
+  />
 </div>
 
-<div mat-dialog-actions>
-  <button mat-button (click)="toggleEditViewMode()" [attr.aria-label]="labelModeText">
-    <mat-icon>{{ labelMode }}</mat-icon>
-  </button>
-  <button mat-button [mat-dialog-close]="data">
-    <mat-icon [attr.aria-label]="'Save' | translate">save</mat-icon>
-  </button>
-  <button mat-button (click)="cancel()">
-    <mat-icon [attr.aria-label]="'Cancel' | translate">cancel</mat-icon>
-  </button>
+} @case ('preview') {
+<h2>{{ data().title }}</h2>
+
+<app-markdown-preview [data]="data().description" />
+} }
+<!-- /Switch -->
+@if (mode === 'edit') {
+<div class="embeddables">
+  <app-media-browser (addMedia)="addEntitySwitch($event)" />
 </div>
+} } @if (canUserEdit()) {
+<k-button-row justify="end">
+  <k-button type="outlined-primary" (click)="close(false)">
+    <span>{{ 'Cancel' | translate }}</span>
+  </k-button>
+  <k-button type="solid-primary" (click)="close(true)">
+    <span>{{ 'Save' | translate }}</span>
+  </k-button>
+</k-button-row>
+}

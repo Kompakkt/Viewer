@@ -1,4 +1,75 @@
 @if (annotation$ | async; as annotation) {
+<img
+  class="preview-image"
+  [src]="annotation.body.content.relatedPerspective.preview | fixImageUrl"
+/>
+<div class="header" (click)="toggleVisibility()">
+  <span class="ranking">{{ annotation.ranking }}</span>
+  <span class="title">{{ annotation.body.content.title || ('No title' | translate) }}</span>
+  <small>{{ (annotation.validated ? 'validated' : 'not validated') | translate }}</small>
+</div>
+<app-markdown-preview
+  id="annotation-content"
+  [data]="annotation.body.content.description || ('No description' | translate)"
+></app-markdown-preview>
+<k-button-row justify="end" gap="4">
+  @if ((canUserEdit$ | async)) {
+  <k-button
+    icon-button
+    color="transparent"
+    [tooltip]="'Edit annotation' | translate"
+    (click)="toggleFullscreen('edit')"
+    ><mat-icon>edit</mat-icon></k-button
+  >
+  }
+  <k-button
+    icon-button
+    color="transparent"
+    [tooltip]="'Copy annotation to collection' | translate"
+    (click)="shareAnnotation()"
+    ><mat-icon>file_copy</mat-icon></k-button
+  >
+  <k-button icon-button color="transparent" [tooltip]="'Export annotation as JSON' | translate"
+    ><mat-icon>file_download</mat-icon></k-button
+  >
+  <k-button
+    icon-button
+    color="transparent"
+    [tooltip]="'Show in fullscreen view' | translate"
+    (click)="toggleFullscreen('preview')"
+    ><mat-icon>select_all</mat-icon></k-button
+  >
+  @if (isAnnotationHidden$ | async) {
+  <k-button
+    icon-button
+    color="transparent"
+    [tooltip]="'Show annotation' | translate"
+    (click)="setVisibility(true)"
+    ><mat-icon>visibility_off</mat-icon></k-button
+  >
+  } @else {
+  <k-button
+    icon-button
+    color="transparent"
+    [tooltip]="'Hide annotation' | translate"
+    (click)="setVisibility(false)"
+    ><mat-icon>visibility</mat-icon></k-button
+  >
+  } @if ((canUserDelete$ | async)) {
+  <k-button
+    icon-button
+    color="transparent"
+    [tooltip]="'Delete annotation' | translate"
+    (click)="deleteAnnotation()"
+    ><mat-icon>delete</mat-icon></k-button
+  >
+  }
+</k-button-row>
+}
+
+<!-- TODO: Figure out if we need any of the commented out features, e.g. set perspective -->
+<!--
+@if (annotation$ | async; as annotation) {
 <mat-card appearance="outlined" class="annotation-card">
   <form class="annotation-form">
     <mat-card-header (click)="changeOpenPopup()">
@@ -56,8 +127,8 @@
         mat-stroked-button
         color="primary"
         (click)="selectPerspective()"
-        matTooltip="{{ 'Select Perspective' | translate }}"
-        matTooltipPosition="right"
+        tooltip="{{ 'Select Perspective' | translate }}"
+        tooltipPosition="right"
         type="button"
         class="perspective"
       >
@@ -77,11 +148,11 @@
         {{ ((showAnnotation$ | async) ? 'Hide' : 'Show') | translate }}
       </mat-slide-toggle>
       @if ((processing.hasAnnotationAllowance$ | async) && (isAnnotationOwner$ | async)) {
-      <button
-        mat-icon-button
+      <k-button
+        icon-button
         (click)="toggleEditViewMode()"
-        [matTooltip]="((isEditMode$ | async) ? 'Save annotation' : 'Edit annotation') | translate"
-        matTooltipPosition="above"
+        [tooltip]="((isEditMode$ | async) ? 'Save annotation' : 'Edit annotation') | translate"
+        tooltipPosition="above"
         type="button"
       >
         <mat-icon
@@ -91,37 +162,38 @@
         >
           {{ (isEditMode$ | async) ? 'save' : 'edit' }}
         </mat-icon>
-      </button>
-      <button
-        mat-icon-button
+      </k-button>
+      <k-button
+        icon-button
         (click)="editFullscreen()"
-        matTooltip="{{ 'Edit in Fullscreen Mode' | translate }}"
-        matTooltipPosition="above"
+        tooltip="{{ 'Edit in Fullscreen Mode' | translate }}"
+        tooltipPosition="above"
         type="button"
       >
         <mat-icon [attr.aria-label]="'Fullscreen' | translate">select_all</mat-icon>
-      </button>
-      <button
-        mat-icon-button
+      </k-button>
+      <k-button
+        icon-button
         (click)="deleteAnnotation()"
-        matTooltip="{{ 'Delete' | translate }}"
-        matTooltipPosition="above"
+        tooltip="{{ 'Delete' | translate }}"
+        tooltipPosition="above"
         type="button"
       >
         <mat-icon [attr.aria-label]="'Delete' | translate">delete</mat-icon>
-      </button>
+      </k-button>
       } @if (annotation._id !== 'DefaultAnnotation') {
-      <button
-        mat-icon-button
+      <k-button
+        icon-button
         (click)="shareAnnotation()"
-        matTooltip="{{ 'Copy to collection' | translate }}"
-        matTooltipPosition="above"
+        tooltip="{{ 'Copy to collection' | translate }}"
+        tooltipPosition="above"
         type="button"
       >
         <mat-icon [attr.aria-label]="'Copy to collection' | translate">file_copy</mat-icon>
-      </button>
+      </k-button>
       }
     </mat-card-actions>
   </form>
 </mat-card>
 }
+-->

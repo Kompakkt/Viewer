@@ -1,5 +1,13 @@
-import { Component, OnChanges, Input, SimpleChanges, SecurityContext } from '@angular/core';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import {
+  Component,
+  ElementRef,
+  Input,
+  OnChanges,
+  SecurityContext,
+  SimpleChanges,
+  inject,
+} from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 import { marked } from 'marked';
 
 @Component({
@@ -12,16 +20,17 @@ export class MarkdownPreviewComponent implements OnChanges {
   @Input('data')
   public markdown!: string;
 
-  public content: SafeHtml = '';
-
   constructor(private sanitizer: DomSanitizer) {}
+
+  #ref = inject<ElementRef<HTMLElement>>(ElementRef);
 
   public sanitize(markdown: string) {
     const sanitized = this.sanitizer.sanitize(SecurityContext.HTML, marked(markdown));
-    if (sanitized) this.content = sanitized;
+    if (!sanitized) return;
+    this.#ref.nativeElement.innerHTML = sanitized;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.markdown) this.sanitize(changes.markdown.currentValue.trim());
+    if (changes.markdown?.currentValue) this.sanitize(changes.markdown.currentValue.trim());
   }
 }

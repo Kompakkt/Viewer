@@ -1,6 +1,5 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, viewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { MatStepper, MatStep, MatStepLabel, MatStepperPrevious } from '@angular/material/stepper';
 import { saveAs } from 'file-saver';
 import { combineLatest, firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -12,18 +11,23 @@ import { PostMessageService } from '../../services/post-message/post-message.ser
 import { ProcessingService } from '../../services/processing/processing.service';
 import { UserdataService } from '../../services/userdata/userdata.service';
 // tslint:disable-next-line:max-line-length
-import { DialogMeshsettingsComponent } from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
-import { TranslatePipe } from '../../pipes/translate.pipe';
 import { AsyncPipe } from '@angular/common';
-import { MatIcon } from '@angular/material/icon';
-import { MatTooltip } from '@angular/material/tooltip';
-import { EntityFeatureSettingsMeshComponent } from './entity-feature-settings-mesh/entity-feature-settings-mesh.component';
-import { EntityFeatureSettingsLightsComponent } from './entity-feature-settings-lights/entity-feature-settings-lights.component';
 import { FormsModule } from '@angular/forms';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
-import { ColorChromeModule } from 'ngx-color/chrome';
-import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { ColorChromeModule } from 'ngx-color/chrome';
+import {
+  ButtonComponent,
+  DetailsComponent,
+  LabelledCheckboxComponent,
+  WizardComponent,
+  WizardStepComponent,
+} from 'projects/komponents/src';
+import { FixImageUrlPipe } from 'src/app/pipes/fix-image-url.pipe';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { DialogMeshsettingsComponent } from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
+import { EntityFeatureSettingsLightsComponent } from './entity-feature-settings-lights/entity-feature-settings-lights.component';
+import { EntityFeatureSettingsMeshComponent } from './entity-feature-settings-mesh/entity-feature-settings-mesh.component';
 
 @Component({
   selector: 'app-entity-feature-settings',
@@ -33,27 +37,25 @@ import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/m
   imports: [
     MatCard,
     MatCardContent,
-    MatButton,
     MatCardHeader,
     MatCardTitle,
     ColorChromeModule,
-    MatSlideToggle,
     FormsModule,
     EntityFeatureSettingsLightsComponent,
-    MatStepper,
-    MatStep,
     EntityFeatureSettingsMeshComponent,
-    MatStepLabel,
-    MatIconButton,
-    MatTooltip,
     MatIcon,
-    MatStepperPrevious,
     AsyncPipe,
     TranslatePipe,
+    DetailsComponent,
+    ButtonComponent,
+    LabelledCheckboxComponent,
+    WizardComponent,
+    WizardStepComponent,
+    FixImageUrlPipe,
   ],
 })
 export class EntityFeatureSettingsComponent {
-  @ViewChild('stepper') stepper: MatStepper | undefined;
+  stepper = viewChild<WizardComponent>('stepper');
 
   // used during upload while setting initial settings
   public backgroundToggle = false;
@@ -149,6 +151,12 @@ export class EntityFeatureSettingsComponent {
     this.entitySettings.loadBackgroundColor();
   }
 
+  public async setBackgroundEffect(enabled: boolean) {
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
+    localSettings.background.effect = enabled;
+    this.entitySettings.loadBackgroundEffect();
+  }
+
   public async saveSettings() {
     const entity = await firstValueFrom(this.entity$);
     const { localSettings } = await firstValueFrom(this.processing.settings$);
@@ -197,39 +205,27 @@ export class EntityFeatureSettingsComponent {
     this.entitySettings.restoreSettings();
   }
 
+  public resetBackground() {
+    this.setBackgroundColor({ r: 127, g: 127, b: 127, a: 1 });
+    this.setBackgroundEffect(true);
+  }
+
   // _______Only used during Upload ________
 
   // ___________ Stepper for initial Setting during upload ___________
-  public showNextAlertFirstStep() {
-    const dialogRef = this.dialog.open(DialogMeshsettingsComponent);
-    dialogRef.afterClosed().subscribe(finish => {
-      if (finish) {
-        this.entitySettings.meshSettingsCompleted.emit(true);
-        if (!this.stepper) {
-          return console.error('Stepper could not be accessed');
-        } else {
-          if (this.stepper.selected) {
-            this.stepper.selected.completed = true;
-            this.stepper.selected.editable = false;
-            this.stepper.next();
-          }
-        }
-      } else {
-        return;
-      }
-    });
+  public async showNextAlertFirstStep() {
+    const dialogRef = this.dialog.open<DialogMeshsettingsComponent, void, boolean>(
+      DialogMeshsettingsComponent,
+    );
+    const result = await firstValueFrom(dialogRef.afterClosed());
+    console.log('Result', result, this.stepper());
+    if (!result) return false;
+    this.entitySettings.meshSettingsCompleted.emit(true);
+    this.stepper()?.nextStep();
   }
 
-  public nextSecondStep() {
+  public setPerspectiveStep() {
     this.setInitialPerspectivePreview();
-    if (!this.stepper) {
-      return console.error('Stepper could not be accessed');
-    } else {
-      if (this.stepper.selected) {
-        this.stepper.selected.completed = true;
-        this.stepper.selected.editable = true;
-        this.stepper.next();
-      }
-    }
+    this.stepper()?.nextStep();
   }
 }

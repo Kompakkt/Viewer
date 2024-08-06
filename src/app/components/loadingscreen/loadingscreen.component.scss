@@ -1,9 +1,9 @@
 @keyframes kompakkt-logo-spin {
-  from {
+  0% {
     transform: rotate(0deg);
   }
-  to {
-    transform: rotate(360deg);
+  100% {
+     transform: rotate(360deg);
   }
 }
 
@@ -18,7 +18,7 @@
   margin: 0;
   padding: 0;
 
-  background: #111111;
+  background: var(--color-primary);
 
   display: flex;
   flex-direction: column;
@@ -26,7 +26,8 @@
   align-items: center;
 
   img {
-    animation: kompakkt-logo-spin 2s infinite ease-in-out;
+    animation: kompakkt-logo-spin 5s infinite linear;
+    mix-blend-mode: luminosity;
     transform-origin: center center;
     pointer-events: none;
   }
@@ -35,7 +36,7 @@
     color: white;
     text-align: center;
     pointer-events: none;
-    font-size: 16px;
+    font-size: var(--font-size-base);
     margin-top: 1em;
   }
 }

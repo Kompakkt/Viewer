@@ -4,7 +4,6 @@ import { firstValueFrom } from 'rxjs';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { AsyncPipe, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatButton, MatIconButton } from '@angular/material/button';
 import {
   MatCard,
   MatCardActions,
@@ -15,12 +14,9 @@ import {
   MatCardSubtitle,
   MatCardTitle,
 } from '@angular/material/card';
-import { MatCheckbox } from '@angular/material/checkbox';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
-import { MatInput } from '@angular/material/input';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
-import { MatTooltip } from '@angular/material/tooltip';
+import { ButtonComponent, ButtonRowComponent, SlideToggleComponent, TooltipDirective } from 'projects/komponents/src';
+import { FixImageUrlPipe } from 'src/app/pipes/fix-image-url.pipe';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-preview.component';
 import { AnnotationComponent } from './annotation.component';
@@ -36,37 +32,50 @@ import { AnnotationComponent } from './annotation.component';
     MatCardHeader,
     MatCardAvatar,
     MatCardTitle,
-    MatFormField,
-    MatInput,
-    MatLabel,
     MatCardSubtitle,
     MatCardImage,
     MatCardContent,
     CdkTextareaAutosize,
-    MatCheckbox,
-    MatIconButton,
-    MatButton,
-    MatTooltip,
     MatIcon,
     MarkdownPreviewComponent,
     MatCardActions,
-    MatSlideToggle,
     AsyncPipe,
     UpperCasePipe,
     TranslatePipe,
+    SlideToggleComponent,
+    ButtonComponent,
+    ButtonRowComponent,
+    TooltipDirective,
+    FixImageUrlPipe,
   ],
 })
 export class AnnotationComponentForEditorComponent extends AnnotationComponent {
   public async toggleVisibility() {
-    const [{ _id }, showAnnotation, isSelectedAnnotation] = await Promise.all([
+    const [{ _id }, showAnnotation, isSelectedAnnotation, isAnnotationHidden] = await Promise.all([
       firstValueFrom(this.annotation$),
       firstValueFrom(this.showAnnotation$),
       firstValueFrom(this.isSelectedAnnotation$),
+      firstValueFrom(this.isAnnotationHidden$),
     ]);
+
+    if (isAnnotationHidden) return;
 
     this.showAnnotation$.next(!showAnnotation);
     this.annotationService.setSelectedAnnotation(isSelectedAnnotation ? '' : _id.toString());
     this.babylon.hideMesh(_id.toString(), showAnnotation);
+  }
+
+  public async setVisibility(visible: boolean) {
+    const [{ _id }, isSelectedAnnotation] = await Promise.all([
+      firstValueFrom(this.annotation$),
+      firstValueFrom(this.isSelectedAnnotation$),
+    ]);
+
+    if (isSelectedAnnotation) {
+      this.annotationService.setSelectedAnnotation(visible ? _id.toString() : '');
+    }
+
+    this.annotationService.setAnnotationVisibility(_id.toString(), visible);
   }
 
   // TODO: set perspective in annotation Service and make it not async and public and save!

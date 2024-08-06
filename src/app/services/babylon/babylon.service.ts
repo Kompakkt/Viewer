@@ -20,13 +20,13 @@ import {
   SharpenPostProcess,
   Tools,
   UniversalCamera,
-  Vector3,
+  Vector3
 } from '@babylonjs/core';
 import '@babylonjs/core/Debug/debugLayer';
 import '@babylonjs/inspector';
 // tslint:disable-next-line:no-import-side-effect
 import '@babylonjs/loaders';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, interval } from 'rxjs';
 import { RenderCanvasComponent } from '../../components/render-canvas/render-canvas.component';
 import {
   cameraDefaults$,
@@ -191,22 +191,13 @@ export class BabylonService {
       this.scene.registerBeforeRender(renderVideo);
     });
 
-    this.scene.registerBeforeRender(() => {
+    interval(100).subscribe(() => {
       const camera = this.getActiveCamera();
       if (!camera) return;
       camera.panningSensibility =
         1000 / (this.cameraManager.cameraSpeed * Math.min(Math.max(camera.radius, 1), 10));
       camera.wheelDeltaPercentage = this.cameraManager.cameraSpeed * 0.01;
       camera.speed = this.cameraManager.cameraSpeed;
-
-      this.scene.getMeshesByTags('marker', mesh => {
-        const dist = Vector3.Distance(mesh.position, camera.position);
-        const scale = Math.min(2, dist / 50);
-        // Scale based on distance
-        mesh.scaling = new Vector3(scale, scale, scale);
-        // Fade out markers with distance < 50
-        mesh.material!.alpha = Math.max(Math.min(1, scale), 0.5);
-      });
     });
 
     this.engine.runRenderLoop(() => {
@@ -256,13 +247,12 @@ export class BabylonService {
   }
 
   public setBackgroundImage(setBackground: boolean): void {
+    this.background.layer?.dispose();
     if (setBackground) {
       const layer = new Layer('background', this.background.url, this.scene, true);
       layer.alphaBlendingMode = Engine.ALPHA_ADD;
       layer.isBackground = true;
       this.background.layer = layer;
-    } else {
-      this.background.layer?.dispose();
     }
   }
 

@@ -1,22 +1,22 @@
+import { AsyncPipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { MatIcon } from '@angular/material/icon';
 import { Vector3 } from '@babylonjs/core';
+import { ColorChromeModule } from 'ngx-color/chrome';
+import {
+  ButtonComponent,
+  DetailsComponent,
+  InputComponent,
+  LabelledCheckboxComponent,
+  SliderComponent,
+} from 'projects/komponents/src';
 import { firstValueFrom } from 'rxjs';
 import { IColor } from 'src/common';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { BabylonService } from '../../../services/babylon/babylon.service';
 import { EntitySettingsService } from '../../../services/entitysettings/entitysettings.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
-import { TranslatePipe } from '../../../pipes/translate.pipe';
-import { AsyncPipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { MatInput } from '@angular/material/input';
-import { MatFormField } from '@angular/material/form-field';
-import { MatSlider, MatSliderThumb } from '@angular/material/slider';
-import { ColorChromeModule } from 'ngx-color/chrome';
-import { MatCheckbox } from '@angular/material/checkbox';
-import { MatIcon } from '@angular/material/icon';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatIconButton, MatButton } from '@angular/material/button';
-import { MatStepLabel } from '@angular/material/stepper';
 
 @Component({
   selector: 'app-entity-feature-settings-mesh',
@@ -24,20 +24,16 @@ import { MatStepLabel } from '@angular/material/stepper';
   styleUrls: ['./entity-feature-settings-mesh.component.scss'],
   standalone: true,
   imports: [
-    MatStepLabel,
-    MatIconButton,
-    MatTooltip,
     MatIcon,
-    MatButton,
-    MatCheckbox,
     ColorChromeModule,
-    MatSlider,
-    MatSliderThumb,
-    MatFormField,
-    MatInput,
     FormsModule,
     AsyncPipe,
     TranslatePipe,
+    ButtonComponent,
+    DetailsComponent,
+    LabelledCheckboxComponent,
+    SliderComponent,
+    InputComponent,
   ],
 })
 export class EntityFeatureSettingsMeshComponent implements OnInit {
@@ -83,31 +79,38 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
   // ________Mesh Settings__________
 
   // Scaling
-  public async handleChangeDimension(dimension: string, value?: number | null) {
+  public async handleChangeDimension(dimension: string, value: number) {
     const { localSettings } = await firstValueFrom(this.processing.settings$);
     let factor;
-    switch (dimension) {
-      case 'height':
-        factor = +this.processing.entityHeight / this.entitySettings.initialSize.y;
-        localSettings.scale = parseFloat(factor.toFixed(2));
-        this.entitySettings.loadScaling();
-        break;
-      case 'width':
-        factor = +this.processing.entityWidth / this.entitySettings.initialSize.x;
-        localSettings.scale = parseFloat(factor.toFixed(2));
-        this.entitySettings.loadScaling();
-        break;
-      case 'depth':
-        factor = +this.processing.entityDepth / this.entitySettings.initialSize.z;
-        localSettings.scale = parseFloat(factor.toFixed(2));
-        this.entitySettings.loadScaling();
-        break;
-      case 'scale':
-        if (value) localSettings.scale = value;
-        this.entitySettings.loadScaling();
-        break;
-      default:
-        console.log('I do not know this dimension: ', dimension);
+    try {
+      switch (dimension) {
+        case 'height':
+          factor = value / this.entitySettings.initialSize.y;
+          localSettings.scale = parseFloat(factor.toFixed(2));
+          this.processing.entityHeight = value.toFixed(2);
+          this.entitySettings.loadScaling();
+          break;
+        case 'width':
+          factor = value / this.entitySettings.initialSize.x;
+          localSettings.scale = parseFloat(factor.toFixed(2));
+          this.processing.entityWidth = value.toFixed(2);
+          this.entitySettings.loadScaling();
+          break;
+        case 'depth':
+          factor = value / this.entitySettings.initialSize.z;
+          localSettings.scale = parseFloat(factor.toFixed(2));
+          this.processing.entityDepth = value.toFixed(2);
+          this.entitySettings.loadScaling();
+          break;
+        case 'scale':
+          localSettings.scale = value;
+          this.entitySettings.loadScaling();
+          break;
+        default:
+          console.log('I do not know this dimension: ', dimension);
+      }
+    } catch (err) {
+      console.error(err);
     }
   }
 
@@ -116,15 +119,15 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
     const { localSettings } = await firstValueFrom(this.processing.settings$);
     switch (axis) {
       case 'x':
-        localSettings.rotation.x = localSettings.rotation.x + degree;
+        localSettings.rotation.x = degree;
         this.entitySettings.loadRotation();
         break;
       case 'y':
-        localSettings.rotation.y = localSettings.rotation.y + degree;
+        localSettings.rotation.y = degree;
         this.entitySettings.loadRotation();
         break;
       case 'z':
-        localSettings.rotation.z = localSettings.rotation.z + degree;
+        localSettings.rotation.z = degree;
         this.entitySettings.loadRotation();
         break;
       case 'xyz_reset':
@@ -141,17 +144,16 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
   public async resetVisualUIMeshSettingsHelper() {
     const meshes = await firstValueFrom(this.meshes$);
     if (!meshes) {
-      throw new Error('Center missing');
-      console.error(this);
+      console.error('Center missing', this);
       return;
     }
-    this.toggleBoundingBoxEntityVisibility(false);
-    this.toggleBoundingBoxMeshesVisibility(false);
-    this.toggleAxesVisibility('worldAxis', false);
-    this.setScalingFactorAxis(1, true);
-    this.toggleAxesVisibility('localAxis', false);
-    this.setScalingFactorAxis(1, false);
-    this.toggleGroundVisibility(false);
+    this.setBoundingBoxEntityVisibility(false);
+    this.setBoundingBoxMeshesVisibility(false);
+    this.setAxesVisibility('worldAxis', false);
+    this.setScalingFactorAxis(1, 'world');
+    this.setAxesVisibility('localAxis', false);
+    this.setScalingFactorAxis(1, 'local');
+    this.setGroundVisibility(false);
     this.setScalingFactorGround(1);
     this.entitySettings.setGroundMaterial();
     this.resetBackgroundColor();
@@ -163,21 +165,20 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
     this.entitySettings.setGroundMaterial(color);
   }
 
-  public setScalingFactorAxis(factor: number | null, world: boolean) {
-    if (!factor) factor = 1;
-    world ? (this.worldAxisScalingFactor = factor) : (this.localAxisScalingFactor = factor);
-    const pos =
-      factor *
-      0.9 *
-      (world ? this.entitySettings.worldAxisInitialSize : this.entitySettings.localAxisInitialSize);
-    this.babylon
-      .getScene()
-      .getMeshesByTags(world ? 'worldAxis' : 'localAxis')
-      .map(mesh => {
-        if (!factor) factor = 1;
-        mesh.scaling = new Vector3(factor, factor, factor);
-      });
-    this.babylon
+  public setScalingFactorAxis(factor: number, space: 'world' | 'local') {
+    if (space === 'world') {
+      this.worldAxisScalingFactor = factor;
+      //const pos = factor * 0.9 * this.entitySettings.worldAxisInitialSize;
+      const transformNode = this.babylon.getScene().getTransformNodesByTags('worldAxis')[0];
+      transformNode.scaling = new Vector3(factor, factor, factor);
+    } else {
+      this.localAxisScalingFactor = factor;
+      //const pos = factor * 0.9 * this.entitySettings.localAxisInitialSize;
+      const transformNode = this.babylon.getScene().getTransformNodesByTags('localAxis')[0];
+      transformNode.scaling = new Vector3(factor, factor, factor);
+    }
+
+    /*this.babylon
       .getScene()
       .getMeshesByTags(world ? 'worldAxisX' : 'localAxisX')
       .map(mesh => (mesh.position = new Vector3(pos * 0.9, pos * -0.05, 0)));
@@ -188,65 +189,59 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
     this.babylon
       .getScene()
       .getMeshesByTags(world ? 'worldAxisZ' : 'localAxisZ')
-      .map(mesh => (mesh.position = new Vector3(0, pos * 0.05, pos * 0.9)));
+      .map(mesh => (mesh.position = new Vector3(0, pos * 0.05, pos * 0.9)));*/
   }
 
   public setScalingFactorGround(factor: number | null) {
     if (!factor) factor = 1;
     if (!this.entitySettings.ground) {
-      throw new Error('Ground missing');
-      console.error(this);
+      console.error('Ground missing', this);
       return;
     }
     this.groundScalingFactor = factor;
     this.entitySettings.ground.scaling = new Vector3(factor, factor, factor);
   }
 
-  public toggleBoundingBoxEntityVisibility(value?: boolean) {
+  public setBoundingBoxEntityVisibility(enabled: boolean) {
     if (!this.entitySettings.boundingBox) {
-      throw new Error('BoundingBox missing');
-      console.error(this);
+      console.error('BoundingBox missing', this);
       return;
     }
-    this.boundingBoxVisibility = value !== undefined ? value : !this.boundingBoxVisibility;
+    this.boundingBoxVisibility = enabled;
     this.entitySettings.boundingBox.visibility = this.boundingBoxVisibility ? 1 : 0;
   }
 
-  public async toggleBoundingBoxMeshesVisibility(value?: boolean) {
+  public async setBoundingBoxMeshesVisibility(enabled: boolean) {
     const meshes = await firstValueFrom(this.meshes$);
     if (!meshes) {
-      throw new Error('Meshes missing');
-      console.error(this);
+      console.error('Meshes missing', this);
       return;
     }
-    this.boundingBoxMeshesVisibility =
-      value !== undefined ? value : !this.boundingBoxMeshesVisibility;
+    this.boundingBoxMeshesVisibility = enabled;
     meshes.forEach(mesh => (mesh.showBoundingBox = this.boundingBoxMeshesVisibility));
   }
 
-  public toggleAxesVisibility(axis: string, value?: boolean) {
-    let axisVisibility = false;
+  public setAxesVisibility(axis: string, enabled: boolean) {
     if (axis === 'localAxis') {
-      axisVisibility = value !== undefined ? value : !this.localAxisVisibility;
-      this.localAxisVisibility = axisVisibility;
+      this.localAxisVisibility = enabled;
     }
     if (axis === 'worldAxis') {
-      axisVisibility = value !== undefined ? value : !this.worldAxisVisibility;
-      this.worldAxisVisibility = axisVisibility;
+      this.worldAxisVisibility = enabled;
     }
-    this.visibilityMesh(axis, axisVisibility);
+    this.visibilityMesh(axis, enabled);
   }
 
-  public toggleGroundVisibility(value?: boolean) {
-    this.groundVisibility = value !== undefined ? value : !this.groundVisibility;
+  public setGroundVisibility(enabled: boolean) {
+    this.groundVisibility = enabled;
     this.visibilityMesh('ground', this.groundVisibility);
   }
 
   private visibilityMesh(tag: string, visibility: boolean) {
-    const setVisibility = visibility ? 1 : 0;
-    this.babylon
-      .getScene()
-      .getMeshesByTags(tag)
-      .map(mesh => (mesh.visibility = setVisibility));
+    const scene = this.babylon.getScene();
+    const nodes = scene.getTransformNodesByTags(tag);
+    const meshes = scene.getMeshesByTags(tag);
+    for (const el of [...nodes, ...meshes]) {
+      el.setEnabled(visibility);
+    }
   }
 }
