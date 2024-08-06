@@ -10,7 +10,7 @@ import {
   Tags,
   Vector3,
 } from '@babylonjs/core';
-import { firstValueFrom } from 'rxjs';
+import { debounceTime, filter, firstValueFrom } from 'rxjs';
 import { IColor, IEntitySettings } from 'src/common';
 import { minimalSettings } from '../../../assets/settings/settings';
 import { AnnotationService } from '../annotation/annotation.service';
@@ -54,15 +54,20 @@ export class EntitySettingsService {
     private lights: LightService,
     private annotationService: AnnotationService,
   ) {
-    this.processing.state$.subscribe(({ settings, entity, meshes }) => {
-      console.log('EntitySettingsService', { settings, entity, meshes });
-      this.entitySettings = settings;
-      requestAnimationFrame(() =>
-        this.setUpSettings()
-          .then(() => console.log('Settings loaded'))
-          .catch((err: Error) => console.log('Settings not loaded', err.message)),
-      );
-    });
+    this.processing.state$
+      .pipe(
+        filter(({ entity, meshes }) => !!entity && !!meshes),
+        debounceTime(100),
+      )
+      .subscribe(({ settings, entity, meshes }) => {
+        console.log('EntitySettingsService', entity?._id, { settings, entity, meshes });
+        this.entitySettings = settings;
+        requestAnimationFrame(() =>
+          this.setUpSettings()
+            .then(() => console.log('Settings loaded'))
+            .catch((err: Error) => console.log('Settings not loaded', err.message)),
+        );
+      });
   }
 
   get meshes$() {
@@ -73,7 +78,8 @@ export class EntitySettingsService {
     this.min = new Vector3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
     this.max = new Vector3(Number.MAX_VALUE * -1, Number.MAX_VALUE * -1, Number.MAX_VALUE * -1);
     this.initialSize = Vector3.Zero();
-    this.initialCenterPoint = this.currentCenterPoint = Vector3.Zero();
+    this.initialCenterPoint = Vector3.Zero();
+    this.currentCenterPoint = Vector3.Zero();
     this.groundInitialSize = 0;
     this.localAxisInitialSize = 0;
     this.worldAxisInitialSize = 0;
@@ -164,9 +170,8 @@ export class EntitySettingsService {
     if (!meshes) {
       throw new Error('No meshes available.');
     }
-    if (this.center) {
-      return;
-    }
+    this.center?.dispose();
+    
     this.center = MeshBuilder.CreateBox('center', { size: 0.01 }, this.babylon.getScene());
     this.center.isPickable = false;
     Tags.AddTagsTo(this.center, 'center');
