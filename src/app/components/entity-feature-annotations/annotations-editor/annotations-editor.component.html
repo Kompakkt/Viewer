@@ -49,7 +49,7 @@
   class="annotations-list"
   (cdkDropListDropped)="drop($event)"
 >
-  @for (annotation of currentAnnotations$ | async; track annotation._id) {
+  @for (annotation of currentAnnotations$ | async; track annotation) {
   <app-annotation-for-editor
     class="annotation-box"
     [annotation]="annotation"
