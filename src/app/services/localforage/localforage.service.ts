@@ -9,6 +9,7 @@ import { IAnnotation } from 'src/common';
 export class LocalForageService {
   private store: LocalForage = localForage.createInstance({
     name: 'annotationdb',
+    driver: localForage.LOCALSTORAGE,
   });
 
   public async fetch(): Promise<IAnnotation[]> {
