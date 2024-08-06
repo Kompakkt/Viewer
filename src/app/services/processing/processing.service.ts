@@ -24,7 +24,7 @@ import {
 } from '../../../assets/settings/settings';
 // tslint:disable-next-line:max-line-length
 import { DialogPasswordComponent } from '../../components/dialogs/dialog-password/dialog-password.component';
-import { decodeBase64, isBase64 } from '../../helpers';
+import { decodeBase64, decodeURIUntilStable, isBase64 } from '../../helpers';
 import { IIIFData, convertIIIFAnnotation, isIIIFData } from '../../helpers/iiif-data-helper';
 import { BabylonService } from '../babylon/babylon.service';
 import { LoadingScreenService } from '../babylon/loadingscreen';
@@ -354,24 +354,27 @@ export class ProcessingService {
     console.log('loadStandaloneEntity', entries);
 
     const url = ((): string | undefined => {
-      if (!entries.endpoint && !entries.resource) {
-        return undefined;
-      }
+      const { endpoint, resource } = entries;
       // If only endpoint or resource is set, use as is
-      if (!entries.endpoint && entries.resource) {
-        if (isBase64(entries.resource)) {
-          return decodeBase64(entries.resource);
+      if (!endpoint && resource) {
+        if (isBase64(resource)) {
+          return decodeBase64(resource);
         }
-        return entries.resource;
+        return resource;
       }
-      if (entries.endpoint && !entries.resource) {
-        if (isBase64(entries.endpoint)) {
-          return decodeBase64(entries.endpoint);
+      if (endpoint && !resource) {
+        if (isBase64(endpoint)) {
+          return decodeBase64(endpoint);
         }
-        return entries.endpoint;
+        return endpoint;
       }
       // If both are set, concatenate them as url
-      return `${entries.endpoint}/${entries.resource}`;
+      if (endpoint && resource) {
+        const stableEndpoint = decodeURIUntilStable(endpoint);
+        const stableResource = decodeURIUntilStable(resource);
+        return `${stableEndpoint}/${stableResource}`;
+      }
+      return undefined;
     })();
 
     if (!url) throw new Error('No endpoint or resource defined');

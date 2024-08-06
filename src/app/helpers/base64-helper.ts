@@ -1,4 +1,4 @@
-const decodeURIUntilStable = (str: string, max = 3) => {
+export const decodeURIUntilStable = (str: string, max = 3) => {
   const initial = str;
   let decoded = decodeURIComponent(str);
   let counter = 0;
