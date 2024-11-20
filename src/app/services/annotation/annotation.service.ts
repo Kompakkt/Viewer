@@ -20,7 +20,6 @@ import { MessageService } from '../message/message.service';
 import { ProcessingService } from '../processing/processing.service';
 import { UserdataService } from '../userdata/userdata.service';
 import { createMarker } from './visual3DElements';
-import { LocalForageService } from '../localforage/localforage.service';
 
 const isDefaultAnnotation = (annotation: IAnnotation) =>
   !annotation.target.source.relatedCompilation ||
@@ -64,7 +63,6 @@ export class AnnotationService {
   );
 
   constructor(
-    private local: LocalForageService,
     private babylon: BabylonService,
     private backend: BackendService,
     private message: MessageService,
@@ -146,27 +144,9 @@ export class AnnotationService {
     const loadFromServer = !isStandalone && !isDefault && !isFallback;
 
     if (loadFromServer) {
-      // Filter null/undefined annotations
-      const serverAnnotations = (await this.getAnnotationsfromServerDB()).filter(
-        annotation => annotation && annotation._id && annotation.lastModificationDate,
-      );
-      const localAnnotations = (await this.getAnnotationsfromLocalDB()).filter(
-        annotation => annotation && annotation._id && annotation.lastModificationDate,
-      );
-      // Update and sort local
-      await this.updateLocalDB(localAnnotations, serverAnnotations);
-      const updated = await this.updateAnnotationList(localAnnotations, serverAnnotations);
-      this.annotations$.next(updated);
-
-      // above updateAnnotationList call already checks if values in localAnnotations changed
-      // and sends update requests to server.
-      // we still need to check if the order changed for which _id comparisons are sufficient
-      let unchanged =
-        updated.length === serverAnnotations.length &&
-        updated.every((val, index) => val._id === serverAnnotations[index]._id);
-      if (!unchanged) {
-        await this.sortAnnotations();
-      }
+      const serverAnnotations = await this.getAnnotationsfromServerDB();
+      this.annotations$.next(serverAnnotations);
+      await this.sortAnnotations();
     } else {
       if (isFallback) {
         this.annotations$.next([annotationFallback]);
@@ -208,110 +188,9 @@ export class AnnotationService {
       }
     }
     console.log('getAnnotationsfromServerDB', serverAnnotations);
-    return serverAnnotations;
-  }
-
-  private async getAnnotationsfromLocalDB() {
-    const entity = await firstValueFrom(this.processing.entity$);
-    const compilation = await firstValueFrom(this.processing.compilation$);
-    const isCompilationLoaded = await firstValueFrom(this.processing.compilationLoaded$);
-    let localAnnotations: IAnnotation[] = entity
-      ? await this.fetchAnnotations(entity._id.toString())
-      : [];
-    // Annotationen aus localDB des aktuellen Entityls und der aktuellen Compilation (if existing)
-
-    if (isCompilationLoaded) {
-      const _compilationAnnotations =
-        entity && compilation
-          ? await this.fetchAnnotations(entity._id.toString(), compilation._id.toString())
-          : [];
-      localAnnotations = localAnnotations.concat(_compilationAnnotations);
-    }
-    console.log('getAnnotationsfromLocalDB', localAnnotations);
-    return localAnnotations;
-  }
-
-  private async updateLocalDB(localAnnotations: IAnnotation[], serverAnnotations: IAnnotation[]) {
-    for (const annotation of serverAnnotations) {
-      const localAnnotation = localAnnotations.find(
-        _localAnnotation => _localAnnotation._id === annotation._id,
-      );
-      if (!localAnnotation) {
-        await this.local.updateAnnotation(annotation);
-        localAnnotations.push(annotation);
-      }
-    }
-    console.log('updateLocalDB', localAnnotations);
-  }
-
-  private async updateAnnotationList(
-    localAnnotations: IAnnotation[],
-    serverAnnotations: IAnnotation[],
-  ) {
-    const unsorted: IAnnotation[] = [];
-    const userData = await firstValueFrom(this.userdata.userData$);
-    // Durch alle Annotationen der lokalen DB
-    for (const annotation of localAnnotations) {
-      const isLastModifiedByMe = userData ? annotation.lastModifiedBy._id === userData._id : false;
-      const isCreatedByMe = userData ? annotation.creator._id === userData._id : false;
-
-      // Finde die Annotaion in den Server Annotationen
-      const serverAnnotation = serverAnnotations.find(
-        _serverAnnotation => _serverAnnotation._id === annotation._id,
-      );
-      // Wenn sie gefunden wurde aktuellere speichern lokal bzw. server
-
-      if (serverAnnotation) {
-        if (!annotation.lastModificationDate || !serverAnnotation.lastModificationDate) {
-          continue;
-        }
-        // vergleichen welche aktueller ist
-        const isSame = annotation.lastModificationDate === serverAnnotation.lastModificationDate;
-        const isLocalNewer =
-          annotation.lastModificationDate > serverAnnotation.lastModificationDate;
-        if (isLocalNewer || isSame) {
-          if (!isSame) {
-            // Update Server
-            this.backend.updateAnnotation(annotation);
-            serverAnnotations.splice(
-              localAnnotations.findIndex(ann => ann._id === serverAnnotation._id),
-              1,
-              annotation,
-            );
-          }
-          unsorted.push(annotation);
-        } else {
-          // Update local DB
-          await this.local.updateAnnotation(serverAnnotation);
-          localAnnotations.splice(
-            localAnnotations.findIndex(ann => ann._id === annotation._id),
-            1,
-            serverAnnotation,
-          );
-          unsorted.push(serverAnnotation);
-        }
-        // Wenn sie nicht gefunden wurde: Annotation existiert nicht auf dem Server,
-        // aber in der Local DB
-        // -> wurde gelöscht oder
-        // noch nicht gespeichert
-      } else {
-        // Nicht in Server Annos gefunden
-        // Checke, ob local last editor === creator === ich
-        if (isLastModifiedByMe && isCreatedByMe) {
-          // Annotation auf Server speichern
-          // Update Server
-          this.backend.updateAnnotation(annotation);
-          serverAnnotations.push(annotation);
-          unsorted.push(annotation);
-        } else {
-          // Nicht local last editor === creator === ich
-          // Annotation local löschen
-          await this.local.deleteAnnotation(annotation._id.toString());
-          localAnnotations.splice(localAnnotations.findIndex(ann => ann._id === annotation._id));
-        }
-      }
-    }
-    return unsorted;
+    return serverAnnotations.filter(
+      annotation => annotation && annotation._id && annotation.lastModificationDate,
+    );
   }
 
   private async getSortedAnnotations() {
@@ -373,8 +252,7 @@ export class AnnotationService {
     const referencePoint = result.pickedPoint!;
     const referenceNormal = result.getNormal(true, true)!;
 
-    const relatedCompilation =
-      isCompilationLoaded && compilation ? compilation._id.toString() : '';
+    const relatedCompilation = isCompilationLoaded && compilation ? compilation._id.toString() : '';
 
     const { position, target, cameraType } = camera;
 
@@ -445,7 +323,6 @@ export class AnnotationService {
         .catch((errorMessage: any) => {
           console.log(errorMessage);
         });
-      this.local.updateAnnotation(newAnnotation);
     }
     this.drawMarker(newAnnotation);
     this.annotations$.next(this.annotations$.getValue().concat(newAnnotation));
@@ -475,7 +352,6 @@ export class AnnotationService {
             console.log(errorMessage);
           });
       }
-      this.local.updateAnnotation(newAnnotation);
     }
     const arr = this.annotations$.getValue();
     arr.splice(
@@ -500,7 +376,6 @@ export class AnnotationService {
         return false;
       }
       this.message.info('Annotation has been deleted.');
-      this.local.deleteAnnotation(_annotation._id.toString()).catch(() => {});
     }
 
     this.setSelectedAnnotation('');
@@ -557,16 +432,6 @@ export class AnnotationService {
       if (!annotation._id) continue;
       await this.updateAnnotation({ ...annotation, ranking: i - offset + 1 });
     }
-  }
-
-  private async fetchAnnotations(entity: string, compilation?: string): Promise<IAnnotation[]> {
-    return new Promise<IAnnotation[]>(async (resolve, _) => {
-      const annotationList: IAnnotation[] = await this.local.findAnnotations(
-        entity,
-        compilation ? compilation : '',
-      );
-      resolve(annotationList);
-    });
   }
 
   public deleteMarker(annotationID: string) {
