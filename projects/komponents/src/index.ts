@@ -13,3 +13,5 @@ export * from './textarea/textarea.component';
 export * from './tooltip.directive';
 export * from './wizard-step/wizard-step.component';
 export * from './wizard/wizard.component';
+export * from './menu/menu.component';
+export * from './menu-option/menu-option.component';
