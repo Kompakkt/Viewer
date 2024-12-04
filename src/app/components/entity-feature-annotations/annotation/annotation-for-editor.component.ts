@@ -15,7 +15,14 @@ import {
   MatCardTitle,
 } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
-import { ButtonComponent, ButtonRowComponent, SlideToggleComponent, TooltipDirective } from 'projects/komponents/src';
+import {
+  ButtonComponent,
+  ButtonRowComponent,
+  SlideToggleComponent,
+  TooltipDirective,
+  MenuComponent,
+  MenuOptionComponent,
+} from 'projects/komponents/src';
 import { FixImageUrlPipe } from 'src/app/pipes/fix-image-url.pipe';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-preview.component';
@@ -47,6 +54,8 @@ import { AnnotationComponent } from './annotation.component';
     ButtonRowComponent,
     TooltipDirective,
     FixImageUrlPipe,
+    MenuComponent,
+    MenuOptionComponent,
   ],
 })
 export class AnnotationComponentForEditorComponent extends AnnotationComponent {

@@ -1,8 +1,16 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Mesh, Quaternion } from '@babylonjs/core';
-import { BehaviorSubject, combineLatest, debounceTime, filter, firstValueFrom, map } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  firstValueFrom,
+  map,
+} from 'rxjs';
 import {
   IAnnotation,
   ICompilation,
@@ -77,6 +85,15 @@ const areSettingsSet = (entity: IEntity) => {
   providedIn: 'root',
 })
 export class ProcessingService {
+  private backend: BackendService = inject(BackendService);
+  private message: MessageService = inject(MessageService);
+  private overlay: OverlayService = inject(OverlayService);
+  public babylon: BabylonService = inject(BabylonService);
+  private loadingScreen: LoadingScreenService = inject(LoadingScreenService);
+  private userdata: UserdataService = inject(UserdataService);
+  private dialog: MatDialog = inject(MatDialog);
+  private http: HttpClient = inject(HttpClient);
+
   public entity$ = new BehaviorSubject<IEntity | undefined>(undefined);
   public meshes$ = new BehaviorSubject<Mesh[]>([]);
   public compilation$ = new BehaviorSubject<ICompilation | undefined>(undefined);
@@ -111,99 +128,91 @@ export class ProcessingService {
   public entityWidth = (0).toFixed(2);
   public entityDepth = (0).toFixed(2);
 
-  get isAnnotatingFeatured$() {
-    return combineLatest([
-      this.entity$,
-      this.compilation$,
-      this.defaultEntityLoaded$,
-      this.fallbackEntityLoaded$,
-      this.showAnnotationEditor$,
-      this.compilationLoaded$,
-      this.isStandalone$,
-      this.mode$,
-      this.userdata.isAuthenticated$,
-    ]).pipe(
-      map(
-        ([
-          entity,
-          compilation,
-          isDefault,
-          isFallback,
-          showEditor,
-          isCompilationLoaded,
-          isStandalone,
-          mode,
-          isAuthenticated,
-        ]) => {
-          if (!entity) return false;
-          if (isStandalone) return true;
+  isOwner$ = combineLatest({
+    entity: this.entity$,
+    compilation: this.compilation$,
+  }).pipe(
+    map(({ entity, compilation }) => {
+      const ofEntity = this.userdata.doesUserOwn(entity);
+      const ofCompilation = this.userdata.doesUserOwn(compilation);
+      return { ofEntity, ofCompilation };
+    }),
+  );
 
-          const isAnnotatable =
-            entity.mediaType === 'image' ||
-            entity.mediaType === 'entity' ||
-            entity.mediaType === 'model';
+  isAnnotatingFeatured$ = combineLatest({
+    entity: this.entity$,
+    compilation: this.compilation$,
+    isDefault: this.defaultEntityLoaded$,
+    isFallback: this.fallbackEntityLoaded$,
+    showEditor: this.showAnnotationEditor$,
+    isCompilationLoaded: this.compilationLoaded$,
+    isStandalone: this.isStandalone$,
+    mode: this.mode$,
+    isAuthenticated: this.userdata.isAuthenticated$,
+    isOwner: this.isOwner$,
+  }).pipe(
+    map(args => {
+      const { entity, compilation } = args;
+      if (!entity) return false;
+      if (args.isStandalone) return true;
 
-          const hideEditor = !showEditor || !isAnnotatable || isFallback;
-          const shouldHideEditor = !isAnnotatable || isFallback;
-          const isEditorVisible = showEditor && !isCompilationLoaded;
-          if (hideEditor && shouldHideEditor && isEditorVisible) return false;
+      const isAnnotatable =
+        entity.mediaType === 'image' ||
+        entity.mediaType === 'entity' ||
+        entity.mediaType === 'model';
 
-          if (isCompilationLoaded) {
-            if (!compilation) return false;
-            if (compilation?.whitelist.enabled && isAuthenticated) return true;
-            if (compilation.whitelist.enabled)
-              return this.userdata.isUserWhitelistedFor(compilation);
-          } else {
-            if ((isDefault || isFallback) && mode === 'annotation') return true;
-            if (this.userdata.doesUserOwn(entity)) return true;
-          }
-          return false;
-        },
-      ),
-    );
-  }
+      const hideEditor = !args.showEditor || !isAnnotatable || args.isFallback;
+      const shouldHideEditor = !isAnnotatable || args.isFallback;
+      const isEditorVisible = args.showEditor && !args.isCompilationLoaded;
+      console.debug({ hideEditor, shouldHideEditor, isEditorVisible });
+      if (hideEditor && shouldHideEditor && isEditorVisible) return false;
 
-  get hasAnnotationAllowance$() {
-    return combineLatest([
-      this.isStandalone$,
-      this.overlay.sidenav$,
-      this.isInUpload$,
-      this.isAnnotatingFeatured$,
-      this.userdata.isAuthenticated$,
-    ]).pipe(
-      map(([isStandalone, { mode, open }, isInUpload, isAnnotatingFeatured, isAuthenticated]) => {
-        if (isInUpload) return false;
-        if (!open) return false;
-        if (!isAnnotatingFeatured) return false;
-        if (isStandalone) return true;
-        if (mode === 'annotation' && isAuthenticated) return true;
-        return false;
-      }),
-    );
-  }
+      if (args.isCompilationLoaded) {
+        if (!compilation) return false;
+        if (compilation.whitelist.enabled) {
+          if (!args.isAuthenticated) return false;
+          return this.userdata.isUserWhitelistedFor(compilation) || args.isOwner.ofCompilation;
+        } else {
+          return args.isOwner.ofCompilation;
+        }
+      } else {
+        if ((args.isDefault || args.isFallback) && args.mode === 'annotation') return true;
+        if (args.isOwner.ofEntity) return true;
+      }
+      return false;
+    }),
+    distinctUntilChanged(),
+  );
 
-  get state$() {
-    return combineLatest([this.entity$, this.settings$, this.meshes$, this.compilation$]).pipe(
-      map(([entity, { localSettings }, meshes, compilation]) => ({
-        entity,
-        settings: localSettings,
-        meshes,
-        compilation,
-      })),
-      debounceTime(100),
-    );
-  }
+  hasAnnotationAllowance$ = combineLatest({
+    isStandalone: this.isStandalone$,
+    sidenav: this.overlay.sidenav$,
+    isInUpload: this.isInUpload$,
+    isAnnotatingFeatured: this.isAnnotatingFeatured$,
+    isAuthenticated: this.userdata.isAuthenticated$,
+  }).pipe(
+    map(args => {
+      if (args.isInUpload) return false;
+      if (!args.sidenav.open) return false;
+      if (!args.isAnnotatingFeatured) return false;
+      if (args.isStandalone) return true;
+      if (args.sidenav.mode === 'annotation' && args.isAuthenticated) return true;
+      return false;
+    }),
+    distinctUntilChanged(),
+  );
 
-  constructor(
-    private backend: BackendService,
-    private message: MessageService,
-    private overlay: OverlayService,
-    public babylon: BabylonService,
-    private loadingScreen: LoadingScreenService,
-    private userdata: UserdataService,
-    private dialog: MatDialog,
-    private http: HttpClient,
-  ) {
+  state$ = combineLatest([this.entity$, this.settings$, this.meshes$, this.compilation$]).pipe(
+    map(([entity, { localSettings }, meshes, compilation]) => ({
+      entity,
+      settings: localSettings,
+      meshes,
+      compilation,
+    })),
+    debounceTime(100),
+  );
+
+  constructor() {
     this.entity$.pipe(filter(isEntity)).subscribe(entity => this.handleEntitySettings(entity));
   }
 

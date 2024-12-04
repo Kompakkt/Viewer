@@ -1,4 +1,4 @@
-import { Component, viewChild } from '@angular/core';
+import { Component, inject, viewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { saveAs } from 'file-saver';
 import { combineLatest, firstValueFrom } from 'rxjs';
@@ -55,6 +55,14 @@ import { EntityFeatureSettingsMeshComponent } from './entity-feature-settings-me
   ],
 })
 export class EntityFeatureSettingsComponent {
+  private babylon = inject(BabylonService);
+  public processing = inject(ProcessingService);
+  public entitySettings = inject(EntitySettingsService);
+  public dialog = inject(MatDialog);
+  private backend = inject(BackendService);
+  public userdata = inject(UserdataService);
+  private postMessage = inject(PostMessageService);
+
   stepper = viewChild<WizardComponent>('stepper');
 
   // used during upload while setting initial settings
@@ -62,60 +70,40 @@ export class EntityFeatureSettingsComponent {
   public lightsToggle = false;
   public previewToggle = false;
 
-  constructor(
-    private babylon: BabylonService,
-    public processing: ProcessingService,
-    public entitySettings: EntitySettingsService,
-    public dialog: MatDialog,
-    private backend: BackendService,
-    public userdata: UserdataService,
-    private postMessage: PostMessageService,
-  ) {}
+  entity$ = this.processing.entity$;
 
-  get entity$() {
-    return this.processing.entity$;
-  }
+  mode$ = this.processing.mode$;
 
-  get mode$() {
-    return this.processing.mode$;
-  }
+  settingsReady$ = combineLatest([
+    this.processing.showSettingsEditor$,
+    this.entity$,
+    this.processing.settings$,
+  ]).pipe(
+    map(([value, entity, { localSettings }]) => {
+      if (!entity) return false;
+      if (!localSettings) return false;
+      return value;
+    }),
+  );
 
-  get settingsReady$() {
-    return combineLatest([
-      this.processing.showSettingsEditor$,
-      this.entity$,
-      this.processing.settings$,
-    ]).pipe(
-      map(([value, entity, { localSettings }]) => {
-        if (!entity) return false;
-        if (!localSettings) return false;
-        return value;
-      }),
-    );
-  }
+  isStandalone$ = this.processing.isStandalone$;
 
-  get isStandalone$() {
-    return this.processing.isStandalone$;
-  }
-
-  get canSaveSettings$() {
-    return combineLatest([
-      this.processing.defaultEntityLoaded$,
-      this.processing.fallbackEntityLoaded$,
-      this.processing.compilationLoaded$,
-      this.mode$,
-      this.processing.entity$,
-    ]).pipe(
-      map(
-        ([isDefault, isFallback, isCompilationLoaded, mode, entity]) =>
-          !isDefault &&
-          !isFallback &&
-          !isCompilationLoaded &&
-          mode === 'edit' &&
-          this.userdata.doesUserOwn(entity),
-      ),
-    );
-  }
+  canSaveSettings$ = combineLatest([
+    this.processing.defaultEntityLoaded$,
+    this.processing.fallbackEntityLoaded$,
+    this.processing.compilationLoaded$,
+    this.mode$,
+    this.processing.entity$,
+  ]).pipe(
+    map(
+      ([isDefault, isFallback, isCompilationLoaded, mode, entity]) =>
+        !isDefault &&
+        !isFallback &&
+        !isCompilationLoaded &&
+        mode === 'edit' &&
+        this.userdata.doesUserOwn(entity),
+    ),
+  );
 
   public setInitialPerspectivePreview() {
     this.setPreview();
