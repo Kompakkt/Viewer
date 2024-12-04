@@ -35,8 +35,9 @@ const isUserOwned = (
   elementType: 'entity' | 'compilation',
 ) => {
   if (!element || !userdata) return false;
-  const userElements = userdata.data?.[elementType];
-  return userElements?.some((other: IEntity | ICompilation) => other._id === element._id);
+  const userElements = userdata.data?.[elementType] ?? [];
+  if (userElements.some((other: IEntity | ICompilation) => other._id === element._id)) return true;
+  return element.creator?._id === userdata._id;
 };
 
 const isUserWhitelisted = (
@@ -45,7 +46,8 @@ const isUserWhitelisted = (
 ) => {
   if (!element || !userdata) return false;
   const persons = getWhitelistedPersons(element);
-  return !!persons.find(person => person._id === userdata._id);
+  if (persons.some(person => person._id === userdata._id)) return true;
+  return element.creator?._id === userdata._id;
 };
 
 export type LoginData = { username: string; password: string };
@@ -59,7 +61,10 @@ export class UserdataService {
   public userData$ = new BehaviorSubject<IUserData | undefined>(undefined);
   public isAuthenticated$ = this.userData$.pipe(map(userdata => !!userdata?._id));
 
-  constructor(private backend: BackendService, private dialog: MatDialog) {}
+  constructor(
+    private backend: BackendService,
+    private dialog: MatDialog,
+  ) {}
 
   public doesUserOwn(element?: IEntity | ICompilation) {
     if (isEntity(element)) return isUserOwned(element, this.userData$.getValue(), 'entity');

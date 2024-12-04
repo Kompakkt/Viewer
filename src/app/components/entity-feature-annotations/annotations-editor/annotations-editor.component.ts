@@ -1,7 +1,5 @@
-import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { AsyncPipe } from '@angular/common';
 import { Component, QueryList, ViewChildren, inject } from '@angular/core';
-import { MatCard } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { saveAs } from 'file-saver';
 import { ButtonComponent, TooltipDirective } from 'projects/komponents/src';
@@ -20,10 +18,7 @@ import { AnnotationComponent } from '../annotation/annotation.component';
   styleUrls: ['./annotations-editor.component.scss'],
   standalone: true,
   imports: [
-    MatCard,
-    CdkDropList,
     AnnotationComponentForEditorComponent,
-    CdkDrag,
     MatIcon,
     AsyncPipe,
     TranslatePipe,
@@ -44,51 +39,25 @@ export class AnnotationsEditorComponent {
 
   public currentAnnotations$ = this.annotations.currentAnnotations$;
 
-  get annotationCount$() {
-    return this.currentAnnotations$.pipe(map(arr => arr.length));
-  }
+  annotationCount$ = this.currentAnnotations$.pipe(map(arr => arr.length));
 
-  get objectName$() {
-    return this.processing.entity$.pipe(map(entity => entity?.name));
-  }
+  objectName$ = this.processing.entity$.pipe(map(entity => entity?.name));
 
-  get isDefault$() {
-    return combineLatest([
-      this.processing.hasAnnotationAllowance$,
-      this.processing.compilationLoaded$,
-    ]).pipe(
-      map(
-        ([isAnnotatingAllowed, isCompilationLoaded]) => isAnnotatingAllowed && !isCompilationLoaded,
-      ),
-    );
-  }
+  isDefault$ = combineLatest([
+    this.processing.hasAnnotationAllowance$,
+    this.processing.compilationLoaded$,
+  ]).pipe(
+    map(
+      ([isAnnotatingAllowed, isCompilationLoaded]) => isAnnotatingAllowed && !isCompilationLoaded,
+    ),
+  );
 
-  get isForbidden$() {
-    return combineLatest([
-      this.processing.isInUpload$,
-      this.processing.hasAnnotationAllowance$,
-      this.processing.compilationLoaded$,
-      this.processing.defaultEntityLoaded$,
-    ]).pipe(map(arr => arr.every(boolean => !boolean)));
-  }
-
-  get isDraggingDisabled$() {
-    return combineLatest([
-      this.processing.hasAnnotationAllowance$,
-      this.processing.compilationLoaded$,
-      this.processing.compilation$,
-    ]).pipe(
-      map(([isAnnotatingAllowed, isCompilationLoaded, compilation]) => {
-        if (!isAnnotatingAllowed) return true;
-        if (isCompilationLoaded) return this.userdata.doesUserOwn(compilation);
-        return false;
-      }),
-    );
-  }
-
-  drop(event: CdkDragDrop<string[]>) {
-    this.annotations.moveAnnotationByIndex(event.previousIndex, event.currentIndex);
-  }
+  isForbidden$ = combineLatest([
+    this.processing.isInUpload$,
+    this.processing.hasAnnotationAllowance$,
+    this.processing.compilationLoaded$,
+    this.processing.defaultEntityLoaded$,
+  ]).pipe(map(arr => arr.every(boolean => !boolean)));
 
   exportAnnotations() {
     firstValueFrom(this.currentAnnotations$).then(arr => {
