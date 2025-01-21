@@ -33,11 +33,11 @@ export class BackendService {
   constructor(private http: HttpClient) {}
 
   // Override GET and POST to use HttpOptions which is needed for auth
-  private async get(path: string): Promise<any> {
+  public async get(path: string): Promise<any> {
     return this.http.get(`${this.endpoint}${path}`, this.httpOptions).toPromise();
   }
 
-  private post(path: string, obj: any): Promise<any> {
+  public post(path: string, obj: any): Promise<any> {
     return this.http.post(`${this.endpoint}${path}`, obj, this.httpOptions).toPromise();
   }
 
@@ -72,10 +72,6 @@ export class BackendService {
 
   public async getEntityMetadata(identifier: string | ObjectId): Promise<IDigitalEntity> {
     return this.get(`api/v1/get/find/digitalentity/${identifier}`);
-  }
-
-  public async getCurrentUserData(): Promise<IUserData> {
-    return this.get(`api/v1/get/ldata`);
   }
 
   // POSTs

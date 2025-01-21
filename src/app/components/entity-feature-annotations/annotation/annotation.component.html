@@ -10,6 +10,8 @@
   [data]="annotation.body.content.description || ('No description' | translate)"
 />
 
+<div class="embeddables" extendSlot="annotation-embeddables" slotBehaviour="append" [slotData]="annotation"></div>
+
 <k-button-row justify="end" gap="4">
   @if ((canUserDelete$ | async)) {
   <k-button

@@ -59,7 +59,14 @@ export class UserdataService {
   public userData$ = new BehaviorSubject<IUserData | undefined>(undefined);
   public isAuthenticated$ = this.userData$.pipe(map(userdata => !!userdata?._id));
 
-  constructor(private backend: BackendService, private dialog: MatDialog) {}
+  constructor(
+    private backend: BackendService,
+    private dialog: MatDialog,
+  ) {
+    this.userData$.subscribe(userdata => {
+      console.log('Userdata changed:', userdata);
+    });
+  }
 
   public doesUserOwn(element?: IEntity | ICompilation) {
     if (isEntity(element)) return isUserOwned(element, this.userData$.getValue(), 'entity');
@@ -68,9 +75,14 @@ export class UserdataService {
     return false;
   }
 
-  public isUserWhitelistedFor(element?: IEntity | ICompilation) {
+  public isUserOwnerOrWhitelistedFor(element?: IEntity | ICompilation) {
+    const userdata = this.userData$.getValue();
+    if (!userdata) return false;
+
+    if (this.doesUserOwn(element)) return true;
     if (isEntity(element)) return isUserWhitelisted(element, this.userData$.getValue());
     if (isCompilation(element)) return isUserWhitelisted(element, this.userData$.getValue());
+    
     return false;
   }
 

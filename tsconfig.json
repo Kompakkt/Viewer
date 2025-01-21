@@ -22,14 +22,17 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "outDir": "./dist/out-tsc",
+    "sourceMap": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "target": "ES2022",
+    "typeRoots": ["node_modules/@types", "src/@types"],
     "paths": {
+      "@kompakkt/extender": ["./plugins/dist/kompakkt/extender"],
+      "@kompakkt/plugin-*": ["./plugins/dist/kompakkt/plugin-*"],
       "core-js/es7/reflect": ["node_modules/core-js/proposals/reflect-metadata"],
       "komponents": ["./dist/komponents"]
     },
-    "skipLibCheck": true,
-    "sourceMap": true,
-    "strict": true,
-    "target": "ES2022",
-    "typeRoots": ["node_modules/@types", "src/@types"]
+    "preserveSymlinks": true
   }
 }

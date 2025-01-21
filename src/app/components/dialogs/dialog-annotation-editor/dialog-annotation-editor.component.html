@@ -36,7 +36,7 @@
 } }
 <!-- /Switch -->
 @if (mode === 'edit') {
-<div class="embeddables">
+<div class="embeddables" extendSlot="annotation-editor-embeddables" slotBehaviour="append">
   <app-media-browser (addMedia)="addEntitySwitch($event)" />
 </div>
 } } @if (canUserEdit()) {

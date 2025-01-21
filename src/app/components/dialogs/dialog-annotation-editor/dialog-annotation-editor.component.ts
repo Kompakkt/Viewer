@@ -26,6 +26,7 @@ import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-previe
 import { ProcessingService } from 'src/app/services/processing/processing.service';
 import { UserdataService } from 'src/app/services/userdata/userdata.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { ExtenderSlotDirective } from '@kompakkt/extender';
 
 export interface IDialogData {
   annotation: IAnnotation;
@@ -58,6 +59,7 @@ interface IExternalImage {
     InputComponent,
     ButtonComponent,
     ButtonRowComponent,
+    ExtenderSlotDirective,
   ],
 })
 export class DialogAnnotationEditorComponent implements OnInit {

@@ -16,6 +16,7 @@ import { ColorChromeModule } from 'ngx-color/chrome';
 
 import { TranslatePipe } from './pipes/translate.pipe';
 import { TranslateService } from './services/translate/translate.service';
+import { pluginProviders } from './app.plugin';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -42,5 +43,6 @@ export const appConfig: ApplicationConfig = {
     provideRouter([]),
     provideAnimations(),
     provideHttpClient(withInterceptorsFromDi()),
+    pluginProviders,
   ],
 };
