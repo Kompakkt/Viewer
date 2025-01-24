@@ -5,7 +5,7 @@
     "Kompakkt": {
       "architect": {
         "build": {
-          "builder": "@angular/build:application",
+          "builder": "@angular-devkit/build-angular:application",
           "configurations": {
             "development": {
               "extractLicenses": false,
@@ -46,13 +46,13 @@
           }
         },
         "extract-i18n": {
-          "builder": "@angular/build:extract-i18n",
+          "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
             "buildTarget": "Kompakkt:build"
           }
         },
         "serve": {
-          "builder": "@angular/build:dev-server",
+          "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "development": {
               "buildTarget": "Kompakkt:build:development"
@@ -62,7 +62,9 @@
             }
           },
           "defaultConfiguration": "development",
-          "options": {}
+          "options": {
+            "servePath": "/viewer/"
+          }
         }
       },
       "prefix": "app",

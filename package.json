@@ -4,6 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:docker": "ng serve --host=0.0.0.0 --disable-host-check",
     "local": "ng serve --host=0.0.0.0",
     "build": "ng build",
     "lint": "ng lint",
@@ -62,6 +63,7 @@
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
+    "@angular-devkit/build-angular": "^19.1.4",
     "@angular/build": "^19.1.4",
     "@angular/cli": "19.1.4",
     "@angular/compiler-cli": "^19.1.3",

@@ -49,6 +49,6 @@ export const appConfig: ApplicationConfig = {
     provideRouter([]),
     provideAnimations(),
     provideHttpClient(withInterceptorsFromDi()),
-    ...pluginProviders,
+    pluginProviders,
   ],
 };
