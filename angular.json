@@ -95,10 +95,7 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "tsConfig": "projects/komponents/tsconfig.spec.json",
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ]
+            "polyfills": ["zone.js", "zone.js/testing"]
           }
         }
       }
@@ -134,6 +131,7 @@
   },
   "version": 1,
   "cli": {
-    "analytics": false
+    "analytics": false,
+    "packageManager": "bun"
   }
 }

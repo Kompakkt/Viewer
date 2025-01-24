@@ -12,11 +12,10 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { skip, Subscription } from 'rxjs';
 
 @Component({
-  selector: 'k-textarea',
-  standalone: true,
-  imports: [],
-  templateUrl: './textarea.component.html',
-  styleUrl: './textarea.component.scss',
+    selector: 'k-textarea',
+    imports: [],
+    templateUrl: './textarea.component.html',
+    styleUrl: './textarea.component.scss'
 })
 export class TextareaComponent {
   textarea = viewChild.required<ElementRef<HTMLTextAreaElement>>('textarea');

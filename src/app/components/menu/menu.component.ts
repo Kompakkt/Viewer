@@ -14,22 +14,21 @@ import { UserdataService } from '../../services/userdata/userdata.service';
 import { CameraSettingsComponent } from './camera-settings/camera-settings.component';
 
 @Component({
-  selector: 'app-menu',
-  templateUrl: './menu.component.html',
-  styleUrls: ['./menu.component.scss'],
-  standalone: true,
-  imports: [
-    MatIcon,
-    CameraSettingsComponent,
-    MatMenuTrigger,
-    MatMenu,
-    MatMenuItem,
-    AsyncPipe,
-    KeyValuePipe,
-    TranslatePipe,
-    TooltipDirective,
-    ButtonComponent,
-  ],
+    selector: 'app-menu',
+    templateUrl: './menu.component.html',
+    styleUrls: ['./menu.component.scss'],
+    imports: [
+        MatIcon,
+        CameraSettingsComponent,
+        MatMenuTrigger,
+        MatMenu,
+        MatMenuItem,
+        AsyncPipe,
+        KeyValuePipe,
+        TranslatePipe,
+        TooltipDirective,
+        ButtonComponent,
+    ]
 })
 export class MenuComponent implements OnInit {
   public fullscreen = !!fscreen.fullscreenElement;

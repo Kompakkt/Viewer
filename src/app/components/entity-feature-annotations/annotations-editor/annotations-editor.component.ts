@@ -15,21 +15,20 @@ import { AnnotationComponentForEditorComponent } from '../annotation/annotation-
 import { AnnotationComponent } from '../annotation/annotation.component';
 
 @Component({
-  selector: 'app-annotations-editor',
-  templateUrl: './annotations-editor.component.html',
-  styleUrls: ['./annotations-editor.component.scss'],
-  standalone: true,
-  imports: [
-    MatCard,
-    CdkDropList,
-    AnnotationComponentForEditorComponent,
-    CdkDrag,
-    MatIcon,
-    AsyncPipe,
-    TranslatePipe,
-    TooltipDirective,
-    ButtonComponent,
-  ],
+    selector: 'app-annotations-editor',
+    templateUrl: './annotations-editor.component.html',
+    styleUrls: ['./annotations-editor.component.scss'],
+    imports: [
+        MatCard,
+        CdkDropList,
+        AnnotationComponentForEditorComponent,
+        CdkDrag,
+        MatIcon,
+        AsyncPipe,
+        TranslatePipe,
+        TooltipDirective,
+        ButtonComponent,
+    ]
 })
 export class AnnotationsEditorComponent {
   @ViewChildren(AnnotationComponent)

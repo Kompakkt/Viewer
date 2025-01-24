@@ -30,29 +30,28 @@ import { EntityFeatureSettingsLightsComponent } from './entity-feature-settings-
 import { EntityFeatureSettingsMeshComponent } from './entity-feature-settings-mesh/entity-feature-settings-mesh.component';
 
 @Component({
-  selector: 'app-entity-feature-settings',
-  templateUrl: './entity-feature-settings.component.html',
-  styleUrls: ['./entity-feature-settings.component.scss'],
-  standalone: true,
-  imports: [
-    MatCard,
-    MatCardContent,
-    MatCardHeader,
-    MatCardTitle,
-    ColorChromeModule,
-    FormsModule,
-    EntityFeatureSettingsLightsComponent,
-    EntityFeatureSettingsMeshComponent,
-    MatIcon,
-    AsyncPipe,
-    TranslatePipe,
-    DetailsComponent,
-    ButtonComponent,
-    LabelledCheckboxComponent,
-    WizardComponent,
-    WizardStepComponent,
-    FixImageUrlPipe,
-  ],
+    selector: 'app-entity-feature-settings',
+    templateUrl: './entity-feature-settings.component.html',
+    styleUrls: ['./entity-feature-settings.component.scss'],
+    imports: [
+        MatCard,
+        MatCardContent,
+        MatCardHeader,
+        MatCardTitle,
+        ColorChromeModule,
+        FormsModule,
+        EntityFeatureSettingsLightsComponent,
+        EntityFeatureSettingsMeshComponent,
+        MatIcon,
+        AsyncPipe,
+        TranslatePipe,
+        DetailsComponent,
+        ButtonComponent,
+        LabelledCheckboxComponent,
+        WizardComponent,
+        WizardStepComponent,
+        FixImageUrlPipe,
+    ]
 })
 export class EntityFeatureSettingsComponent {
   stepper = viewChild<WizardComponent>('stepper');

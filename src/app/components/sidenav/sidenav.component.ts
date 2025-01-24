@@ -6,15 +6,14 @@ import { EntityFeatureSettingsComponent } from '../entity-feature-settings/entit
 import { AnnotationsEditorComponent } from '../entity-feature-annotations/annotations-editor/annotations-editor.component';
 
 @Component({
-  selector: 'app-sidenav',
-  templateUrl: './sidenav.component.html',
-  styleUrls: ['./sidenav.component.scss'],
-  standalone: true,
-  imports: [
-    AnnotationsEditorComponent,
-    EntityFeatureSettingsComponent,
-    CompilationBrowserComponent,
-  ],
+    selector: 'app-sidenav',
+    templateUrl: './sidenav.component.html',
+    styleUrls: ['./sidenav.component.scss'],
+    imports: [
+        AnnotationsEditorComponent,
+        EntityFeatureSettingsComponent,
+        CompilationBrowserComponent,
+    ]
 })
 export class SidenavComponent implements OnInit {
   @HostBinding('class.is-open')

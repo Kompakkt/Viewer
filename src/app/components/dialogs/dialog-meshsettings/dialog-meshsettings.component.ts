@@ -10,19 +10,18 @@ import { ButtonComponent, ButtonRowComponent } from 'projects/komponents/src';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 @Component({
-  selector: 'app-dialog-meshsettings',
-  templateUrl: './dialog-meshsettings.component.html',
-  styleUrls: ['./dialog-meshsettings.component.scss'],
-  standalone: true,
-  imports: [
-    MatDialogTitle,
-    MatDialogContent,
-    MatDialogActions,
-    MatDialogClose,
-    TranslatePipe,
-    ButtonComponent,
-    ButtonRowComponent,
-  ],
+    selector: 'app-dialog-meshsettings',
+    templateUrl: './dialog-meshsettings.component.html',
+    styleUrls: ['./dialog-meshsettings.component.scss'],
+    imports: [
+        MatDialogTitle,
+        MatDialogContent,
+        MatDialogActions,
+        MatDialogClose,
+        TranslatePipe,
+        ButtonComponent,
+        ButtonRowComponent,
+    ]
 })
 export class DialogMeshsettingsComponent {
   #ref = inject(MatDialogRef);

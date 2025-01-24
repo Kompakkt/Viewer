@@ -9,11 +9,10 @@ import { ProcessingService } from '../../../services/processing/processing.servi
 import { ButtonComponent, InputComponent, SliderComponent } from 'projects/komponents/src';
 
 @Component({
-  selector: 'app-entity-feature-settings-lights',
-  templateUrl: './entity-feature-settings-lights.component.html',
-  styleUrls: ['./entity-feature-settings-lights.component.scss'],
-  standalone: true,
-  imports: [TranslatePipe, SliderComponent, InputComponent, ButtonComponent],
+    selector: 'app-entity-feature-settings-lights',
+    templateUrl: './entity-feature-settings-lights.component.html',
+    styleUrls: ['./entity-feature-settings-lights.component.scss'],
+    imports: [TranslatePipe, SliderComponent, InputComponent, ButtonComponent]
 })
 export class EntityFeatureSettingsLightsComponent {
   constructor(

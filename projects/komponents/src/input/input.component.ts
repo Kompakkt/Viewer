@@ -5,11 +5,10 @@ import { skip, Subscription } from 'rxjs';
 export type InputType = 'text' | 'number' | 'username' | 'password' | 'email' | 'tel' | 'url';
 
 @Component({
-  selector: 'k-input',
-  standalone: true,
-  imports: [],
-  templateUrl: './input.component.html',
-  styleUrl: './input.component.scss',
+    selector: 'k-input',
+    imports: [],
+    templateUrl: './input.component.html',
+    styleUrl: './input.component.scss'
 })
 export class InputComponent implements OnInit, OnDestroy {
   min = input<number>(0);

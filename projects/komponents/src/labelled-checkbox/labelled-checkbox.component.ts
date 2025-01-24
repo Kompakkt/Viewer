@@ -3,11 +3,10 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'k-labelled-checkbox',
-  standalone: true,
-  imports: [],
-  templateUrl: './labelled-checkbox.component.html',
-  styleUrl: './labelled-checkbox.component.scss',
+    selector: 'k-labelled-checkbox',
+    imports: [],
+    templateUrl: './labelled-checkbox.component.html',
+    styleUrl: './labelled-checkbox.component.scss'
 })
 export class LabelledCheckboxComponent implements OnInit, OnDestroy {
   label = input.required<string>();

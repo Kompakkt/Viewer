@@ -22,20 +22,19 @@ export type AuthResult = {
 };
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss'],
-  standalone: true,
-  imports: [
-    FormsModule,
-    MatDialogTitle,
-    MatDialogContent,
-    MatDialogActions,
-    TranslatePipe,
-    InputComponent,
-    ButtonComponent,
-    ButtonRowComponent,
-  ],
+    selector: 'app-login',
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.scss'],
+    imports: [
+        FormsModule,
+        MatDialogTitle,
+        MatDialogContent,
+        MatDialogActions,
+        TranslatePipe,
+        InputComponent,
+        ButtonComponent,
+        ButtonRowComponent,
+    ]
 })
 export class LoginComponent {
   public data: AuthResult = {

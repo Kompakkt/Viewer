@@ -11,19 +11,18 @@ import { SidenavMenuComponent } from '../sidenav-menu/sidenav-menu.component';
 import { SidenavComponent } from '../sidenav/sidenav.component';
 
 @Component({
-  selector: 'app-scene',
-  templateUrl: './scene.component.html',
-  styleUrls: ['./scene.component.scss'],
-  standalone: true,
-  imports: [
-    AnnotationComponent,
-    AnnotationMarkerComponent,
-    AnnotationwalkthroughComponent,
-    MenuComponent,
-    SidenavMenuComponent,
-    SidenavComponent,
-    AsyncPipe,
-  ],
+    selector: 'app-scene',
+    templateUrl: './scene.component.html',
+    styleUrls: ['./scene.component.scss'],
+    imports: [
+        AnnotationComponent,
+        AnnotationMarkerComponent,
+        AnnotationwalkthroughComponent,
+        MenuComponent,
+        SidenavMenuComponent,
+        SidenavComponent,
+        AsyncPipe,
+    ]
 })
 export class SceneComponent implements AfterViewInit {
   @HostListener('window:resize', ['$event'])

@@ -31,28 +31,27 @@ import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-previe
 import { ExtenderSlotDirective } from '@kompakkt/extender';
 
 @Component({
-  selector: 'app-annotation',
-  templateUrl: './annotation.component.html',
-  styleUrls: ['./annotation.component.scss'],
-  standalone: true,
-  imports: [
-    MatCard,
-    FormsModule,
-    MatCardHeader,
-    MatCardTitle,
-    MatIcon,
-    MatCardContent,
-    CdkTextareaAutosize,
-    MarkdownPreviewComponent,
-    MatCardActions,
-    AsyncPipe,
-    TranslatePipe,
-    ButtonComponent,
-    ButtonRowComponent,
-    InputComponent,
-    TooltipDirective,
-    ExtenderSlotDirective,
-  ],
+    selector: 'app-annotation',
+    templateUrl: './annotation.component.html',
+    styleUrls: ['./annotation.component.scss'],
+    imports: [
+        MatCard,
+        FormsModule,
+        MatCardHeader,
+        MatCardTitle,
+        MatIcon,
+        MatCardContent,
+        CdkTextareaAutosize,
+        MarkdownPreviewComponent,
+        MatCardActions,
+        AsyncPipe,
+        TranslatePipe,
+        ButtonComponent,
+        ButtonRowComponent,
+        InputComponent,
+        TooltipDirective,
+        ExtenderSlotDirective,
+    ]
 })
 export class AnnotationComponent {
   public annotationService = inject(AnnotationService);

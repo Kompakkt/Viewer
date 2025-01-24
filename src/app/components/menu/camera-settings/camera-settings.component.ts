@@ -8,19 +8,18 @@ import { BabylonService } from 'src/app/services/babylon/babylon.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 @Component({
-  selector: 'app-camera-settings',
-  templateUrl: './camera-settings.component.html',
-  styleUrls: ['./camera-settings.component.scss'],
-  standalone: true,
-  imports: [
-    FormsModule,
-    ReactiveFormsModule,
-    AsyncPipe,
-    TranslatePipe,
-    SliderComponent,
-    ButtonComponent,
-    ButtonRowComponent,
-  ],
+    selector: 'app-camera-settings',
+    templateUrl: './camera-settings.component.html',
+    styleUrls: ['./camera-settings.component.scss'],
+    imports: [
+        FormsModule,
+        ReactiveFormsModule,
+        AsyncPipe,
+        TranslatePipe,
+        SliderComponent,
+        ButtonComponent,
+        ButtonRowComponent,
+    ]
 })
 export class CameraSettingsComponent implements OnInit {
   public cameraSpeed = signal(1.0);

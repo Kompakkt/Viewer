@@ -17,21 +17,20 @@ import { ICompilation } from 'src/common';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 @Component({
-  selector: 'app-dialog-share-annotation',
-  templateUrl: './dialog-share-annotation.component.html',
-  styleUrls: ['./dialog-share-annotation.component.scss'],
-  standalone: true,
-  imports: [
-    MatDialogTitle,
-    MatDialogContent,
-    FormsModule,
-    MatDialogActions,
-    MatDialogClose,
-    TranslatePipe,
-    InputComponent,
-    ButtonRowComponent,
-    ButtonComponent,
-  ],
+    selector: 'app-dialog-share-annotation',
+    templateUrl: './dialog-share-annotation.component.html',
+    styleUrls: ['./dialog-share-annotation.component.scss'],
+    imports: [
+        MatDialogTitle,
+        MatDialogContent,
+        FormsModule,
+        MatDialogActions,
+        MatDialogClose,
+        TranslatePipe,
+        InputComponent,
+        ButtonRowComponent,
+        ButtonComponent,
+    ]
 })
 export class DialogShareAnnotationComponent {
   public targetCollectionId = '';

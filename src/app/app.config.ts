@@ -1,4 +1,9 @@
-import { APP_INITIALIZER, ApplicationConfig, importProvidersFrom } from '@angular/core';
+import {
+  ApplicationConfig,
+  importProvidersFrom,
+  inject,
+  provideAppInitializer,
+} from '@angular/core';
 
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
@@ -34,15 +39,16 @@ export const appConfig: ApplicationConfig = {
     ),
     TranslateService,
     TranslatePipe,
-    {
-      provide: APP_INITIALIZER,
-      useFactory: (service: TranslateService) => () => service.requestLanguage(),
-      deps: [TranslateService],
-      multi: true,
-    },
+    provideAppInitializer(() => {
+      const initializerFn = (
+        (service: TranslateService) => () =>
+          service.requestLanguage()
+      )(inject(TranslateService));
+      return initializerFn();
+    }),
     provideRouter([]),
     provideAnimations(),
     provideHttpClient(withInterceptorsFromDi()),
-    pluginProviders,
+    ...pluginProviders,
   ],
 };

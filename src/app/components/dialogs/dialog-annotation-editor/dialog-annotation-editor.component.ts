@@ -40,27 +40,26 @@ interface IExternalImage {
 }
 
 @Component({
-  selector: 'app-dialog-annotation-editor',
-  templateUrl: './dialog-annotation-editor.component.html',
-  styleUrls: ['./dialog-annotation-editor.component.scss'],
-  standalone: true,
-  imports: [
-    MatDialogTitle,
-    FormsModule,
-    MatDialogContent,
-    MarkdownPreviewComponent,
-    MediaBrowserComponent,
-    CdkTextareaAutosize,
-    MatDialogActions,
-    MatIcon,
-    MatDialogClose,
-    TranslatePipe,
-    TextareaComponent,
-    InputComponent,
-    ButtonComponent,
-    ButtonRowComponent,
-    ExtenderSlotDirective,
-  ],
+    selector: 'app-dialog-annotation-editor',
+    templateUrl: './dialog-annotation-editor.component.html',
+    styleUrls: ['./dialog-annotation-editor.component.scss'],
+    imports: [
+        MatDialogTitle,
+        FormsModule,
+        MatDialogContent,
+        MarkdownPreviewComponent,
+        MediaBrowserComponent,
+        CdkTextareaAutosize,
+        MatDialogActions,
+        MatIcon,
+        MatDialogClose,
+        TranslatePipe,
+        TextareaComponent,
+        InputComponent,
+        ButtonComponent,
+        ButtonRowComponent,
+        ExtenderSlotDirective,
+    ]
 })
 export class DialogAnnotationEditorComponent implements OnInit {
   @ViewChild('annotationContent')

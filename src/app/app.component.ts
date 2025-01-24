@@ -3,11 +3,10 @@ import { LoadingscreenComponent } from './components/loadingscreen/loadingscreen
 import { SceneComponent } from './components/scene/scene.component';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
-  standalone: true,
-  imports: [LoadingscreenComponent, SceneComponent],
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss'],
+    imports: [LoadingscreenComponent, SceneComponent]
 })
 export class AppComponent implements AfterContentChecked {
   constructor(private changeDetector: ChangeDetectorRef) {}

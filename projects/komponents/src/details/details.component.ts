@@ -3,11 +3,10 @@ import { AfterViewInit, Component, ElementRef, input, signal, viewChild } from '
 import { interval } from 'rxjs';
 
 @Component({
-  selector: 'k-details',
-  standalone: true,
-  imports: [AsyncPipe],
-  templateUrl: './details.component.html',
-  styleUrl: './details.component.scss',
+    selector: 'k-details',
+    imports: [AsyncPipe],
+    templateUrl: './details.component.html',
+    styleUrl: './details.component.scss'
 })
 export class DetailsComponent implements AfterViewInit {
   title = input.required<string>();

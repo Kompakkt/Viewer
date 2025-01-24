@@ -2,11 +2,10 @@ import { AfterViewInit, Component, computed, contentChildren, input, signal } fr
 import { WizardStepComponent } from '../wizard-step/wizard-step.component';
 
 @Component({
-  selector: 'k-wizard',
-  standalone: true,
-  imports: [],
-  templateUrl: './wizard.component.html',
-  styleUrl: './wizard.component.scss',
+    selector: 'k-wizard',
+    imports: [],
+    templateUrl: './wizard.component.html',
+    styleUrl: './wizard.component.scss'
 })
 export class WizardComponent implements AfterViewInit {
   direction = input<'horizontal' | 'vertical'>('horizontal');

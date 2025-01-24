@@ -19,22 +19,21 @@ import { EntitySettingsService } from '../../../services/entitysettings/entityse
 import { ProcessingService } from '../../../services/processing/processing.service';
 
 @Component({
-  selector: 'app-entity-feature-settings-mesh',
-  templateUrl: './entity-feature-settings-mesh.component.html',
-  styleUrls: ['./entity-feature-settings-mesh.component.scss'],
-  standalone: true,
-  imports: [
-    MatIcon,
-    ColorChromeModule,
-    FormsModule,
-    AsyncPipe,
-    TranslatePipe,
-    ButtonComponent,
-    DetailsComponent,
-    LabelledCheckboxComponent,
-    SliderComponent,
-    InputComponent,
-  ],
+    selector: 'app-entity-feature-settings-mesh',
+    templateUrl: './entity-feature-settings-mesh.component.html',
+    styleUrls: ['./entity-feature-settings-mesh.component.scss'],
+    imports: [
+        MatIcon,
+        ColorChromeModule,
+        FormsModule,
+        AsyncPipe,
+        TranslatePipe,
+        ButtonComponent,
+        DetailsComponent,
+        LabelledCheckboxComponent,
+        SliderComponent,
+        InputComponent,
+    ]
 })
 export class EntityFeatureSettingsMeshComponent implements OnInit {
   public meshSettingsHelperToggle = false;

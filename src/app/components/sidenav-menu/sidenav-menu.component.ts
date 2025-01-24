@@ -8,11 +8,10 @@ import { OverlayService } from '../../services/overlay/overlay.service';
 import { ProcessingService } from '../../services/processing/processing.service';
 
 @Component({
-  selector: 'app-sidenav-menu',
-  templateUrl: './sidenav-menu.component.html',
-  styleUrls: ['./sidenav-menu.component.scss'],
-  standalone: true,
-  imports: [MatIcon, AsyncPipe, TranslatePipe, TooltipDirective, ButtonComponent],
+    selector: 'app-sidenav-menu',
+    templateUrl: './sidenav-menu.component.html',
+    styleUrls: ['./sidenav-menu.component.scss'],
+    imports: [MatIcon, AsyncPipe, TranslatePipe, TooltipDirective, ButtonComponent]
 })
 export class SidenavMenuComponent implements OnInit {
   @HostBinding('class.is-open')

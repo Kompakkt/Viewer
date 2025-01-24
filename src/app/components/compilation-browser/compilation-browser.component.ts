@@ -8,11 +8,10 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ProcessingService } from '../../services/processing/processing.service';
 
 @Component({
-  selector: 'app-compilation-browser',
-  templateUrl: './compilation-browser.component.html',
-  styleUrls: ['./compilation-browser.component.scss'],
-  standalone: true,
-  imports: [MatCard, MatCardHeader, MatCardTitle, AsyncPipe, TranslatePipe, FixImageUrlPipe],
+    selector: 'app-compilation-browser',
+    templateUrl: './compilation-browser.component.html',
+    styleUrls: ['./compilation-browser.component.scss'],
+    imports: [MatCard, MatCardHeader, MatCardTitle, AsyncPipe, TranslatePipe, FixImageUrlPipe]
 })
 export class CompilationBrowserComponent {
   public colorToRGBA = (colorString: { r: number; g: number; b: number; a: number }) => {

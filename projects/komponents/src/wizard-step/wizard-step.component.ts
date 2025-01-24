@@ -11,11 +11,10 @@ import {
 import { interval } from 'rxjs';
 
 @Component({
-  selector: 'k-wizard-step',
-  standalone: true,
-  imports: [],
-  templateUrl: './wizard-step.component.html',
-  styleUrl: './wizard-step.component.scss',
+    selector: 'k-wizard-step',
+    imports: [],
+    templateUrl: './wizard-step.component.html',
+    styleUrl: './wizard-step.component.scss'
 })
 export class WizardStepComponent implements AfterViewInit {
   label = input.required<string>();

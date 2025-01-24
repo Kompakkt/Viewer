@@ -3,11 +3,10 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { Subscription, skip } from 'rxjs';
 
 @Component({
-  selector: 'k-slide-toggle',
-  standalone: true,
-  imports: [],
-  templateUrl: './slide-toggle.component.html',
-  styleUrl: './slide-toggle.component.scss',
+    selector: 'k-slide-toggle',
+    imports: [],
+    templateUrl: './slide-toggle.component.html',
+    styleUrl: './slide-toggle.component.scss'
 })
 export class SlideToggleComponent implements OnInit, OnDestroy {
   label = input.required<string>();

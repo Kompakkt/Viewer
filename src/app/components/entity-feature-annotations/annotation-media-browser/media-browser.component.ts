@@ -12,24 +12,23 @@ import { ProcessingService } from '../../../services/processing/processing.servi
 type BrowsedMedia = IEntity | { mediaType: string; url: string; description: string };
 
 @Component({
-  selector: 'app-media-browser',
-  templateUrl: './media-browser.component.html',
-  styleUrls: ['./media-browser.component.scss'],
-  standalone: true,
-  imports: [
-    MatIcon,
-    MatCard,
-    MatCardImage,
-    MatCardFooter,
-    AsyncPipe,
-    TranslatePipe,
-    TooltipDirective,
-    InputComponent,
-    ButtonComponent,
-    TooltipDirective,
-    DetailsComponent,
-    ButtonRowComponent,
-],
+    selector: 'app-media-browser',
+    templateUrl: './media-browser.component.html',
+    styleUrls: ['./media-browser.component.scss'],
+    imports: [
+        MatIcon,
+        MatCard,
+        MatCardImage,
+        MatCardFooter,
+        AsyncPipe,
+        TranslatePipe,
+        TooltipDirective,
+        InputComponent,
+        ButtonComponent,
+        TooltipDirective,
+        DetailsComponent,
+        ButtonRowComponent,
+    ]
 })
 export class MediaBrowserComponent {
   @Output() addMedia = new EventEmitter<BrowsedMedia>();

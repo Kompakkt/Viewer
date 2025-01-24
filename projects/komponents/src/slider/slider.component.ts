@@ -26,11 +26,10 @@ import {
 } from 'rxjs';
 
 @Component({
-  selector: 'k-slider',
-  standalone: true,
-  imports: [AsyncPipe],
-  templateUrl: './slider.component.html',
-  styleUrl: './slider.component.scss',
+    selector: 'k-slider',
+    imports: [AsyncPipe],
+    templateUrl: './slider.component.html',
+    styleUrl: './slider.component.scss'
 })
 export class SliderComponent implements AfterViewInit, OnInit, OnDestroy {
   label = input.required<string>();

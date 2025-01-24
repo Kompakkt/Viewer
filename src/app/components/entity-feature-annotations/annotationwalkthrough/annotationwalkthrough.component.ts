@@ -8,11 +8,10 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
 
 @Component({
-  selector: 'app-annotationwalkthrough',
-  templateUrl: './annotationwalkthrough.component.html',
-  styleUrls: ['./annotationwalkthrough.component.scss'],
-  standalone: true,
-  imports: [MatIcon, AsyncPipe, TranslatePipe, TooltipDirective, ButtonComponent],
+    selector: 'app-annotationwalkthrough',
+    templateUrl: './annotationwalkthrough.component.html',
+    styleUrls: ['./annotationwalkthrough.component.scss'],
+    imports: [MatIcon, AsyncPipe, TranslatePipe, TooltipDirective, ButtonComponent]
 })
 export class AnnotationwalkthroughComponent  {
   public annotationService = inject(AnnotationService);
