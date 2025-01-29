@@ -1,12 +1,5 @@
 import { Component, Inject } from '@angular/core';
-import {
-  MAT_DIALOG_DATA,
-  MatDialogActions,
-  MatDialogContent,
-  MatDialogRef,
-  MatDialogTitle,
-} from '@angular/material/dialog';
-
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { ButtonComponent, ButtonRowComponent, InputComponent } from 'projects/komponents/src';
 import { IUserData } from 'src/common';
@@ -22,19 +15,10 @@ export type AuthResult = {
 };
 
 @Component({
-    selector: 'app-login',
-    templateUrl: './login.component.html',
-    styleUrls: ['./login.component.scss'],
-    imports: [
-        FormsModule,
-        MatDialogTitle,
-        MatDialogContent,
-        MatDialogActions,
-        TranslatePipe,
-        InputComponent,
-        ButtonComponent,
-        ButtonRowComponent,
-    ]
+  selector: 'app-login',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss'],
+  imports: [FormsModule, TranslatePipe, InputComponent, ButtonComponent, ButtonRowComponent],
 })
 export class LoginComponent {
   public data: AuthResult = {

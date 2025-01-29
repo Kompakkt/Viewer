@@ -1,12 +1,10 @@
-import { AsyncPipe } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, input, signal, viewChild } from '@angular/core';
 import { interval } from 'rxjs';
 
 @Component({
-    selector: 'k-details',
-    imports: [AsyncPipe],
-    templateUrl: './details.component.html',
-    styleUrl: './details.component.scss'
+  selector: 'k-details',
+  templateUrl: './details.component.html',
+  styleUrl: './details.component.scss',
 })
 export class DetailsComponent implements AfterViewInit {
   title = input.required<string>();

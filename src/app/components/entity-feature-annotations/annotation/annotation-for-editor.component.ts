@@ -1,24 +1,11 @@
 import { Component } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-
-import { CdkTextareaAutosize } from '@angular/cdk/text-field';
-import { AsyncPipe, UpperCasePipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {
-  MatCard,
-  MatCardActions,
-  MatCardAvatar,
-  MatCardContent,
-  MatCardHeader,
-  MatCardImage,
-  MatCardSubtitle,
-  MatCardTitle,
-} from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import {
   ButtonComponent,
   ButtonRowComponent,
-  SlideToggleComponent,
   TooltipDirective,
   MenuComponent,
   MenuOptionComponent,
@@ -33,22 +20,12 @@ import { AnnotationComponent } from './annotation.component';
   templateUrl: './annotation-for-editor.component.html',
   styleUrls: ['./annotation-for-editor.component.scss'],
   imports: [
-    MatCard,
     FormsModule,
-    MatCardHeader,
-    MatCardAvatar,
-    MatCardTitle,
-    MatCardSubtitle,
-    MatCardImage,
-    MatCardContent,
-    CdkTextareaAutosize,
+
     MatIcon,
     MarkdownPreviewComponent,
-    MatCardActions,
     AsyncPipe,
-    UpperCasePipe,
     TranslatePipe,
-    SlideToggleComponent,
     ButtonComponent,
     ButtonRowComponent,
     TooltipDirective,

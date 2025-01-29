@@ -13,8 +13,6 @@ import { UserdataService } from '../../services/userdata/userdata.service';
 // tslint:disable-next-line:max-line-length
 import { AsyncPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
-import { MatIcon } from '@angular/material/icon';
 import { ColorChromeModule } from 'ngx-color/chrome';
 import {
   ButtonComponent,
@@ -34,15 +32,10 @@ import { EntityFeatureSettingsMeshComponent } from './entity-feature-settings-me
   templateUrl: './entity-feature-settings.component.html',
   styleUrls: ['./entity-feature-settings.component.scss'],
   imports: [
-    MatCard,
-    MatCardContent,
-    MatCardHeader,
-    MatCardTitle,
     ColorChromeModule,
     FormsModule,
     EntityFeatureSettingsLightsComponent,
     EntityFeatureSettingsMeshComponent,
-    MatIcon,
     AsyncPipe,
     TranslatePipe,
     DetailsComponent,

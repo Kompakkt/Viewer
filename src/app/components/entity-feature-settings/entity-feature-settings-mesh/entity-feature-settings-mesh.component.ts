@@ -1,7 +1,6 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatIcon } from '@angular/material/icon';
 import { Vector3 } from '@babylonjs/core';
 import { ColorChromeModule } from 'ngx-color/chrome';
 import {
@@ -19,21 +18,20 @@ import { EntitySettingsService } from '../../../services/entitysettings/entityse
 import { ProcessingService } from '../../../services/processing/processing.service';
 
 @Component({
-    selector: 'app-entity-feature-settings-mesh',
-    templateUrl: './entity-feature-settings-mesh.component.html',
-    styleUrls: ['./entity-feature-settings-mesh.component.scss'],
-    imports: [
-        MatIcon,
-        ColorChromeModule,
-        FormsModule,
-        AsyncPipe,
-        TranslatePipe,
-        ButtonComponent,
-        DetailsComponent,
-        LabelledCheckboxComponent,
-        SliderComponent,
-        InputComponent,
-    ]
+  selector: 'app-entity-feature-settings-mesh',
+  templateUrl: './entity-feature-settings-mesh.component.html',
+  styleUrls: ['./entity-feature-settings-mesh.component.scss'],
+  imports: [
+    ColorChromeModule,
+    FormsModule,
+    AsyncPipe,
+    TranslatePipe,
+    ButtonComponent,
+    DetailsComponent,
+    LabelledCheckboxComponent,
+    SliderComponent,
+    InputComponent,
+  ],
 })
 export class EntityFeatureSettingsMeshComponent implements OnInit {
   public meshSettingsHelperToggle = false;

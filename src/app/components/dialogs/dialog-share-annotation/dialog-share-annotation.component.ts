@@ -1,12 +1,5 @@
 import { Component, Inject } from '@angular/core';
-import {
-  MAT_DIALOG_DATA,
-  MatDialogActions,
-  MatDialogClose,
-  MatDialogContent,
-  MatDialogRef,
-  MatDialogTitle,
-} from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { BackendService } from '../../../services/backend/backend.service';
 import { MessageService } from '../../../services/message/message.service';
@@ -17,20 +10,10 @@ import { ICompilation } from 'src/common';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 @Component({
-    selector: 'app-dialog-share-annotation',
-    templateUrl: './dialog-share-annotation.component.html',
-    styleUrls: ['./dialog-share-annotation.component.scss'],
-    imports: [
-        MatDialogTitle,
-        MatDialogContent,
-        FormsModule,
-        MatDialogActions,
-        MatDialogClose,
-        TranslatePipe,
-        InputComponent,
-        ButtonRowComponent,
-        ButtonComponent,
-    ]
+  selector: 'app-dialog-share-annotation',
+  templateUrl: './dialog-share-annotation.component.html',
+  styleUrls: ['./dialog-share-annotation.component.scss'],
+  imports: [FormsModule, TranslatePipe, InputComponent, ButtonRowComponent, ButtonComponent],
 })
 export class DialogShareAnnotationComponent {
   public targetCollectionId = '';

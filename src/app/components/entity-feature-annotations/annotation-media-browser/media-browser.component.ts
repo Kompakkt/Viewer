@@ -1,8 +1,5 @@
-import { AsyncPipe } from '@angular/common';
 import { Component, EventEmitter, Output } from '@angular/core';
-import { MatCard, MatCardFooter, MatCardImage } from '@angular/material/card';
-import { MatIcon } from '@angular/material/icon';
-import { ButtonComponent, ButtonRowComponent, DetailsComponent, InputComponent, TooltipDirective } from 'projects/komponents/src';
+import { ButtonComponent, ButtonRowComponent, InputComponent } from 'projects/komponents/src';
 import { filter, firstValueFrom, map } from 'rxjs';
 import { IEntity, isCompilation, isEntity } from 'src/common';
 import { environment } from 'src/environment';
@@ -12,23 +9,10 @@ import { ProcessingService } from '../../../services/processing/processing.servi
 type BrowsedMedia = IEntity | { mediaType: string; url: string; description: string };
 
 @Component({
-    selector: 'app-media-browser',
-    templateUrl: './media-browser.component.html',
-    styleUrls: ['./media-browser.component.scss'],
-    imports: [
-        MatIcon,
-        MatCard,
-        MatCardImage,
-        MatCardFooter,
-        AsyncPipe,
-        TranslatePipe,
-        TooltipDirective,
-        InputComponent,
-        ButtonComponent,
-        TooltipDirective,
-        DetailsComponent,
-        ButtonRowComponent,
-    ]
+  selector: 'app-media-browser',
+  templateUrl: './media-browser.component.html',
+  styleUrls: ['./media-browser.component.scss'],
+  imports: [TranslatePipe, InputComponent, ButtonComponent, ButtonRowComponent],
 })
 export class MediaBrowserComponent {
   @Output() addMedia = new EventEmitter<BrowsedMedia>();

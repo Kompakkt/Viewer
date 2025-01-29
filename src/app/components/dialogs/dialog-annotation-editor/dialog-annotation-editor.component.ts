@@ -1,16 +1,6 @@
 import { Component, OnInit, ViewChild, computed, effect, inject, signal } from '@angular/core';
-import {
-  MAT_DIALOG_DATA,
-  MatDialogActions,
-  MatDialogClose,
-  MatDialogContent,
-  MatDialogRef,
-  MatDialogTitle,
-} from '@angular/material/dialog';
-
-import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
-import { MatIcon } from '@angular/material/icon';
 import {
   ButtonComponent,
   ButtonRowComponent,
@@ -40,26 +30,20 @@ interface IExternalImage {
 }
 
 @Component({
-    selector: 'app-dialog-annotation-editor',
-    templateUrl: './dialog-annotation-editor.component.html',
-    styleUrls: ['./dialog-annotation-editor.component.scss'],
-    imports: [
-        MatDialogTitle,
-        FormsModule,
-        MatDialogContent,
-        MarkdownPreviewComponent,
-        MediaBrowserComponent,
-        CdkTextareaAutosize,
-        MatDialogActions,
-        MatIcon,
-        MatDialogClose,
-        TranslatePipe,
-        TextareaComponent,
-        InputComponent,
-        ButtonComponent,
-        ButtonRowComponent,
-        ExtenderSlotDirective,
-    ]
+  selector: 'app-dialog-annotation-editor',
+  templateUrl: './dialog-annotation-editor.component.html',
+  styleUrls: ['./dialog-annotation-editor.component.scss'],
+  imports: [
+    FormsModule,
+    MarkdownPreviewComponent,
+    MediaBrowserComponent,
+    TranslatePipe,
+    TextareaComponent,
+    InputComponent,
+    ButtonComponent,
+    ButtonRowComponent,
+    ExtenderSlotDirective,
+  ],
 })
 export class DialogAnnotationEditorComponent implements OnInit {
   @ViewChild('annotationContent')

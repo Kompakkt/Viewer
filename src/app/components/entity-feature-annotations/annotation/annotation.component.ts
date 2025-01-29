@@ -7,24 +7,10 @@ import { AnnotationService } from '../../../services/annotation/annotation.servi
 import { BabylonService } from '../../../services/babylon/babylon.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
 import { UserdataService } from '../../../services/userdata/userdata.service';
-// tslint:disable-next-line:max-line-length
-import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { AsyncPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {
-  MatCard,
-  MatCardActions,
-  MatCardContent,
-  MatCardHeader,
-  MatCardTitle,
-} from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
-import {
-  ButtonComponent,
-  ButtonRowComponent,
-  InputComponent,
-  TooltipDirective,
-} from 'projects/komponents/src';
+import { ButtonComponent, ButtonRowComponent, TooltipDirective } from 'projects/komponents/src';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { DialogAnnotationEditorComponent } from '../../dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
 import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-preview.component';
@@ -37,20 +23,13 @@ export type ReorderMovement = 'one-up' | 'one-down' | 'first' | 'last';
   templateUrl: './annotation.component.html',
   styleUrls: ['./annotation.component.scss'],
   imports: [
-    MatCard,
     FormsModule,
-    MatCardHeader,
-    MatCardTitle,
     MatIcon,
-    MatCardContent,
-    CdkTextareaAutosize,
     MarkdownPreviewComponent,
-    MatCardActions,
     AsyncPipe,
     TranslatePipe,
     ButtonComponent,
     ButtonRowComponent,
-    InputComponent,
     TooltipDirective,
     ExtenderSlotDirective,
   ],
