@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostBinding, Input, inject } from '@angular/core';
+import { Component, ElementRef, HostBinding, Input, inject, output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Matrix, Vector3 } from '@babylonjs/core';
 import { BehaviorSubject, ReplaySubject, combineLatest, firstValueFrom, interval, map } from 'rxjs';
@@ -30,28 +30,30 @@ import { DialogAnnotationEditorComponent } from '../../dialogs/dialog-annotation
 import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-preview.component';
 import { ExtenderSlotDirective } from '@kompakkt/extender';
 
+export type ReorderMovement = 'one-up' | 'one-down' | 'first' | 'last';
+
 @Component({
-    selector: 'app-annotation',
-    templateUrl: './annotation.component.html',
-    styleUrls: ['./annotation.component.scss'],
-    imports: [
-        MatCard,
-        FormsModule,
-        MatCardHeader,
-        MatCardTitle,
-        MatIcon,
-        MatCardContent,
-        CdkTextareaAutosize,
-        MarkdownPreviewComponent,
-        MatCardActions,
-        AsyncPipe,
-        TranslatePipe,
-        ButtonComponent,
-        ButtonRowComponent,
-        InputComponent,
-        TooltipDirective,
-        ExtenderSlotDirective,
-    ]
+  selector: 'app-annotation',
+  templateUrl: './annotation.component.html',
+  styleUrls: ['./annotation.component.scss'],
+  imports: [
+    MatCard,
+    FormsModule,
+    MatCardHeader,
+    MatCardTitle,
+    MatIcon,
+    MatCardContent,
+    CdkTextareaAutosize,
+    MarkdownPreviewComponent,
+    MatCardActions,
+    AsyncPipe,
+    TranslatePipe,
+    ButtonComponent,
+    ButtonRowComponent,
+    InputComponent,
+    TooltipDirective,
+    ExtenderSlotDirective,
+  ],
 })
 export class AnnotationComponent {
   public annotationService = inject(AnnotationService);
@@ -59,6 +61,8 @@ export class AnnotationComponent {
   public dialog = inject(MatDialog);
   public userdata = inject(UserdataService);
   public processing = inject(ProcessingService);
+
+  public reorderAnnotation = output<ReorderMovement>();
 
   @Input() entityFileName: string | undefined;
   @Input('annotation') set setAnnotation(annotation: IAnnotation) {
@@ -98,6 +102,7 @@ export class AnnotationComponent {
   public canUserDelete$ = combineLatest([this.isAnnotatingAllowed$, this.isAnnotationOwner$]).pipe(
     map(([isAnnotatingAllowed, isAnnotationOwner]) => isAnnotatingAllowed && isAnnotationOwner),
   );
+  public canUserReorder$ = this.processing.isOwner$.pipe(map(isOwner => isOwner.ofCompilation));
 
   public isSelectedAnnotation$ = combineLatest([
     this.annotation$,

@@ -1,78 +1,74 @@
 <h1>{{ 'Annotations' | translate }}</h1>
 
 @if (processing.isInUpload$ | async) {
-<div class="note">
-  <mat-icon>info</mat-icon>
-  <span>{{ 'Info' | translate }}</span>
-  <mat-icon class="pointer" (click)="closeNote($event)">close</mat-icon>
-  <p>{{ 'Please set and save the settings before you add annotations.' | translate }}</p>
-</div>
-} @if (isDefault$ | async) {
-<div class="note">
-  <mat-icon>info</mat-icon>
-  <span>{{ 'Info' | translate }}</span>
-  <mat-icon class="pointer" (click)="closeNote($event)">close</mat-icon>
-  <p>
-    {{
-      'All annotations you create are default annotations and visible for everyone who can access the
+  <div class="note">
+    <mat-icon>info</mat-icon>
+    <span>{{ 'Info' | translate }}</span>
+    <mat-icon class="pointer" (click)="closeNote($event)">close</mat-icon>
+    <p>{{ 'Please set and save the settings before you add annotations.' | translate }}</p>
+  </div>
+}
+@if (isDefault$ | async) {
+  <div class="note">
+    <mat-icon>info</mat-icon>
+    <span>{{ 'Info' | translate }}</span>
+    <mat-icon class="pointer" (click)="closeNote($event)">close</mat-icon>
+    <p>
+      {{
+        'All annotations you create are default annotations and visible for everyone who can access the
       entity.' | translate
-    }}
-  </p>
-</div>
-} @if (isForbidden$ | async) {
-<div class="note">
-  <mat-icon>info</mat-icon>
-  <span>{{ 'Info' | translate }}</span>
-  <mat-icon class="pointer" (click)="closeNote($event)">close</mat-icon>
-  <p>
-    {{
-      'Default Annotations are not editable for foreign entities. Load entity from a collection to save
+      }}
+    </p>
+  </div>
+}
+@if (isForbidden$ | async) {
+  <div class="note">
+    <mat-icon>info</mat-icon>
+    <span>{{ 'Info' | translate }}</span>
+    <mat-icon class="pointer" (click)="closeNote($event)">close</mat-icon>
+    <p>
+      {{
+        'Default Annotations are not editable for foreign entities. Load entity from a collection to save
       your annotations to make them visible for others. If you are the owner of this entity do not load
       it from a collection to edit the default Annotations.' | translate
-    }}
-  </p>
-</div>
-} @if (isAnnotatingAllowed$ | async) {
-<div class="note">
-  <mat-icon>info</mat-icon>
-  <span>{{ 'Info' | translate }}</span>
-  <mat-icon class="pointer" (click)="closeNote($event)">close</mat-icon>
-  <p>{{ 'To add annotations, simply double-click on the entity.' | translate }}</p>
-</div>
+      }}
+    </p>
+  </div>
+}
+@if (isAnnotatingAllowed$ | async) {
+  <div class="note">
+    <mat-icon>info</mat-icon>
+    <span>{{ 'Info' | translate }}</span>
+    <mat-icon class="pointer" (click)="closeNote($event)">close</mat-icon>
+    <p>{{ 'To add annotations, simply double-click on the entity.' | translate }}</p>
+  </div>
 }
 
 <h2>{{ objectName$ | async }}</h2>
 
-<div
-  cdkDropList
-  id="annotations-droplist"
-  class="annotations-list"
-  (cdkDropListDropped)="drop($event)"
->
-  @for (annotation of currentAnnotations$ | async; track annotation) {
-  <app-annotation-for-editor
-    class="annotation-box"
-    [annotation]="annotation"
-    [cdkDragDisabled]="isDraggingDisabled$ | async"
-    cdkDrag
-    cdkDragLockAxis="y"
-  ></app-annotation-for-editor>
+<div class="annotations-list">
+  @for (annotation of currentAnnotations$ | async; track annotation; let index = $index) {
+    <app-annotation-for-editor
+      class="annotation-box"
+      [annotation]="annotation"
+      (reorderAnnotation)="annotations.moveAnnotationByReorderMovement(index, $event)"
+    />
   } @empty {
-  <p style="margin: 0">{{ 'This object has no annotations yet.' | translate }}</p>
+    <p style="margin: 0">{{ 'This object has no annotations yet.' | translate }}</p>
   }
 </div>
 
 @if (annotationCount$ | async; as count) {
-<div id="editor-footermenu">
-  @if (count > 0) {
-  <k-button
-    icon-button
-    color="transparent"
-    tooltip="Export all annotations as JSON"
-    (click)="exportAnnotations()"
-    ><mat-icon>file_download</mat-icon></k-button
-  >
-  }
-  <!--app-broadcast [style.visibility]="isBroadcastingAllowed ? 'visible' : 'hidden'"></app-broadcast-->
-</div>
+  <div id="editor-footermenu">
+    @if (count > 0) {
+      <k-button
+        icon-button
+        color="transparent"
+        tooltip="Export all annotations as JSON"
+        (click)="exportAnnotations()"
+        ><mat-icon>file_download</mat-icon></k-button
+      >
+    }
+    <!--app-broadcast [style.visibility]="isBroadcastingAllowed ? 'visible' : 'hidden'"></app-broadcast-->
+  </div>
 }

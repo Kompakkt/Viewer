@@ -19,6 +19,7 @@ import { MessageService } from '../message/message.service';
 import { ProcessingService } from '../processing/processing.service';
 import { UserdataService } from '../userdata/userdata.service';
 import { createMarker } from './visual3DElements';
+import { ReorderMovement } from 'src/app/components/entity-feature-annotations/annotation/annotation.component';
 
 const isDefaultAnnotation = (annotation: IAnnotation) =>
   !annotation.target.source.relatedCompilation ||
@@ -123,6 +124,19 @@ export class AnnotationService {
     moveItemInArray(arr, from_index + offset, to_index + offset);
     this.annotations$.next(arr);
     await this.changedRankingPositions();
+  }
+
+  public async moveAnnotationByReorderMovement(annotationIndex: number, movement: ReorderMovement) {
+    switch (movement) {
+      case 'first':
+        return this.moveAnnotationByIndex(annotationIndex, 0);
+      case 'last':
+        return this.moveAnnotationByIndex(annotationIndex, this.annotations$.getValue().length - 1);
+      case 'one-up':
+        return this.moveAnnotationByIndex(annotationIndex, annotationIndex - 1);
+      case 'one-down':
+        return this.moveAnnotationByIndex(annotationIndex, annotationIndex + 1);
+    }
   }
 
   public async loadAnnotations() {
