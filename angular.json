@@ -28,7 +28,7 @@
           },
           "defaultConfiguration": "production",
           "options": {
-            "assets": ["src/favicon.ico", "src/assets"],
+            "assets": ["src/favicon.ico", "src/assets", "src/laz-perf.wasm"],
             "index": "src/index.html",
             "inlineStyleLanguage": "scss",
             "namedChunks": true,

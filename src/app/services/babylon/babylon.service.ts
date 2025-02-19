@@ -18,9 +18,10 @@ import {
   PostProcess,
   Scene,
   SharpenPostProcess,
+  SceneLoader,
   Tools,
   UniversalCamera,
-  Vector3
+  Vector3,
 } from '@babylonjs/core';
 import '@babylonjs/core/Debug/debugLayer';
 import '@babylonjs/inspector';
@@ -42,12 +43,23 @@ import {
   IImageContainer,
   IVideoContainer,
 } from './container.interfaces';
-import { load3DEntity, loadAudio, loadImage, loadVideo } from './strategies/loading-strategies';
+import {
+  load3DEntity,
+  loadAudio,
+  loadImage,
+  loadPointCloud,
+  loadVideo,
+} from './strategies/loading-strategies';
 import {
   afterAudioRender,
   beforeAudioRender,
   beforeVideoRender,
 } from './strategies/render-strategies';
+import { EptImporter } from './importers/ept/ept-importer';
+import { CopcImporter } from './importers/copc/copc-importer';
+
+SceneLoader.RegisterPlugin(new CopcImporter());
+SceneLoader.RegisterPlugin(new EptImporter());
 
 type RGBA = { r: number; b: number; g: number; a: number };
 
@@ -335,6 +347,11 @@ export class BabylonService {
         return loadImage(rootUrl, this.scene, isDefault).then(result => {
           image$.next(result);
           return [result.plane];
+        });
+      case 'cloud':
+        return loadPointCloud(rootUrl, this.scene).then(result => {
+          entity$.next(result);
+          return result.meshes;
         });
       case 'entity':
       case 'model':
