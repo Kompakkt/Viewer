@@ -29,10 +29,11 @@
     "useDefineForClassFields": false,
     "typeRoots": ["node_modules/@types", "src/@types"],
     "paths": {
-      "@kompakkt/extender": ["./plugins/dist/kompakkt/extender"],
-      "@kompakkt/plugin-*": ["./plugins/dist/kompakkt/plugin-*"],
+      "@kompakkt/extender": ["src/@kompakkt/plugins/extender/src"],
+      "@kompakkt/plugins/*": ["src/@kompakkt/plugins/plugins/*/src"],
       "core-js/es7/reflect": ["node_modules/core-js/proposals/reflect-metadata"]
     },
     "preserveSymlinks": true
-  }
+  },
+  "exclude": ["src/@kompakkt/plugins/*.ts"]
 }

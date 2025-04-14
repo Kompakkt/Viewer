@@ -1,3 +1,6 @@
 [submodule "src/common"]
 	path = src/common
 	url = https://github.com/Kompakkt/Common
+[submodule "src/@kompakkt/plugins"]
+	path = src/@kompakkt/plugins
+	url = https://github.com/Kompakkt/Plugins
