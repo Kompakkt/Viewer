@@ -1,22 +1,28 @@
-import { Component, OnInit, ViewChild, computed, effect, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  ElementRef,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
-import {
-  ButtonComponent,
-  ButtonRowComponent,
-  InputComponent,
-  TextareaComponent,
-} from 'projects/komponents/src';
+import { AsyncPipe } from '@angular/common';
+import { ButtonComponent, ButtonRowComponent, InputComponent, TextareaComponent } from 'komponents';
 import { AnnotationService } from 'src/app/services/annotation/annotation.service';
-import { IAnnotation, IEntity } from 'src/common';
+import { IAnnotation, IEntity, isAnnotation } from 'src/common';
 import { environment } from 'src/environment';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { MediaBrowserComponent } from '../../entity-feature-annotations/annotation-media-browser/media-browser.component';
 import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-preview.component';
 import { ProcessingService } from 'src/app/services/processing/processing.service';
 import { UserdataService } from 'src/app/services/userdata/userdata.service';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { ExtenderSlotDirective } from '@kompakkt/extender';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
+import { ExtenderSlotDirective, ExtenderSlotEvent } from '@kompakkt/extender';
+import { BehaviorSubject, map } from 'rxjs';
 
 export interface IDialogData {
   annotation: IAnnotation;
@@ -34,6 +40,7 @@ interface IExternalImage {
   templateUrl: './dialog-annotation-editor.component.html',
   styleUrls: ['./dialog-annotation-editor.component.scss'],
   imports: [
+    AsyncPipe,
     FormsModule,
     MarkdownPreviewComponent,
     MediaBrowserComponent,
@@ -45,24 +52,37 @@ interface IExternalImage {
     ExtenderSlotDirective,
   ],
 })
-export class DialogAnnotationEditorComponent implements OnInit {
-  @ViewChild('annotationContent')
-  private annotationContent?: TextareaComponent;
+export class DialogAnnotationEditorComponent {
+  @ViewChild('annotationDescription')
+  private annotationDescription?: TextareaComponent;
 
-  public modes = {
-    edit: 'Edit',
-    preview: 'Preview',
-  };
-  public currentMode = signal<keyof typeof this.modes>('preview');
-  public data = signal({ title: '', description: '' });
-
-  private serverUrl = environment.server_url;
+  @ViewChild('embeddablesSlot')
+  private embeddablesSlot?: ElementRef<HTMLDivElement>;
 
   public dialogRef = inject(MatDialogRef<DialogAnnotationEditorComponent>);
   public dialogData = inject<IDialogData>(MAT_DIALOG_DATA);
   public annotationService = inject(AnnotationService);
   public processing = inject(ProcessingService);
   public userdata = inject(UserdataService);
+
+  public modes = {
+    edit: 'Edit',
+    preview: 'Preview',
+  };
+  public currentMode = signal<keyof typeof this.modes>(this.dialogData.mode);
+  public annotation$ = new BehaviorSubject<IAnnotation | undefined>(this.dialogData.annotation);
+
+  public annotationValidationErrors$ = this.annotation$.pipe(
+    map(annotation => {
+      if (!annotation) return false;
+      const { title, description } = annotation.body.content;
+      if (!title.trim() || !description.trim()) return 'Title and description cannot be empty';
+      if (title.trim() === description.trim()) return 'Title and description cannot be the same';
+      return false;
+    }),
+  );
+
+  private serverUrl = environment.server_url;
 
   public canUserEdit = toSignal(this.processing.hasAnnotationAllowance$);
   public canUserDelete = computed(() => {
@@ -79,17 +99,29 @@ export class DialogAnnotationEditorComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.currentMode.set(this.dialogData.mode);
-    this.data.update(state => ({
-      ...state,
-      title: this.dialogData.annotation.body.content.title,
-      description: this.dialogData.annotation.body.content.description,
-    }));
+  public handleEmbeddablesEvent(event: ExtenderSlotEvent) {
+    const annotation = event.event.detail;
+    if (!isAnnotation(annotation)) return;
+    console.log('Got new annotation from embeddables', annotation, event);
+    this.annotation$.next(annotation);
   }
 
-  private updateDescription(content: string) {
-    this.data.update(state => ({ ...state, description: content }));
+  private updateAnnotationContent(update: { title?: string; description?: string }) {
+    const annotation = this.annotation$.getValue();
+    if (!annotation) return;
+    this.annotation$.next({
+      ...annotation,
+      body: {
+        ...annotation.body,
+        content: {
+          ...annotation.body.content,
+          title: update.title ? update.title : annotation.body.content.title,
+          description: update.description
+            ? update.description
+            : annotation.body.content.description,
+        },
+      },
+    });
   }
 
   public addEntitySwitch(entity: IEntity | IExternalImage) {
@@ -112,7 +144,7 @@ export class DialogAnnotationEditorComponent implements OnInit {
   }
 
   private getCaretPosition() {
-    const textarea = this.annotationContent?.textarea();
+    const textarea = this.annotationDescription?.textarea();
 
     if (!textarea) return { start: 0, value: '' };
     textarea.nativeElement.focus();
@@ -141,7 +173,9 @@ export class DialogAnnotationEditorComponent implements OnInit {
   }
 
   private addExternalImage(image: IExternalImage) {
-    this.updateDescription(this.createMarkdown(`![alt ${image.description}](${image.url})`));
+    this.updateAnnotationContent({
+      description: this.createMarkdown(`![alt ${image.description}](${image.url})`),
+    });
   }
 
   private addEntity(entity: IEntity) {
@@ -175,15 +209,21 @@ export class DialogAnnotationEditorComponent implements OnInit {
         </a>`;
     }
 
-    this.updateDescription(this.createMarkdown(markdown));
+    this.updateAnnotationContent({
+      description: this.createMarkdown(markdown),
+    });
   }
 
   public onTextAreaChange(value: string) {
-    this.data.update(state => ({ ...state, description: value }));
+    this.updateAnnotationContent({
+      description: value,
+    });
   }
 
   public onTitleChange(value: string) {
-    this.data.update(state => ({ ...state, title: value }));
+    this.updateAnnotationContent({
+      title: value,
+    });
   }
 
   public toggleEditViewMode() {
@@ -195,7 +235,8 @@ export class DialogAnnotationEditorComponent implements OnInit {
   }
 
   public close(withData?: boolean) {
-    this.dialogRef.close(withData ? this.data() : undefined);
+    const annotation = this.annotation$.getValue();
+    this.dialogRef.close(withData ? annotation : undefined);
   }
 
   public async deleteAnnotation() {

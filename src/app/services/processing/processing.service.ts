@@ -11,14 +11,7 @@ import {
   firstValueFrom,
   map,
 } from 'rxjs';
-import {
-  IAnnotation,
-  ICompilation,
-  IEntity,
-  IEntitySettings,
-  ObjectId,
-  isEntity,
-} from 'src/common';
+import { IAnnotation, ICompilation, IEntity, IEntitySettings, isEntity } from 'src/common';
 import { environment } from 'src/environment';
 import { baseEntity } from '../../../assets/defaults';
 import { defaultEntity, fallbackEntity } from '../../../assets/entities/entities';
@@ -107,7 +100,7 @@ export class ProcessingService {
   public mediaType$ = this.entity$.pipe(map(entity => entity?.mediaType));
   public isInUpload$ = this.entity$.pipe(map(entity => entity && !areSettingsSet(entity)));
   public hasMeshSettings$ = this.mediaType$.pipe(
-    map(mediaType => mediaType && ['model', 'entity', 'image'].includes(mediaType)),
+    map(mediaType => mediaType && ['model', 'entity', 'cloud', 'image'].includes(mediaType)),
   );
 
   public compilationLoaded$ = this.compilation$.pipe(map(compilation => !!compilation?._id));
@@ -159,12 +152,13 @@ export class ProcessingService {
       const isAnnotatable =
         entity.mediaType === 'image' ||
         entity.mediaType === 'entity' ||
+        entity.mediaType === 'cloud' ||
         entity.mediaType === 'model';
 
       const hideEditor = !args.showEditor || !isAnnotatable || args.isFallback;
       const shouldHideEditor = !isAnnotatable || args.isFallback;
       const isEditorVisible = args.showEditor && !args.isCompilationLoaded;
-      console.debug({ hideEditor, shouldHideEditor, isEditorVisible });
+
       if (hideEditor && shouldHideEditor && isEditorVisible) return false;
 
       if (args.isCompilationLoaded) {
@@ -229,6 +223,7 @@ export class ProcessingService {
         switch (entity.mediaType) {
           case 'entity':
           case 'model':
+          case 'cloud':
             return settingsEntity;
           case 'audio':
             return settingsAudio;
@@ -501,10 +496,7 @@ export class ProcessingService {
     this.loadEntity(fallbackEntity as IEntity, '');
   }
 
-  public fetchAndLoad(
-    entityId?: string | ObjectId | null,
-    compilationId?: string | ObjectId | null,
-  ) {
+  public fetchAndLoad(entityId?: string | null, compilationId?: string | null) {
     if (entityId && !compilationId) {
       this.fetchEntityData(entityId);
     }
@@ -513,11 +505,7 @@ export class ProcessingService {
     }
   }
 
-  private fetchCompilationData(
-    id: string | ObjectId,
-    specifiedEntity?: string | ObjectId,
-    password?: string,
-  ) {
+  private fetchCompilationData(id: string, specifiedEntity?: string, password?: string) {
     this.backend
       .getCompilation(id, password ?? undefined)
       .then(compilation => {
@@ -549,16 +537,13 @@ export class ProcessingService {
       });
   }
 
-  private fetchEntityDataAfterCollection(
-    compilation: ICompilation,
-    specifiedEntity?: string | ObjectId,
-  ) {
+  private fetchEntityDataAfterCollection(compilation: ICompilation, specifiedEntity?: string) {
     const specified = specifiedEntity && compilation.entities[specifiedEntity.toString()];
     const entityToLoad = isEntity(specified) ? specified : Object.values(compilation.entities)[0];
     if (isEntity(entityToLoad)) this.fetchEntityData(entityToLoad._id);
   }
 
-  public fetchEntityData(query: string | ObjectId) {
+  public fetchEntityData(query: string) {
     this.backend
       .getEntity(query)
       .then(entity => {

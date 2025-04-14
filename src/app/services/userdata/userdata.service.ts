@@ -2,8 +2,11 @@ import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
 import {
+  areDocumentsEqual,
+  isDocument,
   IAnnotation,
   ICompilation,
+  IDocument,
   IEntity,
   isAnnotation,
   isCompilation,
@@ -35,8 +38,8 @@ const isUserOwned = (
   elementType: 'entity' | 'compilation',
 ) => {
   if (!element || !userdata) return false;
-  const userElements = userdata.data?.[elementType] ?? [];
-  if (userElements.some((other: IEntity | ICompilation) => other._id === element._id)) return true;
+  const userElements = (userdata.data?.[elementType] ?? []).filter(isDocument);
+  if (userElements.some(other => areDocumentsEqual(other, element))) return true;
   return element.creator?._id === userdata._id;
 };
 

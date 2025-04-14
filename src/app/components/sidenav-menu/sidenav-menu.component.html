@@ -10,37 +10,51 @@
     </k-button>
   </div>
   @if (processing.showAnnotationEditor$ | async) {
-  <div class="button-wrapper" [class.selected]="isAnnotation">
-    <k-button
-      icon-button
-      (click)="overlay.toggleSidenav('annotation')"
-      [tooltip]="'Annotations' | translate"
-      tooltipPosition="right"
-    >
-      <mat-icon [attr.aria-label]="'Toggle annotation' | translate">place</mat-icon>
-    </k-button>
-  </div>
-  } @if (processing.showSettingsEditor$ | async) {
-  <div class="button-wrapper" [class.selected]="isSettings">
-    <k-button
-      icon-button
-      (click)="overlay.toggleSidenav('settings')"
-      [tooltip]="'Settings' | translate"
-      tooltipPosition="right"
-    >
-      <mat-icon [attr.aria-label]="'Toggle settings' | translate">settings</mat-icon>
-    </k-button>
-  </div>
-  } @if (processing.compilationLoaded$ | async) {
-  <div class="button-wrapper" [class.selected]="isCompilationBrowser">
-    <k-button
-      icon-button
-      (click)="overlay.toggleSidenav('compilationBrowser')"
-      [tooltip]="'Collections' | translate"
-      tooltipPosition="right"
-    >
-      <mat-icon [attr.aria-label]="'Toggle collection browser' | translate">folder_open</mat-icon>
-    </k-button>
-  </div>
+    <div class="button-wrapper" [class.selected]="isAnnotation">
+      <k-button
+        icon-button
+        (click)="overlay.toggleSidenav('annotation')"
+        [tooltip]="'Annotations' | translate"
+        tooltipPosition="right"
+      >
+        <mat-icon [attr.aria-label]="'Toggle annotation' | translate">place</mat-icon>
+      </k-button>
+    </div>
+  }
+  @if (processing.showSettingsEditor$ | async) {
+    <div class="button-wrapper" [class.selected]="isSettings">
+      <k-button
+        icon-button
+        (click)="overlay.toggleSidenav('settings')"
+        [tooltip]="'Settings' | translate"
+        tooltipPosition="right"
+      >
+        <mat-icon [attr.aria-label]="'Toggle settings' | translate">settings</mat-icon>
+      </k-button>
+    </div>
+  }
+  @if (processing.compilationLoaded$ | async) {
+    <div class="button-wrapper" [class.selected]="isCompilationBrowser">
+      <k-button
+        icon-button
+        (click)="overlay.toggleSidenav('compilationBrowser')"
+        [tooltip]="'Collections' | translate"
+        tooltipPosition="right"
+      >
+        <mat-icon [attr.aria-label]="'Toggle collection browser' | translate">folder_open</mat-icon>
+      </k-button>
+    </div>
+  }
+  @if ((processing.mediaType$ | async) === 'cloud') {
+    <div class="button-wrapper" [class.selected]="isPointCloud">
+      <k-button
+        icon-button
+        (click)="overlay.toggleSidenav('pointCloud')"
+        [tooltip]="'Point cloud settings' | translate"
+        tooltipPosition="right"
+      >
+        <mat-icon [attr.aria-label]="'Toggle point cloud settings' | translate">grain</mat-icon>
+      </k-button>
+    </div>
   }
 </div>

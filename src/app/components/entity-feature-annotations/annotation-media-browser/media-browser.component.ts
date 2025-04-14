@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Output } from '@angular/core';
-import { ButtonComponent, ButtonRowComponent, InputComponent } from 'projects/komponents/src';
+import { ButtonComponent, ButtonRowComponent, InputComponent } from 'komponents';
 import { filter, firstValueFrom, map } from 'rxjs';
 import { IEntity, isCompilation, isEntity } from 'src/common';
 import { environment } from 'src/environment';

@@ -31,8 +31,7 @@
     "paths": {
       "@kompakkt/extender": ["./plugins/dist/kompakkt/extender"],
       "@kompakkt/plugin-*": ["./plugins/dist/kompakkt/plugin-*"],
-      "core-js/es7/reflect": ["node_modules/core-js/proposals/reflect-metadata"],
-      "komponents": ["./dist/komponents"]
+      "core-js/es7/reflect": ["node_modules/core-js/proposals/reflect-metadata"]
     },
     "preserveSymlinks": true
   }

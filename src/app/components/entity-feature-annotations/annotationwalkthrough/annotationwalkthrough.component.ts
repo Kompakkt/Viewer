@@ -2,18 +2,18 @@ import { AsyncPipe } from '@angular/common';
 import { Component, HostBinding, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIcon } from '@angular/material/icon';
-import { ButtonComponent, TooltipDirective } from 'projects/komponents/src';
+import { ButtonComponent, TooltipDirective } from 'komponents';
 import { BehaviorSubject, combineLatest, firstValueFrom, map } from 'rxjs';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
 
 @Component({
-    selector: 'app-annotationwalkthrough',
-    templateUrl: './annotationwalkthrough.component.html',
-    styleUrls: ['./annotationwalkthrough.component.scss'],
-    imports: [MatIcon, AsyncPipe, TranslatePipe, TooltipDirective, ButtonComponent]
+  selector: 'app-annotationwalkthrough',
+  templateUrl: './annotationwalkthrough.component.html',
+  styleUrls: ['./annotationwalkthrough.component.scss'],
+  imports: [MatIcon, AsyncPipe, TranslatePipe, TooltipDirective, ButtonComponent],
 })
-export class AnnotationwalkthroughComponent  {
+export class AnnotationwalkthroughComponent {
   public annotationService = inject(AnnotationService);
 
   public ranking$ = new BehaviorSubject(-1);
@@ -38,7 +38,6 @@ export class AnnotationwalkthroughComponent  {
   @HostBinding('class.hidden') get hidden() {
     return !this.showWalkthrough();
   }
-
 
   public async previousAnnotation() {
     const [ranking, annotations] = await Promise.all([

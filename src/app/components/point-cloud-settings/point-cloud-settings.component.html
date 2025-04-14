@@ -1,0 +1,58 @@
+<h1>{{ 'Point cloud settings' | translate }}</h1>
+
+<h3>Level of detail</h3>
+
+<p>Controls how many levels of the point cloud octree will be loaded.</p>
+
+<p>Warning: Increases memory usage and decreases performance.</p>
+
+<p>
+  <strong>Level {{ currentLevelOfDetail + 1 }} of {{ maxLevelOfDetail }}</strong>
+  <br />
+  <small>Loaded: {{ loadedPointsPercentage }}%</small>
+  <br />
+  <small># Points: {{ loadedPointsCount }} of {{ totalPointsCount }}</small>
+</p>
+
+<p>Next level will load {{ pointsOfNextLevel }} points.</p>
+
+<k-button
+  type="solid-primary"
+  (click)="loadNextLevelOfDetail()"
+  [disabled]="currentLevelOfDetail >= maxLevelOfDetail"
+  >Load next detail level</k-button
+>
+
+<h3>Point size</h3>
+
+<p>
+  Adjusts how small or how large individual points will be displayed. Has no impact on performance.
+</p>
+
+<k-slider
+  [min]="0.1"
+  [max]="3"
+  [step]="0.1"
+  [startingValue]="currentPointSize"
+  (valueChanged)="changePointSize($event)"
+  [label]="('Point Size' | translate) + ': ' + currentPointSize"
+/>
+
+<h3>Show octree boxes</h3>
+
+<p>Toggle the visibility of boxes displaying the loading zones of the octree.</p>
+
+<p>
+  Reaching a loading zone with the camera will initiate loading of the respective octree of the
+  point cloud, if the octree is in the configured level of detail.
+</p>
+
+<p>
+  A larger box indicates a lower level of detail, and smaller boxes indicate higher levels of
+  detail.
+</p>
+
+<k-labelled-checkbox
+  [label]="'Show octree boxes' | translate"
+  (checkedChange)="toggleOctreeBoxes()"
+/>

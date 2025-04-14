@@ -1,14 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-import {
-  IAnnotation,
-  ICompilation,
-  IDigitalEntity,
-  IEntity,
-  IUserData,
-  ObjectId,
-} from 'src/common';
+import { IAnnotation, ICompilation, IDigitalEntity, IEntity, IUserData } from 'src/common';
 import { environment } from 'src/environment';
 
 @Injectable({
@@ -50,7 +43,7 @@ export class BackendService {
     return this.get(`api/v1/get/findall/entity`);
   }
 
-  public async getEntity(identifier: string | ObjectId): Promise<IEntity> {
+  public async getEntity(identifier: string): Promise<IEntity> {
     return this.get(`api/v1/get/find/entity/${identifier}`);
   }
 
@@ -61,21 +54,18 @@ export class BackendService {
    * @param  {[type]}             [description]
    * @return {Promise}            Returns the compilation or null if it's password protected
    */
-  public async getCompilation(
-    identifier: string | ObjectId,
-    password?: string,
-  ): Promise<ICompilation | null> {
+  public async getCompilation(identifier: string, password?: string): Promise<ICompilation | null> {
     return password
       ? this.get(`api/v1/get/find/compilation/${identifier}/${password}`)
       : this.get(`api/v1/get/find/compilation/${identifier}`);
   }
 
-  public async getEntityMetadata(identifier: string | ObjectId): Promise<IDigitalEntity> {
+  public async getEntityMetadata(identifier: string): Promise<IDigitalEntity> {
     return this.get(`api/v1/get/find/digitalentity/${identifier}`);
   }
 
   // POSTs
-  public updateSettings(identifier: string | ObjectId, settings: any): Promise<any> {
+  public updateSettings(identifier: string, settings: any): Promise<any> {
     return this.post(`api/v1/post/settings/${identifier}`, settings);
   }
 
@@ -102,7 +92,7 @@ export class BackendService {
 
   // TODO: check return type
   public deleteRequest(
-    identifier: string | ObjectId,
+    identifier: string,
     type: string,
     username: string,
     password: string,

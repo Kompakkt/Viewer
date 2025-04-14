@@ -9,7 +9,7 @@ import {
   InputComponent,
   LabelledCheckboxComponent,
   SliderComponent,
-} from 'projects/komponents/src';
+} from 'komponents';
 import { firstValueFrom } from 'rxjs';
 import { IColor } from 'src/common';
 import { TranslatePipe } from '../../../pipes/translate.pipe';

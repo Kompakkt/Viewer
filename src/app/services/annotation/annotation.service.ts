@@ -1,6 +1,6 @@
 import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ActionManager, ExecuteCodeAction, PickingInfo, Tags, Vector3 } from '@babylonjs/core';
 import { BehaviorSubject, ReplaySubject, combineLatest, firstValueFrom, fromEvent } from 'rxjs';
@@ -20,6 +20,7 @@ import { ProcessingService } from '../processing/processing.service';
 import { UserdataService } from '../userdata/userdata.service';
 import { createMarker } from './visual3DElements';
 import { ReorderMovement } from 'src/app/components/entity-feature-annotations/annotation/annotation.component';
+import { ExtenderTransformer } from '@kompakkt/extender';
 
 const isDefaultAnnotation = (annotation: IAnnotation) =>
   !annotation.target.source.relatedCompilation ||
@@ -317,7 +318,15 @@ export class AnnotationService {
         },
       },
     };
-    this.add(newAnnotation);
+
+    console.log('newAnnotation', newAnnotation);
+    const transformedAnnotation = await ExtenderTransformer.applyTransformations<IAnnotation>(
+      'annotation',
+      newAnnotation,
+    );
+    console.log('transformedAnnotation', transformedAnnotation);
+
+    this.add(transformedAnnotation);
   }
 
   private async add(_annotation: IAnnotation) {

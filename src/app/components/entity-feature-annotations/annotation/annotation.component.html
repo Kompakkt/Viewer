@@ -1,41 +1,55 @@
-@if (annotation$ | async; as annotation) { @if (isSelectedAnnotation$ | async) {
-<div class="header">
-  <h2>{{ annotation.body.content.title || ('No title' | translate) }}</h2>
-  <k-button icon-button color="transparent" (click)="closeAnnotation()"
-    ><mat-icon>close</mat-icon></k-button
-  >
-</div>
+@if (annotation$ | async; as annotation) {
+  @if (isSelectedAnnotation$ | async) {
+    <div class="header">
+      <h2>{{ annotation.body.content.title || ('No title' | translate) }}</h2>
+      <k-button icon-button color="transparent" (click)="closeAnnotation()"
+        ><mat-icon>close</mat-icon></k-button
+      >
+    </div>
 
-<app-markdown-preview
-  [data]="annotation.body.content.description || ('No description' | translate)"
-/>
+    <app-markdown-preview
+      [data]="annotation.body.content.description || ('No description' | translate)"
+    />
 
-<div class="embeddables" extendSlot="annotation-embeddables" slotBehaviour="append" [slotData]="annotation"></div>
+    <div
+      class="embeddables"
+      extendSlot="annotation-embeddables"
+      slotBehaviour="append"
+      [dataObservable]="annotation$$"
+    ></div>
 
-<k-button-row justify="end" gap="4">
-  @if ((canUserDelete$ | async)) {
-  <k-button
-    icon-button
-    color="transparent"
-    [tooltip]="'Delete annotation' | translate"
-    (click)="deleteAnnotation()"
-    ><mat-icon>delete</mat-icon></k-button
-  >
-  } @if ((canUserEdit$ | async)) {
-  <k-button
-    icon-button
-    color="transparent"
-    [tooltip]="'Edit annotation' | translate"
-    (click)="toggleFullscreen('edit')"
-    ><mat-icon>edit</mat-icon></k-button
-  >
+    <k-button-row
+      justify="end"
+      gap="4"
+      extendSlot="annotation-preview-buttons"
+      slotBehaviour="prepend"
+      [dataObservable]="annotation$"
+    >
+      @if (canUserDelete$ | async) {
+        <k-button
+          icon-button
+          color="transparent"
+          [tooltip]="'Delete annotation' | translate"
+          (click)="deleteAnnotation()"
+          ><mat-icon>delete</mat-icon></k-button
+        >
+      }
+      @if (canUserEdit$ | async) {
+        <k-button
+          icon-button
+          color="transparent"
+          [tooltip]="'Edit annotation' | translate"
+          (click)="toggleFullscreen('edit')"
+          ><mat-icon>edit</mat-icon></k-button
+        >
+      }
+      <k-button
+        icon-button
+        color="transparent"
+        tooltip="Toggle fullscreen"
+        (click)="toggleFullscreen('preview')"
+        ><mat-icon>select_all</mat-icon></k-button
+      >
+    </k-button-row>
   }
-  <k-button
-    icon-button
-    color="transparent"
-    tooltip="Toggle fullscreen"
-    (click)="toggleFullscreen('preview')"
-    ><mat-icon>select_all</mat-icon></k-button
-  >
-</k-button-row>
-} }
+}

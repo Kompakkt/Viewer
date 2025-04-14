@@ -1,7 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
-import { ButtonComponent, ButtonRowComponent, InputComponent } from 'projects/komponents/src';
+import { ButtonComponent, ButtonRowComponent, InputComponent } from 'komponents';
 import { ICompilation } from 'src/common';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { BackendService } from '../../../services/backend/backend.service';

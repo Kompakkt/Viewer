@@ -4,16 +4,18 @@ import { OverlayService } from '../../services/overlay/overlay.service';
 import { CompilationBrowserComponent } from '../compilation-browser/compilation-browser.component';
 import { EntityFeatureSettingsComponent } from '../entity-feature-settings/entity-feature-settings.component';
 import { AnnotationsEditorComponent } from '../entity-feature-annotations/annotations-editor/annotations-editor.component';
+import { PointCloudSettingsComponent } from '../point-cloud-settings/point-cloud-settings.component';
 
 @Component({
-    selector: 'app-sidenav',
-    templateUrl: './sidenav.component.html',
-    styleUrls: ['./sidenav.component.scss'],
-    imports: [
-        AnnotationsEditorComponent,
-        EntityFeatureSettingsComponent,
-        CompilationBrowserComponent,
-    ]
+  selector: 'app-sidenav',
+  templateUrl: './sidenav.component.html',
+  styleUrls: ['./sidenav.component.scss'],
+  imports: [
+    AnnotationsEditorComponent,
+    EntityFeatureSettingsComponent,
+    CompilationBrowserComponent,
+    PointCloudSettingsComponent,
+  ],
 })
 export class SidenavComponent implements OnInit {
   @HostBinding('class.is-open')

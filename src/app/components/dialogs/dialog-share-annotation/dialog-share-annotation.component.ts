@@ -5,7 +5,7 @@ import { BackendService } from '../../../services/backend/backend.service';
 import { MessageService } from '../../../services/message/message.service';
 
 import { FormsModule } from '@angular/forms';
-import { ButtonComponent, ButtonRowComponent, InputComponent } from 'projects/komponents/src';
+import { ButtonComponent, ButtonRowComponent, InputComponent } from 'komponents';
 import { ICompilation } from 'src/common';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 

@@ -10,11 +10,14 @@ import { UserdataService } from '../../../services/userdata/userdata.service';
 import { AsyncPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
-import { ButtonComponent, ButtonRowComponent, TooltipDirective } from 'projects/komponents/src';
+import { ButtonComponent, ButtonRowComponent, TooltipDirective } from 'komponents';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { DialogAnnotationEditorComponent } from '../../dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
 import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-preview.component';
 import { ExtenderSlotDirective } from '@kompakkt/extender';
+import DeepClone from 'rfdc';
+import deepEqual from 'fast-deep-equal';
+const deepClone = DeepClone({ circles: true });
 
 export type ReorderMovement = 'one-up' | 'one-down' | 'first' | 'last';
 
@@ -48,6 +51,7 @@ export class AnnotationComponent {
     this.annotation$.next(annotation);
   }
   public annotation$ = new ReplaySubject<IAnnotation>(1);
+  public annotation$$ = this.annotation$.asObservable();
 
   public positionTop = 0;
   public positionLeft = 0;
@@ -162,25 +166,19 @@ export class AnnotationComponent {
     const dialogRef = this.dialog.open<
       DialogAnnotationEditorComponent,
       any,
-      { title: string; description: string } | undefined
+      IAnnotation | undefined
     >(DialogAnnotationEditorComponent, {
       width: 'min(75vw, 860px)',
-      data: { annotation, mode },
+      maxHeight: '80vh',
+      data: { annotation: deepClone(annotation), mode },
     });
     if (mode !== 'edit') return;
 
     // Save changes only if edited
     const result = await firstValueFrom(dialogRef.afterClosed());
     if (!result) return;
-    if (
-      result.title === annotation.body.content.title &&
-      result.description === annotation.body.content.description
-    )
-      return;
+    if (deepEqual(annotation, result)) return;
 
-    annotation.body.content.title = result.title;
-    annotation.body.content.description = result.description;
-
-    this.annotationService.updateAnnotation(annotation);
+    this.annotationService.updateAnnotation(result);
   }
 }

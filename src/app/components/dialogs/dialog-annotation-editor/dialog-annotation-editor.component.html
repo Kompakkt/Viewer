@@ -1,51 +1,85 @@
 @if (currentMode(); as mode) {
+  <!-- Switch -->
+  @if (canUserEdit()) {
+    <h1>{{ 'Edit annotation' | translate }}</h1>
 
-<!-- Switch -->
+    <div class="tab-selection">
+      <div class="tab" [class.active]="mode === 'edit'" (click)="currentMode.set('edit')">
+        <span>Edit</span>
+      </div>
+      <div class="tab" [class.active]="mode === 'preview'" (click)="currentMode.set('preview')">
+        <span>Preview</span>
+      </div>
+    </div>
+  }
+  @switch (mode) {
+    @case ('edit') {
+      @if (annotation$ | async; as annotation) {
+        <div>
+          <k-input
+            [label]="'Title' | translate"
+            [startingValue]="annotation.body.content.title"
+            (valueChanged)="onTitleChange($event.value)"
+          />
+
+          <k-textarea
+            #annotationDescription
+            [label]="'Description content' | translate"
+            [startingValue]="annotation.body.content.description"
+            (valueChanged)="onTextAreaChange($event.value)"
+            resize="both"
+          />
+        </div>
+
+        @if (annotationValidationErrors$ | async; as error) {
+          <div class="error" style="color: var(--color-warn, red)">
+            {{ error }}
+          </div>
+        }
+      }
+    }
+    @case ('preview') {
+      @if (annotation$ | async; as annotation) {
+        <h2>{{ annotation.body.content.title }}</h2>
+
+        <app-markdown-preview [data]="annotation.body.content.description" />
+      }
+    }
+  }
+  <!-- /Switch -->
+  @switch (mode) {
+    @case ('edit') {
+      <div
+        class="embeddables"
+        extendSlot="annotation-editor-embeddables"
+        slotBehaviour="append"
+        [dataObservable]="annotation$"
+        (event)="handleEmbeddablesEvent($event)"
+      >
+        <app-media-browser (addMedia)="addEntitySwitch($event)" />
+      </div>
+    }
+    @case ('preview') {
+      <div
+        class="embeddables"
+        extendSlot="annotation-embeddables"
+        slotBehaviour="append"
+        [dataObservable]="annotation$"
+      ></div>
+    }
+  }
+}
 @if (canUserEdit()) {
-<h1>{{ 'Edit annotation' | translate }}</h1>
-
-<div class="tab-selection">
-  <div class="tab" [class.active]="mode === 'edit'" (click)="currentMode.set('edit')">
-    <span>Edit</span>
-  </div>
-  <div class="tab" [class.active]="mode === 'preview'" (click)="currentMode.set('preview')">
-    <span>Preview</span>
-  </div>
-</div>
-} @switch (mode) { @case ('edit') {
-<div>
-  <k-input
-    [label]="'Title' | translate"
-    [startingValue]="data().title"
-    (valueChanged)="onTitleChange($event.value)"
-  />
-
-  <k-textarea
-    #annotationContent
-    [label]="'Content' | translate"
-    [startingValue]="data().description"
-    (valueChanged)="onTextAreaChange($event.value)"
-    resize="both"
-  />
-</div>
-
-} @case ('preview') {
-<h2>{{ data().title }}</h2>
-
-<app-markdown-preview [data]="data().description" />
-} }
-<!-- /Switch -->
-@if (mode === 'edit') {
-<div class="embeddables" extendSlot="annotation-editor-embeddables" slotBehaviour="append">
-  <app-media-browser (addMedia)="addEntitySwitch($event)" />
-</div>
-} } @if (canUserEdit()) {
-<k-button-row justify="end">
-  <k-button type="outlined-primary" (click)="close(false)">
-    <span>{{ 'Cancel' | translate }}</span>
-  </k-button>
-  <k-button type="solid-primary" (click)="close(true)">
-    <span>{{ 'Save' | translate }}</span>
-  </k-button>
-</k-button-row>
+  <k-button-row justify="end">
+    <k-button type="outlined-primary" (click)="close(false)">
+      <span>{{ 'Cancel' | translate }}</span>
+    </k-button>
+    <k-button
+      type="solid-primary"
+      (click)="close(true)"
+      [disabled]="!!(annotationValidationErrors$ | async)"
+    >
+      <span>{{ 'Save' | translate }}</span>
+    </k-button>
+  </k-button-row>
 }

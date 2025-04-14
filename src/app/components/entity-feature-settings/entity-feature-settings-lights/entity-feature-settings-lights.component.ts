@@ -6,13 +6,13 @@ import { EntitySettingsService } from '../../../services/entitysettings/entityse
 import { LightService } from '../../../services/light/light.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
 
-import { ButtonComponent, InputComponent, SliderComponent } from 'projects/komponents/src';
+import { ButtonComponent, InputComponent, SliderComponent } from 'komponents';
 
 @Component({
-    selector: 'app-entity-feature-settings-lights',
-    templateUrl: './entity-feature-settings-lights.component.html',
-    styleUrls: ['./entity-feature-settings-lights.component.scss'],
-    imports: [TranslatePipe, SliderComponent, InputComponent, ButtonComponent]
+  selector: 'app-entity-feature-settings-lights',
+  templateUrl: './entity-feature-settings-lights.component.html',
+  styleUrls: ['./entity-feature-settings-lights.component.scss'],
+  imports: [TranslatePipe, SliderComponent, InputComponent, ButtonComponent],
 })
 export class EntityFeatureSettingsLightsComponent {
   constructor(
