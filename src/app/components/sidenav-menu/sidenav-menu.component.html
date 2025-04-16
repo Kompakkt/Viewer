@@ -1,4 +1,4 @@
-<div [class.active]="isOpen">
+<div [class.active]="isOpen()">
   <div class="button-wrapper button-close">
     <k-button
       icon-button
@@ -10,7 +10,7 @@
     </k-button>
   </div>
   @if (processing.showAnnotationEditor$ | async) {
-    <div class="button-wrapper" [class.selected]="isAnnotation">
+    <div class="button-wrapper" [class.selected]="mode() === 'annotation'">
       <k-button
         icon-button
         (click)="overlay.toggleSidenav('annotation')"
@@ -22,7 +22,7 @@
     </div>
   }
   @if (processing.showSettingsEditor$ | async) {
-    <div class="button-wrapper" [class.selected]="isSettings">
+    <div class="button-wrapper" [class.selected]="mode() === 'settings'">
       <k-button
         icon-button
         (click)="overlay.toggleSidenav('settings')"
@@ -34,7 +34,7 @@
     </div>
   }
   @if (processing.compilationLoaded$ | async) {
-    <div class="button-wrapper" [class.selected]="isCompilationBrowser">
+    <div class="button-wrapper" [class.selected]="mode() === 'compilationBrowser'">
       <k-button
         icon-button
         (click)="overlay.toggleSidenav('compilationBrowser')"
@@ -46,7 +46,7 @@
     </div>
   }
   @if ((processing.mediaType$ | async) === 'cloud') {
-    <div class="button-wrapper" [class.selected]="isPointCloud">
+    <div class="button-wrapper" [class.selected]="mode() === 'pointCloud'">
       <k-button
         icon-button
         (click)="overlay.toggleSidenav('pointCloud')"
