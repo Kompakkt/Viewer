@@ -34,7 +34,7 @@
             "namedChunks": true,
             "optimization": false,
             "outputPath": {
-              "base": "dist/Kompakkt"
+              "base": "dist/viewer"
             },
             "polyfills": ["zone.js", "src/global-shim.ts"],
             "scripts": ["node_modules/pepjs/dist/pep.js"],
