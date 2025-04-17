@@ -49,6 +49,9 @@ const isUserWhitelisted = (
 ) => {
   if (!element || !userdata) return false;
   const persons = getWhitelistedPersons(element);
+  // This is according to the behaviour of the annotation access dialog in the repo
+  // No persons with enabled whitelist = open access
+  if (persons.length === 0) return true;
   if (persons.some(person => person._id === userdata._id)) return true;
   return element.creator?._id === userdata._id;
 };

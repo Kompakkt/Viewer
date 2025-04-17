@@ -81,8 +81,12 @@ export class AnnotationComponent {
   public userOwnsCompilation$ = this.processing.compilation$.pipe(
     map(compilation => this.userdata.doesUserOwn(compilation)),
   );
-  public canUserEdit$ = this.isAnnotatingAllowed$;
-  public canUserDelete$ = combineLatest([this.isAnnotatingAllowed$, this.isAnnotationOwner$]).pipe(
+  // TODO: Discuss if these should be the same?
+  //public canUserEdit$ = this.isAnnotatingAllowed$;
+  public canUserEditAndDelete$ = combineLatest([
+    this.isAnnotatingAllowed$,
+    this.isAnnotationOwner$,
+  ]).pipe(
     map(([isAnnotatingAllowed, isAnnotationOwner]) => isAnnotatingAllowed && isAnnotationOwner),
   );
   public canUserReorder$ = this.processing.isOwner$.pipe(map(isOwner => isOwner.ofCompilation));

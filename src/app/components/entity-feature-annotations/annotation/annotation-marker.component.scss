@@ -13,9 +13,12 @@
   user-select: none;
   cursor: pointer;
 
-  transform: translateX(var(--left)) translateY(var(--top));
+  scale: var(--scale);
+  translate: var(--left) var(--top);
 
-  transition: opacity 0.3s;
+  transition:
+    opacity 0.3s,
+    scale 0.3s cubic-bezier(0.68, -0.6, 0.32, 1.6);
 
   &.hidden {
     opacity: 0.2;

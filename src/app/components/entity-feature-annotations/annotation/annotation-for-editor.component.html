@@ -14,6 +14,7 @@
   ></app-markdown-preview>
   <k-button-row justify="end" gap="4">
     @if (canUserEdit$ | async) {
+    @if (canUserEditAndDelete$ | async) {
       <k-button
         icon-button
         color="transparent"
@@ -73,7 +74,7 @@
         ><mat-icon>visibility</mat-icon></k-button
       >
     }
-    @if (canUserDelete$ | async) {
+    @if (canUserEditAndDelete$ | async) {
       <k-button
         icon-button
         color="transparent"

@@ -25,7 +25,7 @@
       slotBehaviour="prepend"
       [dataObservable]="annotation$"
     >
-      @if (canUserDelete$ | async) {
+      @if (canUserEditAndDelete$ | async) {
         <k-button
           icon-button
           color="transparent"
@@ -33,8 +33,6 @@
           (click)="deleteAnnotation()"
           ><mat-icon>delete</mat-icon></k-button
         >
-      }
-      @if (canUserEdit$ | async) {
         <k-button
           icon-button
           color="transparent"
