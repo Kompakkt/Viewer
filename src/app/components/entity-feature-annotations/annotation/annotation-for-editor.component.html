@@ -13,7 +13,6 @@
     [data]="annotation.body.content.description || ('No description' | translate)"
   ></app-markdown-preview>
   <k-button-row justify="end" gap="4">
-    @if (canUserEdit$ | async) {
     @if (canUserEditAndDelete$ | async) {
       <k-button
         icon-button
