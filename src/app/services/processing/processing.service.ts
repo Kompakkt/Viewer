@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Mesh, Quaternion } from '@babylonjs/core';
+import { AbstractMesh, Mesh, Quaternion } from '@babylonjs/core';
 import {
   BehaviorSubject,
   combineLatest,
@@ -88,7 +88,7 @@ export class ProcessingService {
   private http: HttpClient = inject(HttpClient);
 
   public entity$ = new BehaviorSubject<IEntity | undefined>(undefined);
-  public meshes$ = new BehaviorSubject<Mesh[]>([]);
+  public meshes$ = new BehaviorSubject<AbstractMesh[]>([]);
   public compilation$ = new BehaviorSubject<ICompilation | undefined>(undefined);
   public mode$ = new BehaviorSubject<Mode>('');
   public settings$ = new BehaviorSubject({
@@ -100,7 +100,9 @@ export class ProcessingService {
   public mediaType$ = this.entity$.pipe(map(entity => entity?.mediaType));
   public isInUpload$ = this.entity$.pipe(map(entity => entity && !areSettingsSet(entity)));
   public hasMeshSettings$ = this.mediaType$.pipe(
-    map(mediaType => mediaType && ['model', 'entity', 'cloud', 'image'].includes(mediaType)),
+    map(
+      mediaType => mediaType && ['model', 'entity', 'cloud', 'splat', 'image'].includes(mediaType),
+    ),
   );
 
   public compilationLoaded$ = this.compilation$.pipe(map(compilation => !!compilation?._id));
@@ -246,7 +248,7 @@ export class ProcessingService {
     this.quality$.next(quality);
   }
 
-  public updateActiveEntity(entity: IEntity | undefined, meshes: Mesh[]) {
+  public updateActiveEntity(entity: IEntity | undefined, meshes: AbstractMesh[]) {
     console.log('New loaded Entity:', { entity, meshes });
     this.entity$.next(entity);
 
@@ -254,7 +256,12 @@ export class ProcessingService {
     meshes.forEach(mesh => {
       mesh.isPickable = isPickableMode;
     });
-    this.babylon.getScene().getMeshesByTags('videoPlane', mesh => (mesh.renderingGroupId = 3));
+    this.babylon
+      .getScene()
+      .getMeshesByTags('videoPlane')
+      .forEach(mesh => {
+        mesh.renderingGroupId = 3;
+      });
     this.meshes$.next(meshes);
     this.babylon.resize();
   }

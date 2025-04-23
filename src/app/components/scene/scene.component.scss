@@ -21,3 +21,44 @@
   outline: none;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
 }
+
+div.web-gpu-warning {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--color-bg-transparent);
+  backdrop-filter: blur(4px);
+  color: white;
+  z-index: 999;
+
+  div.center {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    max-width: 70ch;
+    text-wrap: balance;
+    padding: 24px 36px 36px;
+
+    h2,
+    p {
+      margin-top: 0;
+      margin-bottom: 1em;
+    }
+
+    h2 {
+      font-size: var(--font-size-large);
+      font-weight: var(--font-weight-bold);
+    }
+
+    a {
+      color: var(--brand-color);
+      text-decoration: underline !important;
+      text-decoration-color: var(--brand-color);
+    }
+  }
+}

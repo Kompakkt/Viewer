@@ -22,6 +22,9 @@ import {
   Tools,
   UniversalCamera,
   Vector3,
+  ISceneLoaderAsyncResult,
+  AbstractMesh,
+  WebGPUEngine,
 } from '@babylonjs/core';
 import '@babylonjs/core/Debug/debugLayer';
 import '@babylonjs/inspector';
@@ -48,6 +51,7 @@ import {
   loadAudio,
   loadImage,
   loadPointCloud,
+  loadSplat,
   loadVideo,
 } from './strategies/loading-strategies';
 import {
@@ -84,7 +88,7 @@ export class BabylonService {
     video$: new BehaviorSubject<IVideoContainer | undefined>(undefined),
     audio$: new BehaviorSubject<IAudioContainer | undefined>(undefined),
     image$: new BehaviorSubject<IImageContainer | undefined>(undefined),
-    entity$: new BehaviorSubject<I3DEntityContainer | undefined>(undefined),
+    entity$: new BehaviorSubject<ISceneLoaderAsyncResult | undefined>(undefined),
   };
 
   public cameraManager = {
@@ -326,7 +330,7 @@ export class BabylonService {
     rootUrl: string,
     mediaType = 'model',
     isDefault?: boolean,
-  ): Promise<Mesh[]> {
+  ): Promise<AbstractMesh[]> {
     this.resize();
     if (clearScene) this.clearScene();
     const { audio$, entity$, image$, video$ } = this.containers;
@@ -350,6 +354,11 @@ export class BabylonService {
         });
       case 'cloud':
         return loadPointCloud(rootUrl, this.scene).then(result => {
+          entity$.next(result);
+          return result.meshes;
+        });
+      case 'splat':
+        return loadSplat(rootUrl, this.scene).then(result => {
           entity$.next(result);
           return result.meshes;
         });
@@ -417,5 +426,12 @@ export class BabylonService {
     this.hideMesh('marker', true);
 
     return result;
+  }
+
+  public async checkWebGPUSupport() {
+    return WebGPUEngine.IsSupportedAsync.then(result => {
+      console.log('WebGPU supported:', result);
+      return result;
+    });
   }
 }

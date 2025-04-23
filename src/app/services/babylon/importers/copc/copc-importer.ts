@@ -332,6 +332,7 @@ export class CopcImporter implements ISceneLoaderPluginAsync {
       particleSystems: [],
       skeletons: [],
       transformNodes: [rootNode],
+      spriteManagers: [],
     };
   }
 

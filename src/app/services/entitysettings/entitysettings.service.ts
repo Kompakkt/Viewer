@@ -171,7 +171,7 @@ export class EntitySettingsService {
       throw new Error('No meshes available.');
     }
     this.center?.dispose();
-    
+
     this.center = MeshBuilder.CreateBox('center', { size: 0.01 }, this.babylon.getScene());
     this.center.isPickable = false;
     Tags.AddTagsTo(this.center, 'center');
@@ -249,6 +249,15 @@ export class EntitySettingsService {
     const isDefault = await firstValueFrom(this.processing.defaultEntityLoaded$);
     const scale = this.entitySettings.scale;
     const isModel = mediaType === 'model' || mediaType === 'entity';
+    const isSplat = mediaType === 'splat';
+
+    if (isSplat) {
+      const meshes = await firstValueFrom(this.processing.meshes$);
+      console.log(meshes.at(0)?.getBoundingInfo().diagonalLength);
+      const target = meshes.at(0)?.getBoundingInfo()?.boundingSphere.minimum.negate();
+      if (target) this.currentCenterPoint = target;
+    }
+
     let diagonalLength = 0;
     if (this.boundingBox) {
       const bi = this.boundingBox.getBoundingInfo();
@@ -267,7 +276,7 @@ export class EntitySettingsService {
       const position = new Vector3(
         isModel ? Math.PI / 4 : -Math.PI / 2,
         isModel ? Math.PI / 4 : Math.PI / 2,
-        diagonalLength * 1.25,
+        isSplat ? diagonalLength * 0.01 : diagonalLength * 1.25,
       );
       const target = this.currentCenterPoint;
       console.log('target', target);

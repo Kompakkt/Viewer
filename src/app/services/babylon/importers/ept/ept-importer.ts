@@ -367,6 +367,7 @@ export class EptImporter implements ISceneLoaderPluginAsync {
       particleSystems: [],
       skeletons: [],
       transformNodes: [rootNode],
+      spriteManagers: [],
     };
   }
 

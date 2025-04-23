@@ -11,5 +11,37 @@
   }
   <app-sidenav-menu />
   <app-sidenav />
+
+  @if (showWebGPUUnsupportedWarning$ | async) {
+    <div class="web-gpu-warning">
+      <div class="center">
+        <h2>Warning: WebGPU is may not be fully supported</h2>
+
+        <p>To display gaussian splatting scenes, WebGPU needs to be supported and enabled.</p>
+
+        <p>Your browser reports only partial or no support for WebGPU.</p>
+
+        <p>
+          More information about WebGPU support can be found on the
+          <a
+            href="https://github.com/gpuweb/gpuweb/wiki/Implementation-Status"
+            target="_blank"
+            rel="noopener noreferrer"
+            >official WebGPU wiki</a
+          >
+          and on
+          <a href="https://caniuse.com/webgpu" target="_blank" rel="noopener noreferrer"
+            >caniuse.com/webgpu</a
+          >.
+        </p>
+
+        <k-button-row justify="end">
+          <k-button type="solid-primary" (click)="warningIgnored$.next(true)"
+            >Continue anyways</k-button
+          >
+        </k-button-row>
+      </div>
+    </div>
+  }
 }
 <!-- app-render-canvas will be dynamically added to this -->

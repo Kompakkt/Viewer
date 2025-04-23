@@ -1,9 +1,11 @@
 import {
+  AbstractEngine,
   AbstractMesh,
   ActionManager,
   Analyser,
   Engine,
   ExecuteCodeAction,
+  ImportMeshAsync,
   ISceneLoaderProgressEvent,
   Material,
   Mesh,
@@ -28,7 +30,7 @@ import {
   IVideoContainer,
 } from '../container.interfaces';
 
-const updateLoadingUI = (engine: Engine) => (progress: ISceneLoaderProgressEvent) => {
+const updateLoadingUI = (engine: AbstractEngine) => (progress: ISceneLoaderProgressEvent) => {
   if (progress.lengthComputable) {
     engine.loadingUIText = `${((progress.loaded * 100) / progress.total).toFixed()}%`;
   }
@@ -102,9 +104,13 @@ export const loadPointCloud = async (rootUrl: string, scene: Scene) => {
     scene,
     updateLoadingUI(engine),
     extension,
-  ).then(result => {
-    return result as unknown as I3DEntityContainer;
-  });
+  );
+};
+
+export const loadSplat = async (rootUrl: string, scene: Scene) => {
+  const engine = scene.getEngine();
+
+  return ImportMeshAsync(rootUrl, scene, { onProgress: updateLoadingUI(engine) });
 };
 
 export const load3DEntity = async (rootUrl: string, scene: Scene, isDefault?: boolean) => {
@@ -113,6 +119,8 @@ export const load3DEntity = async (rootUrl: string, scene: Scene, isDefault?: bo
   const extension = filename.includes('.') ? `.${filename.split('.').slice(-1).pop()!}` : undefined;
 
   const engine = scene.getEngine();
+
+  console.log('load3Dentity', rootUrl, filename, extension);
 
   return SceneLoader.ImportMeshAsync(
     null,
@@ -137,7 +145,7 @@ export const load3DEntity = async (rootUrl: string, scene: Scene, isDefault?: bo
       patchMeshPBR(mesh, scene);
       mesh.renderingGroupId = 1;
     });
-    return result as unknown as I3DEntityContainer;
+    return result;
   });
 };
 
@@ -251,7 +259,7 @@ const createVideoScene = (videoTexture: VideoTexture, texture: Texture, scene: S
   return { plane, timeSlider };
 };
 
-export const loadAudio = (rootUrl: string, scene: Scene, meshes: Mesh[]) => {
+export const loadAudio = (rootUrl: string, scene: Scene, meshes: AbstractMesh[]) => {
   const filename = Tools.GetFilename(rootUrl);
   return requestFile(rootUrl).then(async (arrayBuffer): Promise<IAudioContainer> => {
     const audio = await new Promise<Sound>((resolve, _) => {
@@ -271,7 +279,7 @@ export const loadAudio = (rootUrl: string, scene: Scene, meshes: Mesh[]) => {
   });
 };
 
-const createAudioScene = (audio: Sound, scene: Scene, meshes: Mesh[]) => {
+const createAudioScene = (audio: Sound, scene: Scene, meshes: AbstractMesh[]) => {
   // audio analyser
   const analyser = new Analyser(scene);
   // TODO: AudioEngine implements IAudioEngine
