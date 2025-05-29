@@ -62,10 +62,9 @@ export class EntitySettingsService {
       .subscribe(({ settings, entity, meshes }) => {
         console.log('EntitySettingsService', entity?._id, { settings, entity, meshes });
         this.entitySettings = settings;
-        requestAnimationFrame(() =>
-          this.setUpSettings()
-            .then(() => console.log('Settings loaded'))
-            .catch((err: Error) => console.log('Settings not loaded', err.message)),
+        requestAnimationFrame(
+          () => this.setUpSettings().then(() => console.log('Settings loaded')),
+          // .catch((err: Error) => console.error('Settings not loaded', err.message, err.stack)),
         );
       });
   }
@@ -470,12 +469,33 @@ export class EntitySettingsService {
     if (!this.entitySettings) {
       throw new Error('Settings missing');
     }
-    const camera = this.entitySettings.cameraPositionInitial;
-    const position = new Vector3(camera.position.x, camera.position.y, camera.position.z);
-    const target = new Vector3(camera.target.x, camera.target.y, camera.target.z);
-    this.babylon.cameraManager.cameraDefaults$.next({ position, target });
-    this.babylon.cameraManager.moveActiveCameraToPosition(position);
-    this.babylon.cameraManager.setActiveCameraTarget(target);
+    const cameraSettings = this.entitySettings.cameraPositionInitial;
+    if (!cameraSettings) {
+      throw new Error('Camera settings missing');
+    }
+
+    const position = new Vector3(
+      cameraSettings.position.x,
+      cameraSettings.position.y,
+      cameraSettings.position.z,
+    );
+    const target = new Vector3(
+      cameraSettings.target.x,
+      cameraSettings.target.y,
+      cameraSettings.target.z,
+    );
+
+    this.babylon.cameraManager.cameraDefaults$.next({
+      position: position.clone(),
+      target: target.clone(),
+    });
+
+    this.babylon.cameraManager.smoothCameraTransition({
+      camera: this.babylon.cameraManager.getActiveCamera(),
+      scene: this.babylon.getScene(),
+      position,
+      target,
+    });
   }
 
   // background: color, effect

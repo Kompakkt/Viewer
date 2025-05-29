@@ -36,9 +36,8 @@ import {
   cameraDefaults$,
   createDefaultCamera,
   createUniversalCamera,
-  moveCameraToTarget,
-  setCameraTarget,
   setUpCamera,
+  smoothCameraTransition,
 } from './camera-handler';
 import {
   I3DEntityContainer,
@@ -92,16 +91,22 @@ export class BabylonService {
   };
 
   public cameraManager = {
-    getActiveCamera: this.getActiveCamera,
-    moveActiveCameraToPosition: (positionVector: Vector3) => {
-      moveCameraToTarget(this.getActiveCamera(), this.scene, positionVector);
-    },
+    getActiveCamera: () => this.getActiveCamera(),
+    moveActiveCameraToPosition: (position: Vector3) =>
+      smoothCameraTransition({
+        camera: this.getActiveCamera(),
+        scene: this.scene,
+        position,
+      }),
     resetCamera: () => {
-      this.cameraManager.setCameraType('ArcRotateCamera');
-      const camera = this.getActiveCamera();
+      const camera = this.cameraManager.setCameraType<ArcRotateCamera>('ArcRotateCamera');
       const { position, target } = cameraDefaults$.getValue();
-      setCameraTarget(camera, target);
-      moveCameraToTarget(camera, this.scene, position);
+      smoothCameraTransition({
+        camera,
+        scene: this.scene,
+        position,
+        target,
+      });
     },
     getInitialPosition: () => ({
       cameraType: 'arcRotateCam',
@@ -116,14 +121,21 @@ export class BabylonService {
         z: this.getActiveCamera().target.z,
       },
     }),
-    setActiveCameraTarget: (targetVector: Vector3) =>
-      setCameraTarget(this.getActiveCamera(), targetVector),
+    smoothCameraTransition,
+    setActiveCameraTarget: (target: Vector3) =>
+      smoothCameraTransition({
+        camera: this.getActiveCamera(),
+        scene: this.scene,
+        target,
+      }),
     setUpActiveCamera: (maxSize: number, mediaType: string) =>
       setUpCamera(this.getActiveCamera(), maxSize, mediaType),
-    setCameraType: (type: 'ArcRotateCamera' | 'UniversalCamera') => {
+    setCameraType: <T extends ArcRotateCamera | UniversalCamera>(
+      type: 'ArcRotateCamera' | 'UniversalCamera',
+    ) => {
       const cameras = this.scene.cameras;
       const currentType = this.cameraManager.cameraType$.getValue();
-      if (type === currentType) return;
+      if (type === currentType) return this.scene.activeCamera as T;
       this.cameraManager.cameraType$.next(type);
 
       const rotateCamera = cameras.find(
@@ -141,9 +153,14 @@ export class BabylonService {
       } else {
         rotateCamera.position = universalCamera.position.clone();
         this.scene.activeCamera = rotateCamera;
-        setCameraTarget(rotateCamera, target);
-        moveCameraToTarget(rotateCamera, this.scene, position);
+        smoothCameraTransition({
+          camera: rotateCamera,
+          scene: this.scene,
+          position,
+          target,
+        });
       }
+      return this.scene.activeCamera as T;
     },
     cameraSpeed: 1.0,
     cameraType$: new BehaviorSubject<'ArcRotateCamera' | 'UniversalCamera'>('ArcRotateCamera'),

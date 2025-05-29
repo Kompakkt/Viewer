@@ -2,10 +2,32 @@ import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { ActionManager, ExecuteCodeAction, PickingInfo, Tags, Vector3 } from '@babylonjs/core';
-import { BehaviorSubject, ReplaySubject, combineLatest, firstValueFrom, fromEvent } from 'rxjs';
-import { distinct, filter, map, switchMap } from 'rxjs/operators';
-import { IAnnotation, IVector3, IAmbiguousVector3, asVector3, isAnnotation } from 'src/common';
+import {
+  ActionManager,
+  ArcRotateCamera,
+  Color3,
+  ExecuteCodeAction,
+  GaussianSplattingMesh,
+  Mesh,
+  MeshBuilder,
+  Nullable,
+  PickingInfo,
+  Ray,
+  StandardMaterial,
+  Tags,
+  Vector3,
+  VertexData,
+} from '@babylonjs/core';
+import {
+  BehaviorSubject,
+  ReplaySubject,
+  combineLatest,
+  firstValueFrom,
+  fromEvent,
+  interval,
+} from 'rxjs';
+import { distinct, filter, map, switchMap, throttleTime } from 'rxjs/operators';
+import { IAnnotation, IVector3, isAnnotation } from 'src/common';
 import { annotationFallback, annotationLogo } from '../../../assets/annotations/annotations';
 import {
   AuthConcern,
@@ -21,6 +43,7 @@ import { UserdataService } from '../userdata/userdata.service';
 import { createMarker } from './visual3DElements';
 import { ReorderMovement } from 'src/app/components/entity-feature-annotations/annotation/annotation.component';
 import { ExtenderTransformer } from '@kompakkt/extender';
+import { smoothCameraTransition } from '../babylon/camera-handler';
 
 const isDefaultAnnotation = (annotation: IAnnotation) =>
   !annotation.target.source.relatedCompilation ||
@@ -215,11 +238,106 @@ export class AnnotationService {
 
   // Die Annotationsfunktionalität wird zue aktuellen Entity hinzugefügt
   public initializeAnnotationMode() {
-    fromEvent<MouseEvent>(this.babylon.getCanvas(), 'dblclick').subscribe(() => {
-      const scene = this.babylon.getScene();
-      const result = scene.pick(scene.pointerX, scene.pointerY, mesh => mesh.isPickable);
-      if (!result?.pickedPoint) return;
-      this.picked$.next(result);
+    const scene = this.babylon.getScene();
+
+    const previewSphere = MeshBuilder.CreateSphere(
+      'annotation-preview-sphere',
+      { diameter: 0.1, updatable: true },
+      scene,
+    );
+    const previewSphereMaterial = new StandardMaterial('previewSphereMaterial', scene);
+    previewSphereMaterial.emissiveColor = Color3.Magenta();
+    previewSphere.material = previewSphereMaterial;
+
+    const previewRay = MeshBuilder.CreateTube(
+      'annotation-preview-ray',
+      {
+        path: [new Vector3(0, 0, 0), new Vector3(0, 0, 1)],
+        radius: 0.01,
+        tessellation: 64,
+        updatable: true,
+      },
+      scene,
+    );
+    const rayMaterial = new StandardMaterial('rayMaterial', scene);
+    rayMaterial.wireframe = true;
+    previewRay.material = rayMaterial;
+
+    const gsMesh = scene.getMeshByName('GaussianSplatting') as Nullable<GaussianSplattingMesh>;
+    if (!gsMesh) return;
+    const gsMaterial = gsMesh.material;
+
+    // Position 3, Size 3, Color 4, Quaternion 4
+    const findClosestSplatPoint = (ray: Ray, maxDistance: number = 1) => {
+      if (!gsMesh) return undefined;
+      const data = gsMesh['_splatPositions'] as Float32Array;
+
+      let closestDistance = Number.MAX_VALUE;
+      let closestSplatIndex = -1;
+      let closestPoint: Vector3 | null = null;
+
+      // Iterate through all splat positions
+      for (let i = 0; i < data.length; i += 14) {
+        // Extract position of current splat
+        const splatPosition = new Vector3(data[i], data[i + 1], data[i + 2]);
+
+        // Calculate vector from ray origin to splat position
+        const v = splatPosition.subtract(ray.origin);
+
+        // Project v onto ray direction to find parameter t
+        const t = Vector3.Dot(v, ray.direction);
+
+        // Calculate closest point on ray
+        const closestPointOnRay = ray.origin.add(ray.direction.scale(t));
+
+        // Calculate distance from splat to ray
+        const distance = Vector3.Distance(splatPosition, closestPointOnRay);
+
+        // Only consider points within the maximum distance threshold
+        if (distance <= maxDistance) {
+          // Update if this is the closest splat so far
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestSplatIndex = i;
+            closestPoint = splatPosition;
+          }
+        }
+      }
+
+      // Return the result
+      if (closestSplatIndex !== -1) {
+        return {
+          position: closestPoint,
+          index: closestSplatIndex,
+          distance: closestDistance,
+        };
+      }
+
+      return undefined;
+    };
+
+    interval(20).subscribe(event => {
+      const { pointerX, pointerY } = scene;
+      const camera = this.babylon.getActiveCamera();
+      const ray = scene.createPickingRay(pointerX, pointerY, null, camera);
+
+      const closestSplat = findClosestSplatPoint(ray);
+
+      if (closestSplat?.position) {
+        previewSphere.position = closestSplat.position;
+      }
+
+      const endpoint = ray.origin.add(ray.direction.scale(100));
+      MeshBuilder.CreateTube(
+        'annotation-preview-ray',
+        {
+          path: [ray.origin, endpoint],
+          radius: 0.01,
+          tessellation: 64,
+          instance: previewRay,
+        },
+        scene,
+      );
     });
 
     this.setAnnotationMode(false);
