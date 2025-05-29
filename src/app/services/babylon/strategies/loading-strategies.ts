@@ -3,8 +3,10 @@ import {
   AbstractMesh,
   ActionManager,
   Analyser,
+  Color3,
   Engine,
   ExecuteCodeAction,
+  GaussianSplattingMesh,
   ImportMeshAsync,
   ISceneLoaderProgressEvent,
   Material,
@@ -18,7 +20,10 @@ import {
   Tags,
   Texture,
   Tools,
+  TransformNode,
   Vector3,
+  VertexBuffer,
+  VertexData,
   VideoTexture,
 } from '@babylonjs/core';
 import { AdvancedDynamicTexture, Control, Slider, StackPanel, TextBlock } from '@babylonjs/gui';
@@ -110,7 +115,18 @@ export const loadPointCloud = async (rootUrl: string, scene: Scene) => {
 export const loadSplat = async (rootUrl: string, scene: Scene) => {
   const engine = scene.getEngine();
 
-  return ImportMeshAsync(rootUrl, scene, { onProgress: updateLoadingUI(engine) });
+  return ImportMeshAsync(rootUrl, scene, { onProgress: updateLoadingUI(engine) }).then(result => {
+    const gsMesh = result.meshes.at(0)! as GaussianSplattingMesh;
+    gsMesh.isPickable = true;
+    const gsMaterial = gsMesh.material;
+
+    // Position 3, Size 3, Color 4, Quaternion 4
+    const data = gsMesh['_splatPositions'] as Float32Array;
+
+    console.log('loadSplat', gsMesh, gsMaterial);
+
+    return result;
+  });
 };
 
 export const load3DEntity = async (rootUrl: string, scene: Scene, isDefault?: boolean) => {

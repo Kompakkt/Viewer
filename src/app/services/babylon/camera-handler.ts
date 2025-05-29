@@ -22,8 +22,12 @@ cameraDefaults$.subscribe(defaults => {
 
 export const resetCamera = (camera: ArcRotateCamera, scene: Scene) => {
   const { position, target } = cameraDefaults$.getValue();
-  setCameraTarget(camera, target);
-  moveCameraToTarget(camera, scene, position);
+  smoothCameraTransition({
+    camera,
+    scene,
+    position,
+    target,
+  });
   return camera;
 };
 
@@ -103,58 +107,64 @@ export const setUpCamera = (camera: ArcRotateCamera, maxSize: number, mediaType:
   return camera;
 };
 
-const createAnimationsForCamera = (
-  camera: ArcRotateCamera,
-  positionVector: Vector3,
-  cameraAxis = ['x', 'y', 'z'],
-  positionAxis = ['x', 'y', 'z'],
-  frames = 30,
-) => {
-  const creatAnimCam = (camAxis: string, posAxis: string) => {
-    const anim = new Animation(
-      'animCam',
-      camAxis,
-      frames,
-      Animation.ANIMATIONTYPE_FLOAT,
-      Animation.ANIMATIONLOOPMODE_CYCLE,
-    );
-    const multipleProperties = camAxis.indexOf('.') !== -1;
-    let value = (camera as any)[camAxis];
-    if (multipleProperties) {
-      const props = camAxis.split('.');
-      value = (camera as any)[props[0]][props[1]];
-    }
-    anim.setKeys([
-      { frame: 0, value },
-      { frame: frames, value: (positionVector as any)[posAxis] },
-    ]);
-    return anim;
-  };
+const FPS = 24;
 
-  const arr: Animation[] = [];
-  for (let i = 0; i < 3; i++) {
-    const anim = creatAnimCam(cameraAxis[i], positionAxis[i]);
-    const ease = new QuarticEase();
-    ease.setEasingMode(EasingFunction.EASINGMODE_EASEOUT);
-    anim.setEasingFunction(ease);
-    arr.push(anim);
-  }
-  return arr;
-};
-
-export const moveCameraToTarget = (
-  camera: ArcRotateCamera,
-  scene: Scene,
-  positionVector: Vector3,
-) => {
-  console.log('move Cam to', positionVector);
-
-  camera.animations.push(
-    ...createAnimationsForCamera(camera, positionVector, ['alpha', 'beta', 'radius']),
+export const smoothCameraTransition = ({
+  camera,
+  scene,
+  position,
+  target,
+}: {
+  camera: ArcRotateCamera;
+  scene: Scene;
+  position?: Vector3;
+  target?: Vector3;
+}) => {
+  console.log(
+    'SmoothCameraTransition from',
+    JSON.stringify([camera.position, camera.target]),
+    'to',
+    JSON.stringify([position, target]),
   );
-  scene.beginAnimation(camera, 0, 30, false, 1, () => {});
-};
 
-export const setCameraTarget = (camera: ArcRotateCamera, target: Vector3) => {
-  camera.setTarget(target, true);
+  if (!position && !target) return;
+  camera.position = new Vector3(camera.position.x, camera.position.y, camera.position.z);
+  camera.target = new Vector3(camera.target.x, camera.target.y, camera.target.z);
+
+  position ??= camera.position;
+  target ??= camera.target;
+
+  const animPosition = new Animation(
+    'camera_position_animation',
+    'position',
+    FPS,
+    Animation.ANIMATIONTYPE_VECTOR3,
+    Animation.ANIMATIONLOOPMODE_CYCLE,
+  );
+  const animTarget = new Animation(
+    'camera_target_animation',
+    'target',
+    FPS,
+    Animation.ANIMATIONTYPE_VECTOR3,
+    Animation.ANIMATIONLOOPMODE_CYCLE,
+  );
+
+  animPosition.setKeys([
+    { frame: 0, value: camera.position.clone() },
+    { frame: FPS, value: position.clone() },
+  ]);
+
+  animTarget.setKeys([
+    { frame: 0, value: camera.target.clone() },
+    { frame: FPS, value: target.clone() },
+  ]);
+
+  console.log('SmoothCameraTransition', animPosition);
+
+  const ease = new QuarticEase();
+  ease.setEasingMode(EasingFunction.EASINGMODE_EASEOUT);
+  animPosition.setEasingFunction(ease);
+  animTarget.setEasingFunction(ease);
+
+  scene.beginDirectAnimation(camera, [animPosition, animTarget], 0, FPS, false);
 };
