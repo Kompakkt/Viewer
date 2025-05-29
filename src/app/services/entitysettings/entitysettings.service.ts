@@ -102,6 +102,7 @@ export class EntitySettingsService {
     const meshes = await firstValueFrom(this.processing.meshes$);
     const isInUpload = await firstValueFrom(this.processing.isInUpload$);
     const hasMeshSettings = await firstValueFrom(this.processing.hasMeshSettings$);
+    console.log("Setup settings")
     if (!this.entitySettings) {
       throw new Error('No settings available.');
     }
@@ -189,26 +190,40 @@ export class EntitySettingsService {
     // rotation to zero
     this.center.rotationQuaternion = this.processing.rotationQuaternion;
 
-    // position model to origin of the world coordinate system
-    if (this.min.x > 0) {
-      this.center.position.x = -this.min.x;
-    }
-    if (this.min.x < 0) {
-      this.center.position.x = Math.abs(this.min.x);
-    }
-    if (this.min.y > 0) {
-      this.center.position.y = -this.min.y;
-    }
-    if (this.min.y < 0) {
-      this.center.position.y = Math.abs(this.min.y);
-    }
-    if (this.min.z > 0) {
-      this.center.position.z = -this.min.z;
-    }
-    if (this.min.z < 0) {
-      this.center.position.z = Math.abs(this.min.z);
-    }
+    // case iiif position set -> set to position
+    // else case position model to origin of the world coordinate system
+    if (this.entitySettings.position !== undefined) {
+      let temp_vec = new Vector3();
+      if (this.entitySettings.position) {
+        temp_vec.x = this.entitySettings.position.x;
+        temp_vec.y = this.entitySettings.position.y;
+        temp_vec.z = this.entitySettings.position.z;
 
+        console.log('Temp Vec', temp_vec, this.entitySettings.position);
+      }
+      console.log('Center Position Settings', this.entitySettings.position.x, this.entitySettings.position.y, this.entitySettings.position.z);
+      this.center.position = new Vector3(this.entitySettings.position.x, this.entitySettings.position.y, this.entitySettings.position.z);
+      console.log('Center Position', this.center.position);
+    } else {
+      if (this.min.x > 0) {
+        this.center.position.x = -this.min.x;
+      }
+      if (this.min.x < 0) {
+        this.center.position.x = Math.abs(this.min.x);
+      }
+      if (this.min.y > 0) {
+        this.center.position.y = -this.min.y;
+      }
+      if (this.min.y < 0) {
+        this.center.position.y = Math.abs(this.min.y);
+      }
+      if (this.min.z > 0) {
+        this.center.position.z = -this.min.z;
+      }
+      if (this.min.z < 0) {
+        this.center.position.z = Math.abs(this.min.z);
+      }
+    }
     this.currentCenterPoint = new Vector3(
       this.initialSize.x / 2,
       this.initialSize.y / 2,
@@ -237,6 +252,7 @@ export class EntitySettingsService {
     if (hasMeshSettings || mediaType === 'audio') {
       await this.loadRotation();
       await this.loadScaling();
+      await this.loadTranslation();
     }
   }
 
@@ -423,6 +439,14 @@ export class EntitySettingsService {
     this.processing.entityWidth = (this.initialSize.x * scale.x).toFixed(2);
     this.processing.entityDepth = (this.initialSize.z * scale.z).toFixed(2);
   }
+
+  public loadTranslation() {
+    if (this.center) {
+      this.center.position = this.center.position.add(new Vector3(this.entitySettings.translate?.x, this.entitySettings.translate?.y, this.entitySettings.translate?.z));
+      console.log('Center Position 20', this.center.position);
+    }
+  }
+
 
   public async createVisualUIMeshSettingsHelper() {
     if (!this.center) {

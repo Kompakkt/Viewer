@@ -138,6 +138,9 @@ export class AnnotationService {
     const isDefault = await firstValueFrom(this.processing.defaultEntityLoaded$);
     const isFallback = await firstValueFrom(this.processing.fallbackEntityLoaded$);
     const isAnnotatingFeatured = await firstValueFrom(this.processing.isAnnotatingFeatured$);
+    if (isAnnotatingFeatured) {
+      console.log("Anno feat");
+    }
     if (!entity) {
       throw new Error('Entity missing');
     }
@@ -154,12 +157,7 @@ export class AnnotationService {
       await this.sortAnnotations();
     } else {
       if (isFallback) {
-        this.annotations$.next([annotationFallback]);
-      }
-      if (isDefault) {
-        if (isAnnotatingFeatured && annotationLogo.length) {
-          this.annotations$.next(annotationLogo);
-        }
+        this.annotations$.next([]);
       }
       if (isStandalone) {
         this.annotations$.next(Object.values(entity.annotations) as IAnnotation[]);
