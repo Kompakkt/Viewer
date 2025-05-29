@@ -2,8 +2,10 @@ import {
   AbstractMesh,
   ActionManager,
   Analyser,
+  Color3,
   Engine,
   ExecuteCodeAction,
+  GaussianSplattingMesh,
   ImportMeshAsync,
   ISceneLoaderProgressEvent,
   Material,
@@ -16,7 +18,10 @@ import {
   Tags,
   Texture,
   Tools,
+  TransformNode,
   Vector3,
+  VertexBuffer,
+  VertexData,
   VideoTexture,
 } from '@babylonjs/core';
 import '@babylonjs/loaders';
@@ -94,7 +99,18 @@ export const loadSplat = async (
   scene: Scene,
   onProgress?: (progress: ISceneLoaderProgressEvent) => void,
 ) => {
-  return ImportMeshAsync(rootUrl, scene, { onProgress });
+  return ImportMeshAsync(rootUrl, scene, { onProgress }).then(result => {
+    const gsMesh = result.meshes.at(0)! as GaussianSplattingMesh;
+    gsMesh.isPickable = true;
+    const gsMaterial = gsMesh.material;
+
+    // Position 3, Size 3, Color 4, Quaternion 4
+    const data = gsMesh['_splatPositions'] as Float32Array;
+
+    console.log('loadSplat', gsMesh, gsMaterial);
+
+    return result;
+  });
 };
 
 export const load3DEntity = async (

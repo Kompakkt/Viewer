@@ -162,10 +162,12 @@ export class ProcessingService {
       if (!entity) return false;
       if (args.isStandalone) return true;
 
+      // TODO: Implement annotation for every type, then we don't need this check
       const isAnnotatable =
         entity.mediaType === 'image' ||
         entity.mediaType === 'entity' ||
         entity.mediaType === 'cloud' ||
+        entity.mediaType === 'splat' ||
         entity.mediaType === 'model';
 
       const hideEditor = !args.showEditor || !isAnnotatable || args.isFallback;
