@@ -369,9 +369,8 @@ const createMediaControls = (
   panel.addControl(header);
 
   timeSlider.onValueChangedObservable.add(() => {
-    header.text = `Current time: ${
-      audio ? secondsToHms(timeSlider.value) : getCurrentTime(video?.currentTime ?? 0)
-    }`;
+    header.text = `Current time: ${audio ? secondsToHms(timeSlider.value) : getCurrentTime(video?.currentTime ?? 0)
+      }`;
   });
   panel.addControl(timeSlider);
 

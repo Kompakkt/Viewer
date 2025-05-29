@@ -33,6 +33,7 @@ import { BackendService } from '../backend/backend.service';
 import { MessageService } from '../message/message.service';
 import { OverlayService } from '../overlay/overlay.service';
 import { UserdataService } from '../userdata/userdata.service';
+import { AnnotationBody, Manifest, Scene, SpecificResource, parseManifest } from 'manifesto.js';
 
 export type QualitySetting = 'low' | 'medium' | 'high' | 'raw';
 const isQualitySetting = (setting: any): setting is QualitySetting => {
@@ -52,6 +53,7 @@ interface IQueryParams {
   endpoint?: string;
   settings?: string;
   annotations?: string;
+  manifest?: string;
   resource?: string;
   minimal?: string;
 }
