@@ -149,11 +149,11 @@
 
     const manifestBaseUrl = isLocalHost
       ? 'http://localhost:8081/'
-      : 'https://raw.githubusercontent.com/IIIF/3d/refs/heads/main/manifests/';
+      : location.origin + '/demos/iiif-3d/manifests/';
 
     const viewerBaseUrl = isLocalHost
       ? 'http://localhost:4200/viewer/'
-      : 'https://kompakkt.de/viewer/';
+      : location.origin + '/viewer/';
 
     console.log(isLocalHost, manifestBaseUrl, viewerBaseUrl);
 
