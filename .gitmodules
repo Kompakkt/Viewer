@@ -4,3 +4,6 @@
 [submodule "src/@kompakkt/plugins"]
 	path = src/@kompakkt/plugins
 	url = https://github.com/Kompakkt/Plugins
+[submodule "demos/iiif-3d"]
+	path = demos/iiif-3d
+	url = https://github.com/IIIF/3d/
