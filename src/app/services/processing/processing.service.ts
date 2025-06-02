@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { AbstractMesh, Mesh, Quaternion } from '@babylonjs/core';
+import { AbstractMesh, Mesh, Quaternion, TransformNode, Vector3 } from '@babylonjs/core';
 import {
   BehaviorSubject,
   combineLatest,
@@ -34,7 +34,15 @@ import { BackendService } from '../backend/backend.service';
 import { MessageService } from '../message/message.service';
 import { OverlayService } from '../overlay/overlay.service';
 import { UserdataService } from '../userdata/userdata.service';
-import { AnnotationBody, Manifest, Scene, SpecificResource, parseManifest } from 'manifesto.js';
+import {
+  Annotation,
+  AnnotationBody,
+  AnnotationPage,
+  Manifest,
+  Scene,
+  SpecificResource,
+  parseManifest,
+} from '@iiif/3d-manifesto-dev';
 
 export type QualitySetting = 'low' | 'medium' | 'high' | 'raw';
 const isQualitySetting = (setting: any): setting is QualitySetting => {
@@ -113,6 +121,8 @@ export class ProcessingService {
   public defaultEntityLoaded$ = this.entity$.pipe(map(entity => entity?._id === 'default'));
   public fallbackEntityLoaded$ = this.entity$.pipe(map(entity => entity?._id === 'fallback'));
   public isStandalone$ = this.entity$.pipe(map(entity => entity?._id === 'standalone_entity'));
+
+  public standaloneAnnotations$ = new BehaviorSubject<IAnnotation[]>([]);
 
   // general features and modes
   public showMenu$ = new BehaviorSubject(true);
@@ -376,10 +386,293 @@ export class ProcessingService {
     this.bootstrapped$.next(true);
   }
 
-  private async loadStandaloneEntity(entries: IQueryParams) {
-    const { settings, annotations } = entries;
+  private async loadIIIF3DManifest(manifestUrl: string) {
+    const manifestJson = await fetch(decodeURIUntilStable(manifestUrl), {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(res => res.json() as object)
+      .catch(error => {
+        console.log('Error loading manifest:', error);
+        return undefined;
+      });
+    if (!manifestJson) {
+      console.error('Manifest could not be loaded from URL', manifestUrl);
+      return;
+    }
+    const manifest = parseManifest(manifestJson) as Manifest;
 
-    console.log('loadStandaloneEntity', entries);
+    const scenes = manifest?.getSequences()?.flatMap(seq => seq.getScenes());
+    const scene = scenes?.at(0); // TODO: Allow scene selection
+    console.log('loadIIIF3DManifest', manifest, scenes, scene);
+
+    if (!scene) {
+      console.warn('No scene found in manifest');
+    }
+
+    const entitySettings = minimalSettings;
+    const setBackground = () => {
+      const bgColor = scene?.getBackgroundColor();
+      if (bgColor) {
+        const color = {
+          r: bgColor.red,
+          g: bgColor.green,
+          b: bgColor.blue,
+          a: 1,
+        };
+        entitySettings.background = {
+          color: color,
+          effect: false,
+        };
+        console.log('background color', color);
+        this.babylon.setBackgroundColor(color);
+        this.babylon.setBackgroundImage(false);
+        this.babylon.hideBackgroundHelpers();
+      }
+    };
+
+    let hasProcessedCamera = false;
+
+    const processBody = async (annotation: Annotation, body: AnnotationBody) => {
+      console.log('json', annotation.__jsonld);
+
+      const annotationBody = body.isSpecificResource()
+        ? ((body as unknown as SpecificResource).getSource() as AnnotationBody)
+        : body.getType()?.toLowerCase() === 'model'
+          ? body
+          : undefined;
+
+      const entityUrl = typeof annotationBody === 'string' ? annotationBody : annotationBody?.id;
+      if (!entityUrl) {
+        console.warn(`Failed getting entity URL from annotation body`, body);
+        return;
+      }
+      console.log('processBody', entityUrl);
+
+      const meshes = await this.babylon.addEntityToScene(entityUrl);
+      const transformNode = new TransformNode(
+        `transformNode-${entityUrl}`,
+        this.babylon.getScene(),
+      );
+      meshes.filter(mesh => !mesh.parent).forEach(mesh => mesh.setParent(transformNode));
+
+      const pointSelector = (() => {
+        try {
+          return annotation.getTarget()?.getSelector();
+        } catch (error) {
+          console.warn(`Failed getting point selector from annotation target`, error);
+          return undefined;
+        }
+      })();
+      transformNode.position.set(
+        Number(pointSelector?.getProperty('x') ?? 0) * -1,
+        Number(pointSelector?.getProperty('y') ?? 0),
+        Number(pointSelector?.getProperty('z') ?? 0),
+      );
+
+      const transforms = (() => {
+        try {
+          return body.getTransform();
+        } catch (error) {
+          console.warn(`Failed getting transforms from annotation body`, error);
+          return [];
+        }
+      })();
+      for (const transform of transforms) {
+        const vector = new Vector3(
+          Number(transform?.getProperty('x') ?? 0) * -1,
+          Number(transform?.getProperty('y') ?? 0),
+          Number(transform?.getProperty('z') ?? 0),
+        );
+        if (transform.isScaleTransform) {
+          transformNode.scaling = vector;
+        }
+        if (transform.isRotateTransform) {
+          transformNode.rotation.addInPlace(vector);
+        }
+        if (transform.isTranslateTransform) {
+          transformNode.position.addInPlace(vector);
+        }
+      }
+
+      return transformNode;
+    };
+
+    const transformNodes = new Array<TransformNode>();
+
+    const processAnnotation = async (annotation: Annotation | AnnotationPage) => {
+      const isBody = (object: any): object is Annotation => {
+        return object['getBody'] !== undefined;
+      };
+
+      type CommentPage = {
+        items: {
+          id: string;
+          type: 'Annotation';
+          bodyValue: string;
+          target: {
+            selector: { x: number; y: number; z: number } | { x: number; y: number; z: number }[];
+            source: unknown[];
+          };
+        }[];
+      };
+
+      const isCommentPage = (object: any): object is CommentPage => {
+        return (
+          object !== undefined &&
+          object['items'] !== undefined &&
+          object['items'].some(
+            (item: any) => item.type === 'Annotation' && item.bodyValue !== undefined,
+          )
+        );
+      };
+
+      console.log(annotation, isCommentPage(annotation), (annotation as any).bodyValue);
+
+      if (isBody(annotation)) {
+        for await (const body of annotation.getBody()) {
+          const transformNode = await processBody(annotation, body);
+          if (transformNode) {
+            transformNodes.push(transformNode);
+          }
+        }
+      }
+
+      const page = (() => {
+        if (isCommentPage(annotation)) return annotation;
+        if (annotation.__jsonld.bodyValue !== undefined) {
+          const page = { items: [annotation.__jsonld] } as unknown as CommentPage;
+          console.log('Page', page);
+          return page;
+        }
+        return undefined;
+      })();
+
+      if (isCommentPage(page)) {
+        const items = page.items.filter(item => item.bodyValue !== undefined);
+        const manufacturedAnnotations = new Array<IAnnotation>();
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          const firstSelector = Array.isArray(item.target.selector)
+            ? item.target.selector[0]
+            : item.target.selector;
+
+          firstSelector.x = firstSelector.x * -1;
+
+          const position = Vector3.Zero()
+            .subtract(new Vector3(firstSelector.x, firstSelector.y, firstSelector.z))
+            .normalize();
+
+          console.log('Creating annotation from', item, position);
+
+          manufacturedAnnotations.push({
+            _id: item.id,
+            body: {
+              content: {
+                title: item.bodyValue,
+                description: item.bodyValue,
+                relatedPerspective: {
+                  preview: '',
+                  cameraType: 'ArcRotateCamera',
+                  target: firstSelector,
+                  position,
+                },
+                type: 'text',
+              },
+              type: 'annotation',
+            },
+            created: new Date().toISOString(),
+            generator: {
+              type: 'software',
+              name: 'Kompakkt',
+              _id: 'kompakkt',
+              homepage: 'https://github.com/Kompakkt/Kompakkt',
+            },
+            motivation: 'defaultMotivation',
+            lastModifiedBy: {
+              type: 'person',
+              name: 'Kompakkt',
+              _id: 'kompakkt',
+            },
+            creator: {
+              type: 'person',
+              name: 'Kompakkt',
+              _id: 'kompakkt',
+            },
+            validated: true,
+            ranking: i + 1,
+            identifier: item.id,
+            target: {
+              source: {
+                relatedEntity: 'standalone',
+                relatedCompilation: '',
+              },
+              selector: {
+                referenceNormal: position,
+                referencePoint: firstSelector,
+              },
+            },
+          } as IAnnotation);
+        }
+        this.standaloneAnnotations$.next(manufacturedAnnotations);
+        console.log('AnnotationPage items', items);
+      }
+    };
+
+    console.log('scene', scene);
+    const annotations = [...(scene?.getContent() ?? []), ...(scene?.__jsonld['annotations'] ?? [])];
+    await Promise.all(annotations?.map(annotation => processAnnotation(annotation)) ?? []);
+
+    // "Smart" automatic positioning of camera
+    const automoveCamera = () => {
+      if (!hasProcessedCamera) {
+        const camera = this.babylon.cameraManager.getActiveCamera();
+
+        const childMeshes = transformNodes.flatMap(node =>
+          node.getChildMeshes(false).filter((m): m is Mesh => m instanceof Mesh),
+        );
+        const boundingInfo = childMeshes
+          .map(m => m.getBoundingInfo().boundingBox)
+          .filter(b => b.extendSizeWorld.asArray().some(v => v > 0))
+          .map(b => ({
+            center: b.centerWorld,
+            extend: [...b.maximumWorld.asArray(), ...b.minimumWorld.asArray()].map(v =>
+              Math.abs(v),
+            ),
+          }));
+
+        const averageCenter = boundingInfo
+          .reduce((acc, info) => acc.add(info.center), Vector3.Zero())
+          .scale(1 / boundingInfo.length);
+
+        const maxExtend = Math.max(...boundingInfo.flatMap(info => info.extend));
+
+        this.babylon.cameraManager.moveActiveCameraToPosition(
+          new Vector3(camera.alpha * -1, camera.beta, maxExtend * 4),
+        );
+        this.babylon.cameraManager.setActiveCameraTarget(averageCenter);
+      }
+    };
+
+    console.log('Transform nodes from manifest:', transformNodes);
+
+    this.loadingScreen.hide();
+    this.bootstrapped$.next(true);
+
+    setTimeout(() => {
+      automoveCamera();
+      setBackground();
+    }, 0);
+  }
+
+  private async loadStandaloneEntity(entries: IQueryParams) {
+    const { settings, annotations, manifest: manifestUrl } = entries;
+
+    if (manifestUrl) {
+      return this.loadIIIF3DManifest(manifestUrl);
+    }
 
     const url = ((): string | undefined => {
       const { endpoint, resource } = entries;

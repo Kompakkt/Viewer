@@ -48,6 +48,7 @@
     "@babylonjs/loaders": "8.38.0",
     "@babylonjs/materials": "8.38.0",
     "@babylonjs/serializers": "8.38.0",
+    "@iiif/3d-manifesto-dev": "Kompakkt/manifesto-3d",
     "bson-objectid": "^2.0.4",
     "copc": "^0.0.7",
     "core-js": "^3.38.0",

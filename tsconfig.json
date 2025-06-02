@@ -35,5 +35,7 @@
     },
     "preserveSymlinks": true
   },
-  "exclude": ["src/@kompakkt/plugins/*.ts"]
+  "exclude": ["src/@kompakkt/plugins/*.ts"],
+  "files": ["./src/main.ts"],
+  "include": ["./src/**/*.ts", "./src/**/*.d.ts"]
 }
