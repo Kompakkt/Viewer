@@ -1,0 +1,216 @@
+<!doctype html>
+<html>
+  <head>
+    <title>IIIF 3D Manifests demo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        max-width: 100%;
+      }
+
+      body {
+        display: grid;
+        place-items: center;
+      }
+
+      main {
+        margin: 0 auto;
+        box-sizing: border-box;
+        width: 100%;
+        height: 100%;
+        max-width: 1280px;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 32px;
+      }
+
+      iframe {
+        flex-grow: 1;
+        width: 100%;
+        height: 100%;
+        min-height: 800px;
+        outline: none;
+        border: none;
+        border-radius: 0px 0px 4px 4px;
+      }
+
+      select {
+        margin: 0;
+        border: solid 2px #00afe7;
+        border-radius: 4px 4px 0px 0px;
+      }
+
+      h1 {
+        margin-top: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>IIIF 3D in the Kompakkt Viewer</h1>
+
+      <p>
+        Kompakkt is closely following developments of the IIIF 3D specification working group to
+        support the upcoming IIIF 3D specification.
+
+        <br />
+
+        The content below is a demonstration and is still a work in progress.
+
+        <br />
+
+        Pick a manifest from below. The latest manifests can be found on the
+        <a href="https://github.com/IIIF/3d/tree/main/manifests" rel="noopener noreferer"
+          >IIIF Github</a
+        >.
+      </p>
+
+      <select id="select"></select>
+
+      <iframe id="viewer"></iframe>
+    </main>
+  </body>
+  <script>
+    const manifests = {
+      '1_basic_model_in_scene/model_origin.json': 'Single Model',
+      '1_basic_model_in_scene/model_origin_bgcolor.json': 'Single Model with background color',
+      '2_cameras/zz_near_and_far.json': 'Cameras: Near and far',
+      '2_cameras/zz_positioned_camera_fov.json': 'Positioned camera with explicit field of view.',
+      '2_cameras/zz_positioned_camera_look_at_polygonz.json':
+        'Positioned camera looking at polygon.',
+      '2_cameras/perspective_camera.json': 'Model with Explicit Perspective Camera',
+      '2_cameras/positioned_camera_lookat_anno.json':
+        'Model with Explicit Perspective Camera Looking at an Annotation',
+      '2_cameras/positioned_camera_lookat_point.json':
+        'Model with Explicit Perspective Camera Looking at a Point',
+      '2_cameras/zz_choice_of_cameras.json': 'Choice of cameras WARNING use of Choice',
+      '2_cameras/zz_orthographic_camera.json': 'Orthographic Camera',
+      '3_lights/zz_multiple_lights_with_intensities_and_colors.json':
+        'Multiple lights with intensities and colors.',
+      '3_lights/zz_point_light.json': 'Point light',
+      '3_lights/zz_spot_light.json': 'Spotlight',
+      '3_lights/ambient_green_light.json': 'Model with Green AmbientLight',
+      '3_lights/direction_light_lookat_positioned.json': 'Model with DirectionalLight',
+      '3_lights/direction_light_transform_rotate.json': 'Model with Rotated DirectionalLight',
+      '4_transform_and_position/model_position.json': 'Single Positioned Model',
+      '4_transform_and_position/model_transform_negative_scale_position.json':
+        'Model shown normally and mirrored',
+      '4_transform_and_position/model_transform_rotate_position.json': 'Rotated Model',
+      '4_transform_and_position/model_transform_rotate_translate_position.json':
+        'Rotated Translated Model',
+      '4_transform_and_position/model_transform_scale_position.json':
+        'Scaled, Translated Model with original for comparison',
+      '4_transform_and_position/model_transform_scale_translate_position.json':
+        'Scaled, Translated Model with original for comparison',
+      '4_transform_and_position/model_transform_translate_rotate_position.json':
+        'Translated Rotated Model',
+      '4_transform_and_position/model_transform_translate_scale_position.json':
+        'Scaled Model with original for comparison',
+      '4_transform_and_position/whale_cranium_and_mandible_position.json':
+        'Whale Cranium and Mandible Positioned',
+      '5_nesting/zz_canvas_positioned_in_scene_then_duplicated_with_rotations.json':
+        'IIIF Canvas positioned in Scene multiple times with rotations',
+      '5_nesting/zz_scene_in_scene.json': 'Scene in Scene',
+      '5_nesting/zz_scene_in_scene_transform.json': 'Scene in Scene with Transforms',
+      '6_2d_canvases_in_scene/zz_iiif_canvas_static_img_only.json':
+        'IIIF Canvas in Scene, static image only',
+      '6_2d_canvases_in_scene/iiif_canvas_with_bgcolor_backward.json': 'Scene with a Canvas',
+      '6_2d_canvases_in_scene/iiif_canvas_with_bgcolor_forward.json': 'Scene with a Canvas',
+      '7_excluding_model_features/zz_exclude_cameras.json': 'Exclude Cameras',
+      '7_excluding_model_features/zz_exclude_cameras_and_lights.json': 'Exclude Cameras and Lights',
+      '7_excluding_model_features/zz_exclude_lights.json': 'Exclude Lights',
+      '7_excluding_model_features/zz_include_cameras_and_lights.json':
+        'Include Cameras and Lights (default behavior)',
+      '9_commenting_annotations/astronaut_comment.json': 'Single Model with Comment Annotations',
+      '9_commenting_annotations/whale_comment.json':
+        'Whale Cranium and Mandible with Point Comment Annotation',
+      '9_commenting_annotations/whale_comment_camera.json':
+        'Whale Cranium and Mandible with Point Comment Annotation and Camera',
+      '9_commenting_annotations/whale_comment_label_body_position.json':
+        'Whale Cranium and Mandible with Point Comment Annotation Oriented Toward Camera',
+      '9_commenting_annotations/whale_comment_label_body_position_rotate.json':
+        'Whale Cranium and Mandible with Point Comment Annotation Oriented Toward Camera',
+      '9_commenting_annotations/whale_comment_point_polygon.json':
+        'Whale Cranium and Mandible with Point and 2D Shape Comment Annotations',
+      '10_content_state/whale_comment_scope_content_state.json':
+        'Whale Cranium and Mandible with Dynamic Commenting Annotations and Custom Per-Anno Views',
+    };
+
+    const selectEl = document.getElementById('select');
+    const viewerEl = document.getElementById('viewer');
+
+    const isLocalHost = location.host.includes('localhost') || location.host.includes('127.0.0.1');
+
+    const manifestBaseUrl = isLocalHost
+      ? 'http://localhost:8081/'
+      : 'https://raw.githubusercontent.com/IIIF/3d/refs/heads/main/manifests/';
+
+    const viewerBaseUrl = isLocalHost
+      ? 'http://localhost:4200/viewer/'
+      : 'https://kompakkt.de/viewer/';
+
+    console.log(isLocalHost, manifestBaseUrl, viewerBaseUrl);
+
+    const updateViewerUrl = manifest => {
+      const manifestUrl = `${manifestBaseUrl}${manifest}`;
+      const viewerUrl = `${viewerBaseUrl}?locale=en&standalone=true&manifest=${encodeURIComponent(manifestUrl)}`;
+
+      viewerEl.src = viewerUrl;
+    };
+
+    selectEl.addEventListener('change', () => {
+      updateViewerUrl(selectEl.value);
+    });
+
+    let prevCategory = null;
+    let currentCategoryGroup = null;
+
+    for (const [key, value] of Object.entries(manifests)) {
+      const categoryName = key
+        .split('/')[0]
+        .split('_')
+        .slice(1)
+        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(' ');
+
+      if (categoryName !== prevCategory) {
+        prevCategory = categoryName;
+        // Append category group
+        if (currentCategoryGroup) {
+          selectEl.append(currentCategoryGroup);
+        }
+        currentCategoryGroup = document.createElement('optgroup');
+        currentCategoryGroup.label = categoryName;
+      }
+
+      const manifestName = key
+        .split('/')[1]
+        .replace('.json', '')
+        .split('_')
+        .slice(1)
+        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(' ');
+
+      const option = document.createElement('option');
+      option.value = key;
+      option.textContent = value;
+      currentCategoryGroup.appendChild(option);
+    }
+
+    if (currentCategoryGroup) {
+      selectEl.append(currentCategoryGroup);
+    }
+
+    const firstOption = selectEl.querySelector('option');
+    firstOption.selected = true;
+    selectEl.value = firstOption.value;
+
+    updateViewerUrl(firstOption.value);
+  </script>
+</html>

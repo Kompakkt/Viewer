@@ -93,6 +93,12 @@ export class AnnotationService {
     });
 
     this.currentAnnotations$.subscribe(() => this.redrawMarker());
+
+    this.processing.standaloneAnnotations$.subscribe(arr => {
+      for (const annotation of arr) {
+        this.add(annotation);
+      }
+    });
   }
 
   get defaultAnnotations$() {
@@ -148,7 +154,7 @@ export class AnnotationService {
     const isFallback = await firstValueFrom(this.processing.fallbackEntityLoaded$);
     const isAnnotatingFeatured = await firstValueFrom(this.processing.isAnnotatingFeatured$);
     if (isAnnotatingFeatured) {
-      console.log("Anno feat");
+      console.log('Anno feat');
     }
     if (!entity) {
       throw new Error('Entity missing');

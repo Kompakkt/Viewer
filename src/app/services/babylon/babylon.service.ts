@@ -25,6 +25,8 @@ import {
   ISceneLoaderAsyncResult,
   AbstractMesh,
   WebGPUEngine,
+  AxesViewer,
+  CreateGround,
 } from '@babylonjs/core';
 import '@babylonjs/core/Debug/debugLayer';
 import '@babylonjs/inspector';
@@ -92,7 +94,7 @@ export class BabylonService {
   };
 
   public cameraManager = {
-    getActiveCamera: this.getActiveCamera,
+    getActiveCamera: () => this.getActiveCamera(),
     moveActiveCameraToPosition: (positionVector: Vector3) => {
       moveCameraToTarget(this.getActiveCamera(), this.scene, positionVector);
     },
@@ -155,10 +157,10 @@ export class BabylonService {
     color: RGBA;
     layer: Layer | undefined;
   } = {
-      url: 'assets/textures/backgrounds/darkgrey.jpg',
-      color: { r: 0, g: 0, b: 0, a: 0 },
-      layer: undefined,
-    };
+    url: 'assets/textures/backgrounds/darkgrey.jpg',
+    color: { r: 0, g: 0, b: 0, a: 0 },
+    layer: undefined,
+  };
 
   constructor() {
     this.canvas.id = 'renderCanvas';
@@ -207,9 +209,14 @@ export class BabylonService {
       this.scene.registerBeforeRender(renderVideo);
     });
 
+    const skybox = this.scene.meshes.find(m => m.name === 'BackgroundSkybox')!;
     interval(100).subscribe(() => {
       const camera = this.getActiveCamera();
       if (!camera) return;
+      // Make sure skybox is always big enough
+      skybox.scaling = new Vector3(camera.radius, camera.radius, camera.radius);
+
+      // Automatically adjust camera panning sensitivity
       camera.panningSensibility =
         1000 / (this.cameraManager.cameraSpeed * Math.min(Math.max(camera.radius, 1), 10));
       camera.wheelDeltaPercentage = this.cameraManager.cameraSpeed * 0.01;
@@ -224,14 +231,6 @@ export class BabylonService {
     (window as any)['enableInspector'] = () => this.enableInspector();
     (window as any)['disableInspector'] = () => this.disableInspector();
     (window as any)['scene'] = () => this.getScene();
-
-    setTimeout(() => {
-      this.enableInspector();
-
-      new AxesViewer(this.scene, 10, 2, undefined, undefined, undefined, 2);
-
-      MeshBuilder.CreateGround('ground', { width: 100, height: 100 }, this.scene);
-    }, 1000);
   }
 
   public enableInspector() {
@@ -291,6 +290,11 @@ export class BabylonService {
 
   public hideMesh(tag: string, visibility: boolean) {
     this.scene.getMeshesByTags(tag, mesh => (mesh.isVisible = visibility));
+  }
+
+  public hideBackgroundHelpers() {
+    const names = ['BackgroundPlane', 'BackgroundSkybox'];
+    this.scene.meshes.filter(m => names.includes(m.name)).forEach(m => (m.isVisible = false));
   }
 
   private clearScene() {
@@ -381,7 +385,7 @@ export class BabylonService {
   }
 
   public async addEntityToScene(entityUrl: string) {
-    console.debug("entity url: ", entityUrl);
+    console.debug('entity url: ', entityUrl);
     return this.loadEntity(false, entityUrl, 'entity', false);
   }
 
