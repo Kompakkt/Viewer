@@ -8,6 +8,7 @@ import {
   Color3,
   ExecuteCodeAction,
   GaussianSplattingMesh,
+  Matrix,
   Mesh,
   MeshBuilder,
   Nullable,
@@ -17,6 +18,7 @@ import {
   Tags,
   Vector3,
   VertexData,
+  Viewport,
 } from '@babylonjs/core';
 import {
   BehaviorSubject,
@@ -248,96 +250,117 @@ export class AnnotationService {
     const previewSphereMaterial = new StandardMaterial('previewSphereMaterial', scene);
     previewSphereMaterial.emissiveColor = Color3.Magenta();
     previewSphere.material = previewSphereMaterial;
-
-    const previewRay = MeshBuilder.CreateTube(
-      'annotation-preview-ray',
-      {
-        path: [new Vector3(0, 0, 0), new Vector3(0, 0, 1)],
-        radius: 0.01,
-        tessellation: 64,
-        updatable: true,
-      },
-      scene,
-    );
-    const rayMaterial = new StandardMaterial('rayMaterial', scene);
-    rayMaterial.wireframe = true;
-    previewRay.material = rayMaterial;
+    previewSphere.renderingGroupId = 2;
 
     const gsMesh = scene.getMeshByName('GaussianSplatting') as Nullable<GaussianSplattingMesh>;
-    if (!gsMesh) return;
+    if (!gsMesh?.material || !gsMesh?.splatsData) return;
     const gsMaterial = gsMesh.material;
 
-    // Position 3, Size 3, Color 4, Quaternion 4
-    const findClosestSplatPoint = (ray: Ray, maxDistance: number = 1) => {
-      if (!gsMesh) return undefined;
-      const data = gsMesh['_splatPositions'] as Float32Array;
+    // ArrayBuffer: postions (3 floats), size (3 floats), color (4 bytes), orientation quaternion (4 bytes)
+    const splatsData = gsMesh.splatsData;
 
-      let closestDistance = Number.MAX_VALUE;
-      let closestSplatIndex = -1;
-      let closestPoint: Vector3 | null = null;
+    const findClosestSplatPoint = (): Nullable<Vector3> => {
+      const { pointerX, pointerY } = scene;
+      const camera = this.babylon.getActiveCamera();
+      const engine = scene.getEngine();
 
-      // Iterate through all splat positions
-      for (let i = 0; i < data.length; i += 14) {
-        // Extract position of current splat
-        const splatPosition = new Vector3(data[i], data[i + 1], data[i + 2]);
+      if (!camera || !splatsData) return null;
 
-        // Calculate vector from ray origin to splat position
-        const v = splatPosition.subtract(ray.origin);
+      const screenWidth = engine.getRenderWidth();
+      const screenHeight = engine.getRenderHeight();
 
-        // Project v onto ray direction to find parameter t
-        const t = Vector3.Dot(v, ray.direction);
+      // Constants for splat data structure
+      const SIZEOF_FLOAT = 4;
+      const SIZEOF_BYTE = 1; // For clarity
 
-        // Calculate closest point on ray
-        const closestPointOnRay = ray.origin.add(ray.direction.scale(t));
+      // Stride calculation based on your comment:
+      // Position (3 floats), Size (3 floats), Color (4 bytes), Orientation (4 bytes)
+      const POSITION_OFFSET = 0;
+      const POSITION_COMPONENTS = 3;
 
-        // Calculate distance from splat to ray
-        const distance = Vector3.Distance(splatPosition, closestPointOnRay);
+      // If your splat data format is different, adjust these:
+      const SIZE_COMPONENTS = 3;
+      const COLOR_COMPONENTS_BYTE = 4;
+      const ORIENTATION_COMPONENTS_BYTE = 4;
 
-        // Only consider points within the maximum distance threshold
-        if (distance <= maxDistance) {
-          // Update if this is the closest splat so far
-          if (distance < closestDistance) {
-            closestDistance = distance;
-            closestSplatIndex = i;
-            closestPoint = splatPosition;
+      const STRIDE =
+        POSITION_COMPONENTS * SIZEOF_FLOAT +
+        SIZE_COMPONENTS * SIZEOF_FLOAT +
+        COLOR_COMPONENTS_BYTE * SIZEOF_BYTE +
+        ORIENTATION_COMPONENTS_BYTE * SIZEOF_BYTE; // Should be 32 based on your description
+
+      if (STRIDE <= 0 || splatsData.byteLength % STRIDE !== 0) {
+        console.error('Invalid STRIDE or splatsData length.', STRIDE, splatsData.byteLength);
+        return null;
+      }
+
+      const numSplats = splatsData.byteLength / STRIDE;
+      const dataView = new DataView(splatsData);
+
+      let closestSplatWorldPosition: Nullable<Vector3> = null;
+      let minScreenDistanceSq = Infinity;
+      let closestSplatDepth = Infinity;
+
+      const worldMatrix = gsMesh.getWorldMatrix();
+      const transformMatrix = scene.getTransformMatrix(); // View-Projection matrix
+      const viewport = new Viewport(0, 0, screenWidth, screenHeight);
+
+      // Define a maximum distance in screen pixels for a splat to be considered "close"
+      // Adjust this threshold as needed.
+      const MAX_PICKING_DISTANCE_SCREEN_SQ = 50 * 50; // e.g., 50 pixels radius
+
+      for (let i = 0; i < numSplats; ++i) {
+        const currentOffset = i * STRIDE;
+
+        // Read position (assuming Little Endian, common for .splat files)
+        const localX = dataView.getFloat32(currentOffset + POSITION_OFFSET, true);
+        const localY =
+          dataView.getFloat32(currentOffset + POSITION_OFFSET + SIZEOF_FLOAT, true) * -1;
+        const localZ = dataView.getFloat32(
+          currentOffset + POSITION_OFFSET + 2 * SIZEOF_FLOAT,
+          true,
+        );
+        const splatLocalPosition = new Vector3(localX, localY, localZ);
+
+        // Transform splat position from local mesh space to world space
+        const splatWorldPosition = Vector3.TransformCoordinates(splatLocalPosition, worldMatrix);
+
+        // Project world position to 2D screen coordinates
+        // Note: The first matrix argument to Vector3.Project is the world matrix of the object
+        // whose vertices (in local space) are being projected. Since splatWorldPosition is already
+        // in world space, we use Matrix.IdentityReadOnly.
+        const screenPosition = Vector3.Project(
+          splatWorldPosition,
+          Matrix.IdentityReadOnly, // Object's world matrix (already applied)
+          transformMatrix, // Combined ViewProjection matrix
+          viewport,
+        );
+
+        const dx = screenPosition.x - pointerX;
+        const dy = screenPosition.y - pointerY;
+        const distSq = dx * dx + dy * dy;
+
+        if (distSq < MAX_PICKING_DISTANCE_SCREEN_SQ) {
+          // If this splat is closer on screen OR
+          // if it's at a similar screen distance but closer to the camera (smaller depth value)
+          if (
+            distSq < minScreenDistanceSq ||
+            (Math.abs(distSq - minScreenDistanceSq) < 1e-5 && screenPosition.z < closestSplatDepth)
+          ) {
+            minScreenDistanceSq = distSq;
+            closestSplatWorldPosition = splatWorldPosition;
+            closestSplatDepth = screenPosition.z;
           }
         }
       }
-
-      // Return the result
-      if (closestSplatIndex !== -1) {
-        return {
-          position: closestPoint,
-          index: closestSplatIndex,
-          distance: closestDistance,
-        };
-      }
-
-      return undefined;
+      return closestSplatWorldPosition;
     };
 
-    interval(20).subscribe(event => {
-      const { pointerX, pointerY } = scene;
-      const camera = this.babylon.getActiveCamera();
-      const ray = scene.createPickingRay(pointerX, pointerY, null, camera);
-
-      const closestSplat = findClosestSplatPoint(ray);
-
-      if (closestSplat?.position) {
-        previewSphere.position = closestSplat.position;
-      }
-
-      const endpoint = ray.origin.add(ray.direction.scale(100));
-      MeshBuilder.CreateTube(
-        'annotation-preview-ray',
-        {
-          path: [ray.origin, endpoint],
-          radius: 0.01,
-          tessellation: 64,
-          instance: previewRay,
-        },
-        scene,
-      );
+    const canvas = this.babylon.getCanvas();
+    fromEvent<PointerEvent>(canvas, 'dblclick').subscribe(event => {
+      const closestSplat = findClosestSplatPoint();
+      console.log('closestSplat', closestSplat);
+      if (closestSplat) previewSphere.position = closestSplat;
     });
 
     this.setAnnotationMode(false);
