@@ -102,12 +102,10 @@ export const loadSplat = async (
   return ImportMeshAsync(rootUrl, scene, { onProgress }).then(result => {
     const gsMesh = result.meshes.at(0)! as GaussianSplattingMesh;
     gsMesh.isPickable = true;
-    const gsMaterial = gsMesh.material;
 
-    // Position 3, Size 3, Color 4, Quaternion 4
-    const data = gsMesh['_splatPositions'] as Float32Array;
+    // gsMesh.material!.wireframe = false;
 
-    console.log('loadSplat', gsMesh, gsMaterial);
+    console.log('loadSplat', gsMesh.splatsData);
 
     return result;
   });
