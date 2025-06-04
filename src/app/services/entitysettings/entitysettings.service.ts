@@ -3,19 +3,22 @@ import {
   Animation,
   Axis,
   Color3,
+  DirectionalLight,
+  HemisphericLight,
   Mesh,
   MeshBuilder,
+  PointLight,
   Quaternion,
+  SpotLight,
   StandardMaterial,
   Tags,
   Vector3,
 } from '@babylonjs/core';
-import { debounceTime, filter, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, debounceTime, filter, firstValueFrom } from 'rxjs';
 import { IColor, IEntitySettings } from 'src/common';
 import { minimalSettings } from '../../../assets/settings/settings';
 import { AnnotationService } from '../annotation/annotation.service';
 import { BabylonService } from '../babylon/babylon.service';
-import { LightService } from '../light/light.service';
 import { ProcessingService } from '../processing/processing.service';
 import {
   createBoundingBox,
@@ -23,6 +26,7 @@ import {
   createlocalAxes,
   createWorldAxis,
 } from './visualUIHelper';
+import { createLight } from 'src/app/helpers/light-helper';
 
 const isDegreeSpectrum = (value: number) => {
   return value >= 0 && value <= 360 ? value : value > 360 ? 360 : 0;
@@ -48,10 +52,11 @@ export class EntitySettingsService {
 
   private entitySettings: IEntitySettings = minimalSettings;
 
+  public areSettingsLoaded$ = new BehaviorSubject<boolean>(false);
+
   constructor(
     private babylon: BabylonService,
     private processing: ProcessingService,
-    private lights: LightService,
     private annotationService: AnnotationService,
   ) {
     this.processing.state$
@@ -64,7 +69,10 @@ export class EntitySettingsService {
         this.entitySettings = settings;
         requestAnimationFrame(() =>
           this.setUpSettings()
-            .then(() => console.log('Settings loaded'))
+            .then(() => {
+              console.log('Settings loaded');
+              this.areSettingsLoaded$.next(true);
+            })
             .catch((err: Error) => console.log('Settings not loaded', err.message)),
         );
       });
@@ -235,8 +243,6 @@ export class EntitySettingsService {
     this.loadCameraInititalPosition();
     this.loadBackgroundEffect();
     this.loadBackgroundColor();
-    this.loadPointLightPosition();
-    this.loadLightIntensityAllLights();
   }
 
   private async initialiseCamera() {
@@ -506,65 +512,9 @@ export class EntitySettingsService {
     if (!this.entitySettings) {
       throw new Error('Settings missing');
     }
-    const pointLight = this.lights.getLightByType('pointLight');
-    if (pointLight) {
-      const position = new Vector3(
-        pointLight.position.x,
-        pointLight.position.y,
-        pointLight.position.z,
-      );
-      this.lights.initialisePointLight(pointLight.intensity, position);
-    }
-    const hemisphericLightUp = this.lights.getLightByType('ambientlightUp');
-    if (hemisphericLightUp) {
-      this.lights.initialiseAmbientLight('up', hemisphericLightUp.intensity);
-    }
-    const hemisphericLightDown = this.lights.getLightByType('ambientlightDown');
-    if (hemisphericLightDown) {
-      this.lights.initialiseAmbientLight('down', hemisphericLightDown.intensity);
-    }
-  }
-
-  public loadLightIntensityAllLights() {
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    const ambientlightUp = this.lights.getLightByType('ambientlightUp');
-    if (ambientlightUp) {
-      this.lights.setLightIntensity('ambientlightUp', ambientlightUp.intensity);
-    }
-    const ambientlightDown = this.lights.getLightByType('ambientlightDown');
-    if (ambientlightDown) {
-      this.lights.setLightIntensity('ambientlightDown', ambientlightDown.intensity);
-    }
-    const pointLight = this.lights.getLightByType('pointLight');
-    if (pointLight) {
-      this.lights.setLightIntensity('pointLight', pointLight.intensity);
-    }
-  }
-
-  public loadLightIntensity(lightType: string) {
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    const light = this.lights.getLightByType(lightType);
-    if (light) {
-      this.lights.setLightIntensity(lightType, light.intensity);
-    }
-  }
-
-  public loadPointLightPosition() {
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    const pointLight = this.lights.getLightByType('pointLight');
-    if (pointLight) {
-      const position = new Vector3(
-        pointLight.position.x,
-        pointLight.position.y,
-        pointLight.position.z,
-      );
-      this.lights.setPointLightPosition(position);
+    const scene = this.babylon.getScene();
+    for (const light of this.entitySettings.lights) {
+      createLight(light, scene);
     }
   }
 }

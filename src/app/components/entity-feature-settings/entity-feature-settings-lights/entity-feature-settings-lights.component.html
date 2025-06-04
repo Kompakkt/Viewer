@@ -1,66 +1,77 @@
-<h2>{{ 'Ambient environment lights' | translate }}</h2>
+<h2>{{ 'Add a new light' | translate }}</h2>
 
-<k-slider
-  [label]="('Light intensity from above' | translate) + ': ' + getLightIntensity('ambientlightUp')"
-  [min]="0"
-  [max]="50"
-  [startingValue]="getLightIntensity('ambientlightUp')"
-  (valueChanged)="setLightIntensity($event, 'ambientlightUp')"
-  [showInfo]="true"
-  [showTooltip]="true"
-></k-slider>
-
-<k-slider
-  [label]="('Light intensity from below' | translate) + ': ' + getLightIntensity('ambientlightDown')"
-  [min]="0"
-  [max]="50"
-  [startingValue]="getLightIntensity('ambientlightDown')"
-  (valueChanged)="setLightIntensity($event, 'ambientlightDown')"
-  [showInfo]="true"
-  [showTooltip]="true"
-></k-slider>
-
-<h2>{{ 'Pointlight' | translate }}</h2>
-
-<k-slider
-  [label]="('Pointlight intensity' | translate) + ': ' + getLightIntensity('pointLight')"
-  [min]="0"
-  [max]="50"
-  [startingValue]="getLightIntensity('pointLight')"
-  (valueChanged)="setLightIntensity($event, 'pointLight')"
-  [showInfo]="true"
-  [showTooltip]="true"
-></k-slider>
-
-<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px">
-  <k-input
-    [label]="'X-axis' | translate"
-    [min]="0"
-    [max]="5"
-    type="number"
-    [startingValue]="pointLightX"
-    (valueChanged)="setPointlightPosition('x', $event.valueAsNumber)"
-  />
-
-  <k-input
-    [label]="'Y-axis' | translate"
-    [min]="0"
-    [max]="5"
-    type="number"
-    [startingValue]="pointLightY"
-    (valueChanged)="setPointlightPosition('y', $event.valueAsNumber)"
-  />
-
-  <k-input
-    [label]="'Z-axis' | translate"
-    [min]="0"
-    [max]="5"
-    type="number"
-    [startingValue]="pointLightZ"
-    (valueChanged)="setPointlightPosition('z', $event.valueAsNumber)"
-  />
+<div class="add-light-list">
+  <k-button full-width type="outlined-#fff" (click)="addLight('PointLight')">Point light</k-button>
+  <k-button full-width type="outlined-#fff" (click)="addLight('HemisphericLight')"
+    >Hemispheric light</k-button
+  >
+  <k-button full-width type="outlined-#fff" (click)="addLight('DirectionalLight')"
+    >Directional light</k-button
+  >
+  <k-button full-width type="outlined-#fff" (click)="addLight('SpotLight')">Spotlight</k-button>
 </div>
 
-<k-button (click)="resetLights()" type="outlined-primary">
-  {{ 'Reset lights' | translate }}
-</k-button>
+<h2>{{ 'Modify lights' | translate }}</h2>
+
+<div class="light-list">
+  @for (light of sceneLights(); track light; let first = $first) {
+    @if (first) {
+      <p>{{ 'Click a light to select and modify it' | translate }}</p>
+    }
+
+    <div
+      class="light"
+      (click)="selectLight(light)"
+      [class.selected]="selectedSceneLight()?.id === light.id"
+    >
+      <h2>
+        {{ light.type | splitClassName }}
+        <k-button icon-button color="transparent" (click)="removeLight(light)"
+          ><mat-icon>delete</mat-icon></k-button
+        >
+      </h2>
+
+      <k-labelled-checkbox
+        label="Enabled"
+        [startingValue]="light.light.isEnabled()"
+        (checkedChange)="light.light.setEnabled($event)"
+      />
+
+      <k-slider
+        [label]="('Intensity' | translate) + ': ' + light.light.intensity"
+        [min]="0"
+        [max]="10"
+        [startingValue]="light.light.intensity"
+        (valueChanged)="light.light.intensity = $event"
+        [showInfo]="true"
+        [showTooltip]="true"
+      />
+
+      <color-chrome
+        (onChange)="setLightColor(light, $event.color.rgb)"
+        [color]="light.light.diffuse | colorToRgba"
+        [disableAlpha]="true"
+      />
+
+      @switch (light.type) {
+        @case ('SpotLight') {
+          @if (light.light | isInstanceOf: SpotLight; as spotLight) {
+            <k-slider
+              [label]="
+                ('Angle' | translate) + ': ' + ((spotLight.angle * 180) / Math.PI).toFixed(1) + '°'
+              "
+              [min]="1"
+              [max]="360"
+              [startingValue]="(spotLight.angle * 180) / Math.PI"
+              (valueChanged)="spotLight.angle = ($event * Math.PI) / 180"
+              [showInfo]="true"
+              [showTooltip]="true"
+            />
+          }
+        }
+      }
+    </div>
+  } @empty {
+    <p>{{ 'No lights in scene. Add a light using the options above.' | translate }}</p>
+  }
+</div>
