@@ -147,13 +147,18 @@
 
     const isLocalHost = location.host.includes('localhost') || location.host.includes('127.0.0.1');
 
+    const rootPath = () => {
+      const path = location.origin + location.pathname;
+      return path.split('/').slice(0, -1).join('/');
+    })();
+
     const manifestBaseUrl = isLocalHost
       ? 'http://localhost:8081/'
-      : location.origin + '/demos/iiif-3d/manifests/';
+      : rootPath + '/demos/iiif-3d/manifests/';
 
     const viewerBaseUrl = isLocalHost
       ? 'http://localhost:4200/viewer/'
-      : location.origin + '/viewer/';
+      : rootPath + '/viewer/';
 
     console.log(isLocalHost, manifestBaseUrl, viewerBaseUrl);
 
