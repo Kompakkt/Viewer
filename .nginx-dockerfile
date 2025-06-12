@@ -1,0 +1,9 @@
+FROM ghcr.io/kompakkt/mono/bun-base-image:latest AS builder
+
+COPY . /app
+WORKDIR /app
+RUN bun install
+RUN bun run ng build --base-href ./ --configuration production
+
+FROM docker.io/nginx:stable-alpine
+COPY --from=builder /app/dist/viewer/browser /usr/share/nginx/html
