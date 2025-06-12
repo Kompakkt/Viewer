@@ -3,7 +3,24 @@ FROM ghcr.io/kompakkt/mono/bun-base-image:latest AS builder
 COPY . /app
 WORKDIR /app
 RUN bun install
-RUN bun run ng build --base-href ./ --configuration production
+RUN bun run ng build --base-href ./ --configuration production,docker
 
 FROM docker.io/nginx:stable-alpine
+
+RUN cat > /etc/nginx/conf.d/default.conf << 'EOF'
+server {
+    listen       80;
+    listen  [::]:80;
+    server_name  localhost;
+
+    keepalive_timeout  65;
+    sendfile on;
+
+    location / {
+        root /usr/share/nginx/html;
+        try_files $uri $uri/ /index.html;
+    }
+}
+EOF
+
 COPY --from=builder /app/dist/viewer/browser /usr/share/nginx/html
