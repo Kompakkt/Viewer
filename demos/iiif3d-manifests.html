@@ -147,9 +147,9 @@
 
     const isLocalHost = location.host.includes('localhost') || location.host.includes('127.0.0.1');
 
-    const rootPath = () => {
+    const rootPath = (() => {
       const path = location.origin + location.pathname;
-      return path.split('/').slice(0, -1).join('/');
+      return path.split('/').slice(0, -2).join('/');
     })();
 
     const manifestBaseUrl = isLocalHost
