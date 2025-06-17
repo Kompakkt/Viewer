@@ -1,6 +1,16 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatestWith,
+  filter,
+  firstValueFrom,
+  map,
+  Observable,
+  share,
+  switchMap,
+  tap,
+} from 'rxjs';
 import {
   areDocumentsEqual,
   isDocument,
@@ -13,6 +23,7 @@ import {
   isEntity,
   IStrippedUserData,
   IUserData,
+  Collection,
 } from 'src/common';
 import {
   AuthConcern,
@@ -20,6 +31,7 @@ import {
   LoginComponent,
 } from '../../components/dialogs/dialog-login/login.component';
 import { BackendService } from '../backend/backend.service';
+import { IUserDataWithoutData } from 'src/common/interfaces';
 
 const getWhitelistedPersons = (element: IEntity | ICompilation) => {
   return (
@@ -32,22 +44,19 @@ const getWhitelistedPersons = (element: IEntity | ICompilation) => {
   );
 };
 
-const isUserOwned = (
-  element: IEntity | ICompilation | null,
-  userdata: IUserData | undefined,
-  elementType: 'entity' | 'compilation',
+const isUserOwned = <T extends IEntity | ICompilation>(
+  element: T,
+  userdata: IUserData | IUserDataWithoutData,
+  array: T[],
 ) => {
-  if (!element || !userdata) return false;
-  const userElements = (userdata.data?.[elementType] ?? []).filter(isDocument);
-  if (userElements.some(other => areDocumentsEqual(other, element))) return true;
+  if (array.some(other => areDocumentsEqual(other, element))) return true;
   return element.creator?._id === userdata._id;
 };
 
 const isUserWhitelisted = (
-  element: IEntity | ICompilation | null,
-  userdata: IUserData | undefined,
+  element: IEntity | ICompilation,
+  userdata: IUserData | IUserDataWithoutData,
 ) => {
-  if (!element || !userdata) return false;
   const persons = getWhitelistedPersons(element);
   // This is according to the behaviour of the annotation access dialog in the repo
   // No persons with enabled whitelist = open access
@@ -58,30 +67,62 @@ const isUserWhitelisted = (
 
 export type LoginData = { username: string; password: string };
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class UserdataService {
-  public loginRequired$ = new BehaviorSubject(false);
-  public loginData$ = new BehaviorSubject<LoginData | undefined>(undefined);
-  public userData$ = new BehaviorSubject<IUserData | undefined>(undefined);
-  public isAuthenticated$ = this.userData$.pipe(map(userdata => !!userdata?._id));
+  #backend = inject(BackendService);
+  #dialog = inject(MatDialog);
 
-  constructor(
-    private backend: BackendService,
-    private dialog: MatDialog,
-  ) {}
+  loginRequired$ = new BehaviorSubject(false);
+  loginData$ = new BehaviorSubject<LoginData | undefined>(undefined);
+  userData$ = new BehaviorSubject<IUserDataWithoutData | undefined>(undefined);
+  isAuthenticated$ = this.userData$.pipe(map(userdata => !!userdata?._id));
 
-  public doesUserOwn(element?: IEntity | ICompilation) {
-    if (isEntity(element)) return isUserOwned(element, this.userData$.getValue(), 'entity');
-    if (isCompilation(element))
-      return isUserOwned(element, this.userData$.getValue(), 'compilation');
+  updateTrigger$ = new BehaviorSubject<
+    'all' | Collection.entity | Collection.compilation | Collection.annotation
+  >('all');
+
+  user$ = this.userData$.pipe(filter(user => !!user));
+
+  entities$: Observable<IEntity[]> = this.user$.pipe(
+    combineLatestWith(this.updateTrigger$),
+    filter(([_, trigger]) => trigger === 'all' || trigger === Collection.entity),
+    switchMap(() => this.#backend.getUserDataCollection(Collection.entity)),
+    share(),
+  );
+
+  compilations$: Observable<ICompilation[]> = this.user$.pipe(
+    combineLatestWith(this.updateTrigger$),
+    filter(([_, trigger]) => trigger === 'all' || trigger === Collection.compilation),
+    switchMap(() => this.#backend.getUserDataCollection(Collection.compilation)),
+    share(),
+  );
+
+  annotations$: Observable<IAnnotation[]> = this.user$.pipe(
+    combineLatestWith(this.updateTrigger$),
+    filter(([_, trigger]) => trigger === 'all' || trigger === Collection.annotation),
+    switchMap(() => this.#backend.getUserDataCollection(Collection.annotation)),
+    share(),
+  );
+
+  public async doesUserOwn(element?: IEntity | ICompilation) {
+    const userdata = await firstValueFrom(this.userData$);
+    if (!userdata) return false;
+    if (isEntity(element)) {
+      const entities = await firstValueFrom(this.entities$);
+      return isUserOwned(element, userdata, entities);
+    }
+    if (isCompilation(element)) {
+      const compilations = await firstValueFrom(this.compilations$);
+      return isUserOwned(element, userdata, compilations);
+    }
     return false;
   }
 
-  public isUserWhitelistedFor(element?: IEntity | ICompilation) {
-    if (isEntity(element)) return isUserWhitelisted(element, this.userData$.getValue());
-    if (isCompilation(element)) return isUserWhitelisted(element, this.userData$.getValue());
+  public async isUserWhitelistedFor(element?: IEntity | ICompilation) {
+    const userdata = await firstValueFrom(this.userData$);
+    if (!userdata) return false;
+    if (isEntity(element)) return isUserWhitelisted(element, userdata);
+    if (isCompilation(element)) return isUserWhitelisted(element, userdata);
     return false;
   }
 
@@ -90,7 +131,7 @@ export class UserdataService {
     const isAuthenticated = await firstValueFrom(this.isAuthenticated$);
     if (isAuthenticated) return true;
 
-    return this.backend
+    return this.#backend
       .isAuthorized()
       .then(result => {
         this.userData$.next(result);
@@ -111,7 +152,7 @@ export class UserdataService {
     const loginData = this.loginData$.getValue();
 
     if (loginData) {
-      return this.backend
+      return this.#backend
         .login(loginData.username, loginData.password)
         .then(result => {
           this.userData$.next(result);
@@ -124,7 +165,7 @@ export class UserdataService {
   }
 
   public async openLoginDialog(): Promise<boolean> {
-    const dialogRef = this.dialog.open<LoginComponent, AuthConcern, AuthResult>(LoginComponent, {
+    const dialogRef = this.#dialog.open<LoginComponent, AuthConcern, AuthResult>(LoginComponent, {
       width: '360px',
       data: 'login',
     });
@@ -138,7 +179,7 @@ export class UserdataService {
   }
 
   public logout() {
-    this.backend
+    this.#backend
       .logout()
       .then(() => {})
       .catch(err => console.error(err));
@@ -146,11 +187,12 @@ export class UserdataService {
     this.loginData$.next(undefined);
   }
 
-  public isAnnotationOwner(annotation: IAnnotation): boolean {
-    const userData = this.userData$.getValue();
-    const annotations = userData?.data?.annotation;
+  public async isAnnotationOwner(annotation: IAnnotation) {
+    const userdata = await firstValueFrom(this.userData$);
+    if (!userdata) return false;
+    const annotations = await firstValueFrom(this.annotations$);
 
-    if (annotation.creator._id === userData?._id) return true;
+    if (annotation.creator._id === userdata?._id) return true;
     return annotations?.some(other => isAnnotation(other) && other._id === annotation._id) ?? false;
   }
 }

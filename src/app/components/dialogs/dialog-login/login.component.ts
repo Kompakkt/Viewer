@@ -5,13 +5,14 @@ import { ButtonComponent, ButtonRowComponent, InputComponent } from 'komponents'
 import { IUserData } from 'src/common';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { BackendService } from '../../../services/backend/backend.service';
+import { IUserDataWithoutData } from 'src/common/interfaces';
 
 export type AuthConcern = 'login' | 'delete-annotation';
 
 export type AuthResult = {
   username: string;
   password: string;
-  userData: IUserData | undefined;
+  userData: IUserData | IUserDataWithoutData | undefined;
 };
 
 @Component({

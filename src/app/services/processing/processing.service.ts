@@ -10,6 +10,7 @@ import {
   filter,
   firstValueFrom,
   map,
+  switchMap,
 } from 'rxjs';
 import { IAnnotation, ICompilation, IEntity, IEntitySettings, isEntity } from 'src/common';
 import { environment } from 'src/environment';
@@ -127,10 +128,19 @@ export class ProcessingService {
     entity: this.entity$,
     compilation: this.compilation$,
   }).pipe(
-    map(({ entity, compilation }) => {
-      const ofEntity = this.userdata.doesUserOwn(entity);
-      const ofCompilation = this.userdata.doesUserOwn(compilation);
+    switchMap(async ({ entity, compilation }) => {
+      const ofEntity = await this.userdata.doesUserOwn(entity);
+      const ofCompilation = await this.userdata.doesUserOwn(compilation);
       return { ofEntity, ofCompilation };
+    }),
+  );
+
+  isUserWhitelistedForCompilation$ = combineLatest({
+    compilation: this.compilation$,
+  }).pipe(
+    switchMap(async ({ compilation }) => {
+      if (!compilation) return false;
+      return this.userdata.isUserWhitelistedFor(compilation);
     }),
   );
 
@@ -145,6 +155,7 @@ export class ProcessingService {
     mode: this.mode$,
     isAuthenticated: this.userdata.isAuthenticated$,
     isOwner: this.isOwner$,
+    isUserWhitelistedForCompilation: this.isUserWhitelistedForCompilation$,
   }).pipe(
     map(args => {
       const { entity, compilation } = args;
@@ -167,7 +178,7 @@ export class ProcessingService {
         if (!compilation) return false;
         if (compilation.whitelist.enabled) {
           if (!args.isAuthenticated) return false;
-          return this.userdata.isUserWhitelistedFor(compilation) || args.isOwner.ofCompilation;
+          return args.isUserWhitelistedForCompilation || args.isOwner.ofCompilation;
         } else {
           return args.isOwner.ofCompilation;
         }

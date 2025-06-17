@@ -1,7 +1,15 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-import { IAnnotation, ICompilation, IDigitalEntity, IEntity, IUserData } from 'src/common';
+import {
+  Collection,
+  IAnnotation,
+  ICompilation,
+  IDigitalEntity,
+  IEntity,
+  IUserData,
+} from 'src/common';
+import { IUserDataWithoutData, UserDataCollectionDocumentType } from 'src/common/interfaces';
 import { environment } from 'src/environment';
 
 @Injectable({
@@ -74,7 +82,7 @@ export class BackendService {
   }
 
   // Auth
-  public login(username: string, password: string): Promise<IUserData> {
+  public login(username: string, password: string): Promise<IUserDataWithoutData> {
     return this.post(`user-management/login`, { username, password });
   }
 
@@ -82,7 +90,7 @@ export class BackendService {
     return this.get(`user-management/logout`);
   }
 
-  public async isAuthorized(): Promise<IUserData> {
+  public async isAuthorized(): Promise<IUserDataWithoutData> {
     return this.get(`user-management/auth`);
   }
 
@@ -107,6 +115,14 @@ export class BackendService {
     return this.post(`utility/moveannotations/${identifierColl}`, {
       annotationArray,
     });
+  }
+
+  // API V2
+  public async getUserDataCollection<
+    C extends Collection,
+    T extends UserDataCollectionDocumentType<C>,
+  >(collection: C): Promise<T[]> {
+    return this.get(`api/v2/user-data/${collection}`);
   }
 
   /**
