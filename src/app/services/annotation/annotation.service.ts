@@ -5,7 +5,14 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ActionManager, ExecuteCodeAction, PickingInfo, Tags, Vector3 } from '@babylonjs/core';
 import { BehaviorSubject, ReplaySubject, combineLatest, firstValueFrom, fromEvent } from 'rxjs';
 import { distinct, filter, map, switchMap } from 'rxjs/operators';
-import { IAnnotation, IVector3, isAnnotation } from 'src/common';
+import {
+  Collection,
+  IAmbiguousVector3,
+  IAnnotation,
+  IVector3,
+  asVector3,
+  isAnnotation,
+} from 'src/common';
 import { annotationFallback, annotationLogo } from '../../../assets/annotations/annotations';
 import {
   AuthConcern,
@@ -32,15 +39,6 @@ const isCompilationAnnotation = (annotation: IAnnotation) =>
 
 const sortByRanking = (a: IAnnotation, b: IAnnotation): number =>
   +a.ranking === +b.ranking ? 0 : +a.ranking < +b.ranking ? -1 : 1;
-
-interface IAmbiguousVector extends IVector3 {
-  _x?: number;
-  _y?: number;
-  _z?: number;
-}
-
-const getVector = ({ x, y, z, _x, _y, _z }: IAmbiguousVector) =>
-  _x && _y && _z ? new Vector3(_x, _y, _z) : new Vector3(x, y, z);
 
 @Injectable({
   providedIn: 'root',
@@ -325,7 +323,7 @@ export class AnnotationService {
 
     console.log('newAnnotation', newAnnotation);
     const transformedAnnotation = await ExtenderTransformer.applyTransformations<IAnnotation>(
-      'annotation',
+      Collection.annotation,
       newAnnotation,
     );
     console.log('transformedAnnotation', transformedAnnotation);
@@ -477,12 +475,17 @@ export class AnnotationService {
 
   public drawMarker(newAnnotation: IAnnotation) {
     const { referencePoint, referenceNormal } = newAnnotation.target.selector;
-    const positionVector = getVector(referencePoint);
-    const normalVector = getVector(referenceNormal);
+    const positionVector = asVector3(referencePoint);
+    const normalVector = asVector3(referenceNormal);
 
     const scene = this.babylon.getScene();
     const id = newAnnotation._id.toString();
-    const marker = createMarker(scene, id, positionVector, normalVector);
+    const marker = createMarker(
+      scene,
+      id,
+      Vector3.FromArray(Object.values(positionVector)),
+      Vector3.FromArray(Object.values(normalVector)),
+    );
     marker.isPickable = true;
 
     // Parent markers to center to fix offset
@@ -507,12 +510,12 @@ export class AnnotationService {
     const perspective = selectedAnnotation.body.content.relatedPerspective;
     if (perspective !== undefined) {
       this.babylon.cameraManager.setCameraType('ArcRotateCamera');
+      const position = asVector3(perspective.position);
+      const target = asVector3(perspective.target);
       this.babylon.cameraManager.moveActiveCameraToPosition(
-        new Vector3(perspective.position.x, perspective.position.y, perspective.position.z),
+        Vector3.FromArray(Object.values(position)),
       );
-      this.babylon.cameraManager.setActiveCameraTarget(
-        new Vector3(perspective.target.x, perspective.target.y, perspective.target.z),
-      );
+      this.babylon.cameraManager.setActiveCameraTarget(Vector3.FromArray(Object.values(target)));
     }
     this.babylon.hideMesh(selectedAnnotation._id.toString(), true);
   }
