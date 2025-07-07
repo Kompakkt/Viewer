@@ -5,7 +5,14 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ActionManager, ExecuteCodeAction, PickingInfo, Tags, Vector3 } from '@babylonjs/core';
 import { BehaviorSubject, ReplaySubject, combineLatest, firstValueFrom, fromEvent } from 'rxjs';
 import { distinct, filter, map, switchMap } from 'rxjs/operators';
-import { IAnnotation, IVector3, IAmbiguousVector3, asVector3, isAnnotation } from 'src/common';
+import {
+  Collection,
+  IAmbiguousVector3,
+  IAnnotation,
+  IVector3,
+  asVector3,
+  isAnnotation,
+} from 'src/common';
 import { annotationFallback, annotationLogo } from '../../../assets/annotations/annotations';
 import {
   AuthConcern,
