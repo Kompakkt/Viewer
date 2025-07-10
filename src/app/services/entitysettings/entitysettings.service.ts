@@ -470,12 +470,7 @@ export class EntitySettingsService {
     if (!this.entitySettings) {
       throw new Error('Settings missing');
     }
-    const camera = Array.isArray(this.entitySettings.cameraPositionInitial)
-      ? (this.entitySettings.cameraPositionInitial as any[]).find(
-          obj => obj.cameraType === 'arcRotateCam',
-        )
-      : this.entitySettings.cameraPositionInitial;
-
+    const camera = this.entitySettings.cameraPositionInitial;
     const position = new Vector3(camera.position.x, camera.position.y, camera.position.z);
     const target = new Vector3(camera.target.x, camera.target.y, camera.target.z);
     this.babylon.cameraManager.cameraDefaults$.next({ position, target });
