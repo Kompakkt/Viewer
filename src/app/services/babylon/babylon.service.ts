@@ -5,6 +5,7 @@ import {
   ViewContainerRef,
   createComponent,
   inject,
+  signal,
 } from '@angular/core';
 import {
   ArcRotateCamera,
@@ -160,6 +161,8 @@ export class BabylonService {
     layer: undefined,
   };
 
+  isTransparent = signal(!!new URLSearchParams(location.search).get('transparent'));
+
   constructor() {
     this.canvas.id = 'renderCanvas';
     this.engine = new Engine(this.canvas, true, {
@@ -169,7 +172,14 @@ export class BabylonService {
     });
 
     this.scene = new Scene(this.engine);
-    this.scene.createDefaultEnvironment();
+    this.scene.createDefaultEnvironment(
+      this.isTransparent()
+        ? {
+            createGround: false,
+            createSkybox: false,
+          }
+        : {},
+    );
     this.scene.environmentIntensity = 1;
 
     // Add default camera
@@ -264,7 +274,7 @@ export class BabylonService {
 
   public setBackgroundImage(setBackground: boolean): void {
     this.background.layer?.dispose();
-    if (setBackground) {
+    if (setBackground && !this.isTransparent()) {
       const layer = new Layer('background', this.background.url, this.scene, true);
       layer.alphaBlendingMode = Engine.ALPHA_ADD;
       layer.isBackground = true;
@@ -274,7 +284,9 @@ export class BabylonService {
 
   public setBackgroundColor(color: RGBA): void {
     this.background.color = color;
-    this.scene.clearColor = new Color4(color.r / 255, color.g / 255, color.b / 255, color.a);
+    this.scene.clearColor = this.isTransparent()
+      ? new Color4(0, 0, 0, 0)
+      : new Color4(color.r / 255, color.g / 255, color.b / 255, color.a);
   }
 
   public getColor(): any {

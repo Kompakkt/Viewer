@@ -55,6 +55,7 @@ interface IQueryParams {
   annotations?: string;
   resource?: string;
   minimal?: string;
+  transparent?: string;
 }
 
 type Mode = '' | 'upload' | 'explore' | 'edit' | 'annotation' | 'open';
@@ -296,6 +297,8 @@ export class ProcessingService {
     // check if standalone and exit early to init standalone mode
     const isStandalone = !!entries['standalone'];
     if (isStandalone) return this.loadStandaloneEntity(entries);
+
+    if (entries.transparent) this.babylon.isTransparent.set(true);
 
     // loading         // modes
     // default        '', explore, annotation, open
