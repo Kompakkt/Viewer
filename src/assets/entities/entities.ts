@@ -11,14 +11,6 @@ export const defaultEntity: IEntity = {
   ...baseEntity(),
   _id: 'default',
   name: 'Cube',
-  files: [
-    {
-      file_name: 'kompakkt.glb',
-      file_link: 'assets/models/kompakkt.glb',
-      file_size: 0,
-      file_format: '.glb',
-    },
-  ],
   annotations: {},
   relatedDigitalEntity: { _id: 'default_entity' },
   creator: {
@@ -27,12 +19,6 @@ export const defaultEntity: IEntity = {
     fullname: 'kompakkt',
   },
   mediaType: 'entity',
-  processed: {
-    low: 'assets/models/kompakkt.glb',
-    medium: 'assets/models/kompakkt.glb',
-    high: 'assets/models/kompakkt.glb',
-    raw: 'assets/models/kompakkt.glb',
-  },
   settings: settingsKompakktLogo,
 };
 
