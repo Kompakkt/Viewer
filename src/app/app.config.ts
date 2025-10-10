@@ -6,7 +6,7 @@ import {
 } from '@angular/core';
 
 import { DragDropModule } from '@angular/cdk/drag-drop';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -22,6 +22,7 @@ import { ColorChromeModule } from 'ngx-color/chrome';
 import { TranslatePipe } from './pipes/translate.pipe';
 import { TranslateService } from './services/translate/translate.service';
 import { pluginProviders } from './app.plugin';
+import { jwtInterceptor } from './interceptors/jwt-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -48,7 +49,7 @@ export const appConfig: ApplicationConfig = {
     }),
     provideRouter([]),
     provideAnimations(),
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(withInterceptors([jwtInterceptor])),
     pluginProviders,
   ],
 };
