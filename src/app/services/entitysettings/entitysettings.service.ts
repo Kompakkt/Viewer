@@ -11,7 +11,7 @@ import {
   Vector3,
 } from '@babylonjs/core';
 import { debounceTime, filter, firstValueFrom } from 'rxjs';
-import { IColor, IEntitySettings } from 'src/common';
+import { IColor, IEntitySettings, IPosition } from 'src/common';
 import { minimalSettings } from '../../../assets/settings/settings';
 import { AnnotationService } from '../annotation/annotation.service';
 import { BabylonService } from '../babylon/babylon.service';
@@ -26,6 +26,15 @@ import {
 
 const isDegreeSpectrum = (value: number) => {
   return value >= 0 && value <= 360 ? value : value > 360 ? 360 : 0;
+};
+
+// Some models have uniform scaling, others non-uniform scaling
+const getScaleVector = (scale: number | IPosition) => {
+  if (typeof scale === 'number') {
+    return new Vector3(scale, scale, scale);
+  } else {
+    return new Vector3(scale.x, scale.y, scale.z);
+  }
 };
 
 @Injectable({
@@ -247,7 +256,7 @@ export class EntitySettingsService {
     const mediaType = await firstValueFrom(this.processing.mediaType$);
     const isInUpload = await firstValueFrom(this.processing.isInUpload$);
     const isDefault = await firstValueFrom(this.processing.defaultEntityLoaded$);
-    const scale = this.entitySettings.scale;
+    const scale = getScaleVector(this.entitySettings.scale);
     const isModel = mediaType === 'model' || mediaType === 'entity';
     const isSplat = mediaType === 'splat';
 
@@ -264,9 +273,9 @@ export class EntitySettingsService {
       diagonalLength = bi.diagonalLength;
     } else {
       diagonalLength = Math.sqrt(
-        this.initialSize.x * scale * (this.initialSize.x * scale) +
-          this.initialSize.y * scale * (this.initialSize.y * scale) +
-          this.initialSize.z * scale * (this.initialSize.z * scale),
+        this.initialSize.x * scale.x * (this.initialSize.x * scale.x) +
+          this.initialSize.y * scale.y * (this.initialSize.y * scale.y) +
+          this.initialSize.z * scale.z * (this.initialSize.z * scale.z),
       );
     }
     const max = !isDefault ? (isInUpload && isModel ? diagonalLength * 2.5 : diagonalLength) : 87.5;
@@ -407,12 +416,12 @@ export class EntitySettingsService {
     if (!this.entitySettings) {
       throw new Error('Settings missing');
     }
-    const factor = this.entitySettings.scale;
-    this.center.scaling = new Vector3(factor, factor, factor);
+    const scale = getScaleVector(this.entitySettings.scale);
+    this.center.scaling = new Vector3(scale.x, scale.y, scale.z);
 
-    this.processing.entityHeight = (this.initialSize.y * factor).toFixed(2);
-    this.processing.entityWidth = (this.initialSize.x * factor).toFixed(2);
-    this.processing.entityDepth = (this.initialSize.z * factor).toFixed(2);
+    this.processing.entityHeight = (this.initialSize.y * scale.y).toFixed(2);
+    this.processing.entityWidth = (this.initialSize.x * scale.x).toFixed(2);
+    this.processing.entityDepth = (this.initialSize.z * scale.z).toFixed(2);
   }
 
   public async createVisualUIMeshSettingsHelper() {
