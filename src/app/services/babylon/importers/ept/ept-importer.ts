@@ -3,38 +3,21 @@ import {
   ArcRotateCamera,
   AssetContainer,
   Color3,
-  Color4,
-  Effect,
   Engine,
-  FreeCamera,
   Mesh,
   MeshBuilder,
-  PostProcess,
-  RenderTargetTexture,
   Scene,
-  ShaderMaterial,
-  Stage,
   StandardMaterial,
-  Tags,
   TransformNode,
   Vector3,
-  VertexBuffer,
-  VertexData,
-} from '@babylonjs/core';
-import {
   ISceneLoaderAsyncResult,
   ISceneLoaderPluginAsync,
   ISceneLoaderProgressEvent,
-  SceneLoader,
-} from '@babylonjs/core/Loading/sceneLoader';
-import { Copc, Getter, Hierarchy } from 'copc';
-import { BehaviorSubject, delayWhen, interval } from 'rxjs';
-import { createLazPerf } from 'laz-perf';
-import { createGetter } from '../copc/copc-getter';
-import { parseHeader } from './las-helper';
-import { parse } from 'lazts';
-import WorkerPool from './worker-pool';
+  VertexData,
+  RegisterSceneLoaderPlugin,
+} from '@babylonjs/core';
 import { getInstance } from './laz-perf';
+import WorkerPool from './worker-pool';
 
 type Nodes = Record<string, number>;
 
@@ -391,7 +374,5 @@ export class EptImporter implements ISceneLoaderPluginAsync {
   }
 }
 
-if (SceneLoader) {
-  console.log('Registering EptImporter');
-  SceneLoader.RegisterPlugin(new EptImporter());
-}
+console.log('Registering EptImporter');
+RegisterSceneLoaderPlugin(new EptImporter());
