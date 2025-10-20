@@ -81,6 +81,16 @@ export class BackendService {
     return this.post(`api/v1/post/push/annotation`, annotation);
   }
 
+  public generateVideoPreview(
+    identifier: string,
+    screenshots: string[],
+  ): Promise<{ status: 'OK'; videoUrl: string } | undefined> {
+    return this.post(`utility/generate-entity-video-preview`, {
+      entityId: identifier,
+      screenshots,
+    });
+  }
+
   // Auth
   public login(username: string, password: string): Promise<IUserDataWithoutData> {
     return this.post(`user-management/login`, { username, password });

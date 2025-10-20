@@ -3,33 +3,22 @@ import {
   ArcRotateCamera,
   AssetContainer,
   Color3,
-  Color4,
-  Effect,
-  Engine,
-  FreeCamera,
   Mesh,
   MeshBuilder,
-  PostProcess,
-  RenderTargetTexture,
   Scene,
-  ShaderMaterial,
   StandardMaterial,
   TransformNode,
   Vector3,
-  VertexBuffer,
   VertexData,
-} from '@babylonjs/core';
-import {
   ISceneLoaderAsyncResult,
   ISceneLoaderPluginAsync,
   ISceneLoaderProgressEvent,
-  SceneLoader,
-} from '@babylonjs/core/Loading/sceneLoader';
-import { Copc, Getter, Hierarchy } from 'copc';
-import { createGetter } from './copc-getter';
-import WorkerPool from './worker-pool';
-import { BehaviorSubject, delayWhen, interval } from 'rxjs';
+  RegisterSceneLoaderPlugin,
+} from '@babylonjs/core';
+import { Copc, Hierarchy } from 'copc';
+import { BehaviorSubject } from 'rxjs';
 import { prepareCopcShaderMaterial } from './copc-materials';
+import WorkerPool from './worker-pool';
 
 const createMeshFadeAnimation = (mesh: Mesh, scene: Scene) => {
   const animation = new Animation(
@@ -356,7 +345,5 @@ export class CopcImporter implements ISceneLoaderPluginAsync {
   }
 }
 
-if (SceneLoader) {
-  console.log('Registering CopcImporter');
-  SceneLoader.RegisterPlugin(new CopcImporter());
-}
+console.log('Registering CopcImporter');
+RegisterSceneLoaderPlugin(new CopcImporter());

@@ -33,3 +33,119 @@ k-button + k-button {
   height: 140px;
   object-fit: scale-down;
 }
+
+div.video-preview-generation-overlay {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 1);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+
+  transform-origin: center;
+  opacity: 0;
+  transition:
+    opacity 0.3s ease-in-out,
+    background-color 0.5s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100000;
+
+  --gap: 8px;
+
+  div.centered-content {
+    width: 480px;
+    padding: 32px;
+    padding-bottom: 48px;
+    background-color: var(--color-bg-transparent);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--gap);
+    filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.5));
+  }
+
+  h2 {
+    font-size: var(--font-size-large);
+  }
+
+  div.video-container {
+    display: flex;
+    border-radius: 8px;
+    width: 480px;
+    height: 300px;
+    overflow: hidden;
+    margin: calc(2 * var(--gap)) auto;
+    background-color: black;
+
+    video.video-preview {
+      display: block;
+      width: 480px;
+      height: 300px;
+      object-fit: contain;
+      mix-blend-mode: difference;
+
+      animation: previewVideoFadeIn 0.5s ease-in-out 1 both;
+    }
+  }
+
+  div.stack {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    align-items: center;
+    > * {
+      grid-column: 1;
+      grid-row: 1;
+      margin: 0;
+    }
+  }
+
+  div.progress-container {
+    --width: 0;
+    --bg-color: var(--color-bg-solid);
+    width: 480px;
+    height: 12px;
+    border-radius: 16px;
+    background-color: var(--bg-color);
+    overflow: hidden;
+    transition:
+      opacity 0.3s ease-in-out,
+      background-color 0.3s ease-in-out;
+
+    div.progress-bar {
+      height: 100%;
+      width: 100%;
+      background-color: var(--color-primary);
+      transition: transform 0.3s ease-in-out;
+      transform-origin: left;
+      transform: scaleX(var(--width));
+    }
+  }
+
+  &.visible {
+    pointer-events: auto;
+    scale: 1;
+    opacity: 1;
+  }
+
+  &.dimmed-bg {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+}
+
+@keyframes previewVideoFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

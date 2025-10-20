@@ -1,4 +1,4 @@
-import { Component, viewChild, inject } from '@angular/core';
+import { Component, viewChild, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { saveAs } from 'file-saver';
 import { combineLatest, firstValueFrom } from 'rxjs';
@@ -26,6 +26,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { DialogMeshsettingsComponent } from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
 import { EntityFeatureSettingsLightsComponent } from './entity-feature-settings-lights/entity-feature-settings-lights.component';
 import { EntityFeatureSettingsMeshComponent } from './entity-feature-settings-mesh/entity-feature-settings-mesh.component';
+import { Color4, Tools } from '@babylonjs/core';
 
 @Component({
   selector: 'app-entity-feature-settings',
@@ -56,6 +57,15 @@ export class EntityFeatureSettingsComponent {
   private postMessage = inject(PostMessageService);
 
   stepper = viewChild<WizardComponent>('stepper');
+
+  videoPreviewGenerationState = signal<undefined | { current: number; total: number }>(undefined);
+  videoPreviewUrl = signal<string | undefined>(undefined);
+  videoGenerationSuccess = signal<{ value: boolean } | undefined>(undefined);
+
+  currentBackgroundColor$ = this.processing.settings$.pipe(
+    map(settings => settings.localSettings.background.color),
+    map(color => `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`),
+  );
 
   // used during upload while setting initial settings
   public backgroundToggle = false;
@@ -97,14 +107,85 @@ export class EntityFeatureSettingsComponent {
     ),
   );
 
-  public setInitialPerspectivePreview() {
-    this.setPreview();
+  public async setInitialPerspectivePreview() {
+    this.videoPreviewGenerationState.set({ current: 0, total: 1 });
+    // wait for progress overlay
+    await new Promise(resolve => setTimeout(resolve, 300));
+    await this.setPreview();
+    await this.generatePreviewVideoScreenshots();
     this.setViewAsInitialView();
+  }
+
+  private async generatePreviewVideoScreenshots() {
+    const entity = await firstValueFrom(this.entity$);
+    if (!entity) return;
+
+    const degreeRange = 180;
+    const maxDegree = degreeRange / 2;
+    const minDegree = -1 * maxDegree;
+    const degreeSteps = degreeRange / 18; // 18 steps per preview video, total 19 frames with first frame
+    const angles = [0];
+    for (let degrees = maxDegree; degrees >= minDegree; degrees -= degreeSteps) {
+      angles.push(degrees);
+    }
+
+    this.videoPreviewGenerationState.set({ current: 0, total: angles.length });
+    const camera = this.babylon.getActiveCamera();
+    const originalAlpha = camera.alpha;
+
+    const rotateCameraToAngle = (angleDegrees: number) => {
+      const angleRadians = Tools.ToRadians(angleDegrees);
+      camera.alpha = originalAlpha + angleRadians;
+    };
+
+    const scene = this.babylon.getScene();
+    // const clearColor = scene.clearColor;
+    // scene.clearColor = new Color4(0, 0, 0, 0);
+
+    const screenshots: string[] = [];
+    console.time('screenshots');
+    const rotationReady = () =>
+      new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+
+    for (let i = 0; i < angles.length; i++) {
+      this.videoPreviewGenerationState.update(state => ({
+        total: state?.total || angles.length,
+        current: i + 1,
+      }));
+      const angle = angles[i];
+      rotateCameraToAngle(angle);
+      await rotationReady();
+      const result = await Tools.CreateScreenshotUsingRenderTargetAsync(
+        this.babylon.getEngine(),
+        camera,
+        { width: 480, height: 300 }, // 16:10
+      );
+      screenshots.push(result);
+    }
+    console.timeEnd('screenshots');
+    // scene.clearColor = clearColor;
+    console.log('Screenshots captured:', screenshots.length, 'Angles', angles);
+
+    camera.alpha = originalAlpha;
+
+    const videoGenerationSuccess = await this.backend
+      .generateVideoPreview(entity._id.toString(), screenshots)
+      .then(result => {
+        if (result?.videoUrl) {
+          this.videoPreviewUrl.set(result.videoUrl);
+        }
+        return true;
+      })
+      .catch(error => {
+        console.error('Error generating video preview:', error);
+        return false;
+      });
+    this.videoGenerationSuccess.set({ value: videoGenerationSuccess });
   }
 
   private async setPreview() {
     const { localSettings } = await firstValueFrom(this.processing.settings$);
-    this.babylon
+    return this.babylon
       .createPreviewScreenshot()
       .then(screenshot => {
         localSettings.preview = screenshot;
@@ -122,7 +203,7 @@ export class EntityFeatureSettingsComponent {
       position,
       target,
     };
-    this.entitySettings.loadCameraInititalPosition();
+    return this.entitySettings.loadCameraInititalPosition();
   }
 
   public async setBackgroundColor(color: IColor) {
@@ -190,6 +271,31 @@ export class EntityFeatureSettingsComponent {
     this.setBackgroundEffect(true);
   }
 
+  public updateVideoPreview(videoEl: HTMLVideoElement, event: MouseEvent) {
+    const { width } = videoEl.getBoundingClientRect();
+    const { layerX } = event;
+
+    // We need to offset the effect by 1 frame. The content has 19 frames, so we need to calculate the duration of a single frame, to offset by
+    const frameDuration = videoEl.duration / 19;
+    const ratio = layerX / width;
+
+    // Clamp between after first frame and rest of video
+    videoEl.currentTime = Math.min(
+      Math.max(ratio * videoEl.duration, frameDuration),
+      videoEl.duration,
+    );
+  }
+
+  public resetVideoPreview(videoEl: HTMLVideoElement) {
+    videoEl.currentTime = 0;
+  }
+
+  public closeVideoPreviewOverlay() {
+    this.videoPreviewGenerationState.set(undefined);
+    this.videoPreviewUrl.set(undefined);
+    this.videoGenerationSuccess.set(undefined);
+  }
+
   // _______Only used during Upload ________
 
   // ___________ Stepper for initial Setting during upload ___________
@@ -204,8 +310,8 @@ export class EntityFeatureSettingsComponent {
     this.stepper()?.nextStep();
   }
 
-  public setPerspectiveStep() {
-    this.setInitialPerspectivePreview();
+  public async setPerspectiveStep() {
+    await this.setInitialPerspectivePreview();
     this.stepper()?.nextStep();
   }
 }
