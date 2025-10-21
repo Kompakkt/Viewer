@@ -74,11 +74,12 @@ export class TranslateService {
     const supportedLanguages = Object.keys(this.supportedLanguages);
 
     const queryLanguage = new URLSearchParams(location.search).get('locale');
-    const navigatorLanguage = window.navigator.language.split('-').at(0);
+    // Remove navigator language detection for now, until translations are more mature
+    // const navigatorLanguage = window.navigator.language.split('-').at(0);
 
     // Find the first supported language or fallback to English
     const supportedLanguage =
-      [requestedLanguage, queryLanguage, navigatorLanguage].find(
+      [requestedLanguage, queryLanguage].find(
         language => language && supportedLanguages.includes(language),
       ) ?? 'en';
     return supportedLanguage;
