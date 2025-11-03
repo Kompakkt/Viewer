@@ -633,7 +633,7 @@ export class ProcessingService {
   public async loadEntity(newEntity: IEntity, overrideUrl?: string) {
     const mode = this.mode$.getValue();
     const baseURL = overrideUrl ?? environment.server_url;
-    if (this.loadingScreen.isLoading || !newEntity.processed || !newEntity.mediaType) {
+    if (this.loadingScreen.isLoading() || !newEntity.processed || !newEntity.mediaType) {
       return;
     }
 

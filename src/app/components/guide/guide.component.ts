@@ -1,33 +1,45 @@
-import { AfterViewInit, Component, HostBinding } from '@angular/core';
-import { fromEvent } from 'rxjs';
-import { LoadingscreenhandlerService } from 'src/app/services/babylon/loadingscreen';
+import { Component, effect, inject, signal } from '@angular/core';
+import { combineLatest, first, fromEvent, merge, zip } from 'rxjs';
+import { LoadingScreenService } from 'src/app/services/babylon/loadingscreen';
 
 @Component({
   selector: 'app-guide',
   templateUrl: './guide.component.html',
   styleUrls: ['./guide.component.scss'],
+  standalone: true,
+  host: {
+    '[class.visible]': 'isVisible()',
+  },
 })
-export class GuideComponent implements AfterViewInit {
-  @HostBinding('class.visible')
-  get visible() {
-    return this.isVisible;
+export class GuideComponent {
+  isVisible = signal(false);
+  #loadingScreen = inject(LoadingScreenService);
+
+  constructor() {
+    effect(() => {
+      const isLoading = this.#loadingScreen.isLoading();
+      if (isLoading) return;
+      this.#showGuide();
+    });
   }
 
-  private isVisible = false;
+  #showGuide() {
+    if (this.isVisible()) return;
 
-  constructor(private loadingScreenHandler: LoadingscreenhandlerService) {}
-
-  ngAfterViewInit(): void {
-    this.loadingScreenHandler.isLoading$.subscribe(isLoading => {
-      if (isLoading) return;
-
-      setTimeout(() => {
-        this.isVisible = true;
-      }, 1_000);
-    });
-
-    fromEvent(document, 'click').subscribe(() => {
-      this.isVisible = false;
-    });
+    console.log('GuideComponent: Loading complete, showing guide in 1 second...');
+    setTimeout(() => {
+      this.isVisible.set(true);
+      merge(
+        fromEvent(document, 'click'),
+        fromEvent(document, 'tap'),
+        fromEvent(document, 'keydown'),
+        fromEvent(document, 'touchstart'),
+        fromEvent(document, 'mousedown'),
+      )
+        .pipe(first())
+        .subscribe(() => {
+          this.isVisible.set(false);
+        });
+    }, 0);
   }
 }
