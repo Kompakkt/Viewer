@@ -3,22 +3,24 @@ import {
   ArcRotateCamera,
   AssetContainer,
   Color3,
+  Engine,
+  ISceneLoaderAsyncResult,
+  ISceneLoaderPluginAsync,
+  ISceneLoaderProgressEvent,
   Mesh,
   MeshBuilder,
+  RegisterSceneLoaderPlugin,
   Scene,
   StandardMaterial,
   TransformNode,
   Vector3,
   VertexData,
-  ISceneLoaderAsyncResult,
-  ISceneLoaderPluginAsync,
-  ISceneLoaderProgressEvent,
-  RegisterSceneLoaderPlugin,
 } from '@babylonjs/core';
-import { Copc, Hierarchy } from 'copc';
+import { Copc } from 'copc';
 import { BehaviorSubject } from 'rxjs';
 import { prepareCopcShaderMaterial } from './copc-materials';
-import WorkerPool from './worker-pool';
+import { createCOPCWorkerPool } from './worker-pool';
+import { PointCloudImporter } from '../common/point-cloud-importer';
 
 const createMeshFadeAnimation = (mesh: Mesh, scene: Scene) => {
   const animation = new Animation(
@@ -48,73 +50,73 @@ export class CopcImporter implements ISceneLoaderPluginAsync {
   public readonly name = 'CopcImporter';
 
   public readonly extensions = {
-    '.laz': { isBinary: false },
-    '.copc': { isBinary: false },
-    '.copc.laz': { isBinary: false },
+    '.laz': { isBinary: true },
+    '.copc': { isBinary: true },
+    '.copc.laz': { isBinary: true },
   };
 
-  private workerPool: WorkerPool;
-
-  public static readonly stats: Record<
-    string,
-    {
-      pointsLoaded: number;
-      totalPoints: number;
-    }
-  > = {};
-
-  public static readonly maxNodeDepth = (() => {
-    const cores = navigator.hardwareConcurrency || 4;
-    if (cores <= 4) return 4;
-    if (cores <= 12) return 6;
-    if (cores <= 24) return 8;
-    return Infinity;
-  })();
-
-  public static readonly loadingNodes$ = new BehaviorSubject<string[]>([]);
-
-  public static startTime = -1;
-
-  constructor() {
-    this.workerPool = new WorkerPool(
-      Array.from(
-        { length: 1 },
-        () =>
-          new Worker(new URL('./copc.worker.ts', import.meta.url), {
-            type: 'module',
-          }),
-      ),
-    );
-  }
+  private workerPool = createCOPCWorkerPool(
+    Array.from(
+      { length: 1 },
+      () =>
+        new Worker(new URL('./copc.worker.ts', import.meta.url), {
+          type: 'module',
+        }),
+    ),
+  );
 
   public async importMeshAsync(
     meshesNames: any,
     scene: Scene,
-    data: string,
+    data: ArrayBuffer,
     rootUrl: string,
     onProgress?: (event: ISceneLoaderProgressEvent) => void,
     fileName?: string,
   ): Promise<ISceneLoaderAsyncResult> {
-    const { copc, nodes, pages, fileQuery } = JSON.parse(data) as {
-      copc: Copc;
-      nodes: Hierarchy.Node.Map;
-      pages: Hierarchy.Page.Map;
-      fileQuery: string;
-    };
+    const filename = (() => {
+      let url = rootUrl + fileName;
+      return url.startsWith('/') ? new URL(url, window.location.origin).toString() : url;
+    })();
+    const copc = await Copc.create(filename);
+    const { nodes, pages } = await Copc.loadHierarchyPage(filename, copc.info.rootHierarchyPage);
     console.log(copc, nodes, pages);
 
-    const rootNode = new TransformNode('root', scene);
+    PointCloudImporter.maxLOD = Math.max(...Object.keys(nodes).map(key => +key[0]));
+    PointCloudImporter.totalPoints = Object.values(nodes).reduce(
+      (acc, node) => acc + (node?.pointCount ?? 0),
+      0,
+    );
+    PointCloudImporter.pointsPerLevel = Object.entries(nodes).reduce(
+      (acc, [key, node]) => {
+        const level = +key[0];
+        acc[level] += node?.pointCount ?? 0;
+        return acc;
+      },
+      Array.from({ length: PointCloudImporter.maxLOD + 1 }, () => 0),
+    );
 
-    const pointMat = prepareCopcShaderMaterial(scene, copc);
+    const rootNodeMesh = new Mesh('root', scene);
 
+    // const pointMat = prepareCopcShaderMaterial(scene, copc);
+    const pointMat = new StandardMaterial(`point-mat`, scene);
+    pointMat.diffuseColor = new Color3(1, 1, 1);
+    pointMat.emissiveColor = new Color3(1, 1, 1);
+    pointMat.disableLighting = true;
+    pointMat.pointsCloud = true;
+    pointMat.pointSize = 1.5;
+    pointMat.alphaMode = Engine.ALPHA_COMBINE;
+    PointCloudImporter.pointMat = pointMat;
+
+    const debugMat = new StandardMaterial(`debug-mat`, scene);
+    debugMat.wireframe = true;
+    debugMat.disableLighting = true;
+    debugMat.diffuseColor = new Color3(1, 1, 1);
+    debugMat.emissiveColor = new Color3(1, 1, 1);
+    debugMat.alpha = 0;
+    PointCloudImporter.debugMat = debugMat;
+
+    const nodeMeshMap: Record<string, Mesh> = {};
     const loadingStateMap: Record<string, 'loading' | 'loaded'> = {};
-    setInterval(() => {
-      CopcImporter.loadingNodes$.next(
-        Object.entries(loadingStateMap)
-          .filter(([_, state]) => state === 'loading')
-          .map(([key]) => key),
-      );
-    }, 100);
 
     console.log(copc);
     const cube = copc.info.cube;
@@ -162,18 +164,9 @@ export class CopcImporter implements ISceneLoaderPluginAsync {
       return Array.from(visited).sort((a, b) => a.localeCompare(b));
     };
 
-    const nodeMeshMap: Record<string, Mesh> = {};
-
-    const fileUrl = rootUrl + fileQuery;
-    CopcImporter.stats[fileUrl] = {
-      totalPoints: copc.header.pointCount,
-      pointsLoaded: 0,
-    };
     const importNode = async (key: string) => {
-      if (CopcImporter.startTime < 0) CopcImporter.startTime = Date.now();
       const [level, x, y, z] = key.split('-').map(Number);
-      // if (level !== 0 || x !== 0 || y !== 0 || z !== 0) return;
-      if (level > CopcImporter.maxNodeDepth) return;
+      if (level > PointCloudImporter.currentLOD) return;
       const node = nodes[key];
       if (!node) return;
       const loadingState = loadingStateMap[key];
@@ -186,7 +179,7 @@ export class CopcImporter implements ISceneLoaderPluginAsync {
       }
 
       return this.workerPool
-        .addTask(key, fileUrl, nodes)
+        .addTask({ key, url: filename, nodes })
         .then(result => {
           if (result.error) {
             delete loadingStateMap[key];
@@ -194,8 +187,7 @@ export class CopcImporter implements ISceneLoaderPluginAsync {
           }
           const { positions, colors } = result;
           loadingStateMap[key] = 'loaded';
-          CopcImporter.stats[fileUrl].pointsLoaded += node.pointCount;
-          console.debug(`imported ${key}`);
+          PointCloudImporter.totalLoadedPoints += node.pointCount;
 
           const mesh = nodeMeshMap[key];
           if (!mesh) return;
@@ -204,10 +196,11 @@ export class CopcImporter implements ISceneLoaderPluginAsync {
           vertexData.colors = colors;
           vertexData.applyToMesh(mesh, true);
 
-          mesh.material = pointMat;
+          mesh.material = PointCloudImporter.pointMat!;
           mesh.useVertexColors = true;
           mesh.hasVertexAlpha = false;
-          // mesh.alphaIndex = 0;
+          mesh.alphaIndex = 0;
+          mesh.visibility = (level + 1) * 0.025;
 
           createMeshFadeAnimation(mesh, scene);
 
@@ -223,10 +216,9 @@ export class CopcImporter implements ISceneLoaderPluginAsync {
     for (const [key, node] of Object.entries(nodes)) {
       if (!node) continue;
       const [level, x, y, z] = key.split('-').map(Number);
-      if (level > CopcImporter.maxNodeDepth) continue;
       const mesh = new Mesh(`point-cloud-${key}`, scene);
       mesh.visibility = 1;
-      mesh.setParent(rootNode);
+      mesh.setParent(rootNodeMesh);
       nodeMeshMap[key] = mesh;
 
       const sizeX = (maxX - minX) / Math.pow(2, level);
@@ -250,77 +242,57 @@ export class CopcImporter implements ISceneLoaderPluginAsync {
         minY + sizeY * y + sizeY / 2,
         minZ + sizeZ * z + sizeZ / 2,
       );
-      const debugMat = new StandardMaterial(`debug-mat`, scene);
-      debugMat.wireframe = true;
-      debugMat.disableLighting = true;
-      debugMat.diffuseColor = new Color3(1, 1, 1);
-      debugMat.emissiveColor = new Color3(1, 1, 1);
+
       debugMesh.material = debugMat;
-      debugMesh.visibility = 0;
-      debugMesh.setParent(rootNode);
-
-      const debugCenter = debugMesh.getBoundingInfo().boundingBox.centerWorld;
-      setInterval(() => {
-        const distance = Vector3.Distance(scene.activeCamera!.position, debugCenter);
-        if (!distance) return;
-        const isLoaded = loadingStateMap[key] !== undefined;
-        const loadTriggerDistance = loadTriggerDistanceMap[level] ?? -1;
-        if (distance < loadTriggerDistance && !isLoaded) {
-          return importNode(key);
-        }
-
-        // console.log(key, distance, distance < loadTriggerDistance);
-
-        const mesh = nodeMeshMap[key];
-        if (!mesh) return;
-        if (distance < loadTriggerDistance) {
-          // mesh.visibility += 0.1;
-        } else {
-          // mesh.visibility -= 0.1;
-        }
-        // mesh.visibility = Math.min(1, Math.max(0, mesh.visibility));
-        return;
-      }, 100);
+      debugMesh.visibility = 0.05;
+      debugMesh.setParent(rootNodeMesh);
     }
 
-    importNode('0-0-0-0').then(mesh => {
+    const loadedLevels = new Set<number>([0]);
+    const loadNodesWithLevel = async (level: number) => {
+      if (loadedLevels.has(level)) return;
+      loadedLevels.add(level);
+      PointCloudImporter.currentLOD = level;
+
+      const sorted = Object.keys(nodes)
+        .filter(key => +key[0] === level)
+        .toSorted((a, b) => a.localeCompare(b));
+      for (let i = 0; i < sorted.length / 8; i++) {
+        await Promise.all(sorted.slice(i * 8, (i + 1) * 8).map(key => importNode(key)));
+      }
+    };
+    const loadNextLevelOfDetail = async () => {
+      const maxLevel = Math.max(...loadedLevels);
+      await loadNodesWithLevel(maxLevel + 1);
+    };
+    PointCloudImporter.loadNextLevelOfDetail = loadNextLevelOfDetail;
+
+    // Load root level
+    const rootMesh = await importNode('0-0-0-0').then(mesh => {
       if (!mesh) return;
       const camera = scene.activeCamera as ArcRotateCamera;
       if (!camera) return;
       const pos = camera.position;
       const radius = mesh.getBoundingInfo().boundingSphere.radiusWorld;
-      // recalculateLoadTriggerDistanceMap(radius * 3);
-      camera.position = new Vector3(pos.x, pos.y, radius * 1);
+      camera.position = new Vector3(pos.x, pos.y, radius * 2);
       camera.wheelPrecision = 100 / Math.log(radius);
       camera.setTarget(mesh.getBoundingInfo()!.boundingSphere.centerWorld);
-      rootNode.rotation = new Vector3(0, 0, -1.58);
+      return mesh;
     });
+    console.log('rootMesh', rootMesh);
+    loadNextLevelOfDetail();
 
-    /*interval(250)
-      .pipe(delayWhen(() => this.workerPool.isBusy$))
-      .subscribe(() => {
-        const keys = Object.keys(nodes)
-          .filter((key) => +key[0] <= maxDetailLevel && !loadingStateMap[key])
-          .sort((a, b) => a.localeCompare(b));
-        const firstKey = keys[0];
-        if (!firstKey) return;
-        importNode(firstKey);
-      });*/
-
-    (window as any)['setRootRotation'] = (x: number, y: number, z: number) => {
-      rootNode.rotation = new Vector3(x, y, z);
-    };
-
-    (window as any)['importNode'] = importNode;
+    // Recalculate bounding box of rootNodeMesh
+    rootNodeMesh.refreshBoundingInfo();
 
     return {
-      meshes: [...Object.values(nodeMeshMap)],
+      meshes: [rootNodeMesh, rootMesh!],
       animationGroups: [],
       geometries: [],
       lights: [],
       particleSystems: [],
       skeletons: [],
-      transformNodes: [rootNode],
+      transformNodes: [],
       spriteManagers: [],
     };
   }

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ButtonComponent, LabelledCheckboxComponent, SliderComponent } from 'komponents';
 import { TranslatePipe } from 'src/app/pipes/translate.pipe';
-import { EptImporter } from 'src/app/services/babylon/importers/ept/ept-importer';
+import { PointCloudImporter } from 'src/app/services/babylon/importers/common/point-cloud-importer';
 
 @Component({
   selector: 'app-point-cloud-settings',
@@ -11,46 +11,48 @@ import { EptImporter } from 'src/app/services/babylon/importers/ept/ept-importer
 })
 export class PointCloudSettingsComponent {
   get currentLevelOfDetail() {
-    return EptImporter.currentLOD;
+    return PointCloudImporter.currentLOD;
   }
 
   get maxLevelOfDetail() {
-    return EptImporter.maxLOD;
+    return PointCloudImporter.maxLOD;
   }
 
   get currentPointSize() {
-    return EptImporter.pointMat?.pointSize ?? 1;
+    return PointCloudImporter.pointMat?.pointSize ?? 1;
   }
 
   get loadedPointsCount() {
-    return EptImporter.totalLoadedPoints.toLocaleString('en-US').replaceAll(',', ' ');
+    return PointCloudImporter.totalLoadedPoints.toLocaleString('en-US').replaceAll(',', ' ');
   }
 
   get totalPointsCount() {
-    return EptImporter.totalPoints.toLocaleString('en-US').replaceAll(',', ' ');
+    return PointCloudImporter.totalPoints.toLocaleString('en-US').replaceAll(',', ' ');
   }
 
   get pointsOfNextLevel() {
-    return (EptImporter.pointsPerLevel?.[EptImporter.currentLOD + 1] ?? 0)
+    return (PointCloudImporter.pointsPerLevel?.[PointCloudImporter.currentLOD + 1] ?? 0)
       .toLocaleString('en-US')
       .replaceAll(',', ' ');
   }
 
   get loadedPointsPercentage() {
-    return ((EptImporter.totalLoadedPoints / EptImporter.totalPoints) * 100).toFixed(2);
+    return ((PointCloudImporter.totalLoadedPoints / PointCloudImporter.totalPoints) * 100).toFixed(
+      2,
+    );
   }
 
   loadNextLevelOfDetail() {
     if (this.currentLevelOfDetail < this.maxLevelOfDetail) {
-      EptImporter.loadNextLevelOfDetail?.();
+      PointCloudImporter.loadNextLevelOfDetail?.();
     }
   }
 
   changePointSize(size: number) {
-    EptImporter.changePointSize(size);
+    PointCloudImporter.changePointSize(size);
   }
 
   toggleOctreeBoxes() {
-    EptImporter.toggleDebugMatVisibility();
+    PointCloudImporter.toggleDebugMatVisibility();
   }
 }

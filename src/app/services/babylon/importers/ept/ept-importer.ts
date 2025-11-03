@@ -17,7 +17,8 @@ import {
   RegisterSceneLoaderPlugin,
 } from '@babylonjs/core';
 import { getInstance } from './laz-perf';
-import WorkerPool from './worker-pool';
+import { createEPTWorkerPool } from './worker-pool';
+import { PointCloudImporter } from '../common/point-cloud-importer';
 
 type Nodes = Record<string, number>;
 
@@ -119,50 +120,15 @@ export class EptImporter implements ISceneLoaderPluginAsync {
     'ept.json': { isBinary: false },
   };
 
-  private workerPool: WorkerPool;
-  constructor() {
-    this.workerPool = new WorkerPool(
-      Array.from(
-        { length: 8 },
-        () =>
-          new Worker(new URL('./ept.worker.ts', import.meta.url), {
-            type: 'module',
-          }),
-      ),
-    );
-  }
-
-  public static debugMat?: StandardMaterial;
-  public static toggleDebugMatVisibility() {
-    if (!EptImporter.debugMat) return;
-    EptImporter.debugMat.alpha = EptImporter.debugMat.alpha <= 0.5 ? 1 : 0;
-  }
-
-  public static pointMat?: StandardMaterial;
-  /**
-   * Change the point size of the point cloud material.
-   * @param size
-   * @returns
-   */
-  public static changePointSize(size: number) {
-    if (Number.isNaN(size)) size = 1;
-    if (size < 0.1) size = 0.1;
-    if (size > 10) size = 10;
-    if (!EptImporter.pointMat) return;
-    EptImporter.pointMat.pointSize = size;
-  }
-
-  public static currentLOD = 0;
-  public static maxLOD = 10;
-  public static loadNextLevelOfDetail?: () => Promise<void>;
-
-  public static totalLoadedPoints = 0;
-  public static totalPoints = Number.MAX_SAFE_INTEGER;
-  public static pointsPerLevel?: number[];
-
-  private loadUnloadWorker = new Worker(new URL('./load-unload.worker.ts', import.meta.url), {
-    type: 'module',
-  });
+  private workerPool = createEPTWorkerPool(
+    Array.from(
+      { length: 8 },
+      () =>
+        new Worker(new URL('./ept.worker.ts', import.meta.url), {
+          type: 'module',
+        }),
+    ),
+  );
 
   public async importMeshAsync(
     meshesNames: any,
@@ -181,20 +147,20 @@ export class EptImporter implements ISceneLoaderPluginAsync {
     const nodes = await fetchHierarchy('0-0-0-0');
 
     console.log('nodes', nodes);
-    EptImporter.maxLOD = Math.max(...Object.keys(nodes).map(key => +key[0]));
-    EptImporter.totalPoints = Object.values(nodes).reduce(
+    PointCloudImporter.maxLOD = Math.max(...Object.keys(nodes).map(key => +key[0]));
+    PointCloudImporter.totalPoints = Object.values(nodes).reduce(
       (acc, node) => acc + (node < 0 ? 0 : node),
       0,
     );
-    EptImporter.pointsPerLevel = Object.entries(nodes).reduce(
-      (acc, [key, value]) => {
+    PointCloudImporter.pointsPerLevel = Object.entries(nodes).reduce(
+      (acc, [key, node]) => {
         const level = +key[0];
-        acc[level] += value < 0 ? 0 : value;
+        acc[level] += node < 0 ? 0 : node;
         return acc;
       },
-      Array.from({ length: EptImporter.maxLOD + 1 }, () => 0),
+      Array.from({ length: PointCloudImporter.maxLOD + 1 }, () => 0),
     );
-    console.log('pointsPerLevel', EptImporter.pointsPerLevel);
+    console.log('pointsPerLevel', PointCloudImporter.pointsPerLevel);
 
     const [minX, minY, minZ, maxX, maxY, maxZ] = info.bounds;
 
@@ -207,7 +173,7 @@ export class EptImporter implements ISceneLoaderPluginAsync {
     pointMat.pointsCloud = true;
     pointMat.pointSize = 1.5;
     pointMat.alphaMode = Engine.ALPHA_COMBINE;
-    EptImporter.pointMat = pointMat;
+    PointCloudImporter.pointMat = pointMat;
 
     const debugMat = new StandardMaterial(`debug-mat`, scene);
     debugMat.wireframe = true;
@@ -215,14 +181,14 @@ export class EptImporter implements ISceneLoaderPluginAsync {
     debugMat.diffuseColor = new Color3(1, 1, 1);
     debugMat.emissiveColor = new Color3(1, 1, 1);
     debugMat.alpha = 0;
-    EptImporter.debugMat = debugMat;
+    PointCloudImporter.debugMat = debugMat;
 
     const nodeMeshMap: Record<string, Mesh> = {};
     const loadingStateMap: Record<string, 'loading' | 'loaded'> = {};
 
     const importNode = async (key: string) => {
       const [level, x, y, z] = key.split('-').map(Number);
-      if (level > EptImporter.currentLOD) return;
+      if (level > PointCloudImporter.currentLOD) return;
       const node = nodes[key];
       if (node === undefined || node < 0) return;
 
@@ -245,7 +211,7 @@ export class EptImporter implements ISceneLoaderPluginAsync {
           }
           const { positions, colors } = result;
           loadingStateMap[key] = 'loaded';
-          EptImporter.totalLoadedPoints += node;
+          PointCloudImporter.totalLoadedPoints += node;
 
           const mesh = nodeMeshMap[key];
           if (!mesh) return;
@@ -254,7 +220,7 @@ export class EptImporter implements ISceneLoaderPluginAsync {
           vertexData.colors = colors;
           vertexData.applyToMesh(mesh, true);
 
-          mesh.material = EptImporter.pointMat!;
+          mesh.material = PointCloudImporter.pointMat!;
           mesh.useVertexColors = true;
           mesh.hasVertexAlpha = true;
           mesh.alphaIndex = 0;
@@ -310,7 +276,7 @@ export class EptImporter implements ISceneLoaderPluginAsync {
     const loadNodesWithLevel = async (level: number) => {
       if (loadedLevels.has(level)) return;
       loadedLevels.add(level);
-      EptImporter.currentLOD = level;
+      PointCloudImporter.currentLOD = level;
 
       const sorted = Object.keys(nodes)
         .filter(key => +key[0] === level)
@@ -323,7 +289,7 @@ export class EptImporter implements ISceneLoaderPluginAsync {
       const maxLevel = Math.max(...loadedLevels);
       await loadNodesWithLevel(maxLevel + 1);
     };
-    EptImporter.loadNextLevelOfDetail = loadNextLevelOfDetail;
+    PointCloudImporter.loadNextLevelOfDetail = loadNextLevelOfDetail;
 
     // Load root level
     const rootMesh = await importNode('0-0-0-0').then(mesh => {
@@ -332,11 +298,9 @@ export class EptImporter implements ISceneLoaderPluginAsync {
       if (!camera) return;
       const pos = camera.position;
       const radius = mesh.getBoundingInfo().boundingSphere.radiusWorld;
-      // recalculateLoadTriggerDistanceMap(radius * 3);
       camera.position = new Vector3(pos.x, pos.y, radius * 2);
       camera.wheelPrecision = 100 / Math.log(radius);
       camera.setTarget(mesh.getBoundingInfo()!.boundingSphere.centerWorld);
-      rootNode.rotation = new Vector3(0, 0, -1.58);
       return mesh;
     });
     console.log('rootMesh', rootMesh);

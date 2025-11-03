@@ -1,7 +1,6 @@
 /// <reference lib="webworker" />
 
 import { Copc, Getter, Hierarchy } from 'copc';
-import { createGetter, createUrlGetter } from './copc-getter';
 
 addEventListener('message', async event => {
   const { url, key, nodes } = event.data as {
@@ -11,7 +10,7 @@ addEventListener('message', async event => {
   };
 
   try {
-    const getter: Getter = createUrlGetter(url, nodes[key]!);
+    const getter = Getter.http(url);
     const copc = await Copc.create(getter);
 
     const node = nodes[key];
