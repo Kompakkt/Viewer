@@ -16,10 +16,11 @@ export class GuideComponent {
   #loadingScreen = inject(LoadingScreenService);
 
   constructor() {
-    effect(() => {
+    let effectRef = effect(() => {
       const isLoading = this.#loadingScreen.isLoading();
       if (isLoading) return;
       this.#showGuide();
+      effectRef.destroy();
     });
   }
 
