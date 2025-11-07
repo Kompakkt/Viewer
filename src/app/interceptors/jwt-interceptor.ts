@@ -17,7 +17,8 @@ export const jwtInterceptor = (
   return next(req).pipe(
     tap(event => {
       if (event.type === HttpEventType.Response) {
-        const jwt = event.headers.get('X-JWT');
+        const jwtKey = event.headers.keys().find(key => key.toLowerCase() === 'x-jwt');
+        const jwt = event.headers.get(jwtKey ?? 'x-jwt');
         if (!jwt) return;
         localStorage.setItem('jwt', jwt);
       }
