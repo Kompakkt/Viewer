@@ -1,0 +1,31 @@
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 400;
+  src:
+    url('./MaterialSymbolsOutlined[FILL,GRAD,opsz,wght].woff2') format('woff2'),
+    url('./MaterialSymbolsOutlined[FILL,GRAD,opsz,wght].ttf') format('truetype');
+}
+
+@mixin material-symbols($size: 24px) {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: $size;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+}
+
+.material-symbols-outlined {
+  @include material-symbols();
+}
+
+.material-symbols-filled {
+  @include material-symbols();
+  font-variation-settings: 'FILL' 1;
+}

@@ -13,8 +13,9 @@
 @include mat.app-background();
 
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
-@import url('./assets/fonts/OpenSans.css');
-@import url('./assets/fonts/MaterialIcons.css');
+@import url('./assets/fonts/OpenSans/OpenSans.css');
+@import url('./assets/fonts/MaterialIcons/MaterialIcons.css');
+@import url('./assets/fonts/MaterialSymbols/MaterialSymbolsOutlined.scss');
 
 :root {
   --font-stack: 'Open Sans', Frutiger, 'Frutiger Linotype', Univers, Calibri, 'Gill Sans',
