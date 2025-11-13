@@ -236,6 +236,12 @@ mat-card-content {
   width: 100% !important;
 }
 
+/* Remove background from detail component */
+k-details {
+  background-color: transparent !important;
+  box-shadow: unset !important;
+}
+
 // MARK: Angular 17 Material Fixes
 .mat-mdc-icon-button {
   display: grid !important;
