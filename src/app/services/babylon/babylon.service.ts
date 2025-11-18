@@ -15,17 +15,16 @@ import {
   FxaaPostProcess,
   ImageProcessingConfiguration,
   Layer,
-  Mesh,
   PostProcess,
   Scene,
   SharpenPostProcess,
-  SceneLoader,
   Tools,
   UniversalCamera,
   Vector3,
   ISceneLoaderAsyncResult,
   AbstractMesh,
   WebGPUEngine,
+  RegisterSceneLoaderPlugin,
 } from '@babylonjs/core';
 import '@babylonjs/core/Debug/debugLayer';
 import '@babylonjs/inspector';
@@ -41,12 +40,7 @@ import {
   setCameraTarget,
   setUpCamera,
 } from './camera-handler';
-import {
-  I3DEntityContainer,
-  IAudioContainer,
-  IImageContainer,
-  IVideoContainer,
-} from './container.interfaces';
+import { IAudioContainer, IImageContainer, IVideoContainer } from './container.interfaces';
 import {
   load3DEntity,
   loadAudio,
@@ -55,22 +49,16 @@ import {
   loadSplat,
   loadVideo,
 } from './strategies/loading-strategies';
-import {
-  afterAudioRender,
-  beforeAudioRender,
-  beforeVideoRender,
-} from './strategies/render-strategies';
+import { beforeAudioRender } from './strategies/render-strategies';
 import { EptImporter } from './importers/ept/ept-importer';
 import { CopcImporter } from './importers/copc/copc-importer';
 
-SceneLoader.RegisterPlugin(new CopcImporter());
-SceneLoader.RegisterPlugin(new EptImporter());
+RegisterSceneLoaderPlugin(new CopcImporter());
+RegisterSceneLoaderPlugin(new EptImporter());
 
 type RGBA = { r: number; b: number; g: number; a: number };
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class BabylonService {
   private environmentInjector = inject(EnvironmentInjector);
 
@@ -207,14 +195,7 @@ export class BabylonService {
       // Define as function so we can unregister by variable name
       let renderAudio = () => beforeAudioRender(this.scene, audioContainer);
       this.scene.registerBeforeRender(renderAudio);
-      renderAudio = () => afterAudioRender(audioContainer);
       this.scene.registerAfterRender(renderAudio);
-    });
-    this.containers.video$.subscribe(videoContainer => {
-      if (!videoContainer) return;
-      // Define as function so we can unregister by variable name
-      const renderVideo = () => beforeVideoRender(videoContainer);
-      this.scene.registerBeforeRender(renderVideo);
     });
 
     interval(100).subscribe(() => {
@@ -310,15 +291,11 @@ export class BabylonService {
     const video = video$.getValue();
     if (audio) {
       audio.audio.dispose();
-      audio.timeSlider.dispose();
-      audio.currentTime = 0;
     }
     // Video
     if (video) {
       video.video.pause();
       video.video.remove();
-      video.timeSlider.dispose();
-      video.currentTime = 0;
     }
     // Unregister renderers
     const preObservers = this.scene.onBeforeRenderObservable['_observers'];

@@ -1,0 +1,102 @@
+:host {
+  display: flex;
+  align-items: center;
+
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  height: auto;
+  width: auto;
+  bottom: 8px;
+
+  background-color: var(--color-bg-transparent);
+  border-radius: 12px;
+  padding: 8px 12px;
+  gap: 8px;
+
+  color: white;
+}
+
+div.playtime {
+  display: block;
+  width: 160px;
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.2);
+
+  cursor: pointer;
+
+  --play-percentage: 0%;
+
+  position: relative;
+
+  &::before {
+    content: attr(data-mouse-time);
+    position: absolute;
+    top: -32px;
+    padding: 2px 6px;
+    background-color: var(--color-bg-transparent);
+    border-radius: 4px;
+    left: 50%;
+    transform: translateX(-50%) translateY(12px);
+    opacity: 0;
+    transition:
+      transform 0.2s ease,
+      opacity 0.2s ease;
+    pointer-events: none;
+    font-size: var(--font-size-small);
+  }
+
+  &.hovered::before {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: var(--play-percentage);
+    background-color: var(--color-primary);
+  }
+}
+
+div.playtime-label {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  span {
+    font-size: var(--font-size-small);
+    &:last-child {
+      color: var(--color-gray-font);
+    }
+  }
+}
+
+div.volume-container {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  position: relative;
+
+  div.slider-container {
+    background-color: var(--color-bg-transparent);
+    border-radius: 4px;
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+
+    transition:
+      transform 0.3s ease,
+      opacity 0.3s ease;
+    transform: translateX(-50%) translateY(12px);
+    opacity: 0;
+    pointer-events: none;
+    &.opened {
+      transform: translateX(-50%) translateY(-12px);
+      opacity: 1;
+      pointer-events: all;
+    }
+  }
+}

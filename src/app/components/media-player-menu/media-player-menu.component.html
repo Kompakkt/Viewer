@@ -1,0 +1,55 @@
+<k-button icon-button (click)="togglePlay()">
+  @if (isPlaying) {
+    <mat-icon class="material-symbols-filled">pause</mat-icon>
+  } @else {
+    <mat-icon class="material-symbols-filled">play_arrow</mat-icon>
+  }
+</k-button>
+
+<div
+  class="playtime"
+  #playtimeEl
+  [style.--play-percentage]="playPercentage + '%'"
+  (mousemove)="onPlaytimeMouseMove($event)"
+  (mouseenter)="playtimeEl.classList.add('hovered')"
+  (mouseleave)="playtimeEl.classList.remove('hovered')"
+  (click)="onPlaytimeClick($event)"
+  [attr.data-mouse-time]="mouseTime() | prettyTime"
+></div>
+<div class="playtime-label">
+  <span>{{ mediaElement()?.currentTime ?? 0 | prettyTime }}</span>
+  <span>{{ totalDuration() | prettyTime }}</span>
+</div>
+
+<div
+  class="volume-container"
+  (mouseenter)="onMouseEnterVolume()"
+  (mouseleave)="onMouseLeaveVolume()"
+>
+  <k-button icon-button>
+    @if (currentVolumePercentage(); as percentage) {
+      @if (percentage < 50) {
+        <mat-icon class="material-symbols-filled">volume_down</mat-icon>
+      } @else {
+        <mat-icon class="material-symbols-filled">volume_up</mat-icon>
+      }
+    } @else {
+      <mat-icon class="material-symbols-filled">volume_off</mat-icon>
+    }
+  </k-button>
+
+  <div
+    class="slider-container"
+    (mouseenter)="onMouseEnterVolume()"
+    (mouseleave)="onMouseLeaveVolume()"
+    [class.opened]="isMouseInVolume()"
+  >
+    <k-slider
+      [label]="'Volume'"
+      [startingValue]="currentVolumePercentageGetter"
+      [showLabel]="false"
+      direction="bottom-to-top"
+      (valueChanged)="setVolume($event)"
+    />
+  </div>
+</div>

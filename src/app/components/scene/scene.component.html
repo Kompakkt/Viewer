@@ -12,6 +12,12 @@
   <app-sidenav-menu />
   <app-sidenav />
 
+  @if (processing.mediaType$ | async; as mediaType) {
+    @if (mediaType === 'video' || mediaType === 'audio') {
+      <app-media-player-menu />
+    }
+  }
+
   @if (showWebGPUUnsupportedWarning$ | async) {
     <div class="web-gpu-warning">
       <div class="center">

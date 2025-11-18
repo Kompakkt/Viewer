@@ -1,6 +1,6 @@
-import { Engine, Scene, Vector3 } from '@babylonjs/core';
+import { Scene, Vector3 } from '@babylonjs/core';
 
-import { IAudioContainer, IVideoContainer } from '../container.interfaces';
+import { IAudioContainer } from '../container.interfaces';
 
 export const beforeAudioRender = (scene: Scene, audioContainer: IAudioContainer) => {
   if (audioContainer.audio.isPlaying) {
@@ -12,30 +12,5 @@ export const beforeAudioRender = (scene: Scene, audioContainer: IAudioContainer)
         mesh.scaling = new Vector3(scale, scale, scale);
       });
     }
-    if (Engine.audioEngine?.audioContext) {
-      audioContainer.currentTime =
-        Engine.audioEngine.audioContext['currentTime'] - audioContainer.currentTime;
-      if (audioContainer.timeSlider) {
-        audioContainer.timeSlider.value =
-          audioContainer.timeSlider.value + audioContainer.currentTime;
-      }
-    }
-  }
-};
-
-export const afterAudioRender = (audioContainer: IAudioContainer) => {
-  if (audioContainer.audio && audioContainer.audio.isPlaying) {
-    if (Engine.audioEngine?.audioContext) {
-      audioContainer.currentTime = Engine.audioEngine.audioContext['currentTime'];
-    }
-  }
-};
-
-export const beforeVideoRender = (
-  // scene: Scene,
-  videoContainer: IVideoContainer,
-) => {
-  if (!videoContainer.video.paused) {
-    videoContainer.timeSlider.value = videoContainer.video.currentTime;
   }
 };

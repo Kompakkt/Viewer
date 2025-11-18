@@ -55,7 +55,7 @@
     "fast-deep-equal": "^3.1.3",
     "file-saver": "^2.0.5",
     "fscreen": "^1.2.0",
-    "komponents": "Kompakkt/Komponents#dist",
+    "komponents": "Kompakkt/Komponents#f468048",
     "laz-perf": "^0.0.7",
     "lazts": "^1.0.0",
     "localforage": "^1.10.0",

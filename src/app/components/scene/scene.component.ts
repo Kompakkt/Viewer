@@ -11,6 +11,7 @@ import { SidenavMenuComponent } from '../sidenav-menu/sidenav-menu.component';
 import { SidenavComponent } from '../sidenav/sidenav.component';
 import { BehaviorSubject, combineLatest, from, map, of } from 'rxjs';
 import { ButtonComponent, ButtonRowComponent } from 'komponents';
+import { MediaPlayerMenuComponent } from '../media-player-menu/media-player-menu.component';
 
 @Component({
   selector: 'app-scene',
@@ -26,6 +27,7 @@ import { ButtonComponent, ButtonRowComponent } from 'komponents';
     AsyncPipe,
     ButtonComponent,
     ButtonRowComponent,
+    MediaPlayerMenuComponent,
   ],
 })
 export class SceneComponent implements AfterViewInit {
