@@ -33,13 +33,20 @@
         />
       </k-details>
 
-      <k-button (click)="backToDefaultSettings()" type="outlined-primary">
-        {{ 'Back to default' | translate }}
+      <k-button style="align-self: center" rounded type="solid-primary" (click)="exportSettings()">
+        <mat-icon style="margin-right: 4px">download</mat-icon>
+        <span>{{ 'Download viewer settings' | translate }}</span>
       </k-button>
-      @if (canSaveSettings$ | async) {
-        <k-button (click)="saveSettings()" type="solid-primary">
-          {{ 'Save as default' | translate }}
+
+      @if (!(isStandalone$ | async)) {
+        <k-button (click)="backToDefaultSettings()" type="outlined-primary">
+          {{ 'Back to default' | translate }}
         </k-button>
+        @if (canSaveSettings$ | async) {
+          <k-button (click)="saveSettings()" type="solid-primary">
+            {{ 'Save as default' | translate }}
+          </k-button>
+        }
       }
     }
     @if (processing.isInUpload$ | async) {

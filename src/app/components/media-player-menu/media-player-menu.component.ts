@@ -6,7 +6,7 @@ import { ButtonComponent, SliderComponent } from 'komponents';
 import { interval } from 'rxjs';
 import { BabylonService } from 'src/app/services/babylon/babylon.service';
 
-@Pipe({ name: 'prettyTime', standalone: true })
+@Pipe({ name: 'prettyTime' })
 class PrettyTimePipe implements PipeTransform {
   transform(inputSeconds: number): string {
     const hours = Math.floor(inputSeconds / 3600);

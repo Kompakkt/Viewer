@@ -27,6 +27,7 @@ import { DialogMeshsettingsComponent } from '../dialogs/dialog-meshsettings/dial
 import { EntityFeatureSettingsLightsComponent } from './entity-feature-settings-lights/entity-feature-settings-lights.component';
 import { EntityFeatureSettingsMeshComponent } from './entity-feature-settings-mesh/entity-feature-settings-mesh.component';
 import { Color4, Tools } from '@babylonjs/core';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-entity-feature-settings',
@@ -37,6 +38,7 @@ import { Color4, Tools } from '@babylonjs/core';
     FormsModule,
     EntityFeatureSettingsLightsComponent,
     EntityFeatureSettingsMeshComponent,
+    MatIconModule,
     AsyncPipe,
     TranslatePipe,
     DetailsComponent,
@@ -248,16 +250,8 @@ export class EntityFeatureSettingsComponent {
 
   public async exportSettings() {
     const { localSettings } = await firstValueFrom(this.processing.settings$);
-    if (this.postMessage.hasParent) {
-      this.postMessage.sendToParent({
-        type: 'settings',
-        settings: localSettings,
-        data: localSettings,
-      });
-    } else {
-      const blob = new Blob([JSON.stringify(localSettings)], { type: 'text/plain;charset=utf-8' });
-      saveAs(blob, 'settings.json');
-    }
+    const blob = new Blob([JSON.stringify(localSettings)], { type: 'text/plain;charset=utf-8' });
+    saveAs(blob, 'settings.json');
   }
 
   public async backToDefaultSettings() {
