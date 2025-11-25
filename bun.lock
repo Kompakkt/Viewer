@@ -15,13 +15,13 @@
         "@angular/platform-browser": "^19.2.6",
         "@angular/platform-browser-dynamic": "^19.2.6",
         "@angular/router": "^19.2.6",
-        "@babylonjs/core": "8.3.1",
-        "@babylonjs/gui": "8.3.1",
-        "@babylonjs/gui-editor": "8.3.1",
-        "@babylonjs/inspector": "8.3.1",
-        "@babylonjs/loaders": "8.3.1",
-        "@babylonjs/materials": "8.3.1",
-        "@babylonjs/serializers": "8.3.1",
+        "@babylonjs/core": "8.38.0",
+        "@babylonjs/gui": "8.38.0",
+        "@babylonjs/gui-editor": "8.38.0",
+        "@babylonjs/inspector": "8.38.0",
+        "@babylonjs/loaders": "8.38.0",
+        "@babylonjs/materials": "8.38.0",
+        "@babylonjs/serializers": "8.38.0",
         "bson-objectid": "^2.0.4",
         "copc": "^0.0.7",
         "core-js": "^3.38.0",
@@ -331,19 +331,21 @@
 
     "@babel/types": ["@babel/types@7.28.5", "", { "dependencies": { "@babel/helper-string-parser": "^7.27.1", "@babel/helper-validator-identifier": "^7.28.5" } }, "sha512-qQ5m48eI/MFLQ5PxQj4PFaprjyCTLI37ElWMmNs0K8Lk3dVeOdNpB3ks8jc7yM5CDmVC73eMVk/trk3fgmrUpA=="],
 
-    "@babylonjs/core": ["@babylonjs/core@8.3.1", "", {}, "sha512-FBf/rMHeLu1QEhfAm5ye2EV+ACBu2hb9SrnyQnspGhevm8PM4VKA2z2P7IqnDB8CgCjQ4Vr7PCGCmuZ7ZENWoA=="],
+    "@babylonjs/addons": ["@babylonjs/addons@8.38.0", "", { "peerDependencies": { "@babylonjs/core": "^8.0.0" } }, "sha512-3K0wVK6QctmhEaRA4KcxCKOADuongmyn8xIuMKJGJdcOuC4m8NOgIuVC1rHf4rjAyoM+6g061Y23fFNDBASh2g=="],
 
-    "@babylonjs/gui": ["@babylonjs/gui@8.3.1", "", { "peerDependencies": { "@babylonjs/core": "^8.0.0" } }, "sha512-R1zfL4jgjm+jHUB0pBP29A2nc8Bmi3UlnLhm3WK4f+30s8vU5dVyrhHnrSjeKGybUxg6okkNyGZF1MguHrPrxQ=="],
+    "@babylonjs/core": ["@babylonjs/core@8.38.0", "", {}, "sha512-c2HnAbp21m9RHdkuand3iCQwfPsbI+srPNSgnzwplCicqlRDjvD0GkuJDE+z4yHlk+4DAZmhbs69meEP3xO/UQ=="],
 
-    "@babylonjs/gui-editor": ["@babylonjs/gui-editor@8.3.1", "", { "peerDependencies": { "@babylonjs/core": "^8.0.0", "@babylonjs/gui": "^8.0.0", "@types/react": ">=16.7.3", "@types/react-dom": ">=16.0.9" } }, "sha512-VF3v33aVV6ukykTymbZKS5sFrSgmUSJYVzzWbJdhIx3m8I67w79XR1bhCwFQxt0EDmloZRjmpI1cs9IXXl5MSg=="],
+    "@babylonjs/gui": ["@babylonjs/gui@8.38.0", "", { "peerDependencies": { "@babylonjs/core": "^8.0.0" } }, "sha512-X8Bdbe8EemDtFUUXbHQPT79+k+p/z2Gq+kGTC4JElU+ef00jHU2+RRq9/ACBYHubDmV9ywOxy8wo0nYPAH+k3g=="],
 
-    "@babylonjs/inspector": ["@babylonjs/inspector@8.3.1", "", { "dependencies": { "@fortawesome/fontawesome-svg-core": "^6.1.0", "@fortawesome/free-regular-svg-icons": "^6.0.0", "@fortawesome/free-solid-svg-icons": "^6.0.0" }, "peerDependencies": { "@babylonjs/core": "^8.0.0", "@babylonjs/gui": "^8.0.0", "@babylonjs/gui-editor": "^8.0.0", "@babylonjs/loaders": "^8.0.0", "@babylonjs/materials": "^8.0.0", "@babylonjs/serializers": "^8.0.0", "@types/react": ">=16.7.3", "@types/react-dom": ">=16.0.9" } }, "sha512-utI8T+U1qm9BQiGYsaPL/z4FeJs4ZggnF8qXeKUIWBNEsVTPdNrHudaixYKfb7VJowt5INpktPD3OJnWeHyjmQ=="],
+    "@babylonjs/gui-editor": ["@babylonjs/gui-editor@8.38.0", "", { "peerDependencies": { "@babylonjs/core": "^8.0.0", "@babylonjs/gui": "^8.0.0", "@types/react": ">=16.7.3", "@types/react-dom": ">=16.0.9" } }, "sha512-fwPn0jlB3NrIP12ZIOgg1ywyxiR+fhq28vHJdf0AngNTdkvYEYav57XDTEh4SrsSMy8Jvgl+uq/yd1aPtWAbVg=="],
 
-    "@babylonjs/loaders": ["@babylonjs/loaders@8.3.1", "", { "peerDependencies": { "@babylonjs/core": "^8.0.0", "babylonjs-gltf2interface": "^8.0.0" } }, "sha512-cOGzKYyRuU7eMiLKX0VeyLAk+mjBrdY3Tp6UcB4275MVuJ87kuZoZrsHV4qDsTb9t/aOlu1HpH80lPRI52tnVw=="],
+    "@babylonjs/inspector": ["@babylonjs/inspector@8.38.0", "", { "dependencies": { "@fortawesome/fontawesome-svg-core": "^6.1.0", "@fortawesome/free-regular-svg-icons": "^6.0.0", "@fortawesome/free-solid-svg-icons": "^6.0.0" }, "peerDependencies": { "@babylonjs/addons": "^8.0.0", "@babylonjs/core": "^8.0.0", "@babylonjs/gui": "^8.0.0", "@babylonjs/gui-editor": "^8.0.0", "@babylonjs/loaders": "^8.0.0", "@babylonjs/materials": "^8.0.0", "@babylonjs/serializers": "^8.0.0", "@types/react": ">=16.7.3", "@types/react-dom": ">=16.0.9" } }, "sha512-+0r04e+qS3IJucDnrabiw22ZCVYodIWgvDbDzE+l1Q1emUNBlCGMazwxyAxOxj9g7seDy7j+e/XNgm52Q1UXXw=="],
 
-    "@babylonjs/materials": ["@babylonjs/materials@8.3.1", "", { "peerDependencies": { "@babylonjs/core": "^8.0.0" } }, "sha512-eQSH5RCgQbXN0Vqxlyz+kokgJGip43TgauXKLHPUCtXkcJCUSibehFeNESYtBZHHN30oakI5hbKC7mSXhGnYLQ=="],
+    "@babylonjs/loaders": ["@babylonjs/loaders@8.38.0", "", { "peerDependencies": { "@babylonjs/core": "^8.0.0", "babylonjs-gltf2interface": "^8.0.0" } }, "sha512-5h7ByG9IgCNBpUQJIPhqUsMIW1Z9wmBtoWc8uvT0JBMhMadmbElUSqRM7+Imz04wTjvX8bsCyXv7EWmJi0AEnw=="],
 
-    "@babylonjs/serializers": ["@babylonjs/serializers@8.3.1", "", { "peerDependencies": { "@babylonjs/core": "^8.0.0", "babylonjs-gltf2interface": "^8.0.0" } }, "sha512-wRCqJTDZ1OZynzHUcpvAQyHO2UBPbU/izfC/ImotPaphk85lVdvngvvXrfE20rlZDG9rfePSMVyqZLbtT5070g=="],
+    "@babylonjs/materials": ["@babylonjs/materials@8.38.0", "", { "peerDependencies": { "@babylonjs/core": "^8.6.0" } }, "sha512-mi9pUcHRW8k9cA2qv5H6oPb2/HqSsVLEAtnBuKeBv2m0iYF6pw6+S/t+gLGsBhqkc9hdF2kHs9tNc9u6vm/nCQ=="],
+
+    "@babylonjs/serializers": ["@babylonjs/serializers@8.38.0", "", { "peerDependencies": { "@babylonjs/core": "^8.0.0", "babylonjs-gltf2interface": "^8.0.0" } }, "sha512-KAqV/4SSckGgQuaB9IWGb4TTgCZaOUwR46QydFv/HO09TJ6iQGGFxuFNqkaiSZNt8zig96+Ok5oeFSs8rtiIig=="],
 
     "@colors/colors": ["@colors/colors@1.5.0", "", {}, "sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ=="],
 
@@ -2006,6 +2008,8 @@
     "@isaacs/cliui/strip-ansi": ["strip-ansi@7.1.2", "", { "dependencies": { "ansi-regex": "^6.0.1" } }, "sha512-gmBGslpoQJtgnMAvOVqGZpEz9dyoKTCzy2nfz/n8aIFhN/jCE/rCmcxabB6jOOHV+0WNnylOxaxBQPSvcWklhA=="],
 
     "@isaacs/cliui/wrap-ansi": ["wrap-ansi@8.1.0", "", { "dependencies": { "ansi-styles": "^6.1.0", "string-width": "^5.0.1", "strip-ansi": "^7.0.1" } }, "sha512-si7QWI6zUMq56bESFvagtmzMdGOtoxfR+Sez11Mobfc7tm+VkUckk9bW2UeffTGVUbOksxmSw0AA2gs8g71NCQ=="],
+
+    "@kompakkt/plugins-source/komponents": ["komponents@github:Kompakkt/Komponents#f468048", { "dependencies": { "tslib": "^2.3.0" }, "peerDependencies": { "@angular/common": "^19.2.2", "@angular/core": "^19.2.2", "@angular/forms": "^19.2.5", "@angular/platform-browser": "^19.2.5", "rxjs": "^7.8.2" } }, "Kompakkt-Komponents-f468048"],
 
     "@listr2/prompt-adapter-inquirer/@inquirer/type": ["@inquirer/type@1.5.5", "", { "dependencies": { "mute-stream": "^1.0.0" } }, "sha512-MzICLu4yS7V8AA61sANROZ9vT1H3ooca5dSmI1FjZkzq7o/koMsRfQSzRtFo+F3Ao4Sf1C0bpLKejpKB/+j6MA=="],
 
