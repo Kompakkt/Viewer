@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
@@ -8,7 +8,7 @@ export class LoadingScreenService {
   public opacity$ = new BehaviorSubject<string>('1');
   public loadingText$ = new BehaviorSubject<string>('Loading');
 
-  public isLoading = false;
+  public isLoading = signal(false);
 
   public show() {
     this.updateOpacity('1');
@@ -20,9 +20,9 @@ export class LoadingScreenService {
 
   public updateOpacity(newOpacity: string): void {
     if (parseFloat(newOpacity) > 0.5) {
-      this.isLoading = true;
+      this.isLoading.set(true);
     } else {
-      this.isLoading = false;
+      this.isLoading.set(false);
     }
     this.opacity$.next(newOpacity);
   }

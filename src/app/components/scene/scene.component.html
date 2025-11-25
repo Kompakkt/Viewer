@@ -6,6 +6,9 @@
     </div>
   }
   <app-annotationwalkthrough />
+  @if (!(processing.defaultEntityLoaded$ | async)) {
+    <app-guide />
+  }
   @if (processing.showMenu$ | async) {
     <app-menu />
   }
