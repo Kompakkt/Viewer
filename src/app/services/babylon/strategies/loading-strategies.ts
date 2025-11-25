@@ -125,7 +125,6 @@ export const load3DEntity = async (rootUrl: string, scene: Scene, isDefault?: bo
   return ImportMeshAsync(rootUrl, scene, {
     pluginExtension: extension,
     onProgress: updateLoadingUI(engine),
-    rootUrl,
   }).then(result => {
     console.log(result);
     if (isDefault) {
