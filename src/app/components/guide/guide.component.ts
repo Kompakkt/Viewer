@@ -27,6 +27,10 @@ export class GuideComponent {
   #showGuide() {
     if (this.isVisible()) return;
 
+    const hasBeenShown = !!localStorage.getItem('hasKompakktGuideBeenShown');
+    if (hasBeenShown) return;
+    localStorage.setItem('hasKompakktGuideBeenShown', new Date().toISOString());
+
     console.log('GuideComponent: Loading complete, showing guide in 1 second...');
     setTimeout(() => {
       this.isVisible.set(true);
