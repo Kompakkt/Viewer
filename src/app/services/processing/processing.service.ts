@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { AbstractMesh, Mesh, Quaternion, TransformNode, Vector3 } from '@babylonjs/core';
+import { AbstractMesh, Mesh, Quaternion, TransformNode, Vector3, Angle } from '@babylonjs/core';
 import {
   BehaviorSubject,
   combineLatest,
@@ -458,20 +458,11 @@ export class ProcessingService {
       );
       meshes.filter(mesh => !mesh.parent).forEach(mesh => mesh.setParent(transformNode));
 
-      const pointSelector = (() => {
-        try {
-          return annotation.getTarget()?.getSelector();
-        } catch (error) {
-          console.warn(`Failed getting point selector from annotation target`, error);
-          return undefined;
-        }
-      })();
-      transformNode.position.set(
-        Number(pointSelector?.getProperty('x') ?? 0) * -1,
-        Number(pointSelector?.getProperty('y') ?? 0),
-        Number(pointSelector?.getProperty('z') ?? 0),
-      );
-
+      /*
+      Beginning of section in which the parameters of the transforms in the body
+      and the PointSelector in the target used to calculate the parameters of the
+      Babylon.js transformNode.
+      */
       const transforms = (() => {
         try {
           return body.getTransform();
@@ -481,22 +472,76 @@ export class ProcessingService {
         }
       })();
       for (const transform of transforms) {
-        const vector = new Vector3(
-          Number(transform?.getProperty('x') ?? 0) * -1,
+        let vector = new Vector3(
+          Number(transform?.getProperty('x') ?? 0),
           Number(transform?.getProperty('y') ?? 0),
           Number(transform?.getProperty('z') ?? 0),
-        );
+        );        
+        /*
+        x_inversion is the vector which, through the Vector3.multiply
+        method, will negate the x coordinate of a Vector. This is relevant
+        because the conventional conversion from Babylon axes to IIIF axes
+        is :
+        Babylon X --> - IIIF X
+        Babylon Y -->   IIIF Y
+        Babylon Z -->   IIIF Z
+        */
+        const x_inversion = new Vector3(-1, 1, 1);
+        
         if (transform.isScaleTransform) {
-          transformNode.scaling = vector;
+          transformNode.scaling.multiplyInPlace(vector);
+          transformNode.position .multiplyInPlace(vector);
         }
         if (transform.isRotateTransform) {
-          transformNode.rotation.addInPlace(vector);
+          
+          const deg_to_radians = Math.PI/180.0;
+          const angles = vector
+                            .multiply(x_inversion)
+                            .multiplyByFloats(deg_to_radians,deg_to_radians,deg_to_radians)
+                            .negate();
+          
+          let axesOrder=[0,1,2];
+          let initQuat = new Quaternion();
+          let accQuat = axesOrder.reduce( (acc, axis) => {
+             let axisVectorArray = [0.0,0.0,0.0]
+             axisVectorArray[axis] = 1.0;   
+             let axisVector = new Vector3().fromArray(axisVectorArray);       
+             let axisAngle = angles.asArray()[axis];
+             let axisQuat = Quaternion.RotationAxis(axisVector,axisAngle);
+             return acc.multiply(axisQuat);
+            }, initQuat);
+        
+          let netQuat = accQuat.multiply( Quaternion.FromEulerVector(transformNode.rotation));
+          
+          transformNode.rotation = netQuat.toEulerAngles();
+          transformNode.position.applyRotationQuaternionInPlace(netQuat);
         }
         if (transform.isTranslateTransform) {
           transformNode.position.addInPlace(vector);
         }
       }
+      
+      const pointSelector = (() => {
+        try {
+          return annotation.getTarget()?.getSelector();
+        } catch (error) {
+          console.warn(`Failed getting point selector from annotation target`, error);
+          return undefined;
+        }
+      })();
+      
+      const targetSelectorPosition = new Vector3(
+        Number(pointSelector?.getProperty('x') ?? 0) * -1,
+        Number(pointSelector?.getProperty('y') ?? 0),
+        Number(pointSelector?.getProperty('z') ?? 0)
+      );
 
+      transformNode.position.addInPlace(targetSelectorPosition);
+      /*
+      Beginning of section in which the parameters of the transforms in the body
+      and the PointSelector in the target used to calculate the parameters of the
+      Babylon.js transformNode.
+      */
       return transformNode;
     };
 
