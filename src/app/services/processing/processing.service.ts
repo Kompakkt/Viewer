@@ -387,7 +387,7 @@ export class ProcessingService {
   }
 
   private async loadIIIF3DManifest(manifestUrl: string) {
-    const manifestJson = await fetch(decodeURIUntilStable(manifestUrl), {
+    const manifestJson = await fetch(manifestUrl, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
