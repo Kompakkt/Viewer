@@ -1,21 +1,23 @@
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, KeyValuePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Vector3 } from '@babylonjs/core';
 import { ColorChromeModule } from 'ngx-color/chrome';
 import {
   ButtonComponent,
+  ButtonRowComponent,
   DetailsComponent,
   InputComponent,
   LabelledCheckboxComponent,
   SliderComponent,
 } from 'komponents';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, map } from 'rxjs';
 import { IColor } from 'src/common';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { BabylonService } from '../../../services/babylon/babylon.service';
 import { EntitySettingsService } from '../../../services/entitysettings/entitysettings.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
+import { AsAbsolutePipe } from 'src/app/pipes/as-absolute.pipe';
 
 @Component({
   selector: 'app-entity-feature-settings-mesh',
@@ -26,6 +28,9 @@ import { ProcessingService } from '../../../services/processing/processing.servi
     FormsModule,
     AsyncPipe,
     TranslatePipe,
+    AsAbsolutePipe,
+    KeyValuePipe,
+    ButtonRowComponent,
     ButtonComponent,
     DetailsComponent,
     LabelledCheckboxComponent,
@@ -53,6 +58,19 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
     private babylon: BabylonService,
   ) {}
 
+  get mirroredAxes$() {
+    return this.processing.settings$.pipe(
+      map(({ localSettings }) => localSettings.scale),
+      map(scale => {
+        const mirroredAxes: string[] = [];
+        if (scale.x < 0) mirroredAxes.push('X');
+        if (scale.y < 0) mirroredAxes.push('Y');
+        if (scale.z < 0) mirroredAxes.push('Z');
+        return mirroredAxes.length > 0 ? mirroredAxes.join(', ') : '';
+      }),
+    );
+  }
+
   get meshes$() {
     return this.processing.meshes$;
   }
@@ -76,38 +94,28 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
   // ________Mesh Settings__________
 
   // Scaling
-  public async handleChangeDimension(dimension: string, value: number) {
+  public async handleChangeDimension(value: number) {
     const { localSettings } = await firstValueFrom(this.processing.settings$);
-    let factor;
-    try {
-      switch (dimension) {
-        case 'height':
-          factor = value / this.entitySettings.initialSize.y;
-          localSettings.scale = parseFloat(factor.toFixed(2));
-          this.processing.entityHeight = value.toFixed(2);
-          this.entitySettings.loadScaling();
-          break;
-        case 'width':
-          factor = value / this.entitySettings.initialSize.x;
-          localSettings.scale = parseFloat(factor.toFixed(2));
-          this.processing.entityWidth = value.toFixed(2);
-          this.entitySettings.loadScaling();
-          break;
-        case 'depth':
-          factor = value / this.entitySettings.initialSize.z;
-          localSettings.scale = parseFloat(factor.toFixed(2));
-          this.processing.entityDepth = value.toFixed(2);
-          this.entitySettings.loadScaling();
-          break;
-        case 'scale':
-          localSettings.scale = value;
-          this.entitySettings.loadScaling();
-          break;
-        default:
-          console.log('I do not know this dimension: ', dimension);
-      }
-    } catch (err) {
-      console.error(err);
+    const signX = localSettings.scale.x >= 0 ? 1 : -1;
+    const signY = localSettings.scale.y >= 0 ? 1 : -1;
+    const signZ = localSettings.scale.z >= 0 ? 1 : -1;
+    localSettings.scale.x = Math.abs(value) * signX;
+    localSettings.scale.y = Math.abs(value) * signY;
+    localSettings.scale.z = Math.abs(value) * signZ;
+    this.entitySettings.loadScaling();
+  }
+
+  // Mirror
+  public async handleMirrorAxis(axis: 'x' | 'y' | 'z' | 'reset') {
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
+    if (axis === 'reset') {
+      localSettings.scale.x = Math.abs(localSettings.scale.x);
+      localSettings.scale.y = Math.abs(localSettings.scale.y);
+      localSettings.scale.z = Math.abs(localSettings.scale.z);
+      this.entitySettings.loadScaling();
+    } else {
+      localSettings.scale[axis] = localSettings.scale[axis] * -1;
+      this.entitySettings.loadScaling();
     }
   }
 

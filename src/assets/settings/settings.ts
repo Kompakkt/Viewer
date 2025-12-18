@@ -30,7 +30,7 @@ export const minimalSettings: IEntitySettings = {
     y: 0,
     z: 0,
   },
-  scale: 1,
+  scale: { x: 1, y: 1, z: 1 },
 };
 
 export const settingsFallback: IEntitySettings = {
@@ -92,7 +92,7 @@ export const settingsFallback: IEntitySettings = {
     y: 0,
     z: 0,
   },
-  scale: 1,
+  scale: { x: 1, y: 1, z: 1 },
 };
 
 export const settingsKompakktLogo: IEntitySettings = {
@@ -126,7 +126,7 @@ export const settingsKompakktLogo: IEntitySettings = {
     y: 0,
     z: 0,
   },
-  scale: 1,
+  scale: { x: 1, y: 1, z: 1 },
 };
 
 export const settings2D: IEntitySettings = {
@@ -188,7 +188,7 @@ export const settings2D: IEntitySettings = {
     y: 0,
     z: 0,
   },
-  scale: 1,
+  scale: { x: 1, y: 1, z: 1 },
 };
 
 export const settingsEntity: IEntitySettings = {
@@ -250,7 +250,7 @@ export const settingsEntity: IEntitySettings = {
     y: 0,
     z: 0,
   },
-  scale: 1,
+  scale: { x: 1, y: 1, z: 1 },
 };
 
 export const settingsAudio: IEntitySettings = {
@@ -312,5 +312,5 @@ export const settingsAudio: IEntitySettings = {
     y: 0,
     z: 0,
   },
-  scale: 1,
+  scale: { x: 1, y: 1, z: 1 },
 };

@@ -67,50 +67,46 @@
     </k-button>
   </k-details>
 
-  <k-details [title]="'Scale' | translate">
-    <!-- NOTE: We decided to comment out the centimeter sliders, as they are not representative of the real world size of any given object - Kai N & Senya B -->
-    <!--
-  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px">
-    <k-input
-      [label]="'Height:' | translate"
-      [min]="0"
-      [max]="entitySettings.initialSize.y * 5"
-      [startingValue]="processing.entityHeight"
-      type="number"
-      (valueChanged)="handleChangeDimension('height', $event.valueAsNumber)"
-      suffix="cm"
-    />
-    <k-input
-      [label]="'Width:' | translate"
-      [min]="0"
-      [max]="entitySettings.initialSize.x * 5"
-      [startingValue]="processing.entityWidth"
-      type="number"
-      (valueChanged)="handleChangeDimension('width', $event.valueAsNumber)"
-      suffix="cm"
-    />
-    <k-input
-      [label]="'Depth:' | translate"
-      [min]="0"
-      [max]="entitySettings.initialSize.z * 5"
-      [startingValue]="processing.entityDepth"
-      type="number"
-      (valueChanged)="handleChangeDimension('depth', $event.valueAsNumber)"
-      suffix="cm"
-    />
-  </div>
-  -->
+  <k-details [title]="'Mirror axes' | translate">
+    <k-button-row>
+      <k-button (click)="handleMirrorAxis('x')" type="outlined-primary">
+        {{ 'X-axis' | translate }}
+      </k-button>
+      <k-button (click)="handleMirrorAxis('y')" type="outlined-primary">
+        {{ 'Y-axis' | translate }}
+      </k-button>
+      <k-button (click)="handleMirrorAxis('z')" type="outlined-primary">
+        {{ 'Z-axis' | translate }}
+      </k-button>
+    </k-button-row>
 
+    <p>
+      {{ 'Current mirroring' | translate }}:
+      <strong>
+        @if (mirroredAxes$ | async; as mirrored) {
+          {{ mirrored.toUpperCase() }}
+        } @else {
+          {{ 'None' | translate }}
+        }
+      </strong>
+    </p>
+
+    <k-button (click)="handleMirrorAxis('reset')" type="outlined-primary">
+      {{ 'Reset mirroring' | translate }}
+    </k-button>
+  </k-details>
+
+  <k-details [title]="'Scale' | translate">
     <k-slider
-      [label]="('Scale factor:' | translate) + ' ' + (settings.localSettings.scale || 1)"
+      [label]="('Scale factor:' | translate) + ' ' + (settings.localSettings.scale.x | asAbsolute)"
       [min]="0.1"
       [max]="5"
       [step]="0.1"
-      [startingValue]="settings.localSettings.scale || 1"
-      (valueChanged)="handleChangeDimension('scale', $event)"
+      [startingValue]="settings.localSettings.scale.x | asAbsolute"
+      (valueChanged)="handleChangeDimension($event)"
     />
 
-    <k-button (click)="handleChangeDimension('scale', 1)" type="outlined-primary">
+    <k-button (click)="handleChangeDimension(1)" type="outlined-primary">
       {{ 'Reset size' | translate }}
     </k-button>
   </k-details>
