@@ -1,8 +1,12 @@
 import { EventEmitter } from '@angular/core';
+import { e } from '@angular/material/ripple.d-BxTUZJt7';
 import { BehaviorSubject, filter, firstValueFrom } from 'rxjs';
+
+const MAX_RETRIES = 3;
 
 export interface BaseTask {
   key: string;
+  retryCount?: number;
 }
 
 export interface BaseResult {
@@ -74,28 +78,56 @@ class WorkerPool<T extends BaseTask> {
   }
 
   private handleWorkerMessage(worker: Worker, event: MessageEvent) {
+    const task = this.activeTasks.get(worker);
     this.activeTasks.delete(worker);
     this.processNextTask();
 
     if (event.data.error) {
-      console.error(event.data);
-    }
+      console.error('Worker returned error:', event.data);
 
-    this.results$.next({ error: false, ...event.data });
+      // Retry logic for application errors
+      if (task) {
+        const currentRetryCount = task.retryCount || 0;
+        if (currentRetryCount < MAX_RETRIES) {
+          task.retryCount = currentRetryCount + 1;
+          console.warn(`Task ${task.key} failed, retrying (${task.retryCount}/${MAX_RETRIES})`);
+          // Re-queue for retry
+          this.taskQueue.addTask(task);
+          return;
+        }
+      }
+
+      this.results$.next({ error: false, ...event.data });
+    } else {
+      this.results$.next({ error: false, ...event.data });
+    }
   }
 
   private handleWorkerError(worker: Worker, error: ErrorEvent) {
     const task = this.activeTasks.get(worker);
-    console.error(error);
+    console.error('Worker error:', error);
     this.activeTasks.delete(worker);
     this.processNextTask();
 
     if (task) {
-      this.results$.next({
-        error: true,
-        message: error.message,
-        key: task.key,
-      });
+      const currentRetryCount = task.retryCount || 0;
+      if (currentRetryCount < MAX_RETRIES) {
+        task.retryCount = currentRetryCount + 1;
+        console.warn(
+          `Task ${task.key} failed due to worker error, retrying (${task.retryCount}/${MAX_RETRIES})`,
+        );
+        // Re-queue for retry
+        this.taskQueue.addTask(task);
+        return;
+      } else {
+        console.error(`Task ${task.key} exceeded max retries due to worker error.`);
+        this.results$.next({
+          error: true,
+          message: error.message,
+          key: task.key,
+        });
+        return;
+      }
     }
   }
 
@@ -117,8 +149,20 @@ class WorkerPool<T extends BaseTask> {
     } catch (e: any) {
       this.activeTasks.delete(availableWorker);
       console.error(e);
+
+      // Retry logic
+      const currentRetryCount = task.retryCount || 0;
+      if (currentRetryCount < MAX_RETRIES) {
+        task.retryCount = currentRetryCount + 1;
+        console.warn(`Task ${task.key} failed, retrying (${task.retryCount}/${MAX_RETRIES})`);
+        // Re-queue for retry
+        this.taskQueue.addTask(task);
+        this.processNextTask();
+        return;
+      }
+
       this.results$.next({ error: true, message: e.toString(), key: task.key });
-      this.processNextTask(); // Try to process next task after error
+      this.processNextTask();
     }
   }
 

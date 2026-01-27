@@ -21,6 +21,7 @@ import { BehaviorSubject } from 'rxjs';
 import { prepareCopcShaderMaterial } from './copc-materials';
 import { createCOPCWorkerPool } from './worker-pool';
 import { PointCloudImporter } from '../common/point-cloud-importer';
+import { retryWithBackoff } from '../common/retry-utils';
 
 const createMeshFadeAnimation = (mesh: Mesh, scene: Scene) => {
   const animation = new Animation(
@@ -78,7 +79,9 @@ export class CopcImporter implements ISceneLoaderPluginAsync {
       return url.startsWith('/') ? new URL(url, window.location.origin).toString() : url;
     })();
     const copc = await Copc.create(filename);
-    const { nodes, pages } = await Copc.loadHierarchyPage(filename, copc.info.rootHierarchyPage);
+    const { nodes, pages } = await retryWithBackoff(() =>
+      Copc.loadHierarchyPage(filename, copc.info.rootHierarchyPage),
+    );
     console.log(copc, nodes, pages);
 
     PointCloudImporter.maxLOD = Math.max(...Object.keys(nodes).map(key => +key[0]));

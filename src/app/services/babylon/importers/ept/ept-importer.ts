@@ -19,6 +19,7 @@ import {
 import { getInstance } from './laz-perf';
 import { createEPTWorkerPool } from './worker-pool';
 import { PointCloudImporter } from '../common/point-cloud-importer';
+import { retryWithBackoff } from '../common/retry-utils';
 
 type Nodes = Record<string, number>;
 
@@ -144,7 +145,7 @@ export class EptImporter implements ISceneLoaderPluginAsync {
       fetch(`${rootUrl}ept-hierarchy/${key}.json`).then(res => res.json() as Promise<Nodes>);
 
     const info = JSON.parse(data) as EPTInfoFile;
-    const nodes = await fetchHierarchy('0-0-0-0');
+    const nodes = await retryWithBackoff(() => fetchHierarchy('0-0-0-0'));
 
     console.log('nodes', nodes);
     PointCloudImporter.maxLOD = Math.max(...Object.keys(nodes).map(key => +key[0]));
