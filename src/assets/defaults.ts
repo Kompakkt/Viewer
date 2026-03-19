@@ -12,7 +12,7 @@ export const baseEntity = (): IEntity => ({
   name: 'Cube',
   annotations: {},
   relatedDigitalEntity: { _id: 'default_entity' },
-  creator: { _id: '', username: 'kompakkt', fullname: 'kompakkt', profile: { _id: '', type: ProfileType.user } },
+  creator: { _id: '', username: 'kompakkt', fullname: 'kompakkt', profile: { profileId: '', type: ProfileType.user } },
 
   finished: false,
   online: false,
@@ -67,8 +67,5 @@ export const baseEntity = (): IEntity => ({
     raw: logoPath,
   },
 
-  whitelist: {
-    enabled: false,
-    persons: [],
-  },
+  access: [],
 });
