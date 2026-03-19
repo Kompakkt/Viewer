@@ -24,25 +24,14 @@ import {
   IStrippedUserData,
   IUserData,
   Collection,
-} from 'src/common';
+} from '@kompakkt/common';
 import {
   AuthConcern,
   AuthResult,
   LoginComponent,
 } from '../../components/dialogs/dialog-login/login.component';
 import { BackendService } from '../backend/backend.service';
-import { IUserDataWithoutData } from 'src/common/interfaces';
-
-const getWhitelistedPersons = (element: IEntity | ICompilation) => {
-  return (
-    element.whitelist.groups
-      // Flatten group members and owners
-      .map(group => group.members.concat(...group.owners))
-      .reduce((acc, val) => acc.concat(val), [] as IStrippedUserData[])
-      // Combine with whitelisted persons
-      .concat(...element.whitelist.persons)
-  );
-};
+import { IUserDataWithoutData } from '@kompakkt/common/interfaces';
 
 const isUserOwned = <T extends IEntity | ICompilation>(
   element: T,
@@ -57,7 +46,7 @@ const isUserWhitelisted = (
   element: IEntity | ICompilation,
   userdata: IUserData | IUserDataWithoutData,
 ) => {
-  const persons = getWhitelistedPersons(element);
+  const persons = element.whitelist.persons;
   // This is according to the behaviour of the annotation access dialog in the repo
   // No persons with enabled whitelist = open access
   if (persons.length === 0) return true;

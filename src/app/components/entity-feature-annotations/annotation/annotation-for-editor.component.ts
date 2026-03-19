@@ -9,7 +9,7 @@ import {
   TooltipDirective,
   MenuComponent,
   MenuOptionComponent,
-} from 'komponents';
+} from '@kompakkt/komponents';
 import { FixImageUrlPipe } from 'src/app/pipes/fix-image-url.pipe';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-preview.component';

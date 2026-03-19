@@ -2,7 +2,7 @@ import { Component, computed, HostBinding, OnInit, signal } from '@angular/core'
 
 import { AsyncPipe } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
-import { ButtonComponent, TooltipDirective } from 'komponents';
+import { ButtonComponent, TooltipDirective } from '@kompakkt/komponents';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { OverlayService } from '../../services/overlay/overlay.service';
 import { ProcessingService } from '../../services/processing/processing.service';

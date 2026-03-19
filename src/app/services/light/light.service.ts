@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { DirectionalLight, PointLight, Scene, Vector3, Color3 } from '@babylonjs/core';
 
-import { IEntityLight, IEntitySettings } from 'src/common';
+import { IEntityLight, IEntitySettings } from '@kompakkt/common';
 import { BabylonService } from '../babylon/babylon.service';
 import { ProcessingService } from '../processing/processing.service';
 
@@ -17,7 +17,10 @@ export class LightService {
 
   private entitySettings: IEntitySettings | undefined;
 
-  constructor(private babylon: BabylonService, private processing: ProcessingService) {
+  constructor(
+    private babylon: BabylonService,
+    private processing: ProcessingService,
+  ) {
     this.scene = this.babylon.getScene();
     this.processing.settings$.subscribe(({ localSettings }) => {
       this.entitySettings = localSettings;

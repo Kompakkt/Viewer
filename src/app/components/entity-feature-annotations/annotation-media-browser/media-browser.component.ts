@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Output } from '@angular/core';
-import { ButtonComponent, ButtonRowComponent, InputComponent } from 'komponents';
+import { ButtonComponent, ButtonRowComponent, InputComponent } from '@kompakkt/komponents';
 import { filter, firstValueFrom, map } from 'rxjs';
-import { IEntity, isCompilation, isEntity } from 'src/common';
+import { IEntity, isCompilation, isEntity } from '@kompakkt/common';
 import { environment } from 'src/environment';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { ProcessingService } from '../../../services/processing/processing.service';
