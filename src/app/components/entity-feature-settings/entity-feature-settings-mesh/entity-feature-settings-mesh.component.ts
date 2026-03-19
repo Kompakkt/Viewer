@@ -29,7 +29,6 @@ import { AsAbsolutePipe } from 'src/app/pipes/as-absolute.pipe';
     AsyncPipe,
     TranslatePipe,
     AsAbsolutePipe,
-    KeyValuePipe,
     ButtonRowComponent,
     ButtonComponent,
     DetailsComponent,

@@ -49,7 +49,7 @@
     "@babylonjs/loaders": "8.38.0",
     "@babylonjs/materials": "8.38.0",
     "@babylonjs/serializers": "8.38.0",
-    "@kompakkt/common": "git+https://github.com/Kompakkt/Common.git#0406b95",
+    "@kompakkt/common": "git+https://github.com/Kompakkt/Common#07dd559f75ae4e44adebe786c39b2343740df5ab",
     "@kompakkt/komponents": "git+https://github.com/Kompakkt/Komponents#b27043045b9777ef862e7747f5709521a0872e48",
     "@kompakkt/plugins": "git+https://github.com/Kompakkt/Plugins#b61623a",
     "bson-objectid": "^2.0.4",
