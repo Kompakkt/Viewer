@@ -19,7 +19,7 @@ export const defaultEntity: IEntity = {
     username: 'kompakkt',
     fullname: 'kompakkt',
     profile: {
-      _id: '',
+      profileId: '',
       type: ProfileType.user,
     }
   },
@@ -46,7 +46,7 @@ export const fallbackEntity: IEntity = {
     username: 'kompakkt',
     fullname: 'kompakkt',
     profile: {
-      _id: '',
+      profileId: '',
       type: ProfileType.user,
     }
   },

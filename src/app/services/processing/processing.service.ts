@@ -136,12 +136,12 @@ export class ProcessingService {
     }),
   );
 
-  isUserWhitelistedForCompilation$ = combineLatest({
+  doesUserHaveCompilationAccess$ = combineLatest({
     compilation: this.compilation$,
   }).pipe(
     switchMap(async ({ compilation }) => {
       if (!compilation) return false;
-      return this.userdata.isUserWhitelistedFor(compilation);
+      return this.userdata.doesUserHaveAccess(compilation);
     }),
   );
 
@@ -156,7 +156,7 @@ export class ProcessingService {
     mode: this.mode$,
     isAuthenticated: this.userdata.isAuthenticated$,
     isOwner: this.isOwner$,
-    isUserWhitelistedForCompilation: this.isUserWhitelistedForCompilation$,
+    doesUserHaveCompilationAccess: this.doesUserHaveCompilationAccess$,
   }).pipe(
     map(args => {
       const { entity, compilation } = args;
@@ -177,15 +177,7 @@ export class ProcessingService {
 
       if (args.isCompilationLoaded) {
         if (!compilation) return false;
-        if (compilation.whitelist && compilation.whitelist.enabled) {
-          if (!args.isAuthenticated) return false;
-          return args.isUserWhitelistedForCompilation || args.isOwner.ofCompilation;
-        } else if (compilation.access) {
-          if (!args.isAuthenticated) return false;
-          return args.isUserWhitelistedForCompilation || args.isOwner.ofCompilation;
-        } else {
-          return args.isOwner.ofCompilation;
-        }
+        return args.doesUserHaveCompilationAccess || args.isOwner.ofCompilation;
       } else {
         if ((args.isDefault || args.isFallback) && args.mode === 'annotation') return true;
         if (args.isOwner.ofEntity) return true;
@@ -596,7 +588,7 @@ export class ProcessingService {
         }
 
         // Check if access is otherwise restricted
-        const isRestricted = !entity.finished || !entity.online || entity.whitelist.enabled;
+        const isRestricted = !entity.finished || !entity.online;
         console.log('Are access to this entity restricted', isRestricted);
 
         if (isRestricted) {
@@ -620,9 +612,7 @@ export class ProcessingService {
         if (!auth) return false;
         // Check for ownership
         if (!this.userdata.doesUserOwn(entity)) {
-          // Check for whitelist
-          if (!entity.whitelist.enabled) return false;
-          if (!this.userdata.isUserWhitelistedFor(entity)) return false;
+          if (!this.userdata.doesUserHaveAccess(entity)) return false;
         }
         return true;
       })

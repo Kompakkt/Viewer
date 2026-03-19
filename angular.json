@@ -71,7 +71,14 @@
           },
           "defaultConfiguration": "development",
           "options": {
-            "servePath": "/viewer/"
+            "servePath": "/viewer/",
+            "prebundle": {
+              "exclude": [
+                "@kompakkt/common",
+                "@kompakkt/komponents",
+                "@kompakkt/plugins"
+              ]
+            }
           }
         }
       },
