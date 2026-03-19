@@ -11,7 +11,7 @@ import {
   Vector3,
 } from '@babylonjs/core';
 import { debounceTime, filter, firstValueFrom } from 'rxjs';
-import { IColor, IEntitySettings, IPosition } from 'src/common';
+import { IColor, IEntitySettings, IPosition } from '@kompakkt/common';
 import { minimalSettings } from '../../../assets/settings/settings';
 import { AnnotationService } from '../annotation/annotation.service';
 import { BabylonService } from '../babylon/babylon.service';

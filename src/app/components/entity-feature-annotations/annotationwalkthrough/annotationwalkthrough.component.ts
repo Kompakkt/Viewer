@@ -2,7 +2,7 @@ import { AsyncPipe } from '@angular/common';
 import { Component, HostBinding, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIcon } from '@angular/material/icon';
-import { ButtonComponent, TooltipDirective } from 'komponents';
+import { ButtonComponent, TooltipDirective } from '@kompakkt/komponents';
 import { BehaviorSubject, combineLatest, firstValueFrom, map } from 'rxjs';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { AnnotationService } from '../../../services/annotation/annotation.service';

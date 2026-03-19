@@ -8,8 +8,8 @@ import {
   IDigitalEntity,
   IEntity,
   IUserData,
-} from 'src/common';
-import { IUserDataWithoutData, UserDataCollectionDocumentType } from 'src/common/interfaces';
+} from '@kompakkt/common';
+import { IUserDataWithoutData, UserDataCollectionDocumentType } from '@kompakkt/common/interfaces';
 import { environment } from 'src/environment';
 
 @Injectable({

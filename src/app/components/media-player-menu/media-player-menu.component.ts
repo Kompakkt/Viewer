@@ -2,7 +2,7 @@ import { Component, computed, effect, inject, Pipe, PipeTransform, signal } from
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { Sound } from '@babylonjs/core';
-import { ButtonComponent, SliderComponent } from 'komponents';
+import { ButtonComponent, SliderComponent } from '@kompakkt/komponents';
 import { interval } from 'rxjs';
 import { BabylonService } from 'src/app/services/babylon/babylon.service';
 

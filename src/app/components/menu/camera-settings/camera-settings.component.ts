@@ -1,7 +1,7 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, ElementRef, HostListener, OnInit, effect, signal } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { ButtonComponent, ButtonRowComponent, SliderComponent } from 'komponents';
+import { ButtonComponent, ButtonRowComponent, SliderComponent } from '@kompakkt/komponents';
 import { BehaviorSubject, combineLatestWith, debounceTime, filter, skip } from 'rxjs';
 import { AnnotationService } from 'src/app/services/annotation/annotation.service';
 import { BabylonService } from 'src/app/services/babylon/babylon.service';

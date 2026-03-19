@@ -10,9 +10,9 @@ import {
   InputComponent,
   LabelledCheckboxComponent,
   SliderComponent,
-} from 'komponents';
+} from '@kompakkt/komponents';
 import { firstValueFrom, map } from 'rxjs';
-import { IColor } from 'src/common';
+import { IColor } from '@kompakkt/common';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { BabylonService } from '../../../services/babylon/babylon.service';
 import { EntitySettingsService } from '../../../services/entitysettings/entitysettings.service';

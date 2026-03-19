@@ -5,7 +5,13 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ActionManager, ExecuteCodeAction, PickingInfo, Tags, Vector3 } from '@babylonjs/core';
 import { BehaviorSubject, ReplaySubject, combineLatest, firstValueFrom, fromEvent } from 'rxjs';
 import { distinct, filter, map, switchMap } from 'rxjs/operators';
-import { IAnnotation, IVector3, IAmbiguousVector3, asVector3, isAnnotation } from 'src/common';
+import {
+  IAnnotation,
+  IVector3,
+  IAmbiguousVector3,
+  asVector3,
+  isAnnotation,
+} from '@kompakkt/common';
 import { annotationFallback, annotationLogo } from '../../../assets/annotations/annotations';
 import {
   AuthConcern,
@@ -20,7 +26,7 @@ import { ProcessingService } from '../processing/processing.service';
 import { UserdataService } from '../userdata/userdata.service';
 import { createMarker } from './visual3DElements';
 import { ReorderMovement } from 'src/app/components/entity-feature-annotations/annotation/annotation.component';
-import { ExtenderTransformer } from '@kompakkt/extender';
+import { ExtenderTransformer } from '@kompakkt/plugins/extender';
 
 const isDefaultAnnotation = (annotation: IAnnotation) =>
   !annotation.target.source.relatedCompilation ||
