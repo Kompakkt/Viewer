@@ -2,7 +2,7 @@ import { AsyncPipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { filter, map } from 'rxjs';
 import { FixImageUrlPipe } from 'src/app/pipes/fix-image-url.pipe';
-import { isCompilation, isEntity } from 'src/common';
+import { isCompilation, isEntity } from '@kompakkt/common';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ProcessingService } from '../../services/processing/processing.service';
 

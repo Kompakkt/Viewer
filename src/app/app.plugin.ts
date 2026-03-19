@@ -1,4 +1,4 @@
-import { provideExtender } from '@kompakkt/extender';
+import { provideExtender } from '@kompakkt/plugins/extender';
 /*import { HelloWorldPlugin } from '@kompakkt/plugin-hello-world';
 import { TranslatePlugin } from '@kompakkt/plugin-i18n';
 import { SemanticKompakktMetadataPlugin } from '@kompakkt/plugin-semantic-kompakkt-metadata';*/

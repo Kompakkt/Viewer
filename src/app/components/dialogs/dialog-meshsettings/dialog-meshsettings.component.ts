@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
-import { ButtonComponent, ButtonRowComponent } from 'komponents';
+import { ButtonComponent, ButtonRowComponent } from '@kompakkt/komponents';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 @Component({

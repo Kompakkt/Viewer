@@ -6,7 +6,7 @@ import { EntitySettingsService } from '../../../services/entitysettings/entityse
 import { LightService } from '../../../services/light/light.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
 
-import { ButtonComponent, InputComponent, SliderComponent } from 'komponents';
+import { ButtonComponent, InputComponent, SliderComponent } from '@kompakkt/komponents';
 
 @Component({
   selector: 'app-entity-feature-settings-lights',

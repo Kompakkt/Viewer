@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { saveAs } from 'file-saver';
 import { combineLatest, firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { IColor } from 'src/common';
+import { IColor } from '@kompakkt/common';
 import { BabylonService } from '../../services/babylon/babylon.service';
 import { BackendService } from '../../services/backend/backend.service';
 import { EntitySettingsService } from '../../services/entitysettings/entitysettings.service';
@@ -20,7 +20,7 @@ import {
   LabelledCheckboxComponent,
   WizardComponent,
   WizardStepComponent,
-} from 'komponents';
+} from '@kompakkt/komponents';
 import { FixImageUrlPipe } from 'src/app/pipes/fix-image-url.pipe';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { DialogMeshsettingsComponent } from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';

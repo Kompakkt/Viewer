@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import fscreen from 'fscreen';
-import { ButtonComponent, TooltipDirective } from 'komponents';
+import { ButtonComponent, TooltipDirective } from '@kompakkt/komponents';
 import { firstValueFrom, map } from 'rxjs';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { BabylonService } from '../../services/babylon/babylon.service';

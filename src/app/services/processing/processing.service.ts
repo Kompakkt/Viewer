@@ -12,7 +12,7 @@ import {
   map,
   switchMap,
 } from 'rxjs';
-import { IAnnotation, ICompilation, IEntity, IEntitySettings, isEntity } from 'src/common';
+import { IAnnotation, ICompilation, IEntity, IEntitySettings, isEntity } from '@kompakkt/common';
 import { environment } from 'src/environment';
 import { baseEntity } from '../../../assets/defaults';
 import { defaultEntity, fallbackEntity } from '../../../assets/entities/entities';

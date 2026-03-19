@@ -10,7 +10,7 @@ import { MenuComponent } from '../menu/menu.component';
 import { SidenavMenuComponent } from '../sidenav-menu/sidenav-menu.component';
 import { SidenavComponent } from '../sidenav/sidenav.component';
 import { BehaviorSubject, combineLatest, from, map, of } from 'rxjs';
-import { ButtonComponent, ButtonRowComponent } from 'komponents';
+import { ButtonComponent, ButtonRowComponent } from '@kompakkt/komponents';
 import { GuideComponent } from '../guide/guide.component';
 import { MediaPlayerMenuComponent } from '../media-player-menu/media-player-menu.component';
 
