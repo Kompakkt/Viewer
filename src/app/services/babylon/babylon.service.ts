@@ -158,6 +158,9 @@ export class BabylonService {
       preserveDrawingBuffer: true,
       stencil: true,
     });
+    // TODO: Should this be configurable? Theres no good way to detect the users actual refresh rate.
+    // 144Hz is an estimate based on market share research for common high refresh-rate monitors.
+    this.engine.maxFPS = 144;
 
     this.scene = new Scene(this.engine);
     this.scene.createDefaultEnvironment(
