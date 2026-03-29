@@ -446,11 +446,18 @@ export class EntitySettingsService {
     if (isInUpload && hasMeshSettings) {
       this.worldAxisInitialSize = size * 1.2;
       this.localAxisInitialSize = size * 1.1;
-      this.groundInitialSize = size * 1.2;
+      this.groundInitialSize = size * 2;
       createWorldAxis(scene, this.worldAxisInitialSize);
       createlocalAxes(scene, this.localAxisInitialSize, this.center, this.initialCenterPoint);
       this.ground = createGround(scene, this.groundInitialSize);
-      this.ground.position = this.center.position.clone();
+      this.ground.setParent(this.center);
+      this.ground.position = this.initialCenterPoint.subtract(
+        new Vector3(0, this.initialSize.y / 2, 0),
+      );
+      this.ground.renderingGroupId = 1;
+      const groundAbsolutePosition = this.ground.getAbsolutePosition().clone();
+      this.ground.setParent(null, true);
+      this.ground.setAbsolutePosition(groundAbsolutePosition);
       this.setGroundMaterial();
     }
   }
