@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, OnInit, effect, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, effect, signal } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ButtonComponent, ButtonRowComponent, SliderComponent } from 'komponents';
 import { BehaviorSubject, combineLatestWith, debounceTime, filter, skip } from 'rxjs';
@@ -30,6 +30,7 @@ export class CameraSettingsComponent implements OnInit {
   constructor(
     public babylon: BabylonService,
     public annotationService: AnnotationService,
+      private elementRef: ElementRef,
   ) {
     effect(() => {
       const cameraSpeed = this.cameraSpeed();
@@ -77,4 +78,16 @@ export class CameraSettingsComponent implements OnInit {
   }
 
   ngOnInit(): void {}
+
+  //Alternate way to close camera-settings
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    if (!this.opened$.getValue()) return;
+
+    const clickedInside = this.elementRef.nativeElement.contains(event.target);
+
+    if (!clickedInside) {
+      this.close();
+    }
+  }
 }

@@ -6,7 +6,7 @@
           icon-button
           tooltip="{{ 'Camera settings' | translate }}"
           tooltipPosition="above"
-          (click)="cameraSettings.toggle()"
+          (click)="cameraSettings.toggle(); $event.stopPropagation()"
         >
           <mat-icon>videocam</mat-icon>
         </k-button>
