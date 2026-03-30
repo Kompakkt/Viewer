@@ -177,7 +177,10 @@ export class ProcessingService {
 
       if (args.isCompilationLoaded) {
         if (!compilation) return false;
-        if (compilation.whitelist.enabled) {
+        if (compilation.whitelist && compilation.whitelist.enabled) {
+          if (!args.isAuthenticated) return false;
+          return args.isUserWhitelistedForCompilation || args.isOwner.ofCompilation;
+        } else if (compilation.access) {
           if (!args.isAuthenticated) return false;
           return args.isUserWhitelistedForCompilation || args.isOwner.ofCompilation;
         } else {
