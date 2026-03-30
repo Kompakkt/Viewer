@@ -21,7 +21,7 @@ export const defaultEntity: IEntity = {
     profile: {
       profileId: '',
       type: ProfileType.user,
-    }
+    },
   },
   mediaType: 'entity',
   settings: settingsKompakktLogo,
@@ -48,7 +48,7 @@ export const fallbackEntity: IEntity = {
     profile: {
       profileId: '',
       type: ProfileType.user,
-    }
+    },
   },
   mediaType: 'entity',
   processed: {

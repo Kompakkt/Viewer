@@ -1,7 +1,7 @@
-import { Effect, Engine, Mesh, Scene, ShaderMaterial } from "@babylonjs/core";
-import { Copc } from "copc";
+import { Effect, Engine, Mesh, Scene, ShaderMaterial } from '@babylonjs/core';
+import { Copc } from 'copc';
 
-Effect.ShadersStore["pointCloudVertexShader"] = `// pointCloud.vertex.fx
+Effect.ShadersStore['pointCloudVertexShader'] = `// pointCloud.vertex.fx
 precision highp float;
 
 attribute vec3 position;
@@ -39,7 +39,7 @@ void main(void) {
     vPointSize = gl_PointSize;
 }`;
 
-Effect.ShadersStore["pointCloudFragmentShader"] = `// pointCloud.fragment.fx
+Effect.ShadersStore['pointCloudFragmentShader'] = `// pointCloud.fragment.fx
 precision highp float;
 
 varying vec3 vColor;
@@ -54,27 +54,21 @@ void main(void) {
 
 export const prepareCopcShaderMaterial = (scene: Scene, copc: Copc) => {
   const pointMat = new ShaderMaterial(
-    "pointCloudMaterial",
+    'pointCloudMaterial',
     scene,
     {
-      vertex: "pointCloud",
-      fragment: "pointCloud",
+      vertex: 'pointCloud',
+      fragment: 'pointCloud',
     },
     {
-      attributes: ["position", "color"],
-      uniforms: [
-        "world",
-        "viewProjection",
-        "cameraPosition",
-        "pointSizeScale",
-        "maxPointSize",
-      ],
+      attributes: ['position', 'color'],
+      uniforms: ['world', 'viewProjection', 'cameraPosition', 'pointSizeScale', 'maxPointSize'],
     },
   );
   pointMat.needAlphaTesting = () => true;
   pointMat.needAlphaBlending = () => true;
-  pointMat.setFloat("pointSizeScale", copc.info.spacing * 0.1);
-  pointMat.setFloat("maxPointSize", 6);
+  pointMat.setFloat('pointSizeScale', copc.info.spacing * 0.1);
+  pointMat.setFloat('maxPointSize', 6);
   pointMat.pointsCloud = true;
   pointMat.pointSize = 1;
   pointMat.needDepthPrePass = true;
@@ -82,12 +76,12 @@ export const prepareCopcShaderMaterial = (scene: Scene, copc: Copc) => {
 
   scene.getEngine().setDepthBuffer(true);
   scene.onBeforeRenderObservable.add(() => {
-    pointMat.setVector3("cameraPosition", scene.activeCamera!.position);
+    pointMat.setVector3('cameraPosition', scene.activeCamera!.position);
   });
 
-  (window as any)["setPointSize"] = (scale: number, maxSize: number) => {
-    pointMat.setFloat("pointSizeScale", scale);
-    pointMat.setFloat("maxPointSize", maxSize);
+  (window as any)['setPointSize'] = (scale: number, maxSize: number) => {
+    pointMat.setFloat('pointSizeScale', scale);
+    pointMat.setFloat('maxPointSize', maxSize);
   };
 
   return pointMat;

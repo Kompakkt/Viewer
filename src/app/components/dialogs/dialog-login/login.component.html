@@ -1,20 +1,23 @@
 <form action="auth-dialog_submit" method="get" accept-charset="utf-8">
-  @switch (concern) { @case ('login') {
-  <h1>{{ 'Login' | translate }}</h1>
+  @switch (concern) {
+    @case ('login') {
+      <h1>{{ 'Login' | translate }}</h1>
 
-  <p>
-    {{ 'This content is protected and requires authentication.' | translate }}
-  </p>
-  } @case ('delete-annotation') {
-  <h1>{{ 'Delete annotation' | translate }}</h1>
+      <p>
+        {{ 'This content is protected and requires authentication.' | translate }}
+      </p>
+    }
+    @case ('delete-annotation') {
+      <h1>{{ 'Delete annotation' | translate }}</h1>
 
-  <p>
-    {{ 'Are you sure you want to delete this annotation forever?' | translate }}
-  </p>
-  <p>
-    {{ 'If you are sure, enter your username and password to confirm.' | translate }}
-  </p>
-  } }
+      <p>
+        {{ 'Are you sure you want to delete this annotation forever?' | translate }}
+      </p>
+      <p>
+        {{ 'If you are sure, enter your username and password to confirm.' | translate }}
+      </p>
+    }
+  }
 
   <k-input
     [label]="'Username' | translate"
@@ -28,7 +31,7 @@
   />
 
   @if (loginFailed) {
-  <p style="color: red">{{ 'Login failed' | translate }}</p>
+    <p style="color: red">{{ 'Login failed' | translate }}</p>
   }
 
   <k-button-row>
@@ -45,11 +48,14 @@
       full-width
       type="solid-primary"
     >
-      @switch (concern) { @case ('login') {
-      {{ 'Login' | translate }}
-      } @case ('delete-annotation') {
-      {{ 'Delete forever' | translate }}
-      } }
+      @switch (concern) {
+        @case ('login') {
+          {{ 'Login' | translate }}
+        }
+        @case ('delete-annotation') {
+          {{ 'Delete forever' | translate }}
+        }
+      }
     </k-button>
   </k-button-row>
 </form>

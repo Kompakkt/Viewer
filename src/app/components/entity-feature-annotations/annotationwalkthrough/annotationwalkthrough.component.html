@@ -1,21 +1,21 @@
 @if (showWalkthrough$ | async) {
-<div id="annotationwalkthrough">
-  <k-button
-    (click)="previousAnnotation()"
-    tooltip="{{ 'Back' | translate }}"
-    tooltipPosition="above"
-    icon-button
-  >
-    <mat-icon [attr.aria-label]="'Back' | translate">keyboard_arrow_left</mat-icon>
-  </k-button>
-  <span id="walktertitle">{{ title$ | async }}</span>
-  <k-button
-    (click)="nextAnnotation()"
-    tooltip="{{ 'Next' | translate }}"
-    tooltipPosition="above"
-    icon-button
-  >
-    <mat-icon [attr.aria-label]="'Save Scene' | translate">keyboard_arrow_right</mat-icon>
-  </k-button>
-</div>
+  <div id="annotationwalkthrough">
+    <k-button
+      (click)="previousAnnotation()"
+      tooltip="{{ 'Back' | translate }}"
+      tooltipPosition="above"
+      icon-button
+    >
+      <mat-icon [attr.aria-label]="'Back' | translate">keyboard_arrow_left</mat-icon>
+    </k-button>
+    <span id="walktertitle">{{ title$ | async }}</span>
+    <k-button
+      (click)="nextAnnotation()"
+      tooltip="{{ 'Next' | translate }}"
+      tooltipPosition="above"
+      icon-button
+    >
+      <mat-icon [attr.aria-label]="'Save Scene' | translate">keyboard_arrow_right</mat-icon>
+    </k-button>
+  </div>
 }

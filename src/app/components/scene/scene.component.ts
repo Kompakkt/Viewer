@@ -33,7 +33,7 @@ import { MediaPlayerMenuComponent } from '../media-player-menu/media-player-menu
   ],
 })
 export class SceneComponent implements AfterViewInit {
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   public onResize() {
     this.babylon.resize();
   }

@@ -2,8 +2,8 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": [],
+    "types": []
   },
   "files": ["./src/main.ts"],
-  "include": ["./src/**/*.ts", "./src/**/*.d.ts", "./node_modules/@kompakkt/**/*.ts"],
+  "include": ["./src/**/*.ts", "./src/**/*.d.ts", "./node_modules/@kompakkt/**/*.ts"]
 }

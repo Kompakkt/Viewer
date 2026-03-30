@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, viewChild } from '@angular/core';
 
 @Component({
   selector: 'app-render-canvas',
@@ -7,8 +7,5 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
   standalone: true,
 })
 export class RenderCanvasComponent {
-  @ViewChild('renderCanvas', { read: ElementRef })
-  public canvasRef: ElementRef<HTMLCanvasElement> = new ElementRef<HTMLCanvasElement>(
-    document.createElement('canvas'),
-  );
+  public readonly canvasRef = viewChild('renderCanvas', { read: ElementRef });
 }

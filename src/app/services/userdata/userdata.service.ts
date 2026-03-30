@@ -49,7 +49,9 @@ const doesUserHaveAccess = (
   const possibleAccessEntries = element.access.filter(e => {
     // TODO: Is account check necessary, or only profile check?
     if (e._id === userdata._id) return true;
-    return userdata.profiles.some(p => p.profileId === e.profile.profileId && p.type === e.profile.type);
+    return userdata.profiles.some(
+      p => p.profileId === e.profile.profileId && p.type === e.profile.type,
+    );
   });
   return possibleAccessEntries.length > 0 || element.creator?._id === userdata._id;
 };

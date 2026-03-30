@@ -5,7 +5,7 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true,
-    "trace": true,
+    "trace": true
   },
   "compileOnSave": false,
   "compilerOptions": {
@@ -26,8 +26,8 @@
     "target": "ES2022",
     "useDefineForClassFields": false,
     "paths": {
-      "src/*": ["./src/*"],
+      "src/*": ["./src/*"]
     },
-    "preserveSymlinks": true,
-  },
+    "preserveSymlinks": true
+  }
 }

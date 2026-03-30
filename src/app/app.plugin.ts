@@ -6,7 +6,7 @@ import { TranslatePipe } from './pipes/translate.pipe';
 
 export const pluginProviders = provideExtender({
   plugins: [
-    new HelloWorldPlugin(),// new SemanticKompakktMetadataPlugin()
+    new HelloWorldPlugin(), // new SemanticKompakktMetadataPlugin()
   ],
   componentSet: 'viewerComponents',
   services: {
