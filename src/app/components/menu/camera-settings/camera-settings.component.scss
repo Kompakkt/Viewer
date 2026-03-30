@@ -32,6 +32,11 @@ div#camera-settings {
     margin: 0;
   }
 
+  p {
+    overflow-wrap: break-word;
+    text-wrap: balance;
+  }
+
   &.opened {
     transform: scale(1);
     filter: opacity(1);
