@@ -1,5 +1,4 @@
 import { EventEmitter } from '@angular/core';
-import { e } from '@angular/material/ripple.d-BxTUZJt7';
 import { BehaviorSubject, filter, firstValueFrom } from 'rxjs';
 
 const MAX_RETRIES = 3;

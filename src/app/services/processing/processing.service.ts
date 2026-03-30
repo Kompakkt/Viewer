@@ -586,7 +586,10 @@ export class ProcessingService {
 
         // Check if this is an external file
         // This can fail if the external file is not available or not reachable
-        const isExternal = !!entity.externalFile;
+        const isExternal =
+          'externalFile' in entity &&
+          typeof entity.externalFile === 'string' &&
+          entity.externalFile.length > 0;
         if (isExternal) {
           console.log('Loading external file');
           return this.loadEntity(entity);

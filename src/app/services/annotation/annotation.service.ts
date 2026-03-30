@@ -254,8 +254,18 @@ export class AnnotationService {
     const personName = userdata ? userdata.fullname : 'guest';
     const personID = userdata ? userdata._id : 'guest';
 
-    const referencePoint = result.pickedPoint!;
-    const referenceNormal = result.getNormal(true, true)!;
+    const referencePoint = result.pickedPoint;
+    const referenceNormal = (() => {
+      const trueTrue = result.getNormal(true, true);
+      if (trueTrue) return trueTrue;
+      const trueFalse = result.getNormal(true, false);
+      return trueFalse;
+    })();
+
+    if (!referencePoint || !referenceNormal) {
+      console.warn('Could not get normal from picking result, using fallback normal', result);
+      return;
+    }
 
     const relatedCompilation = isCompilationLoaded && compilation ? compilation._id.toString() : '';
 
@@ -464,6 +474,11 @@ export class AnnotationService {
 
   public drawMarker(newAnnotation: IAnnotation) {
     const { referencePoint, referenceNormal } = newAnnotation.target.selector;
+    if (!referencePoint || !referenceNormal) {
+      console.warn('Missing reference point or normal for annotation', newAnnotation);
+      return;
+    }
+
     const positionVector = asVector3(referencePoint);
     const normalVector = asVector3(referenceNormal);
 
