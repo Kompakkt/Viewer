@@ -6,6 +6,7 @@ import { BehaviorSubject, combineLatestWith, debounceTime, filter, skip } from '
 import { AnnotationService } from 'src/app/services/annotation/annotation.service';
 import { BabylonService } from 'src/app/services/babylon/babylon.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-camera-settings',
@@ -14,6 +15,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
   imports: [
     FormsModule,
     ReactiveFormsModule,
+    MatIconModule,
     AsyncPipe,
     TranslatePipe,
     SliderComponent,
@@ -30,7 +32,7 @@ export class CameraSettingsComponent implements OnInit {
   constructor(
     public babylon: BabylonService,
     public annotationService: AnnotationService,
-      private elementRef: ElementRef,
+    private elementRef: ElementRef,
   ) {
     effect(() => {
       const cameraSpeed = this.cameraSpeed();

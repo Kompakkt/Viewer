@@ -5,37 +5,39 @@
 
   <div class="title-style">
     <h1>{{ 'Camera settings' | translate }}</h1>
-    <k-button type="solid-primary" (click)="close()">X</k-button>
+    <k-button icon-button color="solid-primary" (click)="close()"
+      ><mat-icon>close</mat-icon></k-button
+    >
   </div>
 
   <p>{{ 'Type' | translate }}</p>
   @if (annotationService.isAnnotationMode$ | async) {
-  <p>
-    {{ 'Switching the camera type is not supported while annotating' | translate }}
-  </p>
+    <p>
+      {{ 'Switching the camera type is not supported while annotating' | translate }}
+    </p>
   } @else {
-  <k-button-row>
-    <k-button
-      (click)="babylon.cameraManager.setCameraType('ArcRotateCamera')"
-      [type]="
-        (babylon.cameraManager.cameraType$ | async) === 'ArcRotateCamera'
-          ? 'solid-primary'
-          : 'outlined-primary'
-      "
-      full-width
-      >{{ 'Orbit' | translate }}</k-button
-    >
-    <k-button
-      (click)="babylon.cameraManager.setCameraType('UniversalCamera')"
-      [type]="
-        (babylon.cameraManager.cameraType$ | async) === 'UniversalCamera'
-          ? 'solid-primary'
-          : 'outlined-primary'
-      "
-      full-width
-      >{{ 'Free' | translate }}</k-button
-    >
-  </k-button-row>
+    <k-button-row>
+      <k-button
+        (click)="babylon.cameraManager.setCameraType('ArcRotateCamera')"
+        [type]="
+          (babylon.cameraManager.cameraType$ | async) === 'ArcRotateCamera'
+            ? 'solid-primary'
+            : 'outlined-primary'
+        "
+        full-width
+        >{{ 'Orbit' | translate }}</k-button
+      >
+      <k-button
+        (click)="babylon.cameraManager.setCameraType('UniversalCamera')"
+        [type]="
+          (babylon.cameraManager.cameraType$ | async) === 'UniversalCamera'
+            ? 'solid-primary'
+            : 'outlined-primary'
+        "
+        full-width
+        >{{ 'Free' | translate }}</k-button
+      >
+    </k-button-row>
   }
 
   <k-slider
@@ -49,5 +51,7 @@
   />
 
   <hr />
-  <k-button (click)="resetCamera()" type="outlined-secondary">{{ 'Reset camera' | translate }}</k-button>
+  <k-button (click)="resetCamera()" type="outlined-secondary">{{
+    'Reset camera' | translate
+  }}</k-button>
 </div>
