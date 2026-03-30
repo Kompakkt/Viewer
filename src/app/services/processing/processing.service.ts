@@ -496,9 +496,6 @@ export class ProcessingService {
           this.overlay.toggleSidenav(overlay, !!overlay);
         }
         this.bootstrapped$.next(true);
-      })
-      .finally(() => {
-        this.loadingScreen.hide();
       });
   }
 
@@ -677,9 +674,6 @@ export class ProcessingService {
         console.error('Failed to load entity from server', error);
         this.message.error('Failed to load entity from server');
         this.loadFallbackEntity();
-      })
-      .finally(() => {
-        this.loadingScreen.hide();
       });
   }
 }

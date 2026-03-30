@@ -25,6 +25,7 @@ import {
   AbstractMesh,
   WebGPUEngine,
   RegisterSceneLoaderPlugin,
+  ISceneLoaderProgressEvent,
 } from '@babylonjs/core';
 import '@babylonjs/core/Debug/debugLayer';
 import '@babylonjs/inspector';
@@ -52,6 +53,7 @@ import {
 import { beforeAudioRender } from './strategies/render-strategies';
 import { EptImporter } from './importers/ept/ept-importer';
 import { CopcImporter } from './importers/copc/copc-importer';
+import { LoadingScreenService } from './loadingscreen';
 
 RegisterSceneLoaderPlugin(new CopcImporter());
 RegisterSceneLoaderPlugin(new EptImporter());
@@ -61,6 +63,7 @@ type RGBA = { r: number; b: number; g: number; a: number };
 @Injectable({ providedIn: 'root' })
 export class BabylonService {
   private environmentInjector = inject(EnvironmentInjector);
+  private loadingScreen = inject(LoadingScreenService);
 
   // Create an instance of RenderCanvasComponent
   // and use this for the Engine
@@ -317,6 +320,14 @@ export class BabylonService {
     }
   }
 
+  public updateLoadingText(progressEvent: ISceneLoaderProgressEvent) {
+    if (progressEvent.lengthComputable) {
+      const percent = (progressEvent.loaded / progressEvent.total) * 100;
+      const roundedPercent = Math.round(percent * 100) / 100;
+      this.loadingScreen.updateLoadingText(`Loading: ${roundedPercent}%`);
+    }
+  }
+
   public async loadEntity(
     clearScene: boolean,
     rootUrl: string,
@@ -357,7 +368,9 @@ export class BabylonService {
       case 'entity':
       case 'model':
       default:
-        return load3DEntity(rootUrl, this.scene, isDefault).then(result => {
+        return load3DEntity(rootUrl, this.scene, isDefault, progress =>
+          this.updateLoadingText(progress),
+        ).then(result => {
           entity$.next(result);
           return result.meshes;
         });

@@ -23,6 +23,7 @@ import {
   createlocalAxes,
   createWorldAxis,
 } from './visualUIHelper';
+import { LoadingScreenService } from '../babylon/loadingscreen';
 
 const isDegreeSpectrum = (value: number) => {
   return value >= 0 && value <= 360 ? value : value > 360 ? 360 : 0;
@@ -62,6 +63,7 @@ export class EntitySettingsService {
     private processing: ProcessingService,
     private lights: LightService,
     private annotationService: AnnotationService,
+    private loadingScreen: LoadingScreenService,
   ) {
     this.processing.state$
       .pipe(
@@ -74,7 +76,8 @@ export class EntitySettingsService {
         requestAnimationFrame(() =>
           this.setUpSettings()
             .then(() => console.log('Settings loaded'))
-            .catch((err: Error) => console.log('Settings not loaded', err.message)),
+            .catch((err: Error) => console.log('Settings not loaded', err.message))
+            .finally(() => this.loadingScreen.hide()),
         );
       });
   }
