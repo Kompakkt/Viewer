@@ -65,6 +65,23 @@ const isUserWhitelisted = (
   return element.creator?._id === userdata._id;
 };
 
+const hasUserAccess = (
+  element: IEntity | ICompilation,
+  userdata: IUserData | IUserDataWithoutData,
+) => {
+  if (element.whitelist) {
+    const persons = getWhitelistedPersons(element);
+    if (persons.length === 0) return true;
+    if (persons.some(person => person._id === userdata._id)) return true;
+  } else {
+    const access = element.access;
+    if (Array.isArray(access)) {
+      if (access.some(user => user._id === userdata._id)) return true;
+    }
+  }
+  return element.creator?._id === userdata._id;
+};
+
 export type LoginData = { username: string; password: string };
 
 @Injectable({ providedIn: 'root' })
@@ -122,7 +139,8 @@ export class UserdataService {
     const userdata = await firstValueFrom(this.userData$);
     if (!userdata) return false;
     if (isEntity(element)) return isUserWhitelisted(element, userdata);
-    if (isCompilation(element)) return isUserWhitelisted(element, userdata);
+    // if (isCompilation(element)) return isUserWhitelisted(element, userdata);
+    if (isCompilation(element)) return hasUserAccess(element, userdata);
     return false;
   }
 

@@ -3,10 +3,10 @@
     {{ showNotification$ | async }}
   </div>
 
-<div class="title-style">
-  <h1>{{ 'Camera settings' | translate }}</h1>
-  <k-button type="solid-primary" (click)="close()">X</k-button>
-</div>
+  <div class="title-style">
+    <h1>{{ 'Camera settings' | translate }}</h1>
+    <k-button type="solid-primary" (click)="close()">X</k-button>
+  </div>
 
   <p>{{ 'Type' | translate }}</p>
   @if (annotationService.isAnnotationMode$ | async) {
