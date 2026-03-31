@@ -34,6 +34,7 @@ import { BackendService } from '../backend/backend.service';
 import { IUserDataWithoutData } from 'src/common/interfaces';
 
 const getWhitelistedPersons = (element: IEntity | ICompilation) => {
+  if (!('whitelist' in element)) return [];
   return (
     element.whitelist.groups
       // Flatten group members and owners

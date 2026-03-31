@@ -624,7 +624,7 @@ export class ProcessingService {
         // Check for ownership
         if (!this.userdata.doesUserOwn(entity)) {
           // Check for whitelist
-          if (!entity.whitelist.enabled) return false;
+          if ('whitelist' in entity && !entity.whitelist.enabled) return false;
           if (!this.userdata.isUserWhitelistedFor(entity)) return false;
         }
         return true;
