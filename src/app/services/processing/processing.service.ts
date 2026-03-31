@@ -596,7 +596,10 @@ export class ProcessingService {
         }
 
         // Check if access is otherwise restricted
-        const isRestricted = !entity.finished || !entity.online || entity.whitelist.enabled;
+        const isRestricted =
+          !entity.finished ||
+          !entity.online ||
+          ('whitelist' in entity && entity.whitelist?.enabled);
         console.log('Are access to this entity restricted', isRestricted);
 
         if (isRestricted) {
