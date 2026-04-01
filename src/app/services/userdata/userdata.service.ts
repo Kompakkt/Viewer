@@ -24,26 +24,14 @@ import {
   IStrippedUserData,
   IUserData,
   Collection,
-} from 'src/common';
+} from '@kompakkt/common';
 import {
   AuthConcern,
   AuthResult,
   LoginComponent,
 } from '../../components/dialogs/dialog-login/login.component';
 import { BackendService } from '../backend/backend.service';
-import { IUserDataWithoutData } from 'src/common/interfaces';
-
-const getWhitelistedPersons = (element: IEntity | ICompilation) => {
-  if (!('whitelist' in element)) return [];
-  return (
-    element.whitelist.groups
-      // Flatten group members and owners
-      .map(group => group.members.concat(...group.owners))
-      .reduce((acc, val) => acc.concat(val), [] as IStrippedUserData[])
-      // Combine with whitelisted persons
-      .concat(...element.whitelist.persons)
-  );
-};
+import { IUserDataWithoutData } from '@kompakkt/common/interfaces';
 
 const isUserOwned = <T extends IEntity | ICompilation>(
   element: T,
@@ -54,33 +42,18 @@ const isUserOwned = <T extends IEntity | ICompilation>(
   return element.creator?._id === userdata._id;
 };
 
-const isUserWhitelisted = (
+const doesUserHaveAccess = (
   element: IEntity | ICompilation,
   userdata: IUserData | IUserDataWithoutData,
 ) => {
-  const persons = getWhitelistedPersons(element);
-  // This is according to the behaviour of the annotation access dialog in the repo
-  // No persons with enabled whitelist = open access
-  if (persons.length === 0) return true;
-  if (persons.some(person => person._id === userdata._id)) return true;
-  return element.creator?._id === userdata._id;
-};
-
-const hasUserAccess = (
-  element: IEntity | ICompilation,
-  userdata: IUserData | IUserDataWithoutData,
-) => {
-  if (element.whitelist) {
-    const persons = getWhitelistedPersons(element);
-    if (persons.length === 0) return true;
-    if (persons.some(person => person._id === userdata._id)) return true;
-  } else {
-    const access = element.access;
-    if (Array.isArray(access)) {
-      if (access.some(user => user._id === userdata._id)) return true;
-    }
-  }
-  return element.creator?._id === userdata._id;
+  const possibleAccessEntries = element.access.filter(e => {
+    // TODO: Is account check necessary, or only profile check?
+    if (e._id === userdata._id) return true;
+    return userdata.profiles.some(
+      p => p.profileId === e.profile.profileId && p.type === e.profile.type,
+    );
+  });
+  return possibleAccessEntries.length > 0 || element.creator?._id === userdata._id;
 };
 
 export type LoginData = { username: string; password: string };
@@ -136,12 +109,11 @@ export class UserdataService {
     return false;
   }
 
-  public async isUserWhitelistedFor(element?: IEntity | ICompilation) {
+  public async doesUserHaveAccess(element?: IEntity | ICompilation) {
     const userdata = await firstValueFrom(this.userData$);
     if (!userdata) return false;
-    if (isEntity(element)) return isUserWhitelisted(element, userdata);
-    // if (isCompilation(element)) return isUserWhitelisted(element, userdata);
-    if (isCompilation(element)) return hasUserAccess(element, userdata);
+    if (isEntity(element)) return doesUserHaveAccess(element, userdata);
+    if (isCompilation(element)) return doesUserHaveAccess(element, userdata);
     return false;
   }
 

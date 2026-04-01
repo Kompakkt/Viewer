@@ -1,8 +1,8 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, QueryList, ViewChildren, inject } from '@angular/core';
+import { Component, inject, viewChildren } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { saveAs } from 'file-saver';
-import { ButtonComponent, TooltipDirective } from 'komponents';
+import { ButtonComponent, TooltipDirective } from '@kompakkt/komponents';
 import { combineLatest, firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
@@ -26,8 +26,7 @@ import { AnnotationComponent } from '../annotation/annotation.component';
   ],
 })
 export class AnnotationsEditorComponent {
-  @ViewChildren(AnnotationComponent)
-  annotationsList: QueryList<AnnotationComponent> | undefined;
+  readonly annotationsList = viewChildren(AnnotationComponent);
 
   public annotations = inject(AnnotationService);
   public processing = inject(ProcessingService);

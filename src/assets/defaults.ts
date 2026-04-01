@@ -1,4 +1,5 @@
-import { IEntity } from 'src/common/interfaces';
+import { ProfileType } from '@kompakkt/common';
+import { IEntity } from '@kompakkt/common/interfaces';
 
 const logoPath =
   Math.random() > 0.5
@@ -11,7 +12,12 @@ export const baseEntity = (): IEntity => ({
   name: 'Cube',
   annotations: {},
   relatedDigitalEntity: { _id: 'default_entity' },
-  creator: { _id: '', username: 'kompakkt', fullname: 'kompakkt' },
+  creator: {
+    _id: '',
+    username: 'kompakkt',
+    fullname: 'kompakkt',
+    profile: { profileId: '', type: ProfileType.user },
+  },
 
   finished: false,
   online: false,
@@ -66,9 +72,5 @@ export const baseEntity = (): IEntity => ({
     raw: logoPath,
   },
 
-  whitelist: {
-    enabled: false,
-    persons: [],
-    groups: [],
-  },
+  access: [],
 });

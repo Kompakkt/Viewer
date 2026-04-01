@@ -3,9 +3,10 @@
  *  - KompakktLogo(Default)
  */
 
-import { IEntity } from 'src/common/interfaces';
+import { IEntity } from '@kompakkt/common/interfaces';
 import { baseEntity } from '../defaults';
 import { settingsFallback, settingsKompakktLogo } from '../settings/settings';
+import { ProfileType } from '@kompakkt/common';
 
 export const defaultEntity: IEntity = {
   ...baseEntity(),
@@ -17,6 +18,10 @@ export const defaultEntity: IEntity = {
     _id: '',
     username: 'kompakkt',
     fullname: 'kompakkt',
+    profile: {
+      profileId: '',
+      type: ProfileType.user,
+    },
   },
   mediaType: 'entity',
   settings: settingsKompakktLogo,
@@ -40,6 +45,10 @@ export const fallbackEntity: IEntity = {
     _id: '',
     username: 'kompakkt',
     fullname: 'kompakkt',
+    profile: {
+      profileId: '',
+      type: ProfileType.user,
+    },
   },
   mediaType: 'entity',
   processed: {

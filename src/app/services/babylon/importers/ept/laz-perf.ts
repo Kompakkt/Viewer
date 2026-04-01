@@ -1,4 +1,4 @@
-import { createLazPerf } from "laz-perf";
+import { createLazPerf } from 'laz-perf';
 
 type Pointer = number;
 
@@ -17,11 +17,7 @@ declare class ChunkDecoder {
   constructor();
   delete(): void;
 
-  open(
-    pointDataRecordFormat: number,
-    pointDataRecordLength: number,
-    pointer: Pointer,
-  ): void;
+  open(pointDataRecordFormat: number, pointDataRecordLength: number, pointer: Pointer): void;
 
   getPoint(pointer: Pointer): void;
 }
@@ -67,9 +63,7 @@ export const decompress = async (arrayBuffer: ArrayBuffer) => {
 
   for (let i = 0; i < pointCount; i++) {
     lasZip.getPoint(dataPtr);
-    pointBuffer.set(
-      new Uint8Array(lazPerf.HEAP8.buffer, dataPtr, pointDataRecordLength),
-    );
+    pointBuffer.set(new Uint8Array(lazPerf.HEAP8.buffer, dataPtr, pointDataRecordLength));
 
     positions[i * 3 + 0] = view.getInt32(0, true);
     positions[i * 3 + 1] = view.getInt32(4, true);

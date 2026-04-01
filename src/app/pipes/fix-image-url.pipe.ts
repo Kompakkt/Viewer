@@ -5,7 +5,9 @@ const REPLACEMENTS = {
   'https://kompakkt.uni-koeln.de:8080/': 'https://kompakkt.de/server/',
 };
 
-const SERVER_URL = environment.server_url.endsWith('/') ? environment.server_url.slice(0, -1) : environment.server_url;
+const SERVER_URL = environment.server_url.endsWith('/')
+  ? environment.server_url.slice(0, -1)
+  : environment.server_url;
 
 @Pipe({
   name: 'fixImageUrl',
@@ -31,8 +33,6 @@ export class FixImageUrlPipe implements PipeTransform {
       return value;
     }
 
-    return value.startsWith('/')
-      ? SERVER_URL + value
-      : SERVER_URL + '/' + value;
+    return value.startsWith('/') ? SERVER_URL + value : SERVER_URL + '/' + value;
   }
 }

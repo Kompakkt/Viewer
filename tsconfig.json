@@ -9,31 +9,25 @@
   },
   "compileOnSave": false,
   "compilerOptions": {
-    "baseUrl": "./",
     "declaration": false,
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "importHelpers": true,
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "moduleResolution": "node",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
     "noImplicitAny": true,
     "noImplicitReturns": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "strict": true,
     "skipLibCheck": true,
     "target": "ES2022",
     "useDefineForClassFields": false,
-    "typeRoots": ["node_modules/@types", "src/@types"],
     "paths": {
-      "@kompakkt/extender": ["src/@kompakkt/plugins/extender/src"],
-      "@kompakkt/plugins/*": ["src/@kompakkt/plugins/plugins/*/src"],
-      "core-js/es7/reflect": ["node_modules/core-js/proposals/reflect-metadata"]
+      "src/*": ["./src/*"]
     },
     "preserveSymlinks": true
-  },
-  "exclude": ["src/@kompakkt/plugins/*.ts"]
+  }
 }

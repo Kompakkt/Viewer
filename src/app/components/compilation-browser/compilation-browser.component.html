@@ -1,17 +1,22 @@
 <h1>{{ 'Collection browser' | translate }}</h1>
 
-@if (compilation$ | async; as compilation) { @if (entities$ | async; as entities) {
-<h2>{{ compilation.name }}</h2>
-@if (entity$ | async; as selectedEntity) { @for (entity of entities; track entity) {
-<div
-  class="entity-card"
-  [class.selected]="entity._id === selectedEntity._id"
-  (click)="processing.fetchAndLoad(entity._id, undefined)"
->
-  <img
-    [src]="entity.settings.preview | fixImageUrl"
-    [style.--bg]="colorToRGBA(entity.settings.background.color)"
-  />
-  <span>{{ entity.name }}</span>
-</div>
-} } } }
+@if (compilation$ | async; as compilation) {
+  @if (entities$ | async; as entities) {
+    <h2>{{ compilation.name }}</h2>
+    @if (entity$ | async; as selectedEntity) {
+      @for (entity of entities; track entity) {
+        <div
+          class="entity-card"
+          [class.selected]="entity._id === selectedEntity._id"
+          (click)="processing.fetchAndLoad(entity._id, undefined)"
+        >
+          <img
+            [src]="entity.settings.preview | fixImageUrl"
+            [style.--bg]="colorToRGBA(entity.settings.background.color)"
+          />
+          <span>{{ entity.name }}</span>
+        </div>
+      }
+    }
+  }
+}

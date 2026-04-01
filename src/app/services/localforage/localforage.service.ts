@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import localForage from 'localforage';
 
-import { IAnnotation } from 'src/common';
+import { IAnnotation } from '@kompakkt/common';
 
 @Injectable({
   providedIn: 'root',

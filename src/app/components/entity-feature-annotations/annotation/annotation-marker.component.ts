@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, inject, input, OnInit, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { IAnnotation } from 'src/common';
+import { IAnnotation } from '@kompakkt/common';
 
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Engine, Matrix, Scene, Vector3 } from '@babylonjs/core';

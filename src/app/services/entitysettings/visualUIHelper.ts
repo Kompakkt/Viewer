@@ -57,16 +57,26 @@ const createAxis = (
   color: Color3,
   size: number,
   direction: Vector3,
-  parent: TransformNode
+  parent: TransformNode,
 ) => {
   const points = [
     Vector3.Zero(),
     direction.scale(size),
-    direction.scale(size * 0.95).add(new Vector3(size * 0.05, size * 0.05, size * 0.05).subtract(direction.scale(size * 0.05))),
+    direction
+      .scale(size * 0.95)
+      .add(
+        new Vector3(size * 0.05, size * 0.05, size * 0.05).subtract(direction.scale(size * 0.05)),
+      ),
     direction.scale(size),
-    direction.scale(size * 0.95).add(new Vector3(size * -0.05, size * -0.05, size * -0.05).subtract(direction.scale(size * 0.05)))
+    direction
+      .scale(size * 0.95)
+      .add(
+        new Vector3(size * -0.05, size * -0.05, size * -0.05).subtract(
+          direction.scale(size * 0.05),
+        ),
+      ),
   ];
-  
+
   const axis = MeshBuilder.CreateLines(name, { points, updatable: true }, scene);
   axis.color = color;
   axis.parent = parent;
@@ -81,7 +91,7 @@ const createAxisLabel = (
   color: Color3,
   size: number,
   direction: Vector3,
-  parent: TransformNode
+  parent: TransformNode,
 ) => {
   const label = createTextPlane(text, color.toHexString(), size / 10, 'axis', `axis${text}`, scene);
   label.position = direction.scale(size * 1.1);
@@ -100,7 +110,7 @@ export const createWorldAxis = (scene: Scene, size: number) => {
   const axes = [
     { name: 'X', color: new Color3(1, 0, 0), direction: new Vector3(1, 0, 0) },
     { name: 'Y', color: new Color3(0, 1, 0), direction: new Vector3(0, 1, 0) },
-    { name: 'Z', color: new Color3(0, 0, 1), direction: new Vector3(0, 0, 1) }
+    { name: 'Z', color: new Color3(0, 0, 1), direction: new Vector3(0, 0, 1) },
   ];
 
   axes.forEach(({ name, color, direction }) => {
@@ -146,7 +156,7 @@ export const createlocalAxes = (scene: Scene, size: number, center: Mesh, pivot:
   const axes = [
     { name: 'X', color: new Color3(1, 0, 0), direction: new Vector3(1, 0, 0) },
     { name: 'Y', color: new Color3(0, 1, 0), direction: new Vector3(0, 1, 0) },
-    { name: 'Z', color: new Color3(0, 0, 1), direction: new Vector3(0, 0, 1) }
+    { name: 'Z', color: new Color3(0, 0, 1), direction: new Vector3(0, 0, 1) },
   ];
 
   axes.forEach(({ name, color, direction }) => {

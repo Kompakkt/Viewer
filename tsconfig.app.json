@@ -5,5 +5,5 @@
     "types": []
   },
   "files": ["./src/main.ts"],
-  "include": ["./src/**/*.ts", "./src/**/*.d.ts"]
+  "include": ["./src/**/*.ts", "./src/**/*.d.ts", "./node_modules/@kompakkt/**/*.ts"]
 }

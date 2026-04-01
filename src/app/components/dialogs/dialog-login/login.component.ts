@@ -1,11 +1,11 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
-import { ButtonComponent, ButtonRowComponent, InputComponent } from 'komponents';
-import { IUserData } from 'src/common';
+import { ButtonComponent, ButtonRowComponent, InputComponent } from '@kompakkt/komponents';
+import { IUserData } from '@kompakkt/common';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { BackendService } from '../../../services/backend/backend.service';
-import { IUserDataWithoutData } from 'src/common/interfaces';
+import { IUserDataWithoutData } from '@kompakkt/common/interfaces';
 
 export type AuthConcern = 'login' | 'delete-annotation';
 

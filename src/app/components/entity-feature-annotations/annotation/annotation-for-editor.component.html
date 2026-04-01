@@ -11,7 +11,7 @@
   <app-markdown-preview
     id="annotation-content"
     [data]="annotation.body.content.description || ('No description' | translate)"
-  ></app-markdown-preview>
+  />
   <k-button-row justify="end" gap="4">
     @if (canUserEditAndDelete$ | async) {
       <k-button

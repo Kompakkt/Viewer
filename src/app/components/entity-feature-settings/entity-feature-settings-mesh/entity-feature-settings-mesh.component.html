@@ -60,7 +60,7 @@
     />
 
     <p>{{ 'Ground color' | translate }}</p>
-    <color-chrome (onChange)="entitySettings.setGroundMaterial($event.color.rgb)"></color-chrome>
+    <color-chrome (onChange)="entitySettings.setGroundMaterial($event.color.rgb)" />
 
     <k-button (click)="resetVisualUIMeshSettingsHelper()" type="outlined-primary">
       {{ 'Reset helpers' | translate }}

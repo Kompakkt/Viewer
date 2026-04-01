@@ -18,7 +18,9 @@
 
     transition: border 120ms ease-out;
 
-    &:hover, &:focus, &:focus-within {
+    &:hover,
+    &:focus,
+    &:focus-within {
       border: solid 2px var(--color-gray-4);
     }
 
@@ -44,4 +46,3 @@
     }
   }
 }
-

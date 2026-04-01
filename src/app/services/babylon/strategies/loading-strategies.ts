@@ -1,5 +1,4 @@
 import {
-  AbstractEngine,
   AbstractMesh,
   ActionManager,
   Analyser,
@@ -12,7 +11,6 @@ import {
   MeshBuilder,
   PBRMaterial,
   Scene,
-  SceneLoader,
   Sound,
   StandardMaterial,
   Tags,
@@ -21,20 +19,8 @@ import {
   Vector3,
   VideoTexture,
 } from '@babylonjs/core';
-import { AdvancedDynamicTexture, Control, Slider, StackPanel, TextBlock } from '@babylonjs/gui';
 import '@babylonjs/loaders';
-import {
-  I3DEntityContainer,
-  IAudioContainer,
-  IImageContainer,
-  IVideoContainer,
-} from '../container.interfaces';
-
-const updateLoadingUI = (engine: AbstractEngine) => (progress: ISceneLoaderProgressEvent) => {
-  if (progress.lengthComputable) {
-    engine.loadingUIText = `${((progress.loaded * 100) / progress.total).toFixed()}%`;
-  }
-};
+import { IAudioContainer, IImageContainer, IVideoContainer } from '../container.interfaces';
 
 let counter = 0;
 const createOrClonePBRMaterial = (
@@ -89,42 +75,42 @@ const patchMeshPBR = (mesh: AbstractMesh, scene: Scene) => {
   }
 };
 
-export const loadPointCloud = async (rootUrl: string, scene: Scene) => {
-  const rootFolder = Tools.GetFolderPath(rootUrl);
+export const loadPointCloud = async (
+  rootUrl: string,
+  scene: Scene,
+  onProgress?: (progress: ISceneLoaderProgressEvent) => void,
+) => {
   const filename = Tools.GetFilename(rootUrl);
-  const extension = filename.includes('.') ? `.${filename.split('.').slice(-1).pop()!}` : undefined;
-
-  const engine = scene.getEngine();
+  const pluginExtension = filename.includes('.')
+    ? `.${filename.split('.').slice(-1).pop()!}`
+    : undefined;
 
   // TODO: Currently, point clouds do not have a mesh for mesh settings. Using the root node somehow breaks the scene.
-  return SceneLoader.ImportMeshAsync(
-    null,
-    rootFolder,
-    filename,
-    scene,
-    updateLoadingUI(engine),
-    extension,
-  );
+  return ImportMeshAsync(rootUrl, scene, { onProgress, pluginExtension });
 };
 
-export const loadSplat = async (rootUrl: string, scene: Scene) => {
-  const engine = scene.getEngine();
-
-  return ImportMeshAsync(rootUrl, scene, { onProgress: updateLoadingUI(engine) });
+export const loadSplat = async (
+  rootUrl: string,
+  scene: Scene,
+  onProgress?: (progress: ISceneLoaderProgressEvent) => void,
+) => {
+  return ImportMeshAsync(rootUrl, scene, { onProgress });
 };
 
-export const load3DEntity = async (rootUrl: string, scene: Scene, isDefault?: boolean) => {
-  const rootFolder = Tools.GetFolderPath(rootUrl);
+export const load3DEntity = async (
+  rootUrl: string,
+  scene: Scene,
+  isDefault: boolean | undefined,
+  onProgress?: (progress: ISceneLoaderProgressEvent) => void,
+) => {
   const filename = Tools.GetFilename(rootUrl);
   const extension = filename.includes('.') ? `.${filename.split('.').slice(-1).pop()!}` : undefined;
-
-  const engine = scene.getEngine();
 
   console.log('load3Dentity', rootUrl, filename, extension);
 
   return ImportMeshAsync(rootUrl, scene, {
     pluginExtension: extension,
-    onProgress: updateLoadingUI(engine),
+    onProgress,
   }).then(result => {
     console.log(result);
     if (isDefault) {
@@ -145,13 +131,7 @@ export const load3DEntity = async (rootUrl: string, scene: Scene, isDefault?: bo
   });
 };
 
-const requestFile = (url: string) => {
-  return fetch(url)
-    .then(response => response.arrayBuffer())
-    .catch(e => console.error(e));
-};
-
-export const loadImage = (rootUrl: string, scene: Scene, isDefault?: boolean) => {
+export const loadImage = async (rootUrl: string, scene: Scene, isDefault?: boolean) => {
   return new Promise<IImageContainer>((resolve, reject) => {
     const texture = new Texture(
       rootUrl,
@@ -201,7 +181,7 @@ export const loadImage = (rootUrl: string, scene: Scene, isDefault?: boolean) =>
   });
 };
 
-export const loadVideo = (rootUrl: string, scene: Scene) => {
+export const loadVideo = async (rootUrl: string, scene: Scene) => {
   const filename = Tools.GetFilename(rootUrl);
 
   // TODO: Reject on videoTexture fails loading?
@@ -239,9 +219,9 @@ const createVideoScene = (videoTexture: VideoTexture, texture: Texture, scene: S
   groundVideo.isPickable = true;
   groundVideo.actionManager = new ActionManager(scene);
   groundVideo.actionManager.registerAction(
-    new ExecuteCodeAction(ActionManager.OnPickTrigger, () => {
-      video.paused ? video.play() : video.pause();
-    }),
+    new ExecuteCodeAction(ActionManager.OnPickTrigger, () =>
+      video.paused ? video.play() : video.pause(),
+    ),
   );
 
   // Create mediaControls
@@ -249,19 +229,21 @@ const createVideoScene = (videoTexture: VideoTexture, texture: Texture, scene: S
   return { plane };
 };
 
-export const loadAudio = (rootUrl: string, scene: Scene, meshes: AbstractMesh[]) => {
+export const loadAudio = async (rootUrl: string, scene: Scene, meshes: AbstractMesh[]) => {
   const filename = Tools.GetFilename(rootUrl);
-  return requestFile(rootUrl).then(async (arrayBuffer): Promise<IAudioContainer> => {
-    const audio = await new Promise<Sound>((resolve, _) => {
-      const sound = new Sound(`Audio: ${filename}`, arrayBuffer, scene, () => {
-        resolveSound();
+  return fetch(rootUrl)
+    .then(response => response.arrayBuffer())
+    .then(async (arrayBuffer): Promise<IAudioContainer> => {
+      const audio = await new Promise<Sound>((resolve, _) => {
+        const sound = new Sound(`Audio: ${filename}`, arrayBuffer, scene, () => {
+          resolveSound();
+        });
+        const resolveSound = () => resolve(sound);
       });
-      const resolveSound = () => resolve(sound);
-    });
 
-    const { analyser } = createAudioScene(audio, scene, meshes);
-    return { audio, analyser };
-  });
+      const { analyser } = createAudioScene(audio, scene, meshes);
+      return { audio, analyser };
+    });
 };
 
 const createAudioScene = (audio: Sound, scene: Scene, meshes: AbstractMesh[]) => {

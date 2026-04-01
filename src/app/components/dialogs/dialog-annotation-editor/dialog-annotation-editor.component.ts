@@ -1,19 +1,24 @@
 import {
   Component,
   OnInit,
-  ViewChild,
   ElementRef,
   computed,
   effect,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
-import { ButtonComponent, ButtonRowComponent, InputComponent, TextareaComponent } from 'komponents';
+import {
+  ButtonComponent,
+  ButtonRowComponent,
+  InputComponent,
+  TextareaComponent,
+} from '@kompakkt/komponents';
 import { AnnotationService } from 'src/app/services/annotation/annotation.service';
-import { IAnnotation, IEntity, isAnnotation } from 'src/common';
+import { IAnnotation, IEntity, isAnnotation } from '@kompakkt/common';
 import { environment } from 'src/environment';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { MediaBrowserComponent } from '../../entity-feature-annotations/annotation-media-browser/media-browser.component';
@@ -21,7 +26,7 @@ import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-previe
 import { ProcessingService } from 'src/app/services/processing/processing.service';
 import { UserdataService } from 'src/app/services/userdata/userdata.service';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
-import { ExtenderSlotDirective, ExtenderSlotEvent } from '@kompakkt/extender';
+import { ExtenderSlotDirective, ExtenderSlotEvent } from '@kompakkt/plugins/extender';
 import { BehaviorSubject, map } from 'rxjs';
 
 export interface IDialogData {
@@ -53,11 +58,9 @@ interface IExternalImage {
   ],
 })
 export class DialogAnnotationEditorComponent {
-  @ViewChild('annotationDescription')
-  private annotationDescription?: TextareaComponent;
+  private readonly annotationDescription = viewChild<TextareaComponent>('annotationDescription');
 
-  @ViewChild('embeddablesSlot')
-  private embeddablesSlot?: ElementRef<HTMLDivElement>;
+  private readonly embeddablesSlot = viewChild<ElementRef<HTMLDivElement>>('embeddablesSlot');
 
   public dialogRef = inject(MatDialogRef<DialogAnnotationEditorComponent>);
   public dialogData = inject<IDialogData>(MAT_DIALOG_DATA);
@@ -144,7 +147,7 @@ export class DialogAnnotationEditorComponent {
   }
 
   private getCaretPosition() {
-    const textarea = this.annotationDescription?.textarea();
+    const textarea = this.annotationDescription()?.textarea();
 
     if (!textarea) return { start: 0, value: '' };
     textarea.nativeElement.focus();

@@ -12,7 +12,9 @@
     border-radius: 0 8px 8px 0;
     padding: 8px;
 
-    transition: background-color 0.3s, border-color 0.3s;
+    transition:
+      background-color 0.3s,
+      border-color 0.3s;
     &.selected {
       background-color: var(--color-primary);
     }
@@ -26,7 +28,7 @@
     height: 48px !important;
     width: 48px !important;
   }
-  
+
   &.is-open {
     left: var(--sidebar-width);
   }

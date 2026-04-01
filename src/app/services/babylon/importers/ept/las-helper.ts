@@ -9,8 +9,8 @@ export const parseHeader = (data: ArrayBuffer) => {
   );
   const fileSourceId = reader.getUint16(4, true);
   const globalEncoding = reader.getUint16(6, true);
-  const projectId = Array.from(new Uint8Array(reader.buffer.slice(8, 24))).map(
-    (b) => b.toString(16).padStart(2, "0"),
+  const projectId = Array.from(new Uint8Array(reader.buffer.slice(8, 24))).map(b =>
+    b.toString(16).padStart(2, '0'),
   );
   const projectIdSections = [
     projectId.slice(0, 4),
@@ -19,16 +19,16 @@ export const parseHeader = (data: ArrayBuffer) => {
     projectId.slice(8, 10),
     projectId.slice(10),
   ]
-    .map((v) => v.join(""))
-    .join("-");
+    .map(v => v.join(''))
+    .join('-');
   const versionMajor = reader.getUint8(24);
   const versionMinor = reader.getUint8(25);
   const systemIdentifier = String.fromCharCode(
     ...new Uint8Array(reader.buffer.slice(26, 58)),
-  ).replace(/\0/g, "");
+  ).replace(/\0/g, '');
   const generatingSoftware = String.fromCharCode(
     ...new Uint8Array(reader.buffer.slice(58, 90)),
-  ).replace(/\0/g, "");
+  ).replace(/\0/g, '');
   const fileCreationDayOfYear = reader.getUint16(90, true);
   const fileCreationYear = reader.getUint16(92, true);
   const headerSize = reader.getUint16(94, true);
@@ -43,7 +43,7 @@ export const parseHeader = (data: ArrayBuffer) => {
     reader.getUint32(119, true),
     reader.getUint32(123, true),
     reader.getUint32(127, true),
-  ].join(" ");
+  ].join(' ');
   const scaleFactorX = reader.getFloat64(131, true);
   const scaleFactorY = reader.getFloat64(139, true);
   const scaleFactorZ = reader.getFloat64(147, true);

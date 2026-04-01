@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ButtonComponent, LabelledCheckboxComponent, SliderComponent } from 'komponents';
+import { ButtonComponent, LabelledCheckboxComponent, SliderComponent } from '@kompakkt/komponents';
 import { TranslatePipe } from 'src/app/pipes/translate.pipe';
 import { PointCloudImporter } from 'src/app/services/babylon/importers/common/point-cloud-importer';
 

@@ -8,17 +8,19 @@
   (valueChanged)="setLightIntensity($event, 'ambientlightUp')"
   [showInfo]="true"
   [showTooltip]="true"
-></k-slider>
+/>
 
 <k-slider
-  [label]="('Light intensity from below' | translate) + ': ' + getLightIntensity('ambientlightDown')"
+  [label]="
+    ('Light intensity from below' | translate) + ': ' + getLightIntensity('ambientlightDown')
+  "
   [min]="0"
   [max]="50"
   [startingValue]="getLightIntensity('ambientlightDown')"
   (valueChanged)="setLightIntensity($event, 'ambientlightDown')"
   [showInfo]="true"
   [showTooltip]="true"
-></k-slider>
+/>
 
 <h2>{{ 'Pointlight' | translate }}</h2>
 
@@ -30,7 +32,7 @@
   (valueChanged)="setLightIntensity($event, 'pointLight')"
   [showInfo]="true"
   [showTooltip]="true"
-></k-slider>
+/>
 
 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px">
   <k-input
