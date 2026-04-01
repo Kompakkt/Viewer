@@ -50,7 +50,7 @@
     "@babylonjs/serializers": "9.0.0",
     "@kompakkt/common": "git+https://github.com/Kompakkt/Common#07dd559",
     "@kompakkt/komponents": "git+https://github.com/Kompakkt/Komponents#b27043045b9777ef862e7747f5709521a0872e48",
-    "@kompakkt/plugins": "git+https://github.com/Kompakkt/Plugins#138237e",
+    "@kompakkt/plugins": "git+https://github.com/Kompakkt/Plugins#082bfd1",
     "bson-objectid": "^2.0.4",
     "copc": "^0.0.8",
     "fast-deep-equal": "^3.1.3",
