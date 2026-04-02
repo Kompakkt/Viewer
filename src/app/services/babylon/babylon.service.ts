@@ -26,6 +26,12 @@ import {
   WebGPUEngine,
   RegisterSceneLoaderPlugin,
   ISceneLoaderProgressEvent,
+  CreateGround,
+  StandardMaterial,
+  Color3,
+  DirectionalLight,
+  ShadowGenerator,
+  Mesh,
 } from '@babylonjs/core';
 import '@babylonjs/core/Debug/debugLayer';
 import '@babylonjs/inspector';
@@ -54,6 +60,7 @@ import { beforeAudioRender } from './strategies/render-strategies';
 import { EptImporter } from './importers/ept/ept-importer';
 import { CopcImporter } from './importers/copc/copc-importer';
 import { LoadingScreenService } from './loadingscreen';
+import { InspectorToken, ShowInspector } from '@babylonjs/inspector';
 
 RegisterSceneLoaderPlugin(new CopcImporter());
 RegisterSceneLoaderPlugin(new EptImporter());
@@ -144,11 +151,9 @@ export class BabylonService {
 
   public background: {
     url: string;
-    color: RGBA;
     layer: Layer | undefined;
   } = {
     url: 'assets/textures/backgrounds/darkgrey.jpg',
-    color: { r: 0, g: 0, b: 0, a: 0 },
     layer: undefined,
   };
 
@@ -223,12 +228,60 @@ export class BabylonService {
     (window as any)['scene'] = () => this.getScene();
   }
 
+  private inspectorToken?: InspectorToken;
   public enableInspector() {
-    this.scene.debugLayer.show();
+    this.inspectorToken = ShowInspector(this.scene);
   }
 
   public disableInspector() {
-    this.scene.debugLayer.hide();
+    this.inspectorToken?.dispose();
+  }
+
+
+  private defaultShadowVariables = {
+    groundDiffuseColor: new Color3(0.15, 0.15, 0.15),
+    groundSpecularColor: new Color3(0, 0, 0),
+    groundSpecularPower: 64,
+    groundEmissiveColor: new Color3(0.0, 0.0, 0.0),
+    groundAlpha: 0.3,
+    sceneClearColor: new Color4(0.1155, 0.1155, 0.1155, 1),
+  }
+  /**
+   * Adds a default shadow generator to the scene with a directional light and a ground plane to receive shadows.
+   * Intended to be used on the home page with the default model.
+   */
+  public addDefaultShadowGenerator(meshes: AbstractMesh[]) {
+    const ground = CreateGround(
+      'shadowGround',
+      { width: 50000, height: 50000, subdivisions: 1 },
+      this.scene,
+    );
+    ground.setAbsolutePosition(new Vector3(20, 0, 20));
+    const mat = new StandardMaterial('shadowGroundMat');
+    mat.diffuseColor = this.defaultShadowVariables.groundDiffuseColor;
+    mat.specularColor = this.defaultShadowVariables.groundSpecularColor;
+    mat.specularPower = this.defaultShadowVariables.groundSpecularPower;
+    mat.emissiveColor = this.defaultShadowVariables.groundEmissiveColor;
+    mat.alpha = this.defaultShadowVariables.groundAlpha;
+    mat.transparencyMode = StandardMaterial.MATERIAL_ALPHATESTANDBLEND;
+    ground.material = mat;
+    ground.receiveShadows = true;
+    const light = new DirectionalLight('dirLight', new Vector3(-0.05, -0.75, -0.66), this.scene);
+    light.intensity = 1;
+    light.position = new Vector3(20, 120, 20);
+    light.autoUpdateExtends = true;
+    light.autoCalcShadowZBounds = true;
+    const shadowGenerator = new ShadowGenerator(1024, light);
+    shadowGenerator.darkness = 0;
+    shadowGenerator.usePoissonSampling = true;
+
+    for (const mesh of meshes) {
+      if (mesh.name === '__root__') continue;
+      if (mesh === ground) continue;
+      shadowGenerator.addShadowCaster(mesh);
+    }
+
+    return shadowGenerator;
   }
 
   public getScene(): Scene {
@@ -270,14 +323,15 @@ export class BabylonService {
   }
 
   public setBackgroundColor(color: RGBA): void {
-    this.background.color = color;
+    const queryParams = new URLSearchParams(location.search);
+    if (queryParams.get('transparent')) {
+      this.scene.clearColor = this.defaultShadowVariables.sceneClearColor;
+      return;
+    }
+
     this.scene.clearColor = this.isTransparent()
       ? new Color4(0, 0, 0, 0)
       : new Color4(color.r / 255, color.g / 255, color.b / 255, color.a);
-  }
-
-  public getColor(): any {
-    return this.background.color;
   }
 
   public hideMesh(tag: string, visibility: boolean) {
