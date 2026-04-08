@@ -25,7 +25,6 @@ import {
   settingsKompakktLogo,
 } from '../../../assets/settings/settings';
 // tslint:disable-next-line:max-line-length
-import { DialogPasswordComponent } from '../../components/dialogs/dialog-password/dialog-password.component';
 import { decodeBase64, decodeURIUntilStable, isBase64 } from '../../helpers';
 import { IIIFData, convertIIIFAnnotation, isIIIFData } from '../../helpers/iiif-data-helper';
 import { BabylonService } from '../babylon/babylon.service';
@@ -273,7 +272,7 @@ export class ProcessingService {
     this.babylon.resize();
   }
 
-  public async updateActiveCompilation(compilation: ICompilation | undefined) {
+  public updateActiveCompilation(compilation: ICompilation | undefined) {
     this.compilation$.next(compilation);
   }
 
@@ -515,57 +514,62 @@ export class ProcessingService {
     return this.loadEntity(fallbackEntity as IEntity, '');
   }
 
-  public fetchAndLoad(entityId?: string | null, compilationId?: string | null) {
+  public async fetchAndLoad(entityId?: string | null, compilationId?: string | null) {
     if (entityId && !compilationId) {
-      this.fetchEntityData(entityId);
+      return this.fetchEntityData(entityId);
     }
     if (compilationId) {
-      this.fetchCompilationData(compilationId, entityId ? entityId : undefined);
+      return this.fetchCompilationData(compilationId, entityId ? entityId : undefined);
     }
   }
 
-  private fetchCompilationData(id: string, specifiedEntity?: string, password?: string) {
-    this.backend
-      .getCompilation(id, password ?? undefined)
-      .then(compilation => {
-        if (compilation) {
-          this.updateActiveCompilation(compilation as ICompilation);
-          this.fetchEntityDataAfterCollection(compilation, specifiedEntity);
-        } else {
-          const dialogRef = this.dialog.open(DialogPasswordComponent, {
-            disableClose: true,
-            autoFocus: true,
-            data: { id },
-          });
-          dialogRef
-            .afterClosed()
-            .subscribe(({ result, data }: { result: boolean; data: ICompilation }) => {
-              if (result) {
-                this.updateActiveCompilation(data);
-                this.fetchEntityDataAfterCollection(data, specifiedEntity);
-              } else {
-                this.loadFallbackEntity();
-                this.message.error('Sorry, you are not allowed to load this Collection.');
-              }
-            });
+  private async fetchCompilationData(id: string, specifiedEntity?: string) {
+    return this.backend
+      .getCompilation(id)
+      .then(async compilation => {
+        if (!compilation) {
+          throw new Error('Compilation not found');
         }
+
+        const isRestricted = typeof compilation.online === 'boolean' && !compilation.online;
+        if (isRestricted) {
+          const auth = await this.userdata.userAuthentication(true);
+          console.log('isRestricted auth check', auth, document);
+          if (!auth) {
+            this.message.error('You need to be logged in to access this collection.');
+            throw new Error('User authentication failed');
+          }
+          if (!this.userdata.doesUserOwn(compilation)) {
+            if (!this.userdata.doesUserHaveAccess(compilation)) {
+              this.message.error('Sorry, you are not allowed to load this collection.');
+              throw new Error('User does not have access to this compilation');
+            }
+          }
+        }
+
+        this.updateActiveCompilation(compilation as ICompilation);
+        return this.fetchEntityDataAfterCollection(compilation, specifiedEntity);
       })
       .catch(error => {
+        this.message.error('Error loading collection.');
         console.error(error);
-        this.loadFallbackEntity();
+        return this.loadFallbackEntity();
       });
   }
 
-  private fetchEntityDataAfterCollection(compilation: ICompilation, specifiedEntity?: string) {
+  private async fetchEntityDataAfterCollection(
+    compilation: ICompilation,
+    specifiedEntity?: string,
+  ) {
     const specified = specifiedEntity && compilation.entities[specifiedEntity.toString()];
     const entityToLoad = isEntity(specified) ? specified : Object.values(compilation.entities)[0];
-    if (isEntity(entityToLoad)) this.fetchEntityData(entityToLoad._id);
+    if (isEntity(entityToLoad)) return this.fetchEntityData(entityToLoad._id);
   }
 
-  public fetchEntityData(query: string) {
-    this.backend
+  public async fetchEntityData(query: string) {
+    return this.backend
       .getEntity(query)
-      .then(entity => {
+      .then(async entity => {
         console.log('Received this Entity:', entity);
 
         // Force load the entity via query parameter, skipping any checks below.
@@ -595,37 +599,25 @@ export class ProcessingService {
         console.log('Are access to this entity restricted', isRestricted);
 
         if (isRestricted) {
-          console.log(this.fetchRestrictedEntityData, 'f');
+          const auth = await this.userdata.userAuthentication(true);
+          console.log('isRestricted auth check', auth, document);
+          if (!auth) {
+            this.message.error('You need to be logged in to access this entity.');
+            throw new Error('User authentication failed');
+          }
+          if (!this.userdata.doesUserOwn(entity)) {
+            if (!this.userdata.doesUserHaveAccess(entity)) {
+              this.message.error('Sorry, you are not allowed to load this object.');
+              throw new Error('User does not have access to this entity');
+            }
+          }
         }
 
-        this.loadEntity(entity);
+        return this.loadEntity(entity);
       })
       .catch(error => {
         console.error(error);
-        this.loadFallbackEntity();
-      });
-  }
-
-  private async fetchRestrictedEntityData(entity: IEntity) {
-    this.userdata
-      .userAuthentication(true)
-      .then(auth => {
-        console.log('fetchRestrictedEntityData', auth, entity);
-        // Check for user authentication
-        if (!auth) return false;
-        // Check for ownership
-        if (!this.userdata.doesUserOwn(entity)) {
-          if (!this.userdata.doesUserHaveAccess(entity)) return false;
-        }
-        return true;
-      })
-      .then(canUserAccess => {
-        if (canUserAccess) {
-          this.loadEntity(entity);
-        } else {
-          this.message.error('Sorry you are not allowed to load this object.');
-          this.loadFallbackEntity();
-        }
+        return this.loadFallbackEntity();
       });
   }
 

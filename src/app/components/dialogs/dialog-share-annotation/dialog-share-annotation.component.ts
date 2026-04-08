@@ -17,10 +17,12 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
 })
 export class DialogShareAnnotationComponent {
   public targetCollectionId = '';
-  public checkPwdMode = false;
-  public passwordCollection = '';
   private entityId = '';
-  private response: any = {
+  private response: {
+    status: boolean;
+    collectionId: string;
+    annotationListLength: number;
+  } = {
     status: false,
     collectionId: '',
     annotationListLength: 1,
@@ -40,12 +42,7 @@ export class DialogShareAnnotationComponent {
       this.backend
         .getCompilation(this.targetCollectionId)
         .then(compilation => {
-          if (!compilation) {
-            // 'password'
-            this.checkPwdMode = true;
-          } else {
-            // collection is available on server
-            // loaded'
+          if (compilation) {
             compilation = compilation as ICompilation;
 
             if (!compilation.entities[this.entityId])
@@ -74,30 +71,5 @@ export class DialogShareAnnotationComponent {
   public cancel() {
     console.log('canceled');
     this.dialogRef.close(this.response);
-  }
-
-  public checkPwd() {
-    if (this.targetCollectionId !== '') {
-      this.backend
-        .getCompilation(this.targetCollectionId, this.passwordCollection)
-        .then(compilation => {
-          if (!compilation)
-            return this.message.error(
-              `Password is wrong for collection with ID ${this.targetCollectionId}`,
-            );
-          compilation = compilation as ICompilation;
-          this.response = {
-            status: true,
-            collectionId: this.targetCollectionId,
-            annotationListLength: Object.keys(compilation.annotations).length ?? 1,
-          };
-          this.dialogRef.close(this.response);
-        })
-        .catch(error => {
-          console.error(error);
-          this.message.error('Connection to entity server refused.');
-          this.dialogRef.close(this.response);
-        });
-    }
   }
 }
