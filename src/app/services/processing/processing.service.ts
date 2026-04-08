@@ -499,14 +499,20 @@ export class ProcessingService {
       });
   }
 
-  public loadDefaultEntityData() {
+  public async loadDefaultEntityData() {
     this.updateEntityQuality('low');
-    this.loadEntity(defaultEntity as IEntity, '');
+    return this.loadEntity(defaultEntity as IEntity, '').then(meshes => {
+      if (!meshes) return;
+      const queryParams = new URLSearchParams(location.search);
+      if (queryParams.get('transparent')) {
+        this.babylon.addDefaultShadowGenerator(meshes);
+      }
+    });
   }
 
-  public loadFallbackEntity() {
+  public async loadFallbackEntity() {
     this.updateEntityQuality('low');
-    this.loadEntity(fallbackEntity as IEntity, '');
+    return this.loadEntity(fallbackEntity as IEntity, '');
   }
 
   public fetchAndLoad(entityId?: string | null, compilationId?: string | null) {
@@ -623,7 +629,10 @@ export class ProcessingService {
       });
   }
 
-  public async loadEntity(newEntity: IEntity, overrideUrl?: string) {
+  public async loadEntity(
+    newEntity: IEntity,
+    overrideUrl?: string,
+  ): Promise<AbstractMesh[] | undefined> {
     const mode = this.mode$.getValue();
     const baseURL = overrideUrl ?? environment.server_url;
     if (this.loadingScreen.isLoading() || !newEntity.processed || !newEntity.mediaType) {
@@ -656,7 +665,7 @@ export class ProcessingService {
     const isDefault = newEntity._id === 'default';
 
     this.loadingScreen.show();
-    this.babylon
+    return this.babylon
       .loadEntity(
         true,
         isAudio ? 'assets/models/kompakkt.babylon' : url,
@@ -669,11 +678,12 @@ export class ProcessingService {
       })
       .then(meshes => {
         this.updateActiveEntity(newEntity, meshes);
+        return meshes;
       })
       .catch(error => {
         console.error('Failed to load entity from server', error);
         this.message.error('Failed to load entity from server');
-        this.loadFallbackEntity();
+        return this.loadFallbackEntity();
       });
   }
 }
