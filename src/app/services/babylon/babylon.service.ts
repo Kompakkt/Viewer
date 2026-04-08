@@ -237,15 +237,14 @@ export class BabylonService {
     this.inspectorToken?.dispose();
   }
 
-
   private defaultShadowVariables = {
-    groundDiffuseColor: new Color3(0.15, 0.15, 0.15),
+    groundDiffuseColor: new Color3(0.45, 0.45, 0.45),
     groundSpecularColor: new Color3(0, 0, 0),
     groundSpecularPower: 64,
     groundEmissiveColor: new Color3(0.0, 0.0, 0.0),
     groundAlpha: 0.3,
-    sceneClearColor: new Color4(0.1155, 0.1155, 0.1155, 1),
-  }
+    sceneClearColor: new Color4(0.3345, 0.3345, 0.3345, 1),
+  };
   /**
    * Adds a default shadow generator to the scene with a directional light and a ground plane to receive shadows.
    * Intended to be used on the home page with the default model.

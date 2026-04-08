@@ -501,7 +501,7 @@ export class ProcessingService {
 
   public async loadDefaultEntityData() {
     this.updateEntityQuality('low');
-    return this.loadEntity(defaultEntity as IEntity, '').then((meshes) => {
+    return this.loadEntity(defaultEntity as IEntity, '').then(meshes => {
       if (!meshes) return;
       const queryParams = new URLSearchParams(location.search);
       if (queryParams.get('transparent')) {
@@ -629,7 +629,10 @@ export class ProcessingService {
       });
   }
 
-  public async loadEntity(newEntity: IEntity, overrideUrl?: string): Promise<AbstractMesh[] | undefined> {
+  public async loadEntity(
+    newEntity: IEntity,
+    overrideUrl?: string,
+  ): Promise<AbstractMesh[] | undefined> {
     const mode = this.mode$.getValue();
     const baseURL = overrideUrl ?? environment.server_url;
     if (this.loadingScreen.isLoading() || !newEntity.processed || !newEntity.mediaType) {
