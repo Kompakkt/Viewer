@@ -231,17 +231,19 @@ export class EntityFeatureSettingsComponent {
       throw new Error('Entity missing');
     }
     if (isDefault || isFallback) return;
-    this.backend.updateSettings(entity._id, localSettings).then(result => {
+    return this.backend.updateSettings(entity._id, localSettings).then(result => {
       console.log('Settings gespeichert', result);
       this.processing.settings$.next({
         localSettings,
         serverSettings: localSettings,
       });
       if (isInUpload) {
-        this.postMessage.sendToParent({
+        return this.postMessage.sendToParent({
           type: 'settings',
-          settings: localSettings,
-          data: localSettings,
+          data: {
+            entityId: entity._id,
+            settings: localSettings,
+          },
         });
         // this.processing.upload = false;
       }

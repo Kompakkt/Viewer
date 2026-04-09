@@ -1,20 +1,19 @@
 import { Injectable } from '@angular/core';
 import { fromEvent } from 'rxjs';
-import { IEntitySettings } from '@kompakkt/common/interfaces';
 
-type Message = { type: string; data: unknown; settings?: IEntitySettings };
-const isMessage = (message: any): message is Message => {
+type Message<T> = { type: string; data: T };
+const isMessage = (message: unknown): message is Message<unknown> => {
   return (
-    message.type &&
-    message.data &&
+    typeof message === 'object' &&
+    message !== null &&
+    'type' in message &&
+    'data' in message &&
     typeof message.data === 'object' &&
     typeof message.type === 'string'
   );
 };
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class PostMessageService {
   constructor() {
     fromEvent(window, 'message').subscribe(event => {
@@ -25,7 +24,7 @@ export class PostMessageService {
   get hasParent() {
     return !!window.top;
   }
-  public sendToParent(message: Message) {
+  public sendToParent<T>(message: Message<T>) {
     if (!this.hasParent) return;
     window.top?.postMessage(message, '*');
   }
