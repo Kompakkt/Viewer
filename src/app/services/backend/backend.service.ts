@@ -58,14 +58,10 @@ export class BackendService {
   /**
    * Fetch a resolved compilation by it's identifier
    * @param  {string}  identifier Database _id of the compilation
-   * @param  {string}  password   (Optional) Password of the compilation
-   * @param  {[type]}             [description]
-   * @return {Promise}            Returns the compilation or null if it's password protected
+   * @return {Promise}            Returns the compilation or null
    */
-  public async getCompilation(identifier: string, password?: string): Promise<ICompilation | null> {
-    return password
-      ? this.get(`api/v1/get/find/compilation/${identifier}/${password}`)
-      : this.get(`api/v1/get/find/compilation/${identifier}`);
+  public async getCompilation(identifier: string): Promise<ICompilation | null> {
+    return this.get(`api/v1/get/find/compilation/${identifier}`);
   }
 
   public async getEntityMetadata(identifier: string): Promise<IDigitalEntity> {

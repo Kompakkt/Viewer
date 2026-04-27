@@ -18,20 +18,4 @@
     <k-button (click)="share()">{{ 'Share' | translate }}</k-button>
     <k-button (click)="cancel()">{{ 'Cancel' | translate }}</k-button>
   </k-button-row>
-
-  @if (checkPwdMode) {
-    <p>{{ 'The target collection is protected by a password.' | translate }}</p>
-    <p>{{ 'Enter the password to continue.' | translate }}</p>
-  }
-
-  <k-input
-    [label]="'Password' | translate"
-    type="password"
-    (valueChanged)="passwordCollection = $event.value"
-  />
-
-  <k-button-row align="end">
-    <k-button (click)="cancel()">{{ 'Cancel' | translate }}</k-button>
-    <k-button (click)="checkPwd()">{{ 'Check' | translate }}</k-button>
-  </k-button-row>
 </form>
