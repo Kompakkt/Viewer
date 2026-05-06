@@ -2,8 +2,29 @@ import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { ActionManager, Color3, ExecuteCodeAction, GaussianSplattingMesh, MeshBuilder, Nullable, PickingInfo, Ray, StandardMaterial, Tags, Vector3 } from '@babylonjs/core';
-import { BehaviorSubject, ReplaySubject, combineLatest, firstValueFrom, fromEvent, interval } from 'rxjs';
+import {
+  ActionManager,
+  Color3,
+  ExecuteCodeAction,
+  GaussianSplattingMesh,
+  Matrix,
+  MeshBuilder,
+  Nullable,
+  PickingInfo,
+  Ray,
+  StandardMaterial,
+  Tags,
+  Vector3,
+  Viewport,
+} from '@babylonjs/core';
+import {
+  BehaviorSubject,
+  ReplaySubject,
+  combineLatest,
+  firstValueFrom,
+  fromEvent,
+  interval,
+} from 'rxjs';
 import { distinct, filter, map, switchMap } from 'rxjs/operators';
 import {
   IAnnotation,
