@@ -1,6 +1,6 @@
 import { AfterContentChecked, ChangeDetectorRef, Component } from '@angular/core';
 import { LoadingscreenComponent } from './components/loadingscreen/loadingscreen.component';
-import { SceneComponent } from './components/scene/scene.component';
+import { SceneComponent } from 'src/app/components/scene/scene.component';
 
 @Component({
   selector: 'app-root',

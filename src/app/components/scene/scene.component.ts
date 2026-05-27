@@ -13,6 +13,7 @@ import { BehaviorSubject, combineLatest, from, map, of } from 'rxjs';
 import { ButtonComponent, ButtonRowComponent } from 'komponents';
 import { GuideComponent } from '../guide/guide.component';
 import { MediaPlayerMenuComponent } from '../media-player-menu/media-player-menu.component';
+import { DialogIiifImportComponent } from '../dialogs/dialog-iiif-import/dialog-iiif-import.component';
 
 @Component({
   selector: 'app-scene',
@@ -30,6 +31,7 @@ import { MediaPlayerMenuComponent } from '../media-player-menu/media-player-menu
     ButtonRowComponent,
     MediaPlayerMenuComponent,
     GuideComponent,
+    DialogIiifImportComponent,
   ],
 })
 export class SceneComponent implements AfterViewInit {

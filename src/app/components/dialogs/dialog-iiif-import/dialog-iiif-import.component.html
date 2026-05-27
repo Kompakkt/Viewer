@@ -1,0 +1,44 @@
+<div class="iiif-import-dialog">
+  <h1>Import IIIF 3D</h1>
+
+  <section>
+    <h2>Examples</h2>
+    <select (change)="onExampleManifestSelect($event)">
+      <option value="" selected disabled>Select an Example Manifest</option>
+      <optgroup *ngFor="let group of exampleManifestGroups" [label]="group.label">
+        <option *ngFor="let ex of group.manifests" [value]="ex.value" [disabled]="!ex.url">
+          {{ ex.label }}
+        </option>
+      </optgroup>
+    </select>
+  </section>
+
+  <section>
+    <h2>From URL</h2>
+    <textarea
+      class="url-field"
+      rows="1"
+      wrap="off"
+      placeholder="https://example.org/iiif/manifest.json"
+      [(ngModel)]="manifestUrl"
+    ></textarea>
+    <k-button-row>
+      <k-button type="solid-primary" (click)="importFromUrl()" [disabled]="isImportingUrl">
+        {{ isImportingUrl ? 'Importing...' : 'Import URL' }}
+      </k-button>
+    </k-button-row>
+  </section>
+
+  <section>
+    <h2>From JSON</h2>
+    <textarea
+      rows="8"
+      wrap="off"
+      placeholder="Paste IIIF 3D manifest JSON here"
+      [(ngModel)]="manifestJsonText"
+    ></textarea>
+    <k-button-row>
+      <k-button type="solid-primary" (click)="importFromJsonText()">Import JSON</k-button>
+    </k-button-row>
+  </section>
+</div>

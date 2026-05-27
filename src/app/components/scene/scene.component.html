@@ -12,6 +12,9 @@
   @if (processing.showMenu$ | async) {
     <app-menu />
   }
+  <aside class="iiif-import-panel" aria-label="IIIF import">
+    <app-dialog-iiif-import />
+  </aside>
   <app-sidenav-menu />
   <app-sidenav />
 

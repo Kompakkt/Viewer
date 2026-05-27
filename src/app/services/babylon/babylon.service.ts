@@ -290,7 +290,7 @@ export class BabylonService {
     this.scene.meshes.filter(m => names.includes(m.name)).forEach(m => (m.isVisible = false));
   }
 
-  private clearScene() {
+  public clearScene() {
     // Meshes
     this.scene.meshes.forEach(mesh => mesh.dispose());
     this.scene.meshes = [];

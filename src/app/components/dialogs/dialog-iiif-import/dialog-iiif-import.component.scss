@@ -1,0 +1,61 @@
+.iiif-import-dialog {
+  display: grid;
+  gap: 16px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  color: var(--color-fg, #fff);
+
+  h1 {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+  }
+
+  section {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.8;
+  }
+
+  input[type='text'],
+  input[type='file'],
+  select,
+  textarea {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(20, 20, 20, 0.8);
+    color: #fff;
+    font-size: 12px;
+  }
+
+  textarea {
+    overflow: auto;
+    resize: vertical;
+    white-space: pre;
+    overflow-wrap: normal;
+  }
+
+  .url-field {
+    height: 36px;
+    min-height: 36px;
+    resize: none;
+    overflow-y: hidden;
+  }
+
+  .filename {
+    font-size: 12px;
+    opacity: 0.8;
+    margin: 0;
+  }
+}

@@ -102,7 +102,7 @@ export class EntitySettingsService {
     const meshes = await firstValueFrom(this.processing.meshes$);
     const isInUpload = await firstValueFrom(this.processing.isInUpload$);
     const hasMeshSettings = await firstValueFrom(this.processing.hasMeshSettings$);
-    console.log("Setup settings")
+    console.log('Setup settings');
     if (!this.entitySettings) {
       throw new Error('No settings available.');
     }
@@ -245,7 +245,9 @@ export class EntitySettingsService {
     const mediaType = await firstValueFrom(this.processing.mediaType$);
     const hasMeshSettings = await firstValueFrom(this.processing.hasMeshSettings$);
     await this.initialiseCamera();
-    await this.loadCameraInititalPosition();
+    if (!(this.entitySettings as any).skipInitialCameraSetup) {
+      await this.loadCameraInititalPosition();
+    }
     this.loadBackgroundEffect();
     this.loadBackgroundColor();
     this.initialiseLights();
@@ -442,11 +444,16 @@ export class EntitySettingsService {
 
   public loadTranslation() {
     if (this.center) {
-      this.center.position = this.center.position.add(new Vector3(this.entitySettings.translate?.x, this.entitySettings.translate?.y, this.entitySettings.translate?.z));
+      this.center.position = this.center.position.add(
+        new Vector3(
+          this.entitySettings.translate?.x,
+          this.entitySettings.translate?.y,
+          this.entitySettings.translate?.z,
+        ),
+      );
       console.log('Center Position 20', this.center.position);
     }
   }
-
 
   public async createVisualUIMeshSettingsHelper() {
     if (!this.center) {

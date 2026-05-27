@@ -1,7 +1,21 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { AbstractMesh, Mesh, Quaternion, TransformNode, Vector3 } from '@babylonjs/core';
+import {
+  AbstractMesh,
+  Camera,
+  Color3,
+  DirectionalLight,
+  HemisphericLight,
+  Mesh,
+  PBRMaterial,
+  Quaternion,
+  StandardMaterial,
+  Texture,
+  TransformNode,
+  Vector3,
+  VertexData,
+} from '@babylonjs/core';
 import {
   BehaviorSubject,
   combineLatest,
@@ -387,56 +401,555 @@ export class ProcessingService {
   }
 
   private async loadIIIF3DManifest(manifestUrl: string) {
-    const manifestJson = await fetch(decodeURIUntilStable(manifestUrl), {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then(res => res.json() as object)
+    const normalizedUrl = decodeURIUntilStable(manifestUrl.trim().replace(/^['"]|['"]$/g, ''));
+    const manifestJson = await fetch(normalizedUrl)
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status} ${res.statusText}`);
+        }
+        return res.json() as object;
+      })
       .catch(error => {
         console.log('Error loading manifest:', error);
         return undefined;
       });
     if (!manifestJson) {
-      console.error('Manifest could not be loaded from URL', manifestUrl);
+      console.error('Manifest could not be loaded from URL', normalizedUrl);
+      this.message.error('Manifest could not be loaded from URL.');
       return;
     }
-    const manifest = parseManifest(manifestJson) as Manifest;
+    return this.processIIIF3DManifest(manifestJson);
+  }
 
-    const scenes = manifest?.getSequences()?.flatMap(seq => seq.getScenes());
+  private async processIIIF3DManifest(manifestJson: object) {
+    this.loadingScreen.show();
+    this.standaloneAnnotations$.next([]);
+
+    try {
+      this.babylon.clearScene();
+      this.babylon.cameraManager.setCameraType('ArcRotateCamera');
+    } catch (error) {
+      console.warn('[IIIF] Failed to clear scene before import', error);
+    }
+
+    let manifest: Manifest | undefined;
+    try {
+      manifest = parseManifest(manifestJson) as Manifest;
+    } catch (error) {
+      console.error('[IIIF] Manifest parsing failed', error);
+      this.message.error('Failed to parse IIIF manifest JSON.');
+      this.loadingScreen.hide();
+      return;
+    }
+
+    const sequences = manifest?.getSequences?.() ?? [];
+    const sequenceScenes = sequences.flatMap(seq => (seq?.getScenes ? seq.getScenes() : []));
+    const directScenes = (() => {
+      const rawItems = (manifest as any)?.__jsonld?.items;
+      if (!Array.isArray(rawItems)) return [];
+      return rawItems.filter((item: any) => item?.type === 'Scene');
+    })();
+    const scenes = sequenceScenes.length ? sequenceScenes : directScenes;
     const scene = scenes?.at(0); // TODO: Allow scene selection
     console.log('loadIIIF3DManifest', manifest, scenes, scene);
 
     if (!scene) {
       console.warn('No scene found in manifest');
+      this.message.error('No scene found in IIIF manifest.');
+      this.loadingScreen.hide();
+      return;
     }
 
-    const entitySettings = minimalSettings;
-    const setBackground = () => {
-      const bgColor = scene?.getBackgroundColor();
-      if (bgColor) {
-        const color = {
-          r: bgColor.red,
-          g: bgColor.green,
-          b: bgColor.blue,
-          a: 1,
-        };
-        entitySettings.background = {
-          color: color,
-          effect: false,
-        };
-        console.log('background color', color);
-        this.babylon.setBackgroundColor(color);
-        this.babylon.setBackgroundImage(false);
-        this.babylon.hideBackgroundHelpers();
-      }
+    const entitySettings = JSON.parse(JSON.stringify(minimalSettings)) as IEntitySettings;
+    (entitySettings as any).skipInitialCameraSetup = true;
+    this.babylon.getScene().environmentIntensity = 1;
+    let hasExplicitLights = false;
+
+    const parseHexColor = (hex: string) => {
+      const normalized = hex.replace('#', '').trim();
+      if (normalized.length !== 6) return undefined;
+      const r = parseInt(normalized.slice(0, 2), 16);
+      const g = parseInt(normalized.slice(2, 4), 16);
+      const b = parseInt(normalized.slice(4, 6), 16);
+      if ([r, g, b].some(v => Number.isNaN(v))) return undefined;
+      return { r, g, b, a: 1 };
     };
 
+    const getManifestBackgroundColor = () => {
+      const bgColor = scene?.getBackgroundColor?.();
+      const sceneJson = (scene as any)?.__jsonld ?? scene;
+      const rawBackground =
+        sceneJson?.backgroundColor ??
+        sceneJson?.background?.color ??
+        (sceneJson?.background && typeof sceneJson.background === 'string'
+          ? sceneJson.background
+          : undefined);
+
+      const color = bgColor
+        ? { r: bgColor.red, g: bgColor.green, b: bgColor.blue, a: 1 }
+        : typeof rawBackground === 'string'
+          ? parseHexColor(rawBackground)
+          : undefined;
+      return color;
+    };
+
+    const manifestBackground = getManifestBackgroundColor();
+    if (manifestBackground) {
+      entitySettings.background = {
+        color: manifestBackground,
+        effect: false,
+      };
+      console.log('background color', manifestBackground);
+      this.babylon.setBackgroundColor(manifestBackground);
+      this.babylon.setBackgroundImage(false);
+      this.babylon.hideBackgroundHelpers();
+    }
+
     let hasProcessedCamera = false;
+    let applyExplicitCamera: (() => void) | undefined;
+    const loadedMeshes: AbstractMesh[] = [];
+    const annotationPositions = new Map<string, Vector3>();
+    const manifestItems = Array.isArray((manifestJson as any)?.items)
+      ? ((manifestJson as any).items as any[])
+      : [];
+
+    const getSpecificResourceSource = (body: any) => {
+      const source = body?.type === 'SpecificResource' ? body.source : body;
+      return Array.isArray(source) ? source[0] : source;
+    };
+
+    const getRawValue = (value: any, fallback = 1) =>
+      Number(typeof value === 'number' ? value : (value?.value ?? fallback));
+
+    const getPointSelectorPosition = (selector: any) => {
+      if (selector?.type !== 'PointSelector') return undefined;
+      return new Vector3(
+        Number(selector.x ?? 0) * -1,
+        Number(selector.y ?? 0),
+        Number(selector.z ?? 0),
+      );
+    };
+
+    const getSelectorPosition = (annotation: any) => {
+      const selector = Array.isArray(annotation?.target?.selector)
+        ? annotation.target.selector[0]
+        : annotation?.target?.selector;
+      return getPointSelectorPosition(selector) ?? Vector3.Zero();
+    };
+
+    const getAnnotationPointSelectorPosition = (annotation: any) => {
+      const selector = Array.isArray(annotation?.target?.selector)
+        ? annotation.target.selector[0]
+        : annotation?.target?.selector;
+      return getPointSelectorPosition(selector);
+    };
+
+    const getLoadedMeshBounds = () => {
+      const bounds = loadedMeshes
+        .filter(mesh => !mesh.isDisposed())
+        .map(mesh => mesh.getBoundingInfo().boundingBox);
+      if (!bounds.length) return undefined;
+
+      const min = bounds
+        .map(bound => bound.minimumWorld)
+        .reduce((current, next) => Vector3.Minimize(current, next));
+      const max = bounds
+        .map(bound => bound.maximumWorld)
+        .reduce((current, next) => Vector3.Maximize(current, next));
+
+      return { min, max, size: max.subtract(min), center: min.add(max).scale(0.5) };
+    };
+
+    const getRawTransformVector = (transform: any) =>
+      new Vector3(Number(transform?.x ?? 0), Number(transform?.y ?? 0), Number(transform?.z ?? 0));
+
+    const getBodyTransforms = (body: any, source: any = body) => {
+      if (Array.isArray(body?.transform)) return body.transform;
+      if (Array.isArray(source?.transform)) return source.transform;
+      return [];
+    };
+
+    const getTransformPosition = (transforms: any[]) => {
+      const translations = transforms.filter(
+        transform => transform?.type?.toLowerCase() === 'translatetransform',
+      );
+      if (!translations.length) return undefined;
+
+      return translations.reduce(
+        (position, transform) =>
+          position.add(getRawTransformVector(transform).multiply(new Vector3(-1, 1, 1))),
+        Vector3.Zero(),
+      );
+    };
+
+    const rotateDirection = (direction: Vector3, transforms: any[] = []) => {
+      return transforms.reduce((currentDirection, transform) => {
+        if (transform?.type?.toLowerCase() !== 'rotatetransform') return currentDirection;
+        const angles = getRawTransformVector(transform)
+          .multiply(new Vector3(-1, 1, 1))
+          .multiplyByFloats(Math.PI / 180, Math.PI / 180, Math.PI / 180)
+          .negate();
+        const rotation = Quaternion.FromEulerVector(angles);
+        return currentDirection.applyRotationQuaternion(rotation).normalize();
+      }, direction.clone());
+    };
+
+    const processAmbientLightBody = (body: any) => {
+      hasExplicitLights = true;
+      const color = typeof body?.color === 'string' ? parseHexColor(body.color) : undefined;
+      const diffuse = color
+        ? new Color3(color.r / 255, color.g / 255, color.b / 255)
+        : Color3.White();
+      const intensity = getRawValue(body?.intensity);
+      const light = new HemisphericLight(
+        body?.id ?? 'iiif-ambient-light',
+        Vector3.Up(),
+        this.babylon.getScene(),
+      );
+
+      light.diffuse = diffuse;
+      light.groundColor = diffuse;
+      light.specular = Color3.Black();
+      light.intensity = Number.isFinite(intensity) ? intensity : 1;
+    };
+
+    const getRawBody = (body: any) => body?.__jsonld ?? body;
+
+    const getBodyType = (body: AnnotationBody | any) => {
+      const rawBody = getRawBody(body);
+      const source = Array.isArray(rawBody?.source) ? rawBody.source[0] : rawBody?.source;
+      const bodyType = typeof body?.getType === 'function' ? body.getType() : rawBody?.type;
+      const type = bodyType === 'SpecificResource' ? source?.type : (bodyType ?? source?.type);
+      return typeof type === 'string' ? type.toLowerCase() : undefined;
+    };
+
+    const processDirectionalLightBody = (annotation: any, body: any) => {
+      hasExplicitLights = true;
+      const source = getSpecificResourceSource(body);
+      const position = getSelectorPosition(annotation);
+      const lookAtId = source?.lookAt?.id ?? body?.lookAt?.id;
+      const lookAtPosition = lookAtId ? annotationPositions.get(lookAtId) : undefined;
+      const baseDirection = lookAtPosition
+        ? lookAtPosition.subtract(position).normalize()
+        : Vector3.Down();
+      const direction = rotateDirection(baseDirection, body?.transform);
+      const intensity = getRawValue(source?.intensity ?? body?.intensity);
+      const light = new DirectionalLight(
+        source?.id ?? body?.id ?? 'iiif-directional-light',
+        direction,
+        this.babylon.getScene(),
+      );
+
+      if (typeof source?.color === 'string' || typeof body?.color === 'string') {
+        const parsedColor = parseHexColor(source?.color ?? body.color);
+        if (parsedColor) {
+          light.diffuse = new Color3(parsedColor.r / 255, parsedColor.g / 255, parsedColor.b / 255);
+        }
+      }
+      light.position = position;
+      light.intensity = Number.isFinite(intensity) ? intensity : 1;
+    };
+
+    const processCameraBody = (
+      annotation: any,
+      body: any,
+      cameraMode: typeof Camera.PERSPECTIVE_CAMERA | typeof Camera.ORTHOGRAPHIC_CAMERA,
+    ) => {
+      const source = getSpecificResourceSource(body);
+      const lookAt = source?.lookAt ?? body?.lookAt;
+      const transforms = getBodyTransforms(body, source);
+
+      hasProcessedCamera = true;
+      applyExplicitCamera = () => {
+        const bounds = getLoadedMeshBounds();
+        const selectorPosition = getAnnotationPointSelectorPosition(annotation);
+        const transformPosition = getTransformPosition(transforms);
+        const position = selectorPosition ?? transformPosition ?? Vector3.Zero();
+        const lookAtId = lookAt?.id;
+        const lookAtPosition = lookAtId ? annotationPositions.get(lookAtId) : undefined;
+        const lookAtPoint = getPointSelectorPosition(lookAt);
+        const rotationDirection = transforms.some(
+          (transform: any) => transform?.type?.toLowerCase() === 'rotatetransform',
+        )
+          ? rotateDirection(new Vector3(0, 0, -1), transforms)
+          : undefined;
+        const target =
+          lookAtPosition ??
+          lookAtPoint ??
+          (rotationDirection
+            ? position.add(
+                rotationDirection.scale(
+                  bounds ? Math.max(Vector3.Distance(position, bounds.center), 1) : 1,
+                ),
+              )
+            : (bounds?.center ?? position.add(new Vector3(0, 0, -1))));
+
+        this.babylon.cameraManager.setCameraType('ArcRotateCamera');
+        const camera = this.babylon.getScene().activeCamera as any;
+        camera.setTarget(target, true);
+        if (typeof camera.setPosition === 'function') {
+          camera.setPosition(position.clone());
+        } else {
+          camera.position = position.clone();
+        }
+        camera.mode = cameraMode;
+        if (cameraMode === Camera.ORTHOGRAPHIC_CAMERA) {
+          const canvas = this.babylon.getCanvas();
+          const aspect = (canvas.clientWidth || 1) / (canvas.clientHeight || 1);
+          const bounds = getLoadedMeshBounds();
+          const halfHeight = bounds
+            ? Math.max(bounds.size.y / 2, bounds.size.x / (2 * aspect), bounds.size.z / 2, 1) * 1.2
+            : 1;
+          camera.orthoTop = halfHeight;
+          camera.orthoBottom = -halfHeight;
+          camera.orthoLeft = -halfHeight * aspect;
+          camera.orthoRight = halfHeight * aspect;
+        }
+        camera.attachControl(this.babylon.getCanvas(), false);
+        if (typeof source?.fieldOfView === 'number') {
+          camera.fov = (source.fieldOfView * Math.PI) / 180;
+        }
+      };
+    };
+
+    const processPerspectiveCameraBody = (annotation: any, body: any) =>
+      processCameraBody(annotation, body, Camera.PERSPECTIVE_CAMERA);
+
+    const processOrthographicCameraBody = (annotation: any, body: any) =>
+      processCameraBody(annotation, body, Camera.ORTHOGRAPHIC_CAMERA);
+
+    const getCanvasById = (canvasId: string) =>
+      manifestItems.find(item => item?.id === canvasId && item?.type === 'Canvas');
+
+    const getCanvasImageBody = (canvas: any) => {
+      const annotationPages = Array.isArray(canvas?.items) ? canvas.items : [];
+      for (const page of annotationPages) {
+        const annotations = Array.isArray(page?.items) ? page.items : [];
+        for (const annotation of annotations) {
+          const body = Array.isArray(annotation?.body) ? annotation.body[0] : annotation?.body;
+          if (body?.type === 'Image' && body?.id) return body;
+        }
+      }
+      return undefined;
+    };
+
+    const getCanvasImageUrl = (imageBody: any) => {
+      const service = Array.isArray(imageBody?.service) ? imageBody.service[0] : imageBody?.service;
+      const serviceId = service?.id ?? service?.['@id'];
+      if (serviceId) return `${serviceId}/full/1024,/0/default.jpg`;
+      return imageBody?.id;
+    };
+
+    const getPolygonZPoints = (annotation: any): Vector3[] | undefined => {
+      const selector = Array.isArray(annotation?.target?.selector)
+        ? annotation.target.selector[0]
+        : annotation?.target?.selector;
+      if (selector?.type !== 'PolygonZSelector' || typeof selector.value !== 'string') {
+        return undefined;
+      }
+
+      const match = selector.value.match(/POLYGONZ\s*\(\((.*)\)\)/i);
+      if (!match) return undefined;
+
+      const points = match[1]
+        .split(',')
+        .map((point: string) => point.trim().split(/\s+/).map(Number))
+        .filter((point: number[]) => point.length === 3 && point.every(Number.isFinite))
+        .map(([x, y, z]: number[]) => new Vector3(x * -1, y, z));
+
+      return points.length >= 4 ? points : undefined;
+    };
+
+    const getCanvasUVs = (canvas: any, polygon: Vector3[]) => {
+      const draftOrderUVs = [0, 0, 0, 1, 1, 1, 1, 0];
+      const reversedOrderUVs = [0, 0, 1, 0, 1, 1, 0, 1];
+      const width = Number(canvas?.width ?? 0);
+      const height = Number(canvas?.height ?? 0);
+
+      if (polygon.length < 4 || width <= 0 || height <= 0 || width === height) {
+        return draftOrderUVs;
+      }
+
+      const firstEdge = Vector3.Distance(polygon[0], polygon[1]);
+      const closingEdge = Vector3.Distance(polygon[0], polygon[3]);
+      if (firstEdge === 0 || closingEdge === 0) return draftOrderUVs;
+
+      const edgeRatio = firstEdge / closingEdge;
+      const draftOrderRatio = height / width;
+      const reversedOrderRatio = width / height;
+
+      return Math.abs(edgeRatio - reversedOrderRatio) < Math.abs(edgeRatio - draftOrderRatio)
+        ? reversedOrderUVs
+        : draftOrderUVs;
+    };
+
+    const processCanvasBody = async (annotation: any, body: any) => {
+      const canvas = getCanvasById(body?.id);
+      const polygon = getPolygonZPoints(annotation);
+      if (!canvas || !polygon) {
+        console.warn(`Failed processing IIIF Canvas body`, { canvas, polygon, annotation, body });
+        return;
+      }
+
+      const scene = this.babylon.getScene();
+      const canvasId = body.id ?? 'iiif-canvas';
+      const canvasUVs = getCanvasUVs(canvas, polygon);
+      const background =
+        typeof canvas?.backgroundColor === 'string'
+          ? parseHexColor(canvas.backgroundColor)
+          : undefined;
+      const backgroundColor = background
+        ? new Color3(background.r / 255, background.g / 255, background.b / 255)
+        : Color3.White();
+
+      const createCanvasSide = (name: string, indices: number[], material: StandardMaterial) => {
+        const plane = new Mesh(name, scene);
+        const vertexData = new VertexData();
+        vertexData.positions = polygon.flatMap(point => point.asArray());
+        vertexData.indices = indices;
+        vertexData.uvs = canvasUVs;
+        const normals: number[] = [];
+        VertexData.ComputeNormals(vertexData.positions, vertexData.indices, normals);
+        vertexData.normals = normals;
+        vertexData.applyToMesh(plane);
+        plane.material = material;
+        plane.renderingGroupId = 1;
+        return plane;
+      };
+
+      const imageBody = getCanvasImageBody(canvas);
+      const imageUrl = getCanvasImageUrl(imageBody);
+      const texture = imageUrl ? new Texture(imageUrl, scene, false, true) : undefined;
+      const imageMaterial = new StandardMaterial(`${canvasId}-image-material`, scene);
+      imageMaterial.diffuseColor = imageUrl ? Color3.White() : backgroundColor;
+      if (texture) {
+        imageMaterial.diffuseTexture = texture;
+        imageMaterial.emissiveTexture = texture;
+        imageMaterial.emissiveColor = Color3.White();
+      }
+      imageMaterial.backFaceCulling = true;
+
+      const backgroundMaterial = new StandardMaterial(`${canvasId}-background-material`, scene);
+      backgroundMaterial.diffuseColor = backgroundColor;
+      backgroundMaterial.emissiveColor = backgroundColor;
+      if (!background && texture) {
+        backgroundMaterial.diffuseTexture = texture;
+        backgroundMaterial.emissiveTexture = texture;
+        backgroundMaterial.emissiveColor = Color3.White();
+      }
+      backgroundMaterial.backFaceCulling = true;
+
+      const imagePlane = createCanvasSide(`${canvasId}-image`, [0, 1, 2, 0, 2, 3], imageMaterial);
+      const backgroundPlane = createCanvasSide(
+        `${canvasId}-background`,
+        [0, 2, 1, 0, 3, 2],
+        backgroundMaterial,
+      );
+
+      const transformNode = new TransformNode(`transformNode-${canvasId}`, scene);
+      imagePlane.setParent(transformNode);
+      backgroundPlane.setParent(transformNode);
+      loadedMeshes.push(imagePlane, backgroundPlane);
+      return transformNode;
+    };
+
+    const processRawModelBody = async (annotation: any, body: any) => {
+      const source = getSpecificResourceSource(body);
+      const entityUrl = source?.id;
+      if (!entityUrl) {
+        console.warn(`Failed getting entity URL from annotation body`, body);
+        return;
+      }
+
+      const meshes = await this.babylon.addEntityToScene(entityUrl);
+      if (meshes?.length) loadedMeshes.push(...meshes);
+      const transformNode = new TransformNode(
+        `transformNode-${entityUrl}`,
+        this.babylon.getScene(),
+      );
+      meshes.filter(mesh => !mesh.parent).forEach(mesh => mesh.setParent(transformNode));
+
+      const transforms = Array.isArray(body?.transform) ? body.transform : [];
+      const getValue = (t: any, key: 'x' | 'y' | 'z') => Number(t?.[key] ?? 0);
+      const getVector = (t: any) =>
+        new Vector3(getValue(t, 'x'), getValue(t, 'y'), getValue(t, 'z'));
+      const xInversion = new Vector3(-1, 1, 1);
+
+      for (const transform of transforms) {
+        const transformType = transform?.type?.toLowerCase();
+        const vector = getVector(transform);
+        if (transformType === 'scaletransform') {
+          transformNode.scaling = transformNode.scaling.multiply(vector);
+          transformNode.position = transformNode.position.multiply(vector);
+        }
+        if (transformType === 'rotatetransform') {
+          const angles = vector
+            .multiply(xInversion)
+            .multiplyByFloats(Math.PI / 180, Math.PI / 180, Math.PI / 180)
+            .negate();
+          transformNode.rotation = Quaternion.FromEulerVector(angles).toEulerAngles();
+        }
+        if (transformType === 'translatetransform') {
+          transformNode.position.addInPlace(vector.multiply(xInversion));
+        }
+      }
+
+      transformNode.position.addInPlace(getSelectorPosition(annotation));
+      annotationPositions.set(annotation.id, transformNode.position.clone());
+
+      return transformNode;
+    };
+
+    const processRawBody = async (annotation: any, body: any) => {
+      const type = getBodyType(body);
+      if (type === 'ambientlight') {
+        processAmbientLightBody(body);
+        return;
+      }
+      if (type === 'directionallight') {
+        processDirectionalLightBody(annotation, body);
+        return;
+      }
+      if (type === 'perspectivecamera') {
+        processPerspectiveCameraBody(annotation, body);
+        return;
+      }
+      if (type === 'orthographiccamera') {
+        processOrthographicCameraBody(annotation, body);
+        return;
+      }
+      if (type === 'canvas') {
+        return processCanvasBody(annotation, body);
+      }
+      if (type === 'model' || body?.type === 'SpecificResource') {
+        return processRawModelBody(annotation, body);
+      }
+      console.warn(`Unsupported IIIF 3D annotation body type`, body);
+      return;
+    };
 
     const processBody = async (annotation: Annotation, body: AnnotationBody) => {
       console.log('json', annotation.__jsonld);
+      const bodyType = getBodyType(body);
+      if (bodyType === 'ambientlight') {
+        processAmbientLightBody(getRawBody(body));
+        return;
+      }
+      if (bodyType === 'directionallight') {
+        processDirectionalLightBody(annotation.__jsonld, getRawBody(body));
+        return;
+      }
+      if (bodyType === 'perspectivecamera') {
+        processPerspectiveCameraBody(annotation.__jsonld, getRawBody(body));
+        return;
+      }
+      if (bodyType === 'orthographiccamera') {
+        processOrthographicCameraBody(annotation.__jsonld, getRawBody(body));
+        return;
+      }
+      if (bodyType === 'canvas') {
+        return processCanvasBody(annotation.__jsonld, getRawBody(body));
+      }
 
       const annotationBody = body.isSpecificResource()
         ? ((body as unknown as SpecificResource).getSource() as AnnotationBody)
@@ -452,11 +965,80 @@ export class ProcessingService {
       console.log('processBody', entityUrl);
 
       const meshes = await this.babylon.addEntityToScene(entityUrl);
+      if (meshes?.length) loadedMeshes.push(...meshes);
       const transformNode = new TransformNode(
         `transformNode-${entityUrl}`,
         this.babylon.getScene(),
       );
       meshes.filter(mesh => !mesh.parent).forEach(mesh => mesh.setParent(transformNode));
+
+      /*
+      Beginning of section in which the parameters of the transforms in the body
+      and the PointSelector in the target used to calculate the parameters of the
+      Babylon.js transformNode.
+      */
+      const transforms = (() => {
+        try {
+          return body.getTransform();
+        } catch (error) {
+          console.warn(`Failed getting transforms from annotation body`, error);
+          return [];
+        }
+      })();
+      const getValue = (t: any, key: 'x' | 'y' | 'z') =>
+        Number(typeof t?.getProperty === 'function' ? (t.getProperty(key) ?? 0) : (t?.[key] ?? 0));
+      const getVector = (t: any) =>
+        new Vector3(getValue(t, 'x'), getValue(t, 'y'), getValue(t, 'z'));
+      const isScale = (t: any) =>
+        typeof t?.isScaleTransform === 'function'
+          ? t.isScaleTransform()
+          : t?.isScaleTransform || t?.type?.toLowerCase() === 'scaletransform';
+      const isRotate = (t: any) =>
+        typeof t?.isRotateTransform === 'function'
+          ? t.isRotateTransform()
+          : t?.isRotateTransform || t?.type?.toLowerCase() === 'rotatetransform';
+      const isTranslate = (t: any) =>
+        typeof t?.isTranslateTransform === 'function'
+          ? t.isTranslateTransform()
+          : t?.isTranslateTransform || t?.type?.toLowerCase() === 'translatetransform';
+
+      for (const transform of transforms) {
+        const vector = getVector(transform);
+        // IIIF to Babylon axis conversion
+        const x_inversion = new Vector3(-1, 1, 1);
+
+        if (isScale(transform)) {
+          // Apply scale directly (mirroring if negative)
+          transformNode.scaling = transformNode.scaling.multiply(vector);
+          transformNode.position = transformNode.position.multiply(vector);
+        }
+        if (isRotate(transform)) {
+          const deg_to_radians = Math.PI / 180.0;
+          const angles = vector
+            .multiply(x_inversion)
+            .multiplyByFloats(deg_to_radians, deg_to_radians, deg_to_radians)
+            .negate();
+
+          const axesOrder = [0, 1, 2];
+          const initQuat = Quaternion.Identity();
+          const accQuat = axesOrder.reduce((acc, axis) => {
+            const axisVectorArray = [0.0, 0.0, 0.0];
+            axisVectorArray[axis] = 1.0;
+            const axisVector = new Vector3().fromArray(axisVectorArray);
+            const axisAngle = angles.asArray()[axis];
+            const axisQuat = Quaternion.RotationAxis(axisVector, axisAngle);
+            return acc.multiply(axisQuat);
+          }, initQuat);
+
+          const netQuat = accQuat.multiply(Quaternion.FromEulerVector(transformNode.rotation));
+
+          transformNode.rotation = netQuat.toEulerAngles();
+          transformNode.position.applyRotationQuaternionInPlace(netQuat);
+        }
+        if (isTranslate(transform)) {
+          transformNode.position.addInPlace(vector.multiply(x_inversion));
+        }
+      }
 
       const pointSelector = (() => {
         try {
@@ -466,36 +1048,20 @@ export class ProcessingService {
           return undefined;
         }
       })();
-      transformNode.position.set(
+
+      const targetSelectorPosition = new Vector3(
         Number(pointSelector?.getProperty('x') ?? 0) * -1,
         Number(pointSelector?.getProperty('y') ?? 0),
         Number(pointSelector?.getProperty('z') ?? 0),
       );
 
-      const transforms = (() => {
-        try {
-          return body.getTransform();
-        } catch (error) {
-          console.warn(`Failed getting transforms from annotation body`, error);
-          return [];
-        }
-      })();
-      for (const transform of transforms) {
-        const vector = new Vector3(
-          Number(transform?.getProperty('x') ?? 0) * -1,
-          Number(transform?.getProperty('y') ?? 0),
-          Number(transform?.getProperty('z') ?? 0),
-        );
-        if (transform.isScaleTransform) {
-          transformNode.scaling = vector;
-        }
-        if (transform.isRotateTransform) {
-          transformNode.rotation.addInPlace(vector);
-        }
-        if (transform.isTranslateTransform) {
-          transformNode.position.addInPlace(vector);
-        }
-      }
+      transformNode.position.addInPlace(targetSelectorPosition);
+      annotationPositions.set(annotation.id, transformNode.position.clone());
+      /*
+      Beginning of section in which the parameters of the transforms in the body
+      and the PointSelector in the target used to calculate the parameters of the
+      Babylon.js transformNode.
+      */
 
       return transformNode;
     };
@@ -531,6 +1097,19 @@ export class ProcessingService {
 
       console.log(annotation, isCommentPage(annotation), (annotation as any).bodyValue);
 
+      const rawAnnotation = (annotation as any).__jsonld ?? annotation;
+      if (
+        rawAnnotation?.type === 'Annotation' &&
+        rawAnnotation.body &&
+        getBodyType(rawAnnotation.body) === 'canvas'
+      ) {
+        const transformNode = await processRawBody(rawAnnotation, rawAnnotation.body);
+        if (transformNode) {
+          transformNodes.push(transformNode);
+        }
+        return;
+      }
+
       if (isBody(annotation)) {
         for await (const body of annotation.getBody()) {
           const transformNode = await processBody(annotation, body);
@@ -540,10 +1119,22 @@ export class ProcessingService {
         }
       }
 
+      if (!isBody(annotation) && rawAnnotation?.type === 'AnnotationPage') {
+        for (const item of rawAnnotation.items ?? []) {
+          await processAnnotation(item);
+        }
+      }
+      if (!isBody(annotation) && rawAnnotation?.type === 'Annotation' && rawAnnotation.body) {
+        const transformNode = await processRawBody(rawAnnotation, rawAnnotation.body);
+        if (transformNode) {
+          transformNodes.push(transformNode);
+        }
+      }
+
       const page = (() => {
         if (isCommentPage(annotation)) return annotation;
-        if (annotation.__jsonld.bodyValue !== undefined) {
-          const page = { items: [annotation.__jsonld] } as unknown as CommentPage;
+        if (rawAnnotation?.bodyValue !== undefined) {
+          const page = { items: [rawAnnotation] } as unknown as CommentPage;
           console.log('Page', page);
           return page;
         }
@@ -622,13 +1213,47 @@ export class ProcessingService {
     };
 
     console.log('scene', scene);
-    const annotations = [...(scene?.getContent() ?? []), ...(scene?.__jsonld['annotations'] ?? [])];
-    await Promise.all(annotations?.map(annotation => processAnnotation(annotation)) ?? []);
+    const rawSceneAnnotations = (scene as any)?.__jsonld?.annotations ?? [];
+    const sceneContent = (scene as any)?.getContent ? (scene as any).getContent() : [];
+    const rawSceneItems = (scene as any)?.__jsonld?.items ?? (scene as any)?.items ?? [];
+    const rawSceneAnnotationPages = sceneContent.length
+      ? []
+      : rawSceneItems.filter((item: any) => item?.type === 'AnnotationPage');
+    const annotations = [...sceneContent, ...rawSceneAnnotations, ...rawSceneAnnotationPages];
+    for (const annotation of annotations ?? []) {
+      await processAnnotation(annotation);
+    }
+
+    if (loadedMeshes.length) {
+      if (hasExplicitLights) {
+        this.babylon.getScene().environmentIntensity = 0;
+        loadedMeshes.forEach(mesh => {
+          if (mesh.material instanceof PBRMaterial) {
+            mesh.material.environmentIntensity = 0;
+          }
+        });
+      }
+
+      const entity = {
+        ...baseEntity(),
+        _id: 'standalone_entity',
+        name: 'IIIF Manifest',
+        relatedDigitalEntity: { _id: 'standalone_entity' },
+        settings: entitySettings,
+        mediaType: 'model',
+      } as IEntity;
+
+      this.updateActiveEntity(entity, loadedMeshes);
+      this.settings$.next({
+        localSettings: entity.settings,
+        serverSettings: entity.settings,
+      });
+    }
 
     // "Smart" automatic positioning of camera
     const automoveCamera = () => {
       if (!hasProcessedCamera) {
-        const camera = this.babylon.cameraManager.getActiveCamera();
+        const camera = this.babylon.getActiveCamera();
 
         const childMeshes = transformNodes.flatMap(node =>
           node.getChildMeshes(false).filter((m): m is Mesh => m instanceof Mesh),
@@ -649,10 +1274,10 @@ export class ProcessingService {
 
         const maxExtend = Math.max(...boundingInfo.flatMap(info => info.extend));
 
-        this.babylon.cameraManager.moveActiveCameraToPosition(
-          new Vector3(camera.alpha * -1, camera.beta, maxExtend * 4),
-        );
         this.babylon.cameraManager.setActiveCameraTarget(averageCenter);
+        this.babylon.cameraManager.moveActiveCameraToPosition(
+          new Vector3(Math.PI / 2, Math.PI / 2, maxExtend * 2.5),
+        );
       }
     };
 
@@ -662,9 +1287,21 @@ export class ProcessingService {
     this.bootstrapped$.next(true);
 
     setTimeout(() => {
+      if (applyExplicitCamera) {
+        applyExplicitCamera();
+        setTimeout(applyExplicitCamera, 250);
+        return;
+      }
       automoveCamera();
-      setBackground();
     }, 0);
+  }
+
+  public importIIIF3DManifestJson(manifestJson: object) {
+    return this.processIIIF3DManifest(manifestJson);
+  }
+
+  public importIIIF3DManifest(manifestUrl: string) {
+    return this.loadIIIF3DManifest(manifestUrl);
   }
 
   private async loadStandaloneEntity(entries: IQueryParams) {
