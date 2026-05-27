@@ -31,8 +31,8 @@ jobs:
       - name: Build
         run: bun run build -- --base-href /
 
-      - name: Copy build artifacts to root
-        run: cp -r dist/viewer/browser/* .
+      - name: Copy build artifacts to _site
+        run: mkdir -p _site && cp -r dist/viewer/browser/* _site/
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
