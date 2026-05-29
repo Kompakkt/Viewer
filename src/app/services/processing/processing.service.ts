@@ -77,6 +77,7 @@ interface IQueryParams {
   settings?: string;
   annotations?: string;
   manifest?: string;
+  document?: string;
   resource?: string;
   minimal?: string;
   transparent?: string;
@@ -310,10 +311,17 @@ export class ProcessingService {
 
   public async bootstrap() {
     const queryParams = new URLSearchParams(location.search);
-    const entries = Object.fromEntries(queryParams.entries()) as IQueryParams;
+    const hashParams = location.hash.startsWith('#?')
+      ? new URLSearchParams(location.hash.slice(2))
+      : new URLSearchParams();
+    const entries = Object.fromEntries([
+      ...Array.from(hashParams.entries()),
+      ...Array.from(queryParams.entries()),
+    ]) as IQueryParams;
 
     const entityParam = entries['model'] ?? entries['entity'] ?? undefined;
     const compParam = entries['compilation'] ?? undefined;
+    const manifestParam = entries['manifest'] ?? entries['document'] ?? undefined;
     const qualityParam = entries['quality'] ?? 'low';
     if (isQualitySetting(qualityParam)) this.updateEntityQuality(qualityParam);
     // values = upload, explore, edit, annotation, open
@@ -321,7 +329,7 @@ export class ProcessingService {
     if (isMode(mode)) this.mode$.next(mode);
 
     // check if standalone and exit early to init standalone mode
-    const isStandalone = !!entries['standalone'];
+    const isStandalone = !!entries['standalone'] || !!manifestParam;
     if (isStandalone) return this.loadStandaloneEntity(entries);
 
     if (entries.transparent) this.babylon.isTransparent.set(true);
@@ -1305,7 +1313,8 @@ export class ProcessingService {
   }
 
   private async loadStandaloneEntity(entries: IQueryParams) {
-    const { settings, annotations, manifest: manifestUrl } = entries;
+    const { settings, annotations } = entries;
+    const manifestUrl = entries.manifest ?? entries.document;
 
     if (manifestUrl) {
       return this.loadIIIF3DManifest(manifestUrl);
