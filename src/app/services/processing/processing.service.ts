@@ -426,7 +426,30 @@ export class ProcessingService {
       this.message.error('Manifest could not be loaded from URL.');
       return;
     }
+    this.setIIIFManifestUrlParam(normalizedUrl);
     return this.processIIIF3DManifest(manifestJson);
+  }
+
+  private setIIIFManifestUrlParam(manifestUrl: string) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('manifest', manifestUrl);
+    url.searchParams.delete('document');
+    window.history.replaceState(
+      window.history.state,
+      '',
+      `${url.pathname}${url.search}${url.hash}`,
+    );
+  }
+
+  private clearIIIFManifestUrlParam() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('manifest');
+    url.searchParams.delete('document');
+    window.history.replaceState(
+      window.history.state,
+      '',
+      `${url.pathname}${url.search}${url.hash}`,
+    );
   }
 
   private async processIIIF3DManifest(manifestJson: object) {
@@ -1305,6 +1328,7 @@ export class ProcessingService {
   }
 
   public importIIIF3DManifestJson(manifestJson: object) {
+    this.clearIIIFManifestUrlParam();
     return this.processIIIF3DManifest(manifestJson);
   }
 

@@ -35,6 +35,8 @@ import { DialogIiifImportComponent } from '../dialogs/dialog-iiif-import/dialog-
   ],
 })
 export class SceneComponent implements AfterViewInit {
+  public showIiifImportPanel = !this.hasInitialManifestParam();
+
   @HostListener('window:resize', ['$event'])
   public onResize() {
     this.babylon.resize();
@@ -64,5 +66,19 @@ export class SceneComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     this.setupCanvas();
+  }
+
+  private hasInitialManifestParam() {
+    const queryParams = new URLSearchParams(window.location.search);
+    const hashParams = window.location.hash.startsWith('#?')
+      ? new URLSearchParams(window.location.hash.slice(2))
+      : new URLSearchParams();
+
+    return (
+      queryParams.has('manifest') ||
+      queryParams.has('document') ||
+      hashParams.has('manifest') ||
+      hashParams.has('document')
+    );
   }
 }

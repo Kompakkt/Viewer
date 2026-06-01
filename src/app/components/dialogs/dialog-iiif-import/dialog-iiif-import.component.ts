@@ -211,9 +211,7 @@ export class DialogIiifImportComponent {
 
   async importExampleManifest(url: string) {
     try {
-      const response = await fetch(url);
-      const parsed = await response.json();
-      await this.processing.importIIIF3DManifestJson(parsed);
+      await this.processing.importIIIF3DManifest(url);
       this.closeDialogIfPresent();
     } catch (error) {
       console.error(error);
