@@ -42,22 +42,20 @@ export class DialogShareAnnotationComponent {
       this.backend
         .getCompilation(this.targetCollectionId)
         .then(compilation => {
-          if (compilation) {
-            compilation = compilation as ICompilation;
+          if (!compilation) throw new Error('Compilation not found');
 
-            if (!compilation.entities[this.entityId])
-              return this.message.error(
-                'The entity of this annotation is not part of the target collection.',
-              );
+          if (!compilation.entities[this.entityId])
+            return this.message.error(
+              'The entity of this annotation is not part of the target collection.',
+            );
 
-            this.response = {
-              status: true,
-              collectionId: this.targetCollectionId,
-              annotationListLength: Object.keys(compilation.annotations).length ?? 0,
-            };
+          this.response = {
+            status: true,
+            collectionId: this.targetCollectionId,
+            annotationListLength: Object.keys(compilation.annotations).length ?? 0,
+          };
 
-            this.dialogRef.close(this.response);
-          }
+          this.dialogRef.close(this.response);
         })
         .catch(error => {
           console.error(error);

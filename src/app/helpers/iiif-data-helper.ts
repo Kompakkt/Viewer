@@ -1,4 +1,4 @@
-import { IAgent, IAnnotation } from '@kompakkt/common/interfaces';
+import { IAgent, IAnnotation } from '@kompakkt/common';
 
 export type IIIFData = {
   annotations: IIIFAnnotation[];
