@@ -44,6 +44,7 @@ import {
   createUniversalCamera,
   setUpCamera,
   smoothCameraTransition,
+  smoothCameraTransitionFromSpherical,
 } from './camera-handler';
 import { IAudioContainer, IImageContainer, IVideoContainer } from './container.interfaces';
 import {
@@ -126,11 +127,13 @@ export class BabylonService {
       }),
     resetCamera: () => {
       const camera = this.cameraManager.setCameraType<ArcRotateCamera>('ArcRotateCamera');
-      const { position, target } = cameraDefaults$.getValue();
-      smoothCameraTransition({
+      const { alpha, beta, radius, target } = cameraDefaults$.getValue();
+      smoothCameraTransitionFromSpherical({
         camera,
         scene: this.scene,
-        position,
+        alpha,
+        beta,
+        radius,
         target,
       });
     },
@@ -148,6 +151,7 @@ export class BabylonService {
       },
     }),
     smoothCameraTransition,
+    smoothCameraTransitionFromSpherical,
     setActiveCameraTarget: (target: Vector3, speed?: number) =>
       smoothCameraTransition(
         {
@@ -174,7 +178,7 @@ export class BabylonService {
         camera => camera instanceof UniversalCamera,
       )! as UniversalCamera;
 
-      const { position, target } = cameraDefaults$.getValue();
+      const { alpha, beta, radius, target } = cameraDefaults$.getValue();
       if (type === 'UniversalCamera') {
         universalCamera.position = rotateCamera.position.clone();
         universalCamera.setTarget(target);
@@ -182,10 +186,12 @@ export class BabylonService {
       } else {
         rotateCamera.position = universalCamera.position.clone();
         this.scene.activeCamera = rotateCamera;
-        smoothCameraTransition({
+        smoothCameraTransitionFromSpherical({
           camera: rotateCamera,
           scene: this.scene,
-          position,
+          alpha,
+          beta,
+          radius,
           target,
         });
       }

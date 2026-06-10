@@ -11,9 +11,16 @@ import { BehaviorSubject } from 'rxjs';
 
 const halfPi = Math.PI / 180;
 
-export type CameraDefaults = { position: Vector3; target: Vector3 };
+export type CameraDefaults = {
+  alpha: number;
+  beta: number;
+  radius: number;
+  target: Vector3;
+};
 export const cameraDefaults$ = new BehaviorSubject<CameraDefaults>({
-  position: new Vector3(0, 10, 100),
+  alpha: -(Math.PI / 2),
+  beta: Math.PI / 2,
+  radius: 100,
   target: Vector3.Zero(),
 });
 cameraDefaults$.subscribe(defaults => {
@@ -21,11 +28,13 @@ cameraDefaults$.subscribe(defaults => {
 });
 
 export const resetCamera = (camera: ArcRotateCamera, scene: Scene) => {
-  const { position, target } = cameraDefaults$.getValue();
-  smoothCameraTransition({
+  const { alpha, beta, radius, target } = cameraDefaults$.getValue();
+  smoothCameraTransitionFromSpherical({
     camera,
     scene,
-    position,
+    alpha,
+    beta,
+    radius,
     target,
   });
   return camera;
@@ -187,6 +196,94 @@ export const smoothCameraTransition = (
   animRadius.setKeys([
     { frame: 0, value: camera.radius },
     { frame: FPS, value: tempRadius },
+  ]);
+
+  animTarget.setKeys([
+    { frame: 0, value: camera.target.clone() },
+    { frame: FPS, value: target.clone() },
+  ]);
+
+  const ease = new QuarticEase();
+  ease.setEasingMode(EasingFunction.EASINGMODE_EASEOUT);
+  animTarget.setEasingFunction(ease);
+  animAlpha.setEasingFunction(ease);
+  animBeta.setEasingFunction(ease);
+  animRadius.setEasingFunction(ease);
+
+  const animations = [animTarget, animAlpha, animBeta, animRadius];
+
+  return scene.beginDirectAnimation(camera, animations, 0, FPS, false, speed);
+};
+
+export const smoothCameraTransitionFromSpherical = (
+  {
+    camera,
+    scene,
+    alpha,
+    beta,
+    radius,
+    target,
+  }: {
+    camera: ArcRotateCamera;
+    scene: Scene;
+    alpha: number;
+    beta: number;
+    radius: number;
+    target: Vector3;
+  },
+  speed = 1,
+) => {
+  console.log(
+    'SmoothCameraTransitionFromSpherical from',
+    JSON.stringify([camera.alpha, camera.beta, camera.radius, camera.target]),
+    'to',
+    JSON.stringify([alpha, beta, radius, target]),
+  );
+
+  camera.target = new Vector3(target.x, target.y, target.z);
+
+  const animAlpha = new Animation(
+    'camera_alpha_animation',
+    'alpha',
+    FPS,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CYCLE,
+  );
+  const animBeta = new Animation(
+    'camera_beta_animation',
+    'beta',
+    FPS,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CYCLE,
+  );
+  const animRadius = new Animation(
+    'camera_radius_animation',
+    'radius',
+    FPS,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CYCLE,
+  );
+  const animTarget = new Animation(
+    'camera_target_animation',
+    'target',
+    FPS,
+    Animation.ANIMATIONTYPE_VECTOR3,
+    Animation.ANIMATIONLOOPMODE_CYCLE,
+  );
+
+  animAlpha.setKeys([
+    { frame: 0, value: camera.alpha },
+    { frame: FPS, value: alpha },
+  ]);
+
+  animBeta.setKeys([
+    { frame: 0, value: camera.beta },
+    { frame: FPS, value: beta },
+  ]);
+
+  animRadius.setKeys([
+    { frame: 0, value: camera.radius },
+    { frame: FPS, value: radius },
   ]);
 
   animTarget.setKeys([

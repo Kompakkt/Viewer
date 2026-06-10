@@ -502,11 +502,10 @@ export class EntitySettingsService {
       throw new Error('Camera settings missing');
     }
 
-    const position = new Vector3(
-      cameraSettings.position.x,
-      cameraSettings.position.y,
-      cameraSettings.position.z,
-    );
+    // Saved position is { x: alpha, y: beta, z: radius } (spherical ArcRotate)
+    const alpha = cameraSettings.position.x;
+    const beta = cameraSettings.position.y;
+    const radius = cameraSettings.position.z;
     const target = new Vector3(
       cameraSettings.target.x,
       cameraSettings.target.y,
@@ -514,14 +513,18 @@ export class EntitySettingsService {
     );
 
     this.babylon.cameraManager.cameraDefaults$.next({
-      position: position.clone(),
+      alpha,
+      beta,
+      radius,
       target: target.clone(),
     });
 
-    this.babylon.cameraManager.smoothCameraTransition({
+    this.babylon.cameraManager.smoothCameraTransitionFromSpherical({
       camera: this.babylon.cameraManager.getActiveCamera(),
       scene: this.babylon.getScene(),
-      position,
+      alpha,
+      beta,
+      radius,
       target,
     });
   }

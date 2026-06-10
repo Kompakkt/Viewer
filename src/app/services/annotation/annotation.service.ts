@@ -673,12 +673,17 @@ export class AnnotationService {
     const perspective = selectedAnnotation.body.content.relatedPerspective;
     if (perspective !== undefined) {
       this.babylon.cameraManager.setCameraType('ArcRotateCamera');
+      // Saved position is { x: alpha, y: beta, z: radius } (spherical ArcRotate)
       const position = asVector3(perspective.position);
       const target = asVector3(perspective.target);
-      this.babylon.cameraManager.moveActiveCameraToPosition(
-        Vector3.FromArray(Object.values(position)),
-      );
-      this.babylon.cameraManager.setActiveCameraTarget(Vector3.FromArray(Object.values(target)));
+      this.babylon.cameraManager.smoothCameraTransitionFromSpherical({
+        camera: this.babylon.cameraManager.getActiveCamera(),
+        scene: this.babylon.getScene(),
+        alpha: position.x,
+        beta: position.y,
+        radius: position.z,
+        target: Vector3.FromArray(Object.values(target)),
+      });
     }
     this.babylon.hideMesh(selectedAnnotation._id.toString(), true);
   }
