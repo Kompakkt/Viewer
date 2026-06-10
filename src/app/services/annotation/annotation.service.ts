@@ -1,4 +1,4 @@
-import { moveItemInArray } from '@angular/cdk/drag-drop';
+import { copyArrayItem, moveItemInArray } from '@angular/cdk/drag-drop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
@@ -20,7 +20,11 @@ import {
   AuthResult,
   LoginComponent,
 } from 'src/app/components/dialogs/dialog-login/login.component';
-import { DialogShareAnnotationComponent } from '../../components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
+import {
+  DialogShareAnnotationComponent,
+  DialogShareAnnotationData,
+  DialogShareAnnotationResult,
+} from '../../components/dialogs/dialog-share-annotation/dialog-share-annotation.component';
 import { BabylonService } from '../babylon/babylon.service';
 import { BackendService } from '../backend/backend.service';
 import { MessageService } from '../message/message.service';
@@ -494,7 +498,9 @@ export class AnnotationService {
       if (hasContent) {
         this.backend
           .updateAnnotation(_annotation)
-          .then((resultAnnotation: IAnnotation) => {
+          .then(resultAnnotation => {
+            if (!resultAnnotation)
+              throw new Error('No annotation returned from backend after creation');
             newAnnotation = resultAnnotation;
           })
           .catch((errorMessage: any) => {
@@ -527,7 +533,9 @@ export class AnnotationService {
       if (isOwner) {
         this.backend
           .updateAnnotation(_annotation)
-          .then((resultAnnotation: IAnnotation) => {
+          .then(resultAnnotation => {
+            if (!resultAnnotation)
+              throw new Error('No annotation returned from backend after update');
             newAnnotation = resultAnnotation;
           })
           .catch((errorMessage: any) => {
@@ -707,34 +715,35 @@ export class AnnotationService {
       entityId: entity._id,
     };
 
-    const dialogRef = this.dialog.open(DialogShareAnnotationComponent, dialogConfig);
-    dialogRef
-      .afterClosed()
-      .toPromise()
-      .then(data => {
-        if (data.status !== true) {
-          return this.message.error('Annotation has not been shared.');
-        }
-        const copyAnnotation = this.createCopyOfAnnotation(
-          annotation,
-          data.collectionId,
-          data.annotationListLength,
-        );
+    const dialogRef = this.dialog.open<
+      DialogShareAnnotationComponent,
+      DialogShareAnnotationData,
+      DialogShareAnnotationResult
+    >(DialogShareAnnotationComponent, dialogConfig);
+    const result = await firstValueFrom(dialogRef.afterClosed());
+    if (!result) {
+      return this.message.error('Annotation has not been shared.');
+    }
 
-        this.backend
-          .updateAnnotation(copyAnnotation)
-          .then(() => {
-            this.message.info(`Annotation is shared to Collection with id: ${data.collectionId}`);
-          })
-          .catch(() => this.message.error('Annotation can not be shared.'));
-      });
+    const copyAnnotation = await this.createCopyOfAnnotation(
+      annotation,
+      result.collectionId,
+      result.annotationListLength,
+    );
+
+    return this.backend
+      .updateAnnotation(copyAnnotation)
+      .then(() => {
+        this.message.info(`Annotation is shared to Collection with id: ${result.collectionId}`);
+      })
+      .catch(() => this.message.error('Annotation can not be shared.'));
   }
 
   public async createCopyOfAnnotation(
     annotation: IAnnotation,
     collectionId: string,
     annotationLength: number,
-  ) {
+  ): Promise<IAnnotation> {
     const generatedId = new ObjectID().toString();
 
     const entity = await firstValueFrom(this.processing.entity$);
@@ -748,7 +757,7 @@ export class AnnotationService {
       validated: false,
       _id: generatedId,
       identifier: generatedId,
-      ranking: String(annotationLength + 1),
+      ranking: annotationLength + 1,
       creator: annotation.creator,
       created: annotation.created,
       generator: annotation.generator,

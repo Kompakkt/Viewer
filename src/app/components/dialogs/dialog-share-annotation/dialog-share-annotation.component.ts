@@ -6,8 +6,16 @@ import { MessageService } from '../../../services/message/message.service';
 
 import { FormsModule } from '@angular/forms';
 import { ButtonComponent, ButtonRowComponent, InputComponent } from '@kompakkt/komponents';
-import { ICompilation } from '@kompakkt/common';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
+
+export type DialogShareAnnotationResult = {
+  collectionId: string;
+  annotationListLength: number;
+};
+
+export type DialogShareAnnotationData = {
+  entityId: string;
+};
 
 @Component({
   selector: 'app-dialog-share-annotation',
@@ -18,21 +26,12 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
 export class DialogShareAnnotationComponent {
   public targetCollectionId = '';
   private entityId = '';
-  private response: {
-    status: boolean;
-    collectionId: string;
-    annotationListLength: number;
-  } = {
-    status: false,
-    collectionId: '',
-    annotationListLength: 1,
-  };
 
   constructor(
     private backend: BackendService,
     private message: MessageService,
     private dialogRef: MatDialogRef<DialogShareAnnotationComponent>,
-    @Inject(MAT_DIALOG_DATA) data: { entityId: string },
+    @Inject(MAT_DIALOG_DATA) data: DialogShareAnnotationData,
   ) {
     this.entityId = data.entityId;
   }
@@ -49,13 +48,12 @@ export class DialogShareAnnotationComponent {
               'The entity of this annotation is not part of the target collection.',
             );
 
-          this.response = {
-            status: true,
+          const result: DialogShareAnnotationResult = {
             collectionId: this.targetCollectionId,
             annotationListLength: Object.keys(compilation.annotations).length ?? 0,
           };
 
-          this.dialogRef.close(this.response);
+          this.dialogRef.close(result);
         })
         .catch(error => {
           console.error(error);
@@ -67,7 +65,6 @@ export class DialogShareAnnotationComponent {
   }
 
   public cancel() {
-    console.log('canceled');
-    this.dialogRef.close(this.response);
+    this.dialogRef.close();
   }
 }
