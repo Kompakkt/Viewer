@@ -218,6 +218,9 @@ export class ProcessingService {
 
   constructor() {
     this.entity$.pipe(filter(isEntity)).subscribe(entity => this.handleEntitySettings(entity));
+    this.defaultEntityLoaded$.subscribe(isDefault => {
+      this.babylon.setOrbitGizmoVisible(!isDefault);
+    });
   }
 
   private handleEntitySettings(entity: IEntity) {

@@ -391,6 +391,10 @@ export class BabylonService {
     }
   }
 
+  public setOrbitGizmoVisible(visible: boolean): void {
+    this.canvases.gizmo.style.setProperty('display', visible ? 'block' : 'none');
+  }
+
   public getEngine(): Engine {
     return this.engine;
   }
