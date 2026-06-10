@@ -33,6 +33,11 @@
     left: var(--sidebar-width);
   }
 
+  &.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
   &:not(.is-open) div.button-close {
     transition: var(--transition-duration);
     transform: translateX(-100%);

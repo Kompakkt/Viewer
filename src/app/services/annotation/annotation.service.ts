@@ -1,38 +1,19 @@
 import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import {
   ActionManager,
-  Color3,
   ExecuteCodeAction,
-  GaussianSplattingMesh,
-  Matrix,
   MeshBuilder,
-  Nullable,
-  PickingInfo,
-  Ray,
-  StandardMaterial,
+  PositionGizmo,
   Tags,
+  UtilityLayerRenderer,
   Vector3,
-  Viewport,
 } from '@babylonjs/core';
-import {
-  BehaviorSubject,
-  ReplaySubject,
-  combineLatest,
-  firstValueFrom,
-  fromEvent,
-  interval,
-} from 'rxjs';
+import { BehaviorSubject, ReplaySubject, combineLatest, firstValueFrom, fromEvent } from 'rxjs';
 import { distinct, filter, map, switchMap } from 'rxjs/operators';
-import {
-  IAnnotation,
-  IVector3,
-  IAmbiguousVector3,
-  asVector3,
-  isAnnotation,
-} from '@kompakkt/common';
+import { IAnnotation, asVector3, isAnnotation } from '@kompakkt/common';
 import { annotationFallback, annotationLogo } from '../../../assets/annotations/annotations';
 import {
   AuthConcern,
@@ -45,9 +26,16 @@ import { BackendService } from '../backend/backend.service';
 import { MessageService } from '../message/message.service';
 import { ProcessingService } from '../processing/processing.service';
 import { UserdataService } from '../userdata/userdata.service';
-import { createMarker } from './visual3DElements';
+import { createMarker, createMarkerName } from './visual3DElements';
 import { ReorderMovement } from 'src/app/components/entity-feature-annotations/annotation/annotation.component';
 import { ExtenderTransformer } from '@kompakkt/plugins/extender';
+import { findClosestSplatPoint } from './helpers/find-closest-splat';
+import ObjectID from 'bson-objectid';
+import {
+  DialogRepositionAnnotationComponent,
+  RepositionAnnotationDialogChoice,
+} from 'src/app/components/dialogs/dialog-reposition-annotation/dialog-reposition-annotation.component';
+import { OverlayService } from '../overlay/overlay.service';
 
 const isDefaultAnnotation = (annotation: IAnnotation) =>
   !annotation.target.source.relatedCompilation ||
@@ -59,6 +47,9 @@ const isCompilationAnnotation = (annotation: IAnnotation) =>
 
 const sortByRanking = (a: IAnnotation, b: IAnnotation): number =>
   +a.ranking === +b.ranking ? 0 : +a.ranking < +b.ranking ? -1 : 1;
+
+// Gaussian splatting and point clouds require more complex picking logic, and for meshes we only need the point and the normal anyways, so we define a type for the picking result that is relevant for annotations in our use case
+type PartialPick = { pickedPoint: Vector3; pickedNormal: Vector3 };
 
 @Injectable({
   providedIn: 'root',
@@ -74,7 +65,7 @@ export class AnnotationService {
 
   private defaultOffset = 0;
 
-  public picked$ = new ReplaySubject<PickingInfo>();
+  public picked$ = new ReplaySubject<PartialPick>();
   public debouncedPicked$ = this.isAnnotationMode$.pipe(
     filter(isAnnotationMode => isAnnotationMode),
     switchMap(() => this.picked$),
@@ -88,6 +79,7 @@ export class AnnotationService {
     private processing: ProcessingService,
     private dialog: MatDialog,
     private userdata: UserdataService,
+    private overlay: OverlayService,
   ) {
     this.debouncedPicked$.subscribe(result => {
       this.createNewAnnotation(result);
@@ -240,135 +232,147 @@ export class AnnotationService {
     await this.changedRankingPositions();
   }
 
-  // Die Annotationsfunktionalität wird zue aktuellen Entity hinzugefügt
-  public initializeAnnotationMode() {
-    const scene = this.babylon.getScene();
+  isRepositioning = signal(false);
+  public async initializeRepositionMode(annotation: IAnnotation) {
+    const markerName = createMarkerName(annotation._id.toString());
+    const marker = this.babylon.getScene().getMeshByName(markerName);
+    if (!marker) {
+      console.warn('Marker not found for annotation', annotation);
+      return;
+    }
+    console.log('Initializing reposition mode for annotation', { annotation, marker });
 
-    const previewSphere = MeshBuilder.CreateSphere(
-      'annotation-preview-sphere',
-      { diameter: 0.1, updatable: true },
-      scene,
+    const allAnnotations = await firstValueFrom(this.currentAnnotations$);
+    const hiddenAnnotations = await firstValueFrom(this.hiddenAnnotations$);
+    // Hide all markers except the one we want to reposition, to avoid confusion during repositioning
+    this.hiddenAnnotations$.next([
+      ...allAnnotations
+        .filter(anno => anno._id.toString() !== annotation._id.toString())
+        .map(anno => anno._id.toString()),
+    ]);
+
+    const originalPosition = marker.position.clone();
+    const transformMesh = MeshBuilder.CreateBox(
+      `${markerName}_reposition_transform`,
+      { size: 0 },
+      this.babylon.getScene(),
     );
-    const previewSphereMaterial = new StandardMaterial('previewSphereMaterial', scene);
-    previewSphereMaterial.emissiveColor = Color3.Magenta();
-    previewSphere.material = previewSphereMaterial;
-    previewSphere.renderingGroupId = 2;
+    transformMesh.visibility = 0;
+    transformMesh.position = marker.position.clone();
+    marker.setParent(transformMesh);
+    marker.setPositionWithLocalVector(Vector3.Zero());
 
-    const gsMesh = scene.getMeshByName('GaussianSplatting') as Nullable<GaussianSplattingMesh>;
-    if (!gsMesh?.material || !gsMesh?.splatsData) return;
-    const gsMaterial = gsMesh.material;
+    const scene = this.babylon.getScene();
+    const utilLayer = new UtilityLayerRenderer(scene);
+    const gizmo = new PositionGizmo(utilLayer, 2);
+    gizmo.updateGizmoPositionToMatchAttachedMesh = true;
+    gizmo.updateGizmoRotationToMatchAttachedMesh = true;
+    gizmo.attachedMesh = transformMesh;
 
-    // ArrayBuffer: postions (3 floats), size (3 floats), color (4 bytes), orientation quaternion (4 bytes)
-    const splatsData = gsMesh.splatsData;
+    this.isRepositioning.set(true);
+    void this.setSelectedAnnotation('');
+    this.overlay.toggleSidenav('annotation', false);
 
-    const findClosestSplatPoint = (): Nullable<Vector3> => {
-      const { pointerX, pointerY } = scene;
-      const camera = this.babylon.getActiveCamera();
-      const engine = scene.getEngine();
+    const dialogRef = this.dialog.open<
+      DialogRepositionAnnotationComponent,
+      void,
+      RepositionAnnotationDialogChoice
+    >(DialogRepositionAnnotationComponent, {
+      disableClose: true,
+      hasBackdrop: false,
+      panelClass: 'reposition-dialog-panel',
+    });
 
-      if (!camera || !splatsData) return null;
+    const dragRef = gizmo.onDragEndObservable.add(() => {
+      // Update camera to current position after drag, which is the position of the transformMesh
+      this.babylon.cameraManager.setActiveCameraTarget(transformMesh.position, 2);
+      dialogRef.componentInstance.updatePositions({
+        prev: originalPosition,
+        curr: transformMesh.getAbsolutePosition(),
+      });
+    });
 
-      const screenWidth = engine.getRenderWidth();
-      const screenHeight = engine.getRenderHeight();
+    const result = await firstValueFrom(dialogRef.afterClosed());
 
-      // Constants for splat data structure
-      const SIZEOF_FLOAT = 4;
-      const SIZEOF_BYTE = 1; // For clarity
+    gizmo.onDragEndObservable.remove(dragRef);
+    gizmo.dispose();
+    utilLayer.dispose();
+    const nodePosition = transformMesh.position.clone();
+    marker.setParent(null);
+    transformMesh.dispose();
 
-      // Stride calculation based on your comment:
-      // Position (3 floats), Size (3 floats), Color (4 bytes), Orientation (4 bytes)
-      const POSITION_OFFSET = 0;
-      const POSITION_COMPONENTS = 3;
+    if (result !== 'apply') {
+      marker.position = originalPosition.clone();
+    } else {
+      marker.position = nodePosition.clone();
+    }
 
-      // If your splat data format is different, adjust these:
-      const SIZE_COMPONENTS = 3;
-      const COLOR_COMPONENTS_BYTE = 4;
-      const ORIENTATION_COMPONENTS_BYTE = 4;
+    const screenshot = await this.babylon.createPreviewScreenshot();
+    annotation.body.content.relatedPerspective.preview = screenshot;
 
-      const STRIDE =
-        POSITION_COMPONENTS * SIZEOF_FLOAT +
-        SIZE_COMPONENTS * SIZEOF_FLOAT +
-        COLOR_COMPONENTS_BYTE * SIZEOF_BYTE +
-        ORIENTATION_COMPONENTS_BYTE * SIZEOF_BYTE; // Should be 32 based on your description
+    this.hiddenAnnotations$.next([...hiddenAnnotations]);
+    this.isRepositioning.set(false);
+    void this.setSelectedAnnotation(annotation._id.toString());
+    this.overlay.toggleSidenav('annotation', true);
+  }
 
-      if (STRIDE <= 0 || splatsData.byteLength % STRIDE !== 0) {
-        console.error('Invalid STRIDE or splatsData length.', STRIDE, splatsData.byteLength);
-        return null;
-      }
-
-      const numSplats = splatsData.byteLength / STRIDE;
-      const dataView = new DataView(splatsData);
-
-      let closestSplatWorldPosition: Nullable<Vector3> = null;
-      let minScreenDistanceSq = Infinity;
-      let closestSplatDepth = Infinity;
-
-      const worldMatrix = gsMesh.getWorldMatrix();
-      const transformMatrix = scene.getTransformMatrix(); // View-Projection matrix
-      const viewport = new Viewport(0, 0, screenWidth, screenHeight);
-
-      // Define a maximum distance in screen pixels for a splat to be considered "close"
-      // Adjust this threshold as needed.
-      const MAX_PICKING_DISTANCE_SCREEN_SQ = 50 * 50; // e.g., 50 pixels radius
-
-      for (let i = 0; i < numSplats; ++i) {
-        const currentOffset = i * STRIDE;
-
-        // Read position (assuming Little Endian, common for .splat files)
-        const localX = dataView.getFloat32(currentOffset + POSITION_OFFSET, true);
-        const localY =
-          dataView.getFloat32(currentOffset + POSITION_OFFSET + SIZEOF_FLOAT, true) * -1;
-        const localZ = dataView.getFloat32(
-          currentOffset + POSITION_OFFSET + 2 * SIZEOF_FLOAT,
-          true,
-        );
-        const splatLocalPosition = new Vector3(localX, localY, localZ);
-
-        // Transform splat position from local mesh space to world space
-        const splatWorldPosition = Vector3.TransformCoordinates(splatLocalPosition, worldMatrix);
-
-        // Project world position to 2D screen coordinates
-        // Note: The first matrix argument to Vector3.Project is the world matrix of the object
-        // whose vertices (in local space) are being projected. Since splatWorldPosition is already
-        // in world space, we use Matrix.IdentityReadOnly.
-        const screenPosition = Vector3.Project(
-          splatWorldPosition,
-          Matrix.IdentityReadOnly, // Object's world matrix (already applied)
-          transformMatrix, // Combined ViewProjection matrix
-          viewport,
-        );
-
-        const dx = screenPosition.x - pointerX;
-        const dy = screenPosition.y - pointerY;
-        const distSq = dx * dx + dy * dy;
-
-        if (distSq < MAX_PICKING_DISTANCE_SCREEN_SQ) {
-          // If this splat is closer on screen OR
-          // if it's at a similar screen distance but closer to the camera (smaller depth value)
-          if (
-            distSq < minScreenDistanceSq ||
-            (Math.abs(distSq - minScreenDistanceSq) < 1e-5 && screenPosition.z < closestSplatDepth)
-          ) {
-            minScreenDistanceSq = distSq;
-            closestSplatWorldPosition = splatWorldPosition;
-            closestSplatDepth = screenPosition.z;
-          }
-        }
-      }
-      return closestSplatWorldPosition;
-    };
+  public async initializeAnnotationMode() {
+    const scene = this.babylon.getScene();
+    const mediaType = await firstValueFrom(this.processing.mediaType$);
+    if (!mediaType) {
+      console.warn('Media type is undefined, cannot initialize annotation mode');
+      return;
+    }
 
     const canvas = this.babylon.getCanvas();
-    fromEvent<PointerEvent>(canvas, 'dblclick').subscribe(event => {
-      const closestSplat = findClosestSplatPoint();
-      console.log('closestSplat', closestSplat);
-      if (closestSplat) previewSphere.position = closestSplat;
+    fromEvent<PointerEvent>(canvas, 'dblclick').subscribe(() => {
+      const pickResult = (() => {
+        switch (mediaType) {
+          case 'splat': {
+            const closestSplat = findClosestSplatPoint(scene);
+            console.log('closestSplat', closestSplat);
+            if (!closestSplat) return null;
+            // Get normal vector from current camera to the splat point
+            const camera = this.babylon.getActiveCamera();
+            if (!camera) return;
+            const normalVector = closestSplat.subtract(camera.position).normalize();
+            return { pickedPoint: closestSplat, pickedNormal: normalVector };
+          }
+          default: {
+            const result = scene.pick(scene.pointerX, scene.pointerY, mesh => mesh.isPickable);
+            if (!result?.pickedPoint) return;
+            const pickedNormal = (() => {
+              const trueTrue = result.getNormal(true, true);
+              if (trueTrue) return trueTrue;
+              const trueFalse = result.getNormal(true, false);
+              if (trueFalse) return trueFalse;
+              console.warn(
+                'Could not get normal from picking result, using fallback normal',
+                result,
+              );
+              // Fallback normal pointing towards the camera
+              const camera = this.babylon.getActiveCamera();
+              if (!camera) return;
+              return camera.position.subtract(result.pickedPoint).normalize();
+            })();
+            if (!pickedNormal) {
+              console.warn('Could not get normal from picking result after fallback');
+              return null;
+            }
+            return { pickedPoint: result.pickedPoint, pickedNormal };
+          }
+        }
+      })();
+      if (!pickResult) {
+        console.warn('No valid picking result, not creating annotation');
+        return;
+      }
+      this.picked$.next(pickResult);
     });
 
     this.setAnnotationMode(false);
   }
 
-  // Das aktuelle Entityl wird anklickbar und damit annotierbar
   private async setAnnotationMode(value: boolean) {
     const mediaType = await firstValueFrom(this.processing.mediaType$);
     if (mediaType === 'video' || mediaType === 'audio') return;
@@ -380,7 +384,7 @@ export class AnnotationService {
     }
   }
 
-  public async createNewAnnotation(result: PickingInfo) {
+  public async createNewAnnotation(result: PartialPick) {
     const camera = this.babylon.cameraManager.getInitialPosition();
     const currentAnnotations = await firstValueFrom(this.currentAnnotations$);
     const entity = await firstValueFrom(this.processing.entity$);
@@ -392,19 +396,13 @@ export class AnnotationService {
     if (!entity) {
       throw new Error(`this.entity not defined: ${entity}`);
     }
-    const generatedId = this.backend.generateEntityId();
+    const generatedId = new ObjectID().toString();
 
     const personName = userdata ? userdata.fullname : 'guest';
     const personID = userdata ? userdata._id : 'guest';
 
     const referencePoint = result.pickedPoint;
-    const referenceNormal = (() => {
-      const trueTrue = result.getNormal(true, true);
-      if (trueTrue) return trueTrue;
-      const trueFalse = result.getNormal(true, false);
-      return trueFalse;
-    })();
-
+    const referenceNormal = result.pickedNormal;
     if (!referencePoint || !referenceNormal) {
       console.warn('Could not get normal from picking result, using fallback normal', result);
       return;
@@ -473,6 +471,15 @@ export class AnnotationService {
     this.add(transformedAnnotation);
   }
 
+  unsavedAnnotations = signal(new Set<string>());
+  #addUnsavedAnnotation(id: string) {
+    this.unsavedAnnotations.update(set => {
+      const newSet = new Set(set);
+      newSet.add(id);
+      return newSet;
+    });
+  }
+
   private async add(_annotation: IAnnotation) {
     let newAnnotation = _annotation;
     newAnnotation.lastModificationDate = new Date().toISOString();
@@ -481,14 +488,23 @@ export class AnnotationService {
     const isFallback = await firstValueFrom(this.processing.fallbackEntityLoaded$);
     const updateBackend = !isStandalone && !isDefault && !isFallback;
     if (updateBackend) {
-      this.backend
-        .updateAnnotation(_annotation)
-        .then((resultAnnotation: IAnnotation) => {
-          newAnnotation = resultAnnotation;
-        })
-        .catch((errorMessage: any) => {
-          console.log(errorMessage);
-        });
+      const hasContent =
+        (newAnnotation.body.content.title + newAnnotation.body.content.description).trim().length >
+        0;
+      if (hasContent) {
+        this.backend
+          .updateAnnotation(_annotation)
+          .then((resultAnnotation: IAnnotation) => {
+            newAnnotation = resultAnnotation;
+          })
+          .catch((errorMessage: any) => {
+            this.#addUnsavedAnnotation(newAnnotation._id.toString());
+            console.log(errorMessage);
+          });
+      } else {
+        console.warn('Not saving annotation with empty content to backend');
+        this.#addUnsavedAnnotation(newAnnotation._id.toString());
+      }
     }
     this.drawMarker(newAnnotation);
     this.annotations$.next(this.annotations$.getValue().concat(newAnnotation));
@@ -714,7 +730,7 @@ export class AnnotationService {
     collectionId: string,
     annotationLength: number,
   ) {
-    const generatedId = this.backend.generateEntityId();
+    const generatedId = new ObjectID().toString();
 
     const entity = await firstValueFrom(this.processing.entity$);
     const userdata = await firstValueFrom(this.userdata.userData$);

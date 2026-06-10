@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostBinding, Input, inject, output } from '@angular/core';
+import { Component, ElementRef, HostBinding, Input, computed, inject, output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Matrix, Vector3 } from '@babylonjs/core';
 import { BehaviorSubject, ReplaySubject, combineLatest, firstValueFrom, interval, map } from 'rxjs';
@@ -17,6 +17,7 @@ import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-previe
 import { ExtenderSlotDirective } from '@kompakkt/plugins/extender';
 import DeepClone from 'rfdc';
 import deepEqual from 'fast-deep-equal';
+import { toSignal } from '@angular/core/rxjs-interop';
 const deepClone = DeepClone({ circles: true });
 
 export type ReorderMovement = 'one-up' | 'one-down' | 'first' | 'last';
@@ -52,6 +53,7 @@ export class AnnotationComponent {
   }
   public annotation$ = new ReplaySubject<IAnnotation>(1);
   public annotation$$ = this.annotation$.asObservable();
+  public annotationSignal = toSignal(this.annotation$$);
 
   public positionTop = 0;
   public positionLeft = 0;
@@ -114,6 +116,19 @@ export class AnnotationComponent {
   ]).pipe(
     map(([annotation, hiddenAnnotations]) => hiddenAnnotations.includes(annotation._id.toString())),
   );
+
+  public isAnnotationUnsaved = computed(() => {
+    const unsaved = this.annotationService.unsavedAnnotations();
+    const annotation = this.annotationSignal();
+    if (!annotation) return false;
+    return unsaved.has(annotation._id.toString());
+  });
+
+  public async toggleRepositionMode() {
+    const annotation = await firstValueFrom(this.annotation$);
+    if (!annotation) return;
+    this.annotationService.initializeRepositionMode(annotation);
+  }
 
   constructor() {
     combineLatest([interval(15), this.annotation$])

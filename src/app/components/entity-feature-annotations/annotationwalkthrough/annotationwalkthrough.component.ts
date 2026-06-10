@@ -1,6 +1,6 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, HostBinding, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { MatIcon } from '@angular/material/icon';
 import { ButtonComponent, TooltipDirective } from '@kompakkt/komponents';
 import { BehaviorSubject, combineLatest, firstValueFrom, map } from 'rxjs';
@@ -15,6 +15,7 @@ import { AnnotationService } from '../../../services/annotation/annotation.servi
 })
 export class AnnotationwalkthroughComponent {
   public annotationService = inject(AnnotationService);
+  #isRepositioning = toObservable(this.annotationService.isRepositioning);
 
   public ranking$ = new BehaviorSubject(-1);
   public selectedAnnotation$ = combineLatest([
@@ -27,11 +28,14 @@ export class AnnotationwalkthroughComponent {
   );
 
   public title$ = this.selectedAnnotation$.pipe(
-    map(annotation => annotation?.body.content.title ?? 'Annotation Walkthrough'),
+    map(annotation =>
+      annotation ? annotation.body.content.title || 'No title' : 'Annotation Walkthrough',
+    ),
   );
-  public showWalkthrough$ = this.annotationService.currentAnnotations$.pipe(
-    map(annotations => annotations.length > 1),
-  );
+  public showWalkthrough$ = combineLatest([
+    this.annotationService.currentAnnotations$,
+    this.#isRepositioning,
+  ]).pipe(map(([annotations, isRepositioning]) => annotations.length > 1 && !isRepositioning));
 
   public showWalkthrough = toSignal(this.showWalkthrough$);
 

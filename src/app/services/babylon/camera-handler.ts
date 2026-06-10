@@ -109,17 +109,20 @@ export const setUpCamera = (camera: ArcRotateCamera, maxSize: number, mediaType:
 
 const FPS = 24;
 
-export const smoothCameraTransition = ({
-  camera,
-  scene,
-  position,
-  target,
-}: {
-  camera: ArcRotateCamera;
-  scene: Scene;
-  position?: Vector3;
-  target?: Vector3;
-}) => {
+export const smoothCameraTransition = (
+  {
+    camera,
+    scene,
+    position,
+    target,
+  }: {
+    camera: ArcRotateCamera;
+    scene: Scene;
+    position?: Vector3;
+    target?: Vector3;
+  },
+  speed = 1,
+) => {
   console.log(
     'SmoothCameraTransition from',
     JSON.stringify([camera.position, camera.target]),
@@ -134,11 +137,25 @@ export const smoothCameraTransition = ({
   position ??= camera.position;
   target ??= camera.target;
 
-  const animPosition = new Animation(
-    'camera_position_animation',
-    'position',
+  const animAlpha = new Animation(
+    'camera_alpha_animation',
+    'alpha',
     FPS,
-    Animation.ANIMATIONTYPE_VECTOR3,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CYCLE,
+  );
+  const animBeta = new Animation(
+    'camera_beta_animation',
+    'beta',
+    FPS,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CYCLE,
+  );
+  const animRadius = new Animation(
+    'camera_radius_animation',
+    'radius',
+    FPS,
+    Animation.ANIMATIONTYPE_FLOAT,
     Animation.ANIMATIONLOOPMODE_CYCLE,
   );
   const animTarget = new Animation(
@@ -149,9 +166,27 @@ export const smoothCameraTransition = ({
     Animation.ANIMATIONLOOPMODE_CYCLE,
   );
 
-  animPosition.setKeys([
-    { frame: 0, value: camera.position.clone() },
-    { frame: FPS, value: position.clone() },
+  const tempCamera = camera.clone('tempCamera') as ArcRotateCamera;
+  tempCamera.setTarget(target);
+  tempCamera.setPosition(position);
+  const tempAlpha = tempCamera.alpha;
+  const tempBeta = tempCamera.beta;
+  const tempRadius = tempCamera.radius;
+  tempCamera.dispose();
+
+  animAlpha.setKeys([
+    { frame: 0, value: camera.alpha },
+    { frame: FPS, value: tempAlpha },
+  ]);
+
+  animBeta.setKeys([
+    { frame: 0, value: camera.beta },
+    { frame: FPS, value: tempBeta },
+  ]);
+
+  animRadius.setKeys([
+    { frame: 0, value: camera.radius },
+    { frame: FPS, value: tempRadius },
   ]);
 
   animTarget.setKeys([
@@ -159,12 +194,14 @@ export const smoothCameraTransition = ({
     { frame: FPS, value: target.clone() },
   ]);
 
-  console.log('SmoothCameraTransition', animPosition);
-
   const ease = new QuarticEase();
   ease.setEasingMode(EasingFunction.EASINGMODE_EASEOUT);
-  animPosition.setEasingFunction(ease);
   animTarget.setEasingFunction(ease);
+  animAlpha.setEasingFunction(ease);
+  animBeta.setEasingFunction(ease);
+  animRadius.setEasingFunction(ease);
 
-  scene.beginDirectAnimation(camera, [animPosition, animTarget], 0, FPS, false);
+  const animations = [animTarget, animAlpha, animBeta, animRadius];
+
+  return scene.beginDirectAnimation(camera, animations, 0, FPS, false, speed);
 };

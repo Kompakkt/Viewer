@@ -99,7 +99,10 @@ export const loadSplat = async (
   scene: Scene,
   onProgress?: (progress: ISceneLoaderProgressEvent) => void,
 ) => {
-  return ImportMeshAsync(rootUrl, scene, { onProgress }).then(result => {
+  return ImportMeshAsync(rootUrl, scene, {
+    onProgress,
+    pluginOptions: { splat: { keepInRam: true } },
+  }).then(result => {
     const gsMesh = result.meshes.at(0)! as GaussianSplattingMesh;
     gsMesh.isPickable = true;
 
