@@ -7,7 +7,7 @@
  *  - 3D model
  */
 
-import { IEntitySettings } from '@kompakkt/common/interfaces';
+import { IEntitySettings } from '@kompakkt/common';
 
 export const minimalSettings: IEntitySettings = {
   preview: '',

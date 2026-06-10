@@ -3,7 +3,7 @@
  *  - KompakktLogo(Default)
  */
 
-import { IEntity } from '@kompakkt/common/interfaces';
+import { IEntity } from '@kompakkt/common';
 import { baseEntity } from '../defaults';
 import { settingsFallback, settingsKompakktLogo } from '../settings/settings';
 import { ProfileType } from '@kompakkt/common';

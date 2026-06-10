@@ -184,7 +184,7 @@ export class BackendService {
       pathParams: { collection: Collection.annotation },
       queryParams: {},
       body: annotation,
-    }).then(response => isAnnotation(response));
+    }).then(response => (isAnnotation(response) ? response : undefined));
   }
 
   public generateVideoPreview(identifier: string, screenshots: string[]) {

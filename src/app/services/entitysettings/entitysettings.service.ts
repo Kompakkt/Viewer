@@ -11,7 +11,7 @@ import {
   Vector3,
 } from '@babylonjs/core';
 import { debounceTime, filter, firstValueFrom } from 'rxjs';
-import { IColor, IEntitySettings, IPosition } from '@kompakkt/common';
+import { IColor, IEntitySettings, IVector3 } from '@kompakkt/common';
 import { minimalSettings } from '../../../assets/settings/settings';
 import { AnnotationService } from '../annotation/annotation.service';
 import { BabylonService } from '../babylon/babylon.service';
@@ -31,7 +31,7 @@ const isDegreeSpectrum = (value: number) => {
 };
 
 // Some models have uniform scaling, others non-uniform scaling
-const getScaleVector = (scale: number | IPosition) => {
+const getScaleVector = (scale: number | IVector3) => {
   if (typeof scale === 'number') {
     return new Vector3(scale, scale, scale);
   } else {

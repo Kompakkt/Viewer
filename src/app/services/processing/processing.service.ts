@@ -575,6 +575,8 @@ export class ProcessingService {
     return this.backend
       .getEntity(query)
       .then(async entity => {
+        if (!entity) throw new Error('Entity not found');
+
         console.log('Received this Entity:', entity);
 
         // Force load the entity via query parameter, skipping any checks below.

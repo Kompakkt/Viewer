@@ -1,5 +1,5 @@
 import { ProfileType } from '@kompakkt/common';
-import { IEntity } from '@kompakkt/common/interfaces';
+import { IEntity } from '@kompakkt/common';
 
 const logoPath =
   Math.random() > 0.5
