@@ -60,7 +60,7 @@ export const findClosestSplatPoint = (scene: Scene): Nullable<Vector3> => {
 
     // Read position (assuming Little Endian, common for .splat files)
     const localX = dataView.getFloat32(currentOffset + POSITION_OFFSET, true);
-    const localY = dataView.getFloat32(currentOffset + POSITION_OFFSET + SIZEOF_FLOAT, true) * -1;
+    const localY = dataView.getFloat32(currentOffset + POSITION_OFFSET + SIZEOF_FLOAT, true);
     const localZ = dataView.getFloat32(currentOffset + POSITION_OFFSET + 2 * SIZEOF_FLOAT, true);
     const splatLocalPosition = new Vector3(localX, localY, localZ);
 
