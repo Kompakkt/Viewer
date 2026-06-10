@@ -334,7 +334,8 @@ export class BabylonService {
       this.scene,
     );
     ground.setAbsolutePosition(new Vector3(20, 0, 20));
-    const mat = new StandardMaterial('shadowGroundMat');
+
+    const mat = new StandardMaterial('shadowGroundMat', this.scene);
     mat.diffuseColor = this.defaultShadowVariables.groundDiffuseColor;
     mat.specularColor = this.defaultShadowVariables.groundSpecularColor;
     mat.specularPower = this.defaultShadowVariables.groundSpecularPower;
