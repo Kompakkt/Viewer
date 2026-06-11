@@ -23,6 +23,7 @@ import {
   isEntity,
   IStrippedUserData,
   IUserData,
+  IUserDataWithoutData,
   Collection,
 } from '@kompakkt/common';
 import {
@@ -31,7 +32,6 @@ import {
   LoginComponent,
 } from '../../components/dialogs/dialog-login/login.component';
 import { BackendService } from '../backend/backend.service';
-import { IUserDataWithoutData } from '@kompakkt/common/interfaces';
 
 const isUserOwned = <T extends IEntity | ICompilation>(
   element: T,
@@ -68,30 +68,28 @@ export class UserdataService {
   userData$ = new BehaviorSubject<IUserDataWithoutData | undefined>(undefined);
   isAuthenticated$ = this.userData$.pipe(map(userdata => !!userdata?._id));
 
-  updateTrigger$ = new BehaviorSubject<
-    'all' | Collection.entity | Collection.compilation | Collection.annotation
-  >('all');
+  updateTrigger$ = new BehaviorSubject<'all' | keyof typeof Collection>('all');
 
   user$ = this.userData$.pipe(filter(user => !!user));
 
   entities$: Observable<IEntity[]> = this.user$.pipe(
     combineLatestWith(this.updateTrigger$),
     filter(([_, trigger]) => trigger === 'all' || trigger === Collection.entity),
-    switchMap(() => this.#backend.getUserDataCollection(Collection.entity)),
+    switchMap(() => this.#backend.getUserDataEntities({})),
     share(),
   );
 
   compilations$: Observable<ICompilation[]> = this.user$.pipe(
     combineLatestWith(this.updateTrigger$),
     filter(([_, trigger]) => trigger === 'all' || trigger === Collection.compilation),
-    switchMap(() => this.#backend.getUserDataCollection(Collection.compilation)),
+    switchMap(() => this.#backend.getUserDataCompilations({})),
     share(),
   );
 
   annotations$: Observable<IAnnotation[]> = this.user$.pipe(
     combineLatestWith(this.updateTrigger$),
     filter(([_, trigger]) => trigger === 'all' || trigger === Collection.annotation),
-    switchMap(() => this.#backend.getUserDataCollection(Collection.annotation)),
+    switchMap(() => this.#backend.getUserDataAnnotations({})),
     share(),
   );
 

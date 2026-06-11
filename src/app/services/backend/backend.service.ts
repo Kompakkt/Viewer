@@ -7,9 +7,22 @@ import {
   ICompilation,
   IDigitalEntity,
   IEntity,
-  IUserData,
+  isAnnotation,
+  isCompilation,
+  isEntity,
+  isResolvedCompilation,
+  IUserDataWithoutData,
+  UserDataCollectionDocumentType,
 } from '@kompakkt/common';
-import { IUserDataWithoutData, UserDataCollectionDocumentType } from '@kompakkt/common/interfaces';
+import {
+  paths,
+  PathParams,
+  Endpoint,
+  Response,
+  QueryParams,
+  RequestBody,
+} from '@kompakkt/server-openapi';
+import { firstValueFrom } from 'rxjs';
 import { environment } from 'src/environment';
 
 @Injectable({
@@ -34,121 +47,224 @@ export class BackendService {
   constructor(private http: HttpClient) {}
 
   // Override GET and POST to use HttpOptions which is needed for auth
-  public async get(path: string): Promise<any> {
-    return this.http.get(`${this.endpoint}${path}`, this.httpOptions).toPromise();
+  public async get<T extends unknown>(path: string): Promise<T> {
+    return firstValueFrom(this.http.get<T>(`${this.endpoint}${path}`, this.httpOptions));
   }
 
-  public post(path: string, obj: any): Promise<any> {
-    return this.http.post(`${this.endpoint}${path}`, obj, this.httpOptions).toPromise();
+  public post<T extends unknown>(path: string, obj: any): Promise<T> {
+    return firstValueFrom(this.http.post<T>(`${this.endpoint}${path}`, obj, this.httpOptions));
+  }
+
+  // Helper methods for type-safe API calls based on the OpenAPI spec provided by the backend.
+
+  private constructPathWithParams(
+    path: string,
+    {
+      pathParams,
+      queryParams,
+    }: {
+      pathParams?: Record<string, string | boolean | number>;
+      queryParams?: Record<string, string | boolean | number>;
+    },
+  ) {
+    let compiledPath = path;
+    if (pathParams) {
+      for (const [key, value] of Object.entries(pathParams)) {
+        compiledPath = compiledPath.replace(`{${key}}`, value.toString());
+      }
+    }
+    if (queryParams) {
+      const queryString = Object.entries(queryParams)
+        .map(([key, value]) => `${key}=${encodeURIComponent(value.toString())}`)
+        .join('&');
+      if (queryString.length > 0) {
+        compiledPath += `?${queryString}`;
+      }
+    }
+    return compiledPath;
+  }
+
+  public createGetPromise<Path extends keyof paths>(
+    path: Path,
+    {
+      pathParams,
+      queryParams,
+      options,
+    }: {
+      pathParams: PathParams<Endpoint<'get', Path>>;
+      queryParams: QueryParams<Endpoint<'get', Path>>;
+      options?: Parameters<HttpClient['get']>[1];
+    },
+  ) {
+    const compiledPath = this.constructPathWithParams(path as string, { pathParams, queryParams });
+    return this.http.get<Response<Endpoint<'get', Path>>>(compiledPath, options);
+  }
+
+  public createGet<Path extends keyof paths>(
+    path: Path,
+    {
+      pathParams,
+      queryParams,
+      options,
+    }: {
+      pathParams: PathParams<Endpoint<'get', Path>>;
+      queryParams: QueryParams<Endpoint<'get', Path>>;
+      options?: Parameters<HttpClient['get']>[1];
+    },
+  ) {
+    return firstValueFrom(this.createGetPromise(path, { pathParams, queryParams, options }));
+  }
+
+  public createPostPromise<Path extends keyof paths>(
+    path: Path,
+    {
+      body,
+      pathParams,
+      queryParams,
+      options,
+    }: {
+      body: RequestBody<Endpoint<'post', Path>>;
+      pathParams: PathParams<Endpoint<'post', Path>>;
+      queryParams: QueryParams<Endpoint<'post', Path>>;
+      options?: Parameters<HttpClient['post']>[2];
+    },
+  ) {
+    const compiledPath = this.constructPathWithParams(path as string, { pathParams, queryParams });
+    return this.http.post<Response<Endpoint<'post', Path>>>(compiledPath, body, options);
+  }
+
+  public createPost<Path extends keyof paths>(
+    path: Path,
+    {
+      body,
+      pathParams,
+      queryParams,
+      options,
+    }: {
+      body: RequestBody<Endpoint<'post', Path>>;
+      pathParams: PathParams<Endpoint<'post', Path>>;
+      queryParams: QueryParams<Endpoint<'post', Path>>;
+      options?: Parameters<HttpClient['post']>[2];
+    },
+  ) {
+    return firstValueFrom(this.createPostPromise(path, { body, pathParams, queryParams, options }));
   }
 
   // GETs
-  public async getAllCompilations(): Promise<ICompilation[]> {
-    return this.get(`api/v1/get/findall/compilation`);
+  public async getEntity(identifier: string) {
+    return this.createGet('/server/api/v1/get/find/{collection}/{identifier}', {
+      pathParams: { collection: Collection.entity, identifier },
+      queryParams: {},
+    }).then(response => (isEntity(response) ? response : undefined));
   }
 
-  public async getAllEntities(): Promise<IEntity[]> {
-    return this.get(`api/v1/get/findall/entity`);
-  }
-
-  public async getEntity(identifier: string): Promise<IEntity> {
-    return this.get(`api/v1/get/find/entity/${identifier}`);
-  }
-
-  /**
-   * Fetch a resolved compilation by it's identifier
-   * @param  {string}  identifier Database _id of the compilation
-   * @return {Promise}            Returns the compilation or null
-   */
-  public async getCompilation(identifier: string): Promise<ICompilation | null> {
-    return this.get(`api/v1/get/find/compilation/${identifier}`);
-  }
-
-  public async getEntityMetadata(identifier: string): Promise<IDigitalEntity> {
-    return this.get(`api/v1/get/find/digitalentity/${identifier}`);
+  public async getCompilation(identifier: string) {
+    return this.createGet('/server/api/v1/get/find/{collection}/{identifier}', {
+      pathParams: { collection: Collection.compilation, identifier },
+      queryParams: {},
+    }).then(response => (isCompilation(response) ? response : undefined));
   }
 
   // POSTs
-  public updateSettings(identifier: string, settings: any): Promise<any> {
-    return this.post(`api/v1/post/settings/${identifier}`, settings);
-  }
-
-  public updateAnnotation(annotation: any): Promise<IAnnotation> {
-    return this.post(`api/v1/post/push/annotation`, annotation);
-  }
-
-  public generateVideoPreview(
+  public async updateSettings(
     identifier: string,
-    screenshots: string[],
-  ): Promise<{ status: 'OK'; videoUrl: string } | undefined> {
-    return this.post(`utility/generate-entity-video-preview`, {
-      entityId: identifier,
-      screenshots,
+    settings: RequestBody<Endpoint<'post', '/server/api/v1/post/settings/{identifier}'>>,
+  ) {
+    return this.createPost('/server/api/v1/post/settings/{identifier}', {
+      pathParams: { identifier },
+      queryParams: {},
+      body: settings,
+    });
+  }
+
+  public async updateAnnotation(
+    annotation: RequestBody<Endpoint<'post', '/server/api/v1/post/push/{collection}'>>,
+  ) {
+    return this.createPost('/server/api/v1/post/push/{collection}', {
+      pathParams: { collection: Collection.annotation },
+      queryParams: {},
+      body: annotation,
+    }).then(response => (isAnnotation(response) ? response : undefined));
+  }
+
+  public generateVideoPreview(identifier: string, screenshots: string[]) {
+    return this.createPost('/server/utility/generate-entity-video-preview', {
+      pathParams: {},
+      queryParams: {},
+      body: {
+        entityId: identifier,
+        screenshots,
+      },
     });
   }
 
   // Auth
-  public login(username: string, password: string): Promise<IUserDataWithoutData> {
-    return this.post(`user-management/login`, { username, password });
-  }
-
-  public async logout(): Promise<string> {
-    return this.get(`user-management/logout`);
-  }
-
-  public async isAuthorized(): Promise<IUserDataWithoutData> {
-    return this.get(`user-management/auth`);
-  }
-
-  public async findUserInCompilations(): Promise<ICompilation[]> {
-    return this.get(`utility/finduserincompilations`);
-  }
-
-  // TODO: check return type
-  public deleteRequest(
-    identifier: string,
-    type: string,
-    username: string,
-    password: string,
-  ): Promise<any> {
-    return this.post(`api/v1/post/remove/${type}/${identifier}`, {
-      username,
-      password,
+  public login(username: string, password: string) {
+    return this.createPost('/server/user-management/login', {
+      pathParams: { strategy: 'local' },
+      queryParams: {},
+      body: { username, password },
     });
   }
 
-  public async shareAnnotation(identifierColl: string, annotationArray: string[]): Promise<any> {
-    return this.post(`utility/moveannotations/${identifierColl}`, {
-      annotationArray,
+  public async logout() {
+    return this.createGet('/server/user-management/logout', {
+      pathParams: {},
+      queryParams: {},
+    });
+  }
+
+  public async isAuthorized() {
+    return this.createGet('/server/user-management/auth', {
+      pathParams: {},
+      queryParams: {},
+    });
+  }
+
+  public deleteRequest(
+    identifier: string,
+    collection: keyof typeof Collection,
+    username: string,
+    password: string,
+  ) {
+    return this.createPost('/server/api/v1/post/remove/{collection}/{identifier}', {
+      pathParams: { collection, identifier },
+      queryParams: {},
+      body: { username, password },
     });
   }
 
   // API V2
-  public async getUserDataCollection<
-    C extends Collection,
-    T extends UserDataCollectionDocumentType<C>,
-  >(collection: C): Promise<T[]> {
-    return this.get(`api/v2/user-data/${collection}`);
+  public async getUserDataEntities(options: {
+    depth?: number;
+    full?: boolean;
+    profileId?: string;
+  }) {
+    return this.createGet('/server/api/v2/user-data/get-collection/entity', {
+      pathParams: {},
+      queryParams: options,
+    });
   }
 
-  /**
-   * Generates an EntityId
-   * This is used as fallback when we cannot get an EntityId from Server
-   */
-  public generateEntityId(): string {
-    /* tslint:disable:no-magic-numbers */
-    const next = () => {
-      return (this.genIndex = (this.genIndex + 1) % 0xffffff);
-    };
+  public async getUserDataCompilations(options: {
+    depth?: number;
+    full?: boolean;
+    profileId?: string;
+  }) {
+    return this.createGet('/server/api/v2/user-data/get-collection/compilation', {
+      pathParams: {},
+      queryParams: options,
+    });
+  }
 
-    const hex = (length: number, n: string | number) => {
-      n = n.toString(16);
-      return n.length === length ? n : '00000000'.substring(n.length, length) + n;
-    };
-
-    const time = parseInt((Date.now() / 1000).toString(), 10) % 0xffffffff;
-
-    return hex(8, time) + hex(6, this.MACHINE_ID) + hex(4, this.pid) + hex(6, next());
-    /* tslint:enable:no-magic-numbers */
+  public async getUserDataAnnotations(options: {
+    depth?: number;
+    full?: boolean;
+    profileId?: string;
+  }) {
+    return this.createGet('/server/api/v2/user-data/get-collection/annotation', {
+      pathParams: {},
+      queryParams: options,
+    });
   }
 }
