@@ -5,6 +5,7 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import {
   ActionManager,
   ExecuteCodeAction,
+  Matrix,
   MeshBuilder,
   PositionGizmo,
   Tags,
@@ -255,14 +256,16 @@ export class AnnotationService {
         .map(anno => anno._id.toString()),
     ]);
 
-    const originalPosition = marker.position.clone();
+    const originalLocalPosition = marker.position.clone();
+    marker.computeWorldMatrix(true);
+    const originalWorldPosition = marker.getAbsolutePosition().clone();
     const transformMesh = MeshBuilder.CreateBox(
       `${markerName}_reposition_transform`,
       { size: 0 },
       this.babylon.getScene(),
     );
     transformMesh.visibility = 0;
-    transformMesh.position = marker.position.clone();
+    transformMesh.position = originalWorldPosition.clone();
     marker.setParent(transformMesh);
     marker.setPositionWithLocalVector(Vector3.Zero());
 
@@ -291,7 +294,7 @@ export class AnnotationService {
       // Update camera to current position after drag, which is the position of the transformMesh
       this.babylon.cameraManager.setActiveCameraTarget(transformMesh.position, 2);
       dialogRef.componentInstance.updatePositions({
-        prev: originalPosition,
+        prev: originalWorldPosition,
         curr: transformMesh.getAbsolutePosition(),
       });
     });
@@ -301,18 +304,41 @@ export class AnnotationService {
     gizmo.onDragEndObservable.remove(dragRef);
     gizmo.dispose();
     utilLayer.dispose();
-    const nodePosition = transformMesh.position.clone();
-    marker.setParent(null);
+    const newWorldPosition = transformMesh.getAbsolutePosition().clone();
     transformMesh.dispose();
+    marker.setParent(null);
 
-    if (result !== 'apply') {
-      marker.position = originalPosition.clone();
+    const center = this.babylon.getScene().getMeshesByTags('center')[0];
+    if (result === 'apply' && center) {
+      const inverseMatrix = Matrix.Invert(center.getWorldMatrix());
+      const newLocalPosition = Vector3.TransformCoordinates(newWorldPosition, inverseMatrix);
+      annotation.target.selector.referencePoint = {
+        x: newLocalPosition.x,
+        y: newLocalPosition.y,
+        z: newLocalPosition.z,
+      };
+      marker.setParent(center);
+      marker.position = newLocalPosition;
+    } else if (center) {
+      marker.setParent(center);
+      marker.position = originalLocalPosition;
+    } else if (result === 'apply') {
+      annotation.target.selector.referencePoint = {
+        x: newWorldPosition.x,
+        y: newWorldPosition.y,
+        z: newWorldPosition.z,
+      };
+      marker.position = newWorldPosition;
     } else {
-      marker.position = nodePosition.clone();
+      marker.position = originalLocalPosition;
     }
 
     const screenshot = await this.babylon.createPreviewScreenshot();
     annotation.body.content.relatedPerspective.preview = screenshot;
+
+    if (result === 'apply') {
+      await this.updateAnnotation(annotation);
+    }
 
     this.hiddenAnnotations$.next([...hiddenAnnotations]);
     this.isRepositioning.set(false);
