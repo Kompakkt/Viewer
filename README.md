@@ -6,20 +6,47 @@
 
 Web Based 3D Viewer and 3D Annotation System.
 
+## Requirements
+
+- **[Bun](https://bun.sh/)** - runtime and package manager. `npm` / `yarn` / `pnpm` are **not** supported.
+
 ## Development setup
 
-In order to setup your own development environment, you have to have [NodeJS](https://nodejs.org/en/) as well as Node Package Manager ([NPM](https://www.npmjs.com/)) installed.
+Clone the repository, then install the dependencies with Bun:
 
-Clone this repository, cd to the project directory and run the following commands:
-
-```
-$ git clone https://github.com/Kompakkt/Common.git src/common
-$ npm i
-$ ng serve
+```bash
+git clone https://github.com/Kompakkt/Viewer
+cd Viewer
+bun install
 ```
 
-Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+Shared code from upstream Kompakkt packages (`@kompakkt/common`, `@kompakkt/komponents`, `@kompakkt/plugins`, `@kompakkt/server-openapi`) is pulled in automatically as git-pinned npm dependencies.
+
+Start the Angular dev server:
+
+```bash
+bun start
+```
+
+Navigate to `http://localhost:4200/viewer/`. The app will automatically reload if you change any of the source files.
+
+### Selecting a backend
+
+By default the viewer talks to the public Kompakkt server at `https://kompakkt.de/server/`. To point the viewer at a different backend (e.g. a locally running Kompakkt server), edit `src/environment.ts`:
+
+```ts
+export const environment = {
+  server_url: 'https://kompakkt.de/server/',
+  repo_url: 'https://kompakkt.de/',
+};
+```
+
+Adjust `server_url` to the URL of the Kompakkt server you want the viewer to talk to, and `repo_url` to the corresponding Kompakkt.Repo instance.
 
 ## Build
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `-prod` flag for a production build.
+Run `bun run build` to build the project. The build artifacts will be stored in the `dist/viewer/` directory.
+
+## Running the full stack
+
+This repository only contains the Viewer frontend. To run Viewer, Repo and Server together (with all required supporting services such as Redis, Sonic and MongoDB), use the [Kompakkt/Mono](https://github.com/Kompakkt/Mono) environment.
