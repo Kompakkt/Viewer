@@ -1,0 +1,29 @@
+<h2>{{ 'Reposition annotation' | translate }}</h2>
+
+@if (hasChanged()) {
+  <p>
+    {{
+      'You have moved the annotation. Choose whether you want to apply the new position below, or reset to the original position.'
+        | translate
+    }}
+  </p>
+
+  <p>
+    {{
+      'Applying the position will also generate a new preview image using the updated position.'
+        | translate
+    }}
+  </p>
+} @else {
+  <p>
+    {{
+      'Move the annotation by clicking and dragging the annotation on the desired axis.' | translate
+    }}
+  </p>
+}
+<k-button-row gap="4" justify="end">
+  <k-button type="outlined-secondary" (click)="close('reset')">{{ 'Reset' | translate }}</k-button>
+  <k-button type="solid-primary" (click)="close('apply')" [disabled]="!hasChanged()">{{
+    'Apply' | translate
+  }}</k-button>
+</k-button-row>

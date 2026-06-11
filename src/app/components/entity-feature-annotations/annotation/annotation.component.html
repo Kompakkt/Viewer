@@ -36,6 +36,13 @@
         <k-button
           icon-button
           color="transparent"
+          [tooltip]="'Reposition annotation' | translate"
+          (click)="toggleRepositionMode()"
+          ><mat-icon>open_with</mat-icon></k-button
+        >
+        <k-button
+          icon-button
+          color="transparent"
           [tooltip]="'Edit annotation' | translate"
           (click)="toggleFullscreen('edit')"
           ><mat-icon>edit</mat-icon></k-button

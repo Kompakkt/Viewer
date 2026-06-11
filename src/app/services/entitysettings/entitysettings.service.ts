@@ -497,12 +497,36 @@ export class EntitySettingsService {
     if (!this.entitySettings) {
       throw new Error('Settings missing');
     }
-    const camera = this.entitySettings.cameraPositionInitial;
-    const position = new Vector3(camera.position.x, camera.position.y, camera.position.z);
-    const target = new Vector3(camera.target.x, camera.target.y, camera.target.z);
-    this.babylon.cameraManager.cameraDefaults$.next({ position, target });
-    this.babylon.cameraManager.moveActiveCameraToPosition(position);
-    this.babylon.cameraManager.setActiveCameraTarget(target);
+    const cameraSettings = this.entitySettings.cameraPositionInitial;
+    if (!cameraSettings) {
+      throw new Error('Camera settings missing');
+    }
+
+    // Saved position is { x: alpha, y: beta, z: radius } (spherical ArcRotate)
+    const alpha = cameraSettings.position.x;
+    const beta = cameraSettings.position.y;
+    const radius = cameraSettings.position.z;
+    const target = new Vector3(
+      cameraSettings.target.x,
+      cameraSettings.target.y,
+      cameraSettings.target.z,
+    );
+
+    this.babylon.cameraManager.cameraDefaults$.next({
+      alpha,
+      beta,
+      radius,
+      target: target.clone(),
+    });
+
+    this.babylon.cameraManager.smoothCameraTransitionFromSpherical({
+      camera: this.babylon.cameraManager.getActiveCamera(),
+      scene: this.babylon.getScene(),
+      alpha,
+      beta,
+      radius,
+      target,
+    });
   }
 
   // background: color, effect

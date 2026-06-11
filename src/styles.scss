@@ -237,6 +237,13 @@ mat-card-content {
   width: 100% !important;
 }
 
+div.mat-mdc-dialog-panel.reposition-dialog-panel {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  margin: 12px;
+}
+
 /* Remove background from detail component */
 k-details {
   background-color: transparent !important;

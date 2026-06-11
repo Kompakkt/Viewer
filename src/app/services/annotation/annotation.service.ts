@@ -1,17 +1,19 @@
 import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { ActionManager, ExecuteCodeAction, PickingInfo, Tags, Vector3 } from '@babylonjs/core';
+import {
+  ActionManager,
+  ExecuteCodeAction,
+  MeshBuilder,
+  PositionGizmo,
+  Tags,
+  UtilityLayerRenderer,
+  Vector3,
+} from '@babylonjs/core';
 import { BehaviorSubject, ReplaySubject, combineLatest, firstValueFrom, fromEvent } from 'rxjs';
 import { distinct, filter, map, switchMap } from 'rxjs/operators';
-import {
-  IAnnotation,
-  IVector3,
-  IAmbiguousVector3,
-  asVector3,
-  isAnnotation,
-} from '@kompakkt/common';
+import { IAnnotation, asVector3, isAnnotation } from '@kompakkt/common';
 import { annotationFallback, annotationLogo } from '../../../assets/annotations/annotations';
 import {
   AuthConcern,
@@ -24,9 +26,16 @@ import { BackendService } from '../backend/backend.service';
 import { MessageService } from '../message/message.service';
 import { ProcessingService } from '../processing/processing.service';
 import { UserdataService } from '../userdata/userdata.service';
-import { createMarker } from './visual3DElements';
+import { createMarker, createMarkerName } from './visual3DElements';
 import { ReorderMovement } from 'src/app/components/entity-feature-annotations/annotation/annotation.component';
 import { ExtenderTransformer } from '@kompakkt/plugins/extender';
+import { findClosestSplatPoint } from './helpers/find-closest-splat';
+import ObjectID from 'bson-objectid';
+import {
+  DialogRepositionAnnotationComponent,
+  RepositionAnnotationDialogChoice,
+} from 'src/app/components/dialogs/dialog-reposition-annotation/dialog-reposition-annotation.component';
+import { OverlayService } from '../overlay/overlay.service';
 
 const isDefaultAnnotation = (annotation: IAnnotation) =>
   !annotation.target.source.relatedCompilation ||
@@ -38,6 +47,9 @@ const isCompilationAnnotation = (annotation: IAnnotation) =>
 
 const sortByRanking = (a: IAnnotation, b: IAnnotation): number =>
   +a.ranking === +b.ranking ? 0 : +a.ranking < +b.ranking ? -1 : 1;
+
+// Gaussian splatting and point clouds require more complex picking logic, and for meshes we only need the point and the normal anyways, so we define a type for the picking result that is relevant for annotations in our use case
+type PartialPick = { pickedPoint: Vector3; pickedNormal: Vector3 };
 
 @Injectable({
   providedIn: 'root',
@@ -53,7 +65,7 @@ export class AnnotationService {
 
   private defaultOffset = 0;
 
-  public picked$ = new ReplaySubject<PickingInfo>();
+  public picked$ = new ReplaySubject<PartialPick>();
   public debouncedPicked$ = this.isAnnotationMode$.pipe(
     filter(isAnnotationMode => isAnnotationMode),
     switchMap(() => this.picked$),
@@ -67,6 +79,7 @@ export class AnnotationService {
     private processing: ProcessingService,
     private dialog: MatDialog,
     private userdata: UserdataService,
+    private overlay: OverlayService,
   ) {
     this.debouncedPicked$.subscribe(result => {
       this.createNewAnnotation(result);
@@ -219,19 +232,147 @@ export class AnnotationService {
     await this.changedRankingPositions();
   }
 
-  // Die Annotationsfunktionalität wird zue aktuellen Entity hinzugefügt
-  public initializeAnnotationMode() {
-    fromEvent<MouseEvent>(this.babylon.getCanvas(), 'dblclick').subscribe(() => {
-      const scene = this.babylon.getScene();
-      const result = scene.pick(scene.pointerX, scene.pointerY, mesh => mesh.isPickable);
-      if (!result?.pickedPoint) return;
-      this.picked$.next(result);
+  isRepositioning = signal(false);
+  public async initializeRepositionMode(annotation: IAnnotation) {
+    const markerName = createMarkerName(annotation._id.toString());
+    const marker = this.babylon.getScene().getMeshByName(markerName);
+    if (!marker) {
+      console.warn('Marker not found for annotation', annotation);
+      return;
+    }
+    console.log('Initializing reposition mode for annotation', { annotation, marker });
+
+    const allAnnotations = await firstValueFrom(this.currentAnnotations$);
+    const hiddenAnnotations = await firstValueFrom(this.hiddenAnnotations$);
+    // Hide all markers except the one we want to reposition, to avoid confusion during repositioning
+    this.hiddenAnnotations$.next([
+      ...allAnnotations
+        .filter(anno => anno._id.toString() !== annotation._id.toString())
+        .map(anno => anno._id.toString()),
+    ]);
+
+    const originalPosition = marker.position.clone();
+    const transformMesh = MeshBuilder.CreateBox(
+      `${markerName}_reposition_transform`,
+      { size: 0 },
+      this.babylon.getScene(),
+    );
+    transformMesh.visibility = 0;
+    transformMesh.position = marker.position.clone();
+    marker.setParent(transformMesh);
+    marker.setPositionWithLocalVector(Vector3.Zero());
+
+    const scene = this.babylon.getScene();
+    const utilLayer = new UtilityLayerRenderer(scene);
+    const gizmo = new PositionGizmo(utilLayer, 2);
+    gizmo.updateGizmoPositionToMatchAttachedMesh = true;
+    gizmo.updateGizmoRotationToMatchAttachedMesh = true;
+    gizmo.attachedMesh = transformMesh;
+
+    this.isRepositioning.set(true);
+    void this.setSelectedAnnotation('');
+    this.overlay.toggleSidenav('annotation', false);
+
+    const dialogRef = this.dialog.open<
+      DialogRepositionAnnotationComponent,
+      void,
+      RepositionAnnotationDialogChoice
+    >(DialogRepositionAnnotationComponent, {
+      disableClose: true,
+      hasBackdrop: false,
+      panelClass: 'reposition-dialog-panel',
+    });
+
+    const dragRef = gizmo.onDragEndObservable.add(() => {
+      // Update camera to current position after drag, which is the position of the transformMesh
+      this.babylon.cameraManager.setActiveCameraTarget(transformMesh.position, 2);
+      dialogRef.componentInstance.updatePositions({
+        prev: originalPosition,
+        curr: transformMesh.getAbsolutePosition(),
+      });
+    });
+
+    const result = await firstValueFrom(dialogRef.afterClosed());
+
+    gizmo.onDragEndObservable.remove(dragRef);
+    gizmo.dispose();
+    utilLayer.dispose();
+    const nodePosition = transformMesh.position.clone();
+    marker.setParent(null);
+    transformMesh.dispose();
+
+    if (result !== 'apply') {
+      marker.position = originalPosition.clone();
+    } else {
+      marker.position = nodePosition.clone();
+    }
+
+    const screenshot = await this.babylon.createPreviewScreenshot();
+    annotation.body.content.relatedPerspective.preview = screenshot;
+
+    this.hiddenAnnotations$.next([...hiddenAnnotations]);
+    this.isRepositioning.set(false);
+    void this.setSelectedAnnotation(annotation._id.toString());
+    this.overlay.toggleSidenav('annotation', true);
+  }
+
+  public async initializeAnnotationMode() {
+    const scene = this.babylon.getScene();
+    const mediaType = await firstValueFrom(this.processing.mediaType$);
+    if (!mediaType) {
+      console.warn('Media type is undefined, cannot initialize annotation mode');
+      return;
+    }
+
+    const canvas = this.babylon.getCanvas();
+    fromEvent<PointerEvent>(canvas, 'dblclick').subscribe(() => {
+      const pickResult = (() => {
+        switch (mediaType) {
+          case 'splat': {
+            const closestSplat = findClosestSplatPoint(scene);
+            console.log('closestSplat', closestSplat);
+            if (!closestSplat) return null;
+            // Get normal vector from current camera to the splat point
+            const camera = this.babylon.getActiveCamera();
+            if (!camera) return;
+            const normalVector = closestSplat.subtract(camera.position).normalize();
+            return { pickedPoint: closestSplat, pickedNormal: normalVector };
+          }
+          default: {
+            const result = scene.pick(scene.pointerX, scene.pointerY, mesh => mesh.isPickable);
+            if (!result?.pickedPoint) return;
+            const pickedNormal = (() => {
+              const trueTrue = result.getNormal(true, true);
+              if (trueTrue) return trueTrue;
+              const trueFalse = result.getNormal(true, false);
+              if (trueFalse) return trueFalse;
+              console.warn(
+                'Could not get normal from picking result, using fallback normal',
+                result,
+              );
+              // Fallback normal pointing towards the camera
+              const camera = this.babylon.getActiveCamera();
+              if (!camera) return;
+              return camera.position.subtract(result.pickedPoint).normalize();
+            })();
+            if (!pickedNormal) {
+              console.warn('Could not get normal from picking result after fallback');
+              return null;
+            }
+            return { pickedPoint: result.pickedPoint, pickedNormal };
+          }
+        }
+      })();
+      if (!pickResult) {
+        console.warn('No valid picking result, not creating annotation');
+        return;
+      }
+      this.picked$.next(pickResult);
     });
 
     this.setAnnotationMode(false);
   }
 
-  // Das aktuelle Entityl wird anklickbar und damit annotierbar
   private async setAnnotationMode(value: boolean) {
     const mediaType = await firstValueFrom(this.processing.mediaType$);
     if (mediaType === 'video' || mediaType === 'audio') return;
@@ -243,7 +384,7 @@ export class AnnotationService {
     }
   }
 
-  public async createNewAnnotation(result: PickingInfo) {
+  public async createNewAnnotation(result: PartialPick) {
     const camera = this.babylon.cameraManager.getInitialPosition();
     const currentAnnotations = await firstValueFrom(this.currentAnnotations$);
     const entity = await firstValueFrom(this.processing.entity$);
@@ -255,19 +396,13 @@ export class AnnotationService {
     if (!entity) {
       throw new Error(`this.entity not defined: ${entity}`);
     }
-    const generatedId = this.backend.generateEntityId();
+    const generatedId = new ObjectID().toString();
 
     const personName = userdata ? userdata.fullname : 'guest';
     const personID = userdata ? userdata._id : 'guest';
 
     const referencePoint = result.pickedPoint;
-    const referenceNormal = (() => {
-      const trueTrue = result.getNormal(true, true);
-      if (trueTrue) return trueTrue;
-      const trueFalse = result.getNormal(true, false);
-      return trueFalse;
-    })();
-
+    const referenceNormal = result.pickedNormal;
     if (!referencePoint || !referenceNormal) {
       console.warn('Could not get normal from picking result, using fallback normal', result);
       return;
@@ -336,6 +471,15 @@ export class AnnotationService {
     this.add(transformedAnnotation);
   }
 
+  unsavedAnnotations = signal(new Set<string>());
+  #addUnsavedAnnotation(id: string) {
+    this.unsavedAnnotations.update(set => {
+      const newSet = new Set(set);
+      newSet.add(id);
+      return newSet;
+    });
+  }
+
   private async add(_annotation: IAnnotation) {
     let newAnnotation = _annotation;
     newAnnotation.lastModificationDate = new Date().toISOString();
@@ -344,14 +488,23 @@ export class AnnotationService {
     const isFallback = await firstValueFrom(this.processing.fallbackEntityLoaded$);
     const updateBackend = !isStandalone && !isDefault && !isFallback;
     if (updateBackend) {
-      this.backend
-        .updateAnnotation(_annotation)
-        .then((resultAnnotation: IAnnotation) => {
-          newAnnotation = resultAnnotation;
-        })
-        .catch((errorMessage: any) => {
-          console.log(errorMessage);
-        });
+      const hasContent =
+        (newAnnotation.body.content.title + newAnnotation.body.content.description).trim().length >
+        0;
+      if (hasContent) {
+        this.backend
+          .updateAnnotation(_annotation)
+          .then((resultAnnotation: IAnnotation) => {
+            newAnnotation = resultAnnotation;
+          })
+          .catch((errorMessage: any) => {
+            this.#addUnsavedAnnotation(newAnnotation._id.toString());
+            console.log(errorMessage);
+          });
+      } else {
+        console.warn('Not saving annotation with empty content to backend');
+        this.#addUnsavedAnnotation(newAnnotation._id.toString());
+      }
     }
     this.drawMarker(newAnnotation);
     this.annotations$.next(this.annotations$.getValue().concat(newAnnotation));
@@ -520,12 +673,17 @@ export class AnnotationService {
     const perspective = selectedAnnotation.body.content.relatedPerspective;
     if (perspective !== undefined) {
       this.babylon.cameraManager.setCameraType('ArcRotateCamera');
+      // Saved position is { x: alpha, y: beta, z: radius } (spherical ArcRotate)
       const position = asVector3(perspective.position);
       const target = asVector3(perspective.target);
-      this.babylon.cameraManager.moveActiveCameraToPosition(
-        Vector3.FromArray(Object.values(position)),
-      );
-      this.babylon.cameraManager.setActiveCameraTarget(Vector3.FromArray(Object.values(target)));
+      this.babylon.cameraManager.smoothCameraTransitionFromSpherical({
+        camera: this.babylon.cameraManager.getActiveCamera(),
+        scene: this.babylon.getScene(),
+        alpha: position.x,
+        beta: position.y,
+        radius: position.z,
+        target: Vector3.FromArray(Object.values(target)),
+      });
     }
     this.babylon.hideMesh(selectedAnnotation._id.toString(), true);
   }
@@ -577,7 +735,7 @@ export class AnnotationService {
     collectionId: string,
     annotationLength: number,
   ) {
-    const generatedId = this.backend.generateEntityId();
+    const generatedId = new ObjectID().toString();
 
     const entity = await firstValueFrom(this.processing.entity$);
     const userdata = await firstValueFrom(this.userdata.userData$);

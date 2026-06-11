@@ -1,10 +1,12 @@
 import { Mesh, MeshBuilder, Scene, Space, StandardMaterial, Tags, Vector3 } from '@babylonjs/core';
 
+export const createMarkerName = (id: string) => `${id}_marker`;
+
 export const createMarker = (scene: Scene, id: string, position?: Vector3, normal?: Vector3) => {
   const radius = 0.1;
   const mat = new StandardMaterial(`${id}_material`, scene);
   mat.alpha = 0;
-  const markerName = `${id}_marker`;
+  const markerName = createMarkerName(id);
   const marker = MeshBuilder.CreateDisc(markerName, { radius }, scene);
   Tags.AddTagsTo(marker, 'marker');
   Tags.AddTagsTo(marker, 'solid_marker');

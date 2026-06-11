@@ -31,7 +31,6 @@ import {
   Color3,
   DirectionalLight,
   ShadowGenerator,
-  Mesh,
 } from '@babylonjs/core';
 import '@babylonjs/core/Debug/debugLayer';
 import '@babylonjs/inspector';
@@ -43,9 +42,9 @@ import {
   cameraDefaults$,
   createDefaultCamera,
   createUniversalCamera,
-  moveCameraToTarget,
-  setCameraTarget,
   setUpCamera,
+  smoothCameraTransition,
+  smoothCameraTransitionFromSpherical,
 } from './camera-handler';
 import { IAudioContainer, IImageContainer, IVideoContainer } from './container.interfaces';
 import {
@@ -61,6 +60,7 @@ import { EptImporter } from './importers/ept/ept-importer';
 import { CopcImporter } from './importers/copc/copc-importer';
 import { LoadingScreenService } from './loadingscreen';
 import { InspectorToken, ShowInspector } from '@babylonjs/inspector';
+import { createOrbitGizmo } from './orbit-gizmo';
 
 RegisterSceneLoaderPlugin(new CopcImporter());
 RegisterSceneLoaderPlugin(new EptImporter());
@@ -72,15 +72,42 @@ export class BabylonService {
   private environmentInjector = inject(EnvironmentInjector);
   private loadingScreen = inject(LoadingScreenService);
 
-  // Create an instance of RenderCanvasComponent
-  // and use this for the Engine
-  private canvasRef = createComponent(RenderCanvasComponent, {
-    environmentInjector: this.environmentInjector,
-  });
-  private canvas = this.canvasRef.location.nativeElement.childNodes[0] as HTMLCanvasElement;
+  // Create instances of RenderCanvasComponent, which will be injected into SceneComponent
+  // One for the main canvas, and one for the OrbitGizmo
+  // Getters for quick-access to main canvas element and ref
+  private canvasRefs = {
+    main: createComponent(RenderCanvasComponent, { environmentInjector: this.environmentInjector }),
+    gizmo: createComponent(RenderCanvasComponent, {
+      environmentInjector: this.environmentInjector,
+    }),
+  };
+  get canvasRef() {
+    return this.canvasRefs.main;
+  }
+  private canvases = {
+    main: this.canvasRefs.main.location.nativeElement.childNodes[0] as HTMLCanvasElement,
+    gizmo: this.canvasRefs.gizmo.location.nativeElement.childNodes[0] as HTMLCanvasElement,
+  };
+  get canvas() {
+    return this.canvases.main;
+  }
 
-  private engine: Engine;
-  private scene: Scene;
+  private engines: Record<string, Engine> = {};
+  get engine() {
+    return this.engines.main as Engine;
+  }
+  set engine(engine: Engine) {
+    this.engines.main = engine;
+  }
+
+  private scenes: Record<string, Scene> = {};
+  get scene() {
+    return this.scenes.main as Scene;
+  }
+  set scene(scene: Scene) {
+    this.scenes.main = scene;
+  }
+
   private effects: PostProcess[] = [];
 
   public containers = {
@@ -91,16 +118,24 @@ export class BabylonService {
   };
 
   public cameraManager = {
-    getActiveCamera: this.getActiveCamera,
-    moveActiveCameraToPosition: (positionVector: Vector3) => {
-      moveCameraToTarget(this.getActiveCamera(), this.scene, positionVector);
-    },
+    getActiveCamera: () => this.getActiveCamera(),
+    moveActiveCameraToPosition: (position: Vector3) =>
+      smoothCameraTransition({
+        camera: this.getActiveCamera(),
+        scene: this.scene,
+        position,
+      }),
     resetCamera: () => {
-      this.cameraManager.setCameraType('ArcRotateCamera');
-      const camera = this.getActiveCamera();
-      const { position, target } = cameraDefaults$.getValue();
-      setCameraTarget(camera, target);
-      moveCameraToTarget(camera, this.scene, position);
+      const camera = this.cameraManager.setCameraType<ArcRotateCamera>('ArcRotateCamera');
+      const { alpha, beta, radius, target } = cameraDefaults$.getValue();
+      smoothCameraTransitionFromSpherical({
+        camera,
+        scene: this.scene,
+        alpha,
+        beta,
+        radius,
+        target,
+      });
     },
     getInitialPosition: () => ({
       cameraType: 'arcRotateCam',
@@ -115,14 +150,25 @@ export class BabylonService {
         z: this.getActiveCamera().target.z,
       },
     }),
-    setActiveCameraTarget: (targetVector: Vector3) =>
-      setCameraTarget(this.getActiveCamera(), targetVector),
+    smoothCameraTransition,
+    smoothCameraTransitionFromSpherical,
+    setActiveCameraTarget: (target: Vector3, speed?: number) =>
+      smoothCameraTransition(
+        {
+          camera: this.getActiveCamera(),
+          scene: this.scene,
+          target,
+        },
+        speed,
+      ),
     setUpActiveCamera: (maxSize: number, mediaType: string) =>
       setUpCamera(this.getActiveCamera(), maxSize, mediaType),
-    setCameraType: (type: 'ArcRotateCamera' | 'UniversalCamera') => {
+    setCameraType: <T extends ArcRotateCamera | UniversalCamera>(
+      type: 'ArcRotateCamera' | 'UniversalCamera',
+    ) => {
       const cameras = this.scene.cameras;
       const currentType = this.cameraManager.cameraType$.getValue();
-      if (type === currentType) return;
+      if (type === currentType) return this.scene.activeCamera as T;
       this.cameraManager.cameraType$.next(type);
 
       const rotateCamera = cameras.find(
@@ -132,7 +178,7 @@ export class BabylonService {
         camera => camera instanceof UniversalCamera,
       )! as UniversalCamera;
 
-      const { position, target } = cameraDefaults$.getValue();
+      const { alpha, beta, radius, target } = cameraDefaults$.getValue();
       if (type === 'UniversalCamera') {
         universalCamera.position = rotateCamera.position.clone();
         universalCamera.setTarget(target);
@@ -140,9 +186,16 @@ export class BabylonService {
       } else {
         rotateCamera.position = universalCamera.position.clone();
         this.scene.activeCamera = rotateCamera;
-        setCameraTarget(rotateCamera, target);
-        moveCameraToTarget(rotateCamera, this.scene, position);
+        smoothCameraTransitionFromSpherical({
+          camera: rotateCamera,
+          scene: this.scene,
+          alpha,
+          beta,
+          radius,
+          target,
+        });
       }
+      return this.scene.activeCamera as T;
     },
     cameraSpeed: 1.0,
     cameraType$: new BehaviorSubject<'ArcRotateCamera' | 'UniversalCamera'>('ArcRotateCamera'),
@@ -161,6 +214,7 @@ export class BabylonService {
 
   constructor() {
     this.canvas.id = 'renderCanvas';
+
     this.engine = new Engine(this.canvas, true, {
       audioEngine: true,
       preserveDrawingBuffer: true,
@@ -218,23 +272,47 @@ export class BabylonService {
       camera.speed = this.cameraManager.cameraSpeed;
     });
 
+    const orbitGizmoResult = this.initializeOrbitGizmo();
+
     this.engine.runRenderLoop(() => {
       this.scene.render();
+      orbitGizmoResult.render();
     });
 
     // Global - for debugging
-    (window as any)['enableInspector'] = () => this.enableInspector();
-    (window as any)['disableInspector'] = () => this.disableInspector();
-    (window as any)['scene'] = () => this.getScene();
+    (window as any)['enableInspector'] = (name?: string) => this.enableInspector(name);
+    (window as any)['disableInspector'] = (name?: string) => this.disableInspector(name);
+    (window as any)['scene'] = (name?: string) => this.getScene(name);
   }
 
-  private inspectorToken?: InspectorToken;
-  public enableInspector() {
-    this.inspectorToken = ShowInspector(this.scene);
+  private inspectorTokens: Record<string, InspectorToken> = {};
+  public enableInspector(name = 'main') {
+    if (this.inspectorTokens[name]) return;
+    const scene = this.scenes[name];
+    if (!scene) {
+      console.warn(`No scene found with name ${name}`);
+      return;
+    }
+    this.inspectorTokens[name] = ShowInspector(scene);
   }
 
-  public disableInspector() {
-    this.inspectorToken?.dispose();
+  public disableInspector(name = 'main') {
+    const token = this.inspectorTokens[name];
+    if (token) {
+      token.dispose();
+      delete this.inspectorTokens[name];
+    }
+  }
+
+  private initializeOrbitGizmo() {
+    const { render, scene, engine } = createOrbitGizmo({
+      canvas: this.canvases.gizmo,
+      getArcRotateCamera: () => this.getActiveCamera(),
+      mainEngine: this.engine,
+    });
+    this.engines.gizmo = engine;
+    this.scenes.gizmo = scene;
+    return { render, scene, engine };
   }
 
   private defaultShadowVariables = {
@@ -256,7 +334,8 @@ export class BabylonService {
       this.scene,
     );
     ground.setAbsolutePosition(new Vector3(20, 0, 20));
-    const mat = new StandardMaterial('shadowGroundMat');
+
+    const mat = new StandardMaterial('shadowGroundMat', this.scene);
     mat.diffuseColor = this.defaultShadowVariables.groundDiffuseColor;
     mat.specularColor = this.defaultShadowVariables.groundSpecularColor;
     mat.specularPower = this.defaultShadowVariables.groundSpecularPower;
@@ -283,12 +362,16 @@ export class BabylonService {
     return shadowGenerator;
   }
 
-  public getScene(): Scene {
-    return this.scene;
+  public getScene(name = 'main'): Scene {
+    return this.scenes[name];
   }
 
   public attachCanvas(viewContainerRef: ViewContainerRef) {
-    viewContainerRef.insert(this.canvasRef.hostView);
+    for (const canvasRef of Object.values(this.canvasRefs)) {
+      if (!canvasRef.hostView.destroyed) {
+        viewContainerRef.insert(canvasRef.hostView);
+      }
+    }
   }
 
   public getCanvas(): HTMLCanvasElement {
@@ -303,8 +386,20 @@ export class BabylonService {
   }
 
   public resize(): void {
-    this.engine.resize();
-    this.scene.cameras.forEach(camera => camera.attachControl(this.canvas, false));
+    for (const engine of Object.values(this.engines)) {
+      engine.resize();
+    }
+    for (const [name, scene] of Object.entries(this.scenes)) {
+      const canvas = this.canvases[name as keyof typeof this.canvases];
+      if (!canvas) {
+        throw new Error(`No canvas found for scene ${name}`);
+      }
+      scene.cameras.forEach(camera => camera.attachControl(canvas, false));
+    }
+  }
+
+  public setOrbitGizmoVisible(visible: boolean): void {
+    this.canvases.gizmo.style.setProperty('display', visible ? 'block' : 'none');
   }
 
   public getEngine(): Engine {
