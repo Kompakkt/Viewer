@@ -17,7 +17,7 @@ export class AnnotationwalkthroughComponent {
   public annotationService = inject(AnnotationService);
   #isRepositioning = toObservable(this.annotationService.isRepositioning);
 
-  public ranking$ = new BehaviorSubject(-1);
+  public ranking$ = new BehaviorSubject(0);
   public selectedAnnotation$ = combineLatest([
     this.annotationService.currentAnnotations$,
     this.annotationService.selectedAnnotation$,
@@ -48,7 +48,7 @@ export class AnnotationwalkthroughComponent {
       firstValueFrom(this.ranking$),
       firstValueFrom(this.annotationService.currentAnnotations$),
     ]);
-    const isFirst = ranking === 0;
+    const isFirst = ranking <= 0;
     const newRanking = isFirst ? annotations.length - 1 : ranking - 1;
     this.ranking$.next(newRanking);
     this.annotationService.setSelectedAnnotation(annotations[newRanking]._id.toString());
