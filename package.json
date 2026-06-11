@@ -14,7 +14,7 @@
     "update:kompakkt:common": "bun run update-git-dependency.ts -d @kompakkt/common -o Kompakkt -r Common -b master",
     "update:kompakkt:komponents": "bun run update-git-dependency.ts -d @kompakkt/komponents -o Kompakkt -r Komponents -b main",
     "update:kompakkt:plugins": "bun run update-git-dependency.ts -d @kompakkt/plugins -o Kompakkt -r Plugins -b main",
-    "update:kompakkt:server-openapi": "bun run update-git-dependency.ts -d @kompakkt/server-openapi -o Kompakkt -r Server -b openapi-types-staging",
+    "update:kompakkt:server-openapi": "bun run update-git-dependency.ts -d @kompakkt/server-openapi -o Kompakkt -r Server -b openapi-types",
     "extract-translations": "ts-node --skipProject ./extract-translations.ts"
   },
   "contributors": [
@@ -52,10 +52,10 @@
     "@babylonjs/loaders": "9.0.0",
     "@babylonjs/materials": "9.0.0",
     "@babylonjs/serializers": "9.0.0",
-    "@kompakkt/common": "git+https://github.com/Kompakkt/Common.git#9f177f474c2c5f2c51c13fc339caf934584cb858",
+    "@kompakkt/common": "git+https://github.com/Kompakkt/Common.git#d054b5d50529445251f806a3242916d6f8b02e7f",
     "@kompakkt/komponents": "git+https://github.com/Kompakkt/Komponents#445b8ac",
     "@kompakkt/plugins": "git+https://github.com/Kompakkt/Plugins#f6f147a",
-    "@kompakkt/server-openapi": "git+https://github.com/Kompakkt/Server.git#679f866182db110757cc2aaf5fcdd08aadd1f311",
+    "@kompakkt/server-openapi": "git+https://github.com/Kompakkt/Server.git#98adb5b71b14280f4da37227ef7188c497a5f2dc",
     "bson-objectid": "^2.0.4",
     "copc": "^0.0.8",
     "fast-deep-equal": "^3.1.3",
