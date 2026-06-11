@@ -357,6 +357,7 @@ export class AnnotationService {
 
     const canvas = this.babylon.getCanvas();
     fromEvent<PointerEvent>(canvas, 'dblclick').subscribe(() => {
+      if (!this.isAnnotationMode$.getValue()) return;
       const pickResult = (() => {
         switch (mediaType) {
           case 'splat': {
