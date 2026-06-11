@@ -79,10 +79,11 @@ export class CopcImporter implements ISceneLoaderPluginAsync {
       return url.startsWith('/') ? new URL(url, window.location.origin).toString() : url;
     })();
     const copc = await Copc.create(filename);
+    console.log('COPC:', copc);
     const { nodes, pages } = await retryWithBackoff(() =>
       Copc.loadHierarchyPage(filename, copc.info.rootHierarchyPage),
     );
-    console.log(copc, nodes, pages);
+    console.log('COPC nodes & pages:', nodes, pages);
 
     PointCloudImporter.maxLOD = Math.max(...Object.keys(nodes).map(key => +key[0]));
     PointCloudImporter.totalPoints = Object.values(nodes).reduce(
@@ -283,7 +284,7 @@ export class CopcImporter implements ISceneLoaderPluginAsync {
       return mesh;
     });
     console.log('rootMesh', rootMesh);
-    loadNextLevelOfDetail();
+    void loadNextLevelOfDetail();
 
     // Recalculate bounding box of rootNodeMesh
     rootNodeMesh.refreshBoundingInfo();

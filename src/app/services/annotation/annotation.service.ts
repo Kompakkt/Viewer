@@ -34,6 +34,7 @@ import { UserdataService } from '../userdata/userdata.service';
 import { createMarker, createMarkerName } from './visual3DElements';
 import { ReorderMovement } from 'src/app/components/entity-feature-annotations/annotation/annotation.component';
 import { ExtenderTransformer } from '@kompakkt/plugins/extender';
+import { findClosestCloudPoint } from './helpers/find-closest-cloud-point';
 import { findClosestSplatPoint } from './helpers/find-closest-splat';
 import ObjectID from 'bson-objectid';
 import {
@@ -367,6 +368,14 @@ export class AnnotationService {
             if (!camera) return;
             const normalVector = closestSplat.subtract(camera.position).normalize();
             return { pickedPoint: closestSplat, pickedNormal: normalVector };
+          }
+          case 'cloud': {
+            const closestPoint = findClosestCloudPoint(scene);
+            if (!closestPoint) return null;
+            const camera = this.babylon.getActiveCamera();
+            if (!camera) return;
+            const normalVector = closestPoint.subtract(camera.position).normalize();
+            return { pickedPoint: closestPoint, pickedNormal: normalVector };
           }
           default: {
             const result = scene.pick(scene.pointerX, scene.pointerY, mesh => mesh.isPickable);
