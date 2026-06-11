@@ -2,6 +2,7 @@
   <div id="annotationwalkthrough">
     <k-button
       (click)="previousAnnotation()"
+      [disabled]="(annotationService.isTransitioning$ | async) ?? false"
       tooltip="{{ 'Back' | translate }}"
       tooltipPosition="above"
       icon-button
@@ -11,11 +12,12 @@
     <span id="walktertitle">{{ title$ | async }}</span>
     <k-button
       (click)="nextAnnotation()"
+      [disabled]="(annotationService.isTransitioning$ | async) ?? false"
       tooltip="{{ 'Next' | translate }}"
       tooltipPosition="above"
       icon-button
     >
-      <mat-icon [attr.aria-label]="'Save Scene' | translate">keyboard_arrow_right</mat-icon>
+      <mat-icon [attr.aria-label]="'Next' | translate">keyboard_arrow_right</mat-icon>
     </k-button>
   </div>
 }

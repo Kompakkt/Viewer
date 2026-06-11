@@ -12,7 +12,14 @@ import {
   UtilityLayerRenderer,
   Vector3,
 } from '@babylonjs/core';
-import { BehaviorSubject, ReplaySubject, combineLatest, firstValueFrom, fromEvent } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  ReplaySubject,
+  combineLatest,
+  firstValueFrom,
+  fromEvent,
+} from 'rxjs';
 import { distinct, filter, map, switchMap } from 'rxjs/operators';
 import { IAnnotation, asVector3, isAnnotation } from '@kompakkt/common';
 import { annotationFallback, annotationLogo } from '../../../assets/annotations/annotations';
@@ -68,6 +75,11 @@ export class AnnotationService {
   public hiddenAnnotations$ = new BehaviorSubject<string[]>([]);
 
   public isAnnotationMode$ = new BehaviorSubject(false);
+
+  #isTransitioningSubject = new BehaviorSubject<boolean>(false);
+  public get isTransitioning$(): Observable<boolean> {
+    return this.#isTransitioningSubject.asObservable();
+  }
 
   private defaultOffset = 0;
 
@@ -720,7 +732,7 @@ export class AnnotationService {
       // Saved position is { x: alpha, y: beta, z: radius } (spherical ArcRotate)
       const position = asVector3(perspective.position);
       const target = asVector3(perspective.target);
-      this.babylon.cameraManager.smoothCameraTransitionFromSpherical({
+      const animatable = this.babylon.cameraManager.smoothCameraTransitionFromSpherical({
         camera: this.babylon.cameraManager.getActiveCamera(),
         scene: this.babylon.getScene(),
         alpha: position.x,
@@ -728,6 +740,8 @@ export class AnnotationService {
         radius: position.z,
         target: Vector3.FromArray(Object.values(target)),
       });
+      this.#isTransitioningSubject.next(true);
+      animatable.onAnimationEndObservable.addOnce(() => this.#isTransitioningSubject.next(false));
     }
     this.babylon.hideMesh(selectedAnnotation._id.toString(), true);
   }

@@ -233,14 +233,11 @@ export const smoothCameraTransitionFromSpherical = (
   },
   speed = 1,
 ) => {
-  console.log(
-    'SmoothCameraTransitionFromSpherical from',
-    JSON.stringify([camera.alpha, camera.beta, camera.radius, camera.target]),
-    'to',
-    JSON.stringify([alpha, beta, radius, target]),
-  );
-
-  camera.target = new Vector3(target.x, target.y, target.z);
+  // Shortest-path alpha wrap: pick the equivalent alpha value within ±π of
+  // the camera's current alpha so the animation takes the short way around.
+  const TAU = Math.PI * 2;
+  const delta = ((((alpha - camera.alpha + Math.PI) % TAU) + TAU) % TAU) - Math.PI;
+  const wrappedAlpha = camera.alpha + delta;
 
   const animAlpha = new Animation(
     'camera_alpha_animation',
@@ -273,7 +270,7 @@ export const smoothCameraTransitionFromSpherical = (
 
   animAlpha.setKeys([
     { frame: 0, value: camera.alpha },
-    { frame: FPS, value: alpha },
+    { frame: FPS, value: wrappedAlpha },
   ]);
 
   animBeta.setKeys([
