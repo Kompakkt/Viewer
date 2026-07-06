@@ -112,6 +112,12 @@
   </k-details>
 
   <k-details [title]="'Rotation' | translate">
+    <k-labelled-checkbox
+      [label]="'Use rotation gizmo' | translate"
+      [startingValue]="rotationGizmoActive()"
+      (checkedChange)="toggleRotationGizmo($event)"
+    />
+
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px">
       <k-input
         [label]="'X-axis' | translate"

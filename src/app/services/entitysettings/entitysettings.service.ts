@@ -1,16 +1,18 @@
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import {
-  Animation,
-  Axis,
   Color3,
   Mesh,
   MeshBuilder,
   Quaternion,
+  RotationGizmo,
   StandardMaterial,
   Tags,
+  TransformNode,
+  UtilityLayerRenderer,
   Vector3,
 } from '@babylonjs/core';
-import { debounceTime, filter, firstValueFrom } from 'rxjs';
+import type { DragEvent, DragStartEndEvent, Observer } from '@babylonjs/core';
+import { debounceTime, distinctUntilChanged, filter, firstValueFrom } from 'rxjs';
 import { IColor, IEntitySettings, IVector3 } from '@kompakkt/common';
 import { minimalSettings } from '../../../assets/settings/settings';
 import { AnnotationService } from '../annotation/annotation.service';
@@ -57,6 +59,12 @@ export class EntitySettingsService {
   public localAxisInitialSize = 0;
   public worldAxisInitialSize = 0;
 
+  private utilityLayer?: UtilityLayerRenderer;
+  private rotationGizmo?: RotationGizmo;
+  private rotationGizmoAnchor?: TransformNode;
+  private rotationGizmoDragObserver?: Observer<DragEvent>;
+  private rotationGizmoDragEndObserver?: Observer<DragStartEndEvent>;
+
   private entitySettings: IEntitySettings = minimalSettings;
 
   constructor(
@@ -70,6 +78,7 @@ export class EntitySettingsService {
     this.processing.state$
       .pipe(
         filter(({ entity, meshes }) => !!entity && !!meshes),
+        distinctUntilChanged((a, b) => a.entity === b.entity && a.meshes === b.meshes),
         debounceTime(100),
       )
       .subscribe(({ settings, entity, meshes }) => {
@@ -340,6 +349,7 @@ export class EntitySettingsService {
   }
 
   public async destroyVisualUIMeshSettingsHelper() {
+    this.disableRotationGizmo();
     await this.destroyMesh('boundingBox');
     await this.destroyMesh('worldAxis');
     await this.destroyMesh('localAxis');
@@ -359,7 +369,7 @@ export class EntitySettingsService {
    */
 
   // Rotation
-  public async loadRotation() {
+  public loadRotation() {
     if (!this.center) {
       throw new Error('Center missing');
     }
@@ -374,49 +384,79 @@ export class EntitySettingsService {
     this.entitySettings.rotation.y = isDegreeSpectrum(this.entitySettings.rotation.y);
     this.entitySettings.rotation.z = isDegreeSpectrum(this.entitySettings.rotation.z);
 
-    const start = this.processing.rotationQuaternion;
-    const rotationQuaternion = Quaternion.RotationYawPitchRoll(0, 0, 0);
-    const rotationQuaternionX = Quaternion.RotationAxis(
-      Axis['X'],
-      (Math.PI / 180) * this.entitySettings.rotation.x,
-    );
-    let end = rotationQuaternionX.multiply(rotationQuaternion);
-    const rotationQuaternionY = Quaternion.RotationAxis(
-      Axis['Y'],
+    const end = Quaternion.RotationYawPitchRoll(
       (Math.PI / 180) * this.entitySettings.rotation.y,
-    );
-    end = rotationQuaternionY.multiply(end);
-    const rotationQuaternionZ = Quaternion.RotationAxis(
-      Axis['Z'],
+      (Math.PI / 180) * this.entitySettings.rotation.x,
       (Math.PI / 180) * this.entitySettings.rotation.z,
     );
-    end = rotationQuaternionZ.multiply(end);
-    this.animatedMovement(start, end);
     this.processing.rotationQuaternion = end;
     this.center.rotationQuaternion = end;
   }
 
-  private async animatedMovement(start: Quaternion, end: Quaternion) {
+  public setRotationGizmoEnabled(enabled: boolean): void {
+    if (enabled) this.enableRotationGizmo();
+    else this.disableRotationGizmo();
+  }
+
+  private enableRotationGizmo(): void {
+    if (this.rotationGizmo) return;
     if (!this.center) {
-      throw new Error('Center missing');
+      console.error('Center missing, cannot enable rotation gizmo', this);
+      return;
     }
-    const anim = new Animation(
-      'anim',
-      'rotationQuaternion',
-      120,
-      Animation.ANIMATIONTYPE_QUATERNION,
-      Animation.ANIMATIONLOOPMODE_RELATIVE,
-    );
-    const frame = [
-      { frame: 0, value: start },
-      { frame: 100, value: end },
-    ];
-    anim.setKeys(frame);
-    this.center.animations = [];
-    this.center.animations.push(anim);
-    await this.babylon
-      .getScene()
-      .beginAnimation(this.center, 0, 100, false, undefined, undefined, undefined, false);
+    const scene = this.babylon.getScene();
+    this.utilityLayer = new UtilityLayerRenderer(scene);
+    this.rotationGizmo = new RotationGizmo(this.utilityLayer);
+    this.rotationGizmo.updateGizmoRotationToMatchAttachedMesh = true;
+    this.rotationGizmo.updateGizmoPositionToMatchAttachedMesh = true;
+
+    this.rotationGizmoAnchor = new TransformNode('rotationGizmoAnchor', scene);
+    this.rotationGizmoAnchor.position =
+      this.boundingBox?.getAbsolutePosition() ?? this.initialCenterPoint;
+    if (this.center.rotationQuaternion) {
+      this.rotationGizmoAnchor.rotationQuaternion = this.center.rotationQuaternion.clone();
+    }
+    this.rotationGizmo.attachedNode = this.rotationGizmoAnchor;
+
+    this.rotationGizmoDragObserver = this.rotationGizmo.onDragObservable.add(() => {
+      if (this.center && this.rotationGizmoAnchor?.rotationQuaternion) {
+        this.center.rotationQuaternion = this.rotationGizmoAnchor.rotationQuaternion.clone();
+      }
+    });
+
+    this.rotationGizmoDragEndObserver = this.rotationGizmo.onDragEndObservable.add(() => {
+      this.applyRotationFromCenterMesh();
+    });
+  }
+
+  private disableRotationGizmo(): void {
+    if (this.rotationGizmo && this.rotationGizmoDragObserver) {
+      this.rotationGizmo.onDragObservable.remove(this.rotationGizmoDragObserver);
+    }
+    if (this.rotationGizmo && this.rotationGizmoDragEndObserver) {
+      this.rotationGizmo.onDragEndObservable.remove(this.rotationGizmoDragEndObserver);
+    }
+    this.rotationGizmoDragObserver = undefined;
+    this.rotationGizmoDragEndObserver = undefined;
+    this.rotationGizmo?.dispose();
+    this.rotationGizmoAnchor?.dispose();
+    this.utilityLayer?.dispose();
+    this.rotationGizmo = undefined;
+    this.rotationGizmoAnchor = undefined;
+    this.utilityLayer = undefined;
+  }
+
+  private async applyRotationFromCenterMesh(): Promise<void> {
+    if (!this.center?.rotationQuaternion) return;
+    const q = this.center.rotationQuaternion;
+    const euler = q.toEulerAngles();
+    const toDeg = (rad: number) => (((rad * 180) / Math.PI) + 360) % 360;
+    this.entitySettings.rotation.x = toDeg(euler.x);
+    this.entitySettings.rotation.y = toDeg(euler.y);
+    this.entitySettings.rotation.z = toDeg(euler.z);
+    this.processing.rotationQuaternion = q.clone();
+    const { serverSettings } = await firstValueFrom(this.processing.settings$);
+    this.processing.settings$.next({ serverSettings, localSettings: this.entitySettings });
   }
 
   // Size
