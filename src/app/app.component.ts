@@ -1,6 +1,8 @@
 import { AfterContentChecked, ChangeDetectorRef, Component } from '@angular/core';
 import { LoadingscreenComponent } from './components/loadingscreen/loadingscreen.component';
 import { SceneComponent } from './components/scene/scene.component';
+import { EntitySettingsService } from './services/entitysettings/entitysettings.service';
+import { UserdataService } from './services/userdata/userdata.service';
 
 @Component({
   selector: 'app-root',
@@ -9,7 +11,15 @@ import { SceneComponent } from './components/scene/scene.component';
   imports: [LoadingscreenComponent, SceneComponent],
 })
 export class AppComponent implements AfterContentChecked {
-  constructor(private changeDetector: ChangeDetectorRef) {}
+  constructor(
+    private changeDetector: ChangeDetectorRef,
+    private userdata: UserdataService,
+    public entitySettings: EntitySettingsService,
+  ) {
+    this.userdata.isAuthenticated$.subscribe(isAuthenticated => {
+      console.log('Authentication status changed:', isAuthenticated);
+    });
+  }
 
   ngAfterContentChecked(): void {
     this.changeDetector.detectChanges();

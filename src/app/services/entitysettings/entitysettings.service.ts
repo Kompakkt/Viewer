@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable, Output } from "@angular/core";
+import { EventEmitter, Injectable, Output, signal } from "@angular/core";
 import {
   Color3,
   Mesh,
@@ -46,6 +46,14 @@ const getScaleVector = (scale: number | IVector3) => {
   }
 };
 
+const rotationGizmoSnapStepRad = Math.PI / 180;
+
+interface RotationDragTooltip {
+  text: string;
+  x: number;
+  y: number;
+}
+
 @Injectable({
   providedIn: "root",
 })
@@ -77,6 +85,12 @@ export class EntitySettingsService {
   private rotationGizmoAnchor?: TransformNode;
   private rotationGizmoDragObserver?: Observer<DragEvent>;
   private rotationGizmoDragEndObserver?: Observer<DragStartEndEvent>;
+  private rotationGizmoAxisDragObservers: {
+    axis: "x" | "y" | "z";
+    observer: Observer<DragEvent>;
+  }[] = [];
+
+  readonly rotationDragTooltip = signal<RotationDragTooltip | null>(null);
 
   private entitySettings: IEntitySettings = minimalSettings;
 
@@ -450,6 +464,9 @@ export class EntitySettingsService {
     );
     this.processing.rotationQuaternion = end;
     this.center.rotationQuaternion = end;
+    if (this.rotationGizmoAnchor) {
+      this.rotationGizmoAnchor.rotationQuaternion = end.clone();
+    }
   }
 
   public setRotationGizmoEnabled(enabled: boolean): void {
@@ -465,9 +482,15 @@ export class EntitySettingsService {
     }
     const scene = this.babylon.getScene();
     this.utilityLayer = new UtilityLayerRenderer(scene);
-    this.rotationGizmo = new RotationGizmo(this.utilityLayer);
+    this.rotationGizmo = new RotationGizmo(
+      this.utilityLayer,
+      undefined,
+      undefined,
+      2,
+    );
     this.rotationGizmo.updateGizmoRotationToMatchAttachedMesh = true;
     this.rotationGizmo.updateGizmoPositionToMatchAttachedMesh = true;
+    this.rotationGizmo.snapDistance = rotationGizmoSnapStepRad;
 
     this.rotationGizmoAnchor = new TransformNode("rotationGizmoAnchor", scene);
     this.rotationGizmoAnchor.position =
@@ -489,11 +512,34 @@ export class EntitySettingsService {
 
     this.rotationGizmoDragEndObserver =
       this.rotationGizmo.onDragEndObservable.add(() => {
+        this.rotationDragTooltip.set(null);
         this.applyRotationFromCenterMesh();
       });
+
+    this.rotationGizmoAxisDragObservers = [
+      {
+        axis: "x",
+        observer: this.rotationGizmo.xGizmo.dragBehavior.onDragObservable.add(
+          (ev) => this.updateDragTooltip("x", ev),
+        ),
+      },
+      {
+        axis: "y",
+        observer: this.rotationGizmo.yGizmo.dragBehavior.onDragObservable.add(
+          (ev) => this.updateDragTooltip("y", ev),
+        ),
+      },
+      {
+        axis: "z",
+        observer: this.rotationGizmo.zGizmo.dragBehavior.onDragObservable.add(
+          (ev) => this.updateDragTooltip("z", ev),
+        ),
+      },
+    ];
   }
 
   private disableRotationGizmo(): void {
+    this.rotationDragTooltip.set(null);
     if (this.rotationGizmo && this.rotationGizmoDragObserver) {
       this.rotationGizmo.onDragObservable.remove(
         this.rotationGizmoDragObserver,
@@ -504,6 +550,18 @@ export class EntitySettingsService {
         this.rotationGizmoDragEndObserver,
       );
     }
+    for (const { axis, observer } of this.rotationGizmoAxisDragObservers) {
+      const gizmo = this.rotationGizmo;
+      if (!gizmo) break;
+      const sub =
+        axis === "x"
+          ? gizmo.xGizmo
+          : axis === "y"
+            ? gizmo.yGizmo
+            : gizmo.zGizmo;
+      sub.dragBehavior.onDragObservable.remove(observer);
+    }
+    this.rotationGizmoAxisDragObservers = [];
     this.rotationGizmoDragObserver = undefined;
     this.rotationGizmoDragEndObserver = undefined;
     this.rotationGizmo?.dispose();
@@ -518,7 +576,8 @@ export class EntitySettingsService {
     if (!this.center?.rotationQuaternion) return;
     const q = this.center.rotationQuaternion;
     const euler = q.toEulerAngles();
-    const toDeg = (rad: number) => ((rad * 180) / Math.PI + 360) % 360;
+    const toDeg = (rad: number) =>
+      Math.round(((rad * 180) / Math.PI + 360) % 360) % 360;
     this.entitySettings.rotation.x = toDeg(euler.x);
     this.entitySettings.rotation.y = toDeg(euler.y);
     this.entitySettings.rotation.z = toDeg(euler.z);
@@ -527,6 +586,24 @@ export class EntitySettingsService {
     this.processing.settings$.next({
       serverSettings,
       localSettings: this.entitySettings,
+    });
+  }
+
+  private updateDragTooltip(axis: "x" | "y" | "z", ev: DragEvent): void {
+    const gizmo = this.rotationGizmo;
+    if (!gizmo) return;
+    const sub =
+      axis === "x" ? gizmo.xGizmo : axis === "y" ? gizmo.yGizmo : gizmo.zGizmo;
+    const deg = Math.round((sub.angle * 180) / Math.PI);
+    if (deg === 0) {
+      this.rotationDragTooltip.set(null);
+      return;
+    }
+    const e = ev.pointerInfo?.event;
+    this.rotationDragTooltip.set({
+      text: `${deg}°`,
+      x: e?.clientX ?? 0,
+      y: e?.clientY ?? 0,
     });
   }
 
