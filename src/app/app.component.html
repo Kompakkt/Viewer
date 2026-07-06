@@ -2,3 +2,7 @@
   <app-loading-screen />
   <app-scene />
 </div>
+
+@if (entitySettings.rotationDragTooltip(); as t) {
+  <div class="rotation-drag-tooltip" [style.left.px]="t.x" [style.top.px]="t.y">{{ t.text }}</div>
+}
