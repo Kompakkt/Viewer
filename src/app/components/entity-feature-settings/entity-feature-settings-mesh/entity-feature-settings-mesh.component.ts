@@ -1,5 +1,5 @@
 import { AsyncPipe, KeyValuePipe } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Vector3 } from '@babylonjs/core';
 import { ColorChromeModule } from 'ngx-color/chrome';
@@ -37,7 +37,7 @@ import { AsAbsolutePipe } from 'src/app/pipes/as-absolute.pipe';
     InputComponent,
   ],
 })
-export class EntityFeatureSettingsMeshComponent implements OnInit {
+export class EntityFeatureSettingsMeshComponent implements OnInit, OnDestroy {
   public meshSettingsHelperToggle = false;
   public boundingBoxVisibility = false;
   public boundingBoxMeshesVisibility = false;
@@ -50,6 +50,7 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
   public worldAxisScalingFactor = 1;
   public meshScaleToggle = false;
   public meshOrientationToggle = false;
+  readonly rotationGizmoActive = signal(false);
 
   constructor(
     public entitySettings: EntitySettingsService,
@@ -81,8 +82,14 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
           this.entitySettings.destroyVisualUIMeshSettingsHelper();
           this.entitySettings.decomposeMeshSettingsHelper();
         });
+        this.rotationGizmoActive.set(false);
       }
     });
+  }
+
+  ngOnDestroy() {
+    this.rotationGizmoActive.set(false);
+    this.entitySettings.setRotationGizmoEnabled(false);
   }
 
   public async setBackgroundColor(color: IColor) {
@@ -142,6 +149,11 @@ export class EntityFeatureSettingsMeshComponent implements OnInit {
       default:
         console.log('I am not able to rotate.');
     }
+  }
+
+  public toggleRotationGizmo(enabled: boolean) {
+    this.rotationGizmoActive.set(enabled);
+    this.entitySettings.setRotationGizmoEnabled(enabled);
   }
 
   // _____ Helpers for Mesh Settings _______
