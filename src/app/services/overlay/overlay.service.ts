@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
-type Mode = 'compilationBrowser' | 'annotation' | 'settings' | 'pointCloud' | '';
+type Mode = 'compilationBrowser' | 'annotation' | 'settings' | 'pointCloud' | 'animations' | '';
 
 @Injectable({
   providedIn: 'root',

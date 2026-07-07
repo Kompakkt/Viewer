@@ -1,0 +1,16 @@
+@if (isActive()) {
+  <k-button type="solid-warn" (click)="stop.emit()">
+    <mat-icon>stop</mat-icon>
+    <span>{{ 'Stop animation' | translate }}</span>
+  </k-button>
+} @else {
+  <k-button type="solid-primary" (click)="play.emit(target())">
+    <mat-icon>play_arrow</mat-icon>
+    <span>{{ 'Play animation' | translate }}</span>
+  </k-button>
+}
+
+<k-button type="solid-primary" (click)="addToSequenceEditor.emit(target())">
+  <mat-icon>playlist_add</mat-icon>
+  <span>{{ 'Add to sequence editor' | translate }}</span>
+</k-button>

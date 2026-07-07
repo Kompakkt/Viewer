@@ -94,6 +94,42 @@ small {
   line-height: var(--font-size-base);
 }
 
+.fs-small {
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--font-size-small);
+  &.bold {
+    font-weight: var(--font-weight-bold);
+  }
+}
+
+.fs-base {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--font-size-base);
+  &.bold {
+    font-weight: var(--font-weight-bold);
+  }
+}
+
+.fs-large {
+  font-size: var(--font-size-large);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--font-size-large);
+  &.bold {
+    font-weight: var(--font-weight-bold);
+  }
+}
+
+.fs-xlarge {
+  font-size: var(--font-size-xlarge);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--font-size-xlarge);
+  &.bold {
+    font-weight: var(--font-weight-bold);
+  }
+}
+
 app-markdown-preview {
   > * > a {
     display: inline;

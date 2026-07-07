@@ -11,7 +11,7 @@ div#camera-settings {
   text-align: left;
 
   position: absolute;
-  bottom: 36px;
+  bottom: calc(36px + var(--bottom-sheet-offset, 0px));
   right: 8px;
   white-space: nowrap; // Fix width of absolutely positioned element
   width: 320px;

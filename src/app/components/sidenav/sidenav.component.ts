@@ -2,6 +2,7 @@ import { Component, HostBinding, OnInit } from '@angular/core';
 
 import { OverlayService } from '../../services/overlay/overlay.service';
 import { CompilationBrowserComponent } from '../compilation-browser/compilation-browser.component';
+import { EntityFeatureAnimationsComponent } from '../entity-feature-animations/entity-feature-animations.component';
 import { EntityFeatureSettingsComponent } from '../entity-feature-settings/entity-feature-settings.component';
 import { AnnotationsEditorComponent } from '../entity-feature-annotations/annotations-editor/annotations-editor.component';
 import { PointCloudSettingsComponent } from '../point-cloud-settings/point-cloud-settings.component';
@@ -13,6 +14,7 @@ import { PointCloudSettingsComponent } from '../point-cloud-settings/point-cloud
   imports: [
     AnnotationsEditorComponent,
     EntityFeatureSettingsComponent,
+    EntityFeatureAnimationsComponent,
     CompilationBrowserComponent,
     PointCloudSettingsComponent,
   ],

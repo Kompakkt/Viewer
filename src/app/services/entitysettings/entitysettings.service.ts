@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable, Output, signal } from "@angular/core";
+import { EventEmitter, Injectable, Output, signal } from '@angular/core';
 import {
   Color3,
   Mesh,
@@ -10,28 +10,23 @@ import {
   TransformNode,
   UtilityLayerRenderer,
   Vector3,
-} from "@babylonjs/core";
-import type { DragEvent, DragStartEndEvent, Observer } from "@babylonjs/core";
-import {
-  debounceTime,
-  distinctUntilChanged,
-  filter,
-  firstValueFrom,
-} from "rxjs";
-import { IColor, IEntitySettings, IVector3 } from "@kompakkt/common";
-import { minimalSettings } from "../../../assets/settings/settings";
-import { AnnotationService } from "../annotation/annotation.service";
-import { BabylonService } from "../babylon/babylon.service";
-import { LightService } from "../light/light.service";
-import { ProcessingService } from "../processing/processing.service";
+} from '@babylonjs/core';
+import type { DragEvent, DragStartEndEvent, Observer } from '@babylonjs/core';
+import { debounceTime, distinctUntilChanged, filter, firstValueFrom } from 'rxjs';
+import { IColor, IEntitySettings, IVector3 } from '@kompakkt/common';
+import { minimalSettings } from '../../../assets/settings/settings';
+import { AnnotationService } from '../annotation/annotation.service';
+import { BabylonService } from '../babylon/babylon.service';
+import { LightService } from '../light/light.service';
+import { ProcessingService } from '../processing/processing.service';
 import {
   createBoundingBox,
   createGround,
   createlocalAxes,
   createWorldAxis,
-} from "./visualUIHelper";
-import { LoadingScreenService } from "../babylon/loadingscreen";
-import { PostMessageService } from "../post-message/post-message.service";
+} from './visualUIHelper';
+import { LoadingScreenService } from '../babylon/loadingscreen';
+import { PostMessageService } from '../post-message/post-message.service';
 
 const isDegreeSpectrum = (value: number) => {
   return value >= 0 && value <= 360 ? value : value > 360 ? 360 : 0;
@@ -39,7 +34,7 @@ const isDegreeSpectrum = (value: number) => {
 
 // Some models have uniform scaling, others non-uniform scaling
 const getScaleVector = (scale: number | IVector3) => {
-  if (typeof scale === "number") {
+  if (typeof scale === 'number') {
     return new Vector3(scale, scale, scale);
   } else {
     return new Vector3(scale.x, scale.y, scale.z);
@@ -55,19 +50,11 @@ interface RotationDragTooltip {
 }
 
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class EntitySettingsService {
-  private min = new Vector3(
-    Number.MAX_VALUE,
-    Number.MAX_VALUE,
-    Number.MAX_VALUE,
-  );
-  private max = new Vector3(
-    Number.MAX_VALUE * -1,
-    Number.MAX_VALUE * -1,
-    Number.MAX_VALUE * -1,
-  );
+  private min = new Vector3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
+  private max = new Vector3(Number.MAX_VALUE * -1, Number.MAX_VALUE * -1, Number.MAX_VALUE * -1);
   public initialSize = Vector3.Zero();
   private initialCenterPoint = Vector3.Zero();
   private currentCenterPoint = Vector3.Zero();
@@ -86,7 +73,7 @@ export class EntitySettingsService {
   private rotationGizmoDragObserver?: Observer<DragEvent>;
   private rotationGizmoDragEndObserver?: Observer<DragStartEndEvent>;
   private rotationGizmoAxisDragObservers: {
-    axis: "x" | "y" | "z";
+    axis: 'x' | 'y' | 'z';
     observer: Observer<DragEvent>;
   }[] = [];
 
@@ -105,13 +92,11 @@ export class EntitySettingsService {
     this.processing.state$
       .pipe(
         filter(({ entity, meshes }) => !!entity && !!meshes),
-        distinctUntilChanged(
-          (a, b) => a.entity === b.entity && a.meshes === b.meshes,
-        ),
+        distinctUntilChanged((a, b) => a.entity === b.entity && a.meshes === b.meshes),
         debounceTime(100),
       )
       .subscribe(({ settings, entity, meshes }) => {
-        console.log("EntitySettingsService", entity?._id, {
+        console.log('EntitySettingsService', entity?._id, {
           settings,
           entity,
           meshes,
@@ -119,14 +104,12 @@ export class EntitySettingsService {
         this.entitySettings = settings;
         requestAnimationFrame(() =>
           this.setUpSettings()
-            .then(() => console.log("Settings loaded"))
-            .catch((err: Error) =>
-              console.log("Settings not loaded", err.message),
-            )
+            .then(() => console.log('Settings loaded'))
+            .catch((err: Error) => console.log('Settings not loaded', err.message))
             .finally(() => {
               this.loadingScreen.hide();
               this.postMessage.sendToParent({
-                type: "settingsLoaded",
+                type: 'settingsLoaded',
                 data: {},
               });
             }),
@@ -139,27 +122,15 @@ export class EntitySettingsService {
   }
 
   private async resetInitialValues() {
-    this.min = new Vector3(
-      Number.MAX_VALUE,
-      Number.MAX_VALUE,
-      Number.MAX_VALUE,
-    );
-    this.max = new Vector3(
-      Number.MAX_VALUE * -1,
-      Number.MAX_VALUE * -1,
-      Number.MAX_VALUE * -1,
-    );
+    this.min = new Vector3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
+    this.max = new Vector3(Number.MAX_VALUE * -1, Number.MAX_VALUE * -1, Number.MAX_VALUE * -1);
     this.initialSize = Vector3.Zero();
     this.initialCenterPoint = Vector3.Zero();
     this.currentCenterPoint = Vector3.Zero();
     this.groundInitialSize = 0;
     this.localAxisInitialSize = 0;
     this.worldAxisInitialSize = 0;
-    this.processing.rotationQuaternion = Quaternion.RotationYawPitchRoll(
-      0,
-      0,
-      0,
-    );
+    this.processing.rotationQuaternion = Quaternion.RotationYawPitchRoll(0, 0, 0);
     this.processing.entityHeight = (0).toFixed(2);
     this.processing.entityWidth = (0).toFixed(2);
     this.processing.entityDepth = (0).toFixed(2);
@@ -168,14 +139,12 @@ export class EntitySettingsService {
   private async setUpSettings() {
     const meshes = await firstValueFrom(this.processing.meshes$);
     const isInUpload = await firstValueFrom(this.processing.isInUpload$);
-    const hasMeshSettings = await firstValueFrom(
-      this.processing.hasMeshSettings$,
-    );
+    const hasMeshSettings = await firstValueFrom(this.processing.hasMeshSettings$);
     if (!this.entitySettings) {
-      throw new Error("No settings available.");
+      throw new Error('No settings available.');
     }
     if (!meshes || meshes.length === 0) {
-      throw new Error("No meshes available.");
+      throw new Error('No meshes available.');
     }
     await this.resetInitialValues();
     await this.initialiseSizeValues();
@@ -183,7 +152,7 @@ export class EntitySettingsService {
     await this.createVisualUIMeshSettingsHelper();
     await this.loadSettings();
     if (!isInUpload || !hasMeshSettings) {
-      await this.destroyMesh("boundingBox");
+      await this.destroyMesh('boundingBox');
       await this.decomposeMeshSettingsHelper();
     }
 
@@ -204,17 +173,15 @@ export class EntitySettingsService {
           this.max.z - this.initialSize.z / 2,
         );
       })
-      .catch((err: Error) =>
-        console.log("Failed intitializing size", err.message),
-      );
+      .catch((err: Error) => console.log('Failed intitializing size', err.message));
   }
 
   private async calculateMinMax() {
     const meshes = await firstValueFrom(this.processing.meshes$);
     if (!meshes) {
-      throw new Error("Center missing");
+      throw new Error('Center missing');
     }
-    meshes.forEach((mesh) => {
+    meshes.forEach(mesh => {
       mesh.computeWorldMatrix(true);
       // see if mesh is visible or just a dummy
       const bi = mesh.getBoundingInfo();
@@ -248,17 +215,13 @@ export class EntitySettingsService {
   private async setUpMeshSettingsHelper() {
     const meshes = await firstValueFrom(this.processing.meshes$);
     if (!meshes) {
-      throw new Error("No meshes available.");
+      throw new Error('No meshes available.');
     }
     this.center?.dispose();
 
-    this.center = MeshBuilder.CreateBox(
-      "center",
-      { size: 0.01 },
-      this.babylon.getScene(),
-    );
+    this.center = MeshBuilder.CreateBox('center', { size: 0.01 }, this.babylon.getScene());
     this.center.isPickable = false;
-    Tags.AddTagsTo(this.center, "center");
+    Tags.AddTagsTo(this.center, 'center');
     this.center.isVisible = false;
 
     // rotation to zero
@@ -293,25 +256,23 @@ export class EntitySettingsService {
     // pivot to the center of the (visible) model
     this.center.setPivotPoint(this.initialCenterPoint);
 
-    meshes.forEach((mesh) => {
+    meshes.forEach(mesh => {
       if (!mesh.parent) {
         mesh.parent = this.center as Mesh;
-        Tags.AddTagsTo(mesh, "parentedMesh");
+        Tags.AddTagsTo(mesh, 'parentedMesh');
       }
     });
   }
 
   private async loadSettings() {
     const mediaType = await firstValueFrom(this.processing.mediaType$);
-    const hasMeshSettings = await firstValueFrom(
-      this.processing.hasMeshSettings$,
-    );
+    const hasMeshSettings = await firstValueFrom(this.processing.hasMeshSettings$);
     await this.initialiseCamera();
     await this.loadCameraInititalPosition();
     this.loadBackgroundEffect();
     this.loadBackgroundColor();
     this.initialiseLights();
-    if (hasMeshSettings || mediaType === "audio") {
+    if (hasMeshSettings || mediaType === 'audio') {
       await this.loadRotation();
       await this.loadScaling();
     }
@@ -328,24 +289,19 @@ export class EntitySettingsService {
   private async initialiseCamera() {
     if (!this.entitySettings) {
       console.error(this);
-      throw new Error("Settings missing");
+      throw new Error('Settings missing');
     }
     const mediaType = await firstValueFrom(this.processing.mediaType$);
     const isInUpload = await firstValueFrom(this.processing.isInUpload$);
-    const isDefault = await firstValueFrom(
-      this.processing.defaultEntityLoaded$,
-    );
+    const isDefault = await firstValueFrom(this.processing.defaultEntityLoaded$);
     const scale = getScaleVector(this.entitySettings.scale);
-    const isModel = mediaType === "model" || mediaType === "entity";
-    const isSplat = mediaType === "splat";
+    const isModel = mediaType === 'model' || mediaType === 'entity';
+    const isSplat = mediaType === 'splat';
 
     if (isSplat) {
       const meshes = await firstValueFrom(this.processing.meshes$);
       console.log(meshes.at(0)?.getBoundingInfo().diagonalLength);
-      const target = meshes
-        .at(0)
-        ?.getBoundingInfo()
-        ?.boundingSphere.minimum.negate();
+      const target = meshes.at(0)?.getBoundingInfo()?.boundingSphere.minimum.negate();
       if (target) this.currentCenterPoint = target;
     }
 
@@ -360,22 +316,18 @@ export class EntitySettingsService {
           this.initialSize.z * scale.z * (this.initialSize.z * scale.z),
       );
     }
-    const max = !isDefault
-      ? isInUpload && isModel
-        ? diagonalLength * 2.5
-        : diagonalLength
-      : 87.5;
+    const max = !isDefault ? (isInUpload && isModel ? diagonalLength * 2.5 : diagonalLength) : 87.5;
     await this.babylon.cameraManager.setUpActiveCamera(max, mediaType!);
 
-    if (isInUpload && mediaType !== "audio") {
+    if (isInUpload && mediaType !== 'audio') {
       const position = new Vector3(
         isModel ? Math.PI / 4 : -Math.PI / 2,
         isModel ? Math.PI / 4 : Math.PI / 2,
         isSplat ? diagonalLength * 0.01 : diagonalLength * 1.25,
       );
       const target = this.currentCenterPoint;
-      console.log("target", target);
-      console.log("position", position);
+      console.log('target', target);
+      console.log('position', position);
       this.entitySettings.cameraPositionInitial = {
         position,
         target,
@@ -386,13 +338,13 @@ export class EntitySettingsService {
   public async decomposeMeshSettingsHelper() {
     const center = this.center;
     if (!center) {
-      throw new Error("Center missing");
+      throw new Error('Center missing');
     }
-    const meshes = this.babylon.getScene().getMeshesByTags("parentedMesh");
+    const meshes = this.babylon.getScene().getMeshesByTags('parentedMesh');
     if (!meshes) {
-      throw new Error("Meshes missing");
+      throw new Error('Meshes missing');
     }
-    await meshes.forEach((mesh) => {
+    await meshes.forEach(mesh => {
       mesh.computeWorldMatrix(true);
       const abs = mesh.absolutePosition;
       if (!mesh.rotationQuaternion) {
@@ -405,22 +357,21 @@ export class EntitySettingsService {
       mesh.parent = null;
       mesh.position = abs;
       const meshRotation = mesh.rotationQuaternion;
-      mesh.rotationQuaternion =
-        this.processing.rotationQuaternion.multiply(meshRotation);
+      mesh.rotationQuaternion = this.processing.rotationQuaternion.multiply(meshRotation);
       center.computeWorldMatrix();
       mesh.scaling.x *= center.scaling.x;
       mesh.scaling.y *= center.scaling.y;
       mesh.scaling.z *= center.scaling.z;
     });
-    await this.destroyMesh("center");
+    await this.destroyMesh('center');
   }
 
   public async destroyVisualUIMeshSettingsHelper() {
     this.disableRotationGizmo();
-    await this.destroyMesh("boundingBox");
-    await this.destroyMesh("worldAxis");
-    await this.destroyMesh("localAxis");
-    await this.destroyMesh("ground");
+    await this.destroyMesh('boundingBox');
+    await this.destroyMesh('worldAxis');
+    await this.destroyMesh('localAxis');
+    await this.destroyMesh('ground');
     await this.initialiseCamera();
   }
 
@@ -428,7 +379,7 @@ export class EntitySettingsService {
     this.babylon
       .getScene()
       .getMeshesByTags(tag)
-      .map((mesh) => mesh.dispose());
+      .map(mesh => mesh.dispose());
   }
 
   /*
@@ -438,24 +389,18 @@ export class EntitySettingsService {
   // Rotation
   public loadRotation() {
     if (!this.center) {
-      throw new Error("Center missing");
+      throw new Error('Center missing');
     }
     if (!this.entitySettings) {
-      throw new Error("Settings missing");
+      throw new Error('Settings missing');
     }
     if (!this.center.rotationQuaternion) {
-      throw new Error("RotationQuaternion for center missing");
+      throw new Error('RotationQuaternion for center missing');
     }
 
-    this.entitySettings.rotation.x = isDegreeSpectrum(
-      this.entitySettings.rotation.x,
-    );
-    this.entitySettings.rotation.y = isDegreeSpectrum(
-      this.entitySettings.rotation.y,
-    );
-    this.entitySettings.rotation.z = isDegreeSpectrum(
-      this.entitySettings.rotation.z,
-    );
+    this.entitySettings.rotation.x = isDegreeSpectrum(this.entitySettings.rotation.x);
+    this.entitySettings.rotation.y = isDegreeSpectrum(this.entitySettings.rotation.y);
+    this.entitySettings.rotation.z = isDegreeSpectrum(this.entitySettings.rotation.z);
 
     const end = Quaternion.RotationYawPitchRoll(
       (Math.PI / 180) * this.entitySettings.rotation.y,
@@ -477,62 +422,52 @@ export class EntitySettingsService {
   private enableRotationGizmo(): void {
     if (this.rotationGizmo) return;
     if (!this.center) {
-      console.error("Center missing, cannot enable rotation gizmo", this);
+      console.error('Center missing, cannot enable rotation gizmo', this);
       return;
     }
     const scene = this.babylon.getScene();
     this.utilityLayer = new UtilityLayerRenderer(scene);
-    this.rotationGizmo = new RotationGizmo(
-      this.utilityLayer,
-      undefined,
-      undefined,
-      2,
-    );
+    this.rotationGizmo = new RotationGizmo(this.utilityLayer, undefined, undefined, 2);
     this.rotationGizmo.updateGizmoRotationToMatchAttachedMesh = true;
     this.rotationGizmo.updateGizmoPositionToMatchAttachedMesh = true;
     this.rotationGizmo.snapDistance = rotationGizmoSnapStepRad;
 
-    this.rotationGizmoAnchor = new TransformNode("rotationGizmoAnchor", scene);
+    this.rotationGizmoAnchor = new TransformNode('rotationGizmoAnchor', scene);
     this.rotationGizmoAnchor.position =
       this.boundingBox?.getAbsolutePosition() ?? this.initialCenterPoint;
     if (this.center.rotationQuaternion) {
-      this.rotationGizmoAnchor.rotationQuaternion =
-        this.center.rotationQuaternion.clone();
+      this.rotationGizmoAnchor.rotationQuaternion = this.center.rotationQuaternion.clone();
     }
     this.rotationGizmo.attachedNode = this.rotationGizmoAnchor;
 
-    this.rotationGizmoDragObserver = this.rotationGizmo.onDragObservable.add(
-      () => {
-        if (this.center && this.rotationGizmoAnchor?.rotationQuaternion) {
-          this.center.rotationQuaternion =
-            this.rotationGizmoAnchor.rotationQuaternion.clone();
-        }
-      },
-    );
+    this.rotationGizmoDragObserver = this.rotationGizmo.onDragObservable.add(() => {
+      if (this.center && this.rotationGizmoAnchor?.rotationQuaternion) {
+        this.center.rotationQuaternion = this.rotationGizmoAnchor.rotationQuaternion.clone();
+      }
+    });
 
-    this.rotationGizmoDragEndObserver =
-      this.rotationGizmo.onDragEndObservable.add(() => {
-        this.rotationDragTooltip.set(null);
-        this.applyRotationFromCenterMesh();
-      });
+    this.rotationGizmoDragEndObserver = this.rotationGizmo.onDragEndObservable.add(() => {
+      this.rotationDragTooltip.set(null);
+      this.applyRotationFromCenterMesh();
+    });
 
     this.rotationGizmoAxisDragObservers = [
       {
-        axis: "x",
-        observer: this.rotationGizmo.xGizmo.dragBehavior.onDragObservable.add(
-          (ev) => this.updateDragTooltip("x", ev),
+        axis: 'x',
+        observer: this.rotationGizmo.xGizmo.dragBehavior.onDragObservable.add(ev =>
+          this.updateDragTooltip('x', ev),
         ),
       },
       {
-        axis: "y",
-        observer: this.rotationGizmo.yGizmo.dragBehavior.onDragObservable.add(
-          (ev) => this.updateDragTooltip("y", ev),
+        axis: 'y',
+        observer: this.rotationGizmo.yGizmo.dragBehavior.onDragObservable.add(ev =>
+          this.updateDragTooltip('y', ev),
         ),
       },
       {
-        axis: "z",
-        observer: this.rotationGizmo.zGizmo.dragBehavior.onDragObservable.add(
-          (ev) => this.updateDragTooltip("z", ev),
+        axis: 'z',
+        observer: this.rotationGizmo.zGizmo.dragBehavior.onDragObservable.add(ev =>
+          this.updateDragTooltip('z', ev),
         ),
       },
     ];
@@ -541,24 +476,15 @@ export class EntitySettingsService {
   private disableRotationGizmo(): void {
     this.rotationDragTooltip.set(null);
     if (this.rotationGizmo && this.rotationGizmoDragObserver) {
-      this.rotationGizmo.onDragObservable.remove(
-        this.rotationGizmoDragObserver,
-      );
+      this.rotationGizmo.onDragObservable.remove(this.rotationGizmoDragObserver);
     }
     if (this.rotationGizmo && this.rotationGizmoDragEndObserver) {
-      this.rotationGizmo.onDragEndObservable.remove(
-        this.rotationGizmoDragEndObserver,
-      );
+      this.rotationGizmo.onDragEndObservable.remove(this.rotationGizmoDragEndObserver);
     }
     for (const { axis, observer } of this.rotationGizmoAxisDragObservers) {
       const gizmo = this.rotationGizmo;
       if (!gizmo) break;
-      const sub =
-        axis === "x"
-          ? gizmo.xGizmo
-          : axis === "y"
-            ? gizmo.yGizmo
-            : gizmo.zGizmo;
+      const sub = axis === 'x' ? gizmo.xGizmo : axis === 'y' ? gizmo.yGizmo : gizmo.zGizmo;
       sub.dragBehavior.onDragObservable.remove(observer);
     }
     this.rotationGizmoAxisDragObservers = [];
@@ -576,8 +502,7 @@ export class EntitySettingsService {
     if (!this.center?.rotationQuaternion) return;
     const q = this.center.rotationQuaternion;
     const euler = q.toEulerAngles();
-    const toDeg = (rad: number) =>
-      Math.round(((rad * 180) / Math.PI + 360) % 360) % 360;
+    const toDeg = (rad: number) => Math.round(((rad * 180) / Math.PI + 360) % 360) % 360;
     this.entitySettings.rotation.x = toDeg(euler.x);
     this.entitySettings.rotation.y = toDeg(euler.y);
     this.entitySettings.rotation.z = toDeg(euler.z);
@@ -589,11 +514,10 @@ export class EntitySettingsService {
     });
   }
 
-  private updateDragTooltip(axis: "x" | "y" | "z", ev: DragEvent): void {
+  private updateDragTooltip(axis: 'x' | 'y' | 'z', ev: DragEvent): void {
     const gizmo = this.rotationGizmo;
     if (!gizmo) return;
-    const sub =
-      axis === "x" ? gizmo.xGizmo : axis === "y" ? gizmo.yGizmo : gizmo.zGizmo;
+    const sub = axis === 'x' ? gizmo.xGizmo : axis === 'y' ? gizmo.yGizmo : gizmo.zGizmo;
     const deg = Math.round((sub.angle * 180) / Math.PI);
     if (deg === 0) {
       this.rotationDragTooltip.set(null);
@@ -610,10 +534,10 @@ export class EntitySettingsService {
   // Size
   public loadScaling() {
     if (!this.center) {
-      throw new Error("Center missing");
+      throw new Error('Center missing');
     }
     if (!this.entitySettings) {
-      throw new Error("Settings missing");
+      throw new Error('Settings missing');
     }
     const scale = getScaleVector(this.entitySettings.scale);
     this.center.scaling = new Vector3(scale.x, scale.y, scale.z);
@@ -625,11 +549,9 @@ export class EntitySettingsService {
 
   public async createVisualUIMeshSettingsHelper() {
     if (!this.center) {
-      throw new Error("Center missing");
+      throw new Error('Center missing');
     }
-    const hasMeshSettings = await firstValueFrom(
-      this.processing.hasMeshSettings$,
-    );
+    const hasMeshSettings = await firstValueFrom(this.processing.hasMeshSettings$);
     const isInUpload = await firstValueFrom(this.processing.isInUpload$);
     const scene = this.babylon.getScene();
     const size = Math.max(
@@ -649,12 +571,7 @@ export class EntitySettingsService {
       this.localAxisInitialSize = size * 1.1;
       this.groundInitialSize = size * 2;
       createWorldAxis(scene, this.worldAxisInitialSize);
-      createlocalAxes(
-        scene,
-        this.localAxisInitialSize,
-        this.center,
-        this.initialCenterPoint,
-      );
+      createlocalAxes(scene, this.localAxisInitialSize, this.center, this.initialCenterPoint);
       this.ground = createGround(scene, this.groundInitialSize);
       this.ground.setParent(this.center);
       this.ground.position = this.initialCenterPoint.subtract(
@@ -671,8 +588,8 @@ export class EntitySettingsService {
   // Set the color for the helper grid
   public setGroundMaterial(color?: IColor) {
     const scene = this.babylon.getScene();
-    const oldMat = scene.getMaterialByName("GroundPlaneMaterial");
-    const material = new StandardMaterial("GroundPlaneMaterial", scene);
+    const oldMat = scene.getMaterialByName('GroundPlaneMaterial');
+    const material = new StandardMaterial('GroundPlaneMaterial', scene);
     material.diffuseColor = new Color3(
       (color ? color.r : 255) / 255,
       (color ? color.g : 255) / 255,
@@ -690,11 +607,11 @@ export class EntitySettingsService {
   // Load cameraPosition
   public async loadCameraInititalPosition() {
     if (!this.entitySettings) {
-      throw new Error("Settings missing");
+      throw new Error('Settings missing');
     }
     const cameraSettings = this.entitySettings.cameraPositionInitial;
     if (!cameraSettings) {
-      throw new Error("Camera settings missing");
+      throw new Error('Camera settings missing');
     }
 
     // Saved position is { x: alpha, y: beta, z: radius } (spherical ArcRotate)
@@ -727,7 +644,7 @@ export class EntitySettingsService {
   // background: color, effect
   loadBackgroundColor() {
     if (!this.entitySettings) {
-      throw new Error("Settings missing");
+      throw new Error('Settings missing');
     }
     const color = this.entitySettings.background.color;
     this.babylon.setBackgroundColor(color);
@@ -735,7 +652,7 @@ export class EntitySettingsService {
 
   loadBackgroundEffect() {
     if (!this.entitySettings) {
-      throw new Error("Settings missing");
+      throw new Error('Settings missing');
     }
     this.babylon.setBackgroundImage(this.entitySettings.background.effect);
   }
@@ -745,9 +662,9 @@ export class EntitySettingsService {
 
   private initialiseLights() {
     if (!this.entitySettings) {
-      throw new Error("Settings missing");
+      throw new Error('Settings missing');
     }
-    const pointLight = this.lights.getLightByType("pointLight");
+    const pointLight = this.lights.getLightByType('pointLight');
     if (pointLight) {
       const position = new Vector3(
         pointLight.position.x,
@@ -756,43 +673,37 @@ export class EntitySettingsService {
       );
       this.lights.initialisePointLight(pointLight.intensity, position);
     }
-    const hemisphericLightUp = this.lights.getLightByType("ambientlightUp");
+    const hemisphericLightUp = this.lights.getLightByType('ambientlightUp');
     if (hemisphericLightUp) {
-      this.lights.initialiseAmbientLight("up", hemisphericLightUp.intensity);
+      this.lights.initialiseAmbientLight('up', hemisphericLightUp.intensity);
     }
-    const hemisphericLightDown = this.lights.getLightByType("ambientlightDown");
+    const hemisphericLightDown = this.lights.getLightByType('ambientlightDown');
     if (hemisphericLightDown) {
-      this.lights.initialiseAmbientLight(
-        "down",
-        hemisphericLightDown.intensity,
-      );
+      this.lights.initialiseAmbientLight('down', hemisphericLightDown.intensity);
     }
   }
 
   public loadLightIntensityAllLights() {
     if (!this.entitySettings) {
-      throw new Error("Settings missing");
+      throw new Error('Settings missing');
     }
-    const ambientlightUp = this.lights.getLightByType("ambientlightUp");
+    const ambientlightUp = this.lights.getLightByType('ambientlightUp');
     if (ambientlightUp) {
-      this.lights.setLightIntensity("ambientlightUp", ambientlightUp.intensity);
+      this.lights.setLightIntensity('ambientlightUp', ambientlightUp.intensity);
     }
-    const ambientlightDown = this.lights.getLightByType("ambientlightDown");
+    const ambientlightDown = this.lights.getLightByType('ambientlightDown');
     if (ambientlightDown) {
-      this.lights.setLightIntensity(
-        "ambientlightDown",
-        ambientlightDown.intensity,
-      );
+      this.lights.setLightIntensity('ambientlightDown', ambientlightDown.intensity);
     }
-    const pointLight = this.lights.getLightByType("pointLight");
+    const pointLight = this.lights.getLightByType('pointLight');
     if (pointLight) {
-      this.lights.setLightIntensity("pointLight", pointLight.intensity);
+      this.lights.setLightIntensity('pointLight', pointLight.intensity);
     }
   }
 
   public loadLightIntensity(lightType: string) {
     if (!this.entitySettings) {
-      throw new Error("Settings missing");
+      throw new Error('Settings missing');
     }
     const light = this.lights.getLightByType(lightType);
     if (light) {
@@ -802,9 +713,9 @@ export class EntitySettingsService {
 
   public loadPointLightPosition() {
     if (!this.entitySettings) {
-      throw new Error("Settings missing");
+      throw new Error('Settings missing');
     }
-    const pointLight = this.lights.getLightByType("pointLight");
+    const pointLight = this.lights.getLightByType('pointLight');
     if (pointLight) {
       const position = new Vector3(
         pointLight.position.x,

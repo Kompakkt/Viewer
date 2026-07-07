@@ -1,0 +1,33 @@
+<h2>{{ 'Edit item' | translate }}</h2>
+
+<span class="title">{{ 'Name' | translate }}: {{ timelineItem.name }}</span>
+<span>{{ 'Duration' | translate }}: {{ timelineItem.duration }}</span>
+
+@switch (timelineItem.kind) {
+  @case ('sequence') {
+    <k-slide-toggle
+      [label]="'Hold end state' | translate"
+      [startingValue]="holdEndState()"
+      (checkedChange)="holdEndState.set($event)"
+    ></k-slide-toggle>
+  }
+  @case ('spacer') {
+    <k-input
+      [label]="'New duration' | translate"
+      type="number"
+      [min]="1"
+      [max]="10000"
+      [startingValue]="duration()"
+      (valueChanged)="duration.set($event.valueAsNumber)"
+    ></k-input>
+  }
+}
+
+<k-button-row>
+  <k-button full-width type="solid-transparent" (click)="cancel()">
+    {{ 'Cancel' | translate }}
+  </k-button>
+  <k-button full-width type="solid-primary" (click)="save()">
+    {{ 'Save' | translate }}
+  </k-button>
+</k-button-row>

@@ -1,0 +1,33 @@
+:host {
+  position: absolute;
+  bottom: 0;
+  left: var(--sidebar-width);
+  width: calc(100vw - var(--sidebar-width));
+  transition:
+    transform 200ms ease-out,
+    filter 200ms ease-out;
+  z-index: 99;
+  transform: translateY(100%);
+  filter: opacity(0);
+
+  &.is-visible {
+    transform: translateY(0);
+    filter: opacity(1);
+  }
+}
+
+#bottom-sheet {
+  display: flex;
+  flex-direction: column;
+  max-height: 50vh;
+  min-height: 20vh;
+  height: fit-content;
+  padding: 16px;
+  background: var(--color-bg-transparent);
+  color: white;
+  box-sizing: border-box;
+
+  > *[hidden] {
+    display: none !important;
+  }
+}

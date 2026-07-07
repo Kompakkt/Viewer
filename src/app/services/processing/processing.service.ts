@@ -117,6 +117,16 @@ export class ProcessingService {
   public showAnnotationEditor$ = new BehaviorSubject(true);
   public showSettingsEditor$ = new BehaviorSubject(true);
 
+  public showAnimationEditor$ = combineLatest([this.babylon.containers.entity$, this.entity$]).pipe(
+    map(
+      ([result, entity]) =>
+        (result?.animationGroups.length ?? 0) > 0 &&
+        (entity?.mediaType === 'entity' || entity?.mediaType === 'model') &&
+        entity?._id !== 'default',
+    ),
+    distinctUntilChanged(),
+  );
+
   public bootstrapped$ = new BehaviorSubject(false);
 
   public rotationQuaternion = Quaternion.RotationYawPitchRoll(0, 0, 0);

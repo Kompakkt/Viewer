@@ -7,7 +7,7 @@
   transform: translateX(-50%);
   height: auto;
   width: auto;
-  bottom: 8px;
+  bottom: calc(8px + var(--bottom-sheet-offset, 0px));
 
   background-color: var(--color-bg-transparent);
   border-radius: 12px;

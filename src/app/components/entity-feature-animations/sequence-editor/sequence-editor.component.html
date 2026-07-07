@@ -1,0 +1,254 @@
+<div class="sequence-selector">
+  <h2>{{ 'Sequence Editor' | translate }}</h2>
+
+  <k-select
+    [startingValue]="service.activeSequenceId()"
+    (valueChanged)="service.switchSequence($event)"
+  >
+    @for (seq of service.sequences(); track seq.id) {
+      <k-menu-option [value]="seq.id">{{ seq.name }}</k-menu-option>
+    }
+  </k-select>
+
+  <k-input
+    floatingLabel
+    class="sequence-name-input"
+    label="Name"
+    [startingValue]="service.sequences().find(s => s.id === service.activeSequenceId())?.name ?? ''"
+    (valueChanged)="onNameInput($event.value)"
+  />
+
+  <k-button icon-button color="transparent" (click)="addSequence()">
+    <mat-icon>add</mat-icon>
+  </k-button>
+
+  <k-button
+    icon-button
+    color="transparent"
+    (click)="deleteSequence()"
+    [disabled]="service.sequences().length <= 1"
+  >
+    <mat-icon>delete</mat-icon>
+  </k-button>
+
+  <small class="fs-small demo-string"
+    ><i
+      >{{ 'Demo feature for user testing' | translate }}.
+      {{ 'Data model & functionality are subject to changes' | translate }}.</i
+    ></small
+  >
+</div>
+
+<div class="top-row">
+  <k-button
+    icon-button
+    [tooltip]="'Play' | translate"
+    (click)="playback.play()"
+    [disabled]="playback.transport() === 'playing'"
+  >
+    <mat-icon>play_arrow</mat-icon>
+  </k-button>
+
+  <k-button
+    icon-button
+    [tooltip]="'Pause' | translate"
+    (click)="playback.pause()"
+    [disabled]="playback.transport() !== 'playing'"
+  >
+    <mat-icon>pause</mat-icon>
+  </k-button>
+
+  <k-button
+    icon-button
+    [tooltip]="'Stop' | translate"
+    (click)="playback.stop()"
+    [disabled]="playback.transport() === 'stopped'"
+  >
+    <mat-icon>stop</mat-icon>
+  </k-button>
+
+  <k-button
+    icon-button
+    [tooltip]="'Loop' | translate"
+    (click)="playback.toggleLoop()"
+    [class.is-on]="playback.loop()"
+  >
+    <mat-icon>repeat</mat-icon>
+  </k-button>
+
+  <div class="top-row-divider"></div>
+
+  <k-button
+    icon-button
+    [tooltip]="'Add Timeline' | translate"
+    (click)="service.addTimeline()"
+    [disabled]="!service.canAddTimeline()"
+  >
+    <mat-icon>timeline</mat-icon>
+  </k-button>
+
+  <k-button
+    icon-button
+    [tooltip]="'Add Spacer' | translate"
+    (click)="service.addSpacer()"
+    [disabled]="service.timelines().length === 0"
+  >
+    <mat-icon>space_bar</mat-icon>
+  </k-button>
+
+  <k-button
+    icon-button
+    [tooltip]="'Edit selected item' | translate"
+    (click)="editItem()"
+    [disabled]="!service.selectedItem()"
+  >
+    <mat-icon>edit</mat-icon>
+  </k-button>
+
+  <k-button
+    icon-button
+    [tooltip]="'Duplicate selected item' | translate"
+    (click)="duplicateItem()"
+    [disabled]="!service.selectedItem()"
+  >
+    <mat-icon>content_copy</mat-icon>
+  </k-button>
+
+  <k-button
+    icon-button
+    [tooltip]="'Remove selected item' | translate"
+    (click)="removeItem()"
+    [disabled]="!service.selectedItem()"
+  >
+    <mat-icon>delete</mat-icon>
+  </k-button>
+
+  <div class="top-row-divider"></div>
+
+  <k-button
+    icon-button
+    [tooltip]="'Import timeline' | translate"
+    (click)="importTimeline()"
+    [disabled]="playback.transport() !== 'stopped'"
+  >
+    <mat-icon>file_upload</mat-icon>
+  </k-button>
+
+  <k-button icon-button color="transparent">
+    <mat-icon>file_download</mat-icon>
+    <k-menu label="Export">
+      <k-menu-option (click)="exportActiveSequence()">Export active sequence</k-menu-option>
+      <k-menu-option (click)="exportAllSequences()">Export all sequences</k-menu-option>
+    </k-menu>
+  </k-button>
+
+  <div class="top-row-divider"></div>
+
+  <k-input
+    class="fps-input"
+    floatingLabel
+    [label]="'FPS' | translate"
+    type="number"
+    [min]="1"
+    [max]="120"
+    [startingValue]="playback.fps()"
+    (valueChanged)="playback.setFps($event.valueAsNumber)"
+  ></k-input>
+
+  <k-button icon-button [tooltip]="'Zoom out' | translate" (click)="zoomOut()">
+    <mat-icon>zoom_out</mat-icon>
+  </k-button>
+
+  <k-button icon-button [tooltip]="'Zoom in' | translate" (click)="zoomIn()">
+    <mat-icon>zoom_in</mat-icon>
+  </k-button>
+</div>
+<div
+  class="timelines"
+  #timelines
+  cdkDropListGroup
+  [class.scrollable]="isTimelineContainerScrollable()"
+>
+  @for (timeline of service.timelines(); let last = $last; let first = $first; track $index) {
+    <div
+      class="timeline"
+      cdkDropList
+      cdkDropListOrientation="horizontal"
+      [cdkDropListData]="timeline"
+      (cdkDropListDropped)="drop($event)"
+      (click)="onRowClick($event, $index)"
+    >
+      @if (timeline.length === 0) {
+        <span class="timeline-empty-text">{{
+          'Add an animation group from the animations menu on the left, or drag one here from a different timeline'
+            | translate
+        }}</span>
+      } @else {
+        @for (item of timeline; track item.id) {
+          @switch (item.kind) {
+            @case ('sequence') {
+              <div
+                class="sequence item"
+                [class.selected]="item.id === service.selectedItem()?.id"
+                [class.is-stale]="!item.animationGroup"
+                [class.is-hold]="item.holdEndState"
+                cdkDrag
+                [style.width]="item.duration | framesToWidth: numFramesInView()"
+                (click)="service.selectedItem.set(item)"
+              >
+                @if (item.holdEndState) {
+                  <mat-icon class="hold-badge" [tooltip]="'Hold end state' | translate"
+                    >push_pin</mat-icon
+                  >
+                }
+                <span class="title">{{ item.name }}</span>
+                <span>{{ 'Duration' | translate }}: {{ item.duration }}</span>
+              </div>
+            }
+            @case ('spacer') {
+              <div
+                class="spacer item"
+                [class.selected]="item.id === service.selectedItem()?.id"
+                cdkDrag
+                [style.width]="item.duration | framesToWidth: numFramesInView()"
+                (click)="service.selectedItem.set(item)"
+              >
+                <span class="title">{{ 'Spacer' | translate }}</span>
+                <span>{{ 'Duration' | translate }}: {{ item.duration }}</span>
+              </div>
+            }
+          }
+        }
+        @if (timeline.length) {
+          <div
+            class="playhead"
+            [class.is-playing]="playback.transport() === 'playing'"
+            [style.left]="playback.cursors()[$index] | framesToWidth: numFramesInView()"
+          ></div>
+        }
+      }
+      @if (!first) {
+        <k-button
+          icon-button
+          style="opacity: 0.8"
+          class="delete-timeline-btn"
+          [tooltip]="'Delete timeline' | translate"
+          tooltipPosition="left"
+          (click)="service.removeTimeline($index); $event.stopPropagation()"
+        >
+          <mat-icon>delete</mat-icon>
+        </k-button>
+      }
+    </div>
+    @if (!last) {
+      <div class="timeline-separator"></div>
+    }
+  } @empty {
+    <p>
+      {{
+        'To create a timeline, add an animation group from the animations menu on the left, or click the respective button above'
+          | translate
+      }}.
+    </p>
+  }
+</div>

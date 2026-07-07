@@ -12,14 +12,17 @@
   @if (processing.showMenu$ | async) {
     <app-menu />
   }
-  <app-sidenav-menu />
-  <app-sidenav />
 
   @if (processing.mediaType$ | async; as mediaType) {
     @if (mediaType === 'video' || mediaType === 'audio') {
       <app-media-player-menu />
     }
   }
+
+  <app-sidenav-menu />
+  <app-sidenav />
+
+  <app-bottom-sheet #bottomSheet />
 
   @if (showWebGPUUnsupportedWarning$ | async) {
     <div class="web-gpu-warning">

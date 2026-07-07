@@ -33,6 +33,18 @@
       </k-button>
     </div>
   }
+  @if (processing.showAnimationEditor$ | async) {
+    <div class="button-wrapper" [class.selected]="mode() === 'animations'">
+      <k-button
+        icon-button
+        (click)="overlay.toggleSidenav('animations')"
+        [tooltip]="'Animations' | translate"
+        tooltipPosition="right"
+      >
+        <mat-icon [attr.aria-label]="'Toggle animations' | translate">play_circle</mat-icon>
+      </k-button>
+    </div>
+  }
   @if (processing.compilationLoaded$ | async) {
     <div class="button-wrapper" [class.selected]="mode() === 'compilationBrowser'">
       <k-button

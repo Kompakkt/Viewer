@@ -1,0 +1,41 @@
+<h1>{{ 'Animations' | translate }}</h1>
+
+<div class="settings">
+  <k-slide-toggle
+    [label]="'Hide empty animations' | translate"
+    [startingValue]="hideEmpty()"
+    (checkedChange)="hideEmpty.set($event)"
+  />
+</div>
+
+@if (filteredTree().length === 0) {
+  <p class="empty-state">{{ 'No animations in this scene.' | translate }}</p>
+} @else {
+  @for (node of filteredTree(); track node.group.uniqueId) {
+    <k-details [marquee]="true" [title]="node.group.name || 'unnamed'" [startCollapsed]="true">
+      <div class="group-targets">
+        <span class="target-label">{{ 'Targeted meshes:' | translate }}</span>
+        @for (target of node.targets; track target.node.uniqueId) {
+          <k-button
+            icon-button
+            type="solid-transparent"
+            (click)="focus(target)"
+            [tooltip]="'Focus mesh' | translate"
+            tooltipPosition="right"
+          >
+            <mat-icon>center_focus_strong</mat-icon>
+          </k-button>
+        }
+      </div>
+      <div class="group-controls">
+        <app-animation-group-controls
+          [target]="node.group"
+          [isActive]="activeGroup() === node.group"
+          (play)="play($event)"
+          (stop)="stop()"
+          (addToSequenceEditor)="addToSequenceEditor($event)"
+        />
+      </div>
+    </k-details>
+  }
+}

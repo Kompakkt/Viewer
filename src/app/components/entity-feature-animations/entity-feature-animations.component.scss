@@ -1,0 +1,31 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.empty-state {
+  margin: 16px 0;
+  opacity: 0.7;
+}
+
+.group-targets {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.target-label {
+  opacity: 0.8;
+  font-size: var(--font-size-small, 0.85em);
+}
+
+.group-controls {
+  display: flex;
+  margin-top: 8px;
+}
+
+div.settings {
+  padding: 16px;
+}
