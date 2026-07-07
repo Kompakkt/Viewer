@@ -318,7 +318,7 @@ export class EntitySettingsService {
       throw new Error('Meshes missing');
     }
     await meshes.forEach(mesh => {
-      mesh.computeWorldMatrix();
+      mesh.computeWorldMatrix(true);
       const abs = mesh.absolutePosition;
       if (!mesh.rotationQuaternion) {
         mesh.rotationQuaternion = Quaternion.RotationYawPitchRoll(
@@ -391,32 +391,8 @@ export class EntitySettingsService {
       (Math.PI / 180) * this.entitySettings.rotation.z,
     );
     end = rotationQuaternionZ.multiply(end);
-    this.animatedMovement(start, end);
     this.processing.rotationQuaternion = end;
     this.center.rotationQuaternion = end;
-  }
-
-  private async animatedMovement(start: Quaternion, end: Quaternion) {
-    if (!this.center) {
-      throw new Error('Center missing');
-    }
-    const anim = new Animation(
-      'anim',
-      'rotationQuaternion',
-      120,
-      Animation.ANIMATIONTYPE_QUATERNION,
-      Animation.ANIMATIONLOOPMODE_RELATIVE,
-    );
-    const frame = [
-      { frame: 0, value: start },
-      { frame: 100, value: end },
-    ];
-    anim.setKeys(frame);
-    this.center.animations = [];
-    this.center.animations.push(anim);
-    await this.babylon
-      .getScene()
-      .beginAnimation(this.center, 0, 100, false, undefined, undefined, undefined, false);
   }
 
   // Size
