@@ -282,8 +282,7 @@ export class EntitySettingsService {
     this.loadCameraInititalPosition();
     this.loadBackgroundEffect();
     this.loadBackgroundColor();
-    this.loadPointLightPosition();
-    this.loadLightIntensityAllLights();
+    this.lights.initialiseLights(this.entitySettings);
   }
 
   private async initialiseCamera() {
@@ -657,72 +656,38 @@ export class EntitySettingsService {
     this.babylon.setBackgroundImage(this.entitySettings.background.effect);
   }
 
-  // lights: up, down, pointlight
-  // Ambientlights
+  private migrateLegacyLights(): void {
+    if (!this.entitySettings) return;
+    const hasLegacyLight = this.entitySettings.lights.some(
+      light =>
+        light.type === 'HemisphericLight' ||
+        light.type === 'PointLight' ||
+        light.type === 'DirectionalLight',
+    );
+    if (!hasLegacyLight) return;
 
-  private initialiseLights() {
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    const pointLight = this.lights.getLightByType('pointLight');
-    if (pointLight) {
-      const position = new Vector3(
-        pointLight.position.x,
-        pointLight.position.y,
-        pointLight.position.z,
-      );
-      this.lights.initialisePointLight(pointLight.intensity, position);
-    }
-    const hemisphericLightUp = this.lights.getLightByType('ambientlightUp');
-    if (hemisphericLightUp) {
-      this.lights.initialiseAmbientLight('up', hemisphericLightUp.intensity);
-    }
-    const hemisphericLightDown = this.lights.getLightByType('ambientlightDown');
-    if (hemisphericLightDown) {
-      this.lights.initialiseAmbientLight('down', hemisphericLightDown.intensity);
-    }
+    const legacyUp = this.entitySettings.lights.find(
+      light => light.type === 'HemisphericLight' && light.position.y === 1,
+    );
+    const intensity = legacyUp?.intensity ?? 1;
+
+    this.entitySettings.lights = [
+      {
+        type: 'Ambient',
+        position: { x: 0, y: 0, z: 0 },
+        rotation: { x: 0, y: 0, z: 0 },
+        intensity,
+        color: { r: 255, g: 255, b: 255, a: 255 },
+        name: 'Ambient',
+      },
+    ];
   }
 
-  public loadLightIntensityAllLights() {
+  private initialiseLights(): void {
     if (!this.entitySettings) {
       throw new Error('Settings missing');
     }
-    const ambientlightUp = this.lights.getLightByType('ambientlightUp');
-    if (ambientlightUp) {
-      this.lights.setLightIntensity('ambientlightUp', ambientlightUp.intensity);
-    }
-    const ambientlightDown = this.lights.getLightByType('ambientlightDown');
-    if (ambientlightDown) {
-      this.lights.setLightIntensity('ambientlightDown', ambientlightDown.intensity);
-    }
-    const pointLight = this.lights.getLightByType('pointLight');
-    if (pointLight) {
-      this.lights.setLightIntensity('pointLight', pointLight.intensity);
-    }
-  }
-
-  public loadLightIntensity(lightType: string) {
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    const light = this.lights.getLightByType(lightType);
-    if (light) {
-      this.lights.setLightIntensity(lightType, light.intensity);
-    }
-  }
-
-  public loadPointLightPosition() {
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    const pointLight = this.lights.getLightByType('pointLight');
-    if (pointLight) {
-      const position = new Vector3(
-        pointLight.position.x,
-        pointLight.position.y,
-        pointLight.position.z,
-      );
-      this.lights.setPointLightPosition(position);
-    }
+    this.migrateLegacyLights();
+    this.lights.initialiseLights(this.entitySettings);
   }
 }

@@ -1,84 +1,153 @@
-import { Component } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { IColor, IEntityLight, IEntitySettings } from '@kompakkt/common';
+import { ColorChromeModule } from 'ngx-color/chrome';
+import {
+  ButtonComponent,
+  DetailsComponent,
+  InputComponent,
+  LabelledCheckboxComponent,
+  SliderComponent,
+} from '@kompakkt/komponents';
 import { EntitySettingsService } from '../../../services/entitysettings/entitysettings.service';
-import { LightService } from '../../../services/light/light.service';
+import { LightService, LightType } from '../../../services/light/light.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 
-import { ButtonComponent, InputComponent, SliderComponent } from '@kompakkt/komponents';
+const WHITE: IColor = { r: 255, g: 255, b: 255, a: 255 };
 
 @Component({
   selector: 'app-entity-feature-settings-lights',
   templateUrl: './entity-feature-settings-lights.component.html',
   styleUrls: ['./entity-feature-settings-lights.component.scss'],
-  imports: [TranslatePipe, SliderComponent, InputComponent, ButtonComponent],
+  imports: [
+    AsyncPipe,
+    TranslatePipe,
+    SliderComponent,
+    InputComponent,
+    ButtonComponent,
+    LabelledCheckboxComponent,
+    ColorChromeModule,
+    DetailsComponent,
+  ],
 })
 export class EntityFeatureSettingsLightsComponent {
-  constructor(
-    public entitySettings: EntitySettingsService,
-    public lights: LightService,
-    private processing: ProcessingService,
-  ) {}
+  public entitySettings = inject(EntitySettingsService);
+  public lights = inject(LightService);
+  public processing = inject(ProcessingService);
 
-  get pointLightX() {
-    return this.lights.getLightByType('pointLight')?.position?.x ?? 0;
-  }
-  get pointLightY() {
-    return this.lights.getLightByType('pointLight')?.position?.y ?? 0;
-  }
-  get pointLightZ() {
-    return this.lights.getLightByType('pointLight')?.position?.z ?? 0;
-  }
+  public lightTypes: LightType[] = ['Point', 'Spot', 'Ambient', 'Area', 'Directional'];
 
-  public resetLights() {
-    ['pointLight', 'ambientlightUp', 'ambientlightDown'].forEach(lightType => {
-      this.setLightIntensity(0, lightType);
-    });
-    ['x', 'y', 'z'].forEach(dimension => {
-      this.setPointlightPosition(dimension, 0);
-    });
-  }
+  public spotAngleMax = Math.PI / 2;
+  public spotAngleDefault = Math.PI / 4;
+  public spotExponentDefault = 2;
 
-  // Lights
-  public async setLightIntensity(intensity: number | null, lightType: string) {
-    if (!intensity) intensity = 0;
+  public async addLight(type: LightType) {
     const { localSettings } = await firstValueFrom(this.processing.settings$);
-    const indexOfLight = this.lights.getLightIndexByType(lightType);
-    if (indexOfLight !== undefined && localSettings.lights[indexOfLight]) {
-      localSettings.lights[indexOfLight].intensity = intensity;
-      this.entitySettings.loadLightIntensity(lightType);
-    } else {
-      console.error(this);
-      throw new Error('Light, ' + lightType + ', is missing');
-    }
+    this.lights.addLight(type, localSettings);
+    this.emitSettingsUpdate(localSettings);
   }
 
-  public getLightIntensity(lightType: string) {
-    return this.lights.getLightByType(lightType)?.intensity ?? 0;
-  }
-
-  public async setPointlightPosition(dimension: string, value: number | null) {
-    if (!value) value = 0;
+  public async removeLight(index: number) {
     const { localSettings } = await firstValueFrom(this.processing.settings$);
-    const indexOfLight = this.lights.getLightIndexByType('pointLight');
-    if (indexOfLight) {
-      switch (dimension) {
-        case 'x':
-          localSettings.lights[indexOfLight].position.x = value;
-          break;
-        case 'y':
-          localSettings.lights[indexOfLight].position.y = value;
-          break;
-        case 'z':
-          localSettings.lights[indexOfLight].position.z = value;
-          break;
-        default:
-          // tslint:disable-next-line:prefer-template
-          console.error(this);
-          throw new Error('Pointlightposition, ' + dimension + ', is missing');
-      }
-    }
-    this.entitySettings.loadPointLightPosition();
+    this.lights.removeLight(index, localSettings);
+    this.emitSettingsUpdate(localSettings);
+  }
+
+  public async resetLights() {
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
+    localSettings.lights = [
+      {
+        type: 'Ambient',
+        position: { x: 0, y: 0, z: 0 },
+        rotation: { x: 0, y: 0, z: 0 },
+        intensity: 1,
+        color: { ...WHITE },
+        name: 'Ambient',
+      },
+    ];
+    this.lights.initialiseLights(localSettings);
+    this.emitSettingsUpdate(localSettings);
+  }
+
+  public async setName(index: number, value: string) {
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
+    this.lights.setName(index, value, localSettings);
+    this.emitSettingsUpdate(localSettings);
+  }
+
+  public async setIntensity(index: number, value: number | null) {
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
+    this.lights.setIntensity(index, value ?? 0, localSettings);
+    this.emitSettingsUpdate(localSettings);
+  }
+
+  public async setColor(index: number, color: IColor) {
+    console.log('[Light color]', color);
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
+    this.lights.setColor(index, color, localSettings);
+    this.emitSettingsUpdate(localSettings);
+  }
+
+  public async setPosition(index: number, axis: 'x' | 'y' | 'z', value: number | null) {
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
+    const current = localSettings.lights[index].position;
+    const next = { ...current, [axis]: value ?? 0 };
+    this.lights.setPosition(index, next, localSettings);
+    this.emitSettingsUpdate(localSettings);
+  }
+
+  public async setRotation(index: number, axis: 'x' | 'y' | 'z', value: number | null) {
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
+    const current = localSettings.lights[index].rotation ?? { x: 0, y: 0, z: 0 };
+    const next = { ...current, [axis]: value ?? 0 };
+    this.lights.setRotation(index, next, localSettings);
+    this.emitSettingsUpdate(localSettings);
+  }
+
+  public async setSpotParams(index: number, angle: number, exponent: number) {
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
+    this.lights.setSpotParams(index, angle, exponent, localSettings);
+    this.emitSettingsUpdate(localSettings);
+  }
+
+  public async setAreaSize(index: number, width: number, height: number) {
+    const { localSettings } = await firstValueFrom(this.processing.settings$);
+    this.lights.setAreaSize(index, width, height, localSettings);
+    this.emitSettingsUpdate(localSettings);
+  }
+
+  public async toggleGizmo(index: number, kind: 'position' | 'rotation', enabled: boolean) {
+    this.lights.setGizmoEnabled(index, kind, enabled);
+  }
+
+  public hasPositionGizmo(light: IEntityLight): boolean {
+    return light.type === 'Point' || light.type === 'Spot' || light.type === 'Area';
+  }
+
+  public hasRotationGizmo(light: IEntityLight): boolean {
+    return (
+      light.type === 'Spot' ||
+      light.type === 'Ambient' ||
+      light.type === 'Area' ||
+      light.type === 'Directional'
+    );
+  }
+
+  public hasSpotParams(light: IEntityLight): boolean {
+    return light.type === 'Spot';
+  }
+
+  public hasAreaSize(light: IEntityLight): boolean {
+    return light.type === 'Area';
+  }
+
+  private emitSettingsUpdate(settings: IEntitySettings): void {
+    this.processing.settings$.next({
+      ...this.processing.settings$.value,
+      localSettings: settings,
+    });
   }
 }

@@ -37,19 +37,12 @@ export const baseEntity = (): IEntity => ({
     },
     lights: [
       {
-        type: 'HemisphericLight',
-        position: { x: 0, y: -1, z: 0 },
+        type: 'Ambient',
+        position: { x: 0, y: 0, z: 0 },
+        rotation: { x: 0, y: 0, z: 0 },
         intensity: 1,
-      },
-      {
-        type: 'HemisphericLight',
-        position: { x: 0, y: 1, z: 0 },
-        intensity: 1,
-      },
-      {
-        type: 'PointLight',
-        position: { x: 1, y: 10, z: 1 },
-        intensity: 1,
+        color: { r: 255, g: 255, b: 255, a: 255 },
+        name: 'Ambient',
       },
     ],
     rotation: { x: 0, y: 0, z: 0 },
