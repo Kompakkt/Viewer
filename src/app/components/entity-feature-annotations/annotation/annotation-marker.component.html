@@ -4,7 +4,7 @@
   The Indicator is annotation?.ranking
 -->
 @if (annotation(); as annotation) {
-  @if (!isAnnotationHidden()) {
+  @if (!isHidden()) {
     @if (positionData(); as data) {
       <div
         class="marker single-annotation-card"

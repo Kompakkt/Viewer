@@ -1,6 +1,6 @@
 <h1>{{ 'Annotations' | translate }}</h1>
 
-@if (processing.isInUpload$ | async) {
+@if (processing.isInUpload()) {
   <div class="note">
     <mat-icon>info</mat-icon>
     <span>{{ 'Info' | translate }}</span>
@@ -8,7 +8,7 @@
     <p>{{ 'Please set and save the settings before you add annotations.' | translate }}</p>
   </div>
 }
-@if (isDefault$ | async) {
+@if (isDefaultAnnotationMode()) {
   <div class="note">
     <mat-icon>info</mat-icon>
     <span>{{ 'Info' | translate }}</span>
@@ -21,7 +21,7 @@
     </p>
   </div>
 }
-@if (isForbidden$ | async) {
+@if (isForbidden()) {
   <div class="note">
     <mat-icon>info</mat-icon>
     <span>{{ 'Info' | translate }}</span>
@@ -35,7 +35,7 @@
     </p>
   </div>
 }
-@if (isAnnotatingAllowed$ | async) {
+@if (processing.hasAnnotationAllowance()) {
   <div class="note">
     <mat-icon>info</mat-icon>
     <span>{{ 'Info' | translate }}</span>
@@ -44,23 +44,23 @@
   </div>
 }
 
-<h2>{{ objectName$ | async }}</h2>
+<h2>{{ processing.entity()?.name ?? ('Unknown Object' | translate) }}</h2>
 
 <div class="annotations-list">
-  @for (annotation of currentAnnotations$ | async; track annotation; let index = $index) {
+  @for (annotation of annotationService.activeAnnotations(); track annotation; let index = $index) {
     <app-annotation-for-editor
       class="annotation-box"
       [annotation]="annotation"
-      (reorderAnnotation)="annotations.moveAnnotationByReorderMovement(index, $event)"
+      (reorderAnnotation)="annotationService.moveAnnotationByReorderMovement(index, $event)"
     />
   } @empty {
     <p style="margin: 0">{{ 'This object has no annotations yet.' | translate }}</p>
   }
 </div>
 
-@if (annotationCount$ | async; as count) {
+@if (annotationService.activeAnnotations(); as annotations) {
   <div id="editor-footermenu">
-    @if (count > 0) {
+    @if (annotations.length > 0) {
       <k-button
         icon-button
         color="transparent"

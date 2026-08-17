@@ -22,12 +22,12 @@
   <k-input
     [label]="'Username' | translate"
     type="username"
-    (valueChanged)="data.username = $event.value"
+    (valueChange)="data.username = $event"
   />
   <k-input
     [label]="'Password' | translate"
     type="password"
-    (valueChanged)="data.password = $event.value"
+    (valueChange)="data.password = $event"
   />
 
   @if (loginFailed) {

@@ -1,5 +1,5 @@
-@if (annotation$ | async; as annotation) {
-  @if (isSelectedAnnotation$ | async) {
+@if (annotation(); as annotation) {
+  @if (isSelected()) {
     <div class="header">
       <h2>{{ annotation.body.content.title || ('No title' | translate) }}</h2>
       <k-button icon-button color="transparent" (click)="closeAnnotation()"
@@ -15,7 +15,7 @@
       class="embeddables"
       extendSlot="annotation-embeddables"
       slotBehaviour="append"
-      [dataObservable]="annotation$$"
+      [dataObservable]="annotation$"
     ></div>
 
     <k-button-row
@@ -25,7 +25,7 @@
       slotBehaviour="prepend"
       [dataObservable]="annotation$"
     >
-      @if (canUserEditAndDelete$ | async) {
+      @if (canUserEditAndDelete()) {
         <k-button
           icon-button
           color="transparent"

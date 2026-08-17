@@ -11,7 +11,7 @@
   <k-input
     [label]="'Collection identifier' | translate"
     type="text"
-    (valueChanged)="targetCollectionId = $event.value"
+    (valueChange)="targetCollectionId = $event"
   />
 
   <k-button-row align="end">

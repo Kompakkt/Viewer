@@ -9,6 +9,10 @@
   width: 100vw;
   padding: 8px;
   box-sizing: border-box;
+
+  &.is-resizing {
+    transition: none;
+  }
 }
 
 #annotationwalkthrough {

@@ -60,31 +60,12 @@ export const settingsFallback: IEntitySettings = {
   },
   lights: [
     {
-      type: 'HemisphericLight',
-      position: {
-        x: 0,
-        y: -1,
-        z: 0,
-      },
-      intensity: 1,
-    },
-    {
-      type: 'HemisphericLight',
-      position: {
-        x: 0,
-        y: 1,
-        z: 0,
-      },
-      intensity: 1,
-    },
-    {
-      type: 'PointLight',
-      position: {
-        x: 0,
-        y: 0,
-        z: 0,
-      },
-      intensity: 1,
+      type: 'Ambient',
+      position: { x: 0, y: 0, z: 0 },
+      rotation: { x: 0, y: 0, z: 0 },
+      intensity: 5,
+      color: { r: 255, g: 255, b: 255, a: 255 },
+      name: 'Ambient',
     },
   ],
   rotation: {
@@ -156,31 +137,12 @@ export const settings2D: IEntitySettings = {
   },
   lights: [
     {
-      type: 'HemisphericLight',
-      position: {
-        x: 0,
-        y: -1,
-        z: 0,
-      },
-      intensity: 1,
-    },
-    {
-      type: 'HemisphericLight',
-      position: {
-        x: 0,
-        y: 1,
-        z: 0,
-      },
-      intensity: 1,
-    },
-    {
-      type: 'PointLight',
-      position: {
-        x: -9,
-        y: 8,
-        z: 7,
-      },
-      intensity: 1,
+      type: 'Ambient',
+      position: { x: 0, y: 0, z: 0 },
+      rotation: { x: 0, y: 0, z: 0 },
+      intensity: 5,
+      color: { r: 255, g: 255, b: 255, a: 255 },
+      name: 'Ambient',
     },
   ],
   rotation: {
@@ -218,31 +180,12 @@ export const settingsEntity: IEntitySettings = {
   },
   lights: [
     {
-      type: 'HemisphericLight',
-      position: {
-        x: 0,
-        y: -1,
-        z: 0,
-      },
-      intensity: 1,
-    },
-    {
-      type: 'HemisphericLight',
-      position: {
-        x: 0,
-        y: 1,
-        z: 0,
-      },
-      intensity: 1,
-    },
-    {
-      type: 'PointLight',
-      position: {
-        x: 1,
-        y: 10,
-        z: 1,
-      },
-      intensity: 1,
+      type: 'Ambient',
+      position: { x: 0, y: 0, z: 0 },
+      rotation: { x: 0, y: 0, z: 0 },
+      intensity: 5,
+      color: { r: 255, g: 255, b: 255, a: 255 },
+      name: 'Ambient',
     },
   ],
   rotation: {
@@ -280,31 +223,12 @@ export const settingsAudio: IEntitySettings = {
   },
   lights: [
     {
-      type: 'HemisphericLight',
-      position: {
-        x: 0,
-        y: -1,
-        z: 0,
-      },
-      intensity: 1,
-    },
-    {
-      type: 'HemisphericLight',
-      position: {
-        x: 0,
-        y: 1,
-        z: 0,
-      },
-      intensity: 1,
-    },
-    {
-      type: 'PointLight',
-      position: {
-        x: -9,
-        y: 8,
-        z: 7,
-      },
-      intensity: 1,
+      type: 'Ambient',
+      position: { x: 0, y: 0, z: 0 },
+      rotation: { x: 0, y: 0, z: 0 },
+      intensity: 5,
+      color: { r: 255, g: 255, b: 255, a: 255 },
+      name: 'Ambient',
     },
   ],
   rotation: {

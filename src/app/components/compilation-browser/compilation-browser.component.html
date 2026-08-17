@@ -1,7 +1,7 @@
 <h1>{{ 'Collection browser' | translate }}</h1>
 
-@if (compilation$ | async; as compilation) {
-  @if (entities$ | async; as entities) {
+@if (processing.compilation(); as compilation) {
+  @if (processing.compilationEntities(); as entities) {
     <h2>{{ compilation.name }}</h2>
 
     @if (isCompilationOwner()) {
@@ -24,7 +24,7 @@
       }
     }
 
-    @if (entity$ | async; as selectedEntity) {
+    @if (processing.entity(); as selectedEntity) {
       @for (
         entity of entities;
         track entity;

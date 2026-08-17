@@ -1,10 +1,7 @@
-import { AsyncPipe } from '@angular/common';
-import { Component, inject, viewChildren } from '@angular/core';
-import { MatIcon } from '@angular/material/icon';
+import { Component, computed, inject, viewChildren } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 import { saveAs } from 'file-saver';
 import { ButtonComponent, TooltipDirective } from '@kompakkt/komponents';
-import { combineLatest, firstValueFrom } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
@@ -18,8 +15,7 @@ import { AnnotationComponent } from '../annotation/annotation.component';
   styleUrls: ['./annotations-editor.component.scss'],
   imports: [
     AnnotationComponentForEditorComponent,
-    MatIcon,
-    AsyncPipe,
+    MatIconModule,
     TranslatePipe,
     TooltipDirective,
     ButtonComponent,
@@ -28,44 +24,34 @@ import { AnnotationComponent } from '../annotation/annotation.component';
 export class AnnotationsEditorComponent {
   readonly annotationsList = viewChildren(AnnotationComponent);
 
-  public annotations = inject(AnnotationService);
-  public processing = inject(ProcessingService);
-  public userdata = inject(UserdataService);
+  annotationService = inject(AnnotationService);
+  processing = inject(ProcessingService);
+  userdata = inject(UserdataService);
 
   // external
-  public isAnnotatingAllowed$ = this.processing.hasAnnotationAllowance$;
+  isDefaultAnnotationMode = computed(() => {
+    const hasAnnotationAllowance = this.processing.hasAnnotationAllowance();
+    const isCompilationLoaded = this.processing.compilation() !== undefined;
+    return hasAnnotationAllowance && !isCompilationLoaded;
+  });
 
-  public currentAnnotations$ = this.annotations.currentAnnotations$;
-
-  annotationCount$ = this.currentAnnotations$.pipe(map(arr => arr.length));
-
-  objectName$ = this.processing.entity$.pipe(map(entity => entity?.name));
-
-  isDefault$ = combineLatest([
-    this.processing.hasAnnotationAllowance$,
-    this.processing.compilationLoaded$,
-  ]).pipe(
-    map(
-      ([isAnnotatingAllowed, isCompilationLoaded]) => isAnnotatingAllowed && !isCompilationLoaded,
-    ),
-  );
-
-  isForbidden$ = combineLatest([
-    this.processing.isInUpload$,
-    this.processing.hasAnnotationAllowance$,
-    this.processing.compilationLoaded$,
-    this.processing.defaultEntityLoaded$,
-  ]).pipe(map(arr => arr.every(boolean => !boolean)));
+  // TODO: Is this check correct?
+  isForbidden = computed(() => {
+    const isInUpload = this.processing.isInUpload();
+    const hasAnnotationAllowance = this.processing.hasAnnotationAllowance();
+    const isCompilationLoaded = this.processing.compilation() !== undefined;
+    const isDefaultEntityLoaded = this.processing.isDefaultEntity();
+    return !isInUpload && !hasAnnotationAllowance && !isCompilationLoaded && !isDefaultEntityLoaded;
+  });
 
   exportAnnotations() {
-    firstValueFrom(this.currentAnnotations$).then(arr => {
-      saveAs(
-        new Blob([JSON.stringify(arr)], {
-          type: 'text/plain;charset=utf-8',
-        }),
-        'annotations.json',
-      );
-    });
+    const activeAnnotations = this.annotationService.activeAnnotations();
+    saveAs(
+      new Blob([JSON.stringify(activeAnnotations)], {
+        type: 'text/plain;charset=utf-8',
+      }),
+      'annotations.json',
+    );
   }
 
   closeNote(event: Event) {

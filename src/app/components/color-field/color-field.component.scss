@@ -1,0 +1,31 @@
+.color-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  margin: 8px 0;
+}
+
+.color-field-swatch {
+  display: inline-block;
+  width: 42px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--color-gray-12);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.color-field-label {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+}
+
+.color-field-popover {
+  padding: 12px;
+  background: var(--color-bg-solid);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  width: 320px;
+  height: fit-content;
+}

@@ -1,3 +1,21 @@
-<div id="bottom-sheet">
+<div id="bottom-sheet" [style.height]="heightCss()">
   <app-sequence-editor [hidden]="sidenavMode() !== 'animations'" />
 </div>
+
+@if (isOpen()) {
+  <div
+    class="resize-handle"
+    role="separator"
+    aria-orientation="horizontal"
+    [attr.aria-label]="'Resize bottom sheet' | translate"
+    [attr.aria-valuemin]="minHeight()"
+    [attr.aria-valuemax]="maxHeight()"
+    [attr.aria-valuenow]="currentHeight()"
+    tabindex="0"
+    (pointerdown)="onHandlePointerDown($event)"
+    (pointermove)="onHandlePointerMove($event)"
+    (pointerup)="onHandlePointerUp($event)"
+    (pointercancel)="onHandlePointerUp($event)"
+    (keydown)="onHandleKeydown($event)"
+  ></div>
+}

@@ -1,0 +1,37 @@
+<span
+  class="color-field"
+  [tooltip]="'Click to open color picker' | translate"
+  cdkOverlayOrigin
+  #origin="cdkOverlayOrigin"
+>
+  <button
+    type="button"
+    class="color-field-swatch"
+    [style.background]="swatchColor()"
+    [attr.aria-label]="label()"
+    [attr.aria-expanded]="popoverOpen()"
+  ></button>
+  @if (label()) {
+    <span class="color-field-label">{{ label() }}</span>
+  }
+</span>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="origin"
+  [cdkConnectedOverlayOpen]="popoverOpen()"
+  [cdkConnectedOverlayPositions]="positions"
+  cdkConnectedOverlayHasBackdrop
+  cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+  (attach)="onAttach()"
+  (detach)="onDetach()"
+  (backdropClick)="close()"
+>
+  <div class="color-field-popover">
+    <color-chrome
+      [color]="color()"
+      [disableAlpha]="disableAlpha()"
+      (onChange)="onPickerChange($event)"
+    />
+  </div>
+</ng-template>

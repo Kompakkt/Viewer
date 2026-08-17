@@ -1,4 +1,4 @@
-@if (entity$ | async; as entity) {
+@if (processing.entity(); as entity) {
   <div class="bottom">
     <div class="anchor">
       @if (entity.mediaType !== 'audio') {
@@ -34,7 +34,7 @@
     >
     <mat-icon>sentiment_very_satisfied</mat-icon>
   </k-button> -->
-    @if (qualities$ | async; as qualities) {
+    @if (qualities(); as qualities) {
       @if (qualities.high && qualities.medium) {
         <k-button
           icon-button
@@ -47,7 +47,7 @@
       }
       <!-- Quality Submenu -->
       <mat-menu #quality="matMenu">
-        @if (processing.quality$ | async; as currentQuality) {
+        @if (processing.quality(); as currentQuality) {
           @if (qualities.high) {
             <button
               mat-menu-item
@@ -96,7 +96,7 @@
       <mat-icon>translate</mat-icon>
     </k-button>
     <mat-menu #languageMenu="matMenu">
-      @for (language of languages | keyvalue; track language) {
+      @for (language of translateService.supportedLanguages | keyvalue; track language) {
         <button mat-menu-item (click)="translateService.requestLanguage(language.key)">
           {{ language.value }}
         </button>

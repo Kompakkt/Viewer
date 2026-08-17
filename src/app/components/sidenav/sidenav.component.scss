@@ -3,13 +3,18 @@
   top: 0;
   left: calc(-1 * var(--sidebar-width));
   height: 100vh;
-  transition: 280ms;
+  transition: var(--panel-transition);
   z-index: 99;
   font-family: Roboto, 'Helvetica Neue', sans-serif;
 
   &.is-open {
-    transition: 280ms;
+    transition: var(--panel-transition);
     left: 0;
+  }
+
+  &.is-resizing {
+    transition: none;
+    user-select: none;
   }
 
   h3 {
@@ -29,6 +34,23 @@
 
   > *[hidden] {
     display: none !important;
+  }
+}
+
+.resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 100%;
+  z-index: 1;
+  cursor: col-resize;
+  touch-action: none;
+  user-select: none;
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--color-primary);
   }
 }
 

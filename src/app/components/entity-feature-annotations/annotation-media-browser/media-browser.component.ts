@@ -1,7 +1,6 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, inject, output } from '@angular/core';
 import { ButtonComponent, ButtonRowComponent, InputComponent } from '@kompakkt/komponents';
-import { filter, firstValueFrom, map } from 'rxjs';
-import { IEntity, isCompilation, isEntity } from '@kompakkt/common';
+import { IEntity } from '@kompakkt/common';
 import { environment } from 'src/environment';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { ProcessingService } from '../../../services/processing/processing.service';
@@ -15,33 +14,20 @@ type BrowsedMedia = IEntity | { mediaType: string; url: string; description: str
   imports: [TranslatePipe, InputComponent, ButtonComponent, ButtonRowComponent],
 })
 export class MediaBrowserComponent {
-  @Output() addMedia = new EventEmitter<BrowsedMedia>();
+  processing = inject(ProcessingService);
+  addMedia = output<BrowsedMedia>();
 
-  public addExternalImage = false;
-  public addCompilationEntity = false;
+  addExternalImage = false;
+  addCompilationEntity = false;
 
-  public server_url = environment.server_url;
-
-  constructor(public processing: ProcessingService) {}
-
-  get compilation$() {
-    return this.processing.compilation$;
-  }
-
-  get entities$() {
-    return this.compilation$.pipe(
-      filter(isCompilation),
-      map(({ entities }) => Object.values(entities)),
-      map(entities => entities.filter(isEntity)),
-    );
-  }
+  server_url = environment.server_url;
 
   private hideBrowser() {
     this.addExternalImage = false;
     this.addCompilationEntity = false;
   }
 
-  public addImage(url: string, description: string) {
+  addImage(url: string, description: string) {
     this.hideBrowser();
     this.addMedia.emit({
       mediaType: 'externalImage',
@@ -50,9 +36,9 @@ export class MediaBrowserComponent {
     });
   }
 
-  public async addEntity(index: number) {
+  addEntity(index: number) {
     this.hideBrowser();
-    const entities = await firstValueFrom(this.entities$);
+    const entities = this.processing.compilationEntities();
     this.addMedia.emit(entities[index]);
   }
 }
