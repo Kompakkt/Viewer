@@ -1,5 +1,4 @@
-import { Component, HostBinding, OnInit } from '@angular/core';
-
+import { Component, computed, inject } from '@angular/core';
 import { OverlayService } from '../../services/overlay/overlay.service';
 import { CompilationBrowserComponent } from '../compilation-browser/compilation-browser.component';
 import { EntityFeatureAnimationsComponent } from '../entity-feature-animations/entity-feature-animations.component';
@@ -18,24 +17,14 @@ import { PointCloudSettingsComponent } from '../point-cloud-settings/point-cloud
     CompilationBrowserComponent,
     PointCloudSettingsComponent,
   ],
+  host: {
+    '[class.is-open]': 'isReady()',
+  },
 })
-export class SidenavComponent implements OnInit {
-  @HostBinding('class.is-open')
-  public isReady = false;
+export class SidenavComponent {
+  #overlay = inject(OverlayService);
 
-  public isOpen = false;
-  public mode = '';
-
-  constructor(public overlay: OverlayService) {
-    setTimeout(() => {
-      this.overlay.sidenav$.subscribe(({ mode, open }) => {
-        console.log(mode, open);
-        this.mode = mode;
-        this.isOpen = open;
-        this.isReady = this.isOpen && !!this.mode;
-      });
-    }, 0);
-  }
-
-  ngOnInit() {}
+  public isOpen = computed(() => this.#overlay.sidenav().open);
+  public mode = computed(() => this.#overlay.sidenav().mode);
+  public isReady = computed(() => this.isOpen() && !!this.mode());
 }

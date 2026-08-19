@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import {
   BehaviorSubject,
@@ -32,6 +32,8 @@ import {
   LoginComponent,
 } from '../../components/dialogs/dialog-login/login.component';
 import { BackendService } from '../backend/backend.service';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { of } from 'rxjs';
 
 const isUserOwned = <T extends IEntity | ICompilation>(
   element: T,
@@ -63,52 +65,50 @@ export class UserdataService {
   #backend = inject(BackendService);
   #dialog = inject(MatDialog);
 
-  loginRequired$ = new BehaviorSubject(false);
-  loginData$ = new BehaviorSubject<LoginData | undefined>(undefined);
-  userData$ = new BehaviorSubject<IUserDataWithoutData | undefined>(undefined);
-  isAuthenticated$ = this.userData$.pipe(map(userdata => !!userdata?._id));
+  loginData = signal<LoginData | undefined>(undefined);
+  userdata = signal<IUserDataWithoutData | undefined>(undefined);
+  isAuthenticated = computed(() => !!this.userdata()?._id);
 
+  #userdata$ = toObservable(this.userdata);
   updateTrigger$ = new BehaviorSubject<'all' | keyof typeof Collection>('all');
 
-  user$ = this.userData$.pipe(filter(user => !!user));
-
-  entities$: Observable<IEntity[]> = this.user$.pipe(
+  #entities$: Observable<IEntity[]> = this.#userdata$.pipe(
     combineLatestWith(this.updateTrigger$),
     filter(([_, trigger]) => trigger === 'all' || trigger === Collection.entity),
-    switchMap(() => this.#backend.getUserDataEntities({})),
-    share(),
+    switchMap(([user]) => (user ? this.#backend.getUserDataEntities({}) : of([]))),
   );
+  entities = toSignal(this.#entities$, { initialValue: [] });
 
-  compilations$: Observable<ICompilation[]> = this.user$.pipe(
+  #compilations$: Observable<ICompilation[]> = this.#userdata$.pipe(
     combineLatestWith(this.updateTrigger$),
     filter(([_, trigger]) => trigger === 'all' || trigger === Collection.compilation),
-    switchMap(() => this.#backend.getUserDataCompilations({})),
-    share(),
+    switchMap(([user]) => (user ? this.#backend.getUserDataCompilations({}) : of([]))),
   );
+  compilations = toSignal(this.#compilations$, { initialValue: [] });
 
-  annotations$: Observable<IAnnotation[]> = this.user$.pipe(
+  #annotations$: Observable<IAnnotation[]> = this.#userdata$.pipe(
     combineLatestWith(this.updateTrigger$),
     filter(([_, trigger]) => trigger === 'all' || trigger === Collection.annotation),
-    switchMap(() => this.#backend.getUserDataAnnotations({})),
-    share(),
+    switchMap(([user]) => (user ? this.#backend.getUserDataAnnotations({}) : of([]))),
   );
+  annotations = toSignal(this.#annotations$, { initialValue: [] });
 
-  public async doesUserOwn(element?: IEntity | ICompilation) {
-    const userdata = await firstValueFrom(this.userData$);
+  public doesUserOwn(element?: IEntity | ICompilation) {
+    const userdata = this.userdata();
     if (!userdata) return false;
     if (isEntity(element)) {
-      const entities = await firstValueFrom(this.entities$);
+      const entities = this.entities();
       return isUserOwned(element, userdata, entities);
     }
     if (isCompilation(element)) {
-      const compilations = await firstValueFrom(this.compilations$);
+      const compilations = this.compilations();
       return isUserOwned(element, userdata, compilations);
     }
     return false;
   }
 
-  public async doesUserHaveAccess(element?: IEntity | ICompilation) {
-    const userdata = await firstValueFrom(this.userData$);
+  public doesUserHaveAccess(element?: IEntity | ICompilation) {
+    const userdata = this.userdata();
     if (!userdata) return false;
     if (isEntity(element)) return doesUserHaveAccess(element, userdata);
     if (isCompilation(element)) return doesUserHaveAccess(element, userdata);
@@ -116,14 +116,13 @@ export class UserdataService {
   }
 
   public async userAuthentication(loginRequired: boolean): Promise<boolean> {
-    this.loginRequired$.next(loginRequired);
-    const isAuthenticated = await firstValueFrom(this.isAuthenticated$);
+    const isAuthenticated = this.isAuthenticated();
     if (isAuthenticated) return true;
 
     return this.#backend
       .isAuthorized()
       .then(result => {
-        this.userData$.next(result);
+        this.userdata.set(result);
         return true;
       })
       .catch(async e => {
@@ -138,13 +137,13 @@ export class UserdataService {
   }
 
   private async attemptLogin(): Promise<boolean> {
-    const loginData = this.loginData$.getValue();
+    const loginData = this.loginData();
 
     if (loginData) {
       return this.#backend
         .login(loginData.username, loginData.password)
         .then(result => {
-          this.userData$.next(result);
+          this.userdata.set(result);
           return true;
         })
         .catch(() => this.openLoginDialog());
@@ -162,8 +161,8 @@ export class UserdataService {
     if (!result) return false;
 
     const { username, password, userData } = result;
-    this.userData$.next(userData);
-    this.loginData$.next({ username, password });
+    this.userdata.set(userData);
+    this.loginData.set({ username, password });
     return true;
   }
 
@@ -172,14 +171,14 @@ export class UserdataService {
       .logout()
       .then(() => {})
       .catch(err => console.error(err));
-    this.userData$.next(undefined);
-    this.loginData$.next(undefined);
+    this.userdata.set(undefined);
+    this.loginData.set(undefined);
   }
 
-  public async isAnnotationOwner(annotation: IAnnotation) {
-    const userdata = await firstValueFrom(this.userData$);
+  public isAnnotationOwner(annotation: IAnnotation) {
+    const userdata = this.userdata();
     if (!userdata) return false;
-    const annotations = await firstValueFrom(this.annotations$);
+    const annotations = this.annotations();
 
     if (annotation.creator._id === userdata?._id) return true;
     return annotations?.some(other => isAnnotation(other) && other._id === annotation._id) ?? false;

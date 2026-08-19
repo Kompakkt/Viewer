@@ -1,9 +1,6 @@
-import { AsyncPipe } from '@angular/common';
-import { Component, HostBinding, inject } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { MatIcon } from '@angular/material/icon';
+import { Component, computed, inject, signal } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 import { ButtonComponent, TooltipDirective } from '@kompakkt/komponents';
-import { BehaviorSubject, combineLatest, firstValueFrom, map } from 'rxjs';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
 
@@ -11,57 +8,46 @@ import { AnnotationService } from '../../../services/annotation/annotation.servi
   selector: 'app-annotationwalkthrough',
   templateUrl: './annotationwalkthrough.component.html',
   styleUrls: ['./annotationwalkthrough.component.scss'],
-  imports: [MatIcon, AsyncPipe, TranslatePipe, TooltipDirective, ButtonComponent],
+  imports: [MatIconModule, TranslatePipe, TooltipDirective, ButtonComponent],
+  host: {
+    '[class.hidden]': '!showWalkthrough()',
+  },
 })
 export class AnnotationwalkthroughComponent {
-  public annotationService = inject(AnnotationService);
-  #isRepositioning = toObservable(this.annotationService.isRepositioning);
+  annotationService = inject(AnnotationService);
 
-  public ranking$ = new BehaviorSubject(0);
-  public selectedAnnotation$ = combineLatest([
-    this.annotationService.currentAnnotations$,
-    this.annotationService.selectedAnnotation$,
-  ]).pipe(
-    map(([annotations, selectedAnnotationId]) =>
-      annotations.find(({ _id }) => _id === selectedAnnotationId),
-    ),
-  );
+  ranking = signal(0);
+  selectedAnnotation = computed(() => {
+    const activeAnnotations = this.annotationService.activeAnnotations();
+    const selectedAnnotationId = this.annotationService.selectedAnnotation()?._id;
+    return activeAnnotations.find(({ _id }) => _id === selectedAnnotationId);
+  });
+  title = computed(() => {
+    const annotation = this.selectedAnnotation();
+    return annotation ? annotation.body.content.title || 'No title' : 'Annotation Walkthrough';
+  });
 
-  public title$ = this.selectedAnnotation$.pipe(
-    map(annotation =>
-      annotation ? annotation.body.content.title || 'No title' : 'Annotation Walkthrough',
-    ),
-  );
-  public showWalkthrough$ = combineLatest([
-    this.annotationService.currentAnnotations$,
-    this.#isRepositioning,
-  ]).pipe(map(([annotations, isRepositioning]) => annotations.length > 1 && !isRepositioning));
+  showWalkthrough = computed(() => {
+    const isRepositioning = this.annotationService.isRepositioning();
+    const activeAnnotations = this.annotationService.activeAnnotations();
+    return activeAnnotations.length > 1 && !isRepositioning;
+  });
 
-  public showWalkthrough = toSignal(this.showWalkthrough$);
-
-  @HostBinding('class.hidden') get hidden() {
-    return !this.showWalkthrough();
-  }
-
-  public async previousAnnotation() {
-    const [ranking, annotations] = await Promise.all([
-      firstValueFrom(this.ranking$),
-      firstValueFrom(this.annotationService.currentAnnotations$),
-    ]);
+  previousAnnotation() {
+    const ranking = this.ranking();
+    const activeAnnotations = this.annotationService.activeAnnotations();
     const isFirst = ranking <= 0;
-    const newRanking = isFirst ? annotations.length - 1 : ranking - 1;
-    this.ranking$.next(newRanking);
-    this.annotationService.setSelectedAnnotation(annotations[newRanking]._id.toString());
+    const newRanking = isFirst ? activeAnnotations.length - 1 : ranking - 1;
+    this.ranking.set(newRanking);
+    this.annotationService.setSelectedAnnotation(activeAnnotations[newRanking]._id.toString());
   }
 
-  public async nextAnnotation() {
-    const [ranking, annotations] = await Promise.all([
-      firstValueFrom(this.ranking$),
-      firstValueFrom(this.annotationService.currentAnnotations$),
-    ]);
-    const isLast = ranking === annotations.length - 1;
+  async nextAnnotation() {
+    const ranking = this.ranking();
+    const activeAnnotations = this.annotationService.activeAnnotations();
+    const isLast = ranking === activeAnnotations.length - 1;
     const newRanking = isLast ? 0 : ranking + 1;
-    this.ranking$.next(newRanking);
-    this.annotationService.setSelectedAnnotation(annotations[newRanking]._id.toString());
+    this.ranking.set(newRanking);
+    this.annotationService.setSelectedAnnotation(activeAnnotations[newRanking]._id.toString());
   }
 }

@@ -1,4 +1,4 @@
-@if (processing.settings$ | async; as settings) {
+@if (processing.settings(); as settings) {
   <k-details [title]="'Information and helpers' | translate">
     <h3 style="margin-top: 0px">{{ 'Bounding boxes' | translate }}</h3>
 
@@ -12,7 +12,7 @@
       (checkedChange)="setBoundingBoxMeshesVisibility($event)"
     />
 
-    @if (meshes$ | async; as meshes) {
+    @if (processing.meshes(); as meshes) {
       <small>{{ 'Number of meshes:' | translate }} {{ meshes.length }}</small>
     }
 
@@ -83,7 +83,7 @@
     <p>
       {{ 'Current mirroring' | translate }}:
       <strong>
-        @if (mirroredAxes$ | async; as mirrored) {
+        @if (mirroredAxes(); as mirrored) {
           {{ mirrored.toUpperCase() }}
         } @else {
           {{ 'None' | translate }}

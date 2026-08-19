@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   Color3,
   DirectionalLight,
@@ -9,7 +9,6 @@ import {
   Quaternion,
   RectAreaLight,
   RotationGizmo,
-  Scene,
   SpotLight,
   TransformNode,
   UtilityLayerRenderer,
@@ -33,29 +32,16 @@ interface LightEntry {
 
 const WHITE: IColor = { r: 255, g: 255, b: 255, a: 255 };
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class LightService {
-  private scene: Scene;
+  private babylon = inject(BabylonService);
+  private processing = inject(ProcessingService);
   private entries: Map<number, LightEntry> = new Map();
 
-  private entitySettings: IEntitySettings | undefined;
-
-  constructor(
-    private babylon: BabylonService,
-    private processing: ProcessingService,
-  ) {
-    this.scene = this.babylon.getScene();
-    this.processing.settings$.subscribe(({ localSettings }) => {
-      this.entitySettings = localSettings;
-    });
-  }
-
-  public initialiseLights(settings: IEntitySettings): void {
+  public initialiseLights(): void {
+    const settings = this.processing.settings().localSettings;
     console.log('[LightService] initialiseLights', settings.lights.length, 'lights');
     this.disposeAllLights();
-    this.entitySettings = settings;
 
     for (let index = 0; index < settings.lights.length; index++) {
       this.createLight(index, settings.lights[index]);
@@ -63,55 +49,53 @@ export class LightService {
     console.log('[LightService] entries after init', this.entries.size);
   }
 
-  public addLight(type: LightType, settings: IEntitySettings): number {
-    const newLight = this.createDefaultLight(type, settings);
+  public addLight(type: LightType): number {
+    const settings = this.processing.settings().localSettings;
+    const newLight = this.createDefaultLight(type);
     const index = settings.lights.length;
     settings.lights.push(newLight);
     this.createLight(index, newLight);
+    this.processing.localSettings.set(settings);
     return index;
   }
 
-  public removeLight(index: number, settings: IEntitySettings): void {
+  public removeLight(index: number): void {
+    const settings = this.processing.settings().localSettings;
     if (index < 0 || index >= settings.lights.length) {
       throw new Error(`Invalid light index: ${index}`);
     }
-
     this.disposeLight(index);
     settings.lights.splice(index, 1);
+    this.processing.localSettings.set(settings);
     this.rebuildEntriesFromSettings(settings);
   }
 
-  public setIntensity(index: number, value: number, settings: IEntitySettings): void {
-    this.updateConfig(index, settings, { intensity: value });
+  public setIntensity(index: number, value: number): void {
+    this.updateConfig(index, { intensity: value });
     const entry = this.entries.get(index);
     if (entry) entry.light.intensity = value;
   }
 
-  public setColor(index: number, value: IColor, settings: IEntitySettings): void {
-    this.updateConfig(index, settings, { color: value });
+  public setColor(index: number, value: IColor): void {
+    this.updateConfig(index, { color: value });
     const entry = this.entries.get(index);
     if (entry) entry.light.diffuse = this.toColor3(value);
   }
 
-  public setPosition(index: number, value: IVector3, settings: IEntitySettings): void {
-    this.updateConfig(index, settings, { position: value });
+  public setPosition(index: number, value: IVector3): void {
+    this.updateConfig(index, { position: value });
     const entry = this.entries.get(index);
     if (entry) entry.proxy.position = this.toVector3(value);
   }
 
-  public setRotation(index: number, value: IVector3, settings: IEntitySettings): void {
-    this.updateConfig(index, settings, { rotation: value });
+  public setRotation(index: number, value: IVector3): void {
+    this.updateConfig(index, { rotation: value });
     const entry = this.entries.get(index);
     if (entry) entry.proxy.rotationQuaternion = this.toQuaternion(value);
   }
 
-  public setSpotParams(
-    index: number,
-    angle: number,
-    exponent: number,
-    settings: IEntitySettings,
-  ): void {
-    this.updateConfig(index, settings, { angle, exponent });
+  public setSpotParams(index: number, angle: number, exponent: number): void {
+    this.updateConfig(index, { angle, exponent });
     const entry = this.entries.get(index);
     if (entry && entry.light instanceof SpotLight) {
       entry.light.angle = angle;
@@ -119,13 +103,8 @@ export class LightService {
     }
   }
 
-  public setAreaSize(
-    index: number,
-    width: number,
-    height: number,
-    settings: IEntitySettings,
-  ): void {
-    this.updateConfig(index, settings, { width, height });
+  public setAreaSize(index: number, width: number, height: number): void {
+    this.updateConfig(index, { width, height });
     const entry = this.entries.get(index);
     if (entry && entry.light instanceof RectAreaLight) {
       entry.light.width = width;
@@ -133,8 +112,8 @@ export class LightService {
     }
   }
 
-  public setName(index: number, value: string, settings: IEntitySettings): void {
-    this.updateConfig(index, settings, { name: value });
+  public setName(index: number, value: string): void {
+    this.updateConfig(index, { name: value });
   }
 
   public setGizmoEnabled(index: number, kind: GizmoKind, enabled: boolean): void {
@@ -145,6 +124,7 @@ export class LightService {
       enabled,
       hasEntry: !!entry,
       entryCount: this.entries.size,
+      entry,
     });
     if (!entry) return;
 
@@ -179,7 +159,7 @@ export class LightService {
   private createLight(index: number, config: IEntityLight): void {
     if (this.entries.has(index)) return;
 
-    const proxy = new TransformNode(`lightProxy_${index}`, this.scene);
+    const proxy = new TransformNode(`lightProxy_${index}`, this.babylon.scene);
     proxy.position = this.toVector3(config.position);
     if (config.rotation) {
       proxy.rotationQuaternion = this.toQuaternion(config.rotation);
@@ -191,7 +171,7 @@ export class LightService {
 
     switch (config.type) {
       case 'Point':
-        light = new PointLight(name, Vector3.Zero(), this.scene);
+        light = new PointLight(name, Vector3.Zero(), this.babylon.scene);
         break;
       case 'Spot': {
         light = new SpotLight(
@@ -200,12 +180,12 @@ export class LightService {
           Vector3.Forward(),
           config.angle ?? Math.PI / 4,
           config.exponent ?? 2,
-          this.scene,
+          this.babylon.scene,
         );
         break;
       }
       case 'Ambient':
-        light = new HemisphericLight(name, Vector3.Forward(), this.scene);
+        light = new HemisphericLight(name, Vector3.Forward(), this.babylon.scene);
         break;
       case 'Area':
         light = new RectAreaLight(
@@ -213,11 +193,11 @@ export class LightService {
           Vector3.Zero(),
           config.width ?? 1,
           config.height ?? 1,
-          this.scene,
+          this.babylon.scene,
         );
         break;
       case 'Directional':
-        light = new DirectionalLight(name, Vector3.Forward(), this.scene);
+        light = new DirectionalLight(name, Vector3.Forward(), this.babylon.scene);
         break;
       default:
         throw new Error(`Unsupported light type: ${config.type}`);
@@ -232,7 +212,7 @@ export class LightService {
 
   private createPositionGizmo(entry: LightEntry, index: number): void {
     if (!entry.utilityLayer) {
-      entry.utilityLayer = new UtilityLayerRenderer(this.scene);
+      entry.utilityLayer = new UtilityLayerRenderer(this.babylon.scene);
     }
     const gizmo = new PositionGizmo(entry.utilityLayer, 2);
     gizmo.attachedNode = entry.proxy;
@@ -242,7 +222,7 @@ export class LightService {
 
   private createRotationGizmo(entry: LightEntry, index: number): void {
     if (!entry.utilityLayer) {
-      entry.utilityLayer = new UtilityLayerRenderer(this.scene);
+      entry.utilityLayer = new UtilityLayerRenderer(this.babylon.scene);
     }
     const gizmo = new RotationGizmo(entry.utilityLayer, undefined, undefined, 2);
     gizmo.updateGizmoRotationToMatchAttachedMesh = true;
@@ -254,22 +234,24 @@ export class LightService {
 
   private writeBackPosition(index: number): void {
     const entry = this.entries.get(index);
-    if (!entry || !this.entitySettings) return;
+    if (!entry) return;
     const position = entry.proxy.position;
-    this.entitySettings.lights[index].position = { x: position.x, y: position.y, z: position.z };
-    this.emitSettingsUpdate();
+    const settings = this.processing.settings().localSettings;
+    settings.lights[index].position = { x: position.x, y: position.y, z: position.z };
+    this.processing.localSettings.set(settings);
   }
 
   private writeBackRotation(index: number): void {
     const entry = this.entries.get(index);
-    if (!entry || !this.entitySettings) return;
+    if (!entry) return;
     const rotation = entry.proxy.rotationQuaternion?.toEulerAngles() ?? entry.proxy.rotation;
-    this.entitySettings.lights[index].rotation = {
+    const settings = this.processing.settings().localSettings;
+    settings.lights[index].rotation = {
       x: this.radiansToDegrees(rotation.x),
       y: this.radiansToDegrees(rotation.y),
       z: this.radiansToDegrees(rotation.z),
     };
-    this.emitSettingsUpdate();
+    this.processing.localSettings.set(settings);
   }
 
   private disposeLight(index: number): void {
@@ -292,18 +274,18 @@ export class LightService {
     }
   }
 
-  private updateConfig(
-    index: number,
-    settings: IEntitySettings,
-    changes: Partial<IEntityLight>,
-  ): void {
+  private updateConfig(index: number, changes: Partial<IEntityLight>): void {
+    const settings = this.processing.settings().localSettings;
     if (index < 0 || index >= settings.lights.length) {
       throw new Error(`Invalid light index: ${index}`);
     }
-    settings.lights[index] = { ...settings.lights[index], ...changes };
+    const updatedLight = { ...settings.lights[index], ...changes };
+    settings.lights[index] = updatedLight;
+    this.processing.localSettings.set(settings);
   }
 
-  private createDefaultLight(type: LightType, settings: IEntitySettings): IEntityLight {
+  private createDefaultLight(type: LightType): IEntityLight {
+    const settings = this.processing.settings().localSettings;
     const base: IEntityLight = {
       type,
       position: { x: 0, y: type === 'Ambient' || type === 'Directional' ? 1 : 0, z: 0 },
@@ -352,13 +334,5 @@ export class LightService {
 
   private toColor3(color: IColor): Color3 {
     return new Color3(color.r / 255, color.g / 255, color.b / 255);
-  }
-
-  private emitSettingsUpdate(): void {
-    if (!this.entitySettings) return;
-    this.processing.settings$.next({
-      ...this.processing.settings$.value,
-      localSettings: this.entitySettings,
-    });
   }
 }

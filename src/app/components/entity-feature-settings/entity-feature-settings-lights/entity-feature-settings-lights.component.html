@@ -1,4 +1,4 @@
-@if (processing.settings$ | async; as settings) {
+@if (processing.settings(); as settings) {
   <div class="lights-header">
     <h2>{{ 'Lights' | translate }}</h2>
     <k-button (click)="resetLights()" type="outlined-primary">

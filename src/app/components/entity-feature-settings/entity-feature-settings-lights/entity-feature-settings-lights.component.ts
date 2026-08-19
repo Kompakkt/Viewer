@@ -1,8 +1,5 @@
-import { AsyncPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
-
-import { IColor, IEntityLight, IEntitySettings } from '@kompakkt/common';
+import { IColor, IEntityLight } from '@kompakkt/common';
 import { ColorChromeModule } from 'ngx-color/chrome';
 import {
   ButtonComponent,
@@ -23,7 +20,6 @@ const WHITE: IColor = { r: 255, g: 255, b: 255, a: 255 };
   templateUrl: './entity-feature-settings-lights.component.html',
   styleUrls: ['./entity-feature-settings-lights.component.scss'],
   imports: [
-    AsyncPipe,
     TranslatePipe,
     SliderComponent,
     InputComponent,
@@ -45,20 +41,20 @@ export class EntityFeatureSettingsLightsComponent {
   public spotExponentDefault = 2;
 
   public async addLight(type: LightType) {
-    const { localSettings } = await firstValueFrom(this.processing.settings$);
-    this.lights.addLight(type, localSettings);
-    this.emitSettingsUpdate(localSettings);
+    const settings = this.processing.settings().localSettings;
+    this.lights.addLight(type);
+    this.processing.localSettings.set(settings);
   }
 
   public async removeLight(index: number) {
-    const { localSettings } = await firstValueFrom(this.processing.settings$);
-    this.lights.removeLight(index, localSettings);
-    this.emitSettingsUpdate(localSettings);
+    const settings = this.processing.settings().localSettings;
+    this.lights.removeLight(index);
+    this.processing.localSettings.set(settings);
   }
 
   public async resetLights() {
-    const { localSettings } = await firstValueFrom(this.processing.settings$);
-    localSettings.lights = [
+    const settings = this.processing.settings().localSettings;
+    settings.lights = [
       {
         type: 'Ambient',
         position: { x: 0, y: 0, z: 0 },
@@ -68,55 +64,55 @@ export class EntityFeatureSettingsLightsComponent {
         name: 'Ambient',
       },
     ];
-    this.lights.initialiseLights(localSettings);
-    this.emitSettingsUpdate(localSettings);
+    this.processing.localSettings.set(settings);
+    this.lights.initialiseLights();
   }
 
   public async setName(index: number, value: string) {
-    const { localSettings } = await firstValueFrom(this.processing.settings$);
-    this.lights.setName(index, value, localSettings);
-    this.emitSettingsUpdate(localSettings);
+    const settings = this.processing.settings().localSettings;
+    this.lights.setName(index, value);
+    this.processing.localSettings.set(settings);
   }
 
   public async setIntensity(index: number, value: number | null) {
-    const { localSettings } = await firstValueFrom(this.processing.settings$);
-    this.lights.setIntensity(index, value ?? 0, localSettings);
-    this.emitSettingsUpdate(localSettings);
+    const settings = this.processing.settings().localSettings;
+    this.lights.setIntensity(index, value ?? 0);
+    this.processing.localSettings.set(settings);
   }
 
   public async setColor(index: number, color: IColor) {
     console.log('[Light color]', color);
-    const { localSettings } = await firstValueFrom(this.processing.settings$);
-    this.lights.setColor(index, color, localSettings);
-    this.emitSettingsUpdate(localSettings);
+    const settings = this.processing.settings().localSettings;
+    this.lights.setColor(index, color);
+    this.processing.localSettings.set(settings);
   }
 
   public async setPosition(index: number, axis: 'x' | 'y' | 'z', value: number | null) {
-    const { localSettings } = await firstValueFrom(this.processing.settings$);
-    const current = localSettings.lights[index].position;
+    const settings = this.processing.settings().localSettings;
+    const current = settings.lights[index].position;
     const next = { ...current, [axis]: value ?? 0 };
-    this.lights.setPosition(index, next, localSettings);
-    this.emitSettingsUpdate(localSettings);
+    this.lights.setPosition(index, next);
+    this.processing.localSettings.set(settings);
   }
 
   public async setRotation(index: number, axis: 'x' | 'y' | 'z', value: number | null) {
-    const { localSettings } = await firstValueFrom(this.processing.settings$);
-    const current = localSettings.lights[index].rotation ?? { x: 0, y: 0, z: 0 };
+    const settings = this.processing.settings().localSettings;
+    const current = settings.lights[index].rotation ?? { x: 0, y: 0, z: 0 };
     const next = { ...current, [axis]: value ?? 0 };
-    this.lights.setRotation(index, next, localSettings);
-    this.emitSettingsUpdate(localSettings);
+    this.lights.setRotation(index, next);
+    this.processing.localSettings.set(settings);
   }
 
   public async setSpotParams(index: number, angle: number, exponent: number) {
-    const { localSettings } = await firstValueFrom(this.processing.settings$);
-    this.lights.setSpotParams(index, angle, exponent, localSettings);
-    this.emitSettingsUpdate(localSettings);
+    const settings = this.processing.settings().localSettings;
+    this.lights.setSpotParams(index, angle, exponent);
+    this.processing.localSettings.set(settings);
   }
 
   public async setAreaSize(index: number, width: number, height: number) {
-    const { localSettings } = await firstValueFrom(this.processing.settings$);
-    this.lights.setAreaSize(index, width, height, localSettings);
-    this.emitSettingsUpdate(localSettings);
+    const settings = this.processing.settings().localSettings;
+    this.lights.setAreaSize(index, width, height);
+    this.processing.localSettings.set(settings);
   }
 
   public async toggleGizmo(index: number, kind: 'position' | 'rotation', enabled: boolean) {
@@ -142,12 +138,5 @@ export class EntityFeatureSettingsLightsComponent {
 
   public hasAreaSize(light: IEntityLight): boolean {
     return light.type === 'Area';
-  }
-
-  private emitSettingsUpdate(settings: IEntitySettings): void {
-    this.processing.settings$.next({
-      ...this.processing.settings$.value,
-      localSettings: settings,
-    });
   }
 }

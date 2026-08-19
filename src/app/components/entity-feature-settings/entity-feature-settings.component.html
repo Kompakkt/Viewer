@@ -1,57 +1,12 @@
 <h1>{{ 'Settings' | translate }}</h1>
 
-@if (settingsReady$ | async) {
-  @if (processing.settings$ | async; as settings) {
-    @if ((processing.isInUpload$ | async) === false) {
-      <k-details [title]="'Background' | translate">
-        <color-chrome
-          (onChange)="setBackgroundColor($event.color.rgb)"
-          [color]="settings.localSettings.background.color"
-        />
+@if (settingsReady()) {
+  @if (processing.settings(); as settings) {
 
-        <k-labelled-checkbox
-          [label]="'Gradient-brightness effect' | translate"
-          (checkedChange)="setBackgroundEffect($event)"
-          [startingValue]="settings.localSettings.background.effect"
-        />
-
-        <k-button (click)="resetBackground()" type="outlined-primary">
-          {{ 'Reset background' | translate }}
-        </k-button>
-      </k-details>
-      <k-details [title]="'Lights' | translate">
-        <app-entity-feature-settings-lights />
-      </k-details>
-      <k-details [title]="'Preview and initial perspective' | translate">
-        <p class="wizard-step-text">
-          {{ 'Click on this image to set a nice and fitting camera perspective' | translate }}
-        </p>
-        <img
-          class="previewimage"
-          [src]="settings.localSettings.preview | fixImageUrl"
-          (click)="setInitialPerspectivePreview()"
-        />
-      </k-details>
-
-      <k-button style="align-self: center" rounded type="solid-primary" (click)="exportSettings()">
-        <mat-icon style="margin-right: 4px">download</mat-icon>
-        <span>{{ 'Download viewer settings' | translate }}</span>
-      </k-button>
-
-      @if (!(isStandalone$ | async)) {
-        <k-button (click)="backToDefaultSettings()" type="outlined-primary">
-          {{ 'Back to default' | translate }}
-        </k-button>
-        @if (canSaveSettings$ | async) {
-          <k-button (click)="saveSettings()" type="solid-primary">
-            {{ 'Save as default' | translate }}
-          </k-button>
-        }
-      }
-    }
-    @if (processing.isInUpload$ | async) {
+    @if (processing.isInUpload()) {
+        @if (entitySettings.helpersReady()) {
       <k-wizard direction="vertical" [linear]="true" #stepper>
-        @if (processing.hasMeshSettings$ | async) {
+        @if (processing.hasMeshSettings()) {
           <k-wizard-step [label]="'Mesh settings' | translate">
             <app-entity-feature-settings-mesh />
             <k-button type="solid-primary" (click)="showNextAlertFirstStep()">{{
@@ -87,7 +42,7 @@
             'Save background and lights' | translate
           }}</k-button>
         </k-wizard-step>
-        @if ((processing.mediaType$ | async) !== 'audio') {
+        @if (processing.mediaType() !== 'audio') {
           <k-wizard-step [label]="'Preview and initial perspective' | translate">
             <div class="wizard-step-content wizard-step-content-dark">
               <p class="wizard-step-text">
@@ -103,7 +58,7 @@
             }}</k-button>
           </k-wizard-step>
         }
-        @if (!(isStandalone$ | async)) {
+        @if (!processing.isStandalone()) {
           <k-wizard-step [label]="'Confirm' | translate">
             <div class="wizard-step-content wizard-step-content-dark">
               <p class="wizard-step-text">
@@ -149,6 +104,54 @@
           </k-wizard-step>
         }
       </k-wizard>
+        }
+    }
+    @else {
+      <k-details [title]="'Background' | translate">
+        <color-chrome
+          (onChange)="setBackgroundColor($event.color.rgb)"
+          [color]="settings.localSettings.background.color"
+        />
+
+        <k-labelled-checkbox
+          [label]="'Gradient-brightness effect' | translate"
+          (checkedChange)="setBackgroundEffect($event)"
+          [startingValue]="settings.localSettings.background.effect"
+        />
+
+        <k-button (click)="resetBackground()" type="outlined-primary">
+          {{ 'Reset background' | translate }}
+        </k-button>
+      </k-details>
+      <k-details [title]="'Lights' | translate">
+        <app-entity-feature-settings-lights />
+      </k-details>
+      <k-details [title]="'Preview and initial perspective' | translate">
+        <p class="wizard-step-text">
+          {{ 'Click on this image to set a nice and fitting camera perspective' | translate }}
+        </p>
+        <img
+          class="previewimage"
+          [src]="settings.localSettings.preview | fixImageUrl"
+          (click)="setInitialPerspectivePreview()"
+        />
+      </k-details>
+
+      <k-button style="align-self: center" rounded type="solid-primary" (click)="exportSettings()">
+        <mat-icon style="margin-right: 4px">download</mat-icon>
+        <span>{{ 'Download viewer settings' | translate }}</span>
+      </k-button>
+
+      @if (!processing.isStandalone()) {
+        <k-button (click)="backToDefaultSettings()" type="outlined-primary">
+          {{ 'Back to default' | translate }}
+        </k-button>
+        @if (canSaveSettings()) {
+          <k-button (click)="saveSettings()" type="solid-primary">
+            {{ 'Save as default' | translate }}
+          </k-button>
+        }
+      }
     }
   }
 }
@@ -187,7 +190,7 @@
       }
     </div>
 
-    <div class="video-container" [style.--bg-color]="currentBackgroundColor$ | async">
+    <div class="video-container" [style.--bg-color]="currentBackgroundColor()">
       @if (videoPreviewUrl(); as url) {
         <video
           #videoEl

@@ -1,4 +1,4 @@
-@if (annotation$ | async; as annotation) {
+@if (annotation(); as annotation) {
   <img
     class="preview-image"
     [src]="annotation.body.content.relatedPerspective.preview | fixImageUrl"
@@ -6,14 +6,14 @@
   <div class="header" (click)="toggleVisibility()">
     <span class="ranking">{{ annotation.ranking }}</span>
     <span class="title">{{ annotation.body.content.title || ('No title' | translate) }}</span>
-    <small>{{ (isAnnotationUnsaved() ? 'not saved' : 'saved') | translate }}</small>
+    <small>{{ (isUnsaved() ? 'not saved' : 'saved') | translate }}</small>
   </div>
   <app-markdown-preview
     id="annotation-content"
     [data]="annotation.body.content.description || ('No description' | translate)"
   />
   <k-button-row justify="end" gap="4">
-    @if (canUserEditAndDelete$ | async) {
+    @if (canUserEditAndDelete()) {
       <k-button
         icon-button
         color="transparent"
@@ -29,7 +29,7 @@
         ><mat-icon>open_with</mat-icon></k-button
       >
     }
-    @if (canUserReorder$ | async) {
+    @if (canUserReorder()) {
       <k-button icon-button color="transparent" class="reorder-button">
         <mat-icon>low_priority</mat-icon>
         <k-menu label="Reorder annotation">
@@ -63,7 +63,7 @@
       (click)="toggleFullscreen('preview')"
       ><mat-icon>select_all</mat-icon></k-button
     >
-    @if (isAnnotationHidden$ | async) {
+    @if (isHidden()) {
       <k-button
         icon-button
         color="transparent"
@@ -80,7 +80,7 @@
         ><mat-icon>visibility</mat-icon></k-button
       >
     }
-    @if (canUserEditAndDelete$ | async) {
+    @if (canUserEditAndDelete()) {
       <k-button
         icon-button
         color="transparent"
@@ -94,7 +94,7 @@
 
 <!-- TODO: Figure out if we need any of the commented out features, e.g. set perspective -->
 <!--
-@if (annotation$ | async; as annotation) {
+@if (annotation(); as annotation) {
 <mat-card appearance="outlined" class="annotation-card">
   <form class="annotation-form">
     <mat-card-header (click)="changeOpenPopup()">
@@ -102,7 +102,7 @@
         <span>{{ annotation.ranking }}</span>
       </div>
       <mat-card-title>
-        @if (isEditMode$ | async) {
+        @if (isEditMode()) {
         <mat-form-field>
           <mat-label>{{ 'Title' | translate }}</mat-label>
           <input
@@ -121,13 +121,13 @@
         {{ (annotation.validated ? 'validated' : 'not validated') | translate }}
       </mat-card-subtitle>
     </mat-card-header>
-    @if (previewImage$ | async; as previewImage) { @if (!(collapsed$ | async)) {
+    @if (previewImage(); as previewImage) { @if (!(collapsed())) {
     <img mat-card-image [src]="previewImage" />
     } } @else {
     <p>{{ 'This annotation has no preview image' | translate }}</p>
-    } @if (!(collapsed$ | async)) {
+    } @if (!(collapsed())) {
     <mat-card-content>
-      @if (isEditMode$ | async) {
+      @if (isEditMode()) {
       <mat-form-field class="description">
         <textarea
           matInput
@@ -140,7 +140,7 @@
           [(ngModel)]="annotation.body.content.description"
         ></textarea>
       </mat-form-field>
-      @if (userOwnsCompilation$ | async) {
+      @if (userOwnsCompilation()) {
       <mat-checkbox
         class="validation"
         [checked]="annotation.validated"
@@ -169,23 +169,23 @@
     </mat-card-content>
     }
     <mat-card-actions style="color: white">
-      <mat-slide-toggle [checked]="showAnnotation$ | async" (change)="toggleVisibility()">
-        {{ ((showAnnotation$ | async) ? 'Hide' : 'Show') | translate }}
+      <mat-slide-toggle [checked]="showAnnotation()" (change)="toggleVisibility()">
+      {{ ((showAnnotation()) ? 'Hide' : 'Show') | translate }}
       </mat-slide-toggle>
-      @if ((processing.hasAnnotationAllowance$ | async) && (isAnnotationOwner$ | async)) {
+      @if ((processing.hasAnnotationAllowance()) && (isAnnotationOwner())) {
       <k-button
         icon-button
         (click)="toggleEditViewMode()"
-        [tooltip]="((isEditMode$ | async) ? 'Save annotation' : 'Edit annotation') | translate"
+        [tooltip]="((isEditMode()) ? 'Save annotation' : 'Edit annotation') | translate"
         tooltipPosition="above"
         type="button"
       >
         <mat-icon
           [attr.aria-label]="
-            ((isEditMode$ | async) ? 'Save annotation' : 'Edit annotation') | translate
+            ((isEditMode()) ? 'Save annotation' : 'Edit annotation') | translate
           "
         >
-          {{ (isEditMode$ | async) ? 'save' : 'edit' }}
+          {{ (isEditMode()) ? 'save' : 'edit' }}
         </mat-icon>
       </k-button>
       <k-button

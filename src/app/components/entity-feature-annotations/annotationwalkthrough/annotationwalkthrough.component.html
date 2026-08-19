@@ -1,18 +1,18 @@
-@if (showWalkthrough$ | async) {
+@if (showWalkthrough()) {
   <div id="annotationwalkthrough">
     <k-button
       (click)="previousAnnotation()"
-      [disabled]="(annotationService.isTransitioning$ | async) ?? false"
+      [disabled]="annotationService.isTransitioning()"
       tooltip="{{ 'Back' | translate }}"
       tooltipPosition="above"
       icon-button
     >
       <mat-icon [attr.aria-label]="'Back' | translate">keyboard_arrow_left</mat-icon>
     </k-button>
-    <span id="walktertitle">{{ title$ | async }}</span>
+    <span id="walktertitle">{{ title() }}</span>
     <k-button
       (click)="nextAnnotation()"
-      [disabled]="(annotationService.isTransitioning$ | async) ?? false"
+      [disabled]="annotationService.isTransitioning()"
       tooltip="{{ 'Next' | translate }}"
       tooltipPosition="above"
       icon-button

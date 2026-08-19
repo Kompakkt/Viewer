@@ -60,23 +60,22 @@ interface IExternalImage {
 })
 export class DialogAnnotationEditorComponent {
   private readonly annotationDescription = viewChild<TextareaComponent>('annotationDescription');
-
   private readonly embeddablesSlot = viewChild<ElementRef<HTMLDivElement>>('embeddablesSlot');
 
-  public dialogRef = inject(MatDialogRef<DialogAnnotationEditorComponent>);
-  public dialogData = inject<IDialogData>(MAT_DIALOG_DATA);
-  public annotationService = inject(AnnotationService);
-  public processing = inject(ProcessingService);
-  public userdata = inject(UserdataService);
+  dialogRef = inject(MatDialogRef<DialogAnnotationEditorComponent>);
+  dialogData = inject<IDialogData>(MAT_DIALOG_DATA);
+  annotationService = inject(AnnotationService);
+  processing = inject(ProcessingService);
+  userdata = inject(UserdataService);
 
-  public modes = {
+  modes = {
     edit: 'Edit',
     preview: 'Preview',
   };
-  public currentMode = signal<keyof typeof this.modes>(this.dialogData.mode);
-  public annotation$ = new BehaviorSubject<IAnnotation | undefined>(this.dialogData.annotation);
+  currentMode = signal<keyof typeof this.modes>(this.dialogData.mode);
+  annotation$ = new BehaviorSubject<IAnnotation | undefined>(this.dialogData.annotation);
 
-  public annotationValidationErrors$ = this.annotation$.pipe(
+  annotationValidationErrors$ = this.annotation$.pipe(
     map(annotation => {
       if (!annotation) return false;
       const { title, description } = annotation.body.content;
@@ -88,8 +87,8 @@ export class DialogAnnotationEditorComponent {
 
   private serverUrl = environment.server_url;
 
-  public canUserEdit = toSignal(this.processing.hasAnnotationAllowance$);
-  public canUserDelete = computed(() => {
+  canUserEdit = this.processing.hasAnnotationAllowance;
+  canUserDelete = computed(() => {
     if (!this.canUserEdit()) return false;
     const annotation = this.dialogData.annotation;
     if (!this.userdata.isAnnotationOwner(annotation)) return false;
@@ -103,7 +102,7 @@ export class DialogAnnotationEditorComponent {
     });
   }
 
-  public handleEmbeddablesEvent(event: ExtenderSlotEvent) {
+  handleEmbeddablesEvent(event: ExtenderSlotEvent) {
     const annotation = event.event.detail;
     if (!isAnnotation(annotation)) return;
     console.log('Got new annotation from embeddables', annotation, event);
@@ -128,7 +127,7 @@ export class DialogAnnotationEditorComponent {
     });
   }
 
-  public addEntitySwitch(entity: IEntity | IExternalImage) {
+  addEntitySwitch(entity: IEntity | IExternalImage) {
     switch (entity.mediaType) {
       case 'externalImage':
         this.addExternalImage(entity as IExternalImage);
@@ -218,19 +217,19 @@ export class DialogAnnotationEditorComponent {
     });
   }
 
-  public onTextAreaChange(value: string) {
+  onTextAreaChange(value: string) {
     this.updateAnnotationContent({
       description: value,
     });
   }
 
-  public onTitleChange(value: string) {
+  onTitleChange(value: string) {
     this.updateAnnotationContent({
       title: value,
     });
   }
 
-  public toggleEditViewMode() {
+  toggleEditViewMode() {
     if (this.currentMode() === 'edit') {
       this.currentMode.set('preview');
     } else {
@@ -238,12 +237,12 @@ export class DialogAnnotationEditorComponent {
     }
   }
 
-  public close(withData?: boolean) {
+  close(withData?: boolean) {
     const annotation = this.annotation$.getValue();
     this.dialogRef.close(withData ? annotation : undefined);
   }
 
-  public async deleteAnnotation() {
+  async deleteAnnotation() {
     await this.annotationService.deleteAnnotation(this.dialogData.annotation);
     this.close(false);
   }

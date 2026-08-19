@@ -1,22 +1,17 @@
-import { AsyncPipe } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
-import { filter, map } from 'rxjs';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FixImageUrlPipe } from 'src/app/pipes/fix-image-url.pipe';
-import { ICompilation, IEntity, isCompilation, isEntity } from '@kompakkt/common';
+import { ICompilation, IEntity } from '@kompakkt/common';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ProcessingService } from '../../services/processing/processing.service';
 import { ButtonComponent, ButtonRowComponent, TooltipDirective } from '@kompakkt/komponents';
 import { MatIconModule } from '@angular/material/icon';
-import { firstValueFrom } from 'rxjs';
 import { BackendService } from 'src/app/services/backend/backend.service';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-compilation-browser',
   templateUrl: './compilation-browser.component.html',
   styleUrls: ['./compilation-browser.component.scss'],
   imports: [
-    AsyncPipe,
     TranslatePipe,
     FixImageUrlPipe,
     ButtonComponent,
@@ -36,30 +31,24 @@ export class CompilationBrowserComponent {
     return `rgba(${colorString.r}, ${colorString.g}, ${colorString.b}, ${colorString.a})`;
   };
 
-  compilation$ = this.processing.compilation$;
-  entity$ = this.processing.entity$;
-  #isCompilationOwner$ = this.processing.isOwner$.pipe(map(({ ofCompilation }) => ofCompilation));
-  isCompilationOwner = toSignal(this.#isCompilationOwner$);
+  isCompilationOwner = computed(() => {
+    const { ofCompilation } = this.processing.isOwner();
+    return ofCompilation;
+  });
 
-  entities$ = this.compilation$.pipe(
-    filter(isCompilation),
-    map(({ entities }) => Object.values(entities)),
-    map(entities => entities.filter(isEntity)),
-  );
-
-  async enableReorder() {
+  enableReorder() {
     const isEnabled = this.isReorderEnabled();
     if (isEnabled) return;
     // Save current order for cancellation
-    const entitiesArr = await firstValueFrom(this.entities$);
+    const entitiesArr = this.processing.compilationEntities();
     this.#originalOrder.set(entitiesArr);
     this.isReorderEnabled.set(true);
   }
 
   async cancelReorder() {
-    const compilation = await firstValueFrom(this.compilation$);
+    const compilation = this.processing.compilation();
     if (compilation) {
-      this.processing.compilation$.next(
+      this.processing.compilation.set(
         this.#combineArrayWithCompilation(this.#originalOrder(), compilation),
       );
     }
@@ -76,11 +65,11 @@ export class CompilationBrowserComponent {
   }
 
   async saveReorder() {
-    const compilation = await firstValueFrom(this.compilation$);
+    const compilation = this.processing.compilation();
     if (!compilation) return;
     const updatedCompilation = await this.backend.updateCompilation(compilation);
     if (updatedCompilation) {
-      this.processing.compilation$.next({ ...compilation });
+      this.processing.compilation.set({ ...compilation });
       this.#originalOrder.set([]);
       this.isReorderEnabled.set(false);
     }
@@ -92,8 +81,8 @@ export class CompilationBrowserComponent {
     index: number,
   ) {
     event.stopPropagation();
-    const entitiesArr = await firstValueFrom(this.entities$);
-    const compilation = await firstValueFrom(this.compilation$);
+    const entitiesArr = this.processing.compilationEntities();
+    const compilation = this.processing.compilation();
     if (!compilation) return;
 
     console.log('Before', entitiesArr, index, action);
@@ -108,6 +97,6 @@ export class CompilationBrowserComponent {
     entitiesArr.splice(newIndex, 0, entity);
     console.log('After', entitiesArr, newIndex, action);
 
-    this.processing.compilation$.next(this.#combineArrayWithCompilation(entitiesArr, compilation));
+    this.processing.compilation.set(this.#combineArrayWithCompilation(entitiesArr, compilation));
   }
 }

@@ -1,17 +1,17 @@
-<div id="camera-settings" [class.opened]="opened$ | async" (click)="$event.stopPropagation()">
-  <div id="camera-type-notification" [class.opened]="showNotification$ | async">
-    {{ showNotification$ | async }}
+<div id="camera-settings" [class.opened]="opened()" (click)="$event.stopPropagation()">
+  <div id="camera-type-notification" [class.opened]="showNotification() !== undefined">
+    {{ showNotification() }}
   </div>
 
   <div class="title-style">
     <h1>{{ 'Camera settings' | translate }}</h1>
-    <k-button icon-button color="solid-primary" (click)="close()"
+    <k-button icon-button color="solid-primary" (click)="opened.set(false)"
       ><mat-icon>close</mat-icon></k-button
     >
   </div>
 
   <p>{{ 'Type' | translate }}</p>
-  @if (annotationService.isAnnotationMode$ | async) {
+  @if (annotationService.isAnnotationMode()) {
     <p>
       {{ 'Switching the camera type is not supported while annotating' | translate }}
     </p>
@@ -19,21 +19,13 @@
     <k-button-row>
       <k-button
         (click)="babylon.cameraManager.setCameraType('ArcRotateCamera')"
-        [type]="
-          (babylon.cameraManager.cameraType$ | async) === 'ArcRotateCamera'
-            ? 'solid-primary'
-            : 'outlined-primary'
-        "
+        [type]="cameraType() === 'ArcRotateCamera' ? 'solid-primary' : 'outlined-primary'"
         full-width
         >{{ 'Orbit' | translate }}</k-button
       >
       <k-button
         (click)="babylon.cameraManager.setCameraType('UniversalCamera')"
-        [type]="
-          (babylon.cameraManager.cameraType$ | async) === 'UniversalCamera'
-            ? 'solid-primary'
-            : 'outlined-primary'
-        "
+        [type]="cameraType() === 'UniversalCamera' ? 'solid-primary' : 'outlined-primary'"
         full-width
         >{{ 'Free' | translate }}</k-button
       >

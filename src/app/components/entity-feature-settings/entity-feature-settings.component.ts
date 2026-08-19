@@ -1,8 +1,7 @@
-import { Component, viewChild, inject, signal } from '@angular/core';
+import { Component, viewChild, inject, signal, computed } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { saveAs } from 'file-saver';
-import { combineLatest, firstValueFrom } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import { IColor } from '@kompakkt/common';
 import { BabylonService } from '../../services/babylon/babylon.service';
 import { BackendService } from '../../services/backend/backend.service';
@@ -26,7 +25,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { DialogMeshsettingsComponent } from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
 import { EntityFeatureSettingsLightsComponent } from './entity-feature-settings-lights/entity-feature-settings-lights.component';
 import { EntityFeatureSettingsMeshComponent } from './entity-feature-settings-mesh/entity-feature-settings-mesh.component';
-import { Color4, Tools } from '@babylonjs/core';
+import { Tools } from '@babylonjs/core';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -39,7 +38,6 @@ import { MatIconModule } from '@angular/material/icon';
     EntityFeatureSettingsLightsComponent,
     EntityFeatureSettingsMeshComponent,
     MatIconModule,
-    AsyncPipe,
     TranslatePipe,
     DetailsComponent,
     ButtonComponent,
@@ -50,13 +48,13 @@ import { MatIconModule } from '@angular/material/icon';
   ],
 })
 export class EntityFeatureSettingsComponent {
-  private babylon = inject(BabylonService);
-  public processing = inject(ProcessingService);
-  public entitySettings = inject(EntitySettingsService);
-  public dialog = inject(MatDialog);
-  private backend = inject(BackendService);
-  public userdata = inject(UserdataService);
-  private postMessage = inject(PostMessageService);
+  #babylon = inject(BabylonService);
+  #backend = inject(BackendService);
+  #postMessage = inject(PostMessageService);
+  processing = inject(ProcessingService);
+  entitySettings = inject(EntitySettingsService);
+  dialog = inject(MatDialog);
+  userdata = inject(UserdataService);
 
   stepper = viewChild<WizardComponent>('stepper');
 
@@ -64,50 +62,35 @@ export class EntityFeatureSettingsComponent {
   videoPreviewUrl = signal<string | undefined>(undefined);
   videoGenerationSuccess = signal<{ value: boolean } | undefined>(undefined);
 
-  currentBackgroundColor$ = this.processing.settings$.pipe(
-    map(settings => settings.localSettings.background.color),
-    map(color => `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`),
-  );
+  currentBackgroundColor = computed(() => {
+    const settings = this.processing.settings().localSettings;
+    const color = settings.background.color;
+    return `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`;
+  });
 
-  // used during upload while setting initial settings
-  public backgroundToggle = false;
-  public lightsToggle = false;
-  public previewToggle = false;
+  settingsReady = computed(() => {
+    const showSettingsEditor = this.processing.showSettingsEditor();
+    const entity = this.processing.entity();
+    const settings = this.processing.settings().localSettings;
+    if (!entity) return false;
+    if (!settings) return false;
+    return showSettingsEditor;
+  });
 
-  entity$ = this.processing.entity$;
-
-  mode$ = this.processing.mode$;
-
-  settingsReady$ = combineLatest([
-    this.processing.showSettingsEditor$,
-    this.entity$,
-    this.processing.settings$,
-  ]).pipe(
-    map(([value, entity, { localSettings }]) => {
-      if (!entity) return false;
-      if (!localSettings) return false;
-      return value;
-    }),
-  );
-
-  isStandalone$ = this.processing.isStandalone$;
-
-  canSaveSettings$ = combineLatest([
-    this.processing.defaultEntityLoaded$,
-    this.processing.fallbackEntityLoaded$,
-    this.processing.compilationLoaded$,
-    this.mode$,
-    this.processing.entity$,
-  ]).pipe(
-    map(
-      ([isDefault, isFallback, isCompilationLoaded, mode, entity]) =>
-        !isDefault &&
-        !isFallback &&
-        !isCompilationLoaded &&
-        mode === 'edit' &&
-        this.userdata.doesUserOwn(entity),
-    ),
-  );
+  canSaveSettings = computed(() => {
+    const isDefault = this.processing.isDefaultEntity();
+    const isFallback = this.processing.isFallbackEntity();
+    const isCompilationLoaded = this.processing.compilation() !== undefined;
+    const mode = this.processing.mode();
+    const entity = this.processing.entity();
+    return (
+      !isDefault &&
+      !isFallback &&
+      !isCompilationLoaded &&
+      mode === 'edit' &&
+      this.userdata.doesUserOwn(entity)
+    );
+  });
 
   public async setInitialPerspectivePreview() {
     this.videoPreviewGenerationState.set({ current: 0, total: 1 });
@@ -115,11 +98,11 @@ export class EntityFeatureSettingsComponent {
     await new Promise(resolve => setTimeout(resolve, 300));
     await this.setPreview();
     await this.generatePreviewVideoScreenshots();
-    this.setViewAsInitialView();
+    return this.setViewAsInitialView();
   }
 
   private async generatePreviewVideoScreenshots() {
-    const entity = await firstValueFrom(this.entity$);
+    const entity = this.processing.entity();
     if (!entity) return;
 
     const degreeRange = 180;
@@ -132,7 +115,7 @@ export class EntityFeatureSettingsComponent {
     }
 
     this.videoPreviewGenerationState.set({ current: 0, total: angles.length });
-    const camera = this.babylon.getActiveCamera();
+    const camera = this.#babylon.getActiveCamera();
     const originalAlpha = camera.alpha;
 
     const rotateCameraToAngle = (angleDegrees: number) => {
@@ -140,7 +123,7 @@ export class EntityFeatureSettingsComponent {
       camera.alpha = originalAlpha + angleRadians;
     };
 
-    const scene = this.babylon.getScene();
+    const scene = this.#babylon.getScene();
     // const clearColor = scene.clearColor;
     // scene.clearColor = new Color4(0, 0, 0, 0);
 
@@ -158,7 +141,7 @@ export class EntityFeatureSettingsComponent {
       rotateCameraToAngle(angle);
       await rotationReady();
       const result = await Tools.CreateScreenshotUsingRenderTargetAsync(
-        this.babylon.getEngine(),
+        this.#babylon.getEngine(),
         camera,
         { width: 480, height: 300 }, // 16:10
       );
@@ -170,7 +153,7 @@ export class EntityFeatureSettingsComponent {
 
     camera.alpha = originalAlpha;
 
-    const videoGenerationSuccess = await this.backend
+    const videoGenerationSuccess = await this.#backend
       .generateVideoPreview(entity._id.toString(), screenshots)
       .then(result => {
         if (result?.videoUrl) {
@@ -185,12 +168,13 @@ export class EntityFeatureSettingsComponent {
     this.videoGenerationSuccess.set({ value: videoGenerationSuccess });
   }
 
-  private async setPreview() {
-    const { localSettings } = await firstValueFrom(this.processing.settings$);
-    return this.babylon
+  private setPreview() {
+    const settings = this.processing.settings().localSettings;
+    return this.#babylon
       .createPreviewScreenshot()
       .then(screenshot => {
-        localSettings.preview = screenshot;
+        settings.preview = screenshot;
+        this.processing.localSettings.set(settings);
       })
       .catch(error => {
         console.error(error);
@@ -198,51 +182,52 @@ export class EntityFeatureSettingsComponent {
       });
   }
 
-  private async setViewAsInitialView() {
-    const { localSettings } = await firstValueFrom(this.processing.settings$);
-    const { position, target } = await this.babylon.cameraManager.getInitialPosition();
-    localSettings.cameraPositionInitial = {
+  private setViewAsInitialView() {
+    const settings = this.processing.settings().localSettings;
+    const { position, target } = this.#babylon.cameraManager.getInitialPosition();
+    settings.cameraPositionInitial = {
       position,
       target,
     };
+    this.processing.localSettings.set(settings);
     return this.entitySettings.loadCameraInititalPosition();
   }
 
-  public async setBackgroundColor(color: IColor) {
-    const { localSettings } = await firstValueFrom(this.processing.settings$);
-    localSettings.background.color = color;
-    this.entitySettings.loadBackgroundColor();
+  public setBackgroundColor(color: IColor) {
+    const settings = this.processing.settings().localSettings;
+    settings.background.color = color;
+    this.processing.localSettings.set(settings);
+    this.entitySettings.loadBackgroundSettings();
   }
 
-  public async setBackgroundEffect(enabled: boolean) {
-    const { localSettings } = await firstValueFrom(this.processing.settings$);
-    localSettings.background.effect = enabled;
-    this.entitySettings.loadBackgroundEffect();
+  public setBackgroundEffect(enabled: boolean) {
+    const settings = this.processing.settings().localSettings;
+    settings.background.effect = enabled;
+    this.processing.localSettings.set(settings);
+    this.entitySettings.loadBackgroundSettings();
   }
 
   public async saveSettings() {
-    const entity = await firstValueFrom(this.entity$);
-    const { localSettings } = await firstValueFrom(this.processing.settings$);
-    const isDefault = await firstValueFrom(this.processing.defaultEntityLoaded$);
-    const isFallback = await firstValueFrom(this.processing.fallbackEntityLoaded$);
-    const isInUpload = await firstValueFrom(this.processing.isInUpload$);
+    const entity = this.processing.entity();
+    const settings = this.processing.settings().localSettings;
+    const isDefault = this.processing.isDefaultEntity();
+    const isFallback = this.processing.isFallbackEntity();
+    const isInUpload = this.processing.isInUpload();
     if (!entity) {
       console.error(this);
       throw new Error('Entity missing');
     }
     if (isDefault || isFallback) return;
-    return this.backend.updateSettings(entity._id, localSettings).then(result => {
+    return this.#backend.updateSettings(entity._id, settings).then(result => {
       console.log('Settings gespeichert', result);
-      this.processing.settings$.next({
-        localSettings,
-        serverSettings: localSettings,
-      });
+      this.processing.localSettings.set(settings);
+      this.processing.serverSettings.set(settings);
       if (isInUpload) {
-        return this.postMessage.sendToParent({
+        return this.#postMessage.sendToParent({
           type: 'settings',
           data: {
             entityId: entity._id,
-            settings: localSettings,
+            settings: settings,
           },
         });
         // this.processing.upload = false;
@@ -250,15 +235,16 @@ export class EntityFeatureSettingsComponent {
     });
   }
 
-  public async exportSettings() {
-    const { localSettings } = await firstValueFrom(this.processing.settings$);
-    const blob = new Blob([JSON.stringify(localSettings)], { type: 'text/plain;charset=utf-8' });
+  public exportSettings() {
+    const settings = this.processing.settings().localSettings;
+    const blob = new Blob([JSON.stringify(settings)], { type: 'text/plain;charset=utf-8' });
     saveAs(blob, 'settings.json');
   }
 
-  public async backToDefaultSettings() {
-    const { serverSettings } = await firstValueFrom(this.processing.settings$);
-    this.processing.settings$.next({ serverSettings, localSettings: serverSettings });
+  public backToDefaultSettings() {
+    const settings = this.processing.settings().serverSettings;
+    this.processing.localSettings.set(settings);
+    this.processing.serverSettings.set(settings);
     this.entitySettings.restoreSettings();
   }
 

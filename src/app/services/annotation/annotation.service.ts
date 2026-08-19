@@ -1,6 +1,6 @@
 import { copyArrayItem, moveItemInArray } from '@angular/cdk/drag-drop';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Injectable, signal } from '@angular/core';
+import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import {
   ActionManager,
@@ -50,7 +50,7 @@ import {
 } from 'src/app/components/dialogs/dialog-reposition-annotation/dialog-reposition-annotation.component';
 import { OverlayService } from '../overlay/overlay.service';
 
-const isDefaultAnnotation = (annotation: IAnnotation) =>
+const isEntityAnnotation = (annotation: IAnnotation) =>
   !annotation.target.source.relatedCompilation ||
   annotation.target.source.relatedCompilation === '';
 
@@ -64,96 +64,98 @@ const sortByRanking = (a: IAnnotation, b: IAnnotation): number =>
 // Gaussian splatting and point clouds require more complex picking logic, and for meshes we only need the point and the normal anyways, so we define a type for the picking result that is relevant for annotations in our use case
 type PartialPick = { pickedPoint: Vector3; pickedNormal: Vector3 };
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class AnnotationService {
-  // All about annotations
-  public selectedAnnotation$ = new BehaviorSubject('');
-  public editModeAnnotation$ = new BehaviorSubject('');
-  public toggleFullscreenAnnotation$ = new BehaviorSubject('');
-  public annotations$ = new BehaviorSubject<IAnnotation[]>([]);
-  public hiddenAnnotations$ = new BehaviorSubject<string[]>([]);
+  private babylon = inject(BabylonService);
+  private backend = inject(BackendService);
+  private message = inject(MessageService);
+  private processing = inject(ProcessingService);
+  private dialog = inject(MatDialog);
+  private userdata = inject(UserdataService);
+  private overlay = inject(OverlayService);
 
-  public isAnnotationMode$ = new BehaviorSubject(false);
+  public selectedAnnotation = signal<
+    { _id: string; mode: 'view' | 'edit'; fullscreen?: boolean } | undefined
+  >(undefined);
+  public isAnnotationMode = signal(false);
 
-  #isTransitioningSubject = new BehaviorSubject<boolean>(false);
-  public get isTransitioning$(): Observable<boolean> {
-    return this.#isTransitioningSubject.asObservable();
-  }
-
-  private defaultOffset = 0;
-
-  public picked$ = new ReplaySubject<PartialPick>();
-  public debouncedPicked$ = this.isAnnotationMode$.pipe(
-    filter(isAnnotationMode => isAnnotationMode),
-    switchMap(() => this.picked$),
-    distinct(({ pickedPoint }) => JSON.stringify(pickedPoint)),
+  public annotations = signal<IAnnotation[]>([]);
+  public entityAnnotations = computed(() => this.annotations().filter(isEntityAnnotation));
+  public compilationAnnotations = computed(() =>
+    this.annotations().filter(isCompilationAnnotation),
   );
+  public hiddenAnnotations = signal<string[]>([]);
+  public activeAnnotations = computed(() => {
+    const annotations = this.annotations();
+    const compilation = this.processing.compilation();
+    if (!compilation) return annotations.filter(isEntityAnnotation);
+    return annotations.filter(isCompilationAnnotation);
+  });
+  public sortedAnnotations = computed(() => {
+    const entityAnnotations = this.entityAnnotations().sort(sortByRanking);
+    const compilationAnnotations = this.compilationAnnotations().sort(sortByRanking);
+    return [...entityAnnotations, ...compilationAnnotations];
+  });
 
-  constructor(
-    private babylon: BabylonService,
-    private backend: BackendService,
-    private message: MessageService,
-    private processing: ProcessingService,
-    private dialog: MatDialog,
-    private userdata: UserdataService,
-    private overlay: OverlayService,
-  ) {
-    this.debouncedPicked$.subscribe(result => {
-      this.createNewAnnotation(result);
+  public isTransitioning = signal(false);
+
+  private defaultOffset = signal(0);
+
+  public partialPick = signal<PartialPick | undefined>(undefined);
+  public debouncedPick = computed(() => {
+    const partialPick = this.partialPick();
+    const annotationMode = this.isAnnotationMode();
+    if (!annotationMode || !partialPick) return undefined;
+    return partialPick;
+  });
+
+  constructor() {
+    effect(() => {
+      const debouncedPick = this.debouncedPick();
+      if (debouncedPick) return this.createNewAnnotation(debouncedPick);
     });
 
-    this.processing.state$.subscribe(({ entity }) => {
-      if (entity) this.loadAnnotations();
+    effect(() => {
+      const state = this.processing.state();
+      if (state.entity) return this.loadAnnotations();
     });
 
-    this.processing.isAnnotatingFeatured$.subscribe((init: boolean) => {
-      if (init) this.initializeAnnotationMode();
+    effect(() => {
+      const isAnnotatingFeatured = this.processing.isAnnotatingFeatured();
+      if (isAnnotatingFeatured) return this.initializeAnnotationMode();
     });
 
-    this.processing.hasAnnotationAllowance$.subscribe((allowance: boolean) => {
-      console.log('ich setze das mesh als', allowance);
-      this.setAnnotationMode(allowance);
+    effect(() => {
+      const hasAnnotationAllowance = this.processing.hasAnnotationAllowance();
+      return this.setAnnotationMode(hasAnnotationAllowance);
     });
 
-    this.defaultAnnotations$.subscribe(arr => {
-      this.defaultOffset = arr.length;
+    effect(() => {
+      const entityAnnotations = this.entityAnnotations();
+      this.defaultOffset.set(entityAnnotations.length);
     });
 
-    this.currentAnnotations$.subscribe(() => this.redrawMarker());
-  }
+    effect(() => {
+      const activeAnnotations = this.activeAnnotations();
+      return this.redrawMarker();
+    });
 
-  get defaultAnnotations$() {
-    return this.annotations$.pipe(map(arr => arr.filter(isDefaultAnnotation)));
-  }
-
-  get compilationAnnotations$() {
-    return this.annotations$.pipe(map(arr => arr.filter(isCompilationAnnotation)));
-  }
-
-  get currentAnnotations$() {
-    return combineLatest([this.annotations$, this.processing.compilationLoaded$]).pipe(
-      map(([annotations, isCompilationLoaded]) =>
-        annotations.filter(annotation =>
-          isCompilationLoaded
-            ? isCompilationAnnotation(annotation)
-            : isDefaultAnnotation(annotation),
-        ),
-      ),
-    );
+    effect(() => {
+      const sortedAnnotations = this.sortedAnnotations();
+      return this.changedRankingPositions();
+    });
   }
 
   public async moveAnnotationByIndex(from_index: number, to_index: number) {
     // Since all annotations are in the same array but sorted
     // with defaults first and compilation following
     // we can calculate the offset if needed
-    const arr = await this.getSortedAnnotations();
-    const isCompilationLoaded = await firstValueFrom(this.processing.compilationLoaded$);
-    const offset = isCompilationLoaded ? this.defaultOffset : 0;
+    const arr = this.sortedAnnotations();
+    const isCompilationLoaded = this.processing.compilation() !== undefined;
+    const offset = isCompilationLoaded ? this.defaultOffset() : 0;
     moveItemInArray(arr, from_index + offset, to_index + offset);
-    this.annotations$.next(arr);
-    await this.changedRankingPositions();
+    this.annotations.set(arr);
+    // await this.changedRankingPositions();
   }
 
   public async moveAnnotationByReorderMovement(annotationIndex: number, movement: ReorderMovement) {
@@ -161,7 +163,7 @@ export class AnnotationService {
       case 'first':
         return this.moveAnnotationByIndex(annotationIndex, 0);
       case 'last':
-        return this.moveAnnotationByIndex(annotationIndex, this.annotations$.getValue().length - 1);
+        return this.moveAnnotationByIndex(annotationIndex, this.annotations().length - 1);
       case 'one-up':
         return this.moveAnnotationByIndex(annotationIndex, annotationIndex - 1);
       case 'one-down':
@@ -170,49 +172,45 @@ export class AnnotationService {
   }
 
   public async loadAnnotations() {
-    const entity = await firstValueFrom(this.processing.entity$);
-    const meshes = await firstValueFrom(this.processing.meshes$);
-    const isStandalone = await firstValueFrom(this.processing.isStandalone$);
-    const isDefault = await firstValueFrom(this.processing.defaultEntityLoaded$);
-    const isFallback = await firstValueFrom(this.processing.fallbackEntityLoaded$);
-    const isAnnotatingFeatured = await firstValueFrom(this.processing.isAnnotatingFeatured$);
+    const entity = this.processing.entity();
+    const meshes = this.processing.meshes();
+    const isStandalone = this.processing.isStandalone();
+    const isDefault = this.processing.isDefaultEntity();
+    const isFallback = this.processing.isFallbackEntity();
+    const isAnnotatingFeatured = this.processing.isAnnotatingFeatured();
     if (!entity) {
       throw new Error('Entity missing');
     }
     Tags.AddTagsTo(meshes, entity._id.toString());
-    this.selectedAnnotation$.next('');
-    this.editModeAnnotation$.next('');
-    this.annotations$.next([]);
+    this.selectedAnnotation.set(undefined);
+    this.annotations.set([]);
 
     const loadFromServer = !isStandalone && !isDefault && !isFallback;
 
     if (loadFromServer) {
       const serverAnnotations = await this.getAnnotationsfromServerDB();
-      this.annotations$.next(serverAnnotations);
-      await this.sortAnnotations();
+      this.annotations.set(serverAnnotations);
     } else {
       if (isFallback) {
-        this.annotations$.next([annotationFallback]);
+        this.annotations.set([annotationFallback]);
       }
       if (isDefault) {
         if (isAnnotatingFeatured && annotationLogo.length) {
-          this.annotations$.next(annotationLogo);
+          this.annotations.set(annotationLogo);
         }
       }
       if (isStandalone) {
-        this.annotations$.next(Object.values(entity.annotations) as IAnnotation[]);
+        this.annotations.set(Object.values(entity.annotations) as IAnnotation[]);
       }
-      const annotations = this.annotations$.getValue();
-      if (annotations.length > 0) {
-        this.selectedAnnotation$.next(annotations[0]._id.toString());
-      }
+      const annotations = this.annotations();
+      this.setSelectedAnnotation(annotations.at(0)?._id ?? '');
     }
   }
 
   private async getAnnotationsfromServerDB() {
-    const entity = await firstValueFrom(this.processing.entity$);
-    const compilation = await firstValueFrom(this.processing.compilation$);
-    const isCompilationLoaded = await firstValueFrom(this.processing.compilationLoaded$);
+    const entity = this.processing.entity();
+    const compilation = this.processing.compilation();
+    const isCompilationLoaded = compilation !== undefined;
     const serverAnnotations: IAnnotation[] = [];
     // Annotationen vom Server des aktuellen Entityls...
     for (const id in entity?.annotations) {
@@ -236,21 +234,6 @@ export class AnnotationService {
     );
   }
 
-  private async getSortedAnnotations() {
-    const defaultAnnotations = (await firstValueFrom(this.defaultAnnotations$)).sort(sortByRanking);
-    const compilationAnnotations = (await firstValueFrom(this.compilationAnnotations$)).sort(
-      sortByRanking,
-    );
-
-    return defaultAnnotations.concat(compilationAnnotations);
-  }
-
-  private async sortAnnotations() {
-    this.annotations$.next(await this.getSortedAnnotations());
-
-    await this.changedRankingPositions();
-  }
-
   isRepositioning = signal(false);
   public async initializeRepositionMode(annotation: IAnnotation) {
     const markerName = createMarkerName(annotation._id.toString());
@@ -261,10 +244,10 @@ export class AnnotationService {
     }
     console.log('Initializing reposition mode for annotation', { annotation, marker });
 
-    const allAnnotations = await firstValueFrom(this.currentAnnotations$);
-    const hiddenAnnotations = await firstValueFrom(this.hiddenAnnotations$);
+    const allAnnotations = this.activeAnnotations();
+    const hiddenAnnotations = this.hiddenAnnotations();
     // Hide all markers except the one we want to reposition, to avoid confusion during repositioning
-    this.hiddenAnnotations$.next([
+    this.hiddenAnnotations.set([
       ...allAnnotations
         .filter(anno => anno._id.toString() !== annotation._id.toString())
         .map(anno => anno._id.toString()),
@@ -291,7 +274,7 @@ export class AnnotationService {
     gizmo.attachedMesh = transformMesh;
 
     this.isRepositioning.set(true);
-    void this.setSelectedAnnotation('');
+    this.setSelectedAnnotation('');
     this.overlay.toggleSidenav('annotation', false);
 
     const dialogRef = this.dialog.open<
@@ -361,23 +344,22 @@ export class AnnotationService {
       await this.updateAnnotation(annotation);
     }
 
-    this.hiddenAnnotations$.next([...hiddenAnnotations]);
+    this.hiddenAnnotations.set([...hiddenAnnotations]);
     this.isRepositioning.set(false);
-    void this.setSelectedAnnotation(annotation._id.toString());
+    this.setSelectedAnnotation(annotation._id.toString());
     this.overlay.toggleSidenav('annotation', true);
   }
 
-  public async initializeAnnotationMode() {
+  public initializeAnnotationMode() {
     const scene = this.babylon.getScene();
-    const mediaType = await firstValueFrom(this.processing.mediaType$);
+    const mediaType = this.processing.mediaType();
     if (!mediaType) {
-      console.warn('Media type is undefined, cannot initialize annotation mode');
-      return;
+      throw new Error('Media type is undefined, cannot initialize annotation mode');
     }
 
     const canvas = this.babylon.getCanvas();
-    fromEvent<PointerEvent>(canvas, 'dblclick').subscribe(() => {
-      if (!this.isAnnotationMode$.getValue()) return;
+    return fromEvent<PointerEvent>(canvas, 'dblclick').subscribe(() => {
+      if (!this.isAnnotationMode()) return;
       const pickResult = (() => {
         switch (mediaType) {
           case 'splat': {
@@ -427,15 +409,15 @@ export class AnnotationService {
         console.warn('No valid picking result, not creating annotation');
         return;
       }
-      this.picked$.next(pickResult);
+      this.partialPick.set(pickResult);
     });
   }
 
-  private async setAnnotationMode(value: boolean) {
-    const mediaType = await firstValueFrom(this.processing.mediaType$);
-    if (mediaType === 'video' || mediaType === 'audio') return;
-    this.isAnnotationMode$.next(value);
-    if (value) {
+  private setAnnotationMode(enabled: boolean) {
+    const mediaType = this.processing.mediaType();
+    if (!mediaType || ['video', 'audio'].includes(mediaType)) return;
+    this.isAnnotationMode.set(enabled);
+    if (enabled) {
       this.babylon.getCanvas().classList.add('annotation-mode');
     } else {
       this.babylon.getCanvas().classList.remove('annotation-mode');
@@ -444,11 +426,11 @@ export class AnnotationService {
 
   public async createNewAnnotation(result: PartialPick) {
     const camera = this.babylon.cameraManager.getInitialPosition();
-    const currentAnnotations = await firstValueFrom(this.currentAnnotations$);
-    const entity = await firstValueFrom(this.processing.entity$);
-    const compilation = await firstValueFrom(this.processing.compilation$);
-    const isCompilationLoaded = await firstValueFrom(this.processing.compilationLoaded$);
-    const userdata = await firstValueFrom(this.userdata.userData$);
+    const activeAnnotations = this.activeAnnotations();
+    const entity = this.processing.entity();
+    const compilation = this.processing.compilation();
+    const isCompilationLoaded = compilation !== undefined;
+    const userdata = this.userdata.userdata();
 
     const detailScreenshot = await this.babylon.createPreviewScreenshot();
     if (!entity) {
@@ -474,7 +456,7 @@ export class AnnotationService {
       validated: !isCompilationLoaded,
       _id: generatedId,
       identifier: generatedId,
-      ranking: currentAnnotations.length + 1,
+      ranking: activeAnnotations.length + 1,
       creator: {
         type: 'person',
         name: personName,
@@ -526,8 +508,12 @@ export class AnnotationService {
     );
     console.log('transformedAnnotation', transformedAnnotation);
 
-    this.toggleFullscreenAnnotation$.next(transformedAnnotation._id.toString());
-    this.add(transformedAnnotation);
+    this.selectedAnnotation.set({
+      _id: transformedAnnotation._id.toString(),
+      mode: 'edit',
+      fullscreen: true,
+    });
+    return this.add(transformedAnnotation);
   }
 
   unsavedAnnotations = signal(new Set<string>());
@@ -542,9 +528,9 @@ export class AnnotationService {
   private async add(_annotation: IAnnotation) {
     let newAnnotation = _annotation;
     newAnnotation.lastModificationDate = new Date().toISOString();
-    const isStandalone = await firstValueFrom(this.processing.isStandalone$);
-    const isDefault = await firstValueFrom(this.processing.defaultEntityLoaded$);
-    const isFallback = await firstValueFrom(this.processing.fallbackEntityLoaded$);
+    const isStandalone = this.processing.isStandalone();
+    const isDefault = this.processing.isDefaultEntity();
+    const isFallback = this.processing.isFallbackEntity();
     const updateBackend = !isStandalone && !isDefault && !isFallback;
     if (updateBackend) {
       const hasContent =
@@ -568,22 +554,21 @@ export class AnnotationService {
       }
     }
     this.drawMarker(newAnnotation);
-    this.annotations$.next(this.annotations$.getValue().concat(newAnnotation));
-    this.selectedAnnotation$.next(newAnnotation._id.toString());
-    this.editModeAnnotation$.next(newAnnotation._id.toString());
+    this.annotations.set(this.annotations().concat(newAnnotation));
+    this.selectedAnnotation.set({ _id: newAnnotation._id.toString(), mode: 'edit' });
   }
 
   public async updateAnnotation(_annotation: IAnnotation) {
     let newAnnotation = _annotation;
     newAnnotation.lastModificationDate = new Date().toISOString();
-    const isCompilationLoaded = await firstValueFrom(this.processing.compilationLoaded$);
-    const compilation = await firstValueFrom(this.processing.compilation$);
-    const isDefault = await firstValueFrom(this.processing.defaultEntityLoaded$);
-    const isFallback = await firstValueFrom(this.processing.fallbackEntityLoaded$);
+    const compilation = this.processing.compilation();
+    const isCompilationLoaded = compilation !== undefined;
+    const isDefault = this.processing.isDefaultEntity();
+    const isFallback = this.processing.isFallbackEntity();
     const userOwnsCompilation = compilation && this.userdata.doesUserOwn(compilation);
     if (!isFallback && !isDefault) {
       const isOwner =
-        (await this.userdata.isAnnotationOwner(_annotation)) ||
+        this.userdata.isAnnotationOwner(_annotation) ||
         (isCompilationLoaded && userOwnsCompilation);
       if (isOwner) {
         this.backend
@@ -598,18 +583,19 @@ export class AnnotationService {
           });
       }
     }
-    const arr = this.annotations$.getValue();
+    const arr = this.annotations();
     arr.splice(
       arr.findIndex(ann => ann._id === _annotation._id),
       1,
       newAnnotation,
     );
-    this.annotations$.next(arr);
+    this.annotations.set(arr);
+    return newAnnotation;
   }
 
   public async deleteAnnotation(_annotation: IAnnotation) {
-    const isDefault = await firstValueFrom(this.processing.defaultEntityLoaded$);
-    const isFallback = await firstValueFrom(this.processing.fallbackEntityLoaded$);
+    const isDefault = this.processing.isDefaultEntity();
+    const isFallback = this.processing.isFallbackEntity();
     if (!this.userdata.isAnnotationOwner(_annotation)) {
       this.message.error('You are not the owner of this annotation.');
       return false;
@@ -626,15 +612,14 @@ export class AnnotationService {
     this.setSelectedAnnotation('');
     this.setEditModeAnnotation('');
 
-    this.annotations$.next(this.annotations$.getValue().filter(ann => ann._id !== _annotation._id));
-    this.changedRankingPositions();
+    this.annotations.set(this.annotations().filter(ann => ann._id !== _annotation._id));
+    // this.changedRankingPositions();
     this.redrawMarker();
     return true;
   }
 
   public async deleteAnnotationFromServer(annotationId: string) {
-    const loginData =
-      (await firstValueFrom(this.userdata.loginData$)) ?? (await this.promptUserData());
+    const loginData = this.userdata.loginData() ?? (await this.promptUserData());
     if (!loginData) {
       this.message.info('Failed authentication - Annotation can not be deleted from server.');
       return false;
@@ -664,19 +649,21 @@ export class AnnotationService {
     return await firstValueFrom(dialogRef.afterClosed());
   }
 
-  private async changedRankingPositions() {
+  private changedRankingPositions() {
     // Decide whether we iterate over the first part of this.annotations
     // containing all the default annotations or to iterate over the second part
     // containing all of the compilation annotations
-    const arr = this.annotations$.getValue();
-    const isCompilationLoaded = await firstValueFrom(this.processing.compilationLoaded$);
-    const offset = isCompilationLoaded ? this.defaultOffset : 0;
-    const length = isCompilationLoaded ? arr.length : this.defaultOffset;
+    const arr = this.annotations();
+    const isCompilationLoaded = this.processing.compilation() !== undefined;
+    const offset = isCompilationLoaded ? this.defaultOffset() : 0;
+    const length = isCompilationLoaded ? arr.length : this.defaultOffset();
+    const promises = new Array<Promise<IAnnotation>>();
     for (let i = offset; i < length; i++) {
       const annotation = arr[i];
       if (!annotation._id) continue;
-      await this.updateAnnotation({ ...annotation, ranking: i - offset + 1 });
+      promises.push(this.updateAnnotation({ ...annotation, ranking: i - offset + 1 }));
     }
+    return Promise.all(promises);
   }
 
   public deleteMarker(annotationID: string) {
@@ -686,8 +673,8 @@ export class AnnotationService {
       .forEach(value => value.dispose());
   }
 
-  public async redrawMarker() {
-    const arr = await firstValueFrom(this.currentAnnotations$);
+  public redrawMarker() {
+    const arr = this.activeAnnotations();
     for (const annotation of arr) {
       this.deleteMarker(annotation._id.toString());
       this.drawMarker(annotation);
@@ -727,10 +714,10 @@ export class AnnotationService {
     );
   }
 
-  public async setSelectedAnnotation(id: string) {
-    const arr = await firstValueFrom(this.currentAnnotations$);
+  public setSelectedAnnotation(id: string) {
+    const arr = this.activeAnnotations();
     const selectedAnnotation = arr.find(anno => anno._id === id);
-    this.selectedAnnotation$.next(id);
+    this.selectedAnnotation.set({ _id: id, mode: 'view' });
     if (!selectedAnnotation) return;
 
     const perspective = selectedAnnotation.body.content.relatedPerspective;
@@ -747,14 +734,14 @@ export class AnnotationService {
         radius: position.z,
         target: Vector3.FromArray(Object.values(target)),
       });
-      this.#isTransitioningSubject.next(true);
-      animatable.onAnimationEndObservable.addOnce(() => this.#isTransitioningSubject.next(false));
+      this.isTransitioning.set(true);
+      animatable.onAnimationEndObservable.addOnce(() => this.isTransitioning.set(false));
     }
     this.babylon.hideMesh(selectedAnnotation._id.toString(), true);
   }
 
   public setEditModeAnnotation(id: string) {
-    this.editModeAnnotation$.next(id);
+    this.selectedAnnotation.set({ _id: id, mode: 'edit' });
   }
 
   public async shareAnnotation(annotation: IAnnotation) {
@@ -762,7 +749,7 @@ export class AnnotationService {
     dialogConfig.disableClose = true;
     dialogConfig.autoFocus = true;
 
-    const entity = await firstValueFrom(this.processing.entity$);
+    const entity = this.processing.entity();
 
     if (!entity) {
       throw new Error('Entity missing');
@@ -803,8 +790,8 @@ export class AnnotationService {
   ): Promise<IAnnotation> {
     const generatedId = new ObjectID().toString();
 
-    const entity = await firstValueFrom(this.processing.entity$);
-    const userdata = await firstValueFrom(this.userdata.userData$);
+    const entity = this.processing.entity();
+    const userdata = this.userdata.userdata();
 
     if (!entity) {
       throw new Error('Entity missing');
@@ -837,9 +824,9 @@ export class AnnotationService {
 
   public setAnnotationVisibility(id: string, visible: boolean) {
     if (visible) {
-      this.hiddenAnnotations$.next(this.hiddenAnnotations$.value.filter(x => x !== id));
+      this.hiddenAnnotations.update(hidden => [...hidden.filter(x => x !== id)]);
     } else {
-      this.hiddenAnnotations$.next([...this.hiddenAnnotations$.value, id]);
+      this.hiddenAnnotations.update(hidden => [...hidden, id]);
     }
   }
 }

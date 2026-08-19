@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable, Output, signal } from '@angular/core';
+import { effect, EventEmitter, inject, Injectable, Output, signal } from '@angular/core';
 import {
   Color3,
   Mesh,
@@ -27,6 +27,7 @@ import {
 } from './visualUIHelper';
 import { LoadingScreenService } from '../babylon/loadingscreen';
 import { PostMessageService } from '../post-message/post-message.service';
+import { CameraHandlerService } from '../babylon/camera-handler.service';
 
 const isDegreeSpectrum = (value: number) => {
   return value >= 0 && value <= 360 ? value : value > 360 ? 360 : 0;
@@ -49,10 +50,16 @@ interface RotationDragTooltip {
   y: number;
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class EntitySettingsService {
+  private babylon = inject(BabylonService);
+  private cameraHandler = inject(CameraHandlerService);
+  private processing = inject(ProcessingService);
+  private lights = inject(LightService);
+  private annotationService = inject(AnnotationService);
+  private loadingScreen = inject(LoadingScreenService);
+  private postMessage = inject(PostMessageService);
+
   private min = new Vector3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
   private max = new Vector3(Number.MAX_VALUE * -1, Number.MAX_VALUE * -1, Number.MAX_VALUE * -1);
   public initialSize = Vector3.Zero();
@@ -66,6 +73,12 @@ export class EntitySettingsService {
   private groundInitialSize = 0;
   public localAxisInitialSize = 0;
   public worldAxisInitialSize = 0;
+  public rotationQuaternion = signal(Quaternion.RotationYawPitchRoll(0, 0, 0));
+  public entitySize = signal({
+    height: (0).toFixed(2),
+    width: (0).toFixed(2),
+    depth: (0).toFixed(2),
+  });
 
   private utilityLayer?: UtilityLayerRenderer;
   private rotationGizmo?: RotationGizmo;
@@ -79,49 +92,36 @@ export class EntitySettingsService {
 
   readonly rotationDragTooltip = signal<RotationDragTooltip | null>(null);
 
-  private entitySettings: IEntitySettings = minimalSettings;
+  private entitySettings = signal<IEntitySettings>(minimalSettings);
+  public helpersReady = signal(false);
 
-  constructor(
-    private babylon: BabylonService,
-    private processing: ProcessingService,
-    private lights: LightService,
-    private annotationService: AnnotationService,
-    private loadingScreen: LoadingScreenService,
-    private postMessage: PostMessageService,
-  ) {
-    this.processing.state$
-      .pipe(
-        filter(({ entity, meshes }) => !!entity && !!meshes),
-        distinctUntilChanged((a, b) => a.entity === b.entity && a.meshes === b.meshes),
-        debounceTime(100),
-      )
-      .subscribe(({ settings, entity, meshes }) => {
-        console.log('EntitySettingsService', entity?._id, {
-          settings,
-          entity,
-          meshes,
-        });
-        this.entitySettings = settings;
-        requestAnimationFrame(() =>
-          this.setUpSettings()
-            .then(() => console.log('Settings loaded'))
-            .catch((err: Error) => console.log('Settings not loaded', err.message))
-            .finally(() => {
-              this.loadingScreen.hide();
-              this.postMessage.sendToParent({
-                type: 'settingsLoaded',
-                data: {},
-              });
-            }),
-        );
+  constructor() {
+    effect(() => {
+      const { entity, meshes, settings } = this.processing.state();
+      if (!entity || !meshes) return;
+      console.log('[EntitySettingsService]', entity?._id, {
+        settings,
+        entity,
+        meshes,
       });
+      this.entitySettings.set(settings);
+      requestAnimationFrame(() => {
+        try {
+          this.setUpSettings();
+          console.log('[EntitySettingsService]','Settings loaded');
+        } catch (err) {
+          console.error('[EntitySettingsService]','Settings not loaded', err);
+        }
+        this.loadingScreen.hide();
+        this.postMessage.sendToParent({
+          type: 'settingsLoaded',
+          data: {},
+        });
+      });
+    });
   }
 
-  get meshes$() {
-    return this.processing.meshes$;
-  }
-
-  private async resetInitialValues() {
+  private resetInitialValues() {
     this.min = new Vector3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
     this.max = new Vector3(Number.MAX_VALUE * -1, Number.MAX_VALUE * -1, Number.MAX_VALUE * -1);
     this.initialSize = Vector3.Zero();
@@ -130,56 +130,57 @@ export class EntitySettingsService {
     this.groundInitialSize = 0;
     this.localAxisInitialSize = 0;
     this.worldAxisInitialSize = 0;
-    this.processing.rotationQuaternion = Quaternion.RotationYawPitchRoll(0, 0, 0);
-    this.processing.entityHeight = (0).toFixed(2);
-    this.processing.entityWidth = (0).toFixed(2);
-    this.processing.entityDepth = (0).toFixed(2);
+    this.rotationQuaternion.set(Quaternion.RotationYawPitchRoll(0, 0, 0));
+    this.entitySize.set({
+      height: (0).toFixed(2),
+      width: (0).toFixed(2),
+      depth: (0).toFixed(2),
+    });
   }
 
-  private async setUpSettings() {
-    const meshes = await firstValueFrom(this.processing.meshes$);
-    const isInUpload = await firstValueFrom(this.processing.isInUpload$);
-    const hasMeshSettings = await firstValueFrom(this.processing.hasMeshSettings$);
-    if (!this.entitySettings) {
-      throw new Error('No settings available.');
-    }
+  private setUpSettings() {
+    const meshes = this.processing.meshes();
+    const isInUpload = this.processing.isInUpload();
+    const hasMeshSettings = this.processing.hasMeshSettings();
+    console.log('[EntitySettingsService]', { meshes, isInUpload, hasMeshSettings });
     if (!meshes || meshes.length === 0) {
       throw new Error('No meshes available.');
     }
-    await this.resetInitialValues();
-    await this.initialiseSizeValues();
-    await this.setUpMeshSettingsHelper();
-    await this.createVisualUIMeshSettingsHelper();
-    await this.loadSettings();
+    this.resetInitialValues();
+    this.initialiseSizeValues();
+    this.setUpMeshSettingsHelper();
+    this.createVisualUIMeshSettingsHelper();
+    this.loadSettings();
     if (!isInUpload || !hasMeshSettings) {
-      await this.destroyMesh('boundingBox');
-      await this.decomposeMeshSettingsHelper();
+      this.destroyMesh('boundingBox');
+      this.decomposeMeshSettingsHelper();
     }
 
     // Force redraw annotation markers to fix annotations being offset from the entity if the entity is parented to center
-    await this.annotationService.redrawMarker();
+    this.annotationService.redrawMarker();
   }
 
-  private async initialiseSizeValues() {
-    await this.calculateMinMax()
-      .then(() => {
-        this.initialSize = this.max.subtract(this.min);
-        this.processing.entityHeight = this.initialSize.y.toFixed(2);
-        this.processing.entityWidth = this.initialSize.x.toFixed(2);
-        this.processing.entityDepth = this.initialSize.z.toFixed(2);
-        this.initialCenterPoint = this.currentCenterPoint = new Vector3(
-          this.max.x - this.initialSize.x / 2,
-          this.max.y - this.initialSize.y / 2,
-          this.max.z - this.initialSize.z / 2,
-        );
-      })
-      .catch((err: Error) => console.log('Failed intitializing size', err.message));
+  private initialiseSizeValues() {
+    this.calculateMinMax();
+    this.initialSize = this.max.subtract(this.min);
+    this.entitySize.set({
+      height: this.initialSize.y.toFixed(2),
+      width: this.initialSize.x.toFixed(2),
+      depth: this.initialSize.z.toFixed(2),
+    });
+    const centerVector =new Vector3(
+      this.max.x - this.initialSize.x / 2,
+      this.max.y - this.initialSize.y / 2,
+      this.max.z - this.initialSize.z / 2,
+    );
+    this.initialCenterPoint = centerVector.clone();
+    this.currentCenterPoint = centerVector.clone();
   }
 
-  private async calculateMinMax() {
-    const meshes = await firstValueFrom(this.processing.meshes$);
+  private calculateMinMax() {
+    const meshes = this.processing.meshes();
     if (!meshes) {
-      throw new Error('Center missing');
+      throw new Error('Meshes missing');
     }
     meshes.forEach(mesh => {
       mesh.computeWorldMatrix(true);
@@ -212,8 +213,8 @@ export class EntitySettingsService {
     });
   }
 
-  private async setUpMeshSettingsHelper() {
-    const meshes = await firstValueFrom(this.processing.meshes$);
+  private setUpMeshSettingsHelper() {
+    const meshes = this.processing.meshes();
     if (!meshes) {
       throw new Error('No meshes available.');
     }
@@ -225,7 +226,7 @@ export class EntitySettingsService {
     this.center.isVisible = false;
 
     // rotation to zero
-    this.center.rotationQuaternion = this.processing.rotationQuaternion;
+    this.center.rotationQuaternion = this.rotationQuaternion();
 
     // position model to origin of the world coordinate system
     if (this.min.x > 0) {
@@ -262,44 +263,40 @@ export class EntitySettingsService {
         Tags.AddTagsTo(mesh, 'parentedMesh');
       }
     });
+
+    this.helpersReady.set(true);
   }
 
-  private async loadSettings() {
-    const mediaType = await firstValueFrom(this.processing.mediaType$);
-    const hasMeshSettings = await firstValueFrom(this.processing.hasMeshSettings$);
-    await this.initialiseCamera();
-    await this.loadCameraInititalPosition();
-    this.loadBackgroundEffect();
-    this.loadBackgroundColor();
+  private loadSettings() {
+    const mediaType = this.processing.mediaType();
+    const hasMeshSettings = this.processing.hasMeshSettings();
+    this.initialiseCamera();
+    this.loadCameraInititalPosition();
+    this.loadBackgroundSettings();
     this.initialiseLights();
     if (hasMeshSettings || mediaType === 'audio') {
-      await this.loadRotation();
-      await this.loadScaling();
+      this.loadRotation();
+      this.loadScaling();
     }
   }
 
   public restoreSettings() {
     this.loadCameraInititalPosition();
-    this.loadBackgroundEffect();
-    this.loadBackgroundColor();
-    this.lights.initialiseLights(this.entitySettings);
+    this.loadBackgroundSettings();
+    this.lights.initialiseLights();
   }
 
-  private async initialiseCamera() {
-    if (!this.entitySettings) {
-      console.error(this);
-      throw new Error('Settings missing');
-    }
-    const mediaType = await firstValueFrom(this.processing.mediaType$);
-    const isInUpload = await firstValueFrom(this.processing.isInUpload$);
-    const isDefault = await firstValueFrom(this.processing.defaultEntityLoaded$);
-    const scale = getScaleVector(this.entitySettings.scale);
+  private initialiseCamera() {
+    const mediaType = this.processing.mediaType();
+    const isInUpload = this.processing.isInUpload();
+    const isDefault = this.processing.isDefaultEntity();
+    const scale = getScaleVector(this.entitySettings().scale);
     const isModel = mediaType === 'model' || mediaType === 'entity';
     const isSplat = mediaType === 'splat';
 
     if (isSplat) {
-      const meshes = await firstValueFrom(this.processing.meshes$);
-      console.log(meshes.at(0)?.getBoundingInfo().diagonalLength);
+      const meshes = this.processing.meshes();
+      console.log('[EntitySettingsService]',meshes.at(0)?.getBoundingInfo().diagonalLength);
       const target = meshes.at(0)?.getBoundingInfo()?.boundingSphere.minimum.negate();
       if (target) this.currentCenterPoint = target;
     }
@@ -316,7 +313,7 @@ export class EntitySettingsService {
       );
     }
     const max = !isDefault ? (isInUpload && isModel ? diagonalLength * 2.5 : diagonalLength) : 87.5;
-    await this.babylon.cameraManager.setUpActiveCamera(max, mediaType!);
+    this.babylon.cameraManager.setUpActiveCamera(max, mediaType!);
 
     if (isInUpload && mediaType !== 'audio') {
       const position = new Vector3(
@@ -325,25 +322,24 @@ export class EntitySettingsService {
         isSplat ? diagonalLength * 0.01 : diagonalLength * 1.25,
       );
       const target = this.currentCenterPoint;
-      console.log('target', target);
-      console.log('position', position);
-      this.entitySettings.cameraPositionInitial = {
-        position,
-        target,
-      };
+      console.log('[EntitySettingsService]',{ target, position});
+      this.entitySettings.update(state => ({
+        ...state,
+        cameraPositionInitial: { position, target },
+      }));
     }
   }
 
-  public async decomposeMeshSettingsHelper() {
+  public decomposeMeshSettingsHelper() {
     const center = this.center;
     if (!center) {
-      throw new Error('Center missing');
+      throw new Error('Center missing: decomposeMeshSettingsHelper');
     }
     const meshes = this.babylon.getScene().getMeshesByTags('parentedMesh');
     if (!meshes) {
-      throw new Error('Meshes missing');
+      throw new Error('Meshes missing: decomposeMeshSettingsHelper');
     }
-    await meshes.forEach(mesh => {
+    meshes.forEach(mesh => {
       mesh.computeWorldMatrix(true);
       const abs = mesh.absolutePosition;
       if (!mesh.rotationQuaternion) {
@@ -356,22 +352,22 @@ export class EntitySettingsService {
       mesh.parent = null;
       mesh.position = abs;
       const meshRotation = mesh.rotationQuaternion;
-      mesh.rotationQuaternion = this.processing.rotationQuaternion.multiply(meshRotation);
+      mesh.rotationQuaternion = this.rotationQuaternion().multiply(meshRotation);
       center.computeWorldMatrix();
       mesh.scaling.x *= center.scaling.x;
       mesh.scaling.y *= center.scaling.y;
       mesh.scaling.z *= center.scaling.z;
     });
-    await this.destroyMesh('center');
+    this.destroyMesh('center');
   }
 
-  public async destroyVisualUIMeshSettingsHelper() {
+  public destroyVisualUIMeshSettingsHelper() {
     this.disableRotationGizmo();
-    await this.destroyMesh('boundingBox');
-    await this.destroyMesh('worldAxis');
-    await this.destroyMesh('localAxis');
-    await this.destroyMesh('ground');
-    await this.initialiseCamera();
+    this.destroyMesh('boundingBox');
+    this.destroyMesh('worldAxis');
+    this.destroyMesh('localAxis');
+    this.destroyMesh('ground');
+    this.initialiseCamera();
   }
 
   private destroyMesh(tag: string) {
@@ -388,25 +384,29 @@ export class EntitySettingsService {
   // Rotation
   public loadRotation() {
     if (!this.center) {
-      throw new Error('Center missing');
-    }
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    if (!this.center.rotationQuaternion) {
-      throw new Error('RotationQuaternion for center missing');
+      throw new Error('Center missing: loadRotation');
     }
 
-    this.entitySettings.rotation.x = isDegreeSpectrum(this.entitySettings.rotation.x);
-    this.entitySettings.rotation.y = isDegreeSpectrum(this.entitySettings.rotation.y);
-    this.entitySettings.rotation.z = isDegreeSpectrum(this.entitySettings.rotation.z);
+    if (!this.center.rotationQuaternion) {
+      throw new Error('RotationQuaternion for center missing: loadRotation');
+    }
+
+    this.entitySettings.update(state => ({
+      ...state,
+      rotation: {
+        x: isDegreeSpectrum(state.rotation.x),
+        y: isDegreeSpectrum(state.rotation.y),
+        z: isDegreeSpectrum(state.rotation.z),
+      },
+    }));
+    const rotation = this.entitySettings().rotation;
 
     const end = Quaternion.RotationYawPitchRoll(
-      (Math.PI / 180) * this.entitySettings.rotation.y,
-      (Math.PI / 180) * this.entitySettings.rotation.x,
-      (Math.PI / 180) * this.entitySettings.rotation.z,
+      (Math.PI / 180) * rotation.y,
+      (Math.PI / 180) * rotation.x,
+      (Math.PI / 180) * rotation.z,
     );
-    this.processing.rotationQuaternion = end;
+    this.rotationQuaternion.set(end);
     this.center.rotationQuaternion = end;
     if (this.rotationGizmoAnchor) {
       this.rotationGizmoAnchor.rotationQuaternion = end.clone();
@@ -421,7 +421,7 @@ export class EntitySettingsService {
   private enableRotationGizmo(): void {
     if (this.rotationGizmo) return;
     if (!this.center) {
-      console.error('Center missing, cannot enable rotation gizmo', this);
+      console.error('[EntitySettingsService]','Center missing, cannot enable rotation gizmo', this);
       return;
     }
     const scene = this.babylon.getScene();
@@ -497,20 +497,21 @@ export class EntitySettingsService {
     this.utilityLayer = undefined;
   }
 
-  private async applyRotationFromCenterMesh(): Promise<void> {
+  private applyRotationFromCenterMesh() {
     if (!this.center?.rotationQuaternion) return;
     const q = this.center.rotationQuaternion;
     const euler = q.toEulerAngles();
     const toDeg = (rad: number) => Math.round(((rad * 180) / Math.PI + 360) % 360) % 360;
-    this.entitySettings.rotation.x = toDeg(euler.x);
-    this.entitySettings.rotation.y = toDeg(euler.y);
-    this.entitySettings.rotation.z = toDeg(euler.z);
-    this.processing.rotationQuaternion = q.clone();
-    const { serverSettings } = await firstValueFrom(this.processing.settings$);
-    this.processing.settings$.next({
-      serverSettings,
-      localSettings: this.entitySettings,
-    });
+    this.entitySettings.update(state => ({
+      ...state,
+      rotation: {
+        x: toDeg(euler.x),
+        y: toDeg(euler.y),
+        z: toDeg(euler.z),
+      },
+    }));
+    this.rotationQuaternion.set(q.clone());
+    this.processing.localSettings.set(this.entitySettings());
   }
 
   private updateDragTooltip(axis: 'x' | 'y' | 'z', ev: DragEvent): void {
@@ -533,31 +534,28 @@ export class EntitySettingsService {
   // Size
   public loadScaling() {
     if (!this.center) {
-      throw new Error('Center missing');
+      throw new Error('Center missing: loadScaling');
     }
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    const scale = getScaleVector(this.entitySettings.scale);
+
+    const scale = getScaleVector(this.entitySettings().scale);
     this.center.scaling = new Vector3(scale.x, scale.y, scale.z);
 
-    this.processing.entityHeight = (this.initialSize.y * scale.y).toFixed(2);
-    this.processing.entityWidth = (this.initialSize.x * scale.x).toFixed(2);
-    this.processing.entityDepth = (this.initialSize.z * scale.z).toFixed(2);
+    this.entitySize.set({
+      height: (this.initialSize.y * scale.y).toFixed(2),
+      width: (this.initialSize.x * scale.x).toFixed(2),
+      depth: (this.initialSize.z * scale.z).toFixed(2),
+    });
   }
 
-  public async createVisualUIMeshSettingsHelper() {
+  public createVisualUIMeshSettingsHelper() {
     if (!this.center) {
-      throw new Error('Center missing');
+      throw new Error('Center missing: createVisualUIMeshSettingsHelper');
     }
-    const hasMeshSettings = await firstValueFrom(this.processing.hasMeshSettings$);
-    const isInUpload = await firstValueFrom(this.processing.isInUpload$);
+    const hasMeshSettings = this.processing.hasMeshSettings();
+    const isInUpload = this.processing.isInUpload();
     const scene = this.babylon.getScene();
-    const size = Math.max(
-      +this.processing.entityHeight,
-      +this.processing.entityWidth,
-      +this.processing.entityDepth,
-    );
+    const entitySize = this.entitySize();
+    const size = Math.max(+entitySize.height, +entitySize.width, +entitySize.depth);
     this.boundingBox = createBoundingBox(
       scene,
       this.center,
@@ -582,6 +580,11 @@ export class EntitySettingsService {
       this.ground.setAbsolutePosition(groundAbsolutePosition);
       this.setGroundMaterial();
     }
+    console.log('[EntitySettingsService] Helpers', {
+      center: this.center,
+      ground: this.ground,
+      boundingBox: this.boundingBox,
+    } )
   }
 
   // Set the color for the helper grid
@@ -604,14 +607,8 @@ export class EntitySettingsService {
   }
 
   // Load cameraPosition
-  public async loadCameraInititalPosition() {
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    const cameraSettings = this.entitySettings.cameraPositionInitial;
-    if (!cameraSettings) {
-      throw new Error('Camera settings missing');
-    }
+  public loadCameraInititalPosition() {
+    const cameraSettings = this.entitySettings().cameraPositionInitial;
 
     // Saved position is { x: alpha, y: beta, z: radius } (spherical ArcRotate)
     const alpha = cameraSettings.position.x;
@@ -623,7 +620,7 @@ export class EntitySettingsService {
       cameraSettings.target.z,
     );
 
-    this.babylon.cameraManager.cameraDefaults$.next({
+    this.cameraHandler.cameraDefaults.set({
       alpha,
       beta,
       radius,
@@ -641,24 +638,15 @@ export class EntitySettingsService {
   }
 
   // background: color, effect
-  loadBackgroundColor() {
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    const color = this.entitySettings.background.color;
+  loadBackgroundSettings() {
+    const { color, effect } = this.entitySettings().background;
     this.babylon.setBackgroundColor(color);
-  }
-
-  loadBackgroundEffect() {
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
-    this.babylon.setBackgroundImage(this.entitySettings.background.effect);
+    this.babylon.setBackgroundImage(effect);
   }
 
   private migrateLegacyLights(): void {
-    if (!this.entitySettings) return;
-    const hasLegacyLight = this.entitySettings.lights.some(
+    const settings = this.entitySettings();
+    const hasLegacyLight = settings.lights.some(
       light =>
         light.type === 'HemisphericLight' ||
         light.type === 'PointLight' ||
@@ -666,28 +654,28 @@ export class EntitySettingsService {
     );
     if (!hasLegacyLight) return;
 
-    const legacyUp = this.entitySettings.lights.find(
+    const legacyUp = settings.lights.find(
       light => light.type === 'HemisphericLight' && light.position.y === 1,
     );
     const intensity = legacyUp?.intensity ?? 1;
 
-    this.entitySettings.lights = [
-      {
-        type: 'Ambient',
-        position: { x: 0, y: 0, z: 0 },
-        rotation: { x: 0, y: 0, z: 0 },
-        intensity,
-        color: { r: 255, g: 255, b: 255, a: 255 },
-        name: 'Ambient',
-      },
-    ];
+    this.entitySettings.update(state => ({
+      ...state,
+      lights: [
+        {
+          type: 'Ambient',
+          position: { x: 0, y: 0, z: 0 },
+          rotation: { x: 0, y: 0, z: 0 },
+          intensity,
+          color: { r: 255, g: 255, b: 255, a: 255 },
+          name: 'Ambient',
+        },
+      ],
+    }));
   }
 
   private initialiseLights(): void {
-    if (!this.entitySettings) {
-      throw new Error('Settings missing');
-    }
     this.migrateLegacyLights();
-    this.lights.initialiseLights(this.entitySettings);
+    this.lights.initialiseLights();
   }
 }

@@ -1,19 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 
-import {
-  Collection,
-  IAnnotation,
-  ICompilation,
-  IDigitalEntity,
-  IEntity,
-  isAnnotation,
-  isCompilation,
-  isEntity,
-  isResolvedCompilation,
-  IUserDataWithoutData,
-  UserDataCollectionDocumentType,
-} from '@kompakkt/common';
+import { Collection, isAnnotation, isCompilation, isEntity } from '@kompakkt/common';
 import {
   paths,
   PathParams,
@@ -25,34 +13,24 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { environment } from 'src/environment';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class BackendService {
-  // Needed for EntityId gen
-  /* tslint:disable:no-magic-numbers */
-  private genIndex = parseInt((Math.random() * 0xffffff).toString(), 10);
-  private MACHINE_ID = Math.floor(Math.random() * 0xffffff);
-  private pid = Math.floor(Math.random() * 100000) % 0xffff;
-  /* tslint:enable:no-magic-numbers */
-  //
-  private endpoint = environment.server_url;
-  private httpOptions = {
+  #http = inject(HttpClient);
+  #endpoint = environment.server_url;
+  #httpOptions = {
     headers: new HttpHeaders({
       'Content-Type': 'application/json',
     }),
     withCredentials: true,
   };
 
-  constructor(private http: HttpClient) {}
-
   // Override GET and POST to use HttpOptions which is needed for auth
   public async get<T extends unknown>(path: string): Promise<T> {
-    return firstValueFrom(this.http.get<T>(`${this.endpoint}${path}`, this.httpOptions));
+    return firstValueFrom(this.#http.get<T>(`${this.#endpoint}${path}`, this.#httpOptions));
   }
 
   public post<T extends unknown>(path: string, obj: any): Promise<T> {
-    return firstValueFrom(this.http.post<T>(`${this.endpoint}${path}`, obj, this.httpOptions));
+    return firstValueFrom(this.#http.post<T>(`${this.#endpoint}${path}`, obj, this.#httpOptions));
   }
 
   // Helper methods for type-safe API calls based on the OpenAPI spec provided by the backend.
@@ -97,7 +75,7 @@ export class BackendService {
     },
   ) {
     const compiledPath = this.constructPathWithParams(path as string, { pathParams, queryParams });
-    return this.http.get<Response<Endpoint<'get', Path>>>(compiledPath, options);
+    return this.#http.get<Response<Endpoint<'get', Path>>>(compiledPath, options);
   }
 
   public createGet<Path extends keyof paths>(
@@ -130,7 +108,7 @@ export class BackendService {
     },
   ) {
     const compiledPath = this.constructPathWithParams(path as string, { pathParams, queryParams });
-    return this.http.post<Response<Endpoint<'post', Path>>>(compiledPath, body, options);
+    return this.#http.post<Response<Endpoint<'post', Path>>>(compiledPath, body, options);
   }
 
   public createPost<Path extends keyof paths>(
