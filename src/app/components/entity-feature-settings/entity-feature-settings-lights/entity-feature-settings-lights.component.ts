@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { IColor, IEntityLight } from '@kompakkt/common';
 import { ColorChromeModule } from 'ngx-color/chrome';
 import {
@@ -6,12 +6,21 @@ import {
   DetailsComponent,
   InputComponent,
   LabelledCheckboxComponent,
+  MenuComponent,
+  MenuOptionComponent,
   SliderComponent,
 } from '@kompakkt/komponents';
 import { EntitySettingsService } from '../../../services/entitysettings/entitysettings.service';
-import { LightService, LightType } from '../../../services/light/light.service';
+import {
+  LightEntry,
+  LightService,
+  LightType,
+  SPOT_ANGLE_MAX,
+} from '../../../services/light/light.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { MatIconModule } from '@angular/material/icon';
+import { KeyValuePipe } from '@angular/common';
 
 const WHITE: IColor = { r: 255, g: 255, b: 255, a: 255 };
 
@@ -24,48 +33,41 @@ const WHITE: IColor = { r: 255, g: 255, b: 255, a: 255 };
     SliderComponent,
     InputComponent,
     ButtonComponent,
+    MenuComponent,
+    MenuOptionComponent,
     LabelledCheckboxComponent,
     ColorChromeModule,
     DetailsComponent,
+    MatIconModule,
+    KeyValuePipe,
   ],
 })
 export class EntityFeatureSettingsLightsComponent {
   public entitySettings = inject(EntitySettingsService);
   public lights = inject(LightService);
   public processing = inject(ProcessingService);
+  public spotAngleMax = SPOT_ANGLE_MAX;
 
   public lightTypes: LightType[] = ['Point', 'Spot', 'Ambient', 'Area', 'Directional'];
-
-  public spotAngleMax = Math.PI / 2;
-  public spotAngleDefault = Math.PI / 4;
-  public spotExponentDefault = 2;
+  public selectedLightIndex = signal<number | undefined>(
+    this.lights.entries.keys().next().value ?? 0,
+  );
+  public selectedLight = computed(() => {
+    const index = this.selectedLightIndex();
+    return index !== undefined ? this.lights.entries.get(index) : undefined;
+  });
 
   public async addLight(type: LightType) {
     const settings = this.processing.settings().localSettings;
-    this.lights.addLight(type);
+    const index = this.lights.addLight(type);
     this.processing.localSettings.set(settings);
+    this.selectedLightIndex.set(index);
   }
 
   public async removeLight(index: number) {
     const settings = this.processing.settings().localSettings;
     this.lights.removeLight(index);
     this.processing.localSettings.set(settings);
-  }
-
-  public async resetLights() {
-    const settings = this.processing.settings().localSettings;
-    settings.lights = [
-      {
-        type: 'Ambient',
-        position: { x: 0, y: 0, z: 0 },
-        rotation: { x: 0, y: 0, z: 0 },
-        intensity: 1,
-        color: { ...WHITE },
-        name: 'Ambient',
-      },
-    ];
-    this.processing.localSettings.set(settings);
-    this.lights.initialiseLights();
   }
 
   public async setName(index: number, value: string) {
@@ -119,11 +121,11 @@ export class EntityFeatureSettingsLightsComponent {
     this.lights.setGizmoEnabled(index, kind, enabled);
   }
 
-  public hasPositionGizmo(light: IEntityLight): boolean {
+  public hasPositionGizmo(light: LightEntry): boolean {
     return light.type === 'Point' || light.type === 'Spot' || light.type === 'Area';
   }
 
-  public hasRotationGizmo(light: IEntityLight): boolean {
+  public hasRotationGizmo(light: LightEntry): boolean {
     return (
       light.type === 'Spot' ||
       light.type === 'Ambient' ||
@@ -132,11 +134,11 @@ export class EntityFeatureSettingsLightsComponent {
     );
   }
 
-  public hasSpotParams(light: IEntityLight): boolean {
+  public hasSpotParams(light: LightEntry): boolean {
     return light.type === 'Spot';
   }
 
-  public hasAreaSize(light: IEntityLight): boolean {
+  public hasAreaSize(light: LightEntry): boolean {
     return light.type === 'Area';
   }
 }

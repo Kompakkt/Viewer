@@ -38,8 +38,8 @@
     [max]="200"
     [showInfo]="false"
     [showTooltip]="false"
-    [startingValue]="cameraSpeed() * 100"
-    (valueChanged)="cameraSpeed.set($event / 100)"
+    [value]="cameraSpeed() * 100"
+    (valueChange)="cameraSpeed.set($event / 100)"
   />
 
   <hr />

@@ -108,9 +108,9 @@ export class EntitySettingsService {
       requestAnimationFrame(() => {
         try {
           this.setUpSettings();
-          console.log('[EntitySettingsService]','Settings loaded');
+          console.log('[EntitySettingsService]', 'Settings loaded');
         } catch (err) {
-          console.error('[EntitySettingsService]','Settings not loaded', err);
+          console.error('[EntitySettingsService]', 'Settings not loaded', err);
         }
         this.loadingScreen.hide();
         this.postMessage.sendToParent({
@@ -168,7 +168,7 @@ export class EntitySettingsService {
       width: this.initialSize.x.toFixed(2),
       depth: this.initialSize.z.toFixed(2),
     });
-    const centerVector =new Vector3(
+    const centerVector = new Vector3(
       this.max.x - this.initialSize.x / 2,
       this.max.y - this.initialSize.y / 2,
       this.max.z - this.initialSize.z / 2,
@@ -296,7 +296,7 @@ export class EntitySettingsService {
 
     if (isSplat) {
       const meshes = this.processing.meshes();
-      console.log('[EntitySettingsService]',meshes.at(0)?.getBoundingInfo().diagonalLength);
+      console.log('[EntitySettingsService]', meshes.at(0)?.getBoundingInfo().diagonalLength);
       const target = meshes.at(0)?.getBoundingInfo()?.boundingSphere.minimum.negate();
       if (target) this.currentCenterPoint = target;
     }
@@ -322,7 +322,7 @@ export class EntitySettingsService {
         isSplat ? diagonalLength * 0.01 : diagonalLength * 1.25,
       );
       const target = this.currentCenterPoint;
-      console.log('[EntitySettingsService]',{ target, position});
+      console.log('[EntitySettingsService]', { target, position });
       this.entitySettings.update(state => ({
         ...state,
         cameraPositionInitial: { position, target },
@@ -421,7 +421,11 @@ export class EntitySettingsService {
   private enableRotationGizmo(): void {
     if (this.rotationGizmo) return;
     if (!this.center) {
-      console.error('[EntitySettingsService]','Center missing, cannot enable rotation gizmo', this);
+      console.error(
+        '[EntitySettingsService]',
+        'Center missing, cannot enable rotation gizmo',
+        this,
+      );
       return;
     }
     const scene = this.babylon.getScene();
@@ -584,7 +588,7 @@ export class EntitySettingsService {
       center: this.center,
       ground: this.ground,
       boundingBox: this.boundingBox,
-    } )
+    });
   }
 
   // Set the color for the helper grid

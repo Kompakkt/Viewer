@@ -22,12 +22,72 @@ import { ProcessingService } from '../processing/processing.service';
 export type LightType = 'Point' | 'Spot' | 'Ambient' | 'Area' | 'Directional';
 export type GizmoKind = 'position' | 'rotation';
 
-interface LightEntry {
+export const SPOT_ANGLE_MAX = Math.PI / 2;
+export const SPOT_EXPONENT_DEFAULT = 2;
+export const SPOT_ANGLE_DEFAULT = Math.PI / 4;
+
+export class LightEntry {
   light: Light;
   proxy: TransformNode;
+  type: LightType;
   utilityLayer?: UtilityLayerRenderer;
   positionGizmo?: PositionGizmo;
   rotationGizmo?: RotationGizmo;
+
+  constructor({ light, proxy, type }: { light: Light; proxy: TransformNode; type: LightType }) {
+    this.light = light;
+    this.proxy = proxy;
+    this.type = type;
+  }
+
+  get intensity() {
+    return this.light.intensity;
+  }
+
+  get color(): IColor {
+    const { r, g, b } = this.light.diffuse;
+    return { r, g, b, a: 255 };
+  }
+
+  get name() {
+    return this.light.name;
+  }
+
+  get position() {
+    return this.proxy.position;
+  }
+
+  get rotation() {
+    return this.proxy.rotationQuaternion;
+  }
+
+  get angle(): number {
+    if ('angle' in this.light && typeof this.light.angle === 'number') {
+      return this.light.angle;
+    }
+    return SPOT_ANGLE_DEFAULT;
+  }
+
+  get exponent(): number {
+    if ('exponent' in this.light && typeof this.light.exponent === 'number') {
+      return this.light.exponent;
+    }
+    return SPOT_EXPONENT_DEFAULT;
+  }
+
+  get width(): number {
+    if ('width' in this.light && typeof this.light.width === 'number') {
+      return this.light.width;
+    }
+    return 1;
+  }
+
+  get height(): number {
+    if ('height' in this.light && typeof this.light.height === 'number') {
+      return this.light.height;
+    }
+    return 1;
+  }
 }
 
 const WHITE: IColor = { r: 255, g: 255, b: 255, a: 255 };
@@ -36,7 +96,7 @@ const WHITE: IColor = { r: 255, g: 255, b: 255, a: 255 };
 export class LightService {
   private babylon = inject(BabylonService);
   private processing = inject(ProcessingService);
-  private entries: Map<number, LightEntry> = new Map();
+  readonly entries: Map<number, LightEntry> = new Map();
 
   public initialiseLights(): void {
     const settings = this.processing.settings().localSettings;
@@ -207,7 +267,7 @@ export class LightService {
     light.intensity = config.intensity;
     light.diffuse = color;
 
-    this.entries.set(index, { light, proxy });
+    this.entries.set(index, new LightEntry({ light, proxy, type: config.type }));
   }
 
   private createPositionGizmo(entry: LightEntry, index: number): void {

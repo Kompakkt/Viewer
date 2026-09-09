@@ -1,11 +1,7 @@
 <h1>{{ 'Animations' | translate }}</h1>
 
 <div class="settings">
-  <k-slide-toggle
-    [label]="'Hide empty animations' | translate"
-    [startingValue]="hideEmpty()"
-    (checkedChange)="hideEmpty.set($event)"
-  />
+  <k-slide-toggle [label]="'Hide empty animations' | translate" [(checked)]="hideEmpty" />
 </div>
 
 @if (filteredTree().length === 0) {

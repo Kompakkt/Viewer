@@ -1,10 +1,7 @@
 <div class="sequence-selector">
   <h2>{{ 'Sequence Editor' | translate }}</h2>
 
-  <k-select
-    [startingValue]="service.activeSequenceId()"
-    (valueChanged)="service.switchSequence($event)"
-  >
+  <k-select [value]="service.activeSequenceId()" (valueChange)="service.switchSequence($event)">
     @for (seq of service.sequences(); track seq.id) {
       <k-menu-option [value]="seq.id">{{ seq.name }}</k-menu-option>
     }
@@ -14,8 +11,8 @@
     floatingLabel
     class="sequence-name-input"
     label="Name"
-    [startingValue]="service.sequences().find(s => s.id === service.activeSequenceId())?.name ?? ''"
-    (valueChanged)="onNameInput($event.value)"
+    [value]="service.sequences().find(s => s.id === service.activeSequenceId())?.name ?? ''"
+    (valueChange)="onNameInput($event)"
   />
 
   <k-button icon-button color="transparent" (click)="addSequence()">
@@ -151,8 +148,8 @@
     type="number"
     [min]="1"
     [max]="120"
-    [startingValue]="playback.fps()"
-    (valueChanged)="playback.setFps($event.valueAsNumber)"
+    [value]="'' + playback.fps()"
+    (valueChange)="playback.setFps(+$event)"
   ></k-input>
 
   <k-button icon-button [tooltip]="'Zoom out' | translate" (click)="zoomOut()">

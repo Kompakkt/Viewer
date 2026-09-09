@@ -65,7 +65,7 @@ export class SceneComponent implements AfterViewInit {
     return this.processing.bootstrap(params).then(() => {
       this.babylon.resize();
     });
-  })
+  });
 
   processing = inject(ProcessingService);
   annotations = inject(AnnotationService);
@@ -127,5 +127,6 @@ export class SceneComponent implements AfterViewInit {
     };
     waitForBottomSheet();
 
-    this.#afterInit.set(true);  }
+    this.#afterInit.set(true);
+  }
 }

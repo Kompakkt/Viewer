@@ -7,8 +7,7 @@
   @case ('sequence') {
     <k-slide-toggle
       [label]="'Hold end state' | translate"
-      [startingValue]="holdEndState()"
-      (checkedChange)="holdEndState.set($event)"
+      [(checked)]="holdEndState"
     ></k-slide-toggle>
   }
   @case ('spacer') {
@@ -17,8 +16,8 @@
       type="number"
       [min]="1"
       [max]="10000"
-      [startingValue]="duration()"
-      (valueChanged)="duration.set($event.valueAsNumber)"
+      [value]="'' + duration()"
+      (valueChange)="duration.set(+$event)"
     ></k-input>
   }
 }

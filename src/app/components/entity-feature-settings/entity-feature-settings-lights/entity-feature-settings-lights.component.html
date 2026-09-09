@@ -1,151 +1,152 @@
-@if (processing.settings(); as settings) {
-  <div class="lights-header">
-    <h2>{{ 'Lights' | translate }}</h2>
-    <k-button (click)="resetLights()" type="outlined-primary">
-      {{ 'Reset lights' | translate }}
+<k-button style="align-self: center" rounded type="solid-primary">
+  <mat-icon>light_mode</mat-icon>
+  <span>{{ 'Create new light' | translate }}</span>
+  <k-menu [label]="'Light type' | translate">
+    @for (type of lightTypes; track type) {
+      <k-menu-option (click)="addLight(type)">
+        {{ type | translate }}
+      </k-menu-option>
+    }
+  </k-menu>
+</k-button>
+
+@for (entry of lights.entries | keyvalue; track entry.key) {
+  <div class="light-item" (click)="selectedLightIndex.set(entry.key)">
+    <mat-icon>wb_twilight</mat-icon>
+    <span>{{ entry.value.light.name }}</span>
+    <k-button icon-button (click)="removeLight(entry.key)" type="solid-transparent">
+      <mat-icon>delete</mat-icon>
     </k-button>
   </div>
+}
 
-  @for (light of settings.localSettings.lights; track $index; let i = $index) {
-    <k-details [title]="light.name ?? light.type">
-      <div class="light-card">
-        <k-input
-          [label]="'Name' | translate"
-          type="text"
-          [startingValue]="light.name ?? ''"
-          (valueChanged)="setName(i, $event.value)"
-        />
+@if (selectedLightIndex(); as i) {
+  @if (selectedLight(); as light) {
+    <div class="selected-light">
+      <k-input
+        [label]="'Name' | translate"
+        type="text"
+        [value]="light.name"
+        (valueChange)="setName(i, $event)"
+      />
 
-        <k-slider
-          [label]="('Intensity' | translate) + ': ' + light.intensity"
-          [min]="0"
-          [max]="50"
-          [startingValue]="light.intensity"
-          (valueChanged)="setIntensity(i, $event)"
-          [showInfo]="true"
-          [showTooltip]="true"
-        />
+      <k-slider
+        [label]="('Intensity' | translate) + ': ' + light.intensity"
+        [min]="0"
+        [max]="50"
+        [value]="light.intensity"
+        (valueChange)="setIntensity(i, $event)"
+        [showInfo]="true"
+        [showTooltip]="true"
+      />
 
-        <p>{{ 'Color' | translate }}</p>
-        <color-chrome
-          [color]="light.color ?? { r: 255, g: 255, b: 255, a: 255 }"
-          (onChange)="setColor(i, $event.color.rgb)"
-        />
+      <p>{{ 'Color' | translate }}</p>
+      <color-chrome
+        [disableAlpha]="true"
+        [color]="light.color"
+        (onChange)="setColor(i, $event.color.rgb)"
+      />
 
-        @if (hasPositionGizmo(light)) {
-          <div class="axis-inputs">
-            <h4>{{ 'Position' | translate }}</h4>
-            <k-input
-              [label]="'X' | translate"
-              type="number"
-              [startingValue]="light.position.x"
-              (valueChanged)="setPosition(i, 'x', $event.valueAsNumber)"
-            />
-            <k-input
-              [label]="'Y' | translate"
-              type="number"
-              [startingValue]="light.position.y"
-              (valueChanged)="setPosition(i, 'y', $event.valueAsNumber)"
-            />
-            <k-input
-              [label]="'Z' | translate"
-              type="number"
-              [startingValue]="light.position.z"
-              (valueChanged)="setPosition(i, 'z', $event.valueAsNumber)"
-            />
-          </div>
-        }
-
-        @if (hasRotationGizmo(light)) {
-          <div class="axis-inputs">
-            <h4>{{ 'Rotation' | translate }}</h4>
-            <k-input
-              [label]="'X' | translate"
-              type="number"
-              [startingValue]="light.rotation?.x ?? 0"
-              (valueChanged)="setRotation(i, 'x', $event.valueAsNumber)"
-            />
-            <k-input
-              [label]="'Y' | translate"
-              type="number"
-              [startingValue]="light.rotation?.y ?? 0"
-              (valueChanged)="setRotation(i, 'y', $event.valueAsNumber)"
-            />
-            <k-input
-              [label]="'Z' | translate"
-              type="number"
-              [startingValue]="light.rotation?.z ?? 0"
-              (valueChanged)="setRotation(i, 'z', $event.valueAsNumber)"
-            />
-          </div>
-        }
-
-        @if (hasSpotParams(light)) {
-          <k-slider
-            [label]="('Angle' | translate) + ': ' + (light.angle ?? 0)"
-            [min]="0"
-            [max]="spotAngleMax"
-            [step]="0.01"
-            [startingValue]="light.angle ?? spotAngleDefault"
-            (valueChanged)="setSpotParams(i, $event, light.exponent ?? spotExponentDefault)"
+      @if (hasPositionGizmo(light)) {
+        <div class="axis-inputs">
+          <h4>{{ 'Position' | translate }}</h4>
+          <k-input
+            [label]="'X' | translate"
+            type="number"
+            [value]="'' + light.position.x"
+            (valueChange)="setPosition(i, 'x', +$event)"
           />
-          <k-slider
-            [label]="('Exponent' | translate) + ': ' + (light.exponent ?? 2)"
-            [min]="0"
-            [max]="10"
-            [step]="0.1"
-            [startingValue]="light.exponent ?? spotExponentDefault"
-            (valueChanged)="setSpotParams(i, light.angle ?? spotAngleDefault, $event)"
+          <k-input
+            [label]="'Y' | translate"
+            type="number"
+            [value]="'' + light.position.y"
+            (valueChange)="setPosition(i, 'y', +$event)"
           />
-        }
-
-        @if (hasAreaSize(light)) {
-          <k-slider
-            [label]="('Width' | translate) + ': ' + (light.width ?? 1)"
-            [min]="0.1"
-            [max]="10"
-            [step]="0.1"
-            [startingValue]="light.width ?? 1"
-            (valueChanged)="setAreaSize(i, $event, light.height ?? 1)"
+          <k-input
+            [label]="'Z' | translate"
+            type="number"
+            [value]="'' + light.position.z"
+            (valueChange)="setPosition(i, 'z', +$event)"
           />
-          <k-slider
-            [label]="('Height' | translate) + ': ' + (light.height ?? 1)"
-            [min]="0.1"
-            [max]="10"
-            [step]="0.1"
-            [startingValue]="light.height ?? 1"
-            (valueChanged)="setAreaSize(i, light.width ?? 1, $event)"
-          />
-        }
-
-        <div class="gizmo-toggles">
-          @if (hasPositionGizmo(light)) {
-            <k-labelled-checkbox
-              [label]="'Show position gizmo' | translate"
-              (checkedChange)="toggleGizmo(i, 'position', $event)"
-            />
-          }
-          @if (hasRotationGizmo(light)) {
-            <k-labelled-checkbox
-              [label]="'Show rotation gizmo' | translate"
-              (checkedChange)="toggleGizmo(i, 'rotation', $event)"
-            />
-          }
         </div>
+      }
 
-        <k-button (click)="removeLight(i)" type="outlined-primary">
-          {{ 'Remove light' | translate }}
-        </k-button>
+      @if (hasRotationGizmo(light)) {
+        <div class="axis-inputs">
+          <h4>{{ 'Rotation' | translate }}</h4>
+          <k-input
+            [label]="'X' | translate"
+            type="number"
+            [value]="'' + (light.rotation?.x ?? 0)"
+            (valueChange)="setRotation(i, 'x', +$event)"
+          />
+          <k-input
+            [label]="'Y' | translate"
+            type="number"
+            [value]="'' + (light.rotation?.y ?? 0)"
+            (valueChange)="setRotation(i, 'y', +$event)"
+          />
+          <k-input
+            [label]="'Z' | translate"
+            type="number"
+            [value]="'' + (light.rotation?.z ?? 0)"
+            (valueChange)="setRotation(i, 'z', +$event)"
+          />
+        </div>
+      }
+
+      @if (hasSpotParams(light)) {
+        <k-slider
+          [label]="('Angle' | translate) + ': ' + light.angle"
+          [min]="0"
+          [max]="spotAngleMax"
+          [step]="0.01"
+          [value]="light.angle"
+          (valueChange)="setSpotParams(i, $event, light.exponent)"
+        />
+        <k-slider
+          [label]="('Exponent' | translate) + ': ' + light.exponent"
+          [min]="0"
+          [max]="10"
+          [step]="0.1"
+          [value]="light.exponent"
+          (valueChange)="setSpotParams(i, light.angle, $event)"
+        />
+      }
+
+      @if (hasAreaSize(light)) {
+        <k-slider
+          [label]="('Width' | translate) + ': ' + light.width"
+          [min]="0.1"
+          [max]="10"
+          [step]="0.1"
+          [value]="light.width"
+          (valueChange)="setAreaSize(i, $event, light.height)"
+        />
+        <k-slider
+          [label]="('Height' | translate) + ': ' + light.height"
+          [min]="0.1"
+          [max]="10"
+          [step]="0.1"
+          [value]="light.height"
+          (valueChange)="setAreaSize(i, light.width, $event)"
+        />
+      }
+
+      <div class="gizmo-toggles">
+        @if (hasPositionGizmo(light)) {
+          <k-labelled-checkbox
+            [label]="'Show position gizmo' | translate"
+            (checkedChange)="toggleGizmo(i, 'position', $event)"
+          />
+        }
+        @if (hasRotationGizmo(light)) {
+          <k-labelled-checkbox
+            [label]="'Show rotation gizmo' | translate"
+            (checkedChange)="toggleGizmo(i, 'rotation', $event)"
+          />
+        }
       </div>
-    </k-details>
+    </div>
   }
-
-  <div class="add-light-menu">
-    <h3>{{ 'Add light' | translate }}</h3>
-    @for (type of lightTypes; track type) {
-      <k-button (click)="addLight(type)" type="outlined-primary">
-        {{ type | translate }}
-      </k-button>
-    }
-  </div>
 }

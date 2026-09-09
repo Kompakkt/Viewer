@@ -60,5 +60,10 @@
     "builtin": true
   },
   "globals": {},
-  "ignorePatterns": ["test/**", "machine-translation.ts", "extract-translations.ts"]
+  "ignorePatterns": [
+    "test/**",
+    "machine-translation.ts",
+    "extract-translations.ts",
+    ".references/**"
+  ]
 }
