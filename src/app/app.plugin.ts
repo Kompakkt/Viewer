@@ -1,13 +1,11 @@
 import { provideExtender } from '@kompakkt/plugins/extender';
-import { HelloWorldPlugin } from '@kompakkt/plugins/hello-world';
-// import { SemanticKompakktMetadataPlugin } from '@kompakkt/plugins/semantic-kompakkt-metadata';
 import { BackendService } from './services/backend/backend.service';
 import { TranslatePipe } from './pipes/translate.pipe';
 
+import plugins from './custom-plugins';
+
 export const pluginProviders = provideExtender({
-  plugins: [
-    new HelloWorldPlugin(), // new SemanticKompakktMetadataPlugin()
-  ],
+  plugins,
   componentSet: 'viewerComponents',
   services: {
     backendService: BackendService,
