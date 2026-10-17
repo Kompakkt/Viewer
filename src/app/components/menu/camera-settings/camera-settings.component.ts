@@ -1,8 +1,17 @@
-import { Component, ElementRef, HostListener, effect, inject, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ButtonComponent, ButtonRowComponent, SliderComponent } from '@kompakkt/komponents';
 import { AnnotationService } from 'src/app/services/annotation/annotation.service';
 import { BabylonService } from 'src/app/services/babylon/babylon.service';
+import { OverlayService } from 'src/app/services/overlay/overlay.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -19,11 +28,17 @@ import { MatIconModule } from '@angular/material/icon';
     ButtonComponent,
     ButtonRowComponent,
   ],
+  host: {
+    '[class.is-resizing]': 'isResizing()',
+  },
 })
 export class CameraSettingsComponent {
   public babylon = inject(BabylonService);
   public annotationService = inject(AnnotationService);
   #elementRef = inject(ElementRef);
+  #overlay = inject(OverlayService);
+
+  public isResizing = computed(() => this.#overlay.panelResizing());
 
   public cameraSpeed = signal(1.0);
 

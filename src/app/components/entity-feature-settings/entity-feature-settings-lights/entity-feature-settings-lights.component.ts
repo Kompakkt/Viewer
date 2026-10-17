@@ -1,4 +1,5 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, effect, inject, input, OnDestroy, OnInit, signal } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { IColor, IEntityLight } from '@kompakkt/common';
 import { ColorChromeModule } from 'ngx-color/chrome';
 import {
@@ -42,32 +43,64 @@ const WHITE: IColor = { r: 255, g: 255, b: 255, a: 255 };
     KeyValuePipe,
   ],
 })
-export class EntityFeatureSettingsLightsComponent {
+export class EntityFeatureSettingsLightsComponent implements OnInit, OnDestroy {
   public entitySettings = inject(EntitySettingsService);
   public lights = inject(LightService);
   public processing = inject(ProcessingService);
   public spotAngleMax = SPOT_ANGLE_MAX;
 
+  public helpersActive = input(false);
+
+  private pickedSubscription?: Subscription;
+
   public lightTypes: LightType[] = ['Point', 'Spot', 'Ambient', 'Area', 'Directional'];
-  public selectedLightIndex = signal<number | undefined>(
+  public expandedLightIndex = signal<number | undefined>(
     this.lights.entries.keys().next().value ?? 0,
   );
-  public selectedLight = computed(() => {
-    const index = this.selectedLightIndex();
-    return index !== undefined ? this.lights.entries.get(index) : undefined;
-  });
+
+  constructor() {
+    effect(() => this.lights.setHelpersVisible(this.helpersActive()));
+  }
+
+  public ngOnInit(): void {
+    this.pickedSubscription = this.lights.lightPicked.subscribe(index => {
+      this.setLightExpanded(index, true);
+    });
+  }
+
+  public ngOnDestroy(): void {
+    this.lights.setHelpersVisible(false);
+    this.pickedSubscription?.unsubscribe();
+  }
+
+  public setLightExpanded(index: number, expanded: boolean) {
+    if (expanded) {
+      this.expandedLightIndex.set(index);
+    } else if (this.expandedLightIndex() === index) {
+      this.expandedLightIndex.set(undefined);
+    }
+  }
 
   public async addLight(type: LightType) {
     const settings = this.processing.settings().localSettings;
     const index = this.lights.addLight(type);
     this.processing.localSettings.set(settings);
-    this.selectedLightIndex.set(index);
+    this.expandedLightIndex.set(index);
   }
 
   public async removeLight(index: number) {
     const settings = this.processing.settings().localSettings;
     this.lights.removeLight(index);
     this.processing.localSettings.set(settings);
+
+    const remaining = settings.lights.length;
+    const expanded = this.expandedLightIndex();
+    if (expanded === undefined) return;
+    if (expanded === index) {
+      this.expandedLightIndex.set(remaining > 0 ? Math.min(index, remaining - 1) : undefined);
+    } else if (expanded > index) {
+      this.expandedLightIndex.set(expanded - 1);
+    }
   }
 
   public async setName(index: number, value: string) {

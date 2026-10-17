@@ -3,6 +3,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ButtonComponent, TooltipDirective } from '@kompakkt/komponents';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
+import { OverlayService } from '../../../services/overlay/overlay.service';
 
 @Component({
   selector: 'app-annotationwalkthrough',
@@ -11,10 +12,14 @@ import { AnnotationService } from '../../../services/annotation/annotation.servi
   imports: [MatIconModule, TranslatePipe, TooltipDirective, ButtonComponent],
   host: {
     '[class.hidden]': '!showWalkthrough()',
+    '[class.is-resizing]': 'isResizing()',
   },
 })
 export class AnnotationwalkthroughComponent {
   annotationService = inject(AnnotationService);
+  #overlay = inject(OverlayService);
+
+  isResizing = computed(() => this.#overlay.panelResizing());
 
   ranking = signal(0);
   selectedAnnotation = computed(() => {

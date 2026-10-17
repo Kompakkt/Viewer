@@ -14,6 +14,7 @@ import { AnnotationService } from 'src/app/services/annotation/annotation.servic
   host: {
     '[class.is-open]': 'isOpen()',
     '[class.disabled]': 'isDisabled()',
+    '[class.is-resizing]': 'isResizing()',
   },
 })
 export class SidenavMenuComponent {
@@ -23,6 +24,7 @@ export class SidenavMenuComponent {
 
   mode = computed(() => this.overlay.sidenav()?.mode);
   isOpen = computed(() => this.overlay.sidenav()?.open && this.mode() !== '');
+  isResizing = computed(() => this.overlay.panelResizing());
   isDisabled = computed(() => {
     const isRepositioning = this.#annotation.isRepositioning();
     return isRepositioning;

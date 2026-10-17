@@ -16,8 +16,10 @@ import {
 } from '@babylonjs/core';
 
 import { IColor, IEntityLight, IEntitySettings, IVector3 } from '@kompakkt/common';
+import { Subject } from 'rxjs';
 import { BabylonService } from '../babylon/babylon.service';
 import { ProcessingService } from '../processing/processing.service';
+import { LightHelper } from './light-helper';
 
 export type LightType = 'Point' | 'Spot' | 'Ambient' | 'Area' | 'Directional';
 export type GizmoKind = 'position' | 'rotation';
@@ -30,6 +32,7 @@ export class LightEntry {
   light: Light;
   proxy: TransformNode;
   type: LightType;
+  helper?: LightHelper;
   utilityLayer?: UtilityLayerRenderer;
   positionGizmo?: PositionGizmo;
   rotationGizmo?: RotationGizmo;
@@ -46,7 +49,7 @@ export class LightEntry {
 
   get color(): IColor {
     const { r, g, b } = this.light.diffuse;
-    return { r, g, b, a: 255 };
+    return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255), a: 255 };
   }
 
   get name() {
@@ -57,8 +60,18 @@ export class LightEntry {
     return this.proxy.position;
   }
 
-  get rotation() {
-    return this.proxy.rotationQuaternion;
+  get rotation(): IVector3 {
+    const quaternion = this.proxy.rotationQuaternion;
+    const euler = quaternion ? quaternion.toEulerAngles() : this.proxy.rotation;
+    return {
+      x: this.toDegrees(euler.x),
+      y: this.toDegrees(euler.y),
+      z: this.toDegrees(euler.z),
+    };
+  }
+
+  private toDegrees(radians: number): number {
+    return Math.round(((radians * 180) / Math.PI + 360) % 360);
   }
 
   get angle(): number {
@@ -97,6 +110,8 @@ export class LightService {
   private babylon = inject(BabylonService);
   private processing = inject(ProcessingService);
   readonly entries: Map<number, LightEntry> = new Map();
+  readonly lightPicked = new Subject<number>();
+  private helpersVisible = false;
 
   public initialiseLights(): void {
     const settings = this.processing.settings().localSettings;
@@ -139,7 +154,10 @@ export class LightService {
   public setColor(index: number, value: IColor): void {
     this.updateConfig(index, { color: value });
     const entry = this.entries.get(index);
-    if (entry) entry.light.diffuse = this.toColor3(value);
+    if (entry) {
+      entry.light.diffuse = this.toColor3(value);
+      entry.helper?.setColor(value);
+    }
   }
 
   public setPosition(index: number, value: IVector3): void {
@@ -151,7 +169,10 @@ export class LightService {
   public setRotation(index: number, value: IVector3): void {
     this.updateConfig(index, { rotation: value });
     const entry = this.entries.get(index);
-    if (entry) entry.proxy.rotationQuaternion = this.toQuaternion(value);
+    if (entry) {
+      entry.proxy.rotationQuaternion = this.toQuaternion(value);
+      this.syncAmbientDirection(entry);
+    }
   }
 
   public setSpotParams(index: number, angle: number, exponent: number): void {
@@ -160,6 +181,7 @@ export class LightService {
     if (entry && entry.light instanceof SpotLight) {
       entry.light.angle = angle;
       entry.light.exponent = exponent;
+      entry.helper?.rebuild({ angle });
     }
   }
 
@@ -169,6 +191,7 @@ export class LightService {
     if (entry && entry.light instanceof RectAreaLight) {
       entry.light.width = width;
       entry.light.height = height;
+      entry.helper?.rebuild({ width, height });
     }
   }
 
@@ -214,6 +237,13 @@ export class LightService {
       this.disposeLight(index);
     }
     this.entries.clear();
+  }
+
+  public setHelpersVisible(visible: boolean): void {
+    this.helpersVisible = visible;
+    for (const entry of this.entries.values()) {
+      entry.helper?.setVisible(visible);
+    }
   }
 
   private createLight(index: number, config: IEntityLight): void {
@@ -267,7 +297,23 @@ export class LightService {
     light.intensity = config.intensity;
     light.diffuse = color;
 
-    this.entries.set(index, new LightEntry({ light, proxy, type: config.type }));
+    const entry = new LightEntry({ light, proxy, type: config.type });
+    entry.helper = new LightHelper({
+      scene: this.babylon.scene,
+      name: name,
+      type: config.type,
+      color: config.color ?? WHITE,
+      size: this.modelSize(),
+      angle: entry.angle,
+      width: entry.width,
+      height: entry.height,
+      onPick: () => this.lightPicked.next(index),
+    });
+    entry.helper.root.parent = proxy;
+    entry.helper.setVisible(this.helpersVisible);
+    this.syncAmbientDirection(entry);
+
+    this.entries.set(index, entry);
   }
 
   private createPositionGizmo(entry: LightEntry, index: number): void {
@@ -288,6 +334,7 @@ export class LightService {
     gizmo.updateGizmoRotationToMatchAttachedMesh = true;
     gizmo.updateGizmoPositionToMatchAttachedMesh = true;
     gizmo.attachedNode = entry.proxy;
+    gizmo.onDragObservable.add(() => this.syncAmbientDirection(entry));
     gizmo.onDragEndObservable.add(() => this.writeBackRotation(index));
     entry.rotationGizmo = gizmo;
   }
@@ -312,6 +359,20 @@ export class LightService {
       z: this.radiansToDegrees(rotation.z),
     };
     this.processing.localSettings.set(settings);
+    this.syncAmbientDirection(entry);
+  }
+
+  /**
+   * HemisphericLight.direction is not transformed by its parent, so rotating the
+   * proxy has no effect on an Ambient light. Drive the direction vector manually
+   * from the proxy rotation instead.
+   */
+  private syncAmbientDirection(entry: LightEntry): void {
+    if (!(entry.light instanceof HemisphericLight)) return;
+    entry.proxy.computeWorldMatrix(true);
+    const direction = Vector3.Zero();
+    Vector3.TransformNormalToRef(Vector3.Forward(), entry.proxy.getWorldMatrix(), direction);
+    entry.light.direction.copyFrom(direction);
   }
 
   private disposeLight(index: number): void {
@@ -321,6 +382,7 @@ export class LightService {
     entry.positionGizmo?.dispose();
     entry.rotationGizmo?.dispose();
     entry.utilityLayer?.dispose();
+    entry.helper?.dispose();
     entry.light.dispose();
     entry.proxy.dispose();
 
@@ -374,6 +436,27 @@ export class LightService {
 
   private lightName(config: IEntityLight, index: number): string {
     return config.name?.trim() || `light_${index}`;
+  }
+
+  private modelSize(): number {
+    // Mirrors EntitySettingsService.calculateMinMax so the size survives mesh
+    // settings finalization (which bakes scale into the meshes and disposes 'center').
+    const meshes = this.processing.meshes();
+    let min: Vector3 | undefined;
+    let max: Vector3 | undefined;
+    for (const mesh of meshes) {
+      mesh.computeWorldMatrix(true);
+      const boundingInfo = mesh.getBoundingInfo();
+      if (boundingInfo.diagonalLength === 0) continue;
+      const { minimumWorld, maximumWorld } = boundingInfo.boundingBox;
+      min = min ? Vector3.Minimize(min, minimumWorld) : minimumWorld.clone();
+      max = max ? Vector3.Maximize(max, maximumWorld) : maximumWorld.clone();
+    }
+    if (!min || !max) return 1;
+
+    const dimensions = max.subtract(min);
+    const size = Math.max(dimensions.x, dimensions.y, dimensions.z);
+    return Number.isFinite(size) && size > 0 ? size : 1;
   }
 
   private toVector3(v: IVector3): Vector3 {

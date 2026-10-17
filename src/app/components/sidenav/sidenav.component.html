@@ -5,3 +5,21 @@
   <app-compilation-browser [hidden]="mode() !== 'compilationBrowser'" />
   <app-point-cloud-settings [hidden]="mode() !== 'pointCloud'" />
 </div>
+
+@if (isOpen()) {
+  <div
+    class="resize-handle"
+    role="separator"
+    aria-orientation="vertical"
+    [attr.aria-label]="'Resize sidebar' | translate"
+    [attr.aria-valuemin]="minWidth()"
+    [attr.aria-valuemax]="maxWidth()"
+    [attr.aria-valuenow]="width()"
+    tabindex="0"
+    (pointerdown)="onHandlePointerDown($event)"
+    (pointermove)="onHandlePointerMove($event)"
+    (pointerup)="onHandlePointerUp($event)"
+    (pointercancel)="onHandlePointerUp($event)"
+    (keydown)="onHandleKeydown($event)"
+  ></div>
+}

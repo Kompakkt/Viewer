@@ -7,6 +7,7 @@ import { ButtonComponent, TooltipDirective } from '@kompakkt/komponents';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { BabylonService } from '../../services/babylon/babylon.service';
 import { MessageService } from '../../services/message/message.service';
+import { OverlayService } from '../../services/overlay/overlay.service';
 import { ProcessingService, QualitySetting } from '../../services/processing/processing.service';
 import { TranslateService } from '../../services/translate/translate.service';
 import { UserdataService } from '../../services/userdata/userdata.service';
@@ -25,6 +26,9 @@ import { CameraSettingsComponent } from './camera-settings/camera-settings.compo
     TooltipDirective,
     ButtonComponent,
   ],
+  host: {
+    '[class.is-resizing]': 'isResizing()',
+  },
 })
 export class MenuComponent implements OnInit {
   public processing = inject(ProcessingService);
@@ -32,6 +36,9 @@ export class MenuComponent implements OnInit {
   public userdata = inject(UserdataService);
   public translateService = inject(TranslateService);
   private message = inject(MessageService);
+  #overlay = inject(OverlayService);
+
+  public isResizing = computed(() => this.#overlay.panelResizing());
 
   public fullscreen = !!fscreen.fullscreenElement;
   public fullscreenCapable = fscreen.fullscreenEnabled;

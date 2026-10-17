@@ -1,7 +1,7 @@
 <k-button style="align-self: center" rounded type="solid-primary">
   <mat-icon>light_mode</mat-icon>
   <span>{{ 'Create new light' | translate }}</span>
-  <k-menu [label]="'Light type' | translate">
+  <k-menu trigger="click" [label]="'Light type' | translate">
     @for (type of lightTypes; track type) {
       <k-menu-option (click)="addLight(type)">
         {{ type | translate }}
@@ -11,17 +11,22 @@
 </k-button>
 
 @for (entry of lights.entries | keyvalue; track entry.key) {
-  <div class="light-item" (click)="selectedLightIndex.set(entry.key)">
-    <mat-icon>wb_twilight</mat-icon>
-    <span>{{ entry.value.light.name }}</span>
-    <k-button icon-button (click)="removeLight(entry.key)" type="solid-transparent">
+  <k-details
+    [title]="entry.value.light.name"
+    [expanded]="entry.key === expandedLightIndex()"
+    (expandedChange)="setLightExpanded(entry.key, $event)"
+  >
+    <k-button
+      details-actions
+      icon-button
+      (click)="$event.stopPropagation(); removeLight(entry.key)"
+      type="solid-transparent"
+    >
       <mat-icon>delete</mat-icon>
     </k-button>
-  </div>
-}
 
-@if (selectedLightIndex(); as i) {
-  @if (selectedLight(); as light) {
+    @let i = entry.key;
+    @let light = entry.value;
     <div class="selected-light">
       <k-input
         [label]="'Name' | translate"
@@ -148,5 +153,5 @@
         }
       </div>
     </div>
-  }
+  </k-details>
 }

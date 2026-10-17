@@ -12,6 +12,7 @@ export type SidenavState = { mode: SidenavMode; open: boolean };
 @Injectable({ providedIn: 'root' })
 export class OverlayService {
   readonly sidenav = signal<SidenavState>({ mode: '', open: true });
+  readonly panelResizing = signal(false);
 
   closeSidenav() {
     this.sidenav.set({ mode: '', open: false });

@@ -57,6 +57,13 @@ export class EntityFeatureSettingsComponent {
   userdata = inject(UserdataService);
 
   stepper = viewChild<WizardComponent>('stepper');
+  lightsStep = viewChild<WizardStepComponent>('lightsStep');
+
+  // Light helpers are only shown while the light controls are actually on screen.
+  lightsHelpersActive = computed(
+    () => this.lightsDetailsExpanded() && this.lightsStep()?.active() === true,
+  );
+  lightsDetailsExpanded = signal(true);
 
   videoPreviewGenerationState = signal<undefined | { current: number; total: number }>(undefined);
   videoPreviewUrl = signal<string | undefined>(undefined);

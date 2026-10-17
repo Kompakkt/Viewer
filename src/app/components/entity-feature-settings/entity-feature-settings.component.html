@@ -13,7 +13,7 @@
               }}</k-button>
             </k-wizard-step>
           }
-          <k-wizard-step [label]="'Background and lights' | translate">
+          <k-wizard-step #lightsStep [label]="'Background and lights' | translate">
             <div class="wizard-step-content">
               <k-details [title]="'Background' | translate">
                 <color-chrome
@@ -32,8 +32,12 @@
                 </k-button>
               </k-details>
 
-              <k-details [title]="'Lights' | translate">
-                <app-entity-feature-settings-lights />
+              <k-details
+                [title]="'Lights' | translate"
+                [expanded]="lightsDetailsExpanded()"
+                (expandedChange)="lightsDetailsExpanded.set($event)"
+              >
+                <app-entity-feature-settings-lights [helpersActive]="lightsHelpersActive()" />
               </k-details>
             </div>
 
@@ -121,8 +125,12 @@
           {{ 'Reset background' | translate }}
         </k-button>
       </k-details>
-      <k-details [title]="'Lights' | translate">
-        <app-entity-feature-settings-lights />
+      <k-details
+        [title]="'Lights' | translate"
+        [expanded]="lightsDetailsExpanded()"
+        (expandedChange)="lightsDetailsExpanded.set($event)"
+      >
+        <app-entity-feature-settings-lights [helpersActive]="lightsDetailsExpanded()" />
       </k-details>
       <k-details [title]="'Preview and initial perspective' | translate">
         <p class="wizard-step-text">
