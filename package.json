@@ -52,10 +52,11 @@
     "@babylonjs/loaders": "9.0.0",
     "@babylonjs/materials": "9.0.0",
     "@babylonjs/serializers": "9.0.0",
-    "@kompakkt/common": "git+https://github.com/Kompakkt/Common.git#6797ea53a6f976ebc3310db5d434ee20848793bd",
-    "@kompakkt/komponents": "git+https://github.com/Kompakkt/Komponents.git#7617b6c3bae0ee681557da69f49da8707383ab51",
-    "@kompakkt/plugins": "git+https://github.com/Kompakkt/Plugins.git#63ef95ec80b51f0c9ea9a3adab2b84eb4635ce27",
-    "@kompakkt/server-openapi": "git+https://github.com/Kompakkt/Server.git#b6b5bfcccd4247285eafc77652f0a4b7a43f37ca",
+    "@kompakkt/common": "git+https://github.com/Kompakkt/Common.git#49b7d222f9d6edd719ae7183ba53c96acedd9d0f",
+    "@kompakkt/fragments": "git+https://github.com/Kompakkt/engine_fragment#a58a35a1cc530c4d0589df197e99da82eae6d1fa",
+    "@kompakkt/komponents": "git+https://github.com/Kompakkt/Komponents.git#094e77280596c4d82bca0627ce6f257a6e99496e",
+    "@kompakkt/plugins": "git+https://github.com/Kompakkt/Plugins.git#3ce5c36c4a82683c984fed0ca259217c49878e91",
+    "@kompakkt/server-openapi": "git+https://github.com/Kompakkt/Server.git#d73de702a6b2a94c4824f95e5fef008ac18d572b",
     "bson-objectid": "^2.0.4",
     "copc": "^0.0.8",
     "fast-deep-equal": "^3.1.3",
@@ -74,7 +75,7 @@
     "zone.js": "0.16.1"
   },
   "devDependencies": {
-    "@angular/build": "^21.2.5",
+    "@angular/build": "^21.2.6",
     "@angular/cli": "21.2.5",
     "@angular/compiler-cli": "21.2.6",
     "@angular/language-service": "21.2.6",
@@ -88,9 +89,19 @@
     "oxlint": "^1.57.0",
     "oxlint-tsgolint": "^0.18.1",
     "ts-node": "~10.9.2",
-    "typescript": "~6.0.2"
+    "typescript": "~5.9.3"
+  },
+  "overrides": {
+    "@kompakkt/komponents": {
+      "@angular/core": "21.2.6"
+    },
+    "@kompakkt/plugins": {
+      "@angular/core": "21.2.6",
+      "@kompakkt/common": "git+https://github.com/Kompakkt/Common.git#1ec9e452e73a999d2b5ff725febd95dc0774a19f"
+    }
   },
   "trustedDependencies": [
+    "@kompakkt/common",
     "@kompakkt/plugins"
   ]
 }
