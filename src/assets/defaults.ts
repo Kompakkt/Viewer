@@ -40,7 +40,7 @@ export const baseEntity = (): IEntity => ({
         type: 'Ambient',
         position: { x: 0, y: 0, z: 0 },
         rotation: { x: 0, y: 0, z: 0 },
-        intensity: 5,
+        intensity: 1,
         color: { r: 255, g: 255, b: 255, a: 255 },
         name: 'Ambient',
       },

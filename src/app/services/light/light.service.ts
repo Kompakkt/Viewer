@@ -461,7 +461,7 @@ export class LightService {
     const base: IEntityLight = {
       type,
       position: this.toIVector3(this.defaultLightAnchor()),
-      intensity: 5,
+      intensity: 1,
       color: { ...WHITE },
       name: this.defaultNameForType(type, settings.lights.length),
     };
