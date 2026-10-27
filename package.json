@@ -97,7 +97,8 @@
     },
     "@kompakkt/plugins": {
       "@angular/core": "21.2.6",
-      "@kompakkt/common": "git+https://github.com/Kompakkt/Common.git#044af84217ffafddad839841cc35a9e9027f5e3c"
+      "@kompakkt/common": "git+https://github.com/Kompakkt/Common.git#044af84217ffafddad839841cc35a9e9027f5e3c",
+      "@kompakkt/komponents": "git+https://github.com/Kompakkt/Komponents.git#e90a436110cc635aa57953174140ee731ac40048"
     }
   },
   "trustedDependencies": [
