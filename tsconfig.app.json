@@ -4,7 +4,10 @@
     "outDir": "./out-tsc/app",
     "types": []
   },
-  "files": ["./src/main.ts"],
+  "files": [
+    "./src/main.ts",
+    "./node_modules/@kompakkt/fragments/packages/fragments/src/headless/index.ts"
+  ],
   "include": ["./src/**/*.ts", "./src/**/*.d.ts", "./node_modules/@kompakkt/**/*.ts"],
-  "exclude": ["**/*.spec.ts"]
+  "exclude": ["**/*.spec.ts", "./node_modules/@kompakkt/fragments/**"]
 }
