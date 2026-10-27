@@ -21,6 +21,7 @@ import { ColorChromeModule } from 'ngx-color/chrome';
 
 import { TranslatePipe } from './pipes/translate.pipe';
 import { TranslateService } from './services/translate/translate.service';
+import { AppComponent } from './app.component';
 import { pluginProviders } from './app.plugin';
 import { jwtInterceptor } from './interceptors/jwt-interceptor';
 
@@ -47,7 +48,10 @@ export const appConfig: ApplicationConfig = {
       )(inject(TranslateService));
       return initializerFn();
     }),
-    provideRouter([]),
+    provideRouter([
+      { path: '', component: AppComponent },
+      { path: '**', redirectTo: '' },
+    ]),
     provideAnimations(),
     provideHttpClient(withInterceptors([jwtInterceptor])),
     pluginProviders,
