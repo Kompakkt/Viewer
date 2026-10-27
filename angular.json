@@ -36,7 +36,16 @@
           },
           "defaultConfiguration": "production",
           "options": {
-            "assets": ["src/favicon.ico", "src/assets", "src/laz-perf.wasm"],
+            "assets": [
+              "src/favicon.ico",
+              "src/assets",
+              "src/laz-perf.wasm",
+              {
+                "glob": "draco_*gltf*",
+                "input": "node_modules/@babylonjs/core/assets/Draco",
+                "output": "assets/draco"
+              }
+            ],
             "index": "src/index.html",
             "inlineStyleLanguage": "scss",
             "namedChunks": true,

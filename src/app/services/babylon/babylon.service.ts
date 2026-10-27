@@ -41,6 +41,7 @@ import '@babylonjs/core/Debug/debugLayer';
 import '@babylonjs/inspector';
 // tslint:disable-next-line:no-import-side-effect
 import '@babylonjs/loaders';
+import { DracoDecoder } from '@babylonjs/core';
 import { RenderCanvasComponent } from '../../components/render-canvas/render-canvas.component';
 import { CameraHandlerService } from './camera-handler.service';
 import { IAudioContainer, IImageContainer, IVideoContainer } from './container.interfaces';
@@ -62,6 +63,14 @@ import { SKYBOX_PRESETS } from './skyboxes';
 
 RegisterSceneLoaderPlugin(new CopcImporter());
 RegisterSceneLoaderPlugin(new EptImporter());
+
+// Self-hosted Draco decoder (src/assets/draco); absolute URLs required since the wrapper is importScripts'd inside a blob worker.
+const dracoAssetsUrl = new URL('assets/draco/', document.baseURI).href;
+DracoDecoder.DefaultConfiguration = {
+  wasmUrl: new URL('draco_wasm_wrapper_gltf.js', dracoAssetsUrl).href,
+  wasmBinaryUrl: new URL('draco_decoder_gltf.wasm', dracoAssetsUrl).href,
+  fallbackUrl: new URL('draco_decoder_gltf.js', dracoAssetsUrl).href,
+};
 
 type RGBA = { r: number; b: number; g: number; a: number };
 
