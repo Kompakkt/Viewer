@@ -1,19 +1,19 @@
-@if (processing.bootstrapped$ | async) {
-  @for (annotation of annotations.currentAnnotations$ | async; track annotation) {
+@if (processing.bootstrapped()) {
+  @for (annotation of annotations.activeAnnotations(); track annotation) {
     <div>
       <app-annotation-marker [annotation]="annotation" />
       <app-annotation [annotation]="annotation" />
     </div>
   }
   <app-annotationwalkthrough />
-  @if (!(processing.defaultEntityLoaded$ | async)) {
+  @if (!processing.isDefaultEntity()) {
     <app-guide />
   }
-  @if (processing.showMenu$ | async) {
+  @if (processing.showMenu()) {
     <app-menu />
   }
 
-  @if (processing.mediaType$ | async; as mediaType) {
+  @if (processing.mediaType(); as mediaType) {
     @if (mediaType === 'video' || mediaType === 'audio') {
       <app-media-player-menu />
     }
@@ -24,7 +24,7 @@
 
   <app-bottom-sheet #bottomSheet />
 
-  @if (showWebGPUUnsupportedWarning$ | async) {
+  @if (showWebGPUUnsupportedWarning()) {
     <div class="web-gpu-warning">
       <div class="center">
         <h2>Warning: WebGPU is may not be fully supported</h2>
@@ -48,9 +48,7 @@
         </p>
 
         <k-button-row justify="end">
-          <k-button type="solid-primary" (click)="warningIgnored$.next(true)"
-            >Continue anyways</k-button
-          >
+          <k-button type="solid-primary" (click)="ignoreWebGPUWarning()">Continue anyways</k-button>
         </k-button-row>
       </div>
     </div>

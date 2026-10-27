@@ -1,22 +1,22 @@
 import {
   Component,
   ElementRef,
-  HostBinding,
-  Input,
   OnInit,
   computed,
+  effect,
   inject,
+  input,
   output,
+  signal,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Matrix, Vector3 } from '@babylonjs/core';
-import { BehaviorSubject, ReplaySubject, combineLatest, firstValueFrom, interval, map } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { IAnnotation } from '@kompakkt/common';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
 import { BabylonService } from '../../../services/babylon/babylon.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
 import { UserdataService } from '../../../services/userdata/userdata.service';
-import { AsyncPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
 import { ButtonComponent, ButtonRowComponent, TooltipDirective } from '@kompakkt/komponents';
@@ -26,9 +26,7 @@ import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-previe
 import { ExtenderSlotDirective } from '../../../directives/extender-slot.directive';
 import DeepClone from 'rfdc';
 import deepEqual from 'fast-deep-equal';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { filter } from 'rxjs';
-import { first } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
 const deepClone = DeepClone({ circles: true });
 
 export type ReorderMovement = 'one-up' | 'one-down' | 'first' | 'last';
@@ -41,131 +39,103 @@ export type ReorderMovement = 'one-up' | 'one-down' | 'first' | 'last';
     FormsModule,
     MatIcon,
     MarkdownPreviewComponent,
-    AsyncPipe,
     TranslatePipe,
     ButtonComponent,
     ButtonRowComponent,
     TooltipDirective,
     ExtenderSlotDirective,
   ],
+  host: {
+    '[style.--top]': 'this.position().top + "px"',
+    '[style.--left]': 'this.position().left + "px"',
+    '[class.selected]': 'this.isSelected()',
+  },
 })
 export class AnnotationComponent implements OnInit {
-  public annotationService = inject(AnnotationService);
-  public babylon = inject(BabylonService);
-  public dialog = inject(MatDialog);
-  public userdata = inject(UserdataService);
-  public processing = inject(ProcessingService);
+  annotationService = inject(AnnotationService);
+  babylon = inject(BabylonService);
+  dialog = inject(MatDialog);
+  userdata = inject(UserdataService);
+  processing = inject(ProcessingService);
 
-  public reorderAnnotation = output<ReorderMovement>();
+  reorderAnnotation = output<ReorderMovement>();
 
-  @Input() entityFileName: string | undefined;
-  @Input('annotation') set setAnnotation(annotation: IAnnotation) {
-    this.annotation$.next(annotation);
-  }
-  public annotation$ = new ReplaySubject<IAnnotation>(1);
-  public annotation$$ = this.annotation$.asObservable();
-  public annotationSignal = toSignal(this.annotation$$);
+  entityFileName = input<string>();
+  annotation = input.required<IAnnotation>();
+  annotation$ = toObservable(this.annotation);
 
-  public positionTop = 0;
-  public positionLeft = 0;
+  position = signal<{ top: number; left: number }>({ top: 0, left: 0 });
+  isSelected = computed(() => {
+    const annotation = this.annotation();
+    return annotation._id === this.annotationService.selectedAnnotation()?._id;
+  });
 
-  @HostBinding('style.--top')
-  get __positionTop() {
-    return `${this.positionTop}px`;
-  }
+  collapsed = signal(false);
 
-  @HostBinding('style.--left')
-  get __positionLeft() {
-    return `${this.positionLeft}px`;
-  }
+  isAnnotationOwner = computed(() => {
+    const _user = this.userdata.userdata();
+    const annotation = this.annotation();
+    return this.userdata.isAnnotationOwner(annotation);
+  });
 
-  #isSelected = false;
-  @HostBinding('class.selected')
-  get isSelected() {
-    return this.#isSelected;
-  }
+  userOwnsCompilation = computed(() => {
+    const _user = this.userdata.userdata();
+    const compilation = this.processing.compilation();
+    return this.userdata.doesUserOwn(compilation);
+  });
 
-  public showAnnotation$ = new BehaviorSubject(false);
-  public collapsed$ = new BehaviorSubject(false);
-  public isAnnotatingAllowed$ = this.processing.hasAnnotationAllowance$;
-  public isAnnotationOwner$ = this.annotation$.pipe(
-    map(annotation => this.userdata.isAnnotationOwner(annotation)),
-  );
-  public userOwnsCompilation$ = this.processing.compilation$.pipe(
-    map(compilation => this.userdata.doesUserOwn(compilation)),
-  );
   // TODO: Discuss if these should be the same?
-  //public canUserEdit$ = this.isAnnotatingAllowed$;
-  public canUserEditAndDelete$ = combineLatest([
-    this.isAnnotatingAllowed$,
-    this.isAnnotationOwner$,
-  ]).pipe(
-    map(([isAnnotatingAllowed, isAnnotationOwner]) => isAnnotatingAllowed && isAnnotationOwner),
-  );
-  public canUserReorder$ = this.processing.isOwner$.pipe(
-    map(isOwner => isOwner.ofCompilation || isOwner.ofEntity),
-  );
+  //canUserEdit$ = this.isAnnotatingAllowed$;
+  canUserEditAndDelete = computed(() => {
+    return this.processing.hasAnnotationAllowance() && this.isAnnotationOwner();
+  });
 
-  public isSelectedAnnotation$ = combineLatest([
-    this.annotation$,
-    this.annotationService.selectedAnnotation$,
-  ]).pipe(map(([annotation, selectedAnnotation]) => annotation?._id === selectedAnnotation));
+  canUserReorder = computed(() => {
+    const isCompilationLoaded = this.processing.compilation() !== undefined;
+    const { ofCompilation, ofEntity } = this.processing.isOwner();
+    return isCompilationLoaded ? ofCompilation : ofEntity;
+  });
 
-  public isEditMode$ = combineLatest([
-    this.annotationService.editModeAnnotation$,
-    this.annotation$,
-  ]).pipe(
-    map(([editModeAnnotation, annotation]) => {
-      if (!annotation) return false;
-      const isEditAnno = editModeAnnotation === annotation._id;
-      if (!isEditAnno) this.annotationService.updateAnnotation(annotation);
-      return isEditAnno;
-    }),
-  );
+  isEditMode = computed(() => {
+    const annotation = this.annotation();
+    const isSelected = this.isSelected();
+    return annotation._id === this.annotationService.selectedAnnotation()?._id && isSelected;
+  });
 
-  public isAnnotationHidden$ = combineLatest([
-    this.annotation$,
-    this.annotationService.hiddenAnnotations$,
-  ]).pipe(
-    map(([annotation, hiddenAnnotations]) => hiddenAnnotations.includes(annotation._id.toString())),
-  );
+  isHidden = computed(() => {
+    const annotation = this.annotation();
+    const hidden = this.annotationService.hiddenAnnotations();
+    return hidden.includes(annotation._id.toString());
+  });
 
-  public isAnnotationUnsaved = computed(() => {
+  isUnsaved = computed(() => {
+    const annotation = this.annotation();
     const unsaved = this.annotationService.unsavedAnnotations();
-    const annotation = this.annotationSignal();
-    if (!annotation) return false;
     return unsaved.has(annotation._id.toString());
   });
 
-  public async toggleRepositionMode() {
-    const annotation = await firstValueFrom(this.annotation$);
-    if (!annotation) return;
-    this.annotationService.initializeRepositionMode(annotation);
+  toggleRepositionMode() {
+    const annotation = this.annotation();
+    return this.annotationService.initializeRepositionMode(annotation);
   }
 
-  constructor() {
-    this.isSelectedAnnotation$.subscribe(isSelected => {
-      this.#isSelected = isSelected;
-    });
-  }
-
-  public closeAnnotation(): void {
+  closeAnnotation(): void {
     this.annotationService.setSelectedAnnotation('');
   }
 
-  public async shareAnnotation() {
-    const annotation = await firstValueFrom(this.annotation$);
-    this.annotationService.shareAnnotation(annotation);
+  shareAnnotation() {
+    const annotation = this.annotation();
+    return this.annotationService.shareAnnotation(annotation);
   }
 
-  public async deleteAnnotation() {
-    const annotation = await firstValueFrom(this.annotation$);
-    this.annotationService.deleteAnnotation(annotation);
+  deleteAnnotation() {
+    const annotation = this.annotation();
+    return this.annotationService.deleteAnnotation(annotation);
   }
 
   #ref = inject<ElementRef<HTMLElement>>(ElementRef);
 
-  private setPosition(annotation: IAnnotation) {
+  #setPosition(annotation: IAnnotation) {
     const scene = this.babylon.getScene();
     if (!scene || !scene.activeCamera) return;
 
@@ -186,12 +156,14 @@ export class AnnotationComponent implements OnInit {
     const [left, top] = [Math.round(p.x), Math.round(p.y)];
     const [elHeight, elWidth] = [parent.clientHeight, parent.clientWidth];
 
-    this.positionTop = top < 0 ? 0 : top + elHeight > height ? height - elHeight : top;
-    this.positionLeft = left < 0 ? 0 : left + elWidth > width ? width - elWidth : left;
+    this.position.set({
+      top: top < 0 ? 0 : top + elHeight > height ? height - elHeight : top,
+      left: left < 0 ? 0 : left + elWidth > width ? width - elWidth : left,
+    });
   }
 
-  public async toggleFullscreen(mode: 'edit' | 'preview') {
-    const annotation = await firstValueFrom(this.annotation$);
+  async toggleFullscreen(mode: 'edit' | 'preview') {
+    const annotation = this.annotation();
     const existingDialog = this.dialog.getDialogById('fullscreen-editor');
     if (existingDialog) return;
     const dialogRef = this.dialog.open<
@@ -214,26 +186,28 @@ export class AnnotationComponent implements OnInit {
     return this.annotationService.updateAnnotation(result);
   }
 
-  ngOnInit() {
-    combineLatest([interval(15), this.annotation$])
-      .pipe(map(([_, annotation]) => annotation))
-      .subscribe(annotation => this.setPosition(annotation));
+  openInFullscreenRef = effect(() => {
+    const annotation = this.annotation();
+    if (!annotation._id) return;
+    const selectedAnnotation = this.annotationService.selectedAnnotation();
+    const toggleFullscreen = selectedAnnotation?.fullscreen ?? false;
+    if (!toggleFullscreen) return;
+    if (annotation._id !== selectedAnnotation?._id) return;
+    this.openInFullscreenRef.destroy();
+    this.annotationService.selectedAnnotation.set({
+      _id: annotation._id,
+      mode: 'edit',
+      fullscreen: false,
+    });
+    return this.toggleFullscreen('edit');
+  });
 
-    combineLatest([
-      this.annotation$,
-      this.annotationService.selectedAnnotation$,
-      this.annotationService.toggleFullscreenAnnotation$,
-    ])
-      .pipe(
-        filter(
-          ([annotation, selected, toggle]) => annotation._id === selected && selected === toggle,
-        ),
-        first(),
-      )
-      .subscribe(() => {
-        return this.toggleFullscreen('edit').then(() => {
-          this.annotationService.toggleFullscreenAnnotation$.next('');
-        });
-      });
+  ngOnInit() {
+    setInterval(() => {
+      const annotation = this.annotation();
+      if (!annotation) return;
+      console.log('[AnnotationComponent] setPosition', annotation._id);
+      this.#setPosition(annotation);
+    }, 15);
   }
 }

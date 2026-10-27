@@ -1,10 +1,8 @@
-import { AsyncPipe } from '@angular/common';
 import {
   AfterViewInit,
   Component,
   computed,
-  ElementRef,
-  HostListener,
+  effect,
   inject,
   signal,
   viewChild,
@@ -21,11 +19,13 @@ import { AnnotationwalkthroughComponent } from '../entity-feature-annotations/an
 import { MenuComponent } from '../menu/menu.component';
 import { SidenavMenuComponent } from '../sidenav-menu/sidenav-menu.component';
 import { SidenavComponent } from '../sidenav/sidenav.component';
-import { BehaviorSubject, combineLatest, from, map, of } from 'rxjs';
+import { from } from 'rxjs';
 import { ButtonComponent, ButtonRowComponent } from '@kompakkt/komponents';
 import { GuideComponent } from '../guide/guide.component';
 import { BottomSheetComponent } from '../bottom-sheet/bottom-sheet.component';
 import { MediaPlayerMenuComponent } from '../media-player-menu/media-player-menu.component';
+import { ActivatedRoute } from '@angular/router';
+import { skip } from 'rxjs';
 
 @Component({
   selector: 'app-scene',
@@ -38,7 +38,6 @@ import { MediaPlayerMenuComponent } from '../media-player-menu/media-player-menu
     MenuComponent,
     SidenavMenuComponent,
     SidenavComponent,
-    AsyncPipe,
     ButtonComponent,
     ButtonRowComponent,
     MediaPlayerMenuComponent,
@@ -47,28 +46,36 @@ import { MediaPlayerMenuComponent } from '../media-player-menu/media-player-menu
   ],
   host: {
     '[style.--bottom-sheet-offset.px]': 'offsetBinding()',
+    '(window:resize)': 'this.babylon.resize()',
   },
 })
 export class SceneComponent implements AfterViewInit {
-  @HostListener('window:resize')
-  public onResize() {
-    this.babylon.resize();
-  }
+  #viewContainerRef = inject(ViewContainerRef);
+  #route = inject(ActivatedRoute);
+  babylon = inject(BabylonService);
 
-  constructor(
-    private babylon: BabylonService,
-    public processing: ProcessingService,
-    public annotations: AnnotationService,
-    private viewContainerRef: ViewContainerRef,
-  ) {}
+  #afterInit = signal(false);
+  #queryParams = toSignal(this.#route.queryParams.pipe(skip(1)));
+  #bootstrapRef = effect(() => {
+    const params = this.#queryParams();
+    const afterInit = this.#afterInit();
+    if (!afterInit || !params) return;
+    this.babylon.attachCanvas(this.#viewContainerRef);
+    this.#bootstrapRef.destroy();
+    return this.processing.bootstrap(params).then(() => {
+      this.babylon.resize();
+    });
+  });
+
+  processing = inject(ProcessingService);
+  annotations = inject(AnnotationService);
 
   #overlay = inject(OverlayService);
-  #sidenav = toSignal(this.#overlay.sidenav$);
   // TODO: Move this decision to a BottomSheetService for centralized decisions
   #isSequenceEditorVisible = computed(
     () =>
-      this.#sidenav()?.mode === 'animations' &&
-      this.#sidenav()?.open &&
+      this.#overlay.sidenav()?.mode === 'animations' &&
+      this.#overlay.sidenav()?.open &&
       this.processing.mode() === 'annotation',
   );
 
@@ -77,24 +84,32 @@ export class SceneComponent implements AfterViewInit {
   #actualOffset = signal(0);
   offsetBinding = computed(() => (this.#isSequenceEditorVisible() ? this.#actualOffset() : 0));
 
-  private async setupCanvas() {
-    this.babylon.attachCanvas(this.viewContainerRef);
-    return this.processing.bootstrap().then(() => this.babylon.resize());
+  #webGpuSupport$ = from(this.babylon.checkWebGPUSupport());
+  #webGpuSupport = toSignal(this.#webGpuSupport$);
+  #webGpuNeeded = computed(() => this.processing.mediaType() === 'splat');
+  #webGpuWarningIgnored = signal<boolean>(
+    (() => {
+      // Check if the user has ignored the WebGPU warning && if the last ignore is older than 1 month
+      const ignored = localStorage.getItem('webGpuWarningIgnored');
+      try {
+        const date = new Date(ignored ?? '');
+        const now = new Date();
+        return date.getTime() + 30 * 24 * 60 * 60 * 1000 < now.getTime();
+      } catch {
+        return false;
+      }
+    })(),
+  );
+  showWebGPUUnsupportedWarning = computed(() => {
+    return !this.#webGpuSupport() && this.#webGpuNeeded() && !this.#webGpuWarningIgnored();
+  });
+
+  ignoreWebGPUWarning() {
+    this.#webGpuWarningIgnored.set(true);
+    localStorage.setItem('webGpuWarningIgnored', new Date().toISOString());
   }
 
-  warningIgnored$ = new BehaviorSubject<boolean>(false);
-
-  showWebGPUUnsupportedWarning$ = combineLatest({
-    warningIgnored: this.warningIgnored$,
-    isSupported: from(this.babylon.checkWebGPUSupport()),
-    isNeeded: this.processing.mediaType$.pipe(map(type => type === 'splat')),
-  }).pipe(
-    map(({ warningIgnored, isSupported, isNeeded }) => !isSupported && isNeeded && !warningIgnored),
-  );
-
   ngAfterViewInit() {
-    void this.setupCanvas();
-
     const waitForBottomSheet = () => {
       const bottomSheet = this.bottomSheetEl();
       if (bottomSheet) {
@@ -111,5 +126,7 @@ export class SceneComponent implements AfterViewInit {
       }
     };
     waitForBottomSheet();
+
+    this.#afterInit.set(true);
   }
 }

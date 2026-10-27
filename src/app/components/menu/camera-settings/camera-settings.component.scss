@@ -3,6 +3,10 @@
   color: white;
 }
 
+:host(.is-resizing) div#camera-settings {
+  transition: none;
+}
+
 div#camera-settings {
   display: flex;
   flex-direction: column;

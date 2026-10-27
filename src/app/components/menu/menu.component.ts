@@ -1,13 +1,13 @@
-import { AsyncPipe, KeyValuePipe } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { MatIcon } from '@angular/material/icon';
-import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { KeyValuePipe } from '@angular/common';
+import { Component, computed, inject, OnInit } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import fscreen from 'fscreen';
 import { ButtonComponent, TooltipDirective } from '@kompakkt/komponents';
-import { firstValueFrom, map } from 'rxjs';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { BabylonService } from '../../services/babylon/babylon.service';
 import { MessageService } from '../../services/message/message.service';
+import { OverlayService } from '../../services/overlay/overlay.service';
 import { ProcessingService, QualitySetting } from '../../services/processing/processing.service';
 import { TranslateService } from '../../services/translate/translate.service';
 import { UserdataService } from '../../services/userdata/userdata.service';
@@ -18,50 +18,40 @@ import { CameraSettingsComponent } from './camera-settings/camera-settings.compo
   templateUrl: './menu.component.html',
   styleUrls: ['./menu.component.scss'],
   imports: [
-    MatIcon,
+    MatIconModule,
     CameraSettingsComponent,
-    MatMenuTrigger,
-    MatMenu,
-    MatMenuItem,
-    AsyncPipe,
+    MatMenuModule,
     KeyValuePipe,
     TranslatePipe,
     TooltipDirective,
     ButtonComponent,
   ],
+  host: {
+    '[class.is-resizing]': 'isResizing()',
+  },
 })
 export class MenuComponent implements OnInit {
+  public processing = inject(ProcessingService);
+  public babylon = inject(BabylonService);
+  public userdata = inject(UserdataService);
+  public translateService = inject(TranslateService);
+  private message = inject(MessageService);
+  #overlay = inject(OverlayService);
+
+  public isResizing = computed(() => this.#overlay.panelResizing());
+
   public fullscreen = !!fscreen.fullscreenElement;
   public fullscreenCapable = fscreen.fullscreenEnabled;
 
-  constructor(
-    public processing: ProcessingService,
-    public babylon: BabylonService,
-    public userdata: UserdataService,
-    public translateService: TranslateService,
-    private message: MessageService,
-  ) {}
-
-  get languages() {
-    return this.translateService.supportedLanguages;
-  }
-
-  get entity$() {
-    return this.processing.entity$;
-  }
-
-  get qualities$() {
-    return this.entity$.pipe(
-      map(entity => {
-        if (!entity) return undefined;
-        return {
-          low: entity.processed.low !== entity.processed.medium,
-          medium: entity.processed.medium !== entity.processed.low,
-          high: entity.processed.high !== entity.processed.medium,
-        };
-      }),
-    );
-  }
+  qualities = computed(() => {
+    const entity = this.processing.entity();
+    if (!entity) return undefined;
+    return {
+      low: entity.processed.low !== entity.processed.medium,
+      medium: entity.processed.medium !== entity.processed.low,
+      high: entity.processed.high !== entity.processed.medium,
+    };
+  });
 
   ngOnInit() {
     fscreen.addEventListener(
@@ -70,14 +60,14 @@ export class MenuComponent implements OnInit {
     );
   }
 
-  public async updateEntityQuality(nextQuality: QualitySetting) {
-    const currentQuality = this.processing.quality$.getValue();
-    const entity = await firstValueFrom(this.entity$);
+  public updateEntityQuality(nextQuality: QualitySetting) {
+    const currentQuality = this.processing.quality();
+    const entity = this.processing.entity();
     if (nextQuality === currentQuality) return;
     if (!entity?.processed?.[nextQuality]) return;
 
     this.processing.updateEntityQuality(nextQuality);
-    this.processing.loadEntity(entity);
+    return this.processing.loadEntity(entity);
   }
 
   toggleFullscreen() {

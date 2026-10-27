@@ -9,8 +9,9 @@
     "build": "ng build",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
-    "format": "oxfmt",
-    "format:check": "oxfmt --check",
+    "format": "bun fmt",
+    "format:check": "bun fmt --check",
+    "check": "bun check",
     "update:kompakkt:common": "bun run update-git-dependency.ts -d @kompakkt/common -o Kompakkt -r Common -b main",
     "update:kompakkt:komponents": "bun run update-git-dependency.ts -d @kompakkt/komponents -o Kompakkt -r Komponents -b main",
     "update:kompakkt:plugins": "bun run update-git-dependency.ts -d @kompakkt/plugins -o Kompakkt -r Plugins -b main",
@@ -45,17 +46,18 @@
     "@angular/platform-browser": "21.2.6",
     "@angular/platform-browser-dynamic": "21.2.6",
     "@angular/router": "21.2.6",
-    "@babylonjs/core": "9.0.0",
-    "@babylonjs/gui": "9.0.0",
-    "@babylonjs/gui-editor": "9.0.0",
-    "@babylonjs/inspector": "9.0.0",
-    "@babylonjs/loaders": "9.0.0",
-    "@babylonjs/materials": "9.0.0",
-    "@babylonjs/serializers": "9.0.0",
-    "@kompakkt/common": "git+https://github.com/Kompakkt/Common.git#6797ea53a6f976ebc3310db5d434ee20848793bd",
-    "@kompakkt/komponents": "git+https://github.com/Kompakkt/Komponents.git#e2493ee87a9263e11c948a6c5ac2a31441940534",
-    "@kompakkt/plugins": "git+https://github.com/Kompakkt/Plugins.git#5e5274042bee8730dc8789de610a09a741e77c60",
-    "@kompakkt/server-openapi": "git+https://github.com/Kompakkt/Server.git#b6b5bfcccd4247285eafc77652f0a4b7a43f37ca",
+    "@babylonjs/core": "9.31.0",
+    "@babylonjs/gui": "9.31.0",
+    "@babylonjs/gui-editor": "9.31.0",
+    "@babylonjs/inspector": "9.31.0",
+    "@babylonjs/loaders": "9.31.0",
+    "@babylonjs/materials": "9.31.0",
+    "@babylonjs/serializers": "9.31.0",
+    "@kompakkt/common": "git+https://github.com/Kompakkt/Common.git#044af84217ffafddad839841cc35a9e9027f5e3c",
+    "@kompakkt/fragments": "git+https://github.com/Kompakkt/engine_fragment#a58a35a1cc530c4d0589df197e99da82eae6d1fa",
+    "@kompakkt/komponents": "git+https://github.com/Kompakkt/Komponents.git#e90a436110cc635aa57953174140ee731ac40048",
+    "@kompakkt/plugins": "git+https://github.com/Kompakkt/Plugins.git#3ce5c36c4a82683c984fed0ca259217c49878e91",
+    "@kompakkt/server-openapi": "git+https://github.com/Kompakkt/Server.git#9728b208cecb7b7193448324025a94b9c35ac1f2",
     "bson-objectid": "^2.0.4",
     "copc": "^0.0.8",
     "fast-deep-equal": "^3.1.3",
@@ -74,7 +76,7 @@
     "zone.js": "0.16.1"
   },
   "devDependencies": {
-    "@angular/build": "^21.2.5",
+    "@angular/build": "^21.2.6",
     "@angular/cli": "21.2.5",
     "@angular/compiler-cli": "21.2.6",
     "@angular/language-service": "21.2.6",
@@ -84,13 +86,22 @@
     "@types/fscreen": "^1.0.4",
     "@types/localforage": "^0.0.34",
     "@types/node": "^25.5.0",
-    "oxfmt": "^0.42.0",
     "oxlint": "^1.57.0",
     "oxlint-tsgolint": "^0.18.1",
     "ts-node": "~10.9.2",
-    "typescript": "~6.0.2"
+    "typescript": "~5.9.3"
+  },
+  "overrides": {
+    "@kompakkt/komponents": {
+      "@angular/core": "21.2.6"
+    },
+    "@kompakkt/plugins": {
+      "@angular/core": "21.2.6",
+      "@kompakkt/common": "git+https://github.com/Kompakkt/Common.git#1ec9e452e73a999d2b5ff725febd95dc0774a19f"
+    }
   },
   "trustedDependencies": [
+    "@kompakkt/common",
     "@kompakkt/plugins"
   ]
 }

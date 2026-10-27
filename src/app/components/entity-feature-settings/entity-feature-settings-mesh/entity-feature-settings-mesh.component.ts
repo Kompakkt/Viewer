@@ -1,8 +1,7 @@
-import { AsyncPipe, KeyValuePipe } from '@angular/common';
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Vector3 } from '@babylonjs/core';
-import { ColorChromeModule } from 'ngx-color/chrome';
 import {
   ButtonComponent,
   ButtonRowComponent,
@@ -11,7 +10,7 @@ import {
   LabelledCheckboxComponent,
   SliderComponent,
 } from '@kompakkt/komponents';
-import { firstValueFrom, map } from 'rxjs';
+import { ColorFieldComponent } from '../../color-field/color-field.component';
 import { IColor } from '@kompakkt/common';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { BabylonService } from '../../../services/babylon/babylon.service';
@@ -24,9 +23,8 @@ import { AsAbsolutePipe } from 'src/app/pipes/as-absolute.pipe';
   templateUrl: './entity-feature-settings-mesh.component.html',
   styleUrls: ['./entity-feature-settings-mesh.component.scss'],
   imports: [
-    ColorChromeModule,
+    ColorFieldComponent,
     FormsModule,
-    AsyncPipe,
     TranslatePipe,
     AsAbsolutePipe,
     ButtonRowComponent,
@@ -38,50 +36,41 @@ import { AsAbsolutePipe } from 'src/app/pipes/as-absolute.pipe';
   ],
 })
 export class EntityFeatureSettingsMeshComponent implements OnInit, OnDestroy {
-  public meshSettingsHelperToggle = false;
-  public boundingBoxVisibility = false;
-  public boundingBoxMeshesVisibility = false;
-  public backgroundColorPickerToggle = false;
-  public localAxisVisibility = false;
-  public worldAxisVisibility = false;
-  public groundVisibility = false;
-  public groundScalingFactor = 1;
-  public localAxisScalingFactor = 1;
-  public worldAxisScalingFactor = 1;
-  public meshScaleToggle = false;
-  public meshOrientationToggle = false;
-  readonly rotationGizmoActive = signal(false);
+  #babylon = inject(BabylonService);
+  entitySettings = inject(EntitySettingsService);
+  processing = inject(ProcessingService);
 
-  constructor(
-    public entitySettings: EntitySettingsService,
-    public processing: ProcessingService,
-    private babylon: BabylonService,
-  ) {}
+  meshSettingsHelperToggle = false;
+  boundingBoxVisibility = false;
+  boundingBoxMeshesVisibility = false;
+  backgroundColorPickerToggle = false;
+  localAxisVisibility = false;
+  worldAxisVisibility = false;
+  groundVisibility = false;
+  groundScalingFactor = 1;
+  localAxisScalingFactor = 1;
+  worldAxisScalingFactor = 1;
+  meshScaleToggle = false;
+  meshOrientationToggle = false;
+  rotationGizmoActive = signal(false);
+  groundColor = signal<IColor>({ r: 255, g: 255, b: 255, a: 1 });
 
-  get mirroredAxes$() {
-    return this.processing.settings$.pipe(
-      map(({ localSettings }) => localSettings.scale),
-      map(scale => {
-        const mirroredAxes: string[] = [];
-        if (scale.x < 0) mirroredAxes.push('X');
-        if (scale.y < 0) mirroredAxes.push('Y');
-        if (scale.z < 0) mirroredAxes.push('Z');
-        return mirroredAxes.length > 0 ? mirroredAxes.join(', ') : '';
-      }),
-    );
-  }
-
-  get meshes$() {
-    return this.processing.meshes$;
-  }
+  mirroredAxes = computed(() => {
+    const settings = this.processing.settings().localSettings;
+    const scale = settings.scale;
+    const mirroredAxes: string[] = [];
+    if (scale.x < 0) mirroredAxes.push('X');
+    if (scale.y < 0) mirroredAxes.push('Y');
+    if (scale.z < 0) mirroredAxes.push('Z');
+    return mirroredAxes.length > 0 ? mirroredAxes.join(', ') : '';
+  });
 
   ngOnInit() {
     this.entitySettings.meshSettingsCompleted.subscribe((finished: boolean) => {
       if (finished) {
-        this.resetVisualUIMeshSettingsHelper().then(() => {
-          this.entitySettings.destroyVisualUIMeshSettingsHelper();
-          this.entitySettings.decomposeMeshSettingsHelper();
-        });
+        this.resetVisualUIMeshSettingsHelper();
+        this.entitySettings.destroyVisualUIMeshSettingsHelper();
+        this.entitySettings.decomposeMeshSettingsHelper();
         this.rotationGizmoActive.set(false);
       }
     });
@@ -93,62 +82,61 @@ export class EntityFeatureSettingsMeshComponent implements OnInit, OnDestroy {
   }
 
   public async setBackgroundColor(color: IColor) {
-    const { localSettings } = await firstValueFrom(this.processing.settings$);
-    localSettings.background.color = color;
-    this.entitySettings.loadBackgroundColor();
+    const settings = this.processing.settings().localSettings;
+    settings.background.color = color;
+    this.processing.localSettings.set(settings);
+    this.entitySettings.loadBackgroundSettings();
   }
   // ________Mesh Settings__________
 
   // Scaling
   public async handleChangeDimension(value: number) {
-    const { localSettings } = await firstValueFrom(this.processing.settings$);
-    const signX = localSettings.scale.x >= 0 ? 1 : -1;
-    const signY = localSettings.scale.y >= 0 ? 1 : -1;
-    const signZ = localSettings.scale.z >= 0 ? 1 : -1;
-    localSettings.scale.x = Math.abs(value) * signX;
-    localSettings.scale.y = Math.abs(value) * signY;
-    localSettings.scale.z = Math.abs(value) * signZ;
+    const settings = this.processing.settings().localSettings;
+    const signX = settings.scale.x >= 0 ? 1 : -1;
+    const signY = settings.scale.y >= 0 ? 1 : -1;
+    const signZ = settings.scale.z >= 0 ? 1 : -1;
+    settings.scale.x = Math.abs(value) * signX;
+    settings.scale.y = Math.abs(value) * signY;
+    settings.scale.z = Math.abs(value) * signZ;
+
+    this.processing.localSettings.set(settings);
     this.entitySettings.loadScaling();
   }
 
   // Mirror
   public async handleMirrorAxis(axis: 'x' | 'y' | 'z' | 'reset') {
-    const { localSettings } = await firstValueFrom(this.processing.settings$);
+    const settings = this.processing.settings().localSettings;
     if (axis === 'reset') {
-      localSettings.scale.x = Math.abs(localSettings.scale.x);
-      localSettings.scale.y = Math.abs(localSettings.scale.y);
-      localSettings.scale.z = Math.abs(localSettings.scale.z);
-      this.entitySettings.loadScaling();
+      settings.scale.x = Math.abs(settings.scale.x);
+      settings.scale.y = Math.abs(settings.scale.y);
+      settings.scale.z = Math.abs(settings.scale.z);
     } else {
-      localSettings.scale[axis] = localSettings.scale[axis] * -1;
-      this.entitySettings.loadScaling();
+      settings.scale[axis] = settings.scale[axis] * -1;
     }
+    this.processing.localSettings.set(settings);
+    this.entitySettings.loadScaling();
   }
 
   // Rotation
-  public async setRotation(axis: string, degree: number) {
-    const { localSettings } = await firstValueFrom(this.processing.settings$);
+  public async setRotation(axis: 'x' | 'y' | 'z' | 'xyz_reset', degree: number) {
+    const settings = this.processing.settings().localSettings;
     switch (axis) {
       case 'x':
-        localSettings.rotation.x = degree;
-        this.entitySettings.loadRotation();
+        settings.rotation.x = degree;
         break;
       case 'y':
-        localSettings.rotation.y = degree;
-        this.entitySettings.loadRotation();
+        settings.rotation.y = degree;
         break;
       case 'z':
-        localSettings.rotation.z = degree;
-        this.entitySettings.loadRotation();
+        settings.rotation.z = degree;
         break;
       case 'xyz_reset':
-        localSettings.rotation.x = 0;
-        localSettings.rotation.y = 0;
-        localSettings.rotation.z = 0;
-        this.entitySettings.loadRotation();
-      default:
-        console.log('I am not able to rotate.');
+        settings.rotation.x = 0;
+        settings.rotation.y = 0;
+        settings.rotation.z = 0;
     }
+    this.processing.localSettings.set(settings);
+    this.entitySettings.loadRotation();
   }
 
   public toggleRotationGizmo(enabled: boolean) {
@@ -157,8 +145,8 @@ export class EntityFeatureSettingsMeshComponent implements OnInit, OnDestroy {
   }
 
   // _____ Helpers for Mesh Settings _______
-  public async resetVisualUIMeshSettingsHelper() {
-    const meshes = await firstValueFrom(this.meshes$);
+  public resetVisualUIMeshSettingsHelper() {
+    const meshes = this.processing.meshes();
     if (!meshes) {
       console.error('Center missing', this);
       return;
@@ -172,12 +160,19 @@ export class EntityFeatureSettingsMeshComponent implements OnInit, OnDestroy {
     this.setGroundVisibility(false);
     this.setScalingFactorGround(1);
     this.entitySettings.setGroundMaterial();
+    this.groundColor.set({ r: 255, g: 255, b: 255, a: 1 });
     this.resetBackgroundColor();
   }
 
-  public async resetBackgroundColor() {
-    const { serverSettings } = await firstValueFrom(this.processing.settings$);
-    const color = serverSettings.background.color;
+  public setGroundColor(color: IColor) {
+    this.groundColor.set(color);
+    this.entitySettings.setGroundMaterial(color);
+  }
+
+  public resetBackgroundColor() {
+    const settings = this.processing.settings().serverSettings;
+    const color = settings.background.color;
+    this.processing.serverSettings.set(settings);
     this.entitySettings.setGroundMaterial(color);
   }
 
@@ -185,24 +180,24 @@ export class EntityFeatureSettingsMeshComponent implements OnInit, OnDestroy {
     if (space === 'world') {
       this.worldAxisScalingFactor = factor;
       //const pos = factor * 0.9 * this.entitySettings.worldAxisInitialSize;
-      const transformNode = this.babylon.getScene().getTransformNodesByTags('worldAxis')[0];
+      const transformNode = this.#babylon.getScene().getTransformNodesByTags('worldAxis')[0];
       transformNode.scaling = new Vector3(factor, factor, factor);
     } else {
       this.localAxisScalingFactor = factor;
       //const pos = factor * 0.9 * this.entitySettings.localAxisInitialSize;
-      const transformNode = this.babylon.getScene().getTransformNodesByTags('localAxis')[0];
+      const transformNode = this.#babylon.getScene().getTransformNodesByTags('localAxis')[0];
       transformNode.scaling = new Vector3(factor, factor, factor);
     }
 
-    /*this.babylon
+    /*this.#babylon
       .getScene()
       .getMeshesByTags(world ? 'worldAxisX' : 'localAxisX')
       .map(mesh => (mesh.position = new Vector3(pos * 0.9, pos * -0.05, 0)));
-    this.babylon
+    this.#babylon
       .getScene()
       .getMeshesByTags(world ? 'worldAxisY' : 'localAxisY')
       .map(mesh => (mesh.position = new Vector3(0, pos * 0.9, pos * -0.05)));
-    this.babylon
+    this.#babylon
       .getScene()
       .getMeshesByTags(world ? 'worldAxisZ' : 'localAxisZ')
       .map(mesh => (mesh.position = new Vector3(0, pos * 0.05, pos * 0.9)));*/
@@ -227,8 +222,8 @@ export class EntityFeatureSettingsMeshComponent implements OnInit, OnDestroy {
     this.entitySettings.boundingBox.visibility = this.boundingBoxVisibility ? 1 : 0;
   }
 
-  public async setBoundingBoxMeshesVisibility(enabled: boolean) {
-    const meshes = await firstValueFrom(this.meshes$);
+  public setBoundingBoxMeshesVisibility(enabled: boolean) {
+    const meshes = this.processing.meshes();
     if (!meshes) {
       console.error('Meshes missing', this);
       return;
@@ -250,10 +245,11 @@ export class EntityFeatureSettingsMeshComponent implements OnInit, OnDestroy {
   public setGroundVisibility(enabled: boolean) {
     this.groundVisibility = enabled;
     this.visibilityMesh('ground', this.groundVisibility);
+    console.log('[EntityFeatureSettingsMeshComponent] setGroundVisibility', { enabled });
   }
 
   private visibilityMesh(tag: string, visibility: boolean) {
-    const scene = this.babylon.getScene();
+    const scene = this.#babylon.getScene();
     const nodes = scene.getTransformNodesByTags(tag);
     const meshes = scene.getMeshesByTags(tag);
     for (const el of [...nodes, ...meshes]) {

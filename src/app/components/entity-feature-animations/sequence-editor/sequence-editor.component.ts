@@ -47,11 +47,10 @@ class FramesToWidthPipe implements PipeTransform {
 export class SequenceEditorComponent {
   #overlay = inject(OverlayService);
   #dialog = inject(MatDialog);
-  #sidenav = toSignal(this.#overlay.sidenav$);
   service = inject(SequenceEditorService);
   playback = inject(PlaybackControllerService);
-  isAnimationMode = computed(() => this.#sidenav()?.mode === 'animations');
-  isVisible = computed(() => this.#sidenav()?.open && this.isAnimationMode());
+  isAnimationMode = computed(() => this.#overlay.sidenav()?.mode === 'animations');
+  isVisible = computed(() => this.#overlay.sidenav()?.open && this.isAnimationMode());
   _invisibleStopRef = effect(() => {
     const visible = this.isVisible();
     if (!visible && this.playback.transport() !== 'stopped') {

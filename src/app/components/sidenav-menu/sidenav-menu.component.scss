@@ -1,9 +1,8 @@
 :host {
-  --transition-duration: 280ms;
   position: absolute;
   top: 16px;
   left: 0;
-  transition: var(--transition-duration);
+  transition: var(--panel-transition);
   z-index: 99;
   color: #fff;
 
@@ -33,13 +32,17 @@
     left: var(--sidebar-width);
   }
 
+  &.is-resizing {
+    transition: none;
+  }
+
   &.disabled {
     pointer-events: none;
     opacity: 0.5;
   }
 
   &:not(.is-open) div.button-close {
-    transition: var(--transition-duration);
+    transition: var(--panel-transition);
     transform: translateX(-100%);
   }
 }

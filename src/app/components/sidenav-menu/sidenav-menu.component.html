@@ -9,7 +9,7 @@
       <mat-icon [attr.aria-label]="'Close sidebar' | translate">chevron_left</mat-icon>
     </k-button>
   </div>
-  @if (processing.showAnnotationEditor$ | async) {
+  @if (processing.showAnnotationEditor()) {
     <div class="button-wrapper" [class.selected]="mode() === 'annotation' && isOpen()">
       <k-button
         icon-button
@@ -21,7 +21,7 @@
       </k-button>
     </div>
   }
-  @if (processing.showSettingsEditor$ | async) {
+  @if (processing.showSettingsEditor()) {
     <div class="button-wrapper" [class.selected]="mode() === 'settings' && isOpen()">
       <k-button
         icon-button
@@ -33,7 +33,7 @@
       </k-button>
     </div>
   }
-  @if (processing.showAnimationEditor$ | async) {
+  @if (processing.showAnimationEditor()) {
     <div class="button-wrapper" [class.selected]="mode() === 'animations' && isOpen()">
       <k-button
         icon-button
@@ -45,7 +45,7 @@
       </k-button>
     </div>
   }
-  @if (processing.compilationLoaded$ | async) {
+  @if (processing.compilation() !== undefined) {
     <div class="button-wrapper" [class.selected]="mode() === 'compilationBrowser' && isOpen()">
       <k-button
         icon-button
@@ -57,7 +57,7 @@
       </k-button>
     </div>
   }
-  @if ((processing.mediaType$ | async) === 'cloud') {
+  @if (processing.mediaType() === 'cloud') {
     <div class="button-wrapper" [class.selected]="mode() === 'pointCloud' && isOpen()">
       <k-button
         icon-button

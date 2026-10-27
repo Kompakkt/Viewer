@@ -1,14 +1,11 @@
-import { AfterViewInit, Component, inject, input, OnInit, signal } from '@angular/core';
+import { AfterViewInit, Component, computed, inject, input, OnInit, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { IAnnotation } from '@kompakkt/common';
 
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Engine, Matrix, Scene, Vector3 } from '@babylonjs/core';
-import { combineLatest, map } from 'rxjs';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
 import { BabylonService } from '../../../services/babylon/babylon.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
-// tslint:disable-next-line:max-line-length
 
 @Component({
   selector: 'app-annotation-marker',
@@ -17,33 +14,31 @@ import { ProcessingService } from '../../../services/processing/processing.servi
   standalone: true,
 })
 export class AnnotationMarkerComponent implements OnInit, AfterViewInit {
-  public annotationService = inject(AnnotationService);
-  public babylon = inject(BabylonService);
-  public dialog = inject(MatDialog);
-  public processing = inject(ProcessingService);
+  annotationService = inject(AnnotationService);
+  babylon = inject(BabylonService);
+  dialog = inject(MatDialog);
+  processing = inject(ProcessingService);
 
-  public entityFileName = input<string>();
-  public annotation = input.required<IAnnotation>();
-  public isAnnotationHidden$ = combineLatest([
-    this.annotationService.hiddenAnnotations$,
-    toObservable(this.annotation),
-  ]).pipe(
-    map(([hiddenAnnotations, annotation]) => hiddenAnnotations.includes(annotation._id.toString())),
-  );
-  public isAnnotationHidden = toSignal(this.isAnnotationHidden$);
+  entityFileName = input<string>();
+  annotation = input.required<IAnnotation>();
+  isHidden = computed(() => {
+    const annotation = this.annotation();
+    const hidden = this.annotationService.hiddenAnnotations();
+    return hidden.includes(annotation._id.toString());
+  });
 
-  public positionData = signal({
+  positionData = signal({
     top: 0,
     left: 0,
     z: 0,
     behind: false,
   });
 
-  public markerSize = 32;
+  markerSize = 32;
   private scene: Scene;
   private engine: Engine;
 
-  public selectedAnnotation: IAnnotation | undefined;
+  selectedAnnotation: IAnnotation | undefined;
 
   constructor() {
     this.scene = this.babylon.getScene();
@@ -65,7 +60,7 @@ export class AnnotationMarkerComponent implements OnInit, AfterViewInit {
     loop();
   }
 
-  public setPosition() {
+  setPosition() {
     const annotation = this.annotation();
     const camera = this.babylon.getActiveCamera();
     if (!this.scene || !camera || !annotation) return;
@@ -92,7 +87,7 @@ export class AnnotationMarkerComponent implements OnInit, AfterViewInit {
     });
   }
 
-  public selectAnnotation(annotation: IAnnotation) {
+  selectAnnotation(annotation: IAnnotation) {
     this.selectedAnnotation = annotation;
     this.annotationService.setSelectedAnnotation(annotation._id.toString());
   }

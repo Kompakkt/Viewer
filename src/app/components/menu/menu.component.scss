@@ -31,6 +31,10 @@
   gap: 8px;
 }
 
+:host(.is-resizing) .bottom {
+  transition: none;
+}
+
 .is-active {
   background-color: #00aee6;
 }

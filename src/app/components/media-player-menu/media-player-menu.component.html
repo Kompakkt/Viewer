@@ -46,10 +46,10 @@
   >
     <k-slider
       [label]="'Volume'"
-      [startingValue]="currentVolumePercentageGetter"
+      [value]="currentVolumePercentageGetter"
       [showLabel]="false"
       direction="bottom-to-top"
-      (valueChanged)="setVolume($event)"
+      (valueChange)="setVolume($event)"
     />
   </div>
 </div>

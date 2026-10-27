@@ -1,18 +1,16 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { AbstractMesh, Mesh, Quaternion } from '@babylonjs/core';
+import { AbstractMesh, Quaternion } from '@babylonjs/core';
+import { firstValueFrom } from 'rxjs';
 import {
-  BehaviorSubject,
-  combineLatest,
-  debounceTime,
-  distinctUntilChanged,
-  filter,
-  firstValueFrom,
-  map,
-  switchMap,
-} from 'rxjs';
-import { IAnnotation, ICompilation, IEntity, IEntitySettings, isEntity } from '@kompakkt/common';
+  IAnnotation,
+  ICompilation,
+  IEntity,
+  IEntitySettings,
+  isCompilation,
+  isEntity,
+} from '@kompakkt/common';
 import { environment } from 'src/environment';
 import { baseEntity } from '../../../assets/defaults';
 import { defaultEntity, fallbackEntity } from '../../../assets/entities/entities';
@@ -33,7 +31,7 @@ import { BackendService } from '../backend/backend.service';
 import { MessageService } from '../message/message.service';
 import { OverlayService } from '../overlay/overlay.service';
 import { UserdataService } from '../userdata/userdata.service';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, ActivatedRouteSnapshot, ParamMap, Params, Router } from '@angular/router';
 
 export type QualitySetting = 'low' | 'medium' | 'high' | 'raw';
 const isQualitySetting = (setting: any): setting is QualitySetting => {
@@ -57,6 +55,9 @@ interface IQueryParams {
   minimal?: string;
   transparent?: string;
 }
+const isQueryParams = (params: unknown): params is IQueryParams => {
+  return params !== undefined && typeof params === 'object' && !Array.isArray(params);
+};
 
 type Mode = '' | 'upload' | 'explore' | 'edit' | 'annotation' | 'open';
 const isMode = (mode: any): mode is Mode => {
@@ -89,158 +90,150 @@ export class ProcessingService {
   private dialog: MatDialog = inject(MatDialog);
   private http: HttpClient = inject(HttpClient);
 
-  public entity$ = new BehaviorSubject<IEntity | undefined>(undefined);
-  public meshes$ = new BehaviorSubject<AbstractMesh[]>([]);
-  public compilation$ = new BehaviorSubject<ICompilation | undefined>(undefined);
-  public mode$ = new BehaviorSubject<Mode>('');
-  public mode = toSignal(this.mode$);
-  public settings$ = new BehaviorSubject({
-    localSettings: minimalSettings,
-    serverSettings: minimalSettings,
+  public entity = signal<IEntity | undefined>(undefined);
+  public meshes = signal<AbstractMesh[]>([]);
+  public compilation = signal<ICompilation | undefined>(undefined);
+  public compilationEntities = computed(() => {
+    const compilation = this.compilation();
+    return (Object.values(compilation?.entities ?? {}) ?? []).filter(isEntity);
   });
-  public quality$ = new BehaviorSubject<QualitySetting>('low');
 
-  public mediaType$ = this.entity$.pipe(map(entity => entity?.mediaType));
-  public isInUpload$ = this.entity$.pipe(map(entity => entity && !areSettingsSet(entity)));
-  public hasMeshSettings$ = this.mediaType$.pipe(
-    map(
-      mediaType => mediaType && ['model', 'entity', 'cloud', 'splat', 'image'].includes(mediaType),
-    ),
-  );
+  public mode = signal<Mode>('');
+  public localSettings = signal<IEntitySettings>(minimalSettings);
+  public serverSettings = signal<IEntitySettings>(minimalSettings);
+  public settings = computed(() => ({
+    localSettings: this.localSettings(),
+    serverSettings: this.serverSettings(),
+  }));
+  public quality = signal<QualitySetting>('low');
 
-  public compilationLoaded$ = this.compilation$.pipe(map(compilation => !!compilation?._id));
-  public defaultEntityLoaded$ = this.entity$.pipe(map(entity => entity?._id === 'default'));
-  public fallbackEntityLoaded$ = this.entity$.pipe(map(entity => entity?._id === 'fallback'));
-  public isStandalone$ = this.entity$.pipe(map(entity => entity?._id === 'standalone_entity'));
+  public mediaType = computed(() => this.entity()?.mediaType);
+  public isInUpload = computed(() => {
+    const entity = this.entity();
+    if (!entity) return false;
+    return !areSettingsSet(entity);
+  });
+  public hasMeshSettings = computed(() => {
+    const mediaType = this.mediaType();
+    if (!mediaType) return false;
+    return ['model', 'entity', 'cloud', 'splat', 'image'].includes(mediaType);
+  });
+
+  public isDefaultEntity = computed(() => this.entity()?._id === 'default');
+  public isFallbackEntity = computed(() => this.entity()?._id === 'fallback');
+  public isStandalone = computed(() => this.entity()?._id === 'standalone_entity');
 
   // general features and modes
-  public showMenu$ = new BehaviorSubject(true);
-  public showSidenav$ = new BehaviorSubject(true);
-  public showAnnotationEditor$ = new BehaviorSubject(true);
-  public showSettingsEditor$ = new BehaviorSubject(true);
+  public showMenu = signal(true);
+  public showSidenav = signal(true);
+  public showAnnotationEditor = signal(true);
+  public showSettingsEditor = signal(true);
 
-  public showAnimationEditor$ = combineLatest([this.babylon.containers.entity$, this.entity$]).pipe(
-    map(
-      ([result, entity]) =>
-        (result?.animationGroups.length ?? 0) > 0 &&
-        (entity?.mediaType === 'entity' || entity?.mediaType === 'model') &&
-        entity?._id !== 'default',
-    ),
-    distinctUntilChanged(),
-  );
+  public showAnimationEditor = computed(() => {
+    const container = this.babylon.containers.entity();
+    const entity = this.entity();
+    return (
+      (container?.animationGroups.length ?? 0) > 0 &&
+      (entity?.mediaType === 'entity' || entity?.mediaType === 'model') &&
+      entity?._id !== 'default'
+    );
+  });
 
-  public bootstrapped$ = new BehaviorSubject(false);
+  public bootstrapped = signal(false);
 
-  public rotationQuaternion = Quaternion.RotationYawPitchRoll(0, 0, 0);
-  public entityHeight = (0).toFixed(2);
-  public entityWidth = (0).toFixed(2);
-  public entityDepth = (0).toFixed(2);
+  isOwner = computed(() => {
+    const entity = this.entity();
+    const compilation = this.compilation();
+    const ofEntity = this.userdata.doesUserOwn(entity);
+    const ofCompilation = this.userdata.doesUserOwn(compilation);
+    return { ofEntity, ofCompilation };
+  });
 
-  isOwner$ = combineLatest({
-    entity: this.entity$,
-    compilation: this.compilation$,
-  }).pipe(
-    switchMap(async ({ entity, compilation }) => {
-      const ofEntity = await this.userdata.doesUserOwn(entity);
-      const ofCompilation = await this.userdata.doesUserOwn(compilation);
-      return { ofEntity, ofCompilation };
-    }),
-  );
+  doesUserHaveCompilationAccess = computed(() => {
+    const compilation = this.compilation();
+    if (!compilation) return false;
+    return this.userdata.doesUserHaveAccess(compilation);
+  });
 
-  doesUserHaveCompilationAccess$ = combineLatest({
-    compilation: this.compilation$,
-  }).pipe(
-    switchMap(async ({ compilation }) => {
+  isAnnotatingFeatured = computed(() => {
+    // Re-trigger on authentication state change
+    const _isAuthenticated = this.userdata.isAuthenticated();
+
+    const entity = this.entity();
+    const compilation = this.compilation();
+    const isCompilationLoaded = compilation !== undefined;
+    const isDefault = this.isDefaultEntity();
+    const isFallback = this.isFallbackEntity();
+    const showEditor = this.showAnnotationEditor();
+    const isStandalone = this.isStandalone();
+    const mode = this.mode();
+
+    const isOwner = this.isOwner();
+    const doesUserHaveCompilationAccess = this.doesUserHaveCompilationAccess();
+
+    if (!entity) return false;
+    if (isStandalone) return true;
+
+    // TODO: Implement annotation for every type, then we don't need this check
+    const isAnnotatable =
+      entity.mediaType === 'image' ||
+      entity.mediaType === 'entity' ||
+      entity.mediaType === 'cloud' ||
+      entity.mediaType === 'splat' ||
+      entity.mediaType === 'model';
+
+    const hideEditor = !showEditor || !isAnnotatable || isFallback;
+    const shouldHideEditor = !isAnnotatable || isFallback;
+    const isEditorVisible = showEditor && !isCompilationLoaded;
+
+    if (hideEditor && shouldHideEditor && isEditorVisible) return false;
+
+    if (isCompilationLoaded) {
       if (!compilation) return false;
-      return this.userdata.doesUserHaveAccess(compilation);
-    }),
-  );
+      return doesUserHaveCompilationAccess || isOwner.ofCompilation;
+    } else {
+      if ((isDefault || isFallback) && mode === 'annotation') return true;
+      if (isOwner.ofEntity) return true;
+    }
+    return false;
+  });
 
-  isAnnotatingFeatured$ = combineLatest({
-    entity: this.entity$,
-    compilation: this.compilation$,
-    isDefault: this.defaultEntityLoaded$,
-    isFallback: this.fallbackEntityLoaded$,
-    showEditor: this.showAnnotationEditor$,
-    isCompilationLoaded: this.compilationLoaded$,
-    isStandalone: this.isStandalone$,
-    mode: this.mode$,
-    isAuthenticated: this.userdata.isAuthenticated$,
-    isOwner: this.isOwner$,
-    doesUserHaveCompilationAccess: this.doesUserHaveCompilationAccess$,
-  }).pipe(
-    map(args => {
-      const { entity, compilation } = args;
-      if (!entity) return false;
-      if (args.isStandalone) return true;
+  hasAnnotationAllowance = computed(() => {
+    const isStandalone = this.isStandalone();
+    const isInUpload = this.isInUpload();
+    const isAnnotatingFeatured = this.isAnnotatingFeatured();
+    const isAuthenticated = this.userdata.isAuthenticated();
+    const sidenavMode = this.overlay.sidenav().mode;
+    if (isInUpload) return false;
+    if (!isAnnotatingFeatured) return false;
+    if (isStandalone) return true;
+    if (sidenavMode === 'annotation' && isAuthenticated) return true;
+    return false;
+  });
 
-      // TODO: Implement annotation for every type, then we don't need this check
-      const isAnnotatable =
-        entity.mediaType === 'image' ||
-        entity.mediaType === 'entity' ||
-        entity.mediaType === 'cloud' ||
-        entity.mediaType === 'splat' ||
-        entity.mediaType === 'model';
-
-      const hideEditor = !args.showEditor || !isAnnotatable || args.isFallback;
-      const shouldHideEditor = !isAnnotatable || args.isFallback;
-      const isEditorVisible = args.showEditor && !args.isCompilationLoaded;
-
-      if (hideEditor && shouldHideEditor && isEditorVisible) return false;
-
-      if (args.isCompilationLoaded) {
-        if (!compilation) return false;
-        return args.doesUserHaveCompilationAccess || args.isOwner.ofCompilation;
-      } else {
-        if ((args.isDefault || args.isFallback) && args.mode === 'annotation') return true;
-        if (args.isOwner.ofEntity) return true;
-      }
-      return false;
-    }),
-    distinctUntilChanged(),
-  );
-
-  hasAnnotationAllowance$ = combineLatest({
-    isStandalone: this.isStandalone$,
-    sidenav: this.overlay.sidenav$,
-    isInUpload: this.isInUpload$,
-    isAnnotatingFeatured: this.isAnnotatingFeatured$,
-    isAuthenticated: this.userdata.isAuthenticated$,
-  }).pipe(
-    map(args => {
-      if (args.isInUpload) return false;
-      if (!args.sidenav.open) return false;
-      if (!args.isAnnotatingFeatured) return false;
-      if (args.isStandalone) return true;
-      if (args.sidenav.mode === 'annotation' && args.isAuthenticated) return true;
-      return false;
-    }),
-    distinctUntilChanged(),
-  );
-
-  state$ = combineLatest([this.entity$, this.settings$, this.meshes$, this.compilation$]).pipe(
-    map(([entity, { localSettings }, meshes, compilation]) => ({
-      entity,
-      settings: localSettings,
-      meshes,
-      compilation,
-    })),
-    debounceTime(100),
-  );
+  state = computed(() => {
+    return {
+      entity: this.entity(),
+      settings: this.settings().localSettings,
+      meshes: this.meshes(),
+      compilation: this.compilation(),
+    };
+  });
 
   constructor() {
-    this.entity$.pipe(filter(isEntity)).subscribe(entity => this.handleEntitySettings(entity));
-    this.defaultEntityLoaded$.subscribe(isDefault => {
-      this.babylon.setOrbitGizmoVisible(!isDefault);
+    effect(() => {
+      const entity = this.entity();
+      const isDefault = this.isDefaultEntity();
+      if (!entity) return;
+      this.handleEntitySettings(entity);
+      if (isDefault) this.babylon.setOrbitGizmoVisible(false);
     });
   }
 
   private handleEntitySettings(entity: IEntity) {
     if (areSettingsSet(entity)) {
-      this.settings$.next({
-        localSettings: entity.settings,
-        serverSettings: entity.settings,
-      });
+      this.localSettings.set(entity.settings);
+      this.serverSettings.set(entity.settings);
     } else {
       const settings = (() => {
         if (entity._id === 'default') return settingsKompakktLogo;
@@ -260,22 +253,20 @@ export class ProcessingService {
             return settingsEntity;
         }
       })();
-      this.settings$.next({
-        localSettings: settings,
-        serverSettings: settings,
-      });
+      this.localSettings.set(settings);
+      this.serverSettings.set(settings);
     }
   }
 
   public updateEntityQuality(quality: QualitySetting) {
-    this.quality$.next(quality);
+    this.quality.set(quality);
   }
 
   public updateActiveEntity(entity: IEntity | undefined, meshes: AbstractMesh[]) {
     console.log('New loaded Entity:', { entity, meshes });
-    this.entity$.next(entity);
+    this.entity.set(entity);
 
-    const isPickableMode = ['upload', 'annotation'].includes(this.mode$.getValue());
+    const isPickableMode = ['upload', 'annotation'].includes(this.mode());
     meshes.forEach(mesh => {
       mesh.isPickable = isPickableMode;
     });
@@ -285,27 +276,29 @@ export class ProcessingService {
       .forEach(mesh => {
         mesh.renderingGroupId = 3;
       });
-    this.meshes$.next(meshes);
+    this.meshes.set(meshes);
     this.babylon.resize();
   }
 
-  public async bootstrap() {
-    const queryParams = new URLSearchParams(location.search);
-    const entries = Object.fromEntries(queryParams.entries()) as IQueryParams;
+  public async bootstrap(params: Params) {
+    if (!isQueryParams(params)) {
+      throw new Error('Invalid query params');
+    }
+    console.log('[Processing] Param entries', params);
 
-    const entityParam = entries['model'] ?? entries['entity'] ?? undefined;
-    const compParam = entries['compilation'] ?? undefined;
-    const qualityParam = entries['quality'] ?? 'low';
+    const entityParam = params['model'] ?? params['entity'] ?? undefined;
+    const compParam = params['compilation'] ?? undefined;
+    const qualityParam = params['quality'] ?? 'low';
     if (isQualitySetting(qualityParam)) this.updateEntityQuality(qualityParam);
     // values = upload, explore, edit, annotation, open
-    const mode = entries['mode'] ?? '';
-    if (isMode(mode)) this.mode$.next(mode);
+    const mode = params['mode'] ?? '';
+    if (isMode(mode)) this.mode.set(mode);
 
     // check if standalone and exit early to init standalone mode
-    const isStandalone = !!entries['standalone'];
-    if (isStandalone) return this.loadStandaloneEntity(entries);
+    const isStandalone = !!params['standalone'];
+    if (isStandalone) return this.loadStandaloneEntity(params);
 
-    if (entries.transparent) this.babylon.isTransparent.set(true);
+    if (params.transparent) this.babylon.isTransparent.set(true);
 
     // loading         // modes
     // default        '', explore, annotation, open
@@ -335,13 +328,13 @@ export class ProcessingService {
 
     // 3) Load Entity and compilation
     if (compParam || entityParam) {
-      this.fetchAndLoad(entityParam, compParam);
+      void this.fetchAndLoad(entityParam, compParam);
     } else {
-      this.loadDefaultEntityData();
+      void this.loadDefaultEntityData();
     }
 
     // 2) check modes
-    this.showMenu$.next(!!mode);
+    this.showMenu.set(!!mode);
 
     // Default
     let showAnnotationEditor = true;
@@ -351,7 +344,7 @@ export class ProcessingService {
       showAnnotationEditor = false;
       showSettingsEditor = false;
       if (!compParam) {
-        this.showSidenav$.next(false);
+        this.showSidenav.set(false);
       }
     }
 
@@ -359,8 +352,8 @@ export class ProcessingService {
       showAnnotationEditor = false;
     }
 
-    this.showAnnotationEditor$.next(showAnnotationEditor);
-    this.showSettingsEditor$.next(showSettingsEditor);
+    this.showAnnotationEditor.set(showAnnotationEditor);
+    this.showSettingsEditor.set(showSettingsEditor);
 
     // 4) toggle sidenav
     switch (mode) {
@@ -378,7 +371,7 @@ export class ProcessingService {
     }
     // TODO: error handling: wrong mode for loading
 
-    this.bootstrapped$.next(true);
+    this.bootstrapped.set(true);
   }
 
   private async loadStandaloneEntity(entries: IQueryParams) {
@@ -485,29 +478,27 @@ export class ProcessingService {
       .loadEntity(true, url)
       .then(meshes => {
         this.updateActiveEntity(entity, meshes);
-        this.settings$.next({
-          localSettings: entity.settings,
-          serverSettings: entity.settings,
-        });
+        this.localSettings.set(entity.settings);
+        this.serverSettings.set(entity.settings);
       })
       .catch(error => {
         console.error(error);
         this.message.error('Connection to entity server to load entity refused.');
-        this.loadFallbackEntity();
+        return this.loadFallbackEntity();
       })
       .then(() => {
         if (!!entries.minimal) {
-          this.showAnnotationEditor$.next(false);
-          this.showSettingsEditor$.next(false);
-          this.showSidenav$.next(false);
+          this.showAnnotationEditor.set(false);
+          this.showSettingsEditor.set(false);
+          this.showSidenav.set(false);
         } else {
-          this.showAnnotationEditor$.next(!annotations);
-          this.showSettingsEditor$.next(!settings);
+          this.showAnnotationEditor.set(!annotations);
+          this.showSettingsEditor.set(!settings);
           const overlay = !settings ? 'settings' : !annotations ? 'annotation' : '';
-          this.showSidenav$.next(!!overlay);
+          this.showSidenav.set(!!overlay);
           this.overlay.toggleSidenav(overlay, !!overlay);
         }
-        this.bootstrapped$.next(true);
+        this.bootstrapped.set(true);
       });
   }
 
@@ -560,7 +551,10 @@ export class ProcessingService {
           }
         }
 
-        this.compilation$.next(compilation as ICompilation);
+        if (!isCompilation(compilation)) {
+          throw new Error('Compilation is not valid');
+        }
+        this.compilation.set(compilation);
         return this.fetchEntityDataAfterCollection(compilation, specifiedEntity);
       })
       .catch(error => {
@@ -640,32 +634,27 @@ export class ProcessingService {
     newEntity: IEntity,
     overrideUrl?: string,
   ): Promise<AbstractMesh[] | undefined> {
-    const mode = this.mode$.getValue();
+    const mode = this.mode();
     const baseURL = overrideUrl ?? environment.server_url;
     if (this.loadingScreen.isLoading() || !newEntity.processed || !newEntity.mediaType) {
       return;
     }
 
     if (newEntity.dataSource.isExternal) {
-      this.entity$.next(newEntity);
-      this.loadFallbackEntity();
-      return;
+      this.entity.set(newEntity);
+      return this.loadFallbackEntity();
     }
 
     const { mediaType } = newEntity;
 
-    const isInUpload = await firstValueFrom(this.isInUpload$);
-    if (isInUpload && (mode !== 'upload' || newEntity.finished)) {
-      this.settings$.next({
-        localSettings: minimalSettings,
-        serverSettings: minimalSettings,
-      });
-      this.loadFallbackEntity();
+    if (this.isInUpload() && (mode !== 'upload' || newEntity.finished)) {
+      this.localSettings.set(minimalSettings);
+      this.serverSettings.set(minimalSettings);
       this.message.error('Object has no settings and cannot be loaded');
-      return;
+      return this.loadFallbackEntity();
     }
     // cases: entity, image, audio, video, text
-    const quality = this.quality$.getValue();
+    const quality = this.quality();
     const path: string = newEntity.externalFile ?? newEntity.processed[quality];
     const isAudio = mediaType === 'audio';
     const url = path.includes('http') || path.includes('https') ? path : `${baseURL}${path}`;

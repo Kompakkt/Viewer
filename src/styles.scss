@@ -31,6 +31,9 @@
 
   --sidebar-width: clamp(320px, 27vw, 400px);
 
+  /* Panel open/close animation, shared by the sidebar and the bottom sheet */
+  --panel-transition: 200ms ease-out;
+
   /* Sizes */
   --font-size-base: 16px;
   --font-size-small: 14px;
@@ -299,6 +302,13 @@ k-button[rounded] {
 .mat-mdc-icon-button {
   display: grid !important;
   place-items: center !important;
+}
+
+color-chrome {
+  div.chrome-picker {
+    box-shadow: unset;
+    background: transparent;
+  }
 }
 
 /* Scrollbar style */

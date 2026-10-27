@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { AnimationGroup, TransformNode } from '@babylonjs/core';
 import { BabylonService } from '../babylon/babylon.service';
 
@@ -24,7 +24,8 @@ export class AnimationService {
   readonly tree$ = computed(() => this.buildTree(this.animationGroups$()));
 
   constructor() {
-    this.babylon.containers.entity$.subscribe(result => {
+    effect(() => {
+      const entity = this.babylon.containers.entity();
       // Stop any previously-active group first. The group belongs to the previous
       // entity and will be disposed by Babylon's clearScene; stop()/reset() are
       // defensively guarded (try/catch on reset()) so this is safe.
@@ -33,7 +34,7 @@ export class AnimationService {
       // (animationStartMode default = FIRST). Reflect that auto-started state in
       // activeGroup$ so the panel can show a Stop button for the
       // already-playing animation instead of a Play button.
-      const groups = result?.animationGroups ?? undefined;
+      const groups = entity?.animationGroups ?? undefined;
       this.animationGroups$.set(groups);
       const started = groups?.find(g => g.isStarted) ?? null;
       this.activeGroup$.set(started);

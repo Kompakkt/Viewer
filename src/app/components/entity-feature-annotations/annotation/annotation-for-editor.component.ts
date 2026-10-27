@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { AsyncPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
 import {
@@ -21,10 +20,8 @@ import { AnnotationComponent } from './annotation.component';
   styleUrls: ['./annotation-for-editor.component.scss'],
   imports: [
     FormsModule,
-
     MatIcon,
     MarkdownPreviewComponent,
-    AsyncPipe,
     TranslatePipe,
     ButtonComponent,
     ButtonRowComponent,
@@ -35,38 +32,27 @@ import { AnnotationComponent } from './annotation.component';
   ],
 })
 export class AnnotationComponentForEditorComponent extends AnnotationComponent implements OnInit {
-  public async toggleVisibility() {
-    const [{ _id }, showAnnotation, isSelectedAnnotation, isAnnotationHidden] = await Promise.all([
-      firstValueFrom(this.annotation$),
-      firstValueFrom(this.showAnnotation$),
-      firstValueFrom(this.isSelectedAnnotation$),
-      firstValueFrom(this.isAnnotationHidden$),
-    ]);
-
-    if (isAnnotationHidden) return;
-
-    this.showAnnotation$.next(!showAnnotation);
-    this.annotationService.setSelectedAnnotation(isSelectedAnnotation ? '' : _id.toString());
-    this.babylon.hideMesh(_id.toString(), showAnnotation);
+  toggleVisibility() {
+    const annotation = this.annotation();
+    const isSelected = this.isSelected();
+    const isHidden = this.isHidden();
+    if (isHidden) return;
+    this.annotationService.setSelectedAnnotation(isSelected ? '' : annotation._id.toString());
   }
 
-  public async setVisibility(visible: boolean) {
-    const [{ _id }, isSelectedAnnotation] = await Promise.all([
-      firstValueFrom(this.annotation$),
-      firstValueFrom(this.isSelectedAnnotation$),
-    ]);
-
-    if (isSelectedAnnotation) {
-      this.annotationService.setSelectedAnnotation(visible ? _id.toString() : '');
+  setVisibility(visible: boolean) {
+    const annotation = this.annotation();
+    const isSelected = this.isSelected();
+    if (isSelected) {
+      this.annotationService.setSelectedAnnotation(visible ? annotation._id.toString() : '');
     }
 
-    this.annotationService.setAnnotationVisibility(_id.toString(), visible);
+    this.annotationService.setAnnotationVisibility(annotation._id.toString(), visible);
   }
 
-  // TODO: set perspective in annotation Service and make it not async and public and save!
-  public async selectPerspective() {
-    const annotation = await firstValueFrom(this.annotation$);
-    await this.babylon.createPreviewScreenshot().then(detailScreenshot => {
+  selectPerspective() {
+    const annotation = this.annotation();
+    return this.babylon.createPreviewScreenshot().then(detailScreenshot => {
       const camera = this.babylon.getActiveCamera();
       if (!camera) {
         console.error('AnnotationComponentForEditorComponent cannot get ActiveCamera', this);
@@ -78,24 +64,20 @@ export class AnnotationComponentForEditorComponent extends AnnotationComponent i
         preview: detailScreenshot,
       };
 
-      this.annotationService.updateAnnotation(annotation);
+      return this.annotationService.updateAnnotation(annotation);
     });
   }
 
-  public async changeOpenPopup() {
-    const [{ _id }, isEditMode, isCollapsed, isSelectedAnnotation] = await Promise.all([
-      firstValueFrom(this.annotation$),
-      firstValueFrom(this.isEditMode$),
-      firstValueFrom(this.collapsed$),
-      firstValueFrom(this.isSelectedAnnotation$),
-    ]);
+  async changeOpenPopup() {
+    const annotation = this.annotation();
+    const isEditMode = this.isEditMode();
+    const isCollapsed = this.collapsed();
+    const isSelected = this.isSelected();
 
-    if (!isEditMode) this.collapsed$.next(!isCollapsed);
+    if (!isEditMode) this.collapsed.set(!isCollapsed);
     this.annotationService.setSelectedAnnotation(
-      isCollapsed && isSelectedAnnotation ? '' : _id.toString(),
+      isCollapsed && isSelected ? '' : annotation._id.toString(),
     );
-    this.babylon.hideMesh(_id.toString(), true);
-    this.showAnnotation$.next(true);
   }
 
   override ngOnInit() {

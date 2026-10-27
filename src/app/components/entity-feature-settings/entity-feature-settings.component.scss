@@ -34,7 +34,8 @@ k-button + k-button {
   object-fit: scale-down;
 }
 
-div.video-preview-generation-overlay {
+div.video-preview-generation-overlay,
+div.skybox-upload-overlay {
   position: absolute;
   width: 100vw;
   height: 100vh;
@@ -149,6 +150,12 @@ div.video-preview-generation-overlay {
       transform-origin: left;
       transform: scaleX(var(--width));
     }
+
+    &.indeterminate div.progress-bar {
+      width: 40%;
+      transition: opacity 0.3s ease-in-out;
+      animation: indeterminateSlide 1.2s ease-in-out infinite;
+    }
   }
 
   &.visible {
@@ -170,5 +177,14 @@ div.video-preview-generation-overlay {
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@keyframes indeterminateSlide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
   }
 }

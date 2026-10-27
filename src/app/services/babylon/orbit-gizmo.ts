@@ -15,16 +15,18 @@ import {
   StandardMaterial,
   Vector3,
 } from '@babylonjs/core';
-import { smoothCameraTransition } from './camera-handler';
+import { CameraHandlerService } from './camera-handler.service';
 
 export const createOrbitGizmo = ({
   canvas,
   getArcRotateCamera,
   mainEngine,
+  cameraHandler,
 }: {
   canvas: HTMLCanvasElement;
   getArcRotateCamera: () => ArcRotateCamera;
   mainEngine: Engine;
+  cameraHandler: CameraHandlerService;
 }) => {
   canvas.id = 'gizmoCanvas';
   canvas.style.setProperty('position', 'fixed');
@@ -225,7 +227,7 @@ export const createOrbitGizmo = ({
     const position = target.add(direction);
     isAnimating = true;
 
-    const ref = smoothCameraTransition({ camera, scene, position, target }, 2);
+    const ref = cameraHandler.smoothCameraTransition({ camera, scene, position, target }, 2);
     ref?.onAnimationEndObservable.addOnce(() => {
       isAnimating = false;
     });

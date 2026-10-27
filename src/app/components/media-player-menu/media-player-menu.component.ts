@@ -34,11 +34,8 @@ class PrettyTimePipe implements PipeTransform {
 export class MediaPlayerMenuComponent {
   #babylon = inject(BabylonService);
 
-  #videoContainer = toSignal(this.#babylon.containers.video$);
-  #audioContainer = toSignal(this.#babylon.containers.audio$);
-
   mediaElement = computed(() => {
-    return this.#videoContainer()?.video ?? this.#audioContainer()?.audio;
+    return this.#babylon.containers.video()?.video ?? this.#babylon.containers.audio()?.audio;
   });
   totalDuration = computed(() => {
     const el = this.mediaElement();

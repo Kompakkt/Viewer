@@ -18,15 +18,15 @@
         <div>
           <k-input
             [label]="'Title' | translate"
-            [startingValue]="annotation.body.content.title"
-            (valueChanged)="onTitleChange($event.value)"
+            [value]="annotation.body.content.title"
+            (valueChange)="onTitleChange($event)"
           />
 
           <k-textarea
             #annotationDescription
             [label]="'Description content' | translate"
-            [startingValue]="annotation.body.content.description"
-            (valueChanged)="onTextAreaChange($event.value)"
+            [value]="annotation.body.content.description"
+            (valueChange)="onTextAreaChange($event)"
             resize="both"
           />
         </div>

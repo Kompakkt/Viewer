@@ -3,7 +3,9 @@ import {
   EnvironmentInjector,
   Injectable,
   ViewContainerRef,
+  computed,
   createComponent,
+  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -11,11 +13,14 @@ import {
   ArcRotateCamera,
   Camera,
   Color4,
+  CubeTexture,
   Engine,
   FxaaPostProcess,
   ImageProcessingConfiguration,
   Layer,
+  Mesh,
   PostProcess,
+  PBRMaterial,
   Scene,
   SharpenPostProcess,
   Tools,
@@ -36,16 +41,8 @@ import '@babylonjs/core/Debug/debugLayer';
 import '@babylonjs/inspector';
 // tslint:disable-next-line:no-import-side-effect
 import '@babylonjs/loaders';
-import { BehaviorSubject, interval } from 'rxjs';
 import { RenderCanvasComponent } from '../../components/render-canvas/render-canvas.component';
-import {
-  cameraDefaults$,
-  createDefaultCamera,
-  createUniversalCamera,
-  setUpCamera,
-  smoothCameraTransition,
-  smoothCameraTransitionFromSpherical,
-} from './camera-handler';
+import { CameraHandlerService } from './camera-handler.service';
 import { IAudioContainer, IImageContainer, IVideoContainer } from './container.interfaces';
 import {
   load3DEntity,
@@ -61,6 +58,7 @@ import { CopcImporter } from './importers/copc/copc-importer';
 import { LoadingScreenService } from './loadingscreen';
 import { InspectorToken, ShowInspector } from '@babylonjs/inspector';
 import { createOrbitGizmo } from './orbit-gizmo';
+import { SKYBOX_PRESETS } from './skyboxes';
 
 RegisterSceneLoaderPlugin(new CopcImporter());
 RegisterSceneLoaderPlugin(new EptImporter());
@@ -71,6 +69,7 @@ type RGBA = { r: number; b: number; g: number; a: number };
 export class BabylonService {
   private environmentInjector = inject(EnvironmentInjector);
   private loadingScreen = inject(LoadingScreenService);
+  private cameraHandler = inject(CameraHandlerService);
 
   // Create instances of RenderCanvasComponent, which will be injected into SceneComponent
   // One for the main canvas, and one for the OrbitGizmo
@@ -111,24 +110,33 @@ export class BabylonService {
   private effects: PostProcess[] = [];
 
   public containers = {
-    video$: new BehaviorSubject<IVideoContainer | undefined>(undefined),
-    audio$: new BehaviorSubject<IAudioContainer | undefined>(undefined),
-    image$: new BehaviorSubject<IImageContainer | undefined>(undefined),
-    entity$: new BehaviorSubject<ISceneLoaderAsyncResult | undefined>(undefined),
+    video: signal<IVideoContainer | undefined>(undefined),
+    audio: signal<IAudioContainer | undefined>(undefined),
+    image: signal<IImageContainer | undefined>(undefined),
+    entity: signal<ISceneLoaderAsyncResult | undefined>(undefined),
   };
+
+  audioEffectRef = effect(() => {
+    const audio = this.containers.audio();
+    if (!audio) return;
+    // Define as function so we can unregister by variable name
+    let renderAudio = () => beforeAudioRender(this.scene, audio);
+    this.scene.registerBeforeRender(renderAudio);
+    this.scene.registerAfterRender(renderAudio);
+  });
 
   public cameraManager = {
     getActiveCamera: () => this.getActiveCamera(),
     moveActiveCameraToPosition: (position: Vector3) =>
-      smoothCameraTransition({
+      this.cameraHandler.smoothCameraTransition({
         camera: this.getActiveCamera(),
         scene: this.scene,
         position,
       }),
     resetCamera: () => {
       const camera = this.cameraManager.setCameraType<ArcRotateCamera>('ArcRotateCamera');
-      const { alpha, beta, radius, target } = cameraDefaults$.getValue();
-      smoothCameraTransitionFromSpherical({
+      const { alpha, beta, radius, target } = this.cameraHandler.cameraDefaults();
+      this.cameraHandler.smoothCameraTransitionFromSpherical({
         camera,
         scene: this.scene,
         alpha,
@@ -150,10 +158,14 @@ export class BabylonService {
         z: this.getActiveCamera().target.z,
       },
     }),
-    smoothCameraTransition,
-    smoothCameraTransitionFromSpherical,
+    smoothCameraTransition: (
+      ...params: Parameters<typeof this.cameraHandler.smoothCameraTransition>
+    ) => this.cameraHandler.smoothCameraTransition(...params),
+    smoothCameraTransitionFromSpherical: (
+      ...params: Parameters<typeof this.cameraHandler.smoothCameraTransitionFromSpherical>
+    ) => this.cameraHandler.smoothCameraTransitionFromSpherical(...params),
     setActiveCameraTarget: (target: Vector3, speed?: number) =>
-      smoothCameraTransition(
+      this.cameraHandler.smoothCameraTransition(
         {
           camera: this.getActiveCamera(),
           scene: this.scene,
@@ -162,14 +174,14 @@ export class BabylonService {
         speed,
       ),
     setUpActiveCamera: (maxSize: number, mediaType: string) =>
-      setUpCamera(this.getActiveCamera(), maxSize, mediaType),
+      this.cameraHandler.setupCamera(this.getActiveCamera(), maxSize, mediaType),
     setCameraType: <T extends ArcRotateCamera | UniversalCamera>(
       type: 'ArcRotateCamera' | 'UniversalCamera',
     ) => {
       const cameras = this.scene.cameras;
-      const currentType = this.cameraManager.cameraType$.getValue();
+      const currentType = this.cameraManager.cameraType();
       if (type === currentType) return this.scene.activeCamera as T;
-      this.cameraManager.cameraType$.next(type);
+      this.cameraManager.cameraType.set(type);
 
       const rotateCamera = cameras.find(
         camera => camera instanceof ArcRotateCamera,
@@ -178,7 +190,7 @@ export class BabylonService {
         camera => camera instanceof UniversalCamera,
       )! as UniversalCamera;
 
-      const { alpha, beta, radius, target } = cameraDefaults$.getValue();
+      const { alpha, beta, radius, target } = this.cameraHandler.cameraDefaults();
       if (type === 'UniversalCamera') {
         universalCamera.position = rotateCamera.position.clone();
         universalCamera.setTarget(target);
@@ -186,7 +198,7 @@ export class BabylonService {
       } else {
         rotateCamera.position = universalCamera.position.clone();
         this.scene.activeCamera = rotateCamera;
-        smoothCameraTransitionFromSpherical({
+        this.cameraHandler.smoothCameraTransitionFromSpherical({
           camera: rotateCamera,
           scene: this.scene,
           alpha,
@@ -198,8 +210,7 @@ export class BabylonService {
       return this.scene.activeCamera as T;
     },
     cameraSpeed: 1.0,
-    cameraType$: new BehaviorSubject<'ArcRotateCamera' | 'UniversalCamera'>('ArcRotateCamera'),
-    cameraDefaults$,
+    cameraType: signal<'ArcRotateCamera' | 'UniversalCamera'>('ArcRotateCamera'),
   };
 
   public background: {
@@ -236,8 +247,8 @@ export class BabylonService {
     this.scene.environmentIntensity = 1;
 
     // Add default camera
-    this.scene.addCamera(createDefaultCamera(this.scene, this.canvas));
-    this.scene.addCamera(createUniversalCamera(this.scene));
+    this.scene.addCamera(this.cameraHandler.createDefaultCamera(this.scene, this.canvas));
+    this.scene.addCamera(this.cameraHandler.createUniversalCamera(this.scene));
 
     const fxaa = new FxaaPostProcess('fxaa', 1.0, this.getActiveCamera());
     fxaa.samples = 16;
@@ -255,22 +266,14 @@ export class BabylonService {
     this.effects.push(fxaa, sharpen);
     console.log('Effects applied', this.effects);
 
-    this.containers.audio$.subscribe(audioContainer => {
-      if (!audioContainer) return;
-      // Define as function so we can unregister by variable name
-      let renderAudio = () => beforeAudioRender(this.scene, audioContainer);
-      this.scene.registerBeforeRender(renderAudio);
-      this.scene.registerAfterRender(renderAudio);
-    });
-
-    interval(100).subscribe(() => {
+    setInterval(() => {
       const camera = this.getActiveCamera();
       if (!camera) return;
       camera.panningSensibility =
         1000 / (this.cameraManager.cameraSpeed * Math.min(Math.max(camera.radius, 1), 10));
       camera.wheelDeltaPercentage = this.cameraManager.cameraSpeed * 0.01;
       camera.speed = this.cameraManager.cameraSpeed;
-    });
+    }, 100);
 
     const orbitGizmoResult = this.initializeOrbitGizmo();
 
@@ -309,6 +312,7 @@ export class BabylonService {
       canvas: this.canvases.gizmo,
       getArcRotateCamera: () => this.getActiveCamera(),
       mainEngine: this.engine,
+      cameraHandler: this.cameraHandler,
     });
     this.engines.gizmo = engine;
     this.scenes.gizmo = scene;
@@ -428,6 +432,64 @@ export class BabylonService {
       : new Color4(color.r / 255, color.g / 255, color.b / 255, color.a);
   }
 
+  private skyboxMesh: Mesh | undefined;
+  private skyboxTexture: CubeTexture | undefined;
+  private appliedSkybox: string | null | undefined = undefined;
+  private originalEnvironmentTexture: Scene['environmentTexture'] | undefined = undefined;
+
+  public setSkybox(skybox: { preset?: string; url?: string; microSurface: number } | null): void {
+    if (this.isTransparent()) return;
+
+    // The default environment skybox must never compete with ours or the plain background color
+    const defaultEnvironmentSkybox = this.scene.getMeshByName('BackgroundSkybox');
+    if (defaultEnvironmentSkybox) defaultEnvironmentSkybox.setEnabled(false);
+
+    if (this.originalEnvironmentTexture === undefined) {
+      this.originalEnvironmentTexture = this.scene.environmentTexture;
+    }
+
+    // Only the preset/url determines the texture; microSurface is updated live on the material
+    const signature = skybox
+      ? skybox.preset
+        ? `assets/skyboxes/${skybox.preset}.env`
+        : skybox.url!
+      : null;
+    const textureChanged =
+      this.appliedSkybox !== signature || !this.skyboxMesh || this.skyboxMesh.isDisposed();
+    this.appliedSkybox = signature;
+
+    if (textureChanged) {
+      this.skyboxMesh?.dispose(false, true);
+      this.skyboxMesh = undefined;
+      this.skyboxTexture?.dispose();
+      this.skyboxTexture = undefined;
+    }
+
+    if (!skybox) {
+      this.scene.environmentTexture = this.originalEnvironmentTexture;
+      return;
+    }
+
+    if (textureChanged) {
+      // Loading a locally-previewed skybox relies on a blob: URL, which has no
+      // file extension for Babylon to detect, so the env loader is forced
+      const texture = CubeTexture.CreateFromPrefilteredData(signature!, this.scene, '.env');
+      texture.rotationY = SKYBOX_PRESETS.find(preset => preset.id === skybox.preset)?.rotation ?? 0;
+      this.skyboxTexture = texture;
+
+      // Same texture drives the visible backdrop and the PBR environment (IBL), like the Babylon sandbox
+      this.scene.environmentTexture = texture;
+      // PBRMaterial skybox, cloned from the environment texture - renders the prefiltered mip chain
+      // correctly and keeps reflections view-dependent (matches the Babylon sandbox)
+      this.skyboxMesh =
+        this.scene.createDefaultSkybox(texture, true, 1000, 1 - skybox.microSurface, false) ??
+        undefined;
+    } else {
+      const material = this.skyboxMesh?.material;
+      if (material instanceof PBRMaterial) material.microSurface = skybox.microSurface;
+    }
+  }
+
   public hideMesh(tag: string, visibility: boolean) {
     this.scene.getMeshesByTags(tag, mesh => (mesh.isVisible = visibility));
   }
@@ -440,9 +502,8 @@ export class BabylonService {
     this.scene.lights.forEach(light => light.dispose());
     this.scene.lights = [];
     // Audio & Video
-    const { audio$, video$ } = this.containers;
-    const audio = audio$.getValue();
-    const video = video$.getValue();
+    const audio = this.containers.audio();
+    const video = this.containers.video();
     if (audio) {
       audio.audio.dispose();
     }
@@ -484,33 +545,35 @@ export class BabylonService {
   ): Promise<AbstractMesh[]> {
     this.resize();
     if (clearScene) this.clearScene();
-    const { audio$, entity$, image$, video$ } = this.containers;
 
     switch (mediaType) {
       case 'audio':
-        const meshes = entity$.getValue()!.meshes;
+        const meshes = this.containers.entity()?.meshes;
+        if (!meshes) {
+          throw new Error('No meshes found');
+        }
         return loadAudio(rootUrl, this.scene, meshes).then(result => {
-          audio$.next(result);
+          this.containers.audio.set(result);
           return [];
         });
       case 'video':
         return loadVideo(rootUrl, this.scene).then(result => {
-          video$.next(result);
+          this.containers.video.set(result);
           return [result.plane];
         });
       case 'image':
         return loadImage(rootUrl, this.scene, isDefault).then(result => {
-          image$.next(result);
+          this.containers.image.set(result);
           return [result.plane];
         });
       case 'cloud':
         return loadPointCloud(rootUrl, this.scene).then(result => {
-          entity$.next(result);
+          this.containers.entity.set(result);
           return result.meshes;
         });
       case 'splat':
         return loadSplat(rootUrl, this.scene).then(result => {
-          entity$.next(result);
+          this.containers.entity.set(result);
           return result.meshes;
         });
       case 'entity':
@@ -519,7 +582,7 @@ export class BabylonService {
         return load3DEntity(rootUrl, this.scene, isDefault, progress =>
           this.updateLoadingText(progress),
         ).then(result => {
-          entity$.next(result);
+          this.containers.entity.set(result);
           return result.meshes;
         });
     }
