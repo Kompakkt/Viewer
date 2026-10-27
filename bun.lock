@@ -72,7 +72,7 @@
     },
     "@kompakkt/plugins": {
       "@angular/core": "21.2.6",
-      "@kompakkt/common": "git+https://github.com/Kompakkt/Common.git#1ec9e452e73a999d2b5ff725febd95dc0774a19f",
+      "@kompakkt/common": "git+https://github.com/Kompakkt/Common.git#044af84217ffafddad839841cc35a9e9027f5e3c",
     },
   },
   "packages": {
@@ -1445,8 +1445,6 @@
     "@cspotcode/source-map-support/@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.9", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.0.3", "@jridgewell/sourcemap-codec": "^1.4.10" } }, "sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ=="],
 
     "@inquirer/core/wrap-ansi": ["wrap-ansi@6.2.0", "", { "dependencies": { "ansi-styles": "^4.0.0", "string-width": "^4.1.0", "strip-ansi": "^6.0.0" } }, "sha512-r6lPcBGxZXlIcymEu7InxDMhdW0KDxpLgoFLcguasxCaJ/SOIZwINatK9KY/tf+ZrlywOKU0UDj3ATXUBfxJXA=="],
-
-    "@kompakkt/plugins/@kompakkt/common": ["@kompakkt/common@github:Kompakkt/Common#1ec9e45", { "dependencies": { "elysia": "^1.4.28" } }, "Kompakkt-Common-1ec9e45", "sha512-pnXFvIqvl1ru2E5Hhdd049LHLfDrpokPC9L/ogzhdaaohXhekSduwBMLh1iBvgKQ6OOb43bOjxg3ZY8132AlkA=="],
 
     "@kompakkt/plugins/@kompakkt/komponents": ["@kompakkt/komponents@github:Kompakkt/Komponents#2bd6816", { "dependencies": { "@angular/common": "21.2.6", "@angular/compiler": "21.2.6", "@angular/core": "21.2.6", "@angular/platform-browser": "21.2.6", "rxjs": "7.8.2", "tslib": "^2.8.1", "zone.js": "0.16.1" } }, "Kompakkt-Komponents-2bd6816", "sha512-CxFi8OzsLaePIYrYkNZMv0T62uLlmPdTxUuhl9Ggqvg0rzQGFFZwOBYZd4zMYrbvLxyaxApWb/Ski1hl/rsxEg=="],
 
