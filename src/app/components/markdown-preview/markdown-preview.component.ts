@@ -6,6 +6,7 @@ import {
   SecurityContext,
   SimpleChanges,
   inject,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { marked } from 'marked';
@@ -14,6 +15,7 @@ import { marked } from 'marked';
   selector: 'app-markdown-preview',
   templateUrl: './markdown-preview.component.html',
   styleUrls: ['./markdown-preview.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true,
 })
 export class MarkdownPreviewComponent implements OnChanges {

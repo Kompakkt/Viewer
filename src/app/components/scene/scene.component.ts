@@ -7,6 +7,7 @@ import {
   signal,
   viewChild,
   ViewContainerRef,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AnnotationService } from '../../services/annotation/annotation.service';
@@ -44,6 +45,7 @@ import { skip } from 'rxjs';
     GuideComponent,
     BottomSheetComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   host: {
     '[style.--bottom-sheet-offset.px]': 'offsetBinding()',
     '(window:resize)': 'this.babylon.resize()',

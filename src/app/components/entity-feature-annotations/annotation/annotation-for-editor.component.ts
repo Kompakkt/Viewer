@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
@@ -18,6 +18,7 @@ import { AnnotationComponent } from './annotation.component';
   selector: 'app-annotation-for-editor',
   templateUrl: './annotation-for-editor.component.html',
   styleUrls: ['./annotation-for-editor.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FormsModule,
     MatIcon,

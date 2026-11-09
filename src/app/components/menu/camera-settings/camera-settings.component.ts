@@ -6,6 +6,7 @@ import {
   effect,
   inject,
   signal,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ButtonComponent, ButtonRowComponent, SliderComponent } from '@kompakkt/komponents';
@@ -28,6 +29,7 @@ import { MatIconModule } from '@angular/material/icon';
     ButtonComponent,
     ButtonRowComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   host: {
     '[class.is-resizing]': 'isResizing()',
   },

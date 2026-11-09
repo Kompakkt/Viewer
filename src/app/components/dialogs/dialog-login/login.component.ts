@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { ButtonComponent, ButtonRowComponent, InputComponent } from '@kompakkt/komponents';
@@ -18,6 +18,7 @@ export type AuthResult = {
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, TranslatePipe, InputComponent, ButtonComponent, ButtonRowComponent],
 })
 export class LoginComponent {

@@ -1,5 +1,5 @@
 import { KeyValuePipe } from '@angular/common';
-import { Component, computed, inject, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import fscreen from 'fscreen';
@@ -26,6 +26,7 @@ import { CameraSettingsComponent } from './camera-settings/camera-settings.compo
     TooltipDirective,
     ButtonComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   host: {
     '[class.is-resizing]': 'isResizing()',
   },

@@ -1,4 +1,4 @@
-import { Component, inject, InjectionToken, signal } from '@angular/core';
+import { Component, inject, InjectionToken, signal, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
   ButtonComponent,
@@ -19,6 +19,7 @@ import { TimelineItem } from 'src/app/services/sequence-editor.service';
     ButtonRowComponent,
   ],
   templateUrl: './edit-timeline-item-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './edit-timeline-item-dialog.component.scss',
 })
 export class EditTimelineItemDialogComponent {

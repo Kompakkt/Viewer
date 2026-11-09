@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { AnimationGroup } from '@babylonjs/core';
 import { ButtonComponent, TooltipDirective } from '@kompakkt/komponents';
@@ -9,6 +9,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
   standalone: true,
   templateUrl: './animation-group-controls.component.html',
   styleUrls: ['./animation-group-controls.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatIcon, ButtonComponent, TranslatePipe, TooltipDirective],
 })
 export class AnimationGroupControlsComponent {

@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnDestroy, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Vector3 } from '@babylonjs/core';
 import {
@@ -22,6 +22,7 @@ import { AsAbsolutePipe } from 'src/app/pipes/as-absolute.pipe';
   selector: 'app-entity-feature-settings-mesh',
   templateUrl: './entity-feature-settings-mesh.component.html',
   styleUrls: ['./entity-feature-settings-mesh.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     ColorFieldComponent,
     FormsModule,

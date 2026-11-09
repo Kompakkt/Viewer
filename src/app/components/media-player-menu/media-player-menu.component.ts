@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, Pipe, PipeTransform, signal } from '@angular/core';
+import { Component, computed, effect, inject, Pipe, PipeTransform, signal, ChangeDetectionStrategy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { Sound } from '@babylonjs/core';
@@ -29,6 +29,7 @@ class PrettyTimePipe implements PipeTransform {
   selector: 'app-media-player-menu',
   imports: [MatIconModule, ButtonComponent, SliderComponent, PrettyTimePipe],
   templateUrl: './media-player-menu.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './media-player-menu.component.scss',
 })
 export class MediaPlayerMenuComponent {

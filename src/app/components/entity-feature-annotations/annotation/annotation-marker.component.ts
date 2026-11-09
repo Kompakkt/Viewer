@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, computed, inject, input, OnInit, signal } from '@angular/core';
+import { AfterViewInit, Component, computed, inject, input, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { IAnnotation } from '@kompakkt/common';
 
@@ -11,6 +11,7 @@ import { ProcessingService } from '../../../services/processing/processing.servi
   selector: 'app-annotation-marker',
   templateUrl: './annotation-marker.component.html',
   styleUrls: ['./annotation-marker.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true,
 })
 export class AnnotationMarkerComponent implements OnInit, AfterViewInit {

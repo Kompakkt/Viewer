@@ -1,4 +1,4 @@
-import { AfterContentChecked, ChangeDetectorRef, Component, effect, inject } from '@angular/core';
+import { AfterContentChecked, ChangeDetectorRef, Component, effect, inject, ChangeDetectionStrategy } from '@angular/core';
 import { LoadingscreenComponent } from './components/loadingscreen/loadingscreen.component';
 import { SceneComponent } from './components/scene/scene.component';
 import { EntitySettingsService } from './services/entitysettings/entitysettings.service';
@@ -8,6 +8,7 @@ import { UserdataService } from './services/userdata/userdata.service';
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [LoadingscreenComponent, SceneComponent],
 })
 export class AppComponent implements AfterContentChecked {

@@ -7,6 +7,7 @@ import {
   inject,
   signal,
   viewChild,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
@@ -45,6 +46,7 @@ interface IExternalImage {
   selector: 'app-dialog-annotation-editor',
   templateUrl: './dialog-annotation-editor.component.html',
   styleUrls: ['./dialog-annotation-editor.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     AsyncPipe,
     FormsModule,

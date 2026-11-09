@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { BackendService } from '../../../services/backend/backend.service';
@@ -21,6 +21,7 @@ export type DialogShareAnnotationData = {
   selector: 'app-dialog-share-annotation',
   templateUrl: './dialog-share-annotation.component.html',
   styleUrls: ['./dialog-share-annotation.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, TranslatePipe, InputComponent, ButtonRowComponent, ButtonComponent],
 })
 export class DialogShareAnnotationComponent {

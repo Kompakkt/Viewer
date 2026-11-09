@@ -1,4 +1,4 @@
-import { Component, inject, output } from '@angular/core';
+import { Component, inject, output, ChangeDetectionStrategy } from '@angular/core';
 import { ButtonComponent, ButtonRowComponent, InputComponent } from '@kompakkt/komponents';
 import { IEntity } from '@kompakkt/common';
 import { environment } from 'src/environment';
@@ -11,6 +11,7 @@ type BrowsedMedia = IEntity | { mediaType: string; url: string; description: str
   selector: 'app-media-browser',
   templateUrl: './media-browser.component.html',
   styleUrls: ['./media-browser.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [TranslatePipe, InputComponent, ButtonComponent, ButtonRowComponent],
 })
 export class MediaBrowserComponent {

@@ -6,7 +6,7 @@ import {
 } from '@angular/core';
 
 import { DragDropModule } from '@angular/cdk/drag-drop';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -53,7 +53,7 @@ export const appConfig: ApplicationConfig = {
       { path: '**', redirectTo: '' },
     ]),
     provideAnimations(),
-    provideHttpClient(withInterceptors([jwtInterceptor])),
+    provideHttpClient(withXhr(), withInterceptors([jwtInterceptor])),
     pluginProviders,
   ],
 };

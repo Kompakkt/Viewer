@@ -1,4 +1,4 @@
-import { Component, computed, inject, viewChildren } from '@angular/core';
+import { Component, computed, inject, viewChildren, ChangeDetectionStrategy } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { saveAs } from 'file-saver';
 import { ButtonComponent, TooltipDirective } from '@kompakkt/komponents';
@@ -13,6 +13,7 @@ import { AnnotationComponent } from '../annotation/annotation.component';
   selector: 'app-annotations-editor',
   templateUrl: './annotations-editor.component.html',
   styleUrls: ['./annotations-editor.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     AnnotationComponentForEditorComponent,
     MatIconModule,

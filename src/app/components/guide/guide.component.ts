@@ -1,4 +1,4 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { combineLatest, first, fromEvent, merge, zip } from 'rxjs';
 import { LoadingScreenService } from 'src/app/services/babylon/loadingscreen';
 
@@ -7,6 +7,7 @@ import { LoadingScreenService } from 'src/app/services/babylon/loadingscreen';
   templateUrl: './guide.component.html',
   styleUrls: ['./guide.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   host: {
     '[class.visible]': 'isVisible()',
   },

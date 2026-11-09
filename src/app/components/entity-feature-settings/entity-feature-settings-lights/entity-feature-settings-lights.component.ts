@@ -1,4 +1,4 @@
-import { Component, effect, inject, input, OnDestroy } from '@angular/core';
+import { Component, effect, inject, input, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { IColor } from '@kompakkt/common';
 import { ColorFieldComponent } from '../../color-field/color-field.component';
 import {
@@ -27,6 +27,7 @@ import { DecimalPipe, KeyValuePipe } from '@angular/common';
   selector: 'app-entity-feature-settings-lights',
   templateUrl: './entity-feature-settings-lights.component.html',
   styleUrls: ['./entity-feature-settings-lights.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     TranslatePipe,
     SliderComponent,

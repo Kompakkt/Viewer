@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FixImageUrlPipe } from 'src/app/pipes/fix-image-url.pipe';
 import { ICompilation, IEntity } from '@kompakkt/common';
 import { TranslatePipe } from '../../pipes/translate.pipe';
@@ -11,6 +11,7 @@ import { BackendService } from 'src/app/services/backend/backend.service';
   selector: 'app-compilation-browser',
   templateUrl: './compilation-browser.component.html',
   styleUrls: ['./compilation-browser.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     TranslatePipe,
     FixImageUrlPipe,

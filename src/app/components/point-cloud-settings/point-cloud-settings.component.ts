@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ButtonComponent, LabelledCheckboxComponent, SliderComponent } from '@kompakkt/komponents';
 import { TranslatePipe } from 'src/app/pipes/translate.pipe';
 import { PointCloudImporter } from 'src/app/services/babylon/importers/common/point-cloud-importer';
@@ -7,6 +7,7 @@ import { PointCloudImporter } from 'src/app/services/babylon/importers/common/po
   selector: 'app-point-cloud-settings',
   imports: [TranslatePipe, SliderComponent, ButtonComponent, LabelledCheckboxComponent],
   templateUrl: './point-cloud-settings.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './point-cloud-settings.component.scss',
 })
 export class PointCloudSettingsComponent {

@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { ButtonComponent, TooltipDirective } from '@kompakkt/komponents';
 import { TranslatePipe } from '../../pipes/translate.pipe';
@@ -11,6 +11,7 @@ import { AnnotationService } from 'src/app/services/annotation/annotation.servic
   templateUrl: './sidenav-menu.component.html',
   styleUrls: ['./sidenav-menu.component.scss'],
   imports: [MatIcon, TranslatePipe, TooltipDirective, ButtonComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   host: {
     '[class.is-open]': 'isOpen()',
     '[class.disabled]': 'isDisabled()',

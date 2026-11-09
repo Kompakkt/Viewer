@@ -8,6 +8,7 @@ import {
   input,
   output,
   signal,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Matrix, Vector3 } from '@babylonjs/core';
@@ -45,6 +46,7 @@ export type ReorderMovement = 'one-up' | 'one-down' | 'first' | 'last';
     TooltipDirective,
     ExtenderSlotDirective,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   host: {
     '[style.--top]': 'this.position().top + "px"',
     '[style.--left]': 'this.position().left + "px"',
