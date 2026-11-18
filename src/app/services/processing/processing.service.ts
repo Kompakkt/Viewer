@@ -757,6 +757,16 @@ export class ProcessingService {
       });
   }
 
+  private loadedBaseUrl?: string;
+
+  public resolveEntityModelUrl(entity: IEntity, overrideUrl?: string): string | undefined {
+    const baseURL = overrideUrl ?? this.loadedBaseUrl ?? environment.server_url;
+    const quality = this.quality$.getValue();
+    const path: string | undefined = entity.externalFile ?? entity.processed?.[quality];
+    if (!path) return undefined;
+    return path.includes('http') || path.includes('https') ? path : `${baseURL}${path}`;
+  }
+
   public async loadEntity(newEntity: IEntity, overrideUrl?: string) {
     const mode = this.mode$.getValue();
     const baseURL = overrideUrl ?? environment.server_url;
@@ -783,10 +793,9 @@ export class ProcessingService {
       return;
     }
     // cases: entity, image, audio, video, text
-    const quality = this.quality$.getValue();
-    const path: string = newEntity.externalFile ?? newEntity.processed[quality];
+    this.loadedBaseUrl = baseURL;
     const isAudio = mediaType === 'audio';
-    const url = path.includes('http') || path.includes('https') ? path : `${baseURL}${path}`;
+    const url = this.resolveEntityModelUrl(newEntity, baseURL) ?? '';
     const isDefault = newEntity._id === 'default';
 
     this.loadingScreen.show();

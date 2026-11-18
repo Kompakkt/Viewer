@@ -7,7 +7,6 @@ import { combineLatest, firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
-import { environment } from 'src/environment';
 import { exportManifest } from '../../../iiif/exporter';
 import { MessageService } from '../../../services/message/message.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
@@ -81,10 +80,12 @@ export class AnnotationsEditorComponent {
     ]);
     if (!entity) return;
 
-    const path = entity.externalFile ?? entity.processed?.high ?? '';
-    const modelUrl = /^https?:|^blob:/.test(path)
-      ? path
-      : new URL(`${environment.server_url}${path}`, window.location.href).toString();
+    const resolvedUrl = this.processing.resolveEntityModelUrl(entity);
+    if (!resolvedUrl) {
+      this.message.error('This object has no model file that could be exported.');
+      return;
+    }
+    const modelUrl = new URL(resolvedUrl, window.location.href).toString();
 
     const viewerBase = `${window.location.origin}${window.location.pathname.replace(/[^/]*$/, '')}`;
     const entityId = encodeURIComponent(String(entity._id));
@@ -99,7 +100,10 @@ export class AnnotationsEditorComponent {
       baseId: `${viewerBase}iiif/${entityId}`,
     });
     warnings.forEach(warning => console.warn('[IIIF export]', warning));
-    if (warnings.length) this.message.info(warnings.join('\n'));
+    if (warnings.length) {
+      const more = warnings.length > 1 ? ` (+${warnings.length - 1} more, see console)` : '';
+      this.message.info(`${warnings[0]}${more}`);
+    }
 
     const fileName = `${entity.name.replace(/[^\w-]+/g, '_') || 'entity'}-iiif-manifest.json`;
     saveAs(
