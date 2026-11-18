@@ -50,6 +50,7 @@ interface LookAtSource {
 }
 
 const DEG_TO_RAD = Math.PI / 180;
+const SPOT_LIGHT_EXPONENT = 2;
 const toVector3 = (v: Vec3) => new Vector3(v.x, v.y, v.z);
 const toBabylonVector = (iiifPoint: Vec3) => toVector3(pointToBabylon(iiifPoint));
 const rgbToColor3 = ({ r, g, b }: RGB) => new Color3(r / 255, g / 255, b / 255);
@@ -93,10 +94,12 @@ const applyTransforms = (node: TransformNode, transforms: IIIFTransform[]) => {
 };
 
 const getMeshBounds = (meshes: AbstractMesh[]) => {
-  const boxes = meshes.filter(m => !m.isDisposed()).map(m => {
-    m.computeWorldMatrix(true);
-    return m.getBoundingInfo().boundingBox;
-  });
+  const boxes = meshes
+    .filter(m => !m.isDisposed())
+    .map(m => {
+      m.computeWorldMatrix(true);
+      return m.getBoundingInfo().boundingBox;
+    });
   if (!boxes.length) return undefined;
   const min = boxes.map(b => b.minimumWorld).reduce((a, b) => Vector3.Minimize(a, b));
   const max = boxes.map(b => b.maximumWorld).reduce((a, b) => Vector3.Maximize(a, b));
@@ -207,7 +210,7 @@ export class IIIFSceneBuilderService {
 
     return model.comments.map((comment, index) => {
       const target = pointToBabylon(comment.point);
-      const normal = this.surfaceNormal(target, meshes);
+      const normal = this.surfaceNormal(target, meshes, bounds);
       const camera = model.cameras.find(c => c.annotationId === comment.cameraAnnotationId);
       const perspective =
         (camera && perspectiveFromCamera(camera, comment.point)) ??
@@ -217,9 +220,12 @@ export class IIIFSceneBuilderService {
   }
 
   /** Normal at the comment point via a raycast from outside; fallback: direction from the center. */
-  private surfaceNormal(target: Vec3, meshes: AbstractMesh[]): Vec3 {
+  private surfaceNormal(
+    target: Vec3,
+    meshes: AbstractMesh[],
+    bounds: ReturnType<typeof getMeshBounds>,
+  ): Vec3 {
     const point = toVector3(target);
-    const bounds = getMeshBounds(meshes);
     const outward = point.subtract(bounds?.center ?? Vector3.Zero());
     if (outward.lengthSquared() === 0) outward.copyFrom(Vector3.Up());
     outward.normalize();
@@ -227,7 +233,11 @@ export class IIIFSceneBuilderService {
     const reach = bounds ? bounds.size.length() : 1;
     const ray = new Ray(point.add(outward.scale(reach)), outward.negate(), reach * 2);
     const pick = this.babylon.getScene().pickWithRay(ray, mesh => meshes.includes(mesh));
-    const normal = (pick?.hit ? pick.getNormal(true, true) : null) ?? outward;
+    // The first hit may be a different surface (concave meshes, overhangs): only trust it near the point.
+    const tolerance = bounds ? Math.max(bounds.size.length() * 0.02, 1e-4) : 1e-4;
+    const nearPoint =
+      !!pick?.hit && !!pick.pickedPoint && Vector3.Distance(pick.pickedPoint, point) <= tolerance;
+    const normal = (nearPoint ? pick?.getNormal(true, true) : null) ?? outward;
     return { x: normal.x, y: normal.y, z: normal.z };
   }
 
@@ -355,15 +365,19 @@ export class IIIFSceneBuilderService {
         return true;
       }
       const lookAt = this.resolveLookAt(light, positions);
-      const direction = lookAt
-        ? lookAt.subtract(position).normalize()
-        : rotateDirection(Vector3.Down(), light.transforms);
+      const toLookAt = lookAt?.subtract(position);
+      const direction =
+        toLookAt && toLookAt.lengthSquared() > 1e-12
+          ? toLookAt.normalize()
+          : rotateDirection(Vector3.Down(), light.transforms);
+      // IIIF angle is the half-angle in degrees; Babylon expects the full cone angle in radians.
+      const halfAngle = Math.min(Math.max(light.angle ?? 90, 1e-3), 90);
       const spot = new SpotLight(
         light.annotationId,
         position,
         direction,
-        (light.angle ?? 90) * DEG_TO_RAD,
-        2,
+        2 * halfAngle * DEG_TO_RAD,
+        SPOT_LIGHT_EXPONENT,
         scene,
       );
       spot.diffuse = diffuse;

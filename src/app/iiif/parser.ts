@@ -25,7 +25,10 @@ const firstLabel = (label: unknown): string | undefined => {
 
 /** Number or IIIF Value ({ type: "Value", value }). */
 const toNumber = (value: unknown): number | undefined => {
-  const raw = typeof value === 'object' && value !== null ? (value as Json)['value'] : value;
+  const raw =
+    typeof value === 'object' && value !== null
+      ? ((value as Json)['quantityValue'] ?? (value as Json)['value'])
+      : value;
   if (raw === undefined || raw === null) return undefined;
   const parsed = Number(raw);
   return Number.isNaN(parsed) ? undefined : parsed;

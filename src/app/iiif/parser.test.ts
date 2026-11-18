@@ -226,6 +226,24 @@ describe('parseManifest – soft warnings for unsupported features', () => {
     expect(model.lights).toHaveLength(1);
     expect(model.warnings.some(w => w.includes('"exclude"'))).toBe(true);
   });
+
+  test('reads light intensity given as a Quantity', () => {
+    const model = parseManifest(
+      manifestWith([
+        {
+          id: 'light',
+          type: 'Annotation',
+          motivation: ['painting'],
+          body: {
+            type: 'AmbientLight',
+            intensity: { type: 'Quantity', quantityValue: 0.5, unit: 'relative' },
+          },
+          target: { id: 's', type: 'Scene' },
+        },
+      ]),
+    );
+    expect(model.lights[0].intensity).toBe(0.5);
+  });
 });
 
 const DEMO_DIR = join(import.meta.dir, '..', '..', '..', 'demos', 'iiif-3d');
