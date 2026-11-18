@@ -1,6 +1,12 @@
 import { hexToRgb } from './color';
 import type { Vec3 } from './coordinates';
-import type { IIIFComment, IIIFSceneModel, IIIFTransform, LightKind } from './model';
+import type {
+  IIIFCameraItem,
+  IIIFComment,
+  IIIFSceneModel,
+  IIIFTransform,
+  LightKind,
+} from './model';
 
 export class IIIFParseError extends Error {
   constructor(message: string) {
@@ -122,9 +128,9 @@ const parseComment = (annotation: Json, warnings: string[]): IIIFComment | undef
 };
 
 /** Scope references of a comment: on the annotation itself and on each SpecificResource target. */
-const scopeRefs = (annotation: Json): Json[] => [
-  ...asArray<Json>(annotation['scope']),
-  ...asArray<Json>(annotation['target']).flatMap(target => asArray<Json>(target?.['scope'])),
+const scopeRefs = (annotation: Json): Array<Json | string> => [
+  ...asArray<Json | string>(annotation['scope']),
+  ...asArray<Json>(annotation['target']).flatMap(target => asArray<Json | string>(target?.['scope'])),
 ];
 
 /**
@@ -141,6 +147,27 @@ const embeddedPaintingAnnotations = (ref: Json): Json[] => {
     ),
   );
 };
+
+type ScopeRef = { id?: string; embedded?: IIIFCameraItem };
+
+const findCamera = (cameras: IIIFCameraItem[], id?: string, resourceId?: string) =>
+  cameras.find(
+    c =>
+      (id !== undefined && (c.annotationId === id || c.resourceId === id)) ||
+      (resourceId !== undefined && c.resourceId === resourceId),
+  );
+
+const emptyModel = (): IIIFSceneModel => ({
+  manifestId: '',
+  label: '',
+  sceneId: '',
+  models: [],
+  canvases: [],
+  cameras: [],
+  lights: [],
+  comments: [],
+  warnings: [],
+});
 
 const LIGHT_KINDS: Record<string, LightKind> = {
   ambientlight: 'ambient',
@@ -256,7 +283,7 @@ export const parseManifest = (input: unknown): IIIFSceneModel => {
     ...asArray<Json>(manifest['annotations']),
   ];
 
-  const pendingScopes: Array<{ comment: IIIFComment; ids: string[] }> = [];
+  const pendingScopes: Array<{ comment: IIIFComment; refs: ScopeRef[] }> = [];
 
   for (const page of pages) {
     if (page?.['type'] !== 'AnnotationPage') continue;
@@ -281,23 +308,26 @@ export const parseManifest = (input: unknown): IIIFSceneModel => {
         const comment = parseComment(annotation, model.warnings);
         if (comment) {
           model.comments.push(comment);
-          const ids: string[] = [];
-          for (const ref of scopeRefs(annotation)) {
+          const refs: ScopeRef[] = [];
+          for (const entry of scopeRefs(annotation)) {
+            const ref = typeof entry === 'string' ? { id: entry } : entry;
             const embedded = embeddedPaintingAnnotations(ref);
             if (embedded.length) {
-              for (const painting of embedded) {
-                const before = model.cameras.length;
-                parsePainting(painting, manifest, model);
-                for (const camera of model.cameras.slice(before)) {
-                  camera.hidden = true;
-                  ids.push(camera.annotationId);
-                }
+              const scratch = emptyModel();
+              for (const painting of embedded) parsePainting(painting, manifest, scratch);
+              if (scratch.models.length || scratch.lights.length || scratch.canvases.length) {
+                model.warnings.push(
+                  `Comment ${comment.annotationId}: scope contains a non-camera resource that was ignored`,
+                );
               }
+              refs.push({ embedded: scratch.cameras[0] });
             } else if (typeof ref?.['id'] === 'string') {
-              ids.push(ref['id']);
+              refs.push({ id: ref['id'] });
+            } else {
+              model.warnings.push(`Comment ${comment.annotationId}: unusable scope entry ignored`);
             }
           }
-          pendingScopes.push({ comment, ids });
+          pendingScopes.push({ comment, refs });
         }
       } else {
         parsePainting(annotation, manifest, model);
@@ -306,12 +336,26 @@ export const parseManifest = (input: unknown): IIIFSceneModel => {
   }
 
   // Resolved after all pages are parsed, so a camera may appear after the comment referencing it.
-  for (const { comment, ids } of pendingScopes) {
-    const camera = ids
-      .map(id => model.cameras.find(c => c.annotationId === id || c.resourceId === id))
-      .find(found => found !== undefined);
-    comment.cameraAnnotationId = camera?.annotationId;
-    if (ids.length && !camera) {
+  for (const { comment, refs } of pendingScopes) {
+    const resolved: IIIFCameraItem[] = [];
+    for (const ref of refs) {
+      const camera = findCamera(model.cameras, ref.id ?? ref.embedded?.annotationId, ref.embedded?.resourceId);
+      const found = camera ?? ref.embedded;
+      if (found) resolved.push(found);
+    }
+    const chosen = resolved[0];
+    if (chosen) {
+      // Embedded cameras are only added when no camera with the same id exists yet
+      if (!model.cameras.some(c => c.annotationId === chosen.annotationId)) {
+        model.cameras.push({ ...chosen, hidden: true });
+      }
+      comment.cameraAnnotationId = chosen.annotationId;
+      if (new Set(resolved.map(c => c.annotationId)).size > 1) {
+        model.warnings.push(
+          `Comment ${comment.annotationId}: multiple scope references, using ${chosen.annotationId}`,
+        );
+      }
+    } else if (refs.length) {
       model.warnings.push(`Comment ${comment.annotationId}: scope does not reference a known camera`);
     }
   }

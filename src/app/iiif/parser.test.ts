@@ -355,6 +355,106 @@ describe('parseManifest – comment camera scope', () => {
     expect(model.comments[0].cameraAnnotationId).toBe('https://example.org/anno/embedded-cam');
   });
 
+  const contentStateOf = (id: string, ...annotations: unknown[]) => ({
+    id,
+    type: 'Annotation',
+    motivation: ['contentState'],
+    target: {
+      id: SCENE_ID,
+      type: 'Scene',
+      items: [{ id: `${id}/page`, type: 'AnnotationPage', items: annotations }],
+    },
+  });
+  const modelPainting = {
+    id: 'https://example.org/anno/embedded-model',
+    type: 'Annotation',
+    motivation: ['painting'],
+    body: { id: 'https://example.org/m.glb', type: 'Model' },
+    target: { id: SCENE_ID, type: 'Scene' },
+  };
+
+  test('embedded scope only contributes cameras, other resources are ignored with a warning', () => {
+    const state = contentStateOf(
+      'https://example.org/cs1',
+      modelPainting,
+      camera({ id: 'https://example.org/anno/embedded-cam', behavior: undefined }),
+    );
+    const model = parseManifest(manifest([], [comment({}, { scope: state })]));
+    expect(model.models).toHaveLength(0);
+    expect(model.lights).toHaveLength(0);
+    expect(model.canvases).toHaveLength(0);
+    expect(model.comments[0].cameraAnnotationId).toBe('https://example.org/anno/embedded-cam');
+    expect(model.warnings.some(w => w.includes('scope contains a non-camera resource that was ignored'))).toBe(true);
+  });
+
+  test('embedded camera equal to a later top-level camera is not duplicated', () => {
+    const state = contentStateOf('https://example.org/cs1', camera({ behavior: undefined }));
+    const model = parseManifest(manifest([], [comment({}, { scope: state }), camera({ behavior: undefined })]));
+    const matches = model.cameras.filter(c => c.annotationId === 'https://example.org/anno/cam');
+    expect(matches).toHaveLength(1);
+    expect(matches[0].hidden).toBe(false);
+    expect(model.comments[0].cameraAnnotationId).toBe('https://example.org/anno/cam');
+  });
+
+  test('two comments sharing the same embedded camera produce one camera', () => {
+    const state = () => contentStateOf('https://example.org/cs1', camera({ id: 'https://example.org/anno/shared', behavior: undefined }));
+    const model = parseManifest(
+      manifest([], [
+        comment({ id: 'https://example.org/anno/c1' }, { scope: state() }),
+        comment({ id: 'https://example.org/anno/c2' }, { scope: state() }),
+      ]),
+    );
+    expect(model.cameras.filter(c => c.annotationId === 'https://example.org/anno/shared')).toHaveLength(1);
+    expect(model.comments.map(c => c.cameraAnnotationId)).toEqual([
+      'https://example.org/anno/shared',
+      'https://example.org/anno/shared',
+    ]);
+  });
+
+  test('multiple scope references to different cameras: first is used, warning added', () => {
+    const second = camera({
+      id: 'https://example.org/anno/cam2',
+      body: { id: 'https://example.org/cameras/2', type: 'PerspectiveCamera' },
+    });
+    const model = parseManifest(
+      manifest([camera(), second], [
+        comment({
+          scope: [
+            { id: 'https://example.org/cameras/1', type: 'PerspectiveCamera' },
+            { id: 'https://example.org/cameras/2', type: 'PerspectiveCamera' },
+          ],
+        }),
+      ]),
+    );
+    expect(model.comments[0].cameraAnnotationId).toBe('https://example.org/anno/cam');
+    expect(model.warnings.some(w => w.includes('multiple scope references, using https://example.org/anno/cam'))).toBe(true);
+  });
+
+  test('embedded cameras of unused scope references are not added', () => {
+    const model = parseManifest(
+      manifest([camera()], [
+        comment({
+          scope: [
+            { id: 'https://example.org/cameras/1', type: 'PerspectiveCamera' },
+            contentStateOf('https://example.org/cs1', camera({ id: 'https://example.org/anno/unused', behavior: undefined })),
+          ],
+        }),
+      ]),
+    );
+    expect(model.cameras.map(c => c.annotationId)).toEqual(['https://example.org/anno/cam']);
+  });
+
+  test('bare string scope is resolved as an ID reference', () => {
+    const model = parseManifest(manifest([camera()], [comment({ scope: ['https://example.org/cameras/1'] })]));
+    expect(model.comments[0].cameraAnnotationId).toBe('https://example.org/anno/cam');
+  });
+
+  test('unusable scope entry adds a warning', () => {
+    const model = parseManifest(manifest([camera()], [comment({ scope: [{ type: 'PerspectiveCamera' }] })]));
+    expect(model.comments[0].cameraAnnotationId).toBeUndefined();
+    expect(model.warnings.some(w => w.includes('unusable scope entry ignored'))).toBe(true);
+  });
+
   test('unresolved scope adds a warning and leaves the camera undefined', () => {
     const model = parseManifest(
       manifest([], [comment({ scope: [{ id: 'https://example.org/cameras/missing', type: 'PerspectiveCamera' }] })]),
