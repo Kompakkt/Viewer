@@ -8,11 +8,15 @@ import { map } from 'rxjs/operators';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
 import { exportManifest } from '../../../iiif/exporter';
+import { getEffectiveModelTransform } from '../../../iiif/loaded-model-placement';
 import { MessageService } from '../../../services/message/message.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
 import { UserdataService } from '../../../services/userdata/userdata.service';
 import { AnnotationComponentForEditorComponent } from '../annotation/annotation-for-editor.component';
 import { AnnotationComponent } from '../annotation/annotation.component';
+
+const isIIIFExportableMediaType = (mediaType: string | undefined) =>
+  mediaType === 'model' || mediaType === 'entity';
 
 @Component({
   selector: 'app-annotations-editor',
@@ -44,6 +48,9 @@ export class AnnotationsEditorComponent {
   annotationCount$ = this.currentAnnotations$.pipe(map(arr => arr.length));
 
   objectName$ = this.processing.entity$.pipe(map(entity => entity?.name));
+
+  /** IIIF export is only offered for 3D models */
+  isIIIFExportable$ = this.processing.mediaType$.pipe(map(isIIIFExportableMediaType));
 
   isDefault$ = combineLatest([
     this.processing.hasAnnotationAllowance$,
@@ -79,6 +86,10 @@ export class AnnotationsEditorComponent {
       firstValueFrom(this.processing.settings$),
     ]);
     if (!entity) return;
+    if (!isIIIFExportableMediaType(entity.mediaType)) {
+      this.message.error('IIIF export is only available for 3D models.');
+      return;
+    }
 
     const resolvedUrl = this.processing.resolveEntityModelUrl(entity);
     if (!resolvedUrl) {
@@ -90,15 +101,20 @@ export class AnnotationsEditorComponent {
     const viewerBase = `${window.location.origin}${window.location.pathname.replace(/[^/]*$/, '')}`;
     const entityId = encodeURIComponent(String(entity._id));
 
-    const { manifest, warnings } = exportManifest({
+    // Kompakkt auto-places the model; export where it is actually displayed.
+    const placement = getEffectiveModelTransform(this.processing.meshes$.getValue());
+
+    const { manifest, warnings: exportWarnings } = exportManifest({
       entityId: String(entity._id),
       entityName: entity.name,
       modelUrl,
       settings: settings.localSettings,
+      modelTransform: placement.transform,
       annotations,
       manifestId: `${viewerBase}?entity=${entityId}`,
       baseId: `${viewerBase}iiif/${entityId}`,
     });
+    const warnings = [...placement.warnings, ...exportWarnings];
     warnings.forEach(warning => console.warn('[IIIF export]', warning));
     if (warnings.length) {
       const more = warnings.length > 1 ? ` (+${warnings.length - 1} more, see console)` : '';
