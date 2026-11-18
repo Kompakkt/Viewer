@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import {
   AbstractMesh,
-  Axis,
   Camera,
   Color3,
   DirectionalLight,
@@ -9,7 +8,6 @@ import {
   Mesh,
   PBRMaterial,
   PointLight,
-  Quaternion,
   Ray,
   SpotLight,
   StandardMaterial,
@@ -24,7 +22,7 @@ import { BabylonService } from '../services/babylon/babylon.service';
 import type { RGB } from './color';
 import { hexToRgb } from './color';
 import { commentToAnnotation, perspectiveAlongNormal, perspectiveFromCamera } from './comments';
-import { pointToBabylon, rotationToBabylon, type Vec3 } from './coordinates';
+import { pointToBabylon, type Vec3 } from './coordinates';
 import type {
   IIIFCameraItem,
   IIIFCanvasItem,
@@ -33,6 +31,7 @@ import type {
   IIIFSceneModel,
   IIIFTransform,
 } from './model';
+import { composeIIIFTransforms, rotateDirection } from './placement';
 
 export interface IIIFBuildResult {
   meshes: AbstractMesh[];
@@ -55,42 +54,12 @@ const toVector3 = (v: Vec3) => new Vector3(v.x, v.y, v.z);
 const toBabylonVector = (iiifPoint: Vec3) => toVector3(pointToBabylon(iiifPoint));
 const rgbToColor3 = ({ r, g, b }: RGB) => new Color3(r / 255, g / 255, b / 255);
 
-/** Rotation X, then Y, then Z – same as the previous importer. */
-const rotationQuaternion = (iiifDegrees: Vec3) => {
-  const r = rotationToBabylon(iiifDegrees);
-  return Quaternion.RotationAxis(Axis.X, r.x * DEG_TO_RAD)
-    .multiply(Quaternion.RotationAxis(Axis.Y, r.y * DEG_TO_RAD))
-    .multiply(Quaternion.RotationAxis(Axis.Z, r.z * DEG_TO_RAD));
-};
-
-/** Direction vectors for cameras and lights, via Euler angles as before. */
-const rotateDirection = (direction: Vector3, transforms: IIIFTransform[]) =>
-  transforms
-    .filter(t => t.kind === 'rotate')
-    .reduce((current, t) => {
-      const r = rotationToBabylon(t.value);
-      const q = Quaternion.FromEulerAngles(r.x * DEG_TO_RAD, r.y * DEG_TO_RAD, r.z * DEG_TO_RAD);
-      return current.applyRotationQuaternion(q).normalize();
-    }, direction.clone());
-
+/** Places the model node: IIIF transforms in document order (see placement.ts for the conventions). */
 const applyTransforms = (node: TransformNode, transforms: IIIFTransform[]) => {
-  for (const transform of transforms) {
-    if (transform.kind === 'scale') {
-      const v = toVector3(transform.value);
-      node.scaling = node.scaling.multiply(v);
-      node.position = node.position.multiply(v);
-    }
-    if (transform.kind === 'rotate') {
-      const net = rotationQuaternion(transform.value).multiply(
-        Quaternion.FromEulerVector(node.rotation),
-      );
-      node.rotation = net.toEulerAngles();
-      node.position.applyRotationQuaternionInPlace(net);
-    }
-    if (transform.kind === 'translate') {
-      node.position.addInPlace(toBabylonVector(transform.value));
-    }
-  }
+  const { scaling, rotation, position } = composeIIIFTransforms(transforms);
+  node.scaling = scaling;
+  node.rotationQuaternion = rotation;
+  node.position = position;
 };
 
 const getMeshBounds = (meshes: AbstractMesh[]) => {
