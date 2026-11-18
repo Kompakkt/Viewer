@@ -463,3 +463,61 @@ describe('parseManifest – comment camera scope', () => {
     expect(model.warnings.some(w => w.includes('does not reference a known camera'))).toBe(true);
   });
 });
+
+describe('parseManifest – annotations without id', () => {
+  const SCENE_ID = 'https://example.org/s';
+  const point = (x: number) => ({
+    type: 'SpecificResource',
+    source: { id: SCENE_ID, type: 'Scene' },
+    selector: [{ type: 'PointSelector', x, y: 0, z: 0 }],
+  });
+  const comment = (text: string, x: number, extra: Record<string, unknown> = {}) => ({
+    type: 'Annotation',
+    motivation: ['commenting'],
+    body: { type: 'TextualBody', value: text },
+    target: point(x),
+    ...extra,
+  });
+  const camera = {
+    type: 'Annotation',
+    motivation: ['painting'],
+    body: { id: 'https://example.org/cameras/1', type: 'PerspectiveCamera' },
+    target: point(5),
+  };
+  const model = (paintings: unknown[], comments: unknown[]) =>
+    parseManifest({
+      id: 'https://example.org/m',
+      type: 'Manifest',
+      label: { none: ['m'] },
+      items: [
+        {
+          id: SCENE_ID,
+          type: 'Scene',
+          items: [{ id: 'https://example.org/p1', type: 'AnnotationPage', items: paintings }],
+          annotations: [{ id: 'https://example.org/p2', type: 'AnnotationPage', items: comments }],
+        },
+      ],
+    });
+
+  test('two comments without id get distinct, stable fallback ids', () => {
+    const parsed = model([], [comment('A', 1), comment('B', 2)]);
+    const ids = parsed.comments.map(c => c.annotationId);
+    expect(ids).toHaveLength(2);
+    expect(new Set(ids).size).toBe(2);
+    expect(ids.every(id => id.startsWith(`${SCENE_ID}#annotation-`))).toBe(true);
+    expect(ids).not.toContain('undefined');
+    expect(model([], [comment('A', 1), comment('B', 2)]).comments.map(c => c.annotationId)).toEqual(ids);
+    expect(parsed.warnings.filter(w => w.includes('no id'))).toHaveLength(2);
+  });
+
+  test('cameras without id get fallback ids, and comments still resolve them by resource id', () => {
+    const parsed = model(
+      [camera, { ...camera, body: { ...camera.body, id: 'https://example.org/cameras/2' } }],
+      [comment('A', 1, { scope: [{ id: 'https://example.org/cameras/2', type: 'PerspectiveCamera' }] })],
+    );
+    const ids = parsed.cameras.map(c => c.annotationId);
+    expect(new Set(ids).size).toBe(2);
+    expect(ids).not.toContain('undefined');
+    expect(parsed.comments[0].cameraAnnotationId).toBe(ids[1]);
+  });
+});

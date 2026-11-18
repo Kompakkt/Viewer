@@ -108,8 +108,7 @@ const isComment = (annotation: Json) =>
   annotation['bodyValue'] !== undefined ||
   asArray<Json>(annotation['body']).some(body => body?.['type'] === 'TextualBody');
 
-const parseComment = (annotation: Json, warnings: string[]): IIIFComment | undefined => {
-  const id = String(annotation['id']);
+const parseComment = (annotation: Json, id: string, warnings: string[]): IIIFComment | undefined => {
   const point = targetPoint(annotation);
   if (!point) {
     warnings.push(`Comment ${id} has no PointSelector and was skipped`);
@@ -178,8 +177,16 @@ const LIGHT_KINDS: Record<string, LightKind> = {
 
 const SUPPORTED_SELECTOR_TYPES = ['PointSelector', 'PolygonZSelector'];
 
-const parsePainting = (annotation: Json, manifest: Json, model: IIIFSceneModel) => {
-  const id = String(annotation['id']);
+/** The annotation's own id, if it has a usable one. */
+const ownId = (annotation: Json): string | undefined =>
+  typeof annotation?.['id'] === 'string' && annotation['id'] !== '' ? annotation['id'] : undefined;
+
+const parsePainting = (
+  annotation: Json,
+  manifest: Json,
+  model: IIIFSceneModel,
+  id: string = ownId(annotation) ?? 'unknown',
+) => {
   const position = targetPoint(annotation);
 
   for (const rawBody of asArray<Json>(annotation['body'])) {
@@ -284,6 +291,7 @@ export const parseManifest = (input: unknown): IIIFSceneModel => {
   ];
 
   const pendingScopes: Array<{ comment: IIIFComment; refs: ScopeRef[] }> = [];
+  let annotationCount = 0;
 
   for (const page of pages) {
     if (page?.['type'] !== 'AnnotationPage') continue;
@@ -293,7 +301,13 @@ export const parseManifest = (input: unknown): IIIFSceneModel => {
     }
     for (const annotation of page['items'] as Json[]) {
       if (annotation?.['type'] !== 'Annotation') continue;
-      const id = String(annotation['id']);
+      annotationCount++;
+      let id = ownId(annotation);
+      if (id === undefined) {
+        // Stable per document position, so comments, cameras and models stay distinct.
+        id = `${model.sceneId}#annotation-${annotationCount}`;
+        model.warnings.push(`Annotation has no id, using ${id}`);
+      }
       if (asArray(annotation['exclude']).length) {
         model.warnings.push(`Annotation ${id}: "exclude" is not supported and was ignored`);
       }
@@ -305,7 +319,7 @@ export const parseManifest = (input: unknown): IIIFSceneModel => {
         }
       }
       if (isComment(annotation)) {
-        const comment = parseComment(annotation, model.warnings);
+        const comment = parseComment(annotation, id, model.warnings);
         if (comment) {
           model.comments.push(comment);
           const refs: ScopeRef[] = [];
@@ -314,7 +328,14 @@ export const parseManifest = (input: unknown): IIIFSceneModel => {
             const embedded = embeddedPaintingAnnotations(ref);
             if (embedded.length) {
               const scratch = emptyModel();
-              for (const painting of embedded) parsePainting(painting, manifest, scratch);
+              embedded.forEach((painting, index) =>
+                parsePainting(
+                  painting,
+                  manifest,
+                  scratch,
+                  ownId(painting) ?? `${comment.annotationId}#scope-${index + 1}`,
+                ),
+              );
               if (scratch.models.length || scratch.lights.length || scratch.canvases.length) {
                 model.warnings.push(
                   `Comment ${comment.annotationId}: scope contains a non-camera resource that was ignored`,
@@ -330,7 +351,7 @@ export const parseManifest = (input: unknown): IIIFSceneModel => {
           pendingScopes.push({ comment, refs });
         }
       } else {
-        parsePainting(annotation, manifest, model);
+        parsePainting(annotation, manifest, model, id);
       }
     }
   }
