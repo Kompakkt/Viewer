@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Der Kompakkt-Viewer importiert IIIF-Presentation-4.0-Manifeste mit 3D-Scenes über ein eigenes, getestetes Modul und exportiert Entity plus Annotationen als vollständiges 4.0-Manifest.
+**Goal:** The Kompakkt viewer imports IIIF Presentation 4.0 manifests with 3D Scenes through a dedicated, tested module and exports an entity plus its annotations as a complete 4.0 manifest.
 
-**Architecture:** Neues Verzeichnis `src/app/iiif/`. Reine, Babylon-freie Funktionen (`types`, `color`, `coordinates`, `model`, `parser`, `comments`, `exporter`) werden mit `bun test` getestet. Nur `scene-builder.ts` (ein Angular-Service) spricht Babylon an. `processing.service.ts` ruft für den Import nur noch Parser und Builder auf. Der Export hängt am Annotations-Editor.
+**Architecture:** New directory `src/app/iiif/`. Pure, Babylon-free functions (`types`, `color`, `coordinates`, `model`, `parser`, `comments`, `exporter`) are tested with `bun test`. Only `scene-builder.ts` (an Angular service) talks to Babylon. For the import, `processing.service.ts` only calls the parser and the builder. The export hangs off the annotations editor.
 
 **Tech Stack:** Angular 19, Babylon.js 8.38, TypeScript, Bun 1.3 (`bun test`), file-saver
 
@@ -12,40 +12,40 @@
 
 ## Global Constraints
 
-- Nur reine IIIF-4.0-Spec. Kein eigener `@context`, keine Kompakkt-Extension.
-- `@context` beim Export: `http://iiif.io/api/presentation/4/context.json`
-- Alle Werte in `model.ts` liegen im **IIIF-Raum** (rechtshändig). Umgerechnet wird **ausschließlich** über `coordinates.ts`.
-- Punkt IIIF ↔ Babylon: `(x, y, z)` ↔ `(-x, y, z)`. Rotation in Grad: `(x, y, z)` ↔ `(x, -y, -z)`.
-- Kompakkt-Kamerapositionen (`cameraPositionInitial.position`, `relatedPerspective.position`) sind ArcRotate-Werte: `x = alpha`, `y = beta`, `z = radius` relativ zu `target`.
-- `scene.useRightHandedSystem` wird nicht verändert.
-- Module außer `scene-builder.ts` importieren nichts aus `@babylonjs/*` oder `@angular/*`. Typen aus `src/common` nur per `import type`.
-- Testdateien heißen `*.test.ts` und liegen neben dem Code. Die Angular-Build-Konfiguration schließt sie aus.
-- Commit-Messages enden mit `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
+- Plain IIIF 4.0 spec only. No custom `@context`, no Kompakkt extension.
+- `@context` on export: `http://iiif.io/api/presentation/4/context.json`
+- All values in `model.ts` are in **IIIF space** (right-handed). Conversion happens **only** through `coordinates.ts`.
+- Point IIIF ↔ Babylon: `(x, y, z)` ↔ `(-x, y, z)`. Rotation in degrees: `(x, y, z)` ↔ `(x, -y, -z)`.
+- Kompakkt camera positions (`cameraPositionInitial.position`, `relatedPerspective.position`) are ArcRotate values: `x = alpha`, `y = beta`, `z = radius` relative to `target`.
+- `scene.useRightHandedSystem` is not changed.
+- Modules other than `scene-builder.ts` import nothing from `@babylonjs/*` or `@angular/*`. Types from `src/common` only via `import type`.
+- Test files are named `*.test.ts` and live next to the code. The Angular build configuration excludes them.
+- Commit messages end with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 
-## Dateistruktur
+## File structure
 
-| Datei | Status | Aufgabe |
+| File | Status | Responsibility |
 |---|---|---|
-| `src/app/iiif/types.ts` | neu | JSON-Typen für IIIF 4.0 (lose, für Export und Doku) |
-| `src/app/iiif/color.ts` | neu | Hex ↔ RGB |
-| `src/app/iiif/coordinates.ts` | neu | Achsen-, Rotations- und ArcRotate-Umrechnung |
-| `src/app/iiif/model.ts` | neu | internes `IIIFSceneModel` |
-| `src/app/iiif/parser.ts` | neu | Manifest-JSON → `IIIFSceneModel` |
-| `src/app/iiif/comments.ts` | neu | Kommentar → `IAnnotation`, Kamera → `ICameraPerspective` |
-| `src/app/iiif/scene-builder.ts` | neu | `IIIFSceneBuilderService`: Modell → Babylon |
-| `src/app/iiif/exporter.ts` | neu | Entity + Settings + Annotationen → Manifest |
-| `src/app/iiif/__fixtures__/scene-basic.json` | neu | Test-Manifest |
-| `src/app/iiif/*.test.ts` | neu | Tests |
-| `src/app/services/processing/processing.service.ts` | ändern | IIIF-Block (Zeilen 455–1328) durch Aufrufe ersetzen, Manifesto-Import entfernen |
-| `src/app/components/entity-feature-annotations/annotations-editor/annotations-editor.component.{ts,html}` | ändern | Export-Button |
-| `package.json`, `tsconfig.json`, `README.md` | ändern | Test-Script, Test-Exclude, Doku, Manifesto entfernen |
+| `src/app/iiif/types.ts` | new | JSON types for IIIF 4.0 (loose, for export and docs) |
+| `src/app/iiif/color.ts` | new | Hex ↔ RGB |
+| `src/app/iiif/coordinates.ts` | new | Axis, rotation and ArcRotate conversion |
+| `src/app/iiif/model.ts` | new | internal `IIIFSceneModel` |
+| `src/app/iiif/parser.ts` | new | Manifest JSON → `IIIFSceneModel` |
+| `src/app/iiif/comments.ts` | new | Comment → `IAnnotation`, camera → `ICameraPerspective` |
+| `src/app/iiif/scene-builder.ts` | new | `IIIFSceneBuilderService`: model → Babylon |
+| `src/app/iiif/exporter.ts` | new | Entity + settings + annotations → manifest |
+| `src/app/iiif/__fixtures__/scene-basic.json` | new | Test manifest |
+| `src/app/iiif/*.test.ts` | new | Tests |
+| `src/app/services/processing/processing.service.ts` | modify | Replace the IIIF block (lines 455–1328) with calls, remove the Manifesto import |
+| `src/app/components/entity-feature-annotations/annotations-editor/annotations-editor.component.{ts,html}` | modify | Export button |
+| `package.json`, `tsconfig.json`, `README.md` | modify | Test script, test exclude, docs, remove Manifesto |
 
-## PR-Zuschnitt
+## PR split
 
 - **PR 1:** Task 1
-- **PR 2:** Task 2 und Task 3
+- **PR 2:** Task 2 and Task 3
 - **PR 3:** Task 4
-- **PR 4:** Task 5 und Task 6
+- **PR 4:** Task 5 and Task 6
 - **PR 5:** Task 7
 
 ---
@@ -70,23 +70,23 @@
   - `toVec3(v: unknown): Vec3`
   - `arcRotateToCartesian(arc: ArcRotate, target: Vec3): Vec3`
   - `cartesianToArcRotate(position: Vec3, target: Vec3): ArcRotate`
-  - aus `types.ts`: `PRESENTATION_4_CONTEXT` sowie die Typen `Manifest`, `Scene`, `AnnotationPage`, `Annotation`, `Transform`
+  - from `types.ts`: `PRESENTATION_4_CONTEXT` and the types `Manifest`, `Scene`, `AnnotationPage`, `Annotation`, `Transform`
 
-- [ ] **Step 1: Test-Script und Build-Exclude anlegen**
+- [ ] **Step 1: Add the test script and the build exclude**
 
-In `package.json` unter `"scripts"` ergänzen:
+Add to `"scripts"` in `package.json`:
 
 ```json
 "test": "bun test src/app/iiif",
 ```
 
-In `tsconfig.json` die Zeile `"exclude": ["src/@kompakkt/plugins/*.ts"],` ersetzen durch:
+In `tsconfig.json`, replace the line `"exclude": ["src/@kompakkt/plugins/*.ts"],` with:
 
 ```json
 "exclude": ["src/@kompakkt/plugins/*.ts", "./src/**/*.test.ts"],
 ```
 
-- [ ] **Step 2: Failing tests für `color.ts` schreiben**
+- [ ] **Step 2: Write failing tests for `color.ts`**
 
 `src/app/iiif/color.test.ts`:
 
@@ -115,7 +115,7 @@ describe('color', () => {
 });
 ```
 
-- [ ] **Step 3: Failing tests für `coordinates.ts` schreiben**
+- [ ] **Step 3: Write failing tests for `coordinates.ts`**
 
 `src/app/iiif/coordinates.test.ts`:
 
@@ -174,12 +174,12 @@ describe('coordinates', () => {
 });
 ```
 
-- [ ] **Step 4: Tests laufen lassen, Fehlschlag prüfen**
+- [ ] **Step 4: Run the tests and confirm they fail**
 
 Run: `bun test src/app/iiif`
-Expected: FAIL mit `Cannot find module './color'` bzw. `'./coordinates'`
+Expected: FAIL with `Cannot find module './color'` or `'./coordinates'`
 
-- [ ] **Step 5: `color.ts` implementieren**
+- [ ] **Step 5: Implement `color.ts`**
 
 ```ts
 export interface RGB {
@@ -207,12 +207,12 @@ export const rgbToHex = ({ r, g, b }: RGB): string =>
     .toUpperCase()}`;
 ```
 
-- [ ] **Step 6: `coordinates.ts` implementieren**
+- [ ] **Step 6: Implement `coordinates.ts`**
 
 ```ts
 /**
- * Einzige Stelle für die Umrechnung zwischen IIIF (rechtshändig, +y oben, +z nach vorn)
- * und Babylon.js (linkshändig). Spiegelung an der X-Achse.
+ * The single place for converting between IIIF (right-handed, +y up, +z forward)
+ * and Babylon.js (left-handed). Mirrors on the X axis.
  */
 export interface Vec3 {
   x: number;
@@ -220,7 +220,7 @@ export interface Vec3 {
   z: number;
 }
 
-/** Kompakkt speichert Kameras als ArcRotate-Werte: x = alpha, y = beta, z = radius. */
+/** Kompakkt stores cameras as ArcRotate values: x = alpha, y = beta, z = radius. */
 export interface ArcRotate {
   alpha: number;
   beta: number;
@@ -232,25 +232,25 @@ const negate = (value: number) => (value === 0 ? 0 : -value);
 export const pointToBabylon = (p: Vec3): Vec3 => ({ x: negate(p.x), y: p.y, z: p.z });
 export const pointToIIIF = (p: Vec3): Vec3 => ({ x: negate(p.x), y: p.y, z: p.z });
 
-/** Rotationen in Grad. Bei Spiegelung an X bleibt X, Y und Z wechseln das Vorzeichen. */
+/** Rotations in degrees. Mirroring on X keeps X; Y and Z change sign. */
 export const rotationToBabylon = (deg: Vec3): Vec3 => ({ x: deg.x, y: negate(deg.y), z: negate(deg.z) });
 export const rotationToIIIF = (deg: Vec3): Vec3 => ({ x: deg.x, y: negate(deg.y), z: negate(deg.z) });
 
-/** Akzeptiert IVector3, Babylon-Vektoren ({_x,_y,_z}) und undefined. */
+/** Accepts IVector3, Babylon vectors ({_x,_y,_z}) and undefined. */
 export const toVec3 = (value: unknown): Vec3 => {
   const record = (value ?? {}) as Record<string, unknown>;
   const pick = (key: 'x' | 'y' | 'z') => Number(record[key] ?? record[`_${key}`] ?? 0);
   return { x: pick('x'), y: pick('y'), z: pick('z') };
 };
 
-/** Gleiche Formel wie Babylon ArcRotateCamera (im Babylon-Raum). */
+/** Same formula as Babylon's ArcRotateCamera (in Babylon space). */
 export const arcRotateToCartesian = ({ alpha, beta, radius }: ArcRotate, target: Vec3): Vec3 => ({
   x: target.x + radius * Math.cos(alpha) * Math.sin(beta),
   y: target.y + radius * Math.cos(beta),
   z: target.z + radius * Math.sin(alpha) * Math.sin(beta),
 });
 
-/** Umkehrung von arcRotateToCartesian; alpha liegt danach in (-π, π]. */
+/** Inverse of arcRotateToCartesian; alpha ends up in (-π, π]. */
 export const cartesianToArcRotate = (position: Vec3, target: Vec3): ArcRotate => {
   const dx = position.x - target.x;
   const dy = position.y - target.y;
@@ -265,10 +265,10 @@ export const cartesianToArcRotate = (position: Vec3, target: Vec3): ArcRotate =>
 };
 ```
 
-- [ ] **Step 7: `types.ts` anlegen (nur Typen und Konstante)**
+- [ ] **Step 7: Create `types.ts` (types and one constant only)**
 
 ```ts
-/** Lose JSON-Typen für den genutzten Teil von IIIF Presentation 4.0. */
+/** Loose JSON types for the part of IIIF Presentation 4.0 we use. */
 export const PRESENTATION_4_CONTEXT = 'http://iiif.io/api/presentation/4/context.json';
 
 export type LanguageMap = Record<string, string[]>;
@@ -372,15 +372,15 @@ export interface Manifest {
 }
 ```
 
-- [ ] **Step 8: Tests laufen lassen**
+- [ ] **Step 8: Run the tests**
 
 Run: `bun test src/app/iiif`
-Expected: PASS, 11 Tests
+Expected: PASS, 11 tests
 
-- [ ] **Step 9: Prüfen, dass der Angular-Build die Testdateien ignoriert**
+- [ ] **Step 9: Check that the Angular build ignores the test files**
 
 Run: `bunx ng build --configuration development`
-Expected: Build erfolgreich, kein Fehler zu `bun:test`
+Expected: build succeeds, no error about `bun:test`
 
 - [ ] **Step 10: Commit**
 
@@ -391,7 +391,7 @@ git commit -m "feat(iiif): add test setup, color and coordinate helpers, IIIF 4.
 
 ---
 
-### Task 2: `model.ts` und `parser.ts`
+### Task 2: `model.ts` and `parser.ts`
 
 **Files:**
 - Create: `src/app/iiif/model.ts`, `src/app/iiif/parser.ts`, `src/app/iiif/__fixtures__/scene-basic.json`
@@ -404,13 +404,13 @@ git commit -m "feat(iiif): add test setup, color and coordinate helpers, IIIF 4.
   - `parseManifest(input: unknown): IIIFSceneModel`
   - `class IIIFParseError extends Error`
 
-- [ ] **Step 1: `model.ts` anlegen**
+- [ ] **Step 1: Create `model.ts`**
 
 ```ts
 import type { RGB } from './color';
 import type { Vec3 } from './coordinates';
 
-/** Alle Vektoren in diesem Modell liegen im IIIF-Raum (rechtshändig). */
+/** All vectors in this model are in IIIF space (right-handed). */
 export interface IIIFTransform {
   kind: 'scale' | 'rotate' | 'translate';
   value: Vec3;
@@ -421,15 +421,15 @@ export interface IIIFModelItem {
   url: string;
   format?: string;
   transforms: IIIFTransform[];
-  /** PointSelector im Target der Painting-Annotation */
+  /** PointSelector in the target of the painting annotation */
   position?: Vec3;
 }
 
 export interface IIIFCanvasItem {
   annotationId: string;
-  /** Rohes Canvas-JSON aus manifest.items */
+  /** Raw Canvas JSON from manifest.items */
   canvas: Record<string, any>;
-  /** Wert des PolygonZSelector, z. B. "POLYGONZ((0 0 0, ...))" */
+  /** Value of the PolygonZSelector, e.g. "POLYGONZ((0 0 0, ...))" */
   polygonZ: string;
 }
 
@@ -443,11 +443,11 @@ export interface IIIFCameraItem {
   lookAtAnnotationId?: string;
   lookAtPoint?: Vec3;
   transforms: IIIFTransform[];
-  /** Grad */
+  /** degrees */
   fieldOfView?: number;
   near?: number;
   far?: number;
-  /** behavior: ["hidden"] – z. B. Kamera eines Kommentars */
+  /** behavior: ["hidden"] – e.g. the camera of a comment */
   hidden: boolean;
 }
 
@@ -458,7 +458,7 @@ export interface IIIFLightItem {
   kind: LightKind;
   color?: RGB;
   intensity?: number;
-  /** Grad (nur SpotLight) */
+  /** degrees (SpotLight only) */
   angle?: number;
   position?: Vec3;
   lookAtAnnotationId?: string;
@@ -471,7 +471,7 @@ export interface IIIFComment {
   title: string;
   description: string;
   point: Vec3;
-  /** erste ID aus `scope`, verweist auf eine Kamera-Annotation */
+  /** first ID from `scope`; points to a camera annotation */
   cameraAnnotationId?: string;
 }
 
@@ -484,13 +484,13 @@ export interface IIIFSceneModel {
   canvases: IIIFCanvasItem[];
   cameras: IIIFCameraItem[];
   lights: IIIFLightItem[];
-  /** in Dokumentreihenfolge = Kompakkt-ranking */
+  /** in document order = Kompakkt ranking */
   comments: IIIFComment[];
   warnings: string[];
 }
 ```
 
-- [ ] **Step 2: Fixture anlegen**
+- [ ] **Step 2: Create the fixture**
 
 `src/app/iiif/__fixtures__/scene-basic.json`:
 
@@ -617,7 +617,7 @@ export interface IIIFSceneModel {
 }
 ```
 
-- [ ] **Step 3: Failing tests schreiben**
+- [ ] **Step 3: Write failing tests**
 
 `src/app/iiif/parser.test.ts`:
 
@@ -771,12 +771,12 @@ if (demoFiles.length === 0) {
 }
 ```
 
-- [ ] **Step 4: Tests laufen lassen, Fehlschlag prüfen**
+- [ ] **Step 4: Run the tests and confirm they fail**
 
 Run: `bun test src/app/iiif/parser.test.ts`
-Expected: FAIL mit `Cannot find module './parser'`
+Expected: FAIL with `Cannot find module './parser'`
 
-- [ ] **Step 5: `parser.ts` implementieren**
+- [ ] **Step 5: Implement `parser.ts`**
 
 ```ts
 import { hexToRgb } from './color';
@@ -804,7 +804,7 @@ const firstLabel = (label: unknown): string | undefined => {
   return undefined;
 };
 
-/** Zahl oder IIIF-Value ({ type: "Value", value }). */
+/** Number or IIIF Value ({ type: "Value", value }). */
 const toNumber = (value: unknown): number | undefined => {
   const raw = typeof value === 'object' && value !== null ? (value as Json)['value'] : value;
   if (raw === undefined || raw === null) return undefined;
@@ -850,7 +850,7 @@ const parseTransforms = (list: unknown): IIIFTransform[] =>
     ];
   });
 
-/** Löst SpecificResource-Bodies auf: liefert Quelle, Transforms und Typ (lowercase). */
+/** Unwraps SpecificResource bodies: returns source, transforms and type (lowercase). */
 const unwrapBody = (body: Json) => {
   if (body?.['type'] === 'SpecificResource') {
     const source: Json = asArray<Json>(body['source'])[0] ?? {};
@@ -1036,15 +1036,15 @@ export const parseManifest = (input: unknown): IIIFSceneModel => {
 };
 ```
 
-- [ ] **Step 6: Tests laufen lassen**
+- [ ] **Step 6: Run the tests**
 
 Run: `bun test src/app/iiif`
-Expected: PASS. Ohne initialisiertes Submodul erscheint ein übersprungener Test „demo manifests“.
+Expected: PASS. Without the initialized submodule, one skipped test "demo manifests" is shown.
 
-- [ ] **Step 7: Mit Demo-Manifesten prüfen**
+- [ ] **Step 7: Check against the demo manifests**
 
 Run: `git submodule update --init demos/iiif-3d && bun test src/app/iiif/parser.test.ts`
-Expected: PASS für alle Demo-Dateien. Schlägt eine fehl, liegt ein Parser-Fehler vor: Datei ansehen und Parser korrigieren, nicht den Test.
+Expected: PASS for all demo files. If one fails, that's a parser bug: inspect the file and fix the parser, not the test.
 
 - [ ] **Step 8: Commit**
 
@@ -1055,25 +1055,25 @@ git commit -m "feat(iiif): add babylon-free IIIF 4.0 scene model and parser"
 
 ---
 
-### Task 3: `scene-builder.ts` und Umstellung von `processing.service.ts`
+### Task 3: `scene-builder.ts` and switching `processing.service.ts` over
 
-Ziel: Der bestehende Import läuft über Parser und Builder, **ohne sichtbare Verhaltensänderung**. Bewusste Ausnahme: Der Entity-Name ist jetzt das Manifest-Label statt „IIIF Manifest“. Die Kommentar-Perspektive bleibt vorerst die bisherige; Task 4 ersetzt sie.
+Goal: The existing import runs through the parser and the builder **with no visible change in behavior**. Deliberate exception: the entity name is now the manifest label instead of "IIIF Manifest". The comment perspective stays as before for now; Task 4 replaces it.
 
 **Files:**
-- Create: `src/app/iiif/comments.ts` (Grundfunktionen), `src/app/iiif/scene-builder.ts`
+- Create: `src/app/iiif/comments.ts` (basic functions), `src/app/iiif/scene-builder.ts`
 - Test: `src/app/iiif/comments.test.ts`
-- Modify: `src/app/services/processing/processing.service.ts` (Import-Block Zeilen 51–59; Methode `processIIIF3DManifest` Zeilen 455–1328; Felder ab Zeile 108)
+- Modify: `src/app/services/processing/processing.service.ts` (import block lines 51–59; method `processIIIF3DManifest` lines 455–1328; fields from line 108)
 
 **Interfaces:**
-- Consumes: `IIIFSceneModel` und Item-Typen (model.ts); `pointToBabylon`, `rotationToBabylon`, `cartesianToArcRotate`, `Vec3` (coordinates.ts); `parseManifest`, `IIIFParseError` (parser.ts)
+- Consumes: `IIIFSceneModel` and item types (model.ts); `pointToBabylon`, `rotationToBabylon`, `cartesianToArcRotate`, `Vec3` (coordinates.ts); `parseManifest`, `IIIFParseError` (parser.ts)
 - Produces:
   - `ARC_ROTATE_CAMERA_TYPE = 'arcRotateCam'`
-  - `perspectiveFromPoints(position: Vec3, target: Vec3): ICameraPerspective` (beide Babylon-Raum)
+  - `perspectiveFromPoints(position: Vec3, target: Vec3): ICameraPerspective` (both in Babylon space)
   - `commentToAnnotation(comment: IIIFComment, ranking: number, perspective: ICameraPerspective, referenceNormal: Vec3): IAnnotation`
   - `IIIFSceneBuilderService.build(model: IIIFSceneModel): Promise<IIIFBuildResult>`
   - `IIIFBuildResult { meshes; annotations; entitySettings; hasExplicitLights; hasExplicitCamera; applyCamera }`
 
-- [ ] **Step 1: Failing test für `comments.ts` schreiben**
+- [ ] **Step 1: Write a failing test for `comments.ts`**
 
 `src/app/iiif/comments.test.ts`:
 
@@ -1110,19 +1110,19 @@ describe('comments', () => {
 });
 ```
 
-- [ ] **Step 2: Test laufen lassen, Fehlschlag prüfen**
+- [ ] **Step 2: Run the test and confirm it fails**
 
 Run: `bun test src/app/iiif/comments.test.ts`
-Expected: FAIL mit `Cannot find module './comments'`
+Expected: FAIL with `Cannot find module './comments'`
 
-- [ ] **Step 3: `comments.ts` implementieren**
+- [ ] **Step 3: Implement `comments.ts`**
 
 ```ts
 import type { IAgent, IAnnotation, ICameraPerspective } from 'src/common';
 import { cartesianToArcRotate, pointToBabylon, type Vec3 } from './coordinates';
 import type { IIIFComment } from './model';
 
-/** Wert, den cameraManager.getInitialPosition() für ArcRotate-Kameras liefert. */
+/** Value that cameraManager.getInitialPosition() returns for ArcRotate cameras. */
 export const ARC_ROTATE_CAMERA_TYPE = 'arcRotateCam';
 
 const KOMPAKKT_SOFTWARE = {
@@ -1134,7 +1134,7 @@ const KOMPAKKT_SOFTWARE = {
 
 const KOMPAKKT_PERSON = { _id: 'kompakkt', type: 'person', name: 'Kompakkt' } as IAgent;
 
-/** Kompakkt-Perspektive aus Kameraposition und Ziel, beides im Babylon-Raum. */
+/** Kompakkt perspective from camera position and target, both in Babylon space. */
 export const perspectiveFromPoints = (position: Vec3, target: Vec3): ICameraPerspective => {
   const { alpha, beta, radius } = cartesianToArcRotate(position, target);
   return {
@@ -1180,14 +1180,14 @@ export const commentToAnnotation = (
   }) as IAnnotation;
 ```
 
-- [ ] **Step 4: Test laufen lassen**
+- [ ] **Step 4: Run the test**
 
 Run: `bun test src/app/iiif`
 Expected: PASS
 
-- [ ] **Step 5: `scene-builder.ts` anlegen**
+- [ ] **Step 5: Create `scene-builder.ts`**
 
-Die Babylon-Logik stammt aus `processing.service.ts` (Zeilen 578–1098 und 1284–1313). Sie arbeitet jetzt auf `IIIFSceneModel` statt auf Manifesto-Objekten.
+The Babylon logic comes from `processing.service.ts` (lines 578–1098 and 1284–1313). It now works on `IIIFSceneModel` instead of Manifesto objects.
 
 ```ts
 import { Injectable, inject } from '@angular/core';
@@ -1229,7 +1229,7 @@ export interface IIIFBuildResult {
   entitySettings: IEntitySettings;
   hasExplicitLights: boolean;
   hasExplicitCamera: boolean;
-  /** setzt die Default-Kamera des Manifests oder positioniert automatisch */
+  /** applies the manifest's default camera or positions the camera automatically */
   applyCamera: () => void;
 }
 
@@ -1243,7 +1243,7 @@ const toVector3 = (v: Vec3) => new Vector3(v.x, v.y, v.z);
 const toBabylonVector = (iiifPoint: Vec3) => toVector3(pointToBabylon(iiifPoint));
 const rgbToColor3 = ({ r, g, b }: RGB) => new Color3(r / 255, g / 255, b / 255);
 
-/** Rotation X, dann Y, dann Z – wie der bisherige Import. */
+/** Rotation X, then Y, then Z – same as the previous importer. */
 const rotationQuaternion = (iiifDegrees: Vec3) => {
   const r = rotationToBabylon(iiifDegrees);
   return Quaternion.RotationAxis(Axis.X, r.x * DEG_TO_RAD)
@@ -1251,7 +1251,7 @@ const rotationQuaternion = (iiifDegrees: Vec3) => {
     .multiply(Quaternion.RotationAxis(Axis.Z, r.z * DEG_TO_RAD));
 };
 
-/** Richtungsvektoren für Kameras und Lichter, wie bisher über Euler-Winkel. */
+/** Direction vectors for cameras and lights, via Euler angles as before. */
 const rotateDirection = (direction: Vector3, transforms: IIIFTransform[]) =>
   transforms
     .filter(t => t.kind === 'rotate')
@@ -1385,7 +1385,7 @@ export class IIIFSceneBuilderService {
     };
   }
 
-  /** Bisheriges Verhalten des Imports. Wird in Task 4 ersetzt. */
+  /** Previous importer behavior. Replaced in Task 4. */
   protected buildAnnotations(model: IIIFSceneModel, _meshes: AbstractMesh[]): IAnnotation[] {
     return model.comments.map((comment, index) => {
       const target = pointToBabylon(comment.point);
@@ -1479,7 +1479,7 @@ export class IIIFSceneBuilderService {
     return undefined;
   }
 
-  /** Liefert true, wenn ein Licht erzeugt wurde. */
+  /** Returns true if a light was created. */
   protected buildLight(light: IIIFLightItem, positions: Map<string, Vector3>): boolean {
     const scene = this.babylon.getScene();
     const intensity = light.intensity ?? 1;
@@ -1590,9 +1590,9 @@ export class IIIFSceneBuilderService {
 }
 ```
 
-- [ ] **Step 6: `processing.service.ts` umstellen – Imports**
+- [ ] **Step 6: Switch `processing.service.ts` over – imports**
 
-Den Block in Zeilen 51–59 (`import { Annotation, AnnotationBody, … } from '@iiif/3d-manifesto-dev';`) löschen und ersetzen durch:
+Delete the block in lines 51–59 (`import { Annotation, AnnotationBody, … } from '@iiif/3d-manifesto-dev';`) and replace it with:
 
 ```ts
 import type { IIIFSceneModel } from '../../iiif/model';
@@ -1600,15 +1600,15 @@ import { IIIFParseError, parseManifest as parseIIIFManifest } from '../../iiif/p
 import { IIIFSceneBuilderService } from '../../iiif/scene-builder';
 ```
 
-Unter `private http: HttpClient = inject(HttpClient);` (Zeile 115) ergänzen:
+Below `private http: HttpClient = inject(HttpClient);` (line 115), add:
 
 ```ts
   private iiifSceneBuilder: IIIFSceneBuilderService = inject(IIIFSceneBuilderService);
 ```
 
-- [ ] **Step 7: `processing.service.ts` umstellen – Methode ersetzen**
+- [ ] **Step 7: Switch `processing.service.ts` over – replace the method**
 
-Die komplette Methode `private async processIIIF3DManifest(manifestJson: object) { … }` (Zeilen 455–1328, bis direkt vor `public importIIIF3DManifestJson`) ersetzen durch:
+Replace the whole method `private async processIIIF3DManifest(manifestJson: object) { … }` (lines 455–1328, up to just before `public importIIIF3DManifestJson`) with:
 
 ```ts
   private async processIIIF3DManifest(manifestJson: unknown) {
@@ -1665,7 +1665,7 @@ Die komplette Methode `private async processIIIF3DManifest(manifestJson: object)
   }
 ```
 
-- [ ] **Step 8: Ungenutzte Babylon-Imports entfernen**
+- [ ] **Step 8: Remove unused Babylon imports**
 
 Run:
 
@@ -1673,18 +1673,18 @@ Run:
 for n in Camera Color3 DirectionalLight HemisphericLight Mesh PBRMaterial Quaternion StandardMaterial Texture TransformNode VertexData AbstractMesh Vector3 Annotation AnnotationBody AnnotationPage Manifest SpecificResource; do printf "%s: " $n; grep -cw "$n" src/app/services/processing/processing.service.ts; done
 ```
 
-Expected: Jeder Name mit Treffer `1` kommt nur noch im Import vor. Diese Namen aus dem `@babylonjs/core`-Import (Zeilen 4–18) entfernen. Namen mit mehr Treffern bleiben.
+Expected: Every name with a count of `1` now only appears in the import. Remove those names from the `@babylonjs/core` import (lines 4–18). Names with more matches stay.
 
-- [ ] **Step 9: Build und Tests**
+- [ ] **Step 9: Build and tests**
 
 Run: `bun test src/app/iiif && bunx ng build --configuration development`
-Expected: Tests PASS, Build erfolgreich
+Expected: tests PASS, build succeeds
 
-- [ ] **Step 10: Manuelle Regressionsprüfung im Browser**
+- [ ] **Step 10: Manual regression check in the browser**
 
-Run: `bun run start` und `http://localhost:4200/?manifest=<URL>` öffnen. Als URL nacheinander die im Import-Dialog hinterlegten Beispiel-Manifeste verwenden (`dialog-iiif-import.component.ts`). Den Vergleich zum Stand vor Task 3 erhält man über `git stash` bzw. Checkout des Vorgänger-Commits.
+Run: `bun run start` and open `http://localhost:4200/?manifest=<URL>`. Use the example manifests listed in the import dialog (`dialog-iiif-import.component.ts`) as URLs, one after another. To compare with the state before Task 3, use `git stash` or check out the previous commit.
 
-Expected: Modelle, Transforms, Kamera, Lichter, Canvas-in-Scene und Kommentar-Marker sehen aus wie vorher. Nur der Entity-Name entspricht jetzt dem Manifest-Label.
+Expected: Models, transforms, camera, lights, Canvas-in-Scene and comment markers look the same as before. Only the entity name now matches the manifest label.
 
 - [ ] **Step 11: Commit**
 
@@ -1695,7 +1695,7 @@ git commit -m "refactor(iiif): route manifest import through parser and scene bu
 
 ---
 
-### Task 4: Kommentare mit Kamera bzw. berechneter Ansicht; Point- und SpotLight
+### Task 4: Comments with a linked camera or a computed view; PointLight and SpotLight
 
 **Files:**
 - Modify: `src/app/iiif/comments.ts`, `src/app/iiif/scene-builder.ts`
@@ -1704,12 +1704,12 @@ git commit -m "refactor(iiif): route manifest import through parser and scene bu
 **Interfaces:**
 - Consumes: `perspectiveFromPoints`, `commentToAnnotation` (Task 3); `IIIFCameraItem` (Task 2)
 - Produces:
-  - `perspectiveFromCamera(camera: IIIFCameraItem, fallbackTarget: Vec3): ICameraPerspective | undefined` (`fallbackTarget` im IIIF-Raum)
-  - `perspectiveAlongNormal(target: Vec3, normal: Vec3, distance: number): ICameraPerspective` (Babylon-Raum)
+  - `perspectiveFromCamera(camera: IIIFCameraItem, fallbackTarget: Vec3): ICameraPerspective | undefined` (`fallbackTarget` in IIIF space)
+  - `perspectiveAlongNormal(target: Vec3, normal: Vec3, distance: number): ICameraPerspective` (Babylon space)
 
-- [ ] **Step 1: Failing tests ergänzen**
+- [ ] **Step 1: Add failing tests**
 
-In `src/app/iiif/comments.test.ts` den Import erweitern und Tests anhängen:
+In `src/app/iiif/comments.test.ts`, extend the import and append these tests:
 
 ```ts
 import {
@@ -1763,17 +1763,17 @@ describe('perspectives', () => {
 });
 ```
 
-- [ ] **Step 2: Tests laufen lassen, Fehlschlag prüfen**
+- [ ] **Step 2: Run the tests and confirm they fail**
 
 Run: `bun test src/app/iiif/comments.test.ts`
-Expected: FAIL mit `perspectiveFromCamera is not a function` o. ä.
+Expected: FAIL with `perspectiveFromCamera is not a function` or similar
 
-- [ ] **Step 3: Funktionen in `comments.ts` ergänzen**
+- [ ] **Step 3: Add the functions to `comments.ts`**
 
-Den Import `import type { IIIFComment } from './model';` ersetzen durch `import type { IIIFCameraItem, IIIFComment } from './model';` und anhängen:
+Replace the import `import type { IIIFComment } from './model';` with `import type { IIIFCameraItem, IIIFComment } from './model';` and append:
 
 ```ts
-/** Perspektive aus einer IIIF-Kamera. fallbackTarget (IIIF-Raum) gilt, wenn lookAt kein Punkt ist. */
+/** Perspective from a IIIF camera. fallbackTarget (IIIF space) applies when lookAt is not a point. */
 export const perspectiveFromCamera = (
   camera: IIIFCameraItem,
   fallbackTarget: Vec3,
@@ -1783,7 +1783,7 @@ export const perspectiveFromCamera = (
   return perspectiveFromPoints(pointToBabylon(camera.position), pointToBabylon(target));
 };
 
-/** Kamera im Abstand `distance` entlang `normal` vor `target` (beides Babylon-Raum). */
+/** Camera at `distance` along `normal` in front of `target` (both in Babylon space). */
 export const perspectiveAlongNormal = (target: Vec3, normal: Vec3, distance: number): ICameraPerspective => {
   const length = Math.hypot(normal.x, normal.y, normal.z) || 1;
   const position = {
@@ -1795,17 +1795,17 @@ export const perspectiveAlongNormal = (target: Vec3, normal: Vec3, distance: num
 };
 ```
 
-- [ ] **Step 4: Tests laufen lassen**
+- [ ] **Step 4: Run the tests**
 
 Run: `bun test src/app/iiif`
 Expected: PASS
 
-- [ ] **Step 5: `buildAnnotations` im Builder ersetzen**
+- [ ] **Step 5: Replace `buildAnnotations` in the builder**
 
 In `scene-builder.ts`:
-- `Ray`, `PointLight` und `SpotLight` zum `@babylonjs/core`-Import hinzufügen.
-- `import { commentToAnnotation } from './comments';` ersetzen durch `import { commentToAnnotation, perspectiveAlongNormal, perspectiveFromCamera } from './comments';`.
-- Die Methode `buildAnnotations` komplett ersetzen durch:
+- Add `Ray`, `PointLight` and `SpotLight` to the `@babylonjs/core` import.
+- Replace `import { commentToAnnotation } from './comments';` with `import { commentToAnnotation, perspectiveAlongNormal, perspectiveFromCamera } from './comments';`.
+- Replace the whole `buildAnnotations` method with:
 
 ```ts
   protected buildAnnotations(model: IIIFSceneModel, meshes: AbstractMesh[]): IAnnotation[] {
@@ -1823,7 +1823,7 @@ In `scene-builder.ts`:
     });
   }
 
-  /** Normale am Kommentarpunkt per Raycast von außen; Fallback: Richtung vom Zentrum. */
+  /** Normal at the comment point via a raycast from outside; fallback: direction from the center. */
   private surfaceNormal(target: Vec3, meshes: AbstractMesh[]): Vec3 {
     const point = toVector3(target);
     const bounds = getMeshBounds(meshes);
@@ -1839,9 +1839,9 @@ In `scene-builder.ts`:
   }
 ```
 
-- [ ] **Step 6: Point- und SpotLight in `buildLight` ergänzen**
+- [ ] **Step 6: Add PointLight and SpotLight to `buildLight`**
 
-In `buildLight` direkt vor `console.warn(\`[IIIF] Light type …` einfügen:
+In `buildLight`, insert directly before `console.warn(\`[IIIF] Light type …`:
 
 ```ts
     if (light.kind === 'point' || light.kind === 'spot') {
@@ -1870,16 +1870,16 @@ In `buildLight` direkt vor `console.warn(\`[IIIF] Light type …` einfügen:
     }
 ```
 
-- [ ] **Step 7: Build und Tests**
+- [ ] **Step 7: Build and tests**
 
 Run: `bun test src/app/iiif && bunx ng build --configuration development`
-Expected: PASS, Build erfolgreich
+Expected: PASS, build succeeds
 
-- [ ] **Step 8: Manuelle Prüfung im Browser**
+- [ ] **Step 8: Manual check in the browser**
 
-`bun run start`, dann Demo-Manifeste mit Kommentaren laden (z. B. aus `demos/iiif-3d`, „3D Comments“). In der Annotationsliste jeden Kommentar anklicken.
+Run `bun run start`, then load demo manifests with comments (e.g. from `demos/iiif-3d`, "3D Comments"). Click each comment in the annotation list.
 
-Expected: Die Kamera fährt auf den Punkt und blickt aus der Richtung der Oberfläche bzw. der verknüpften Kamera auf ihn. Für SpotLight die Kegelbreite mit einem Demo-Manifest vergleichen. Ob IIIF `angle` als voller oder halber Öffnungswinkel gemeint ist, am Spec-Text prüfen und bei Bedarf `* 2` ergänzen.
+Expected: The camera moves to the point and looks at it from the direction of the surface or of the linked camera. For SpotLight, compare the cone width with a demo manifest. Check in the spec text whether IIIF `angle` means the full or the half cone angle, and add `* 2` if needed.
 
 - [ ] **Step 9: Commit**
 
@@ -1905,9 +1905,9 @@ git commit -m "feat(iiif): derive comment perspectives from linked cameras or su
   - `modelFormatFromUrl(url): string | undefined`
   - `isPublicUrl(url): boolean`
 
-- [ ] **Step 1: Test-Helfer anlegen**
+- [ ] **Step 1: Create the test helpers**
 
-`src/app/iiif/__fixtures__/export-input.ts` (wird auch vom Round-Trip-Test in Task 7 genutzt):
+`src/app/iiif/__fixtures__/export-input.ts` (also used by the round-trip test in Task 7):
 
 ```ts
 import type { IAnnotation, IEntitySettings } from 'src/common';
@@ -1966,7 +1966,7 @@ export const makeInput = (overrides: Partial<ManifestExportInput> = {}): Manifes
 });
 ```
 
-- [ ] **Step 2: Failing tests schreiben**
+- [ ] **Step 2: Write failing tests**
 
 `src/app/iiif/exporter.test.ts`:
 
@@ -2101,12 +2101,12 @@ describe('exportManifest', () => {
 });
 ```
 
-- [ ] **Step 3: Tests laufen lassen, Fehlschlag prüfen**
+- [ ] **Step 3: Run the tests and confirm they fail**
 
 Run: `bun test src/app/iiif/exporter.test.ts`
-Expected: FAIL mit `Cannot find module './exporter'`
+Expected: FAIL with `Cannot find module './exporter'`
 
-- [ ] **Step 4: `exporter.ts` implementieren**
+- [ ] **Step 4: Implement `exporter.ts`**
 
 ```ts
 import type { IAnnotation, IEntitySettings } from 'src/common';
@@ -2125,11 +2125,11 @@ import {
 export interface ManifestExportInput {
   entityId: string;
   entityName: string;
-  /** absolute URL des Modells */
+  /** absolute URL of the model */
   modelUrl: string;
   settings: IEntitySettings;
   annotations: IAnnotation[];
-  /** öffentliche Basis-URL; Default urn:kompakkt:<entityId> */
+  /** public base URL; default urn:kompakkt:<entityId> */
   baseId?: string;
 }
 
@@ -2164,7 +2164,7 @@ export const isPublicUrl = (url: string): boolean => {
   }
 };
 
-/** Kompakkt-Lichttyp → IIIF-Lichttyp */
+/** Kompakkt light type → IIIF light type */
 const LIGHT_TYPES: Record<string, string> = {
   HemisphericLight: 'AmbientLight',
   PointLight: 'PointLight',
@@ -2173,7 +2173,7 @@ const LIGHT_TYPES: Record<string, string> = {
 
 const pointSelector = (p: Vec3): PointSelector => ({ type: 'PointSelector', x: p.x, y: p.y, z: p.z });
 
-/** Kompakkt-Kamera (alpha/beta/radius + Ziel, Babylon) → kartesische IIIF-Punkte. */
+/** Kompakkt camera (alpha/beta/radius + target, Babylon) → Cartesian IIIF points. */
 const cameraPoints = (arcPosition: unknown, rawTarget: unknown) => {
   const arc = toVec3(arcPosition);
   const target = toVec3(rawTarget);
@@ -2218,7 +2218,7 @@ export const exportManifest = (input: ManifestExportInput): ManifestExportResult
     };
   };
 
-  // Modell
+  // Model
   const modelResource = { id: input.modelUrl, type: 'Model', ...(format ? { format } : {}) };
   const transforms: Transform[] = [];
   if (settings.scale !== undefined && settings.scale !== 1) {
@@ -2245,7 +2245,7 @@ export const exportManifest = (input: ManifestExportInput): ManifestExportResult
     },
   ];
 
-  // Default-Kamera
+  // Default camera
   if (settings.cameraPositionInitial) {
     painting.push(
       cameraAnnotation(
@@ -2256,7 +2256,7 @@ export const exportManifest = (input: ManifestExportInput): ManifestExportResult
     );
   }
 
-  // Lichter
+  // Lights
   (settings.lights ?? []).forEach((light, index) => {
     const type = LIGHT_TYPES[light.type];
     if (!type) {
@@ -2272,7 +2272,7 @@ export const exportManifest = (input: ManifestExportInput): ManifestExportResult
     });
   });
 
-  // Kommentare
+  // Comments
   const comments: Annotation[] = [...input.annotations]
     .sort((a, b) => a.ranking - b.ranking)
     .map(annotation => {
@@ -2317,19 +2317,19 @@ export const exportManifest = (input: ManifestExportInput): ManifestExportResult
 };
 ```
 
-- [ ] **Step 5: Tests laufen lassen**
+- [ ] **Step 5: Run the tests**
 
 Run: `bun test src/app/iiif`
 Expected: PASS
 
-- [ ] **Step 6: Spec-Form der Kamera prüfen**
+- [ ] **Step 6: Check the spec form of the camera**
 
-Im Spec-Text (https://iiif.io/api/presentation/4.0/, Abschnitte „Cameras“, „lookAt“, „scope“, „Value“) nachlesen:
-- ob `lookAt` als eingebetteter PointSelector erlaubt ist,
-- ob `scope` die richtige Verknüpfung Kommentar → Kamera ist,
-- ob `intensity` die Form `{ type: "Value", value, unit: "relative" }` hat.
+Look up in the spec text (https://iiif.io/api/presentation/4.0/, sections "Cameras", "lookAt", "scope", "Value"):
+- whether `lookAt` may be an embedded PointSelector,
+- whether `scope` is the right link from comment to camera,
+- whether `intensity` has the form `{ type: "Value", value, unit: "relative" }`.
 
-Weicht etwas ab: Exporter **und** Parser anpassen, Test-Erwartungen nachziehen, Tests grün machen.
+If anything differs: adjust the exporter **and** the parser, update the test expectations, and get the tests green.
 
 - [ ] **Step 7: Commit**
 
@@ -2340,7 +2340,7 @@ git commit -m "feat(iiif): export entity, settings and annotations as IIIF 4.0 m
 
 ---
 
-### Task 6: Export-Button im Annotations-Editor
+### Task 6: Export button in the annotations editor
 
 **Files:**
 - Modify: `src/app/components/entity-feature-annotations/annotations-editor/annotations-editor.component.ts`
@@ -2349,9 +2349,9 @@ git commit -m "feat(iiif): export entity, settings and annotations as IIIF 4.0 m
 **Interfaces:**
 - Consumes: `exportManifest`, `ManifestExportInput` (Task 5); `ProcessingService.entity$`, `ProcessingService.settings$`; `MessageService.info`
 
-- [ ] **Step 1: Methode ergänzen**
+- [ ] **Step 1: Add the method**
 
-Imports in `annotations-editor.component.ts` ergänzen:
+Add these imports to `annotations-editor.component.ts`:
 
 ```ts
 import { environment } from 'src/environment';
@@ -2359,13 +2359,13 @@ import { exportManifest } from '../../../iiif/exporter';
 import { MessageService } from '../../../services/message/message.service';
 ```
 
-Feld unter `public userdata = inject(UserdataService);`:
+Field below `public userdata = inject(UserdataService);`:
 
 ```ts
   private message = inject(MessageService);
 ```
 
-Methode unter `exportAnnotations()`:
+Method below `exportAnnotations()`:
 
 ```ts
   async exportIIIFManifest() {
@@ -2399,9 +2399,9 @@ Methode unter `exportAnnotations()`:
   }
 ```
 
-- [ ] **Step 2: Button ergänzen**
+- [ ] **Step 2: Add the button**
 
-In `annotations-editor.component.html` direkt nach dem schließenden `</k-button>` des JSON-Exports (innerhalb von `@if (count > 0) { … }`) einfügen:
+In `annotations-editor.component.html`, insert directly after the closing `</k-button>` of the JSON export (inside `@if (count > 0) { … }`):
 
 ```html
       <k-button
@@ -2416,16 +2416,16 @@ In `annotations-editor.component.html` direkt nach dem schließenden `</k-button
 - [ ] **Step 3: Build**
 
 Run: `bunx ng build --configuration development`
-Expected: Build erfolgreich
+Expected: build succeeds
 
-- [ ] **Step 4: Manuelle Prüfung**
+- [ ] **Step 4: Manual check**
 
-`bun run start`. Ein Kompakkt-Objekt mit Annotationen öffnen und den neuen Button klicken.
+Run `bun run start`. Open a Kompakkt object that has annotations and click the new button.
 
 Expected:
-- Download `<Name>-iiif-manifest.json` mit `@context`, Scene, Modell, Kamera und Kommentaren.
-- Die Datei über den IIIF-Import-Dialog (JSON-Option) wieder laden: Modell, Ansicht und Kommentare erscheinen an derselben Stelle. Abweichungen notieren, sie werden in Task 7 als Round-Trip-Test festgehalten.
-- Liegen Annotationspunkte nach dem Re-Import versetzt, nutzt Kompakkt für `referencePoint` vermutlich ein anderes Bezugssystem als das transformierte Modell. Dann vor Task 7 klären (systematic-debugging) und Exporter bzw. Builder anpassen.
+- A `<Name>-iiif-manifest.json` download with `@context`, Scene, model, camera and comments.
+- Load the file again through the IIIF import dialog (JSON option): model, view and comments appear in the same place. Note any differences; Task 7 captures them as a round-trip test.
+- If annotation points are offset after re-import, Kompakkt probably uses a different reference frame for `referencePoint` than for the transformed model. In that case, investigate before Task 7 (systematic-debugging) and adjust the exporter or the builder.
 
 - [ ] **Step 5: Commit**
 
@@ -2436,17 +2436,17 @@ git commit -m "feat(iiif): add IIIF 4.0 manifest export button to annotations ed
 
 ---
 
-### Task 7: Round-Trip-Tests, Manifesto entfernen, Doku
+### Task 7: Round-trip tests, remove Manifesto, docs
 
 **Files:**
 - Test: `src/app/iiif/roundtrip.test.ts`
-- Modify: `package.json` (Dependency `@iiif/3d-manifesto-dev` entfernen), `bun.lock`
+- Modify: `package.json` (remove the `@iiif/3d-manifesto-dev` dependency), `bun.lock`
 - Modify: `README.md`
 
 **Interfaces:**
-- Consumes: `exportManifest`, `parseManifest`, `perspectiveFromCamera`, `commentToAnnotation`, `rotationToBabylon`, `pointToBabylon`; Test-Helfer `makeInput`, `makeSettings` aus `__fixtures__/export-input.ts`
+- Consumes: `exportManifest`, `parseManifest`, `perspectiveFromCamera`, `commentToAnnotation`, `rotationToBabylon`, `pointToBabylon`; test helpers `makeInput`, `makeSettings` from `__fixtures__/export-input.ts`
 
-- [ ] **Step 1: Round-Trip-Test schreiben**
+- [ ] **Step 1: Write the round-trip test**
 
 `src/app/iiif/roundtrip.test.ts`:
 
@@ -2508,43 +2508,43 @@ describe('round trip: exportManifest → parseManifest', () => {
 });
 ```
 
-Hinweis: Die Test-Helfer in `makeAnnotation` nutzen `alpha = 0.8`, das liegt in (-π, π]. Ein `alpha` außerhalb davon käme als gleichwertiger Winkel zurück, aber mit anderem Zahlenwert.
+Note: The test helper `makeAnnotation` uses `alpha = 0.8`, which is in (-π, π]. An `alpha` outside that range would come back as an equivalent angle, but with a different number.
 
-- [ ] **Step 2: Test laufen lassen**
+- [ ] **Step 2: Run the test**
 
 Run: `bun test src/app/iiif`
-Expected: PASS. Schlägt der Round-Trip fehl, liegt ein echter Fehler in Exporter oder Parser vor: korrigieren, nicht die Erwartung lockern.
+Expected: PASS. If the round trip fails, there's a real bug in the exporter or the parser: fix it, don't loosen the expectation.
 
-- [ ] **Step 3: Prüfen, dass nichts mehr Manifesto nutzt**
+- [ ] **Step 3: Check that nothing uses Manifesto anymore**
 
 Run: `grep -rn "3d-manifesto" src`
-Expected: keine Treffer
+Expected: no matches
 
-- [ ] **Step 4: Dependency entfernen**
+- [ ] **Step 4: Remove the dependency**
 
 Run: `bun remove @iiif/3d-manifesto-dev`
-Expected: `package.json` und `bun.lock` ohne `@iiif/3d-manifesto-dev`
+Expected: `package.json` and `bun.lock` without `@iiif/3d-manifesto-dev`
 
-- [ ] **Step 5: Build und Tests**
+- [ ] **Step 5: Build and tests**
 
 Run: `bun test src/app/iiif && bunx ng build --configuration development`
-Expected: PASS, Build erfolgreich
+Expected: PASS, build succeeds
 
-- [ ] **Step 6: README ergänzen**
+- [ ] **Step 6: Extend the README**
 
-In `README.md` einen Abschnitt anhängen:
+Append a section to `README.md`:
 
 ````markdown
 ## IIIF Presentation API 4.0
 
-Kompakkt kann 3D-Scenes aus IIIF-4.0-Manifesten importieren (`?manifest=<URL>` oder Import-Dialog) und
-Objekte samt Annotationen als IIIF-4.0-Manifest exportieren (Button im Annotations-Editor).
+Kompakkt can import 3D Scenes from IIIF 4.0 manifests (`?manifest=<URL>` or the import dialog) and
+export objects with their annotations as IIIF 4.0 manifests (button in the annotations editor).
 
-- Code: `src/app/iiif/` – Parser, Exporter und Koordinaten-Umrechnung sind Babylon-frei und getestet.
-- Tests: `bun run test` (Demo-Manifeste werden mitgetestet, wenn das Submodul initialisiert ist:
+- Code: `src/app/iiif/` – the parser, the exporter and the coordinate conversion are Babylon-free and tested.
+- Tests: `bun run test` (demo manifests are tested too when the submodule is initialized:
   `git submodule update --init demos/iiif-3d`)
-- Abbildung Kompakkt ↔ IIIF: siehe `docs/superpowers/specs/2026-11-18-iiif-4-import-export-design.md`
-- Beim Export verworfen (keine Entsprechung in IIIF): Normale am Annotationspunkt, Vorschaubild, `validated`.
+- Kompakkt ↔ IIIF mapping: see `docs/superpowers/specs/2026-11-18-iiif-4-import-export-design.md`
+- Dropped on export (no IIIF equivalent): the normal at the annotation point, the preview image, `validated`.
 ````
 
 - [ ] **Step 7: Commit**
