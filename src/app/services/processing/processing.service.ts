@@ -36,7 +36,7 @@ import { OverlayService } from '../overlay/overlay.service';
 import { UserdataService } from '../userdata/userdata.service';
 import type { IIIFSceneModel } from '../../iiif/model';
 import { IIIFParseError, parseManifest as parseIIIFManifest } from '../../iiif/parser';
-import { IIIFSceneBuilderService } from '../../iiif/scene-builder';
+import { IIIFSceneBuilderService, type IIIFBuildResult } from '../../iiif/scene-builder';
 
 export type QualitySetting = 'low' | 'medium' | 'high' | 'raw';
 const isQualitySetting = (setting: any): setting is QualitySetting => {
@@ -457,7 +457,15 @@ export class ProcessingService {
     }
     model.warnings.forEach(warning => console.warn('[IIIF]', warning));
 
-    const result = await this.iiifSceneBuilder.build(model);
+    let result: IIIFBuildResult;
+    try {
+      result = await this.iiifSceneBuilder.build(model);
+    } catch (error) {
+      console.error('[IIIF] Building the scene failed', error);
+      this.message.error('Failed to build the IIIF scene.');
+      this.loadingScreen.hide();
+      return;
+    }
     this.standaloneAnnotations$.next(result.annotations);
 
     if (result.meshes.length) {
