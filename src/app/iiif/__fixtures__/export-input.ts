@@ -48,6 +48,7 @@ export const makeInput = (overrides: Partial<ManifestExportInput> = {}): Manifes
   manifestId: 'https://viewer.example/viewer/?entity=e1',
   baseId: 'https://viewer.example/viewer/iiif/e1',
   settings: makeSettings(),
+  modelTransform: { scale: { x: 1, y: 1, z: 1 }, rotation: { x: 0, y: 0, z: 0 }, translation: { x: 0, y: 0, z: 0 } },
   annotations: [
     makeAnnotation('a2', 2, 'Second', 'Two', { x: 1, y: 0, z: 0 }),
     makeAnnotation('a1', 1, 'First', '', { x: -1, y: 2, z: 3 }),

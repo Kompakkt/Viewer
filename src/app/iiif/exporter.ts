@@ -1,6 +1,7 @@
 import type { IAnnotation, IEntitySettings } from 'src/common';
 import { rgbToHex } from './color';
 import { arcRotateToCartesian, pointToIIIF, rotationToIIIF, toVec3, type Vec3 } from './coordinates';
+import { modelTransformToIIIFTransforms, type IIIFModelTransform } from './placement';
 import {
   PRESENTATION_4_CONTEXT,
   type Annotation,
@@ -18,6 +19,14 @@ export interface ManifestExportInput {
   /** absolute URL of the model */
   modelUrl: string;
   settings: IEntitySettings;
+  /**
+   * Effective placement of the model in IIIF space (Scale → Rotate → Translate), derived from the
+   * Babylon world matrices (see placement.ts / loaded-model-placement.ts). Kompakkt auto-places
+   * models (bounding-box minimum to the origin, pivot at the bounding-box center), so
+   * `settings.scale/rotation/translate` alone do not describe where the model is displayed.
+   * Without it, the exporter falls back to the settings with a warning.
+   */
+  modelTransform?: IIIFModelTransform;
   annotations: IAnnotation[];
   /** HTTP(S) viewer URL of the entity, used as manifest id */
   manifestId: string;
@@ -71,13 +80,33 @@ const LIGHT_TYPES: Record<string, string> = {
 
 const pointSelector = (p: Vec3): PointSelector => ({ type: 'PointSelector', x: p.x, y: p.y, z: p.z });
 
-/** Kompakkt camera (alpha/beta/radius + target, Babylon) → Cartesian IIIF points. */
+/** Like toVec3, but undefined unless all three components are present and finite. */
+const finiteVec3 = (value: unknown): Vec3 | undefined => {
+  if (!value || typeof value !== 'object') return undefined;
+  const record = value as Record<string, unknown>;
+  const pick = (key: 'x' | 'y' | 'z') => {
+    const raw = record[key] ?? record[`_${key}`];
+    return typeof raw === 'number' && Number.isFinite(raw) ? raw : undefined;
+  };
+  const [x, y, z] = [pick('x'), pick('y'), pick('z')];
+  return x === undefined || y === undefined || z === undefined ? undefined : { x, y, z };
+};
+
+/** Kompakkt camera (alpha/beta/radius + target, Babylon) → Cartesian IIIF points; undefined if incomplete. */
 const cameraPoints = (arcPosition: unknown, rawTarget: unknown) => {
-  const arc = toVec3(arcPosition);
-  const target = toVec3(rawTarget);
+  const arc = finiteVec3(arcPosition);
+  const target = finiteVec3(rawTarget);
+  if (!arc || !target) return undefined;
   const position = arcRotateToCartesian({ alpha: arc.x, beta: arc.y, radius: arc.z }, target);
+  if (![position.x, position.y, position.z].every(Number.isFinite)) return undefined;
   return { position: pointToIIIF(position), target: pointToIIIF(target) };
 };
+
+const TRANSFORM_TYPES = {
+  scale: 'ScaleTransform',
+  rotate: 'RotateTransform',
+  translate: 'TranslateTransform',
+} as const;
 
 export const exportManifest = (input: ManifestExportInput): ManifestExportResult => {
   const warnings: string[] = [];
@@ -101,37 +130,50 @@ export const exportManifest = (input: ManifestExportInput): ManifestExportResult
     selector: [pointSelector(p)],
   });
 
+  /** Returns undefined (and the caller warns) if the camera vectors are incomplete. */
   const cameraAnnotation = (
     id: string,
     bodyId: string,
     arcPosition: unknown,
     rawTarget: unknown,
     extra: Partial<Annotation> = {},
-  ): Annotation => {
-    const { position, target } = cameraPoints(arcPosition, rawTarget);
+  ): Annotation | undefined => {
+    const points = cameraPoints(arcPosition, rawTarget);
+    if (!points) return undefined;
     return {
       id,
       type: 'Annotation',
       motivation: ['painting'],
-      body: { id: bodyId, type: 'PerspectiveCamera', lookAt: pointSelector(target) },
-      target: placedAt(position),
+      body: { id: bodyId, type: 'PerspectiveCamera', lookAt: pointSelector(points.target) },
+      target: placedAt(points.position),
       ...extra,
     };
   };
 
   // Model
   const modelResource = { id: input.modelUrl, type: 'Model', ...(format ? { format } : {}) };
-  const transforms: Transform[] = [];
-  if (settings.scale !== undefined && settings.scale !== 1) {
-    transforms.push({ type: 'ScaleTransform', x: settings.scale, y: settings.scale, z: settings.scale });
-  }
-  const rotation = toVec3(settings.rotation);
-  if (rotation.x || rotation.y || rotation.z) {
-    transforms.push({ type: 'RotateTransform', ...rotationToIIIF(rotation) });
-  }
-  const translate = toVec3(settings.translate);
-  if (translate.x || translate.y || translate.z) {
-    transforms.push({ type: 'TranslateTransform', ...pointToIIIF(translate) });
+  let transforms: Transform[];
+  if (input.modelTransform) {
+    transforms = modelTransformToIIIFTransforms(input.modelTransform).map(({ kind, value }) => ({
+      type: TRANSFORM_TYPES[kind],
+      ...value,
+    }));
+  } else {
+    warnings.push(
+      'Effective model placement unavailable: exporting settings transforms, which ignore Kompakkt\'s auto-placement',
+    );
+    transforms = [];
+    if (settings.scale !== undefined && settings.scale !== 1) {
+      transforms.push({ type: 'ScaleTransform', x: settings.scale, y: settings.scale, z: settings.scale });
+    }
+    const rotation = toVec3(settings.rotation);
+    if (rotation.x || rotation.y || rotation.z) {
+      transforms.push({ type: 'RotateTransform', ...rotationToIIIF(rotation) });
+    }
+    const translate = toVec3(settings.translate);
+    if (translate.x || translate.y || translate.z) {
+      transforms.push({ type: 'TranslateTransform', ...pointToIIIF(translate) });
+    }
   }
 
   const painting: Annotation[] = [
@@ -148,14 +190,14 @@ export const exportManifest = (input: ManifestExportInput): ManifestExportResult
 
   // Default camera
   if (settings.cameraPositionInitial) {
-    painting.push(
-      cameraAnnotation(
-        `${sceneId}/anno/camera`,
-        `${baseId}/camera/initial`,
-        settings.cameraPositionInitial.position,
-        settings.cameraPositionInitial.target,
-      ),
+    const camera = cameraAnnotation(
+      `${sceneId}/anno/camera`,
+      `${baseId}/camera/initial`,
+      settings.cameraPositionInitial.position,
+      settings.cameraPositionInitial.target,
     );
+    if (camera) painting.push(camera);
+    else warnings.push('Initial camera: position or target missing or not finite, skipped');
   }
 
   // Lights
@@ -219,16 +261,21 @@ export const exportManifest = (input: ManifestExportInput): ManifestExportResult
       let scope: Reference[] | undefined;
       if (perspective?.position && perspective?.target) {
         const cameraBodyId = `${baseId}/camera/comment/${key}`;
-        painting.push(
-          cameraAnnotation(
-            `${sceneId}/comment-camera/${key}`,
-            cameraBodyId,
-            perspective.position,
-            perspective.target,
-            { behavior: ['hidden'] },
-          ),
+        const camera = cameraAnnotation(
+          `${sceneId}/comment-camera/${key}`,
+          cameraBodyId,
+          perspective.position,
+          perspective.target,
+          { behavior: ['hidden'] },
         );
-        scope = [{ id: cameraBodyId, type: 'PerspectiveCamera' }];
+        if (camera) {
+          painting.push(camera);
+          scope = [{ id: cameraBodyId, type: 'PerspectiveCamera' }];
+        } else {
+          warnings.push(
+            `Annotation ${label0}: camera position or target missing or not finite, exported without a camera`,
+          );
+        }
       } else {
         warnings.push(`Annotation ${label0}: no camera perspective, exported without a camera`);
       }

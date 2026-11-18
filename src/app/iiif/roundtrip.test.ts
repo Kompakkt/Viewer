@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
+import { Matrix, Quaternion, Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { commentToAnnotation, perspectiveFromCamera } from './comments';
-import { pointToBabylon, rotationToBabylon } from './coordinates';
+import { composeIIIFTransforms, effectiveModelTransform, nodeMatrix } from './placement';
 import { makeInput, makeSettings } from './__fixtures__/export-input';
 import { exportManifest } from './exporter';
 import { parseManifest } from './parser';
@@ -12,18 +13,26 @@ const closeTo = (actual: { x: number; y: number; z: number }, expected: { x: num
 };
 
 describe('round trip: exportManifest → parseManifest', () => {
+  // A model displayed by Kompakkt: glTF __root__ (loader matrix L) below an auto-placed center node.
+  const loaderLocal = Matrix.Compose(new Vector3(1, 1, -1), new Quaternion(0, 1, 0, 0), Vector3.Zero());
+  const center = Matrix.Translation(-1, -2, -3)
+    .multiply(Matrix.Compose(new Vector3(2, 2, 2), Quaternion.FromEulerAngles(0.3, -1.1, 0.7), Vector3.Zero()))
+    .multiply(Matrix.Translation(4, 0.5, -2));
+  const world = loaderLocal.multiply(center);
+  const { transform: modelTransform } = effectiveModelTransform(world, loaderLocal);
+
   const settings = makeSettings({ scale: 2, rotation: { x: 10, y: 45, z: -30 }, translate: { x: 1, y: 2, z: 3 } });
-  const input = makeInput({ settings });
+  const input = makeInput({ settings, modelTransform });
   const model = parseManifest(JSON.parse(JSON.stringify(exportManifest(input).manifest)));
 
-  test('model, transforms and background survive', () => {
+  test('model, placement and background survive', () => {
     expect(model.label).toBe('Pawn');
     expect(model.models[0].url).toBe(input.modelUrl);
     expect(model.backgroundColor).toEqual({ r: 153, g: 204, b: 255 });
-    const [scale, rotate, translate] = model.models[0].transforms;
-    expect(scale).toEqual({ kind: 'scale', value: { x: 2, y: 2, z: 2 } });
-    expect(rotationToBabylon(rotate.value)).toEqual({ x: 10, y: 45, z: -30 });
-    expect(pointToBabylon(translate.value)).toEqual({ x: 1, y: 2, z: 3 });
+    const reimported = loaderLocal.multiply(nodeMatrix(composeIIIFTransforms(model.models[0].transforms)));
+    for (const p of [new Vector3(0, 0, 0), new Vector3(1, 2, 3), new Vector3(-5, 0.5, 2)]) {
+      closeTo(Vector3.TransformCoordinates(p, reimported), Vector3.TransformCoordinates(p, world));
+    }
   });
 
   test('initial camera survives', () => {

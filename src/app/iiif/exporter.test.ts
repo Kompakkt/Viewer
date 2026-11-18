@@ -67,14 +67,33 @@ describe('exportManifest', () => {
     expect(model.target).toEqual({ id: SCENE, type: 'Scene' });
   });
 
-  test('exports scale, rotation and translation in IIIF space and order', () => {
+  test('exports the effective model placement (IIIF space) and ignores settings transforms', () => {
+    const settings = makeSettings({ scale: 5, rotation: { x: 1, y: 2, z: 3 }, translate: { x: 9, y: 9, z: 9 } });
+    const modelTransform = {
+      scale: { x: 2, y: 3, z: 4 },
+      rotation: { x: 10, y: -20, z: 30 },
+      translation: { x: -1, y: 2, z: 3 },
+    };
+    const { manifest, warnings } = exportManifest(makeInput({ settings, modelTransform }));
+    const scene = manifest.items[0] as any;
+    expect(scene.items[0].items[0].body.transform).toEqual([
+      { type: 'ScaleTransform', x: 2, y: 3, z: 4 },
+      { type: 'RotateTransform', x: 10, y: -20, z: 30 },
+      { type: 'TranslateTransform', x: -1, y: 2, z: 3 },
+    ]);
+    expect(warnings).toEqual([]);
+  });
+
+  test('falls back to settings transforms with a warning when no effective placement is given', () => {
     const settings = makeSettings({ scale: 2, rotation: { x: 10, y: 90, z: 0 }, translate: { x: 1, y: 2, z: 3 } });
-    const scene = exportManifest(makeInput({ settings })).manifest.items[0] as any;
+    const { manifest, warnings } = exportManifest(makeInput({ settings, modelTransform: undefined }));
+    const scene = manifest.items[0] as any;
     expect(scene.items[0].items[0].body.transform).toEqual([
       { type: 'ScaleTransform', x: 2, y: 2, z: 2 },
       { type: 'RotateTransform', x: 10, y: -90, z: 0 },
       { type: 'TranslateTransform', x: -1, y: 2, z: 3 },
     ]);
+    expect(warnings.some(w => w.includes('placement'))).toBe(true);
   });
 
   test('exports the initial camera as cartesian PerspectiveCamera with id', () => {
@@ -164,6 +183,43 @@ describe('exportManifest', () => {
     expect(scene.items[0].items.some((x: any) => x.id.includes('/comment-camera/'))).toBe(false);
     expect(warnings).toContain('Annotation x1: no camera perspective, exported without a camera');
   });
+
+  const invalidVectors: [string, unknown][] = [
+    ['missing', undefined],
+    ['partial', { x: 1, y: 2 }],
+    ['NaN', { x: 1, y: NaN, z: 0 }],
+    ['Infinity', { x: Infinity, y: 0, z: 0 }],
+  ];
+  for (const [name, value] of invalidVectors) {
+    test(`skips a comment camera with ${name} perspective position and drops its scope`, () => {
+      const a = makeAnnotation('x1', 1, 'T', 'D', { x: 1, y: 1, z: 1 }) as any;
+      a.body.content.relatedPerspective.position = value;
+      const { scene, warnings } = sceneOf(makeInput({ annotations: [a] }));
+      const comments = commentsOf(scene);
+      expect(comments).toHaveLength(1);
+      expect(comments[0].scope).toBeUndefined();
+      expect(scene.items[0].items.some((x: any) => x.id.includes('/comment-camera/'))).toBe(false);
+      expect(warnings.some(w => w.startsWith('Annotation x1:') && w.includes('camera'))).toBe(true);
+    });
+
+    test(`skips a comment camera with ${name} perspective target`, () => {
+      const a = makeAnnotation('x1', 1, 'T', 'D', { x: 1, y: 1, z: 1 }) as any;
+      a.body.content.relatedPerspective.target = value;
+      const { scene } = sceneOf(makeInput({ annotations: [a] }));
+      expect(commentsOf(scene)[0].scope).toBeUndefined();
+      expect(scene.items[0].items.some((x: any) => x.id.includes('/comment-camera/'))).toBe(false);
+    });
+
+    test(`skips the initial camera with ${name} position or target`, () => {
+      for (const key of ['position', 'target'] as const) {
+        const settings = makeSettings();
+        (settings.cameraPositionInitial as any)[key] = value;
+        const { scene, warnings } = sceneOf(makeInput({ settings }));
+        expect(scene.items[0].items.some((a: any) => a.id.endsWith('/anno/camera'))).toBe(false);
+        expect(warnings.some(w => w.includes('Initial camera'))).toBe(true);
+      }
+    });
+  }
 
   test('skips a comment without referencePoint', () => {
     const a = makeAnnotation('x1', 1, 'T', 'D', { x: 1, y: 1, z: 1 }) as any;

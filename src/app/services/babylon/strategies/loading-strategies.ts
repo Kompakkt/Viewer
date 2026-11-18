@@ -29,6 +29,7 @@ import {
   IImageContainer,
   IVideoContainer,
 } from '../container.interfaces';
+import { rememberLoaderMatrices } from '../../../iiif/loaded-model-placement';
 
 const updateLoadingUI = (engine: AbstractEngine) => (progress: ISceneLoaderProgressEvent) => {
   if (progress.lengthComputable) {
@@ -127,6 +128,8 @@ export const load3DEntity = async (rootUrl: string, scene: Scene, isDefault?: bo
     onProgress: updateLoadingUI(engine),
   }).then(result => {
     console.log(result);
+    // Needed by the IIIF export to derive the model's effective placement later on.
+    rememberLoaderMatrices(result.meshes);
     if (isDefault) {
       // Ignore environment lighting
       result.meshes.forEach(mesh => {
