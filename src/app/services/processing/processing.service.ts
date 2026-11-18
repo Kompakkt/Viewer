@@ -468,6 +468,9 @@ export class ProcessingService {
         relatedDigitalEntity: { _id: 'standalone_entity' },
         settings: result.entitySettings,
         mediaType: 'model',
+        annotations: Object.fromEntries(
+          result.annotations.map(annotation => [String(annotation._id), annotation]),
+        ),
       } as IEntity;
 
       this.updateActiveEntity(entity, result.meshes);
