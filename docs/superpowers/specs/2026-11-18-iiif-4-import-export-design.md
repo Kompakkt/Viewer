@@ -35,8 +35,10 @@ New directory `src/app/iiif/`:
 | `color.ts` | Hex ↔ RGB (0–255) | – |
 | `comments.ts` | Pure mapping comment → `IAnnotation` and IIIF camera → `ICameraPerspective` | model, coordinates |
 | `parser.ts` | `parseManifest(json): IIIFSceneModel`. Pure function. | types, model |
+| `placement.ts` | Pure placement math (Babylon math classes only): IIIF RotateTransform ↔ quaternion, composition of IIIF transforms (used by the importer), decomposition of an effective placement into Scale/Rotate/Translate (used by the export) | coordinates, model |
+| `loaded-model-placement.ts` | Babylon-side helper: records the loader's local matrix of each loaded root node (`load3DEntity`) and derives the effective placement from the current world matrices | placement |
 | `scene-builder.ts` | Turns `IIIFSceneModel` into a Babylon scene (meshes, camera, lights) and produces `IAnnotation[]` | model, coordinates, BabylonService |
-| `exporter.ts` | `exportManifest(input): { manifest, warnings }`. Pure function. | types, coordinates |
+| `exporter.ts` | `exportManifest(input): { manifest, warnings }`. Pure function. | types, coordinates, placement |
 
 ### Data flow
 
@@ -48,8 +50,19 @@ New directory `src/app/iiif/`:
 - IIIF is right-handed (+x right, +y up, +z forward). Babylon is left-handed by default.
 - **Points:** `(x, y, z)` ↔ `(-x, y, z)`.
 - **Rotations** are given in degrees, both in IIIF and in `IEntitySettings.rotation`. Because of the mirroring on the X axis, the rotation around X stays the same and the rotations around Y and Z change sign.
+- **RotateTransform order:** IIIF 4.0 defines the angles as Euler angles with ordering x-y-z: the rotation about X is applied first, then Y, then Z, about the fixed axes of the local coordinate space, with the pivot at its origin; positive angles are counter-clockwise. The importer (models, cameras, lights) and the export decomposition both use this order (`placement.ts`). After the X-mirror conversion, the mirrored angles keep the same application order. This is also the order Kompakkt applies `IEntitySettings.rotation` in.
 - `scene.useRightHandedSystem` is **not** changed, because that would affect existing Kompakkt scenes.
 - **Cameras in Kompakkt:** `cameraPositionInitial.position` and `relatedPerspective.position` hold **no** Cartesian position but the ArcRotate values `x = alpha`, `y = beta`, `z = radius` relative to `target` (see `cameraManager.getInitialPosition`). For IIIF, the exporter computes `target + (r·cos α·sin β, r·cos β, r·sin α·sin β)` in Babylon space and then converts that to IIIF. The importer does the reverse.
+
+## Kompakkt model placement
+
+Kompakkt auto-places every normally loaded entity (`EntitySettingsService.setUpMeshSettingsHelper`): the root meshes are parented to a `center` node, the bounding-box minimum is moved to the origin (unless `settings.position` is set), rotation and scale are applied around a pivot at the bounding-box center, and `translate` is added on top. Later `decomposeMeshSettingsHelper` bakes this helper transform into the root meshes. `referencePoint`, `relatedPerspective` and `cameraPositionInitial` are stored in the resulting world space, so `settings.scale/rotation/translate` alone do not describe where the model is displayed.
+
+The export therefore writes the model's **effective** placement, derived from the real world matrices:
+
+- Right after loading (`load3DEntity`), the local matrix `L` of every parentless root node is recorded (`rememberLoaderMatrices`). For glTF this is the loader's `__root__` with its handedness conversion (scaling `(1, 1, -1)`, 180° about Y); other loaders leave it at identity. It is recorded rather than hard-coded because it differs per loader and cannot be recovered once Kompakkt has re-parented or baked the root.
+- On import, the scene builder parents the loaded roots to a TransformNode carrying the IIIF transforms, so the root's world matrix is `W = L · N` (Babylon row vectors: `L` applied first). At export time, `N = L⁻¹ · W` with `W` the root's current world matrix. `N` is decomposed into scale, rotation and translation, converted to IIIF space (points mirrored, scale unchanged, rotation as x-y-z Euler angles) and written as `[ScaleTransform, RotateTransform, TranslateTransform]`. Shear (not expected) is reported as a warning.
+- Comment points and cameras stay in world space, so re-importing reproduces the displayed placement exactly. If no effective placement is available, the exporter falls back to the settings transforms with a warning.
 
 ## Export mapping
 
@@ -57,12 +70,12 @@ New directory `src/app/iiif/`:
 |---|---|
 | Entity title | `Manifest.label`, `Scene.label` (language map, default `none`) |
 | `entity.externalFile` or server URL + `entity.processed.high` | Painting annotation with body `Model`; `format` from the file extension (`.glb` → `model/gltf-binary`, `.gltf` → `model/gltf+json`, otherwise a matching MIME type) |
-| `settings.scale`, `rotation`, `translate` | Body as `SpecificResource` with `transform: [ScaleTransform, RotateTransform, TranslateTransform]`; transforms with neutral values are left out |
-| `settings.cameraPositionInitial` | Painting annotation with body `PerspectiveCamera`; position as a PointSelector in the target, `lookAt` as a PointSelector on the camera target |
+| Effective model placement (see "Kompakkt model placement"; fallback: `settings.scale`, `rotation`, `translate`) | Body as `SpecificResource` with `transform: [ScaleTransform, RotateTransform, TranslateTransform]`; transforms with neutral values are left out |
+| `settings.cameraPositionInitial` | Painting annotation with body `PerspectiveCamera`; position as a PointSelector in the target, `lookAt` as a PointSelector on the camera target; skipped with a warning if position or target is missing or not finite |
 | `settings.background.color` | `Scene.backgroundColor` (hex `#RRGGBB`) |
-| `settings.lights[]` | `AmbientLight`, `PointLight` or `DirectionalLight` depending on `type`; position as a PointSelector; `intensity` as a `Quantity` (`quantityValue` 0–1, `unit: "relative"`) |
+| `settings.lights[]` | `AmbientLight`, `PointLight` or `DirectionalLight` depending on `type`; position as a PointSelector; `intensity` as a `Quantity` (`quantityValue` 0–1, `unit: "relative"`). Known limitations: Kompakkt's PointLight is attached to the camera, so its exported fixed position only matches the initial view; Hemispheric and Directional lights are exported without their direction |
 | `IAnnotation` | `commenting` annotation in `Scene.annotations` (embedded AnnotationPage); body `TextualBody` (`value` = description, `label` = title, `format` = `text/markdown`); target `SpecificResource` with `source` = Scene and `selector` = `[PointSelector]` from `referencePoint` |
-| `relatedPerspective` | Separate PerspectiveCamera annotation with `behavior: ["hidden"]` (camera resource with its own `id`); the comment points to the camera resource via `scope: [{ id, type: "PerspectiveCamera" }]` |
+| `relatedPerspective` | Separate PerspectiveCamera annotation with `behavior: ["hidden"]` (camera resource with its own `id`); the comment points to the camera resource via `scope: [{ id, type: "PerspectiveCamera" }]`. If position or target is missing or not finite, camera and `scope` are left out with a warning |
 | `ranking` | Order of the items in the AnnotationPage |
 | `referenceNormal`, `preview`, `validated` | dropped |
 
@@ -74,6 +87,8 @@ New directory `src/app/iiif/`:
 
 - A `commenting` annotation with a PointSelector becomes an `IAnnotation`: `referencePoint` from the point, title and description from the `TextualBody`.
 - **With a linked camera**: it becomes `relatedPerspective`. Accepted link forms: `scope` (on the annotation or its target) referencing the camera resource ID (spec form) or the camera annotation ID, and an embedded `contentState` annotation in `target.scope` that paints a camera (form used by the IIIF 3D demo manifests).
+- **Known limitation:** `perspectiveFromCamera` only uses the camera's PointSelector position and a `lookAt` point. A `lookAt` that references an annotation, and camera transforms (e.g. a RotateTransform instead of `lookAt`), are ignored for comment cameras; the comment point is used as the target instead.
+- **Annotations without `id`** get a stable fallback ID `<sceneId>#annotation-<n>` (position in the document) with a warning, so comments, cameras and models stay distinct.
 - **SpotLight `angle`** is the spec's half-angle; Babylon receives the full cone angle.
 - **Without a camera:** A raycast from outside the model toward the point returns the surface normal. The camera is placed along the normal at a fixed distance and looks at the point.
 - Imported annotations are visible and editable in the viewer, but are **not saved to the backend automatically**.
