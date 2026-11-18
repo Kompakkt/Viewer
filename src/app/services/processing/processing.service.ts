@@ -481,6 +481,9 @@ export class ProcessingService {
           model.models.length === 1 && model.canvases.length === 0
             ? model.models[0].url
             : undefined,
+        // Don't inherit the placeholder model paths of baseEntity(): without a single model
+        // file, model URL resolution (e.g. for the IIIF export) must find nothing.
+        processed: { low: '', medium: '', high: '', raw: '' },
         annotations: Object.fromEntries(
           result.annotations.map(annotation => [String(annotation._id), annotation]),
         ),

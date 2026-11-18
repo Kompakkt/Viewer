@@ -93,7 +93,9 @@ export class AnnotationsEditorComponent {
 
     const resolvedUrl = this.processing.resolveEntityModelUrl(entity);
     if (!resolvedUrl) {
-      this.message.error('This object has no model file that could be exported.');
+      this.message.error(
+        'This object has no single model file that could be exported (IIIF scenes with several models are not supported).',
+      );
       return;
     }
     const modelUrl = new URL(resolvedUrl, window.location.href).toString();
