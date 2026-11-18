@@ -8,6 +8,7 @@
     "local": "ng serve --host=0.0.0.0",
     "build": "ng build",
     "lint": "ng lint",
+    "test": "bun test src/app/iiif",
     "prettier": "prettier --config .prettierrc.json 'src/**/*.{ts,html,scss}' --write",
     "extract-translations": "ts-node --skipProject ./extract-translations.ts"
   },
