@@ -60,20 +60,21 @@ New directory `src/app/iiif/`:
 | `settings.scale`, `rotation`, `translate` | Body as `SpecificResource` with `transform: [ScaleTransform, RotateTransform, TranslateTransform]`; transforms with neutral values are left out |
 | `settings.cameraPositionInitial` | Painting annotation with body `PerspectiveCamera`; position as a PointSelector in the target, `lookAt` as a PointSelector on the camera target |
 | `settings.background.color` | `Scene.backgroundColor` (hex `#RRGGBB`) |
-| `settings.lights[]` | `AmbientLight`, `PointLight` or `DirectionalLight` depending on `type`; position as a PointSelector, intensity as far as the spec covers it |
+| `settings.lights[]` | `AmbientLight`, `PointLight` or `DirectionalLight` depending on `type`; position as a PointSelector; `intensity` as a `Quantity` (`quantityValue` 0–1, `unit: "relative"`) |
 | `IAnnotation` | `commenting` annotation in `Scene.annotations` (embedded AnnotationPage); body `TextualBody` (`value` = description, `label` = title, `format` = `text/markdown`); target `SpecificResource` with `source` = Scene and `selector` = `[PointSelector]` from `referencePoint` |
-| `relatedPerspective` | Separate PerspectiveCamera annotation with `behavior: ["hidden"]`; the comment points to it via `scope` |
+| `relatedPerspective` | Separate PerspectiveCamera annotation with `behavior: ["hidden"]` (camera resource with its own `id`); the comment points to the camera resource via `scope: [{ id, type: "PerspectiveCamera" }]` |
 | `ranking` | Order of the items in the AnnotationPage |
 | `referenceNormal`, `preview`, `validated` | dropped |
 
-**IDs:** The base is `urn:kompakkt:<entityId>`. The exporter can optionally receive a public base URL (`baseId`); the UI does not use this in the first step. Hierarchical sub-IDs are derived from the base (`…/scene/1`, `…/scene/1/page/1`, `…/anno/<annotationId>`). Every ID is unique within the manifest.
+**IDs:** The spec requires HTTP(S) URIs. The manifest ID is the viewer URL of the entity (`<origin><viewer path>?entity=<entityId>`). All other IDs live under `<origin><viewer path>iiif/<entityId>/` (`…/scene/1`, `…/scene/1/page/1`, `…/scene/1/comment/<annotationId>`, `…/camera/…`). Every ID is unique within the manifest.
 
 `@context` is `http://iiif.io/api/presentation/4/context.json`.
 
 ## Import mapping (comments)
 
 - A `commenting` annotation with a PointSelector becomes an `IAnnotation`: `referencePoint` from the point, title and description from the `TextualBody`.
-- **With a linked camera** (`scope` pointing to a camera annotation): it becomes `relatedPerspective`.
+- **With a linked camera**: it becomes `relatedPerspective`. Accepted link forms: `scope` (on the annotation or its target) referencing the camera resource ID (spec form) or the camera annotation ID, and an embedded `contentState` annotation in `target.scope` that paints a camera (form used by the IIIF 3D demo manifests).
+- **SpotLight `angle`** is the spec's half-angle; Babylon receives the full cone angle.
 - **Without a camera:** A raycast from outside the model toward the point returns the surface normal. The camera is placed along the normal at a fixed distance and looks at the point.
 - Imported annotations are visible and editable in the viewer, but are **not saved to the backend automatically**.
 

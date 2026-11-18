@@ -2553,3 +2553,246 @@ export objects with their annotations as IIIF 4.0 manifests (button in the annot
 git add src/app/iiif/roundtrip.test.ts package.json bun.lock README.md
 git commit -m "test(iiif): add export/import round trip; drop manifesto dependency; document IIIF support"
 ```
+
+---
+
+## Plan amendments (2026-11-18)
+
+These amendments come from checking the IIIF 4.0 spec and the official 3D demo manifests during execution. They override the task text above wherever they conflict. Decisions confirmed by the user:
+
+- Exported IDs must be HTTP(S) (the spec forbids `urn:` for Manifest, Scene and Annotation IDs). The manifest ID is the **viewer URL of the entity** (`<origin><viewer path>?entity=<entityId>`); all other IDs live under `<origin><viewer path>iiif/<entityId>/…`.
+- Comment → camera links follow the spec on export: `scope: [{ "id": <camera resource id>, "type": "PerspectiveCamera" }]`. On import, all three forms are accepted: the spec form (camera resource ID), a reference to the camera annotation ID (on the annotation or on its `target`), and the demos' embedded `contentState` annotation in `target.scope`.
+- Already fixed during Task 4 (no further action): SpotLight `angle` is the spec's half-angle; the parser reads `intensity` as a `Quantity` (`quantityValue`).
+
+Execution order: Task 1–4, **Task 8**, Task 5, Task 6, Task 7.
+
+### Task 8: Resolve comment → camera scope references on import
+
+**Files:**
+- Modify: `src/app/iiif/model.ts` (`IIIFCameraItem`)
+- Modify: `src/app/iiif/parser.ts`
+- Test: `src/app/iiif/parser.test.ts`
+
+**Interfaces:**
+- Consumes: `parseManifest`, `parsePainting`, `IIIFSceneModel` (Task 2)
+- Produces: `IIIFCameraItem.resourceId?: string` (ID of the camera resource, i.e. the painting body/source `id`); `IIIFComment.cameraAnnotationId` is now resolved after all pages are parsed and always holds the **camera annotation ID** of a camera in `model.cameras` (or `undefined`).
+
+- [ ] **Step 1: Write failing tests**
+
+Append to `src/app/iiif/parser.test.ts` (inline manifests; helper builds a scene with one model, one camera painting annotation and one comment):
+
+```ts
+describe('parseManifest – comment camera scope', () => {
+  const SCENE_ID = 'https://example.org/s';
+  const camera = (extra: Record<string, unknown> = {}) => ({
+    id: 'https://example.org/anno/cam',
+    type: 'Annotation',
+    motivation: ['painting'],
+    behavior: ['hidden'],
+    body: { id: 'https://example.org/cameras/1', type: 'PerspectiveCamera', lookAt: { type: 'PointSelector', x: 0, y: 0, z: 0 } },
+    target: { type: 'SpecificResource', source: { id: SCENE_ID, type: 'Scene' }, selector: [{ type: 'PointSelector', x: 0, y: 1, z: 5 }] },
+    ...extra,
+  });
+  const comment = (extra: Record<string, unknown> = {}, targetExtra: Record<string, unknown> = {}) => ({
+    id: 'https://example.org/anno/comment',
+    type: 'Annotation',
+    motivation: ['commenting'],
+    body: { type: 'TextualBody', value: 'Glove' },
+    target: { type: 'SpecificResource', source: { id: SCENE_ID, type: 'Scene' }, selector: [{ type: 'PointSelector', x: 1, y: 2, z: 3 }], ...targetExtra },
+    ...extra,
+  });
+  const manifest = (paintings: unknown[], comments: unknown[]) => ({
+    id: 'https://example.org/m',
+    type: 'Manifest',
+    label: { none: ['m'] },
+    items: [
+      {
+        id: SCENE_ID,
+        type: 'Scene',
+        items: [{ id: 'https://example.org/p1', type: 'AnnotationPage', items: paintings }],
+        annotations: [{ id: 'https://example.org/p2', type: 'AnnotationPage', items: comments }],
+      },
+    ],
+  });
+
+  test('spec form: scope references the camera resource id', () => {
+    const model = parseManifest(
+      manifest([camera()], [comment({ scope: [{ id: 'https://example.org/cameras/1', type: 'PerspectiveCamera' }] })]),
+    );
+    expect(model.cameras[0].resourceId).toBe('https://example.org/cameras/1');
+    expect(model.comments[0].cameraAnnotationId).toBe('https://example.org/anno/cam');
+  });
+
+  test('scope on the target referencing the camera annotation id', () => {
+    const model = parseManifest(
+      manifest([camera()], [comment({}, { scope: [{ id: 'https://example.org/anno/cam', type: 'Annotation' }] })]),
+    );
+    expect(model.comments[0].cameraAnnotationId).toBe('https://example.org/anno/cam');
+  });
+
+  test('scope resolves even when the camera comes after the comment', () => {
+    const model = parseManifest(
+      manifest([], [comment({ scope: [{ id: 'https://example.org/cameras/1', type: 'PerspectiveCamera' }] }), camera()]),
+    );
+    expect(model.comments[0].cameraAnnotationId).toBe('https://example.org/anno/cam');
+  });
+
+  test('demo form: embedded contentState annotation in target.scope adds a hidden camera', () => {
+    const contentState = {
+      id: 'https://example.org/anno/comment/scope1',
+      type: 'Annotation',
+      motivation: ['contentState'],
+      target: {
+        id: SCENE_ID,
+        type: 'Scene',
+        items: [
+          {
+            id: 'https://example.org/p3',
+            type: 'AnnotationPage',
+            items: [camera({ id: 'https://example.org/anno/embedded-cam', behavior: undefined })],
+          },
+        ],
+      },
+    };
+    const model = parseManifest(manifest([], [comment({}, { scope: contentState })]));
+    const linked = model.cameras.find(c => c.annotationId === 'https://example.org/anno/embedded-cam');
+    expect(linked?.hidden).toBe(true);
+    expect(model.comments[0].cameraAnnotationId).toBe('https://example.org/anno/embedded-cam');
+  });
+
+  test('unresolved scope adds a warning and leaves the camera undefined', () => {
+    const model = parseManifest(
+      manifest([], [comment({ scope: [{ id: 'https://example.org/cameras/missing', type: 'PerspectiveCamera' }] })]),
+    );
+    expect(model.comments[0].cameraAnnotationId).toBeUndefined();
+    expect(model.warnings.some(w => w.includes('does not reference a known camera'))).toBe(true);
+  });
+});
+```
+
+- [ ] **Step 2: Run the tests and confirm they fail**
+
+Run: `bun test src/app/iiif/parser.test.ts`
+Expected: FAIL (e.g. `resourceId` undefined, `cameraAnnotationId` undefined for the camera-resource and contentState forms)
+
+- [ ] **Step 3: Implement**
+
+In `model.ts`, add to `IIIFCameraItem` (after `annotationId`):
+
+```ts
+  /** ID of the camera resource (painting body/source id), used by spec-style `scope` references */
+  resourceId?: string;
+```
+
+In `parser.ts`:
+
+1. In the camera branch of `parsePainting`, add `resourceId: typeof source['id'] === 'string' ? source['id'] : undefined,` to the pushed camera.
+2. In `parseComment`, stop setting `cameraAnnotationId` (scope is resolved later); return `cameraAnnotationId: undefined`.
+3. Add these helpers:
+
+```ts
+/** Scope references of a comment: on the annotation itself and on each SpecificResource target. */
+const scopeRefs = (annotation: Json): Json[] => [
+  ...asArray<Json>(annotation['scope']),
+  ...asArray<Json>(annotation['target']).flatMap(target => asArray<Json>(target?.['scope'])),
+];
+
+/**
+ * Painting annotations embedded in a scope reference: either the reference is itself an
+ * embedded painting annotation, or it is a content-state annotation whose target Scene
+ * carries AnnotationPages (form used by the IIIF 3D demo manifests).
+ */
+const embeddedPaintingAnnotations = (ref: Json): Json[] => {
+  if (ref?.['type'] !== 'Annotation') return [];
+  if (ref['body'] !== undefined) return [ref];
+  return asArray<Json>(ref['target']).flatMap(target =>
+    asArray<Json>(target?.['items']).flatMap(page =>
+      asArray<Json>(page?.['items']).filter(item => item?.['type'] === 'Annotation'),
+    ),
+  );
+};
+```
+
+4. In `parseManifest`, collect scope candidates per comment while looping and resolve them after the loop:
+
+```ts
+  const pendingScopes: Array<{ comment: IIIFComment; ids: string[] }> = [];
+  // … inside the annotation loop, replacing the comment branch:
+      if (isComment(annotation)) {
+        const comment = parseComment(annotation, model.warnings);
+        if (comment) {
+          model.comments.push(comment);
+          const ids: string[] = [];
+          for (const ref of scopeRefs(annotation)) {
+            const embedded = embeddedPaintingAnnotations(ref);
+            if (embedded.length) {
+              for (const painting of embedded) {
+                const before = model.cameras.length;
+                parsePainting(painting, manifest, model);
+                for (const camera of model.cameras.slice(before)) {
+                  camera.hidden = true;
+                  ids.push(camera.annotationId);
+                }
+              }
+            } else if (typeof ref?.['id'] === 'string') {
+              ids.push(ref['id']);
+            }
+          }
+          pendingScopes.push({ comment, ids });
+        }
+      }
+  // … after the page loop, before `return model;`:
+  for (const { comment, ids } of pendingScopes) {
+    const camera = ids
+      .map(id => model.cameras.find(c => c.annotationId === id || c.resourceId === id))
+      .find(found => found !== undefined);
+    comment.cameraAnnotationId = camera?.annotationId;
+    if (ids.length && !camera) {
+      model.warnings.push(`Comment ${comment.annotationId}: scope does not reference a known camera`);
+    }
+  }
+```
+
+(Import `IIIFComment` as a type where needed.)
+
+- [ ] **Step 4: Run the tests**
+
+Run: `bun test src/app/iiif`
+Expected: PASS (existing fixture test with annotation-level `scope` → camera annotation ID still passes)
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/app/iiif/model.ts src/app/iiif/parser.ts src/app/iiif/parser.test.ts
+git commit -m "feat(iiif): resolve comment camera scope in spec, target and content-state forms"
+```
+
+### Amendment to Task 5 (exporter)
+
+Apply these changes on top of the Task 5 text:
+
+- `types.ts`: add `export interface Quantity { type: 'Quantity'; quantityValue: number; unit: string }`.
+- `ManifestExportInput`: replace `baseId?: string` with two required fields: `manifestId: string` (viewer URL of the entity) and `baseId: string` (prefix for all other IDs). Remove the `urn:kompakkt:` default. Use `sceneId = \`${baseId}/scene/1\``, `manifest.id = manifestId`.
+- Add a warning `IDs must be HTTP(S) URIs: <value>` for `manifestId` or `baseId` that is not an `http:`/`https:` URL.
+- Camera bodies get IDs: initial camera `{ id: \`${baseId}/camera/initial\`, type: 'PerspectiveCamera', lookAt }`; comment cameras `{ id: \`${baseId}/camera/comment/${key}\`, type: 'PerspectiveCamera', lookAt }` (annotation IDs unchanged: `${sceneId}/anno/camera`, `${sceneId}/comment-camera/${key}`).
+- Comment `scope` becomes `[{ id: <comment camera body id>, type: 'PerspectiveCamera' }]`.
+- Light `intensity` becomes `{ type: 'Quantity', quantityValue: <intensity clamped to 0..1>, unit: 'relative' }`; add a warning `Light intensity <value> clamped to 0..1` when clamping happens.
+- Test helper `makeInput` (in `__fixtures__/export-input.ts`): `manifestId: 'https://viewer.example/viewer/?entity=e1'`, `baseId: 'https://viewer.example/viewer/iiif/e1'`.
+- Update test expectations accordingly: `manifest.id` equals `manifestId`; scene/annotation IDs start with `https://viewer.example/viewer/iiif/e1/scene/1`; the comment's `scope` equals `[{ id: 'https://viewer.example/viewer/iiif/e1/camera/comment/a1', type: 'PerspectiveCamera' }]` and the hidden camera annotation is found via `body.id`; light intensity equals `{ type: 'Quantity', quantityValue: 0.5, unit: 'relative' }`. Replace the "uses baseId when given" test with "warns when IDs are not HTTP(S)" (`manifestId: 'urn:x'` → warning containing `HTTP(S)`).
+- Step 6 (spec check) is done: `lookAt` may be an embedded PointSelector; `scope` items reference the camera resource; intensity is a Quantity.
+
+### Amendment to Task 6 (export button)
+
+Compute the IDs from the current viewer location and pass them to `exportManifest`:
+
+```ts
+    const viewerBase = `${window.location.origin}${window.location.pathname.replace(/[^/]*$/, '')}`;
+    const entityId = encodeURIComponent(String(entity._id));
+    // …
+      manifestId: `${viewerBase}?entity=${entityId}`,
+      baseId: `${viewerBase}iiif/${entityId}`,
+```
+
+### Amendment to Task 7 (round trip)
+
+The round-trip test finds each comment's camera via the parser-resolved `comment.cameraAnnotationId` (now resolved from the spec-style `scope` → camera resource ID). No other change.
