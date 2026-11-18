@@ -114,6 +114,9 @@ const getCanvasUVs = (canvas: Record<string, any>, polygon: Vector3[]) => {
     : draftOrderUVs;
 };
 
+/** Placeholder preview for imported IIIF scenes (they have no Kompakkt preview image). */
+export const IIIF_SCENE_PREVIEW = 'assets/image-not-found.png';
+
 @Injectable({ providedIn: 'root' })
 export class IIIFSceneBuilderService {
   private babylon = inject(BabylonService);
@@ -122,6 +125,9 @@ export class IIIFSceneBuilderService {
     const scene = this.babylon.getScene();
     const entitySettings = structuredClone(minimalSettings) as IEntitySettings;
     (entitySettings as any).skipInitialCameraSetup = true;
+    // An empty preview marks an entity as "still in upload", which blocks annotating.
+    // Imported IIIF scenes have no Kompakkt preview, so use the placeholder image.
+    entitySettings.preview = IIIF_SCENE_PREVIEW;
     scene.environmentIntensity = 1;
 
     if (model.backgroundColor) {

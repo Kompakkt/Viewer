@@ -476,6 +476,11 @@ export class ProcessingService {
         relatedDigitalEntity: { _id: 'standalone_entity' },
         settings: result.entitySettings,
         mediaType: 'model',
+        // A single-model scene can be exported again; multi-model scenes have no single model file
+        externalFile:
+          model.models.length === 1 && model.canvases.length === 0
+            ? model.models[0].url
+            : undefined,
         annotations: Object.fromEntries(
           result.annotations.map(annotation => [String(annotation._id), annotation]),
         ),
