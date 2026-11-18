@@ -276,3 +276,90 @@ if (demoFiles.length === 0) {
     }
   });
 }
+
+describe('parseManifest – comment camera scope', () => {
+  const SCENE_ID = 'https://example.org/s';
+  const camera = (extra: Record<string, unknown> = {}) => ({
+    id: 'https://example.org/anno/cam',
+    type: 'Annotation',
+    motivation: ['painting'],
+    behavior: ['hidden'],
+    body: { id: 'https://example.org/cameras/1', type: 'PerspectiveCamera', lookAt: { type: 'PointSelector', x: 0, y: 0, z: 0 } },
+    target: { type: 'SpecificResource', source: { id: SCENE_ID, type: 'Scene' }, selector: [{ type: 'PointSelector', x: 0, y: 1, z: 5 }] },
+    ...extra,
+  });
+  const comment = (extra: Record<string, unknown> = {}, targetExtra: Record<string, unknown> = {}) => ({
+    id: 'https://example.org/anno/comment',
+    type: 'Annotation',
+    motivation: ['commenting'],
+    body: { type: 'TextualBody', value: 'Glove' },
+    target: { type: 'SpecificResource', source: { id: SCENE_ID, type: 'Scene' }, selector: [{ type: 'PointSelector', x: 1, y: 2, z: 3 }], ...targetExtra },
+    ...extra,
+  });
+  const manifest = (paintings: unknown[], comments: unknown[]) => ({
+    id: 'https://example.org/m',
+    type: 'Manifest',
+    label: { none: ['m'] },
+    items: [
+      {
+        id: SCENE_ID,
+        type: 'Scene',
+        items: [{ id: 'https://example.org/p1', type: 'AnnotationPage', items: paintings }],
+        annotations: [{ id: 'https://example.org/p2', type: 'AnnotationPage', items: comments }],
+      },
+    ],
+  });
+
+  test('spec form: scope references the camera resource id', () => {
+    const model = parseManifest(
+      manifest([camera()], [comment({ scope: [{ id: 'https://example.org/cameras/1', type: 'PerspectiveCamera' }] })]),
+    );
+    expect(model.cameras[0].resourceId).toBe('https://example.org/cameras/1');
+    expect(model.comments[0].cameraAnnotationId).toBe('https://example.org/anno/cam');
+  });
+
+  test('scope on the target referencing the camera annotation id', () => {
+    const model = parseManifest(
+      manifest([camera()], [comment({}, { scope: [{ id: 'https://example.org/anno/cam', type: 'Annotation' }] })]),
+    );
+    expect(model.comments[0].cameraAnnotationId).toBe('https://example.org/anno/cam');
+  });
+
+  test('scope resolves even when the camera comes after the comment', () => {
+    const model = parseManifest(
+      manifest([], [comment({ scope: [{ id: 'https://example.org/cameras/1', type: 'PerspectiveCamera' }] }), camera()]),
+    );
+    expect(model.comments[0].cameraAnnotationId).toBe('https://example.org/anno/cam');
+  });
+
+  test('demo form: embedded contentState annotation in target.scope adds a hidden camera', () => {
+    const contentState = {
+      id: 'https://example.org/anno/comment/scope1',
+      type: 'Annotation',
+      motivation: ['contentState'],
+      target: {
+        id: SCENE_ID,
+        type: 'Scene',
+        items: [
+          {
+            id: 'https://example.org/p3',
+            type: 'AnnotationPage',
+            items: [camera({ id: 'https://example.org/anno/embedded-cam', behavior: undefined })],
+          },
+        ],
+      },
+    };
+    const model = parseManifest(manifest([], [comment({}, { scope: contentState })]));
+    const linked = model.cameras.find(c => c.annotationId === 'https://example.org/anno/embedded-cam');
+    expect(linked?.hidden).toBe(true);
+    expect(model.comments[0].cameraAnnotationId).toBe('https://example.org/anno/embedded-cam');
+  });
+
+  test('unresolved scope adds a warning and leaves the camera undefined', () => {
+    const model = parseManifest(
+      manifest([], [comment({ scope: [{ id: 'https://example.org/cameras/missing', type: 'PerspectiveCamera' }] })]),
+    );
+    expect(model.comments[0].cameraAnnotationId).toBeUndefined();
+    expect(model.warnings.some(w => w.includes('does not reference a known camera'))).toBe(true);
+  });
+});

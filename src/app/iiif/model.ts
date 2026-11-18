@@ -28,6 +28,8 @@ export type CameraProjection = 'perspective' | 'orthographic';
 
 export interface IIIFCameraItem {
   annotationId: string;
+  /** ID of the camera resource (painting body/source id), used by spec-style `scope` references */
+  resourceId?: string;
   projection: CameraProjection;
   label?: string;
   position?: Vec3;
@@ -62,7 +64,7 @@ export interface IIIFComment {
   title: string;
   description: string;
   point: Vec3;
-  /** first ID from `scope`; points to a camera annotation */
+  /** ID of the camera annotation in `cameras` referenced by `scope`, resolved after parsing */
   cameraAnnotationId?: string;
 }
 

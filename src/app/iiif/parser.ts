@@ -117,10 +117,29 @@ const parseComment = (annotation: Json, warnings: string[]): IIIFComment | undef
     title,
     description: value === title ? '' : value,
     point,
-    cameraAnnotationId: asArray<Json>(annotation['scope'])
-      .map(scope => scope?.['id'])
-      .find((scopeId): scopeId is string => typeof scopeId === 'string'),
+    cameraAnnotationId: undefined,
   };
+};
+
+/** Scope references of a comment: on the annotation itself and on each SpecificResource target. */
+const scopeRefs = (annotation: Json): Json[] => [
+  ...asArray<Json>(annotation['scope']),
+  ...asArray<Json>(annotation['target']).flatMap(target => asArray<Json>(target?.['scope'])),
+];
+
+/**
+ * Painting annotations embedded in a scope reference: either the reference is itself an
+ * embedded painting annotation, or it is a content-state annotation whose target Scene
+ * carries AnnotationPages (form used by the IIIF 3D demo manifests).
+ */
+const embeddedPaintingAnnotations = (ref: Json): Json[] => {
+  if (ref?.['type'] !== 'Annotation') return [];
+  if (ref['body'] !== undefined) return [ref];
+  return asArray<Json>(ref['target']).flatMap(target =>
+    asArray<Json>(target?.['items']).flatMap(page =>
+      asArray<Json>(page?.['items']).filter(item => item?.['type'] === 'Annotation'),
+    ),
+  );
 };
 
 const LIGHT_KINDS: Record<string, LightKind> = {
@@ -158,6 +177,7 @@ const parsePainting = (annotation: Json, manifest: Json, model: IIIFSceneModel) 
         label: firstLabel(source['label']),
         position,
         transforms,
+        resourceId: typeof source['id'] === 'string' ? source['id'] : undefined,
         fieldOfView: toNumber(source['fieldOfView']),
         near: toNumber(source['near']),
         far: toNumber(source['far']),
@@ -236,6 +256,8 @@ export const parseManifest = (input: unknown): IIIFSceneModel => {
     ...asArray<Json>(manifest['annotations']),
   ];
 
+  const pendingScopes: Array<{ comment: IIIFComment; ids: string[] }> = [];
+
   for (const page of pages) {
     if (page?.['type'] !== 'AnnotationPage') continue;
     if (!Array.isArray(page['items'])) {
@@ -257,10 +279,40 @@ export const parseManifest = (input: unknown): IIIFSceneModel => {
       }
       if (isComment(annotation)) {
         const comment = parseComment(annotation, model.warnings);
-        if (comment) model.comments.push(comment);
+        if (comment) {
+          model.comments.push(comment);
+          const ids: string[] = [];
+          for (const ref of scopeRefs(annotation)) {
+            const embedded = embeddedPaintingAnnotations(ref);
+            if (embedded.length) {
+              for (const painting of embedded) {
+                const before = model.cameras.length;
+                parsePainting(painting, manifest, model);
+                for (const camera of model.cameras.slice(before)) {
+                  camera.hidden = true;
+                  ids.push(camera.annotationId);
+                }
+              }
+            } else if (typeof ref?.['id'] === 'string') {
+              ids.push(ref['id']);
+            }
+          }
+          pendingScopes.push({ comment, ids });
+        }
       } else {
         parsePainting(annotation, manifest, model);
       }
+    }
+  }
+
+  // Resolved after all pages are parsed, so a camera may appear after the comment referencing it.
+  for (const { comment, ids } of pendingScopes) {
+    const camera = ids
+      .map(id => model.cameras.find(c => c.annotationId === id || c.resourceId === id))
+      .find(found => found !== undefined);
+    comment.cameraAnnotationId = camera?.annotationId;
+    if (ids.length && !camera) {
+      model.warnings.push(`Comment ${comment.annotationId}: scope does not reference a known camera`);
     }
   }
 
