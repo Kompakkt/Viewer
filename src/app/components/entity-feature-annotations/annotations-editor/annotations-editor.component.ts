@@ -7,6 +7,9 @@ import { combineLatest, firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
+import { environment } from 'src/environment';
+import { exportManifest } from '../../../iiif/exporter';
+import { MessageService } from '../../../services/message/message.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
 import { UserdataService } from '../../../services/userdata/userdata.service';
 import { AnnotationComponentForEditorComponent } from '../annotation/annotation-for-editor.component';
@@ -32,6 +35,7 @@ export class AnnotationsEditorComponent {
   public annotations = inject(AnnotationService);
   public processing = inject(ProcessingService);
   public userdata = inject(UserdataService);
+  private message = inject(MessageService);
 
   // external
   public isAnnotatingAllowed$ = this.processing.hasAnnotationAllowance$;
@@ -67,6 +71,41 @@ export class AnnotationsEditorComponent {
         'annotations.json',
       );
     });
+  }
+
+  async exportIIIFManifest() {
+    const [entity, annotations, settings] = await Promise.all([
+      firstValueFrom(this.processing.entity$),
+      firstValueFrom(this.currentAnnotations$),
+      firstValueFrom(this.processing.settings$),
+    ]);
+    if (!entity) return;
+
+    const path = entity.externalFile ?? entity.processed?.high ?? '';
+    const modelUrl = /^https?:|^blob:/.test(path)
+      ? path
+      : new URL(`${environment.server_url}${path}`, window.location.href).toString();
+
+    const viewerBase = `${window.location.origin}${window.location.pathname.replace(/[^/]*$/, '')}`;
+    const entityId = encodeURIComponent(String(entity._id));
+
+    const { manifest, warnings } = exportManifest({
+      entityId: String(entity._id),
+      entityName: entity.name,
+      modelUrl,
+      settings: settings.localSettings,
+      annotations,
+      manifestId: `${viewerBase}?entity=${entityId}`,
+      baseId: `${viewerBase}iiif/${entityId}`,
+    });
+    warnings.forEach(warning => console.warn('[IIIF export]', warning));
+    if (warnings.length) this.message.info(warnings.join('\n'));
+
+    const fileName = `${entity.name.replace(/[^\w-]+/g, '_') || 'entity'}-iiif-manifest.json`;
+    saveAs(
+      new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/ld+json;charset=utf-8' }),
+      fileName,
+    );
   }
 
   closeNote(event: Event) {
