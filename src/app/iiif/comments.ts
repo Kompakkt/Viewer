@@ -1,6 +1,6 @@
 import type { IAgent, IAnnotation, ICameraPerspective } from 'src/common';
 import { cartesianToArcRotate, pointToBabylon, type Vec3 } from './coordinates';
-import type { IIIFComment } from './model';
+import type { IIIFCameraItem, IIIFComment } from './model';
 
 /** Value that cameraManager.getInitialPosition() returns for ArcRotate cameras. */
 export const ARC_ROTATE_CAMERA_TYPE = 'arcRotateCam';
@@ -23,6 +23,27 @@ export const perspectiveFromPoints = (position: Vec3, target: Vec3): ICameraPers
     target: { ...target },
     preview: '',
   };
+};
+
+/** Perspective from a IIIF camera. fallbackTarget (IIIF space) applies when lookAt is not a point. */
+export const perspectiveFromCamera = (
+  camera: IIIFCameraItem,
+  fallbackTarget: Vec3,
+): ICameraPerspective | undefined => {
+  if (!camera.position) return undefined;
+  const target = camera.lookAtPoint ?? fallbackTarget;
+  return perspectiveFromPoints(pointToBabylon(camera.position), pointToBabylon(target));
+};
+
+/** Camera at `distance` along `normal` in front of `target` (both in Babylon space). */
+export const perspectiveAlongNormal = (target: Vec3, normal: Vec3, distance: number): ICameraPerspective => {
+  const length = Math.hypot(normal.x, normal.y, normal.z) || 1;
+  const position = {
+    x: target.x + (normal.x / length) * distance,
+    y: target.y + (normal.y / length) * distance,
+    z: target.z + (normal.z / length) * distance,
+  };
+  return perspectiveFromPoints(position, target);
 };
 
 export const commentToAnnotation = (

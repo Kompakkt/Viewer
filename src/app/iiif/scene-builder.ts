@@ -8,19 +8,22 @@ import {
   HemisphericLight,
   Mesh,
   PBRMaterial,
+  PointLight,
   Quaternion,
+  Ray,
+  SpotLight,
   StandardMaterial,
   Texture,
   TransformNode,
   Vector3,
   VertexData,
 } from '@babylonjs/core';
-import type { IAnnotation, ICameraPerspective, IEntitySettings } from 'src/common';
+import type { IAnnotation, IEntitySettings } from 'src/common';
 import { minimalSettings } from '../../assets/settings/settings';
 import { BabylonService } from '../services/babylon/babylon.service';
 import type { RGB } from './color';
 import { hexToRgb } from './color';
-import { commentToAnnotation } from './comments';
+import { commentToAnnotation, perspectiveAlongNormal, perspectiveFromCamera } from './comments';
 import { pointToBabylon, rotationToBabylon, type Vec3 } from './coordinates';
 import type {
   IIIFCameraItem,
@@ -198,19 +201,34 @@ export class IIIFSceneBuilderService {
     };
   }
 
-  /** Previous importer behavior. Replaced in Task 4. */
-  protected buildAnnotations(model: IIIFSceneModel, _meshes: AbstractMesh[]): IAnnotation[] {
+  protected buildAnnotations(model: IIIFSceneModel, meshes: AbstractMesh[]): IAnnotation[] {
+    const bounds = getMeshBounds(meshes);
+    const viewDistance = bounds ? Math.max(bounds.size.length() * 0.75, 1) : 3;
+
     return model.comments.map((comment, index) => {
       const target = pointToBabylon(comment.point);
-      const n = Vector3.Zero().subtract(toVector3(target)).normalize();
-      const legacy: ICameraPerspective = {
-        cameraType: 'ArcRotateCamera',
-        position: { x: n.x, y: n.y, z: n.z },
-        target,
-        preview: '',
-      };
-      return commentToAnnotation(comment, index + 1, legacy, { x: n.x, y: n.y, z: n.z });
+      const normal = this.surfaceNormal(target, meshes);
+      const camera = model.cameras.find(c => c.annotationId === comment.cameraAnnotationId);
+      const perspective =
+        (camera && perspectiveFromCamera(camera, comment.point)) ??
+        perspectiveAlongNormal(target, normal, viewDistance);
+      return commentToAnnotation(comment, index + 1, perspective, normal);
     });
+  }
+
+  /** Normal at the comment point via a raycast from outside; fallback: direction from the center. */
+  private surfaceNormal(target: Vec3, meshes: AbstractMesh[]): Vec3 {
+    const point = toVector3(target);
+    const bounds = getMeshBounds(meshes);
+    const outward = point.subtract(bounds?.center ?? Vector3.Zero());
+    if (outward.lengthSquared() === 0) outward.copyFrom(Vector3.Up());
+    outward.normalize();
+
+    const reach = bounds ? bounds.size.length() : 1;
+    const ray = new Ray(point.add(outward.scale(reach)), outward.negate(), reach * 2);
+    const pick = this.babylon.getScene().pickWithRay(ray, mesh => meshes.includes(mesh));
+    const normal = (pick?.hit ? pick.getNormal(true, true) : null) ?? outward;
+    return { x: normal.x, y: normal.y, z: normal.z };
   }
 
   private async buildModel(item: IIIFModelItem, meshes: AbstractMesh[]) {
@@ -325,6 +343,31 @@ export class IIIFSceneBuilderService {
       directional.diffuse = diffuse;
       directional.position = position;
       directional.intensity = intensity;
+      return true;
+    }
+
+    if (light.kind === 'point' || light.kind === 'spot') {
+      const position = light.position ? toBabylonVector(light.position) : Vector3.Zero();
+      if (light.kind === 'point') {
+        const point = new PointLight(light.annotationId, position, scene);
+        point.diffuse = diffuse;
+        point.intensity = intensity;
+        return true;
+      }
+      const lookAt = this.resolveLookAt(light, positions);
+      const direction = lookAt
+        ? lookAt.subtract(position).normalize()
+        : rotateDirection(Vector3.Down(), light.transforms);
+      const spot = new SpotLight(
+        light.annotationId,
+        position,
+        direction,
+        (light.angle ?? 90) * DEG_TO_RAD,
+        2,
+        scene,
+      );
+      spot.diffuse = diffuse;
+      spot.intensity = intensity;
       return true;
     }
 
