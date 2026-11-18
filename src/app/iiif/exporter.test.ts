@@ -1,21 +1,30 @@
 import { describe, expect, test } from 'bun:test';
-import { makeInput, makeSettings } from './__fixtures__/export-input';
+import { makeAnnotation, makeInput, makeSettings } from './__fixtures__/export-input';
 import { exportManifest, isPublicUrl, modelFormatFromUrl } from './exporter';
 
 const BASE = 'https://viewer.example/viewer/iiif/e1';
 const SCENE = `${BASE}/scene/1`;
 
+const ID_TYPES = ['Manifest', 'Scene', 'AnnotationPage', 'Annotation', 'PerspectiveCamera'];
+const REFERENCE_KEYS = ['scope', 'target', 'source'];
+
 const collectIds = (value: unknown, ids: string[] = []): string[] => {
   if (Array.isArray(value)) value.forEach(v => collectIds(v, ids));
   else if (value && typeof value === 'object') {
     const record = value as Record<string, unknown>;
-    if (typeof record['id'] === 'string' && record['type'] === 'Annotation' && 'motivation' in record) {
-      ids.push(record['id']);
+    if (typeof record['id'] === 'string' && ID_TYPES.includes(record['type'] as string)) ids.push(record['id']);
+    for (const [key, v] of Object.entries(record)) {
+      if (!REFERENCE_KEYS.includes(key)) collectIds(v, ids);
     }
-    Object.values(record).forEach(v => collectIds(v, ids));
   }
   return ids;
 };
+
+const sceneOf = (input: ReturnType<typeof makeInput>) => {
+  const result = exportManifest(input);
+  return { ...result, scene: result.manifest.items[0] as any };
+};
+const commentsOf = (scene: any): any[] => scene.annotations?.[0]?.items ?? [];
 
 describe('helpers', () => {
   test('modelFormatFromUrl', () => {
@@ -143,5 +152,76 @@ describe('exportManifest', () => {
     expect(warnings.some(w => w.includes('HTTP(S)') && w.includes('urn:x'))).toBe(true);
     const base = exportManifest(makeInput({ baseId: 'urn:y' })).warnings;
     expect(base.some(w => w.includes('HTTP(S)') && w.includes('urn:y'))).toBe(true);
+  });
+
+  test('keeps a comment without relatedPerspective but skips camera and scope', () => {
+    const a = makeAnnotation('x1', 1, 'T', 'D', { x: 1, y: 1, z: 1 }) as any;
+    delete a.body.content.relatedPerspective;
+    const { scene, warnings } = sceneOf(makeInput({ annotations: [a] }));
+    const comments = commentsOf(scene);
+    expect(comments).toHaveLength(1);
+    expect(comments[0].scope).toBeUndefined();
+    expect(scene.items[0].items.some((x: any) => x.id.includes('/comment-camera/'))).toBe(false);
+    expect(warnings).toContain('Annotation x1: no camera perspective, exported without a camera');
+  });
+
+  test('skips a comment without referencePoint', () => {
+    const a = makeAnnotation('x1', 1, 'T', 'D', { x: 1, y: 1, z: 1 }) as any;
+    delete a.target.selector.referencePoint;
+    const { scene, warnings } = sceneOf(makeInput({ annotations: [a] }));
+    expect(commentsOf(scene)).toHaveLength(0);
+    expect(scene.annotations).toBeUndefined();
+    expect(scene.items[0].items.some((x: any) => x.id.includes('/comment-camera/'))).toBe(false);
+    expect(warnings).toContain('Annotation x1: no reference point, skipped');
+  });
+
+  test('ignores a non-finite light intensity with a warning', () => {
+    const settings = makeSettings({
+      lights: [{ type: 'PointLight', position: { x: 0, y: 1, z: 0 }, intensity: NaN }],
+    });
+    const { scene, warnings } = sceneOf(makeInput({ settings }));
+    const light = scene.items[0].items.find((a: any) => a.id.includes('/anno/light/'));
+    expect(light).toBeDefined();
+    expect('intensity' in light.body).toBe(false);
+    expect(warnings).toContain('Light 1: invalid intensity ignored');
+    expect(warnings.some(w => w.includes('clamped'))).toBe(false);
+  });
+
+  test('makes comment ids unique for duplicate and missing _id', () => {
+    const mk = (id: unknown, ranking: number) => {
+      const a = makeAnnotation('tmp', ranking, `T${ranking}`, 'D', { x: 1, y: 1, z: 1 }) as any;
+      a._id = id;
+      return a;
+    };
+    const input = makeInput({ annotations: [mk('dup', 1), mk('dup', 2), mk(undefined, 3), mk('', 4)] });
+    const { manifest, warnings } = sceneOf(input);
+    const ids = collectIds(manifest);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(warnings.length).toBeGreaterThanOrEqual(3);
+    expect(warnings.some(w => w.includes('dup'))).toBe(true);
+  });
+
+  test('sorts annotations with missing ranking last', () => {
+    const a1 = makeAnnotation('r1', 1, 'A', 'D', { x: 1, y: 1, z: 1 }) as any;
+    const none = makeAnnotation('rn', 0, 'N', 'D', { x: 1, y: 1, z: 1 }) as any;
+    none.ranking = undefined;
+    const a2 = makeAnnotation('r2', 2, 'B', 'D', { x: 1, y: 1, z: 1 }) as any;
+    const { scene } = sceneOf(makeInput({ annotations: [none, a2, a1] }));
+    expect(commentsOf(scene).map((c: any) => c.id)).toEqual([
+      `${SCENE}/comment/r1`,
+      `${SCENE}/comment/r2`,
+      `${SCENE}/comment/rn`,
+    ]);
+  });
+
+  test('omits scene.annotations when there are no annotations', () => {
+    const { scene } = sceneOf(makeInput({ annotations: [] }));
+    expect(scene.annotations).toBeUndefined();
+  });
+
+  test('omits the initial camera when settings have none', () => {
+    const settings = makeSettings({ cameraPositionInitial: undefined } as any);
+    const { scene } = sceneOf(makeInput({ settings }));
+    expect(scene.items[0].items.some((a: any) => a.id.endsWith('/anno/camera'))).toBe(false);
   });
 });

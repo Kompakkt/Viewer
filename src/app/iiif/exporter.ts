@@ -6,6 +6,7 @@ import {
   type Annotation,
   type Manifest,
   type PointSelector,
+  type Quantity,
   type Reference,
   type Scene,
   type Transform,
@@ -164,36 +165,74 @@ export const exportManifest = (input: ManifestExportInput): ManifestExportResult
       warnings.push(`Light type ${light.type} is not exported`);
       return;
     }
-    const quantityValue = Math.min(1, Math.max(0, light.intensity));
-    if (quantityValue !== light.intensity) {
-      warnings.push(`Light intensity ${light.intensity} clamped to 0..1`);
+    let intensity: Quantity | undefined;
+    if (typeof light.intensity === 'number' && Number.isFinite(light.intensity)) {
+      const quantityValue = Math.min(1, Math.max(0, light.intensity));
+      if (quantityValue !== light.intensity) {
+        warnings.push(`Light intensity ${light.intensity} clamped to 0..1`);
+      }
+      intensity = { type: 'Quantity', quantityValue, unit: 'relative' };
+    } else {
+      warnings.push(`Light ${index + 1}: invalid intensity ignored`);
     }
     painting.push({
       id: `${sceneId}/anno/light/${index + 1}`,
       type: 'Annotation',
       motivation: ['painting'],
-      body: { type, intensity: { type: 'Quantity', quantityValue, unit: 'relative' } },
+      body: { type, ...(intensity ? { intensity } : {}) },
       target: type === 'AmbientLight' ? sceneRef : placedAt(pointToIIIF(toVec3(light.position))),
     });
   });
 
   // Comments
-  const comments: Annotation[] = [...input.annotations]
-    .sort((a, b) => a.ranking - b.ranking)
-    .map(annotation => {
-      const key = String(annotation._id);
-      const cameraBodyId = `${baseId}/camera/comment/${key}`;
-      const { title, description, relatedPerspective } = annotation.body.content;
-      painting.push(
-        cameraAnnotation(
-          `${sceneId}/comment-camera/${key}`,
-          cameraBodyId,
-          relatedPerspective.position,
-          relatedPerspective.target,
-          { behavior: ['hidden'] },
-        ),
-      );
-      return {
+  const rankOf = (a: IAnnotation) =>
+    typeof a.ranking === 'number' && Number.isFinite(a.ranking) ? a.ranking : Number.MAX_SAFE_INTEGER;
+  const usedKeys = new Set<string>();
+  const uniqueKey = (raw: unknown, index: number): string => {
+    const missing = raw === undefined || raw === null || String(raw) === '';
+    const base = missing ? `n${index}` : encodeURIComponent(String(raw));
+    if (missing) warnings.push(`Annotation at position ${index}: missing id, using ${base}`);
+    let key = base;
+    for (let n = 2; usedKeys.has(key); n++) key = `${base}-${n}`;
+    if (key !== base && !missing) warnings.push(`Annotation ${base}: duplicate id, using ${key}`);
+    usedKeys.add(key);
+    return key;
+  };
+
+  const comments: Annotation[] = [];
+  [...input.annotations]
+    .map((annotation, index) => ({ annotation, index }))
+    .sort((a, b) => rankOf(a.annotation) - rankOf(b.annotation) || a.index - b.index)
+    .forEach(({ annotation, index }) => {
+      const rawId = annotation._id;
+      const label0 = rawId === undefined || rawId === null || String(rawId) === '' ? `n${index}` : String(rawId);
+      const referencePoint = annotation.target?.selector?.referencePoint;
+      if (referencePoint === undefined || referencePoint === null) {
+        warnings.push(`Annotation ${label0}: no reference point, skipped`);
+        return;
+      }
+      const key = uniqueKey(rawId, index);
+      const content = annotation.body?.content;
+      const title = content?.title ?? '';
+      const description = content?.description;
+      const perspective = content?.relatedPerspective;
+      let scope: Reference[] | undefined;
+      if (perspective?.position && perspective?.target) {
+        const cameraBodyId = `${baseId}/camera/comment/${key}`;
+        painting.push(
+          cameraAnnotation(
+            `${sceneId}/comment-camera/${key}`,
+            cameraBodyId,
+            perspective.position,
+            perspective.target,
+            { behavior: ['hidden'] },
+          ),
+        );
+        scope = [{ id: cameraBodyId, type: 'PerspectiveCamera' }];
+      } else {
+        warnings.push(`Annotation ${label0}: no camera perspective, exported without a camera`);
+      }
+      comments.push({
         id: `${sceneId}/comment/${key}`,
         type: 'Annotation',
         motivation: ['commenting'],
@@ -203,9 +242,9 @@ export const exportManifest = (input: ManifestExportInput): ManifestExportResult
           format: 'text/markdown',
           label: { none: [title] },
         },
-        target: placedAt(pointToIIIF(toVec3(annotation.target.selector.referencePoint))),
-        scope: [{ id: cameraBodyId, type: 'PerspectiveCamera' }],
-      };
+        target: placedAt(pointToIIIF(toVec3(referencePoint))),
+        ...(scope ? { scope } : {}),
+      });
     });
 
   const scene: Scene = {
