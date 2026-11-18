@@ -128,6 +128,106 @@ describe('parseManifest – errors', () => {
   });
 });
 
+describe('parseManifest – soft warnings for unsupported features', () => {
+  const manifestWith = (annotations: unknown[]) => ({
+    id: 'm',
+    type: 'Manifest',
+    label: { none: ['m'] },
+    items: [
+      {
+        id: 's',
+        type: 'Scene',
+        items: [{ id: 'p', type: 'AnnotationPage', items: annotations }],
+      },
+    ],
+  });
+
+  test('warns on unknown target selector type on a painting annotation and keeps the model', () => {
+    const model = parseManifest(
+      manifestWith([
+        {
+          id: 'model',
+          type: 'Annotation',
+          motivation: ['painting'],
+          body: { id: 'https://example.org/pawn.glb', type: 'Model' },
+          target: {
+            type: 'SpecificResource',
+            source: { id: 's', type: 'Scene' },
+            selector: [
+              { type: 'PointSelector', x: 0, y: 1, z: 0 },
+              { type: 'WktSelector', value: 'POINT(0 1)' },
+            ],
+          },
+        },
+      ]),
+    );
+    expect(model.models).toHaveLength(1);
+    expect(model.warnings.some(w => w.includes('Unsupported selector type "WktSelector"'))).toBe(true);
+  });
+
+  test('parses a comment with a PointSelector and warns on an unknown FragmentSelector', () => {
+    const model = parseManifest(
+      manifestWith([
+        {
+          id: 'comment',
+          type: 'Annotation',
+          motivation: ['commenting'],
+          body: { type: 'TextualBody', value: 'Hello', format: 'text/plain' },
+          target: {
+            type: 'SpecificResource',
+            source: { id: 's', type: 'Scene' },
+            selector: [
+              { type: 'PointSelector', x: 1, y: 2, z: 3 },
+              { type: 'FragmentSelector', value: 't=1,2' },
+            ],
+          },
+        },
+      ]),
+    );
+    expect(model.comments).toHaveLength(1);
+    expect(model.comments[0].point).toEqual({ x: 1, y: 2, z: 3 });
+    expect(model.warnings.some(w => w.includes('FragmentSelector'))).toBe(true);
+  });
+
+  test('warns on exclude for a commenting annotation', () => {
+    const model = parseManifest(
+      manifestWith([
+        {
+          id: 'comment',
+          type: 'Annotation',
+          motivation: ['commenting'],
+          exclude: ['audio'],
+          body: { type: 'TextualBody', value: 'Hello', format: 'text/plain' },
+          target: {
+            type: 'SpecificResource',
+            source: { id: 's', type: 'Scene' },
+            selector: [{ type: 'PointSelector', x: 1, y: 2, z: 3 }],
+          },
+        },
+      ]),
+    );
+    expect(model.comments).toHaveLength(1);
+    expect(model.warnings.some(w => w.includes('"exclude"'))).toBe(true);
+  });
+
+  test('still warns on exclude for a painting annotation', () => {
+    const model = parseManifest(
+      manifestWith([
+        {
+          id: 'light',
+          type: 'Annotation',
+          motivation: ['painting'],
+          exclude: ['audio'],
+          body: { type: 'AmbientLight', color: '#FFFFFF' },
+          target: { id: 's', type: 'Scene' },
+        },
+      ]),
+    );
+    expect(model.lights).toHaveLength(1);
+    expect(model.warnings.some(w => w.includes('"exclude"'))).toBe(true);
+  });
+});
+
 const DEMO_DIR = join(import.meta.dir, '..', '..', '..', 'demos', 'iiif-3d');
 const demoFiles = existsSync(DEMO_DIR) ? [...new Glob('**/*.json').scanSync(DEMO_DIR)] : [];
 

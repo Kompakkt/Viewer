@@ -127,15 +127,14 @@ const LIGHT_KINDS: Record<string, LightKind> = {
   spotlight: 'spot',
 };
 
+const SUPPORTED_SELECTOR_TYPES = ['PointSelector', 'PolygonZSelector'];
+
 const parsePainting = (annotation: Json, manifest: Json, model: IIIFSceneModel) => {
   const id = String(annotation['id']);
-  if (asArray(annotation['exclude']).length) {
-    model.warnings.push(`Annotation ${id}: "exclude" is not supported and was ignored`);
-  }
+  const position = targetPoint(annotation);
 
   for (const rawBody of asArray<Json>(annotation['body'])) {
     const { source, transforms, type } = unwrapBody(rawBody);
-    const position = targetPoint(annotation);
 
     if (type === 'model') {
       if (typeof source['id'] !== 'string') {
@@ -242,6 +241,17 @@ export const parseManifest = (input: unknown): IIIFSceneModel => {
     }
     for (const annotation of page['items'] as Json[]) {
       if (annotation?.['type'] !== 'Annotation') continue;
+      const id = String(annotation['id']);
+      if (asArray(annotation['exclude']).length) {
+        model.warnings.push(`Annotation ${id}: "exclude" is not supported and was ignored`);
+      }
+      for (const selector of targetSelectors(annotation)) {
+        if (!SUPPORTED_SELECTOR_TYPES.includes(selector?.['type'])) {
+          model.warnings.push(
+            `Annotation ${id}: Unsupported selector type "${selector?.['type']}" was ignored`,
+          );
+        }
+      }
       if (isComment(annotation)) {
         const comment = parseComment(annotation, model.warnings);
         if (comment) model.comments.push(comment);
