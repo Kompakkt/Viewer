@@ -90,7 +90,10 @@ const applyTransforms = (node: TransformNode, transforms: IIIFTransform[]) => {
 };
 
 const getMeshBounds = (meshes: AbstractMesh[]) => {
-  const boxes = meshes.filter(m => !m.isDisposed()).map(m => m.getBoundingInfo().boundingBox);
+  const boxes = meshes.filter(m => !m.isDisposed()).map(m => {
+    m.computeWorldMatrix(true);
+    return m.getBoundingInfo().boundingBox;
+  });
   if (!boxes.length) return undefined;
   const min = boxes.map(b => b.minimumWorld).reduce((a, b) => Vector3.Minimize(a, b));
   const max = boxes.map(b => b.maximumWorld).reduce((a, b) => Vector3.Maximize(a, b));
@@ -383,8 +386,14 @@ export class IIIFSceneBuilderService {
 
   private automoveCamera(transformNodes: TransformNode[]) {
     const boxes = transformNodes
-      .flatMap(node => node.getChildMeshes(false).filter((m): m is Mesh => m instanceof Mesh))
-      .map(mesh => mesh.getBoundingInfo().boundingBox)
+      .flatMap(node => {
+        node.computeWorldMatrix(true);
+        return node.getChildMeshes(false).filter((m): m is Mesh => m instanceof Mesh);
+      })
+      .map(mesh => {
+        mesh.computeWorldMatrix(true);
+        return mesh.getBoundingInfo().boundingBox;
+      })
       .filter(box => box.extendSizeWorld.asArray().some(v => v > 0));
     if (!boxes.length) return;
 
