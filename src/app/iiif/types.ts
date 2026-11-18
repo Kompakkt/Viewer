@@ -36,6 +36,12 @@ export interface Value {
   unit?: string;
 }
 
+export interface Quantity {
+  type: 'Quantity';
+  quantityValue: number;
+  unit: string;
+}
+
 export interface Resource {
   id?: string;
   type: string;
