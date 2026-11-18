@@ -31,7 +31,9 @@ Neues Verzeichnis `src/app/iiif/`:
 |---|---|---|
 | `types.ts` | TypeScript-Typen für den genutzten Teil von IIIF 4.0: Manifest, Scene, AnnotationPage, Annotation, SpecificResource, PointSelector, Scale-/Rotate-/TranslateTransform, PerspectiveCamera, Lichter | – |
 | `model.ts` | Babylon-freies internes Modell `IIIFSceneModel`: Modelle mit URL, Format und Transforms, Kameras, Lichter, Hintergrund, Kommentare mit Punkt und optionaler Kamera, `warnings` | – |
-| `coordinates.ts` | Einzige Stelle für die Umrechnung zwischen IIIF und Babylon (`toBabylon`/`toIIIF` für Punkte und Rotationen) | – |
+| `coordinates.ts` | Einzige Stelle für die Umrechnung zwischen IIIF und Babylon (`pointToBabylon`/`pointToIIIF`, `rotationToBabylon`/`rotationToIIIF`) sowie zwischen Kompakkts ArcRotate-Werten (alpha, beta, radius) und kartesischen Positionen | – |
+| `color.ts` | Hex ↔ RGB (0–255) | – |
+| `comments.ts` | Reine Abbildung Kommentar → `IAnnotation` und IIIF-Kamera → `ICameraPerspective` | model, coordinates |
 | `parser.ts` | `parseManifest(json): IIIFSceneModel`. Reine Funktion. | types, model |
 | `scene-builder.ts` | Setzt `IIIFSceneModel` in Babylon um (Meshes, Kamera, Lichter) und erzeugt `IAnnotation[]` | model, coordinates, BabylonService |
 | `exporter.ts` | `exportManifest(entity, settings, annotations): Manifest`. Reine Funktion. | types, coordinates |
@@ -47,6 +49,7 @@ Neues Verzeichnis `src/app/iiif/`:
 - **Punkte:** `(x, y, z)` ↔ `(-x, y, z)`.
 - **Rotationen** werden in Grad angegeben, in IIIF wie in `IEntitySettings.rotation`. Wegen der Spiegelung an der X-Achse bleibt die Rotation um X erhalten, die Rotationen um Y und Z wechseln das Vorzeichen.
 - `scene.useRightHandedSystem` wird **nicht** umgestellt, weil das bestehende Kompakkt-Szenen beeinflussen würde.
+- **Kameras in Kompakkt:** `cameraPositionInitial.position` und `relatedPerspective.position` enthalten **keine** kartesische Position, sondern die ArcRotate-Werte `x = alpha`, `y = beta`, `z = radius` relativ zu `target` (siehe `cameraManager.getInitialPosition`). Für IIIF wird daraus `target + (r·cos α·sin β, r·cos β, r·sin α·sin β)` im Babylon-Raum berechnet und danach nach IIIF umgerechnet. Beim Import gilt der umgekehrte Weg.
 
 ## Abbildung beim Export
 
@@ -63,7 +66,7 @@ Neues Verzeichnis `src/app/iiif/`:
 | `ranking` | Reihenfolge der Items in der AnnotationPage |
 | `referenceNormal`, `preview`, `validated` | entfällt |
 
-**IDs:** Basis ist die öffentliche Entity-URL, sonst `urn:kompakkt:<entityId>`. Daraus werden hierarchische Unter-IDs abgeleitet (`…/scene/1`, `…/scene/1/page/1`, `…/anno/<annotationId>`). Jede ID ist im Manifest eindeutig.
+**IDs:** Basis ist `urn:kompakkt:<entityId>`. Optional kann der Exporter eine öffentliche Basis-URL erhalten (`baseId`); im ersten Schritt nutzt die UI das noch nicht. Daraus werden hierarchische Unter-IDs abgeleitet (`…/scene/1`, `…/scene/1/page/1`, `…/anno/<annotationId>`). Jede ID ist im Manifest eindeutig.
 
 `@context` ist `http://iiif.io/api/presentation/4/context.json`.
 
@@ -77,7 +80,8 @@ Neues Verzeichnis `src/app/iiif/`:
 ## Fehlerbehandlung
 
 - **Harte Fehler**, gemeldet über `MessageService` mit Abbruch des Imports: ungültiges JSON, kein `type: "Manifest"`, keine Scene.
-- **Weiche Fehler**: Der Parser sammelt `warnings[]` für nicht unterstützte Features (zum Beispiel `exclude`, verschachtelte Scenes, Audio, OrthographicCamera, unbekannte Selektoren), lädt den Rest und gibt die Warnungen in der Konsole aus.
+- **Weiche Fehler**: Der Parser sammelt `warnings[]` für nicht unterstützte Features (zum Beispiel `exclude`, verschachtelte Scenes, Audio, unbekannte Body-Typen und Selektoren), lädt den Rest und gibt die Warnungen in der Konsole aus.
+- **Ältere Kommentarform:** Kommentare mit `bodyValue` statt `TextualBody`, wie in den bisherigen Demo-Manifesten, werden weiterhin gelesen.
 - **Export:** Ist die Modell-URL nicht öffentlich (`blob:`, `file:`, `localhost`), erscheint eine Warnung. Die Datei wird trotzdem gespeichert.
 
 ## Tests
@@ -107,5 +111,6 @@ Fünf aufeinander aufbauende PRs:
 
 - Kompakkt-eigene IIIF-Erweiterungen bzw. ein eigener `@context`
 - Speichern importierter Annotationen im Backend
-- Timelines, Audio-Emitter, verschachtelte Scenes, OrthographicCamera (nur Warnung)
+- Timelines, Audio-Emitter, verschachtelte Scenes, `exclude` (nur Warnung)
+- OrthographicCamera und Canvas-in-Scene (PolygonZSelector) werden **wie bisher** unterstützt, aber nicht erweitert und nicht exportiert.
 - Umstellung auf `useRightHandedSystem`
