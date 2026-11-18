@@ -30,6 +30,26 @@
   </section>
 
   <section>
+    <h2>From File</h2>
+    <input
+      #fileInput
+      type="file"
+      accept=".json,.jsonld,application/json,application/ld+json"
+      (change)="onManifestFileSelected($event)"
+    />
+    <p class="filename" *ngIf="manifestFile">{{ manifestFile.name }}</p>
+    <k-button-row>
+      <k-button
+        type="solid-primary"
+        (click)="importFromFile(fileInput)"
+        [disabled]="!manifestFile || isImportingFile"
+      >
+        {{ isImportingFile ? 'Importing...' : 'Import File' }}
+      </k-button>
+    </k-button-row>
+  </section>
+
+  <section>
     <h2>From JSON</h2>
     <textarea
       rows="8"

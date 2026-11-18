@@ -16,6 +16,8 @@ export class DialogIiifImportComponent {
   manifestUrl = '';
   manifestJsonText = '';
   isImportingUrl = false;
+  manifestFile: File | undefined;
+  isImportingFile = false;
 
   exampleManifestGroups = [
     {
@@ -251,6 +253,35 @@ export class DialogIiifImportComponent {
       this.message.error('Manifest could not be loaded from URL.');
     } finally {
       this.isImportingUrl = false;
+    }
+  }
+
+  onManifestFileSelected(event: Event) {
+    this.manifestFile = (event.target as HTMLInputElement).files?.[0];
+  }
+
+  async importFromFile(fileInput: HTMLInputElement) {
+    const file = this.manifestFile;
+    if (!file || this.isImportingFile) return;
+    this.isImportingFile = true;
+    try {
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(await file.text());
+      } catch (error) {
+        console.error(error);
+        this.message.error(`"${file.name}" is not a valid JSON file.`);
+        return;
+      }
+      await this.processing.importIIIF3DManifestJson(parsed as object);
+      this.manifestFile = undefined;
+      fileInput.value = '';
+      this.closeDialogIfPresent();
+    } catch (error) {
+      console.error(error);
+      this.message.error('Manifest file could not be imported.');
+    } finally {
+      this.isImportingFile = false;
     }
   }
 
