@@ -551,6 +551,8 @@ export class ProcessingService {
       name: 'Standalone Entity',
       relatedDigitalEntity: { _id: 'standalone_entity' },
       settings: minimalSettings,
+      // Remember the loaded model URL so features like the IIIF export resolve it
+      externalFile: url,
     };
 
     const getResource = async <T extends unknown>(
