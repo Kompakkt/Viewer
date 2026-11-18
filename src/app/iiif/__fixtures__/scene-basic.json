@@ -1,0 +1,120 @@
+{
+  "@context": "http://iiif.io/api/presentation/4/context.json",
+  "id": "https://example.org/iiif/basic.json",
+  "type": "Manifest",
+  "label": { "en": ["Basic Scene"] },
+  "items": [
+    {
+      "id": "https://example.org/iiif/scene/1",
+      "type": "Scene",
+      "label": { "en": ["Scene"] },
+      "backgroundColor": "#99CCFF",
+      "items": [
+        {
+          "id": "https://example.org/iiif/scene/1/page/1",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://example.org/iiif/scene/1/anno/model",
+              "type": "Annotation",
+              "motivation": ["painting"],
+              "body": {
+                "type": "SpecificResource",
+                "source": {
+                  "id": "https://example.org/models/pawn.glb",
+                  "type": "Model",
+                  "format": "model/gltf-binary"
+                },
+                "transform": [
+                  { "type": "ScaleTransform", "x": 2, "y": 2, "z": 2 },
+                  { "type": "RotateTransform", "x": 0, "y": 90, "z": 0 },
+                  { "type": "TranslateTransform", "x": 1, "y": 0, "z": 0 }
+                ]
+              },
+              "target": {
+                "type": "SpecificResource",
+                "source": { "id": "https://example.org/iiif/scene/1", "type": "Scene" },
+                "selector": [{ "type": "PointSelector", "x": 0, "y": 1, "z": 0 }]
+              }
+            },
+            {
+              "id": "https://example.org/iiif/scene/1/anno/camera",
+              "type": "Annotation",
+              "motivation": ["painting"],
+              "body": {
+                "type": "PerspectiveCamera",
+                "fieldOfView": 50,
+                "lookAt": { "id": "https://example.org/iiif/scene/1/anno/model", "type": "Annotation" }
+              },
+              "target": {
+                "type": "SpecificResource",
+                "source": { "id": "https://example.org/iiif/scene/1", "type": "Scene" },
+                "selector": [{ "type": "PointSelector", "x": 0, "y": 6, "z": 10 }]
+              }
+            },
+            {
+              "id": "https://example.org/iiif/scene/1/anno/light",
+              "type": "Annotation",
+              "motivation": ["painting"],
+              "body": {
+                "type": "AmbientLight",
+                "color": "#FFFFFF",
+                "intensity": { "type": "Value", "value": 0.6, "unit": "relative" }
+              },
+              "target": { "id": "https://example.org/iiif/scene/1", "type": "Scene" }
+            },
+            {
+              "id": "https://example.org/iiif/scene/1/anno/audio",
+              "type": "Annotation",
+              "motivation": ["painting"],
+              "body": { "id": "https://example.org/audio.mp3", "type": "Sound" },
+              "target": { "id": "https://example.org/iiif/scene/1", "type": "Scene" }
+            }
+          ]
+        }
+      ],
+      "annotations": [
+        {
+          "id": "https://example.org/iiif/scene/1/comments",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://example.org/iiif/scene/1/comment/1",
+              "type": "Annotation",
+              "motivation": ["commenting"],
+              "body": {
+                "type": "TextualBody",
+                "value": "Base of the pawn.",
+                "format": "text/plain",
+                "label": { "en": ["Base"] }
+              },
+              "target": {
+                "type": "SpecificResource",
+                "source": { "id": "https://example.org/iiif/scene/1", "type": "Scene" },
+                "selector": [{ "type": "PointSelector", "x": 0.5, "y": 0.25, "z": 0 }]
+              },
+              "scope": [{ "id": "https://example.org/iiif/scene/1/anno/camera", "type": "Annotation" }]
+            },
+            {
+              "id": "https://example.org/iiif/scene/1/comment/legacy",
+              "type": "Annotation",
+              "bodyValue": "Legacy comment",
+              "target": {
+                "type": "SpecificResource",
+                "source": [{ "id": "https://example.org/iiif/scene/1", "type": "Scene" }],
+                "selector": [{ "type": "PointSelector", "x": 1, "y": 2, "z": 3 }]
+              }
+            },
+            {
+              "id": "https://example.org/iiif/scene/1/comment/nopoint",
+              "type": "Annotation",
+              "motivation": ["commenting"],
+              "body": { "type": "TextualBody", "value": "No point" },
+              "target": { "id": "https://example.org/iiif/scene/1", "type": "Scene" }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
