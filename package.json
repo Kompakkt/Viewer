@@ -53,10 +53,11 @@
     "@babylonjs/loaders": "9.32.1",
     "@babylonjs/materials": "9.32.1",
     "@babylonjs/serializers": "9.32.1",
-    "@kompakkt/common": "git+https://github.com/Kompakkt/Common.git#044af84217ffafddad839841cc35a9e9027f5e3c",
+    "@fluent/bundle": "^0.19.1",
+    "@kompakkt/common": "git+https://github.com/Kompakkt/Common.git#1ff4f862a5464d8cd236755a900f3722202552a9",
     "@kompakkt/fragments": "git+https://github.com/Kompakkt/engine_fragment#a58a35a1cc530c4d0589df197e99da82eae6d1fa",
-    "@kompakkt/komponents": "git+https://github.com/Kompakkt/Komponents.git#a8299aa77713b01270aa43d2a69a3a6ba26959e7",
-    "@kompakkt/plugins": "git+https://github.com/Kompakkt/Plugins.git#0ff71dfc2f48041b5e8ea3d652f7c0101f2813ad",
+    "@kompakkt/komponents": "git+https://github.com/Kompakkt/Komponents.git#7d4ad1ec8fa03e09ead55bbf667afea5db97f9f7",
+    "@kompakkt/plugins": "git+https://github.com/Kompakkt/Plugins.git#447fce604c076da32a8e24f909bab3aea2f81e68",
     "@kompakkt/server-openapi": "git+https://github.com/Kompakkt/Server.git#9728b208cecb7b7193448324025a94b9c35ac1f2",
     "bson-objectid": "^2.0.4",
     "copc": "^0.0.8",
@@ -97,8 +98,8 @@
     },
     "@kompakkt/plugins": {
       "@angular/core": "22.2.3",
-      "@kompakkt/common": "git+https://github.com/Kompakkt/Common.git#044af84217ffafddad839841cc35a9e9027f5e3c",
-      "@kompakkt/komponents": "git+https://github.com/Kompakkt/Komponents.git#a8299aa77713b01270aa43d2a69a3a6ba26959e7"
+      "@kompakkt/common": "git+https://github.com/Kompakkt/Common.git#1ff4f862a5464d8cd236755a900f3722202552a9",
+      "@kompakkt/komponents": "git+https://github.com/Kompakkt/Komponents.git#7d4ad1ec8fa03e09ead55bbf667afea5db97f9f7"
     }
   },
   "trustedDependencies": [

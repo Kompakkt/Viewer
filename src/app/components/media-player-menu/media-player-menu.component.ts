@@ -1,5 +1,13 @@
-import { Component, computed, effect, inject, Pipe, PipeTransform, signal, ChangeDetectionStrategy } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  Pipe,
+  PipeTransform,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { Sound } from '@babylonjs/core';
 import { ButtonComponent, SliderComponent } from '@kompakkt/komponents';
@@ -82,7 +90,7 @@ export class MediaPlayerMenuComponent {
   togglePlay() {
     const el = this.mediaElement();
     if (!el) return;
-    this.isPlaying ? el.pause() : el.play();
+    void (this.isPlaying ? el.pause() : el.play());
   }
 
   constructor() {

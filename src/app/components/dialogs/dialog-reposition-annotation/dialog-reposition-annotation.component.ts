@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { ButtonComponent, ButtonRowComponent } from '@kompakkt/komponents';
-import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { FluentPipe } from '../../../pipes/fluent.pipe';
 import { Vector3 } from '@babylonjs/core';
 
 export type RepositionAnnotationDialogChoice = 'apply' | 'reset';
@@ -13,7 +13,7 @@ type ChangedPositions = {
 
 @Component({
   selector: 'app-dialog-reposition-annotation',
-  imports: [ButtonComponent, ButtonRowComponent, TranslatePipe],
+  imports: [ButtonComponent, ButtonRowComponent, FluentPipe],
   templateUrl: './dialog-reposition-annotation.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './dialog-reposition-annotation.component.scss',

@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FixImageUrlPipe } from 'src/app/pipes/fix-image-url.pipe';
 import { ICompilation, IEntity } from '@kompakkt/common';
-import { TranslatePipe } from '../../pipes/translate.pipe';
+import { FluentPipe } from '../../pipes/fluent.pipe';
 import { ProcessingService } from '../../services/processing/processing.service';
 import { ButtonComponent, ButtonRowComponent, TooltipDirective } from '@kompakkt/komponents';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,7 +13,7 @@ import { BackendService } from 'src/app/services/backend/backend.service';
   styleUrls: ['./compilation-browser.component.scss'],
   changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
-    TranslatePipe,
+    FluentPipe,
     FixImageUrlPipe,
     ButtonComponent,
     ButtonRowComponent,

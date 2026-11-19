@@ -1,33 +1,31 @@
-import { Injectable, signal } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { inject, Injectable, signal } from '@angular/core';
+import { TranslateService } from '../translate/translate.service';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class LoadingScreenService {
-  public opacity$ = new BehaviorSubject<string>('1');
-  public loadingText$ = new BehaviorSubject<string>('Loading');
+  #translate = inject(TranslateService);
+  opacity = signal<string>('1');
+  loadingText = signal<string>(this.#translate.getTranslation('k_loadingscreen-text', { percentage: 0 }));
+  isLoading = signal(false);
 
-  public isLoading = signal(false);
-
-  public show() {
+  show() {
     this.updateOpacity('1');
   }
 
-  public hide() {
+  hide() {
     this.updateOpacity('0');
   }
 
-  public updateOpacity(newOpacity: string): void {
+  updateOpacity(newOpacity: string): void {
     if (parseFloat(newOpacity) > 0.5) {
       this.isLoading.set(true);
     } else {
       this.isLoading.set(false);
     }
-    this.opacity$.next(newOpacity);
+    this.opacity.set(newOpacity);
   }
 
-  public updateLoadingText(newText: string): void {
-    this.loadingText$.next(newText);
+  updateLoadingPercentage(percentage: number): void {
+    this.loadingText.set(      this.#translate.getTranslation('k_loadingscreen-text', { percentage })    );
   }
 }

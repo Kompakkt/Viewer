@@ -1,4 +1,4 @@
-import { copyArrayItem, moveItemInArray } from '@angular/cdk/drag-drop';
+import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
@@ -12,15 +12,7 @@ import {
   UtilityLayerRenderer,
   Vector3,
 } from '@babylonjs/core';
-import {
-  BehaviorSubject,
-  Observable,
-  ReplaySubject,
-  combineLatest,
-  firstValueFrom,
-  fromEvent,
-} from 'rxjs';
-import { distinct, filter, map, switchMap } from 'rxjs/operators';
+import { firstValueFrom, fromEvent } from 'rxjs';
 import { IAnnotation, asVector3, isAnnotation } from '@kompakkt/common';
 import { annotationFallback, annotationLogo } from '../../../assets/annotations/annotations';
 import {
@@ -136,12 +128,10 @@ export class AnnotationService {
     });
 
     effect(() => {
-      const activeAnnotations = this.activeAnnotations();
       return this.redrawMarker();
     });
 
     effect(() => {
-      const sortedAnnotations = this.sortedAnnotations();
       return this.changedRankingPositions();
     });
   }
@@ -247,11 +237,11 @@ export class AnnotationService {
     const allAnnotations = this.activeAnnotations();
     const hiddenAnnotations = this.hiddenAnnotations();
     // Hide all markers except the one we want to reposition, to avoid confusion during repositioning
-    this.hiddenAnnotations.set([
-      ...allAnnotations
+    this.hiddenAnnotations.set(
+      allAnnotations
         .filter(anno => anno._id.toString() !== annotation._id.toString())
         .map(anno => anno._id.toString()),
-    ]);
+    );
 
     const originalLocalPosition = marker.position.clone();
     marker.computeWorldMatrix(true);
@@ -824,7 +814,7 @@ export class AnnotationService {
 
   public setAnnotationVisibility(id: string, visible: boolean) {
     if (visible) {
-      this.hiddenAnnotations.update(hidden => [...hidden.filter(x => x !== id)]);
+      this.hiddenAnnotations.update(hidden => hidden.filter(x => x !== id));
     } else {
       this.hiddenAnnotations.update(hidden => [...hidden, id]);
     }

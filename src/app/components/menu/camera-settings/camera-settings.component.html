@@ -1,19 +1,21 @@
 <div id="camera-settings" [class.opened]="opened()" (click)="$event.stopPropagation()">
   <div id="camera-type-notification" [class.opened]="showNotification() !== undefined">
-    {{ showNotification() }}
+    @if (showNotification(); as notification) {
+      {{ notification | fluent }}
+    }
   </div>
 
   <div class="title-style">
-    <h1>{{ 'Camera settings' | translate }}</h1>
+    <h1>{{ 'k_camera-settings-title' | fluent }}</h1>
     <k-button icon-button color="solid-primary" (click)="opened.set(false)"
       ><mat-icon>close</mat-icon></k-button
     >
   </div>
 
-  <p>{{ 'Type' | translate }}</p>
+  <p>{{ 'k_camera-settings-type-label' | fluent }}</p>
   @if (annotationService.isAnnotationMode()) {
     <p>
-      {{ 'Switching the camera type is not supported while annotating' | translate }}
+      {{ 'k_camera-settings-annotation-mode-hint' | fluent }}
     </p>
   } @else {
     <k-button-row>
@@ -21,19 +23,19 @@
         (click)="babylon.cameraManager.setCameraType('ArcRotateCamera')"
         [type]="cameraType() === 'ArcRotateCamera' ? 'solid-primary' : 'outlined-primary'"
         full-width
-        >{{ 'Orbit' | translate }}</k-button
+        >{{ 'k_camera-settings-camera-type-orbit' | fluent }}</k-button
       >
       <k-button
         (click)="babylon.cameraManager.setCameraType('UniversalCamera')"
         [type]="cameraType() === 'UniversalCamera' ? 'solid-primary' : 'outlined-primary'"
         full-width
-        >{{ 'Free' | translate }}</k-button
+        >{{ 'k_camera-settings-camera-type-free' | fluent }}</k-button
       >
     </k-button-row>
   }
 
   <k-slider
-    [label]="('Speed' | translate) + ' (' + cameraSpeed() + 'x)'"
+    [label]="'k_camera-settings-speed-label' | fluent: { speed: cameraSpeed() }"
     [min]="25"
     [max]="200"
     [showInfo]="false"
@@ -44,6 +46,6 @@
 
   <hr />
   <k-button (click)="resetCamera()" type="outlined-secondary">{{
-    'Reset camera' | translate
+    'k_camera-settings-reset-button' | fluent
   }}</k-button>
 </div>

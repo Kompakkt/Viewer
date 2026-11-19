@@ -1,18 +1,22 @@
-<h2>{{ 'Edit item' | translate }}</h2>
+<h2>{{ 'k_edit-timeline-item-dialog-title' | fluent }}</h2>
 
-<span class="title">{{ 'Name' | translate }}: {{ timelineItem.name }}</span>
-<span>{{ 'Duration' | translate }}: {{ timelineItem.duration }}</span>
+<span class="title">
+  {{ 'k_edit-timeline-item-dialog-name' | fluent: { name: timelineItem.name } }}
+</span>
+<span>
+  {{ 'k_edit-timeline-item-dialog-duration' | fluent: { duration: timelineItem.duration } }}
+</span>
 
 @switch (timelineItem.kind) {
   @case ('sequence') {
     <k-slide-toggle
-      [label]="'Hold end state' | translate"
+      [label]="'k_edit-timeline-item-dialog-hold-label' | fluent"
       [(checked)]="holdEndState"
     ></k-slide-toggle>
   }
   @case ('spacer') {
     <k-input
-      [label]="'New duration' | translate"
+      [label]="'k_edit-timeline-item-dialog-new-duration-label' | fluent"
       type="number"
       [min]="1"
       [max]="10000"
@@ -24,9 +28,9 @@
 
 <k-button-row>
   <k-button full-width type="solid-transparent" (click)="cancel()">
-    {{ 'Cancel' | translate }}
+    {{ 'k_button-cancel' | fluent }}
   </k-button>
   <k-button full-width type="solid-primary" (click)="save()">
-    {{ 'Save' | translate }}
+    {{ 'k_button-save' | fluent }}
   </k-button>
 </k-button-row>

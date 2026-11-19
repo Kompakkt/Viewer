@@ -1,4 +1,4 @@
-<h1>{{ 'Settings' | translate }}</h1>
+<h1>{{ 'k_entity-feature-settings-title' | fluent }}</h1>
 
 @if (settingsReady()) {
   @if (processing.settings(); as settings) {
@@ -6,50 +6,58 @@
       @if (entitySettings.helpersReady()) {
         <k-wizard direction="vertical" [linear]="true" #stepper>
           @if (processing.hasMeshSettings()) {
-            <k-wizard-step [label]="'Mesh settings' | translate">
+            <k-wizard-step [label]="'k_entity-feature-settings-mesh-heading' | fluent">
               <app-entity-feature-settings-mesh />
               <k-button type="solid-primary" (click)="showNextAlertFirstStep()">{{
-                'Save mesh settings' | translate
+                'k_entity-feature-settings-mesh-save-button' | fluent
               }}</k-button>
             </k-wizard-step>
           }
-          <k-wizard-step #lightsStep [label]="'Background and lights' | translate">
+          <k-wizard-step
+            #lightsStep
+            [label]="'k_entity-feature-settings-background-lights-heading' | fluent"
+          >
             <div class="wizard-step-content">
-              <k-details [title]="'Background' | translate">
+              <k-details [title]="'k_entity-feature-settings-background-heading' | fluent">
                 <div class="skybox-upload-status">
                   @if (skyboxUploadBusy()) {
-                    <p class="wizard-step-text">{{ 'Converting skybox...' | translate }}</p>
+                    <p class="wizard-step-text">
+                      {{ 'k_entity-feature-settings-skybox-converting-message' | fluent }}
+                    </p>
                   } @else if (skyboxUploadError()) {
                     <p class="wizard-step-text">{{ skyboxUploadError() }}</p>
                   }
                 </div>
                 <k-select [value]="selectedSkybox()" (valueChange)="setSkybox($event)">
                   <k-menu-option value="custom">{{
-                    'Custom background color' | translate
+                    'k_entity-feature-settings-background-color-option' | fluent
                   }}</k-menu-option>
                   @for (skybox of skyboxPresets; track skybox.id) {
-                    <k-menu-option [value]="skybox.id">{{ skybox.label }}</k-menu-option>
+                    <k-menu-option [value]="skybox.id">{{ skybox.label | fluent }}</k-menu-option>
                   }
                   <k-menu-option value="custom-upload">{{
-                    'Custom skybox (upload)...' | translate
+                    'k_entity-feature-settings-skybox-upload-option' | fluent
                   }}</k-menu-option>
                 </k-select>
 
                 @if (selectedSkybox() === 'custom') {
                   <app-color-field
-                    [label]="'Background color' | translate"
+                    [label]="'k_entity-feature-settings-background-color-label' | fluent"
                     [color]="settings.localSettings.background.color"
                     (colorChange)="setBackgroundColor($event)"
                   />
 
                   <k-labelled-checkbox
-                    [label]="'Gradient-brightness effect' | translate"
+                    [label]="'k_entity-feature-settings-gradient-effect-label' | fluent"
                     (checkedChange)="setBackgroundEffect($event)"
                     [checked]="settings.localSettings.background.effect"
                   />
                 } @else {
                   <k-slider
-                    [label]="('Micro surface' | translate) + ': ' + skyboxMicroSurface()"
+                    [label]="
+                      'k_entity-feature-settings-micro-surface-label'
+                        | fluent: { value: skyboxMicroSurface() }
+                    "
                     [min]="0"
                     [max]="1"
                     [step]="0.01"
@@ -59,12 +67,12 @@
                 }
 
                 <k-button (click)="resetBackground()" type="outlined-primary">
-                  {{ 'Reset background' | translate }}
+                  {{ 'k_entity-feature-settings-background-reset-button' | fluent }}
                 </k-button>
               </k-details>
 
               <k-details
-                [title]="'Lights' | translate"
+                [title]="'k_entity-feature-settings-lights-heading' | fluent"
                 [expanded]="lightsDetailsExpanded()"
                 (expandedChange)="lightsDetailsExpanded.set($event)"
               >
@@ -73,106 +81,104 @@
             </div>
 
             <k-button type="solid-primary" (click)="completeBackgroundStep()">{{
-              'Save background and lights' | translate
+              'k_entity-feature-settings-background-lights-save-button' | fluent
             }}</k-button>
           </k-wizard-step>
           @if (processing.mediaType() !== 'audio') {
-            <k-wizard-step [label]="'Preview and initial perspective' | translate">
+            <k-wizard-step [label]="'k_entity-feature-settings-preview-heading' | fluent">
               <div class="wizard-step-content wizard-step-content-dark">
                 <p class="wizard-step-text">
-                  {{
-                    'Please select a nice and fitting camera perspective for your object by moving it to the desired position. Click “Save preview” to set the current view as initial perspective. - Smile!'
-                      | translate
-                  }}
+                  {{ 'k_entity-feature-settings-preview-hint' | fluent }}
                 </p>
               </div>
 
               <k-button type="solid-primary" (click)="setPerspectiveStep()">{{
-                'Save preview and initial perspective' | translate
+                'k_entity-feature-settings-preview-save-button' | fluent
               }}</k-button>
             </k-wizard-step>
           }
           @if (!processing.isStandalone()) {
-            <k-wizard-step [label]="'Confirm' | translate">
+            <k-wizard-step [label]="'k_entity-feature-settings-confirm-heading' | fluent">
               <div class="wizard-step-content wizard-step-content-dark">
                 <p class="wizard-step-text">
-                  {{ 'You set all settings and we celebrate it with this preview.' | translate }}
+                  {{ 'k_entity-feature-settings-confirm-message' | fluent }}
                 </p>
 
                 <img class="previewimage" [src]="settings.localSettings.preview | fixImageUrl" />
 
                 <p class="wizard-step-text">
-                  {{
-                    'Please save the settings if you are done. Or go back to make changes. Afterwards you may add annotations.'
-                      | translate
-                  }}
+                  {{ 'k_entity-feature-settings-confirm-save-hint' | fluent }}
                 </p>
               </div>
 
               <k-button type="outlined-primary" (click)="stepper.prevStep()">{{
-                'Back' | translate
+                'k_button-back' | fluent
               }}</k-button>
 
               <k-button type="solid-primary" (click)="saveSettings()">{{
-                'Save' | translate
+                'k_button-save' | fluent
               }}</k-button>
             </k-wizard-step>
           } @else {
-            <k-wizard-step [label]="'Export' | translate">
+            <k-wizard-step [label]="'k_button-export' | fluent">
               <div class="wizard-step-content wizard-step-content-dark">
                 <p class="wizard-step-text">
-                  {{
-                    'Your settings can now be exported and loaded in the standalone Kompakkt viewer.'
-                      | translate
-                  }}
+                  {{ 'k_entity-feature-settings-export-message' | fluent }}
                 </p>
 
                 <img class="previewimage" [src]="settings.localSettings.preview | fixImageUrl" />
               </div>
               <k-button type="outlined-primary" (click)="stepper.prevStep()">{{
-                'Back' | translate
+                'k_button-back' | fluent
               }}</k-button>
               <k-button type="solid-primary" (click)="exportSettings()">{{
-                'Export' | translate
+                'k_button-export' | fluent
               }}</k-button>
             </k-wizard-step>
           }
         </k-wizard>
       }
     } @else {
-      <k-details [title]="'Background' | translate">
+      <k-details [title]="'k_entity-feature-settings-background-heading' | fluent">
         <div class="skybox-upload-status">
           @if (skyboxUploadBusy()) {
-            <p class="wizard-step-text">{{ 'Converting and uploading skybox...' | translate }}</p>
+            <p class="wizard-step-text">
+              {{ 'k_entity-feature-settings-skybox-converting-uploading-message' | fluent }}
+            </p>
           } @else if (skyboxUploadError(); as error) {
             <p class="wizard-step-text">{{ error }}</p>
           }
         </div>
         <k-select [value]="selectedSkybox()" (valueChange)="setSkybox($event)">
-          <k-menu-option value="custom">{{ 'Custom background color' | translate }}</k-menu-option>
+          <k-menu-option value="custom">{{
+            'k_entity-feature-settings-background-color-option' | fluent
+          }}</k-menu-option>
           @for (skybox of skyboxPresets; track skybox.id) {
-            <k-menu-option [value]="skybox.id">{{ skybox.label }}</k-menu-option>
+            <k-menu-option [value]="skybox.id">{{ skybox.label | fluent }}</k-menu-option>
           }
           <k-menu-option value="custom-upload">{{
-            'Custom skybox (upload)...' | translate
+            'k_entity-feature-settings-skybox-upload-option' | fluent
           }}</k-menu-option>
         </k-select>
 
         @if (selectedSkybox() === 'custom') {
           <app-color-field
-            [label]="'Background color' | translate"
+            [label]="'k_entity-feature-settings-background-color-label' | fluent"
             [color]="settings.localSettings.background.color"
             (colorChange)="setBackgroundColor($event)"
           />
 
           <k-labelled-checkbox
-            [label]="'Gradient-brightness effect' | translate"
+            [label]="'k_entity-feature-settings-gradient-effect-label' | fluent"
             (checkedChange)="setBackgroundEffect($event)"
             [checked]="settings.localSettings.background.effect"
           />
         } @else {
           <k-slider
-            [label]="('Micro surface' | translate) + ': ' + skyboxMicroSurface()"
+            [label]="
+              'k_entity-feature-settings-micro-surface-label'
+                | fluent: { value: skyboxMicroSurface() }
+            "
             [min]="0"
             [max]="1"
             [step]="0.01"
@@ -182,19 +188,19 @@
         }
 
         <k-button (click)="resetBackground()" type="outlined-primary">
-          {{ 'Reset background' | translate }}
+          {{ 'k_entity-feature-settings-background-reset-button' | fluent }}
         </k-button>
       </k-details>
       <k-details
-        [title]="'Lights' | translate"
+        [title]="'k_entity-feature-settings-lights-heading' | fluent"
         [expanded]="lightsDetailsExpanded()"
         (expandedChange)="lightsDetailsExpanded.set($event)"
       >
         <app-entity-feature-settings-lights [helpersActive]="lightsDetailsExpanded()" />
       </k-details>
-      <k-details [title]="'Preview and initial perspective' | translate">
+      <k-details [title]="'k_entity-feature-settings-preview-heading' | fluent">
         <p class="wizard-step-text">
-          {{ 'Click on this image to set a nice and fitting camera perspective' | translate }}
+          {{ 'k_entity-feature-settings-preview-image-hint' | fluent }}
         </p>
         <img
           class="previewimage"
@@ -205,16 +211,16 @@
 
       <k-button style="align-self: center" rounded type="solid-primary" (click)="exportSettings()">
         <mat-icon style="margin-right: 4px">download</mat-icon>
-        <span>{{ 'Download viewer settings' | translate }}</span>
+        <span>{{ 'k_entity-feature-settings-download-settings-button' | fluent }}</span>
       </k-button>
 
       @if (!processing.isStandalone()) {
         <k-button (click)="backToDefaultSettings()" type="outlined-primary">
-          {{ 'Back to default' | translate }}
+          {{ 'k_entity-feature-settings-reset-to-default-button' | fluent }}
         </k-button>
         @if (canSaveSettings()) {
           <k-button (click)="saveSettings()" type="solid-primary">
-            {{ 'Save as default' | translate }}
+            {{ 'k_entity-feature-settings-save-default-button' | fluent }}
           </k-button>
         }
       }
@@ -228,10 +234,10 @@
   [class.dimmed-bg]="videoGenerationSuccess()"
 >
   <div class="centered-content">
-    <h2>{{ 'Preview' }}</h2>
+    <h2>{{ 'k_entity-feature-settings-video-preview-heading' | fluent }}</h2>
 
     <p>
-      {{ 'Generating preview image and video. This should only take a moment...' | translate }}
+      {{ 'k_entity-feature-settings-video-generation-message' | fluent }}
     </p>
 
     <div class="stack">
@@ -247,10 +253,12 @@
 
       @if (videoGenerationSuccess(); as success) {
         @if (success.value) {
-          <p class="success-message">{{ 'Video generation successful!' | translate }}</p>
+          <p class="success-message">
+            {{ 'k_entity-feature-settings-video-success-message' | fluent }}
+          </p>
         } @else {
           <p class="error-message">
-            {{ 'Video generation failed. Only using preview screenshot.' | translate }}
+            {{ 'k_entity-feature-settings-video-failed-message' | fluent }}
           </p>
         }
       }
@@ -277,7 +285,7 @@
       (click)="closeVideoPreviewOverlay()"
       type="solid-primary"
     >
-      {{ 'Close' | translate }}
+      {{ 'k_button-close' | fluent }}
     </k-button>
   </div>
 </div>
@@ -288,25 +296,25 @@
   [class.dimmed-bg]="skyboxUploadOverlayDimmed()"
 >
   <div class="centered-content">
-    <h2>Skybox</h2>
+    <h2>{{ 'k_entity-feature-settings-skybox-upload-heading' | fluent }}</h2>
 
     @if (skyboxUploadStage() === 'failed') {
       <p class="error-message">
-        {{ 'Uploading the skybox to the server failed. Please try again.' | translate }}
+        {{ 'k_entity-feature-settings-skybox-upload-failed-message' | fluent }}
       </p>
       <k-button (click)="closeSkyboxUploadOverlay()" type="solid-primary">
-        {{ 'Close' | translate }}
+        {{ 'k_button-close' | fluent }}
       </k-button>
     } @else if (skyboxUploadStage() === 'success') {
       <p class="success-message">
-        {{ 'The skybox was uploaded successfully.' | translate }}
+        {{ 'k_entity-feature-settings-skybox-upload-success-message' | fluent }}
       </p>
       <k-button (click)="closeSkyboxUploadOverlay()" type="solid-primary">
-        {{ 'Close' | translate }}
+        {{ 'k_button-close' | fluent }}
       </k-button>
     } @else {
       <p>
-        {{ 'Uploading skybox. This should only take a moment...' | translate }}
+        {{ 'k_entity-feature-settings-skybox-uploading-message' | fluent }}
       </p>
       <div class="progress-container indeterminate">
         <div class="progress-bar"></div>

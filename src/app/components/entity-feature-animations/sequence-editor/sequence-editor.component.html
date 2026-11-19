@@ -1,5 +1,5 @@
 <div class="sequence-selector">
-  <h2>{{ 'Sequence Editor' | translate }}</h2>
+  <h2>{{ 'k_sequence-editor-title' | fluent }}</h2>
 
   <k-select [value]="service.activeSequenceId()" (valueChange)="service.switchSequence($event)">
     @for (seq of service.sequences(); track seq.id) {
@@ -10,7 +10,7 @@
   <k-input
     floatingLabel
     class="sequence-name-input"
-    label="Name"
+    [label]="'k_sequence-editor-name-label' | fluent"
     [value]="service.sequences().find(s => s.id === service.activeSequenceId())?.name ?? ''"
     (valueChange)="onNameInput($event)"
   />
@@ -30,8 +30,8 @@
 
   <small class="fs-small demo-string"
     ><i
-      >{{ 'Demo feature for user testing' | translate }}.
-      {{ 'Data model & functionality are subject to changes' | translate }}.</i
+      >{{ 'k_sequence-editor-demo-note' | fluent }}
+      {{ 'k_sequence-editor-demo-detail' | fluent }}</i
     ></small
   >
 </div>
@@ -39,7 +39,7 @@
 <div class="top-row">
   <k-button
     icon-button
-    [tooltip]="'Play' | translate"
+    [tooltip]="'k_sequence-editor-play-tooltip' | fluent"
     (click)="playback.play()"
     [disabled]="playback.transport() === 'playing'"
   >
@@ -48,7 +48,7 @@
 
   <k-button
     icon-button
-    [tooltip]="'Pause' | translate"
+    [tooltip]="'k_sequence-editor-pause-tooltip' | fluent"
     (click)="playback.pause()"
     [disabled]="playback.transport() !== 'playing'"
   >
@@ -57,7 +57,7 @@
 
   <k-button
     icon-button
-    [tooltip]="'Stop' | translate"
+    [tooltip]="'k_sequence-editor-stop-tooltip' | fluent"
     (click)="playback.stop()"
     [disabled]="playback.transport() === 'stopped'"
   >
@@ -66,7 +66,7 @@
 
   <k-button
     icon-button
-    [tooltip]="'Loop' | translate"
+    [tooltip]="'k_sequence-editor-loop-tooltip' | fluent"
     (click)="playback.toggleLoop()"
     [class.is-on]="playback.loop()"
   >
@@ -77,7 +77,7 @@
 
   <k-button
     icon-button
-    [tooltip]="'Add Timeline' | translate"
+    [tooltip]="'k_sequence-editor-add-timeline-tooltip' | fluent"
     (click)="service.addTimeline()"
     [disabled]="!service.canAddTimeline()"
   >
@@ -86,7 +86,7 @@
 
   <k-button
     icon-button
-    [tooltip]="'Add Spacer' | translate"
+    [tooltip]="'k_sequence-editor-add-spacer-tooltip' | fluent"
     (click)="service.addSpacer()"
     [disabled]="service.timelines().length === 0"
   >
@@ -95,7 +95,7 @@
 
   <k-button
     icon-button
-    [tooltip]="'Edit selected item' | translate"
+    [tooltip]="'k_sequence-editor-edit-tooltip' | fluent"
     (click)="editItem()"
     [disabled]="!service.selectedItem()"
   >
@@ -104,7 +104,7 @@
 
   <k-button
     icon-button
-    [tooltip]="'Duplicate selected item' | translate"
+    [tooltip]="'k_sequence-editor-duplicate-tooltip' | fluent"
     (click)="duplicateItem()"
     [disabled]="!service.selectedItem()"
   >
@@ -113,7 +113,7 @@
 
   <k-button
     icon-button
-    [tooltip]="'Remove selected item' | translate"
+    [tooltip]="'k_sequence-editor-remove-tooltip' | fluent"
     (click)="removeItem()"
     [disabled]="!service.selectedItem()"
   >
@@ -124,7 +124,7 @@
 
   <k-button
     icon-button
-    [tooltip]="'Import timeline' | translate"
+    [tooltip]="'k_sequence-editor-import-tooltip' | fluent"
     (click)="importTimeline()"
     [disabled]="playback.transport() !== 'stopped'"
   >
@@ -133,9 +133,13 @@
 
   <k-button icon-button color="transparent">
     <mat-icon>file_download</mat-icon>
-    <k-menu label="Export">
-      <k-menu-option (click)="exportActiveSequence()">Export active sequence</k-menu-option>
-      <k-menu-option (click)="exportAllSequences()">Export all sequences</k-menu-option>
+    <k-menu [label]="'k_sequence-editor-export-label' | fluent">
+      <k-menu-option (click)="exportActiveSequence()">
+        {{ 'k_sequence-editor-export-active-option' | fluent }}
+      </k-menu-option>
+      <k-menu-option (click)="exportAllSequences()">
+        {{ 'k_sequence-editor-export-all-option' | fluent }}
+      </k-menu-option>
     </k-menu>
   </k-button>
 
@@ -144,7 +148,7 @@
   <k-input
     class="fps-input"
     floatingLabel
-    [label]="'FPS' | translate"
+    [label]="'k_sequence-editor-fps-label' | fluent"
     type="number"
     [min]="1"
     [max]="120"
@@ -152,11 +156,15 @@
     (valueChange)="playback.setFps(+$event)"
   ></k-input>
 
-  <k-button icon-button [tooltip]="'Zoom out' | translate" (click)="zoomOut()">
+  <k-button
+    icon-button
+    [tooltip]="'k_sequence-editor-zoom-out-tooltip' | fluent"
+    (click)="zoomOut()"
+  >
     <mat-icon>zoom_out</mat-icon>
   </k-button>
 
-  <k-button icon-button [tooltip]="'Zoom in' | translate" (click)="zoomIn()">
+  <k-button icon-button [tooltip]="'k_sequence-editor-zoom-in-tooltip' | fluent" (click)="zoomIn()">
     <mat-icon>zoom_in</mat-icon>
   </k-button>
 </div>
@@ -176,10 +184,9 @@
       (click)="onRowClick($event, $index)"
     >
       @if (timeline.length === 0) {
-        <span class="timeline-empty-text">{{
-          'Add an animation group from the animations menu on the left, or drag one here from a different timeline'
-            | translate
-        }}</span>
+        <span class="timeline-empty-text">
+          {{ 'k_sequence-editor-timeline-empty' | fluent }}
+        </span>
       } @else {
         @for (item of timeline; track item.id) {
           @switch (item.kind) {
@@ -194,12 +201,14 @@
                 (click)="service.selectedItem.set(item)"
               >
                 @if (item.holdEndState) {
-                  <mat-icon class="hold-badge" [tooltip]="'Hold end state' | translate"
+                  <mat-icon class="hold-badge" [tooltip]="'k_sequence-editor-hold-tooltip' | fluent"
                     >push_pin</mat-icon
                   >
                 }
                 <span class="title">{{ item.name }}</span>
-                <span>{{ 'Duration' | translate }}: {{ item.duration }}</span>
+                <span>{{
+                  'k_sequence-editor-duration-label' | fluent: { duration: item.duration }
+                }}</span>
               </div>
             }
             @case ('spacer') {
@@ -210,8 +219,10 @@
                 [style.width]="item.duration | framesToWidth: numFramesInView()"
                 (click)="service.selectedItem.set(item)"
               >
-                <span class="title">{{ 'Spacer' | translate }}</span>
-                <span>{{ 'Duration' | translate }}: {{ item.duration }}</span>
+                <span class="title">{{ 'k_sequence-editor-spacer-heading' | fluent }}</span>
+                <span>{{
+                  'k_sequence-editor-duration-label' | fluent: { duration: item.duration }
+                }}</span>
               </div>
             }
           }
@@ -229,7 +240,7 @@
           icon-button
           style="opacity: 0.8"
           class="delete-timeline-btn"
-          [tooltip]="'Delete timeline' | translate"
+          [tooltip]="'k_sequence-editor-delete-timeline-tooltip' | fluent"
           tooltipPosition="left"
           (click)="service.removeTimeline($index); $event.stopPropagation()"
         >
@@ -242,10 +253,7 @@
     }
   } @empty {
     <p>
-      {{
-        'To create a timeline, add an animation group from the animations menu on the left, or click the respective button above'
-          | translate
-      }}.
+      {{ 'k_sequence-editor-timeline-empty-hint' | fluent }}
     </p>
   }
 </div>

@@ -12,7 +12,6 @@ import {
   Vector3,
 } from '@babylonjs/core';
 import type { DragEvent, DragStartEndEvent, Observer } from '@babylonjs/core';
-import { debounceTime, distinctUntilChanged, filter, firstValueFrom } from 'rxjs';
 import { IColor, IEntitySettings, IVector3 } from '@kompakkt/common';
 import { minimalSettings } from '../../../assets/settings/settings';
 import { AnnotationService } from '../annotation/annotation.service';

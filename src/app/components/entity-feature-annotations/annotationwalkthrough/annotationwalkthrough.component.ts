@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ButtonComponent, TooltipDirective } from '@kompakkt/komponents';
-import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { FluentPipe } from '../../../pipes/fluent.pipe';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
 import { OverlayService } from '../../../services/overlay/overlay.service';
 
@@ -9,7 +9,7 @@ import { OverlayService } from '../../../services/overlay/overlay.service';
   selector: 'app-annotationwalkthrough',
   templateUrl: './annotationwalkthrough.component.html',
   styleUrls: ['./annotationwalkthrough.component.scss'],
-  imports: [MatIconModule, TranslatePipe, TooltipDirective, ButtonComponent],
+  imports: [MatIconModule, FluentPipe, TooltipDirective, ButtonComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   host: {
     '[class.hidden]': '!showWalkthrough()',
@@ -28,10 +28,7 @@ export class AnnotationwalkthroughComponent {
     const selectedAnnotationId = this.annotationService.selectedAnnotation()?._id;
     return activeAnnotations.find(({ _id }) => _id === selectedAnnotationId);
   });
-  title = computed(() => {
-    const annotation = this.selectedAnnotation();
-    return annotation ? annotation.body.content.title || 'No title' : 'Annotation Walkthrough';
-  });
+  title = computed(() => this.selectedAnnotation()?.body.content.title);
 
   showWalkthrough = computed(() => {
     const isRepositioning = this.annotationService.isRepositioning();

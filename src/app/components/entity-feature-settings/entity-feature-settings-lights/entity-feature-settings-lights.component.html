@@ -1,10 +1,10 @@
 <k-button style="align-self: center" rounded type="solid-primary">
   <mat-icon>light_mode</mat-icon>
-  <span>{{ 'Create new light' | translate }}</span>
-  <k-menu trigger="click" [label]="'Light type' | translate">
-    @for (type of lightTypes; track type) {
-      <k-menu-option (click)="addLight(type)">
-        {{ type | translate }}
+  <span>{{ 'k_entity-feature-settings-lights-create-button' | fluent }}</span>
+  <k-menu trigger="click" [label]="'k_entity-feature-settings-lights-type-label' | fluent">
+    @for (type of lightTypes; track type.value) {
+      <k-menu-option (click)="addLight(type.value)">
+        {{ type.label | fluent }}
       </k-menu-option>
     }
   </k-menu>
@@ -12,18 +12,18 @@
 
 <div class="light-toggles">
   <k-labelled-checkbox
-    [label]="'Show helpers' | translate"
+    [label]="'k_entity-feature-settings-lights-helpers-label' | fluent"
     [checked]="lights.helpersOn()"
     (checkedChange)="lights.setHelpersVisible($event)"
   />
   <k-labelled-checkbox
-    [label]="'Show position gizmo' | translate"
+    [label]="'k_entity-feature-settings-lights-position-gizmo-label' | fluent"
     [checked]="lights.positionGizmosOn()"
     [disabled]="!gizmoSupported('position')"
     (checkedChange)="toggleGizmo('position', $event)"
   />
   <k-labelled-checkbox
-    [label]="'Show rotation gizmo' | translate"
+    [label]="'k_entity-feature-settings-lights-rotation-gizmo-label' | fluent"
     [checked]="lights.rotationGizmosOn()"
     [disabled]="!gizmoSupported('rotation')"
     (checkedChange)="toggleGizmo('rotation', $event)"
@@ -38,7 +38,7 @@
         icon-button
         type="solid-transparent"
         (click)="jumpToLight(entry.key)"
-        [title]="'Jump to light' | translate"
+        [title]="'k_entity-feature-settings-lights-jump-tooltip' | fluent"
       >
         <mat-icon>my_location</mat-icon>
       </k-button>
@@ -46,7 +46,7 @@
         icon-button
         type="solid-transparent"
         (click)="selectLight(entry.key)"
-        [title]="'Select light' | translate"
+        [title]="'k_entity-feature-settings-lights-select-tooltip' | fluent"
       >
         <mat-icon>ads_click</mat-icon>
       </k-button>
@@ -54,7 +54,7 @@
         icon-button
         type="solid-transparent"
         (click)="removeLight(entry.key)"
-        [title]="'Delete light' | translate"
+        [title]="'k_entity-feature-settings-lights-delete-tooltip' | fluent"
       >
         <mat-icon>delete</mat-icon>
       </k-button>
@@ -64,21 +64,23 @@
 
 <k-details
   size="sm"
-  [title]="'Selected light settings' | translate"
+  [title]="'k_entity-feature-settings-lights-selected-heading' | fluent"
   [expanded]="lights.selectedLightIndex() !== undefined"
 >
   @if (selectedEntry(); as selected) {
     @let light = selected.light;
     <div class="selected-light">
       <k-input
-        [label]="'Name' | translate"
+        [label]="'k_entity-feature-settings-lights-name-label' | fluent"
         type="text"
         [value]="light.name"
         (valueChange)="setName(selected.index, $event)"
       />
 
       <k-slider
-        [label]="('Intensity' | translate) + ': ' + light.intensity"
+        [label]="
+          'k_entity-feature-settings-lights-intensity-label' | fluent: { value: light.intensity }
+        "
         [min]="0"
         [max]="50"
         [value]="light.intensity"
@@ -88,7 +90,7 @@
       />
 
       <app-color-field
-        [label]="'Color' | translate"
+        [label]="'k_entity-feature-settings-lights-color-label' | fluent"
         [color]="light.color"
         [disableAlpha]="true"
         (colorChange)="setColor(selected.index, $event)"
@@ -96,21 +98,21 @@
 
       @if (light.hasPositionGizmo) {
         <div class="axis-inputs">
-          <h4>{{ 'Position' | translate }}</h4>
+          <h4>{{ 'k_entity-feature-settings-lights-position-heading' | fluent }}</h4>
           <k-input
-            [label]="'X' | translate"
+            [label]="'k_entity-feature-settings-lights-x-label' | fluent"
             type="number"
             [value]="'' + light.position.x"
             (valueChange)="setPosition(selected.index, 'x', +$event)"
           />
           <k-input
-            [label]="'Y' | translate"
+            [label]="'k_entity-feature-settings-lights-y-label' | fluent"
             type="number"
             [value]="'' + light.position.y"
             (valueChange)="setPosition(selected.index, 'y', +$event)"
           />
           <k-input
-            [label]="'Z' | translate"
+            [label]="'k_entity-feature-settings-lights-z-label' | fluent"
             type="number"
             [value]="'' + light.position.z"
             (valueChange)="setPosition(selected.index, 'z', +$event)"
@@ -120,21 +122,21 @@
 
       @if (light.hasRotationGizmo) {
         <div class="axis-inputs">
-          <h4>{{ 'Rotation' | translate }}</h4>
+          <h4>{{ 'k_entity-feature-settings-lights-rotation-heading' | fluent }}</h4>
           <k-input
-            [label]="'X' | translate"
+            [label]="'k_entity-feature-settings-lights-x-label' | fluent"
             type="number"
             [value]="'' + light.rotation.x"
             (valueChange)="setRotation(selected.index, 'x', +$event)"
           />
           <k-input
-            [label]="'Y' | translate"
+            [label]="'k_entity-feature-settings-lights-y-label' | fluent"
             type="number"
             [value]="'' + light.rotation.y"
             (valueChange)="setRotation(selected.index, 'y', +$event)"
           />
           <k-input
-            [label]="'Z' | translate"
+            [label]="'k_entity-feature-settings-lights-z-label' | fluent"
             type="number"
             [value]="'' + light.rotation.z"
             (valueChange)="setRotation(selected.index, 'z', +$event)"
@@ -143,13 +145,11 @@
       }
 
       @if (light.hasSpotParams) {
+        @let angle = light.angle | number: '1.2-2';
+        @let maxAngle = spotAngleMax | number: '1.2-2';
         <k-slider
           [label]="
-            ('Angle' | translate) +
-            ': ' +
-            (light.angle | number: '1.2-2') +
-            ' / ' +
-            (spotAngleMax | number: '1.2-2')
+            'k_entity-feature-settings-lights-angle-label' | fluent: { angle, max: maxAngle }
           "
           [min]="0"
           [max]="spotAngleMax"
@@ -158,7 +158,9 @@
           (valueChange)="setSpotParams(selected.index, $event, light.exponent)"
         />
         <k-slider
-          [label]="('Exponent' | translate) + ': ' + light.exponent"
+          [label]="
+            'k_entity-feature-settings-lights-exponent-label' | fluent: { value: light.exponent }
+          "
           [min]="0"
           [max]="10"
           [step]="0.1"
@@ -168,6 +170,6 @@
       }
     </div>
   } @else {
-    <p class="empty-selection">{{ 'No light selected' | translate }}</p>
+    <p class="empty-selection">{{ 'k_entity-feature-settings-lights-empty' | fluent }}</p>
   }
 </k-details>

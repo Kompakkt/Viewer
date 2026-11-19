@@ -6,18 +6,12 @@ import {
   InputComponent,
   SlideToggleComponent,
 } from '@kompakkt/komponents';
-import { TranslatePipe } from 'src/app/pipes/translate.pipe';
+import { FluentPipe } from 'src/app/pipes/fluent.pipe';
 import { TimelineItem } from 'src/app/services/sequence-editor.service';
 
 @Component({
   selector: 'app-edit-timeline-item-dialog',
-  imports: [
-    TranslatePipe,
-    InputComponent,
-    SlideToggleComponent,
-    ButtonComponent,
-    ButtonRowComponent,
-  ],
+  imports: [FluentPipe, InputComponent, SlideToggleComponent, ButtonComponent, ButtonRowComponent],
   templateUrl: './edit-timeline-item-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './edit-timeline-item-dialog.component.scss',

@@ -1,6 +1,4 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
-import { FormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
 import {
   ButtonComponent,
@@ -10,7 +8,7 @@ import {
   MenuOptionComponent,
 } from '@kompakkt/komponents';
 import { FixImageUrlPipe } from 'src/app/pipes/fix-image-url.pipe';
-import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { FluentPipe } from '../../../pipes/fluent.pipe';
 import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-preview.component';
 import { AnnotationComponent } from './annotation.component';
 
@@ -20,10 +18,9 @@ import { AnnotationComponent } from './annotation.component';
   styleUrls: ['./annotation-for-editor.component.scss'],
   changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
-    FormsModule,
     MatIcon,
     MarkdownPreviewComponent,
-    TranslatePipe,
+    FluentPipe,
     ButtonComponent,
     ButtonRowComponent,
     TooltipDirective,

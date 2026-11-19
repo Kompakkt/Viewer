@@ -1,9 +1,8 @@
 import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { FormsModule } from '@angular/forms';
 import { ButtonComponent, ButtonRowComponent, InputComponent } from '@kompakkt/komponents';
 import { IUserData, IUserDataWithoutData } from '@kompakkt/common';
-import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { FluentPipe } from '../../../pipes/fluent.pipe';
 import { BackendService } from '../../../services/backend/backend.service';
 
 export type AuthConcern = 'login' | 'delete-annotation';
@@ -19,7 +18,7 @@ export type AuthResult = {
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [FormsModule, TranslatePipe, InputComponent, ButtonComponent, ButtonRowComponent],
+  imports: [FluentPipe, InputComponent, ButtonComponent, ButtonRowComponent],
 })
 export class LoginComponent {
   public data: AuthResult = {

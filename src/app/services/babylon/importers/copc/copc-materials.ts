@@ -1,4 +1,4 @@
-import { Effect, Engine, Mesh, Scene, ShaderMaterial } from '@babylonjs/core';
+import { Effect, Engine, Scene, ShaderMaterial } from '@babylonjs/core';
 import { Copc } from 'copc';
 
 Effect.ShadersStore['pointCloudVertexShader'] = `// pointCloud.vertex.fx

@@ -7,7 +7,7 @@ import {
   signal,
   viewChild,
   ViewContainerRef,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AnnotationService } from '../../services/annotation/annotation.service';

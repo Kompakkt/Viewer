@@ -5,26 +5,32 @@
   />
   <div class="header" (click)="toggleVisibility()">
     <span class="ranking">{{ annotation.ranking }}</span>
-    <span class="title">{{ annotation.body.content.title || ('No title' | translate) }}</span>
-    <small>{{ (isUnsaved() ? 'not saved' : 'saved') | translate }}</small>
+    <span class="title">{{
+      annotation.body.content.title || ('k_annotation-for-editor-no-title' | fluent)
+    }}</span>
+    <small>{{
+      (isUnsaved() ? 'k_annotation-for-editor-unsaved' : 'k_annotation-for-editor-saved') | fluent
+    }}</small>
   </div>
   <app-markdown-preview
     id="annotation-content"
-    [data]="annotation.body.content.description || ('No description' | translate)"
+    [data]="
+      annotation.body.content.description || ('k_annotation-for-editor-no-description' | fluent)
+    "
   />
   <k-button-row justify="end" gap="4">
     @if (canUserEditAndDelete()) {
       <k-button
         icon-button
         color="transparent"
-        [tooltip]="'Edit annotation' | translate"
+        [tooltip]="'k_annotation-for-editor-edit-tooltip' | fluent"
         (click)="toggleFullscreen('edit')"
         ><mat-icon>edit</mat-icon></k-button
       >
       <k-button
         icon-button
         color="transparent"
-        [tooltip]="'Reposition annotation' | translate"
+        [tooltip]="'k_annotation-for-editor-reposition-tooltip' | fluent"
         (click)="toggleRepositionMode()"
         ><mat-icon>open_with</mat-icon></k-button
       >
@@ -32,34 +38,39 @@
     @if (canUserReorder()) {
       <k-button icon-button color="transparent" class="reorder-button">
         <mat-icon>low_priority</mat-icon>
-        <k-menu label="Reorder annotation">
-          <k-menu-option (click)="reorderAnnotation.emit('first')"
-            >Move to first position</k-menu-option
-          >
-          <k-menu-option (click)="reorderAnnotation.emit('last')"
-            >Move to last position</k-menu-option
-          >
-          <k-menu-option (click)="reorderAnnotation.emit('one-up')">One position up</k-menu-option>
-          <k-menu-option (click)="reorderAnnotation.emit('one-down')"
-            >One position down</k-menu-option
-          >
+        <k-menu [label]="'k_annotation-for-editor-reorder-label' | fluent">
+          <k-menu-option (click)="reorderAnnotation.emit('first')">{{
+            'k_annotation-for-editor-reorder-first' | fluent
+          }}</k-menu-option>
+          <k-menu-option (click)="reorderAnnotation.emit('last')">{{
+            'k_annotation-for-editor-reorder-last' | fluent
+          }}</k-menu-option>
+          <k-menu-option (click)="reorderAnnotation.emit('one-up')">
+            {{ 'k_annotation-for-editor-reorder-up' | fluent }}
+          </k-menu-option>
+          <k-menu-option (click)="reorderAnnotation.emit('one-down')">{{
+            'k_annotation-for-editor-reorder-down' | fluent
+          }}</k-menu-option>
         </k-menu>
       </k-button>
     }
     <k-button
       icon-button
       color="transparent"
-      [tooltip]="'Copy annotation to collection' | translate"
+      [tooltip]="'k_annotation-for-editor-copy-tooltip' | fluent"
       (click)="shareAnnotation()"
       ><mat-icon>file_copy</mat-icon></k-button
     >
-    <k-button icon-button color="transparent" [tooltip]="'Export annotation as JSON' | translate"
+    <k-button
+      icon-button
+      color="transparent"
+      [tooltip]="'k_annotation-for-editor-export-tooltip' | fluent"
       ><mat-icon>file_download</mat-icon></k-button
     >
     <k-button
       icon-button
       color="transparent"
-      [tooltip]="'Show in fullscreen view' | translate"
+      [tooltip]="'k_annotation-for-editor-fullscreen-tooltip' | fluent"
       (click)="toggleFullscreen('preview')"
       ><mat-icon>select_all</mat-icon></k-button
     >
@@ -67,7 +78,7 @@
       <k-button
         icon-button
         color="transparent"
-        [tooltip]="'Show annotation' | translate"
+        [tooltip]="'k_annotation-for-editor-show-tooltip' | fluent"
         (click)="setVisibility(true)"
         ><mat-icon>visibility_off</mat-icon></k-button
       >
@@ -75,7 +86,7 @@
       <k-button
         icon-button
         color="transparent"
-        [tooltip]="'Hide annotation' | translate"
+        [tooltip]="'k_annotation-for-editor-hide-tooltip' | fluent"
         (click)="setVisibility(false)"
         ><mat-icon>visibility</mat-icon></k-button
       >
@@ -84,7 +95,7 @@
       <k-button
         icon-button
         color="transparent"
-        [tooltip]="'Delete annotation' | translate"
+        [tooltip]="'k_annotation-for-editor-delete-tooltip' | fluent"
         (click)="deleteAnnotation()"
         ><mat-icon>delete</mat-icon></k-button
       >
@@ -104,7 +115,7 @@
       <mat-card-title>
         @if (isEditMode()) {
         <mat-form-field>
-          <mat-label>{{ 'Title' | translate }}</mat-label>
+          <mat-label>{{ 'Title' | fluent }}</mat-label>
           <input
             matInput
             name="title"
@@ -118,13 +129,13 @@
         }
       </mat-card-title>
       <mat-card-subtitle>
-        {{ (annotation.validated ? 'validated' : 'not validated') | translate }}
+        {{ (annotation.validated ? 'validated' : 'not validated') | fluent }}
       </mat-card-subtitle>
     </mat-card-header>
     @if (previewImage(); as previewImage) { @if (!(collapsed())) {
     <img mat-card-image [src]="previewImage" />
     } } @else {
-    <p>{{ 'This annotation has no preview image' | translate }}</p>
+    <p>{{ 'This annotation has no preview image' | fluent }}</p>
     } @if (!(collapsed())) {
     <mat-card-content>
       @if (isEditMode()) {
@@ -136,7 +147,7 @@
           cdkAutosizeMinRows="1"
           name="description"
           type="text"
-          placeholder="{{ 'Description' | translate }}"
+          [placeholder]="'Description' | fluent"
           [(ngModel)]="annotation.body.content.description"
         ></textarea>
       </mat-form-field>
@@ -145,20 +156,20 @@
         class="validation"
         [checked]="annotation.validated"
         (change)="annotation.validated = !annotation.validated"
-        >{{ 'Validated' | translate }}
+        >{{ 'Validated' | fluent }}
       </mat-checkbox>
       }
       <button
         mat-stroked-button
         color="primary"
         (click)="selectPerspective()"
-        tooltip="{{ 'Select Perspective' | translate }}"
+        [tooltip]="'Select Perspective' | fluent"
         tooltipPosition="right"
         type="button"
         class="perspective"
       >
-        <mat-icon [attr.aria-label]="'Select Perspective' | translate">camera</mat-icon>
-        {{ 'Select Perspective' | translate }}
+        <mat-icon [attr.aria-label]="'Select Perspective' | fluent">camera</mat-icon>
+        {{ 'Select Perspective' | fluent }}
       </button>
       } @else {
       <app-markdown-preview
@@ -170,19 +181,19 @@
     }
     <mat-card-actions style="color: white">
       <mat-slide-toggle [checked]="showAnnotation()" (change)="toggleVisibility()">
-      {{ ((showAnnotation()) ? 'Hide' : 'Show') | translate }}
+      {{ ((showAnnotation()) ? 'Hide' : 'Show') | fluent }}
       </mat-slide-toggle>
       @if ((processing.hasAnnotationAllowance()) && (isAnnotationOwner())) {
       <k-button
         icon-button
         (click)="toggleEditViewMode()"
-        [tooltip]="((isEditMode()) ? 'Save annotation' : 'Edit annotation') | translate"
+        [tooltip]="((isEditMode()) ? 'Save annotation' : 'Edit annotation') | fluent"
         tooltipPosition="above"
         type="button"
       >
         <mat-icon
           [attr.aria-label]="
-            ((isEditMode()) ? 'Save annotation' : 'Edit annotation') | translate
+            ((isEditMode()) ? 'Save annotation' : 'Edit annotation') | fluent
           "
         >
           {{ (isEditMode()) ? 'save' : 'edit' }}
@@ -191,30 +202,30 @@
       <k-button
         icon-button
         (click)="editFullscreen()"
-        tooltip="{{ 'Edit in Fullscreen Mode' | translate }}"
+        [tooltip]="'Edit in Fullscreen Mode' | fluent"
         tooltipPosition="above"
         type="button"
       >
-        <mat-icon [attr.aria-label]="'Fullscreen' | translate">select_all</mat-icon>
+        <mat-icon [attr.aria-label]="'Fullscreen' | fluent">select_all</mat-icon>
       </k-button>
       <k-button
         icon-button
         (click)="deleteAnnotation()"
-        tooltip="{{ 'Delete' | translate }}"
+        [tooltip]="'Delete' | fluent"
         tooltipPosition="above"
         type="button"
       >
-        <mat-icon [attr.aria-label]="'Delete' | translate">delete</mat-icon>
+        <mat-icon [attr.aria-label]="'Delete' | fluent">delete</mat-icon>
       </k-button>
       } @if (annotation._id !== 'DefaultAnnotation') {
       <k-button
         icon-button
         (click)="shareAnnotation()"
-        tooltip="{{ 'Copy to collection' | translate }}"
+        [tooltip]="'Copy to collection' | fluent"
         tooltipPosition="above"
         type="button"
       >
-        <mat-icon [attr.aria-label]="'Copy to collection' | translate">file_copy</mat-icon>
+        <mat-icon [attr.aria-label]="'Copy to collection' | fluent">file_copy</mat-icon>
       </k-button>
       }
     </mat-card-actions>

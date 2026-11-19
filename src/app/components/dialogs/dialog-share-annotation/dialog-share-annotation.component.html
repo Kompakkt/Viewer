@@ -1,21 +1,16 @@
 <form action="auth-dialog_submit" method="get" accept-charset="utf-8">
-  <h1>{{ 'Share Annotation to Collection' | translate }}</h1>
+  <h1>{{ 'k_dialog-share-annotation-title' | fluent }}</h1>
 
-  <p>
-    {{
-      'To transfer this annotation to a collection, enter the identifier of the target collection.'
-        | translate
-    }}
-  </p>
+  <p>{{ 'k_dialog-share-annotation-collection-id-hint' | fluent }}</p>
 
   <k-input
-    [label]="'Collection identifier' | translate"
+    [label]="'k_dialog-share-annotation-collection-id-label' | fluent"
     type="text"
     (valueChange)="targetCollectionId = $event"
   />
 
   <k-button-row align="end">
-    <k-button (click)="share()">{{ 'Share' | translate }}</k-button>
-    <k-button (click)="cancel()">{{ 'Cancel' | translate }}</k-button>
+    <k-button (click)="share()">{{ 'k_dialog-share-annotation-share-button' | fluent }}</k-button>
+    <k-button (click)="cancel()">{{ 'k_button-cancel' | fluent }}</k-button>
   </k-button-row>
 </form>

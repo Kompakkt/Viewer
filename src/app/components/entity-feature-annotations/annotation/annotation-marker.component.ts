@@ -1,4 +1,13 @@
-import { AfterViewInit, Component, computed, inject, input, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  inject,
+  input,
+  OnInit,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { IAnnotation } from '@kompakkt/common';
 

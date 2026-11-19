@@ -136,8 +136,8 @@ export class EptImporter implements ISceneLoaderPluginAsync {
     scene: Scene,
     data: string,
     rootUrl: string,
-    onProgress?: (event: ISceneLoaderProgressEvent) => void,
-    fileName?: string,
+    _onProgress?: (event: ISceneLoaderProgressEvent) => void,
+    _fileName?: string,
   ): Promise<ISceneLoaderAsyncResult> {
     await getInstance();
 
@@ -188,7 +188,7 @@ export class EptImporter implements ISceneLoaderPluginAsync {
     const loadingStateMap: Record<string, 'loading' | 'loaded'> = {};
 
     const importNode = async (key: string) => {
-      const [level, x, y, z] = key.split('-').map(Number);
+      const [level] = key.split('-').map(Number);
       if (level > PointCloudImporter.currentLOD) return;
       const node = nodes[key];
       if (node === undefined || node < 0) return;
@@ -305,7 +305,7 @@ export class EptImporter implements ISceneLoaderPluginAsync {
       return mesh;
     });
     console.log('rootMesh', rootMesh);
-    loadNextLevelOfDetail();
+    void loadNextLevelOfDetail();
 
     return {
       meshes: rootMesh ? [rootMesh] : [],
@@ -320,19 +320,19 @@ export class EptImporter implements ISceneLoaderPluginAsync {
   }
 
   public async loadAsync(
-    scene: Scene,
-    data: any,
-    rootUrl: string,
-    onProgress?: (event: ISceneLoaderProgressEvent) => void,
-    fileName?: string,
+    _scene: Scene,
+    _data: any,
+    _rootUrl: string,
+    _onProgress?: (event: ISceneLoaderProgressEvent) => void,
+    _fileName?: string,
   ): Promise<void> {}
 
   public async loadAssetContainerAsync(
     scene: Scene,
-    data: any,
-    rootUrl: string,
-    onProgress?: (event: ISceneLoaderProgressEvent) => void,
-    fileName?: string,
+    _data: any,
+    _rootUrl: string,
+    _onProgress?: (event: ISceneLoaderProgressEvent) => void,
+    _fileName?: string,
   ): Promise<AssetContainer> {
     const container = new AssetContainer(scene);
     return container;

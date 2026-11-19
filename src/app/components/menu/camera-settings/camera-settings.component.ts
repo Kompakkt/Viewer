@@ -6,46 +6,37 @@ import {
   effect,
   inject,
   signal,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
 } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ButtonComponent, ButtonRowComponent, SliderComponent } from '@kompakkt/komponents';
 import { AnnotationService } from 'src/app/services/annotation/annotation.service';
 import { BabylonService } from 'src/app/services/babylon/babylon.service';
 import { OverlayService } from 'src/app/services/overlay/overlay.service';
-import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { FluentPipe } from '../../../pipes/fluent.pipe';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-camera-settings',
   templateUrl: './camera-settings.component.html',
   styleUrls: ['./camera-settings.component.scss'],
-  imports: [
-    FormsModule,
-    ReactiveFormsModule,
-    MatIconModule,
-    TranslatePipe,
-    SliderComponent,
-    ButtonComponent,
-    ButtonRowComponent,
-  ],
+  imports: [MatIconModule, FluentPipe, SliderComponent, ButtonComponent, ButtonRowComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   host: {
     '[class.is-resizing]': 'isResizing()',
   },
 })
 export class CameraSettingsComponent {
-  public babylon = inject(BabylonService);
-  public annotationService = inject(AnnotationService);
+  babylon = inject(BabylonService);
+  annotationService = inject(AnnotationService);
   #elementRef = inject(ElementRef);
   #overlay = inject(OverlayService);
 
-  public isResizing = computed(() => this.#overlay.panelResizing());
+  isResizing = computed(() => this.#overlay.panelResizing());
 
-  public cameraSpeed = signal(1.0);
+  cameraSpeed = signal(1.0);
 
-  public opened = signal(false);
-  public showNotification = signal<string | undefined>(undefined);
+  opened = signal(false);
+  showNotification = signal<string | undefined>(undefined);
 
   constructor() {
     effect(() => {
@@ -60,8 +51,11 @@ export class CameraSettingsComponent {
         isInitial = false;
         return;
       }
-      const typeString = cameraType === 'ArcRotateCamera' ? 'Orbit' : 'Free';
-      this.showNotification.set(`Switched to ${typeString} camera`);
+      this.showNotification.set(
+        cameraType === 'ArcRotateCamera'
+          ? 'k_camera-settings-notification-orbit-camera'
+          : 'k_camera-settings-notification-free-camera',
+      );
     });
 
     let notificationTimeout: number | undefined;
@@ -88,13 +82,13 @@ export class CameraSettingsComponent {
 
   cameraType = this.babylon.cameraManager.cameraType;
 
-  public toggle() {
+  toggle() {
     this.opened.update(state => !state);
   }
 
-  public resetCamera() {
+  resetCamera() {
     this.babylon.cameraManager.resetCamera();
-    this.showNotification.set('Camera has been reset');
+    this.showNotification.set('k_camera-settings-notification-camera-reset');
   }
 
   //Alternate way to close camera-settings

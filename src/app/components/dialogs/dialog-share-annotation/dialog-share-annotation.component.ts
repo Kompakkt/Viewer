@@ -1,12 +1,11 @@
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { BackendService } from '../../../services/backend/backend.service';
 import { MessageService } from '../../../services/message/message.service';
-
-import { FormsModule } from '@angular/forms';
+import { TranslateService } from '../../../services/translate/translate.service';
 import { ButtonComponent, ButtonRowComponent, InputComponent } from '@kompakkt/komponents';
-import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { FluentPipe } from '../../../pipes/fluent.pipe';
 
 export type DialogShareAnnotationResult = {
   collectionId: string;
@@ -22,11 +21,12 @@ export type DialogShareAnnotationData = {
   templateUrl: './dialog-share-annotation.component.html',
   styleUrls: ['./dialog-share-annotation.component.scss'],
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [FormsModule, TranslatePipe, InputComponent, ButtonRowComponent, ButtonComponent],
+  imports: [FluentPipe, InputComponent, ButtonRowComponent, ButtonComponent],
 })
 export class DialogShareAnnotationComponent {
   public targetCollectionId = '';
   private entityId = '';
+  private translate = inject(TranslateService);
 
   constructor(
     private backend: BackendService,
@@ -46,7 +46,9 @@ export class DialogShareAnnotationComponent {
 
           if (!compilation.entities[this.entityId])
             return this.message.error(
-              'The entity of this annotation is not part of the target collection.',
+              this.translate.getTranslation(
+                'k_dialog-share-annotation-entity-not-in-collection-error',
+              ),
             );
 
           const result: DialogShareAnnotationResult = {
@@ -58,9 +60,14 @@ export class DialogShareAnnotationComponent {
         })
         .catch(error => {
           console.error(error);
-          this.message.error('Connection to entity server refused.');
-          // 'missing'
-          this.message.error('Can not find Collection with ID ' + this.targetCollectionId + '.');
+          this.message.error(
+            this.translate.getTranslation('k_dialog-share-annotation-connection-refused-error'),
+          );
+          this.message.error(
+            this.translate.getTranslation('k_dialog-share-annotation-collection-not-found-error', {
+              collectionId: this.targetCollectionId,
+            }),
+          );
         });
     }
   }

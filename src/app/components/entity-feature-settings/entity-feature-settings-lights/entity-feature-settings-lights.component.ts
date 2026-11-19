@@ -1,4 +1,11 @@
-import { Component, effect, inject, input, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  effect,
+  inject,
+  input,
+  OnDestroy,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { IColor } from '@kompakkt/common';
 import { ColorFieldComponent } from '../../color-field/color-field.component';
 import {
@@ -19,7 +26,7 @@ import {
 } from '../../../services/light/light.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
 import { BabylonService } from '../../../services/babylon/babylon.service';
-import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { FluentPipe } from '../../../pipes/fluent.pipe';
 import { MatIconModule } from '@angular/material/icon';
 import { DecimalPipe, KeyValuePipe } from '@angular/common';
 
@@ -29,7 +36,7 @@ import { DecimalPipe, KeyValuePipe } from '@angular/common';
   styleUrls: ['./entity-feature-settings-lights.component.scss'],
   changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
-    TranslatePipe,
+    FluentPipe,
     SliderComponent,
     InputComponent,
     ButtonComponent,
@@ -56,7 +63,12 @@ export class EntityFeatureSettingsLightsComponent implements OnDestroy {
 
   public helpersActive = input(false);
 
-  public lightTypes: LightType[] = ['Point', 'Ambient', 'Spot', 'Directional'];
+  public lightTypes = [
+    { value: 'Point', label: 'k_entity-feature-settings-lights-type-point' },
+    { value: 'Ambient', label: 'k_entity-feature-settings-lights-type-ambient' },
+    { value: 'Spot', label: 'k_entity-feature-settings-lights-type-spot' },
+    { value: 'Directional', label: 'k_entity-feature-settings-lights-type-directional' },
+  ] as const satisfies readonly { value: LightType; label: string }[];
 
   constructor() {
     effect(() => {

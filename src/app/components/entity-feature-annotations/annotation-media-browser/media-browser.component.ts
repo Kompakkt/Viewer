@@ -2,7 +2,7 @@ import { Component, inject, output, ChangeDetectionStrategy } from '@angular/cor
 import { ButtonComponent, ButtonRowComponent, InputComponent } from '@kompakkt/komponents';
 import { IEntity } from '@kompakkt/common';
 import { environment } from 'src/environment';
-import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { FluentPipe } from '../../../pipes/fluent.pipe';
 import { ProcessingService } from '../../../services/processing/processing.service';
 
 type BrowsedMedia = IEntity | { mediaType: string; url: string; description: string };
@@ -12,7 +12,7 @@ type BrowsedMedia = IEntity | { mediaType: string; url: string; description: str
   templateUrl: './media-browser.component.html',
   styleUrls: ['./media-browser.component.scss'],
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [TranslatePipe, InputComponent, ButtonComponent, ButtonRowComponent],
+  imports: [FluentPipe, InputComponent, ButtonComponent, ButtonRowComponent],
 })
 export class MediaBrowserComponent {
   processing = inject(ProcessingService);

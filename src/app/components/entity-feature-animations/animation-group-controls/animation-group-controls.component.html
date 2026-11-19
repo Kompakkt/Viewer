@@ -1,20 +1,19 @@
 @if (isActive()) {
   <k-button type="solid-warn" (click)="stop.emit()">
     <mat-icon>stop</mat-icon>
-    <span>{{ 'Stop animation' | translate }}</span>
+    <span>{{ 'k_animation-group-controls-stop-button' | fluent }}</span>
   </k-button>
 } @else {
   <k-button type="solid-primary" (click)="play.emit(target())">
     <mat-icon>play_arrow</mat-icon>
-    <span>{{ 'Play animation' | translate }}</span>
+    <span>{{ 'k_animation-group-controls-play-button' | fluent }}</span>
   </k-button>
 }
 
 <div
   class="tooltip-wrapper"
   [tooltip]="
-    (isAnnotationMode() ? '' : 'Animation sequences can only be edited in annotation mode')
-      | translate
+    (isAnnotationMode() ? '' : 'k_animation-group-controls-annotation-mode-tooltip') | fluent
   "
   tooltipPosition="right"
 >
@@ -24,6 +23,6 @@
     [disabled]="!isAnnotationMode()"
   >
     <mat-icon>playlist_add</mat-icon>
-    <span>{{ 'Add to sequence editor' | translate }}</span>
+    <span>{{ 'k_animation-group-controls-add-to-sequence-button' | fluent }}</span>
   </k-button>
 </div>

@@ -1,4 +1,11 @@
-import { AfterContentChecked, ChangeDetectorRef, Component, effect, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  AfterContentChecked,
+  ChangeDetectorRef,
+  Component,
+  effect,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { LoadingscreenComponent } from './components/loadingscreen/loadingscreen.component';
 import { SceneComponent } from './components/scene/scene.component';
 import { EntitySettingsService } from './services/entitysettings/entitysettings.service';

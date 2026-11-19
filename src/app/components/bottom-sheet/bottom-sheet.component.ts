@@ -1,6 +1,14 @@
-import { Component, computed, DestroyRef, ElementRef, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  ElementRef,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { OverlayService } from '../../services/overlay/overlay.service';
-import { TranslatePipe } from '../../pipes/translate.pipe';
+import { FluentPipe } from '../../pipes/fluent.pipe';
 import { SequenceEditorComponent } from '../entity-feature-animations/sequence-editor/sequence-editor.component';
 import { ProcessingService } from 'src/app/services/processing/processing.service';
 
@@ -19,7 +27,7 @@ function readStoredHeight(): number | null {
   selector: 'app-bottom-sheet',
   templateUrl: './bottom-sheet.component.html',
   styleUrls: ['./bottom-sheet.component.scss'],
-  imports: [SequenceEditorComponent, TranslatePipe],
+  imports: [SequenceEditorComponent, FluentPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   host: {
     '[class.is-visible]': 'isOpen()',

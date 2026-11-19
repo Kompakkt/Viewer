@@ -7,7 +7,7 @@ import {
   computed,
   effect,
   ElementRef,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { saveAs } from 'file-saver';
@@ -20,8 +20,6 @@ import { PostMessageService } from '../../services/post-message/post-message.ser
 import { ProcessingService } from '../../services/processing/processing.service';
 import { UserdataService } from '../../services/userdata/userdata.service';
 // tslint:disable-next-line:max-line-length
-import { AsyncPipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { ColorFieldComponent } from '../color-field/color-field.component';
 import {
   ButtonComponent,
@@ -34,7 +32,7 @@ import {
   WizardStepComponent,
 } from '@kompakkt/komponents';
 import { FixImageUrlPipe } from 'src/app/pipes/fix-image-url.pipe';
-import { TranslatePipe } from '../../pipes/translate.pipe';
+import { FluentPipe } from '../../pipes/fluent.pipe';
 import { DialogMeshsettingsComponent } from '../dialogs/dialog-meshsettings/dialog-meshsettings.component';
 import { EntityFeatureSettingsLightsComponent } from './entity-feature-settings-lights/entity-feature-settings-lights.component';
 import { EntityFeatureSettingsMeshComponent } from './entity-feature-settings-mesh/entity-feature-settings-mesh.component';
@@ -50,11 +48,10 @@ import { prepareSkyboxForUpload, skyboxToBase64 } from '../../services/babylon/s
   changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     ColorFieldComponent,
-    FormsModule,
     EntityFeatureSettingsLightsComponent,
     EntityFeatureSettingsMeshComponent,
     MatIconModule,
-    TranslatePipe,
+    FluentPipe,
     DetailsComponent,
     ButtonComponent,
     LabelledCheckboxComponent,
@@ -173,7 +170,6 @@ export class EntityFeatureSettingsComponent {
       camera.alpha = originalAlpha + angleRadians;
     };
 
-    const scene = this.#babylon.getScene();
     // const clearColor = scene.clearColor;
     // scene.clearColor = new Color4(0, 0, 0, 0);
 

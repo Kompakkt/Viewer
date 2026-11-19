@@ -1,6 +1,13 @@
-import { Component, computed, effect, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { OverlayService } from '../../services/overlay/overlay.service';
-import { TranslatePipe } from 'src/app/pipes/translate.pipe';
+import { FluentPipe } from 'src/app/pipes/fluent.pipe';
 import { CompilationBrowserComponent } from '../compilation-browser/compilation-browser.component';
 import { EntityFeatureAnimationsComponent } from '../entity-feature-animations/entity-feature-animations.component';
 import { EntityFeatureSettingsComponent } from '../entity-feature-settings/entity-feature-settings.component';
@@ -24,7 +31,7 @@ function readStoredWidth(): number | null {
   templateUrl: './sidenav.component.html',
   styleUrls: ['./sidenav.component.scss'],
   imports: [
-    TranslatePipe,
+    FluentPipe,
     AnnotationsEditorComponent,
     EntityFeatureSettingsComponent,
     EntityFeatureAnimationsComponent,

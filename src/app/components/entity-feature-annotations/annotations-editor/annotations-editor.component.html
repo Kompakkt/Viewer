@@ -1,50 +1,43 @@
-<h1>{{ 'Annotations' | translate }}</h1>
+<h1>{{ 'k_annotations-editor-title' | fluent }}</h1>
 
 @if (processing.isInUpload()) {
   <div class="note">
     <mat-icon>info</mat-icon>
-    <span>{{ 'Info' | translate }}</span>
+    <span>{{ 'k_annotations-editor-note-badge' | fluent }}</span>
     <mat-icon class="pointer" (click)="closeNote($event)">close</mat-icon>
-    <p>{{ 'Please set and save the settings before you add annotations.' | translate }}</p>
+    <p>{{ 'k_annotations-editor-upload-note' | fluent }}</p>
   </div>
 }
 @if (isDefaultAnnotationMode()) {
   <div class="note">
     <mat-icon>info</mat-icon>
-    <span>{{ 'Info' | translate }}</span>
+    <span>{{ 'k_annotations-editor-note-badge' | fluent }}</span>
     <mat-icon class="pointer" (click)="closeNote($event)">close</mat-icon>
     <p>
-      {{
-        'All annotations you create are default annotations and visible for everyone who can access the
-      entity.' | translate
-      }}
+      {{ 'k_annotations-editor-default-mode-note' | fluent }}
     </p>
   </div>
 }
 @if (isForbidden()) {
   <div class="note">
     <mat-icon>info</mat-icon>
-    <span>{{ 'Info' | translate }}</span>
+    <span>{{ 'k_annotations-editor-note-badge' | fluent }}</span>
     <mat-icon class="pointer" (click)="closeNote($event)">close</mat-icon>
     <p>
-      {{
-        'Default Annotations are not editable for foreign entities. Load entity from a collection to save
-      your annotations to make them visible for others. If you are the owner of this entity do not load
-      it from a collection to edit the default Annotations.' | translate
-      }}
+      {{ 'k_annotations-editor-forbidden-note' | fluent }}
     </p>
   </div>
 }
 @if (processing.hasAnnotationAllowance()) {
   <div class="note">
     <mat-icon>info</mat-icon>
-    <span>{{ 'Info' | translate }}</span>
+    <span>{{ 'k_annotations-editor-note-badge' | fluent }}</span>
     <mat-icon class="pointer" (click)="closeNote($event)">close</mat-icon>
-    <p>{{ 'To add annotations, simply double-click on the entity.' | translate }}</p>
+    <p>{{ 'k_annotations-editor-add-hint' | fluent }}</p>
   </div>
 }
 
-<h2>{{ processing.entity()?.name ?? ('Unknown Object' | translate) }}</h2>
+<h2>{{ processing.entity()?.name ?? ('k_annotations-editor-empty-object' | fluent) }}</h2>
 
 <div class="annotations-list">
   @for (annotation of annotationService.activeAnnotations(); track annotation; let index = $index) {
@@ -54,7 +47,7 @@
       (reorderAnnotation)="annotationService.moveAnnotationByReorderMovement(index, $event)"
     />
   } @empty {
-    <p style="margin: 0">{{ 'This object has no annotations yet.' | translate }}</p>
+    <p style="margin: 0">{{ 'k_annotations-editor-empty-list' | fluent }}</p>
   }
 </div>
 
@@ -64,7 +57,7 @@
       <k-button
         icon-button
         color="transparent"
-        tooltip="Export all annotations as JSON"
+        [tooltip]="'k_annotations-editor-export-tooltip' | fluent"
         (click)="exportAnnotations()"
         ><mat-icon>file_download</mat-icon></k-button
       >

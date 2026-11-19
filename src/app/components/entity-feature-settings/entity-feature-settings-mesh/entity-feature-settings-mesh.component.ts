@@ -1,6 +1,12 @@
-import { AsyncPipe } from '@angular/common';
-import { Component, computed, inject, OnDestroy, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import {
+  Component,
+  computed,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { Vector3 } from '@babylonjs/core';
 import {
   ButtonComponent,
@@ -12,7 +18,7 @@ import {
 } from '@kompakkt/komponents';
 import { ColorFieldComponent } from '../../color-field/color-field.component';
 import { IColor } from '@kompakkt/common';
-import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { FluentPipe } from '../../../pipes/fluent.pipe';
 import { BabylonService } from '../../../services/babylon/babylon.service';
 import { EntitySettingsService } from '../../../services/entitysettings/entitysettings.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
@@ -25,8 +31,7 @@ import { AsAbsolutePipe } from 'src/app/pipes/as-absolute.pipe';
   changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     ColorFieldComponent,
-    FormsModule,
-    TranslatePipe,
+    FluentPipe,
     AsAbsolutePipe,
     ButtonRowComponent,
     ButtonComponent,

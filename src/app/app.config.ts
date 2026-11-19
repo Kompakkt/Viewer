@@ -1,13 +1,6 @@
-import {
-  ApplicationConfig,
-  importProvidersFrom,
-  inject,
-  provideAppInitializer,
-} from '@angular/core';
-
+import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,14 +9,13 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { BrowserModule } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
-
 import { ColorChromeModule } from 'ngx-color/chrome';
-
-import { TranslatePipe } from './pipes/translate.pipe';
-import { TranslateService } from './services/translate/translate.service';
+import { provideTranslateService, TranslateService } from './services/translate/translate.service';
 import { AppComponent } from './app.component';
 import { pluginProviders } from './app.plugin';
 import { jwtInterceptor } from './interceptors/jwt-interceptor';
+import { FluentPipe } from './pipes/fluent.pipe';
+import { languageSources } from './app.fluent.sources';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -33,21 +25,13 @@ export const appConfig: ApplicationConfig = {
       MatMenuModule,
       MatIconModule,
       MatCardModule,
-      FormsModule,
-      ReactiveFormsModule,
       DragDropModule,
       ColorChromeModule,
       MatDialogModule,
     ),
     TranslateService,
-    TranslatePipe,
-    provideAppInitializer(() => {
-      const initializerFn = (
-        (service: TranslateService) => () =>
-          service.requestLanguage()
-      )(inject(TranslateService));
-      return initializerFn();
-    }),
+    FluentPipe,
+    provideTranslateService({ defaultLocale: 'en', sources: languageSources }),
     provideRouter([
       { path: '', component: AppComponent },
       { path: '**', redirectTo: '' },

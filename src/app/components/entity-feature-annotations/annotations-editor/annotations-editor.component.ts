@@ -2,7 +2,7 @@ import { Component, computed, inject, viewChildren, ChangeDetectionStrategy } fr
 import { MatIconModule } from '@angular/material/icon';
 import { saveAs } from 'file-saver';
 import { ButtonComponent, TooltipDirective } from '@kompakkt/komponents';
-import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { FluentPipe } from '../../../pipes/fluent.pipe';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
 import { UserdataService } from '../../../services/userdata/userdata.service';
@@ -17,7 +17,7 @@ import { AnnotationComponent } from '../annotation/annotation.component';
   imports: [
     AnnotationComponentForEditorComponent,
     MatIconModule,
-    TranslatePipe,
+    FluentPipe,
     TooltipDirective,
     ButtonComponent,
   ],

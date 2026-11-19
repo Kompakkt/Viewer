@@ -1,33 +1,48 @@
-<h1>{{ 'Point cloud settings' | translate }}</h1>
+<h1>{{ 'k_point-cloud-settings-title' | fluent }}</h1>
 
-<h3>Level of detail</h3>
+<h3>{{ 'k_point-cloud-settings-level-of-detail-heading' | fluent }}</h3>
 
-<p>Controls how many levels of the point cloud octree will be loaded.</p>
+<p>{{ 'k_point-cloud-settings-level-of-detail-hint' | fluent }}</p>
 
-<p>Warning: Increases memory usage and decreases performance.</p>
+<p>{{ 'k_point-cloud-settings-memory-warning' | fluent }}</p>
 
 <p>
-  <strong>Level {{ currentLevelOfDetail + 1 }} of {{ maxLevelOfDetail }}</strong>
+  @let currentLevel = currentLevelOfDetail + 1;
+  <strong>
+    {{
+      'k_point-cloud-settings-level-label'
+        | fluent: { current: currentLevel, total: maxLevelOfDetail }
+    }}
+  </strong>
   <br />
-  <small>Loaded: {{ loadedPointsPercentage }}%</small>
+  <small>
+    {{
+      'k_point-cloud-settings-loaded-percentage' | fluent: { percentage: loadedPointsPercentage }
+    }}
+  </small>
   <br />
-  <small># Points: {{ loadedPointsCount }} of {{ totalPointsCount }}</small>
+  <small>
+    {{
+      'k_point-cloud-settings-points-count'
+        | fluent: { loaded: loadedPointsCount, total: totalPointsCount }
+    }}
+  </small>
 </p>
 
-<p>Next level will load {{ pointsOfNextLevel }} points.</p>
+<p>
+  {{ 'k_point-cloud-settings-next-level-message' | fluent: { count: pointsOfNextLevel } }}
+</p>
 
 <k-button
   type="solid-primary"
   (click)="loadNextLevelOfDetail()"
   [disabled]="currentLevelOfDetail >= maxLevelOfDetail"
-  >Load next detail level</k-button
+  >{{ 'k_point-cloud-settings-load-next-level-button' | fluent }}</k-button
 >
 
-<h3>Point size</h3>
+<h3>{{ 'k_point-cloud-settings-point-size-heading' | fluent }}</h3>
 
-<p>
-  Adjusts how small or how large individual points will be displayed. Has no impact on performance.
-</p>
+<p>{{ 'k_point-cloud-settings-point-size-hint' | fluent }}</p>
 
 <k-slider
   [min]="0.1"
@@ -35,19 +50,16 @@
   [step]="0.1"
   [value]="currentPointSize"
   (valueChange)="changePointSize($event)"
-  [label]="('Point Size' | translate) + ': ' + currentPointSize"
+  [label]="'k_point-cloud-settings-point-size-label' | fluent: { size: currentPointSize }"
 />
 
-<h3>Show octree boxes</h3>
+<h3>{{ 'k_point-cloud-settings-octree-heading' | fluent }}</h3>
 
-<p>Toggle the visibility of boxes displaying the zones of the octree.</p>
+<p>{{ 'k_point-cloud-settings-octree-hint' | fluent }}</p>
 
-<p>
-  A larger box indicates a lower level of detail, and smaller boxes indicate higher levels of
-  detail.
-</p>
+<p>{{ 'k_point-cloud-settings-octree-size-hint' | fluent }}</p>
 
 <k-labelled-checkbox
-  [label]="'Show octree boxes' | translate"
+  [label]="'k_point-cloud-settings-octree-heading' | fluent"
   (checkedChange)="toggleOctreeBoxes()"
 />

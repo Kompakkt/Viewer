@@ -1,37 +1,37 @@
 <form action="auth-dialog_submit" method="get" accept-charset="utf-8">
   @switch (concern) {
     @case ('login') {
-      <h1>{{ 'Login' | translate }}</h1>
+      <h1>{{ 'k_login-title' | fluent }}</h1>
 
       <p>
-        {{ 'This content is protected and requires authentication.' | translate }}
+        {{ 'k_login-protected-hint' | fluent }}
       </p>
     }
     @case ('delete-annotation') {
-      <h1>{{ 'Delete annotation' | translate }}</h1>
+      <h1>{{ 'k_login-delete-title' | fluent }}</h1>
 
       <p>
-        {{ 'Are you sure you want to delete this annotation forever?' | translate }}
+        {{ 'k_login-delete-confirm' | fluent }}
       </p>
       <p>
-        {{ 'If you are sure, enter your username and password to confirm.' | translate }}
+        {{ 'k_login-delete-hint' | fluent }}
       </p>
     }
   }
 
   <k-input
-    [label]="'Username' | translate"
+    [label]="'k_login-username-label' | fluent"
     type="username"
     (valueChange)="data.username = $event"
   />
   <k-input
-    [label]="'Password' | translate"
+    [label]="'k_login-password-label' | fluent"
     type="password"
     (valueChange)="data.password = $event"
   />
 
   @if (loginFailed) {
-    <p style="color: red">{{ 'Login failed' | translate }}</p>
+    <p style="color: red">{{ 'k_login-failed-message' | fluent }}</p>
   }
 
   <k-button-row>
@@ -40,7 +40,7 @@
       [disabled]="waitingForResponse"
       type="outlined-secondary"
       full-width
-      >{{ 'Cancel' | translate }}</k-button
+      >{{ 'Cancel' | fluent }}</k-button
     >-->
     <k-button
       (click)="login()"
@@ -50,10 +50,10 @@
     >
       @switch (concern) {
         @case ('login') {
-          {{ 'Login' | translate }}
+          {{ 'k_login-title' | fluent }}
         }
         @case ('delete-annotation') {
-          {{ 'Delete forever' | translate }}
+          {{ 'k_login-delete-forever-button' | fluent }}
         }
       }
     </k-button>

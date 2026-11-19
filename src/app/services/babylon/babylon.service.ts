@@ -3,7 +3,6 @@ import {
   EnvironmentInjector,
   Injectable,
   ViewContainerRef,
-  computed,
   createComponent,
   effect,
   inject,
@@ -311,7 +310,7 @@ export class BabylonService {
   public disableInspector(name = 'main') {
     const token = this.inspectorTokens[name];
     if (token) {
-      token.dispose();
+      void token.dispose();
       delete this.inspectorTokens[name];
     }
   }
@@ -542,7 +541,7 @@ export class BabylonService {
     if (progressEvent.lengthComputable) {
       const percent = (progressEvent.loaded / progressEvent.total) * 100;
       const roundedPercent = Math.round(percent * 100) / 100;
-      this.loadingScreen.updateLoadingText(`Loading: ${roundedPercent}%`);
+      this.loadingScreen.updateLoadingPercentage(roundedPercent);
     }
   }
 
@@ -599,7 +598,7 @@ export class BabylonService {
 
   public async createScreenshot() {
     this.hideMesh('marker', false);
-    await new Promise<any>((resolve, _) => this.getEngine().onEndFrameObservable.add(resolve));
+    await new Promise<any>((resolve, __) => this.getEngine().onEndFrameObservable.add(resolve));
     const result = await new Promise<string>((resolve, reject) => {
       const _activeCamera = this.getScene().activeCamera;
       if (_activeCamera instanceof Camera) {
@@ -630,10 +629,10 @@ export class BabylonService {
     const clearColor = this.getScene().clearColor;
     this.getScene().clearColor = new Color4(0, 0, 0, 0);
 
-    await new Promise<any>((resolve, _) => {
+    await new Promise<any>((resolve, __) => {
       this.getEngine().onEndFrameObservable.add(resolve);
     });
-    const result = await new Promise<string>((resolve, _) => {
+    const result = await new Promise<string>((resolve, __) => {
       const _activeCamera = this.getScene().activeCamera;
 
       if (_activeCamera instanceof Camera) {

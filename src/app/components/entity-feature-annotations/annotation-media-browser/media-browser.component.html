@@ -1,8 +1,8 @@
-<h2>{{ 'Embed external media into the content of the annotation' | translate }}</h2>
+<h2>{{ 'k_media-browser-title' | fluent }}</h2>
 
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
-  <k-input [label]="'URL' | translate" #url />
-  <k-input [label]="'Fallback media description' | translate" #description />
+  <k-input [label]="'k_media-browser-url-label' | fluent" #url />
+  <k-input [label]="'k_media-browser-description-label' | fluent" #description />
 </div>
 
 <k-button-row justify="end">
@@ -12,7 +12,7 @@
       addImage(url.value(), description.value()); url.value.set(''); description.value.set('')
     "
   >
-    <span>{{ 'Add' | translate }}</span>
+    <span>{{ 'k_media-browser-add-button' | fluent }}</span>
   </k-button>
 </k-button-row>
 
@@ -22,8 +22,8 @@ wird im DialogannotationEditor eine Methode getriggert, die rohes HTML in den An
 Zusammen mit dem Markdown Compiler könnte man aber z.B. festlegen, dass eine echte Entity-Card als Component eingesetzt wird, etc pp.
 
 @if (compilation$ | async) {
-<k-details [title]="'Add Entity From Collection' | translate" [startCollapsed]="true">
-  <p>{{ 'Click on an entity to add it to the annotation' | translate }}</p>
+<k-details [title]="'Add Entity From Collection' | fluent" [startCollapsed]="true">
+  <p>{{ 'Click on an entity to add it to the annotation' | fluent }}</p>
   @for (entity of entities$ | async; track entity; let i = $index) {
   <mat-card appearance="outlined" (click)="addEntity(i)" class="compilation-entity">
     <img mat-card-image [src]="server_url + entity.settings.preview" [alt]="entity.name" />

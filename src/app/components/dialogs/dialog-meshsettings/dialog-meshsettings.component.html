@@ -1,19 +1,19 @@
-<h1>{{ 'Finalize mesh settings' | translate }}</h1>
+<h1>{{ 'k_dialog-meshsettings-title' | fluent }}</h1>
 <p>
-  {{ 'Finalizing will lock the following settings forever:' | translate }}
+  {{ 'k_dialog-meshsettings-lock-hint' | fluent }}
 </p>
 <ul>
-  <li>{{ 'Scaling' | translate }}</li>
-  <li>{{ 'Rotation' | translate }}</li>
+  <li>{{ 'k_dialog-meshsettings-scaling-item' | fluent }}</li>
+  <li>{{ 'k_dialog-meshsettings-rotation-item' | fluent }}</li>
 </ul>
 <p>
-  {{ 'Are you satisfied with how your object is displayed?' | translate }}
+  {{ 'k_dialog-meshsettings-confirm-question' | fluent }}
 </p>
 <k-button-row gap="4">
-  <k-button type="outlined-secondary" (click)="close(false)" full-width>{{
-    'No, cancel and adjust' | translate
-  }}</k-button>
-  <k-button type="solid-primary" (click)="close(true)" full-width>{{
-    'Yes, finalize' | translate
-  }}</k-button>
+  <k-button type="outlined-secondary" (click)="close(false)" full-width>
+    {{ 'k_dialog-meshsettings-cancel-button' | fluent }}
+  </k-button>
+  <k-button type="solid-primary" (click)="close(true)" full-width>
+    {{ 'k_dialog-meshsettings-confirm-button' | fluent }}
+  </k-button>
 </k-button-row>

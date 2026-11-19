@@ -12,13 +12,10 @@ import {
   RegisterSceneLoaderPlugin,
   Scene,
   StandardMaterial,
-  TransformNode,
   Vector3,
   VertexData,
 } from '@babylonjs/core';
 import { Copc } from 'copc';
-import { BehaviorSubject } from 'rxjs';
-import { prepareCopcShaderMaterial } from './copc-materials';
 import { createCOPCWorkerPool } from './worker-pool';
 import { PointCloudImporter } from '../common/point-cloud-importer';
 import { retryWithBackoff } from '../common/retry-utils';
@@ -169,7 +166,7 @@ export class CopcImporter implements ISceneLoaderPluginAsync {
     };
 
     const importNode = async (key: string) => {
-      const [level, x, y, z] = key.split('-').map(Number);
+      const [level] = key.split('-').map(Number);
       if (level > PointCloudImporter.currentLOD) return;
       const node = nodes[key];
       if (!node) return;
@@ -302,19 +299,19 @@ export class CopcImporter implements ISceneLoaderPluginAsync {
   }
 
   public async loadAsync(
-    scene: Scene,
-    data: any,
-    rootUrl: string,
-    onProgress?: (event: ISceneLoaderProgressEvent) => void,
-    fileName?: string,
+    _scene: Scene,
+    _data: any,
+    _rootUrl: string,
+    _onProgress?: (event: ISceneLoaderProgressEvent) => void,
+    _fileName?: string,
   ): Promise<void> {}
 
   public async loadAssetContainerAsync(
     scene: Scene,
-    data: any,
-    rootUrl: string,
-    onProgress?: (event: ISceneLoaderProgressEvent) => void,
-    fileName?: string,
+    _data: any,
+    _rootUrl: string,
+    _onProgress?: (event: ISceneLoaderProgressEvent) => void,
+    _fileName?: string,
   ): Promise<AssetContainer> {
     const container = new AssetContainer(scene);
     return container;

@@ -1,103 +1,140 @@
-import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, firstValueFrom, ReplaySubject } from 'rxjs';
+import {
+  computed,
+  effect,
+  EnvironmentProviders,
+  inject,
+  makeEnvironmentProviders,
+  provideAppInitializer,
+  Service,
+  signal,
+} from '@angular/core';
+import { FluentBundle, FluentResource } from '@fluent/bundle';
+import { first } from 'rxjs';
 
-export type TranslationData = Record<string, string | undefined>;
+export type TranslateConfig = {
+  defaultLocale: string;
+  sources: Record<string, string>;
+};
 
-@Injectable()
+@Service()
 export class TranslateService {
-  private http = inject(HttpClient);
-  private router = inject(Router);
-  private activatedRoute = inject(ActivatedRoute);
+  #http = inject(HttpClient);
+  #requestedLocale = signal<string>('en');
+  locale = computed(() => this.#requestedLocale());
+  defaultLocale = signal<string>('en');
+  sourceMap = signal<Record<string, string>>({});
+  bundleMap = signal<Record<string, FluentBundle>>({});
 
-  private requestedLanguage$ = new BehaviorSubject<string | undefined>(undefined);
-  private languageData$ = new BehaviorSubject<TranslationData>({});
+  _requestLocaleChanged = effect(() => {
+    const requestedLocale = this.#requestedLocale();
+    void this.#loadLocale(requestedLocale);
+  });
 
-  // TODO: Extract this data when necessary
-  private missingTranslations = new Set<string>();
+  _sourceMapChanged = effect(() => {
+    const map = this.sourceMap();
+    void this.#loadFromSources(map);
+  });
 
-  public selectedLanguage$ = new ReplaySubject<string>(1);
-  public supportedLanguages = {
-    en: 'English',
-    mn: 'монгол хэл (Mongolian)',
-  };
+  async #loadFromSources(sources: Record<string, string>) {
+    const defaultLocale = this.defaultLocale();
+    await this.#loadLocale(defaultLocale);
+    const otherLocales = Object.keys(sources).filter(locale => locale !== defaultLocale);
+    for (const locale of otherLocales) {
+      await this.#loadLocale(locale);
+    }
+  }
 
-  constructor() {
-    this.requestedLanguage$.subscribe(requestedLanguage => {
-      const supportedLanguage = this.getSupportedLanguage(requestedLanguage);
-      this.getTranslationData(supportedLanguage)
-        .then(data => {
-          console.log('Loaded translation data', { requestedLanguage, supportedLanguage, data });
-          this.languageData$.next(data);
-          this.selectedLanguage$.next(supportedLanguage);
-        })
-        .catch(err =>
-          console.error('Could not load translation data:', {
-            requestedLanguage,
-            supportedLanguage,
-            err,
-          }),
-        );
-    });
+  async #loadLocale(locale: string) {
+    const sources = this.sourceMap();
+    if (!sources[locale]) {
+      console.warn(
+        '[TranslateService] Requested locale does not exist in sourceMap, returning to defaultLocale',
+      );
+      this.#requestedLocale.set(this.defaultLocale());
+      return;
+    }
 
-    this.selectedLanguage$.subscribe(() => {
-      this.addLocaleToSearchParams();
+    const bundles = this.bundleMap();
+    if (bundles[locale]) {
+      console.log('[TranslateService] Requested locale already loaded');
+      return;
+    }
+
+    this.#http
+      .get(sources[locale], { responseType: 'text' })
+      .pipe(first())
+      .subscribe(content => {
+        if (!content) return;
+        console.log('[TranslateService] Got content', content);
+        const resource = new FluentResource(content);
+        const bundle = new FluentBundle(locale);
+        bundle.addResource(resource);
+        this.bundleMap.update(map => {
+          return { ...map, [locale]: bundle };
+        });
+      });
+  }
+
+  requestLanguage(locale: string) {
+    const sources = this.sourceMap();
+    if (!sources[locale]) {
+      console.warn('[TranslateService] Requested locale is not available in sources');
+      return;
+    }
+    this.#requestedLocale.set(locale);
+  }
+
+  addResource(locale: string, resource: FluentResource) {
+    this.bundleMap.update(map => {
+      map[locale].addResource(resource);
+      return { ...map };
     });
   }
 
-  private async addLocaleToSearchParams() {
-    const locale = await firstValueFrom(this.selectedLanguage$);
-    const windowQueryParams = new URLSearchParams(window.location.search);
-    const queryParams = {
-      ...Object.fromEntries(windowQueryParams.entries()),
-      ...this.router.currentNavigation()?.extras.state,
-      locale: locale,
-    };
-
-    this.router.navigate([], {
-      relativeTo: this.activatedRoute,
-      queryParams: queryParams,
-      queryParamsHandling: 'merge',
-    });
-  }
-
-  public getTranslatedKey(key: string) {
-    const translation = this.languageData$.getValue()[key];
-    if (!translation) {
-      this.missingTranslations.add(key);
+  getTranslation(key: string, args?: any) {
+    const bundles = this.bundleMap();
+    const locale = this.#requestedLocale();
+    const defaultLocale = this.defaultLocale();
+    const localeBundle: FluentBundle | undefined = bundles[locale];
+    const defaultBundle: FluentBundle | undefined = bundles[defaultLocale];
+    if (!localeBundle && !defaultBundle) {
+      console.log('[TranslateService] No bundle ready for request', { key, args });
       return key;
     }
-    return translation;
-  }
 
-  public requestLanguage(requestedLanguage?: string) {
-    this.requestedLanguage$.next(requestedLanguage);
-  }
+    const translatedKey = (() => {
+      fromLocale: {
+        const message = localeBundle?.getMessage(key);
+        const value = message?.value;
+        if (value) {
+          const translated = localeBundle?.formatPattern(value, args);
+          return translated;
+        }
+        break fromLocale;
+      }
+      fromDefault: {
+        const message = defaultBundle?.getMessage(key);
+        const value = message?.value;
+        if (value) {
+          const translated = defaultBundle?.formatPattern(value, args);
+          return translated;
+        }
+        break fromDefault;
+      }
+      return key;
+    })();
 
-  private getSupportedLanguage(requestedLanguage?: string): string {
-    const supportedLanguages = Object.keys(this.supportedLanguages);
-
-    const queryLanguage = new URLSearchParams(location.search).get('locale');
-    // Remove navigator language detection for now, until translations are more mature
-    // const navigatorLanguage = window.navigator.language.split('-').at(0);
-
-    // Find the first supported language or fallback to English
-    const supportedLanguage =
-      [requestedLanguage, queryLanguage].find(
-        language => language && supportedLanguages.includes(language),
-      ) ?? 'en';
-    return supportedLanguage;
-  }
-
-  private async getTranslationData(language: string): Promise<TranslationData> {
-    const path = `assets/i18n/${language}.json`;
-
-    try {
-      return await firstValueFrom(this.http.get<TranslationData>(path));
-    } catch (e) {
-      console.log('Could not load translation', e);
-    }
-    return {};
+    return translatedKey;
   }
 }
+
+export const provideTranslateService = (config: TranslateConfig): EnvironmentProviders => {
+  return makeEnvironmentProviders([
+    provideAppInitializer(() => {
+      const service = inject(TranslateService);
+      if (config.defaultLocale) service.defaultLocale.set(config.defaultLocale);
+      if (config.sources) service.sourceMap.set(config.sources);
+    }),
+  ]);
+};

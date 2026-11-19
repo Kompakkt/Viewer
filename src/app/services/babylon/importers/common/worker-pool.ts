@@ -79,7 +79,7 @@ class WorkerPool<T extends BaseTask> {
   private handleWorkerMessage(worker: Worker, event: MessageEvent) {
     const task = this.activeTasks.get(worker);
     this.activeTasks.delete(worker);
-    this.processNextTask();
+    void this.processNextTask();
 
     if (event.data.error) {
       console.error('Worker returned error:', event.data);
@@ -106,7 +106,7 @@ class WorkerPool<T extends BaseTask> {
     const task = this.activeTasks.get(worker);
     console.error('Worker error:', error);
     this.activeTasks.delete(worker);
-    this.processNextTask();
+    void this.processNextTask();
 
     if (task) {
       const currentRetryCount = task.retryCount || 0;
@@ -156,18 +156,18 @@ class WorkerPool<T extends BaseTask> {
         console.warn(`Task ${task.key} failed, retrying (${task.retryCount}/${MAX_RETRIES})`);
         // Re-queue for retry
         this.taskQueue.addTask(task);
-        this.processNextTask();
+        void this.processNextTask();
         return;
       }
 
       this.results$.next({ error: true, message: e.toString(), key: task.key });
-      this.processNextTask();
+      void this.processNextTask();
     }
   }
 
   public addTask(task: T) {
     this.taskQueue.addTask(task);
-    this.processNextTask();
+    void this.processNextTask();
 
     return firstValueFrom(this.results$.pipe(filter(result => result.key === task.key)));
   }

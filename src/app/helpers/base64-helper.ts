@@ -12,7 +12,7 @@ export const decodeURIUntilStable = (str: string, max = 3) => {
 export const encodeBase64 = (str: string): string | undefined => {
   try {
     return btoa(encodeURIComponent(str.trim()));
-  } catch (error) {
+  } catch {
     return undefined;
   }
 };
@@ -20,7 +20,7 @@ export const encodeBase64 = (str: string): string | undefined => {
 export const decodeBase64 = (str: string) => {
   try {
     return atob(decodeURIUntilStable(str.trim()));
-  } catch (error) {
+  } catch {
     return undefined;
   }
 };
@@ -31,7 +31,7 @@ export const isBase64 = (str: string) => {
   }
   try {
     return atob(decodeURIUntilStable(str.trim()));
-  } catch (error) {
+  } catch {
     return false;
   }
 };

@@ -1,14 +1,14 @@
 @if (currentMode(); as mode) {
   <!-- Switch -->
   @if (canUserEdit()) {
-    <h1>{{ 'Edit annotation' | translate }}</h1>
+    <h1>{{ 'k_dialog-annotation-editor-title' | fluent }}</h1>
 
     <div class="tab-selection">
       <div class="tab" [class.active]="mode === 'edit'" (click)="currentMode.set('edit')">
-        <span>Edit</span>
+        <span>{{ 'k_dialog-annotation-editor-edit-tab' | fluent }}</span>
       </div>
       <div class="tab" [class.active]="mode === 'preview'" (click)="currentMode.set('preview')">
-        <span>Preview</span>
+        <span>{{ 'k_dialog-annotation-editor-preview-tab' | fluent }}</span>
       </div>
     </div>
   }
@@ -17,14 +17,14 @@
       @if (annotation$ | async; as annotation) {
         <div>
           <k-input
-            [label]="'Title' | translate"
+            [label]="'k_dialog-annotation-editor-title-label' | fluent"
             [value]="annotation.body.content.title"
             (valueChange)="onTitleChange($event)"
           />
 
           <k-textarea
             #annotationDescription
-            [label]="'Description content' | translate"
+            [label]="'k_dialog-annotation-editor-description-label' | fluent"
             [value]="annotation.body.content.description"
             (valueChange)="onTextAreaChange($event)"
             resize="both"
@@ -33,7 +33,7 @@
 
         @if (annotationValidationErrors$ | async; as error) {
           <div class="error" style="color: var(--color-warn, red)">
-            {{ error }}
+            {{ error | fluent }}
           </div>
         }
       }
@@ -72,14 +72,14 @@
 @if (canUserEdit()) {
   <k-button-row justify="end">
     <k-button type="outlined-primary" (click)="close(false)">
-      <span>{{ 'Cancel' | translate }}</span>
+      <span>{{ 'k_button-cancel' | fluent }}</span>
     </k-button>
     <k-button
       type="solid-primary"
       (click)="close(true)"
       [disabled]="!!(annotationValidationErrors$ | async)"
     >
-      <span>{{ 'Save' | translate }}</span>
+      <span>{{ 'k_button-save' | fluent }}</span>
     </k-button>
   </k-button-row>
 }

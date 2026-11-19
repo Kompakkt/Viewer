@@ -1,30 +1,35 @@
 @if (processing.settings(); as settings) {
-  <k-details [title]="'Information and helpers' | translate">
-    <h3 style="margin-top: 0px">{{ 'Bounding boxes' | translate }}</h3>
+  <k-details [title]="'k_entity-feature-settings-mesh-information-heading' | fluent">
+    <h3 style="margin-top: 0px">
+      {{ 'k_entity-feature-settings-mesh-bounding-boxes-heading' | fluent }}
+    </h3>
 
     <k-labelled-checkbox
-      [label]="'Show entity bounding boxes' | translate"
+      [label]="'k_entity-feature-settings-mesh-entity-bounding-boxes-label' | fluent"
       (checkedChange)="setBoundingBoxEntityVisibility($event)"
     />
 
     <k-labelled-checkbox
-      [label]="'Show mesh bounding boxes' | translate"
+      [label]="'k_entity-feature-settings-mesh-mesh-bounding-boxes-label' | fluent"
       (checkedChange)="setBoundingBoxMeshesVisibility($event)"
     />
 
     @if (processing.meshes(); as meshes) {
-      <small>{{ 'Number of meshes:' | translate }} {{ meshes.length }}</small>
+      <small>{{ 'k_entity-feature-settings-mesh-count' | fluent: { count: meshes.length } }}</small>
     }
 
-    <h3>{{ 'Axes' | translate }}</h3>
+    <h3>{{ 'k_entity-feature-settings-mesh-axes-heading' | fluent }}</h3>
 
     <k-labelled-checkbox
-      [label]="'Show world axes' | translate"
+      [label]="'k_entity-feature-settings-mesh-world-axes-label' | fluent"
       (checkedChange)="setAxesVisibility('worldAxis', $event)"
     />
 
     <k-slider
-      [label]="('World axes size:' | translate) + ' ' + worldAxisScalingFactor"
+      [label]="
+        'k_entity-feature-settings-mesh-world-axes-size-label'
+          | fluent: { size: worldAxisScalingFactor }
+      "
       [min]="1"
       [max]="3"
       [value]="worldAxisScalingFactor"
@@ -32,27 +37,32 @@
     />
 
     <k-labelled-checkbox
-      [label]="'Show local axes' | translate"
+      [label]="'k_entity-feature-settings-mesh-local-axes-label' | fluent"
       (checkedChange)="setAxesVisibility('localAxis', $event)"
     />
 
     <k-slider
-      [label]="('Local axes size:' | translate) + ' ' + localAxisScalingFactor"
+      [label]="
+        'k_entity-feature-settings-mesh-local-axes-size-label'
+          | fluent: { size: localAxisScalingFactor }
+      "
       [min]="1"
       [max]="3"
       [value]="localAxisScalingFactor"
       (valueChange)="setScalingFactorAxis($event, 'local')"
     />
 
-    <h3>{{ 'Ground' | translate }}</h3>
+    <h3>{{ 'k_entity-feature-settings-mesh-ground-heading' | fluent }}</h3>
 
     <k-labelled-checkbox
-      [label]="'Show ground' | translate"
+      [label]="'k_entity-feature-settings-mesh-ground-label' | fluent"
       (checkedChange)="setGroundVisibility($event)"
     />
 
     <k-slider
-      [label]="('Ground scale:' | translate) + ' ' + groundScalingFactor"
+      [label]="
+        'k_entity-feature-settings-mesh-ground-scale-label' | fluent: { scale: groundScalingFactor }
+      "
       [min]="1"
       [max]="10"
       [value]="groundScalingFactor"
@@ -60,70 +70,73 @@
     />
 
     <app-color-field
-      [label]="'Ground color' | translate"
+      [label]="'k_entity-feature-settings-mesh-ground-color-label' | fluent"
       [color]="groundColor()"
       (colorChange)="setGroundColor($event)"
     />
 
     <k-button (click)="resetVisualUIMeshSettingsHelper()" type="outlined-primary">
-      {{ 'Reset helpers' | translate }}
+      {{ 'k_entity-feature-settings-mesh-helpers-reset-button' | fluent }}
     </k-button>
   </k-details>
 
-  <k-details [title]="'Mirror axes' | translate">
+  <k-details [title]="'k_entity-feature-settings-mesh-mirror-heading' | fluent">
     <k-button-row>
       <k-button (click)="handleMirrorAxis('x')" type="outlined-primary">
-        {{ 'X-axis' | translate }}
+        {{ 'k_entity-feature-settings-mesh-x-axis' | fluent }}
       </k-button>
       <k-button (click)="handleMirrorAxis('y')" type="outlined-primary">
-        {{ 'Y-axis' | translate }}
+        {{ 'k_entity-feature-settings-mesh-y-axis' | fluent }}
       </k-button>
       <k-button (click)="handleMirrorAxis('z')" type="outlined-primary">
-        {{ 'Z-axis' | translate }}
+        {{ 'k_entity-feature-settings-mesh-z-axis' | fluent }}
       </k-button>
     </k-button-row>
 
     <p>
-      {{ 'Current mirroring' | translate }}:
-      <strong>
-        @if (mirroredAxes(); as mirrored) {
-          {{ mirrored.toUpperCase() }}
-        } @else {
-          {{ 'None' | translate }}
-        }
-      </strong>
+      @if (mirroredAxes(); as mirrored) {
+        {{
+          'k_entity-feature-settings-mesh-mirroring-current'
+            | fluent: { axes: mirrored.toUpperCase() }
+        }}
+      } @else {
+        {{ 'k_entity-feature-settings-mesh-mirroring-none' | fluent }}
+      }
     </p>
 
     <k-button (click)="handleMirrorAxis('reset')" type="outlined-primary">
-      {{ 'Reset mirroring' | translate }}
+      {{ 'k_entity-feature-settings-mesh-mirroring-reset-button' | fluent }}
     </k-button>
   </k-details>
 
-  <k-details [title]="'Scale' | translate">
+  <k-details [title]="'k_entity-feature-settings-mesh-scale-heading' | fluent">
+    @let scaleFactor = settings.localSettings.scale.x | asAbsolute;
     <k-slider
-      [label]="('Scale factor:' | translate) + ' ' + (settings.localSettings.scale.x | asAbsolute)"
+      [label]="
+        'k_entity-feature-settings-mesh-scale-factor-label' | fluent: { factor: scaleFactor }
+      "
       [min]="0.1"
       [max]="5"
       [step]="0.1"
-      [value]="settings.localSettings.scale.x | asAbsolute"
+      [value]="scaleFactor"
       (valueChange)="handleChangeDimension($event)"
     />
 
     <k-button (click)="handleChangeDimension(1)" type="outlined-primary">
-      {{ 'Reset size' | translate }}
+      {{ 'k_entity-feature-settings-mesh-size-reset-button' | fluent }}
     </k-button>
   </k-details>
 
-  <k-details [title]="'Rotation' | translate">
+  <k-details [title]="'k_entity-feature-settings-mesh-rotation-heading' | fluent">
     <k-labelled-checkbox
-      [label]="'Use rotation gizmo' | translate"
+      [label]="'k_entity-feature-settings-mesh-rotation-gizmo-label' | fluent"
       [checked]="rotationGizmoActive()"
       (checkedChange)="toggleRotationGizmo($event)"
     />
 
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px">
       <k-input
-        [label]="'X-axis' | translate"
+        [label]="'k_entity-feature-settings-mesh-x-axis' | fluent"
         [min]="0"
         [max]="360"
         type="number"
@@ -133,7 +146,7 @@
       />
 
       <k-input
-        [label]="'Y-axis' | translate"
+        [label]="'k_entity-feature-settings-mesh-y-axis' | fluent"
         [min]="0"
         [max]="360"
         type="number"
@@ -143,7 +156,7 @@
       />
 
       <k-input
-        [label]="'Z-axis' | translate"
+        [label]="'k_entity-feature-settings-mesh-z-axis' | fluent"
         [min]="0"
         [max]="360"
         type="number"
@@ -154,7 +167,7 @@
     </div>
 
     <k-button (click)="setRotation('xyz_reset', 0)" type="outlined-primary">
-      {{ 'Reset rotation' | translate }}
+      {{ 'k_entity-feature-settings-mesh-rotation-reset-button' | fluent }}
     </k-button>
   </k-details>
 }

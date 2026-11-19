@@ -4,7 +4,7 @@
       @if (entity.mediaType !== 'audio') {
         <k-button
           icon-button
-          tooltip="{{ 'Camera settings' | translate }}"
+          [tooltip]="'k_menu-camera-settings-tooltip' | fluent"
           tooltipPosition="above"
           (click)="cameraSettings.toggle(); $event.stopPropagation()"
         >
@@ -39,7 +39,7 @@
         <k-button
           icon-button
           [matMenuTriggerFor]="quality"
-          tooltip="{{ 'Quality' | translate }}"
+          [tooltip]="'k_menu-quality-tooltip' | fluent"
           tooltipPosition="above"
         >
           <mat-icon>high_quality</mat-icon>
@@ -54,7 +54,7 @@
               (click)="updateEntityQuality('high')"
               [class.is-active]="currentQuality === 'high'"
             >
-              {{ 'High' | translate }}
+              {{ 'k_menu-quality-high' | fluent }}
             </button>
           }
           @if (qualities.medium) {
@@ -63,7 +63,7 @@
               (click)="updateEntityQuality('medium')"
               [class.is-active]="currentQuality === 'medium'"
             >
-              {{ 'Medium' | translate }}
+              {{ 'k_menu-quality-medium' | fluent }}
             </button>
           }
           @if (qualities.low) {
@@ -72,7 +72,7 @@
               (click)="updateEntityQuality('low')"
               [class.is-active]="currentQuality === 'low'"
             >
-              {{ 'Low' | translate }}
+              {{ 'k_menu-quality-low' | fluent }}
             </button>
           }
         }
@@ -82,21 +82,21 @@
     <k-button
       icon-button
       (click)="babylon.createScreenshot()"
-      tooltip="{{ 'Screenshot' | translate }}"
+      [tooltip]="'k_menu-screenshot-tooltip' | fluent"
       tooltipPosition="above"
     >
       <mat-icon>camera</mat-icon>
     </k-button>
     <k-button
       icon-button
-      tooltip="{{ 'Select your language' | translate }}"
+      [tooltip]="'k_menu-language-tooltip' | fluent"
       tooltipPosition="above"
       [matMenuTriggerFor]="languageMenu"
     >
       <mat-icon>translate</mat-icon>
     </k-button>
     <mat-menu #languageMenu="matMenu">
-      @for (language of translateService.supportedLanguages | keyvalue; track language) {
+      @for (language of languages() | keyvalue; track language.key) {
         <button mat-menu-item (click)="translateService.requestLanguage(language.key)">
           {{ language.value }}
         </button>
@@ -106,10 +106,13 @@
       <k-button
         icon-button
         (click)="toggleFullscreen()"
-        tooltip="{{ (fullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen') | translate }}"
+        [tooltip]="
+          (fullscreen ? 'k_menu-fullscreen-exit-tooltip' : 'k_menu-fullscreen-enter-tooltip')
+            | fluent
+        "
         tooltipPosition="above"
       >
-        <mat-icon [attr.aria-label]="'Exit fullscreen mode' | translate">{{
+        <mat-icon [attr.aria-label]="'k_menu-fullscreen-aria' | fluent">{{
           fullscreen ? 'fullscreen_exit' : 'fullscreen'
         }}</mat-icon>
       </k-button>

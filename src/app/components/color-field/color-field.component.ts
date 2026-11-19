@@ -14,14 +14,14 @@ import { CdkOverlayOrigin, ConnectedPosition } from '@angular/cdk/overlay';
 import { IColor } from '@kompakkt/common';
 import { ColorChromeModule } from 'ngx-color/chrome';
 import { TooltipDirective } from '@kompakkt/komponents';
-import { TranslatePipe } from 'src/app/pipes/translate.pipe';
+import { FluentPipe } from 'src/app/pipes/fluent.pipe';
 
 @Component({
   selector: 'app-color-field',
   templateUrl: './color-field.component.html',
   styleUrls: ['./color-field.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [OverlayModule, ColorChromeModule, TooltipDirective, TranslatePipe],
+  imports: [OverlayModule, ColorChromeModule, TooltipDirective, FluentPipe],
   host: {
     '(click)': 'toggle()',
   },

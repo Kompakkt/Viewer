@@ -1,10 +1,17 @@
 import { KeyValuePipe } from '@angular/common';
-import { Component, computed, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  OnInit,
+  ChangeDetectionStrategy,
+  signal,
+} from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import fscreen from 'fscreen';
 import { ButtonComponent, TooltipDirective } from '@kompakkt/komponents';
-import { TranslatePipe } from '../../pipes/translate.pipe';
+import { FluentPipe } from '../../pipes/fluent.pipe';
 import { BabylonService } from '../../services/babylon/babylon.service';
 import { MessageService } from '../../services/message/message.service';
 import { OverlayService } from '../../services/overlay/overlay.service';
@@ -12,6 +19,7 @@ import { ProcessingService, QualitySetting } from '../../services/processing/pro
 import { TranslateService } from '../../services/translate/translate.service';
 import { UserdataService } from '../../services/userdata/userdata.service';
 import { CameraSettingsComponent } from './camera-settings/camera-settings.component';
+import { languageNames } from 'src/app/app.fluent.sources';
 
 @Component({
   selector: 'app-menu',
@@ -22,7 +30,7 @@ import { CameraSettingsComponent } from './camera-settings/camera-settings.compo
     CameraSettingsComponent,
     MatMenuModule,
     KeyValuePipe,
-    TranslatePipe,
+    FluentPipe,
     TooltipDirective,
     ButtonComponent,
   ],
@@ -43,6 +51,8 @@ export class MenuComponent implements OnInit {
 
   public fullscreen = !!fscreen.fullscreenElement;
   public fullscreenCapable = fscreen.fullscreenEnabled;
+
+  languages = signal(languageNames);
 
   qualities = computed(() => {
     const entity = this.processing.entity();

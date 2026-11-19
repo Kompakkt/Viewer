@@ -2,7 +2,7 @@ import { Component, input, output, ChangeDetectionStrategy } from '@angular/core
 import { MatIcon } from '@angular/material/icon';
 import { AnimationGroup } from '@babylonjs/core';
 import { ButtonComponent, TooltipDirective } from '@kompakkt/komponents';
-import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { FluentPipe } from '../../../pipes/fluent.pipe';
 
 @Component({
   selector: 'app-animation-group-controls',
@@ -10,7 +10,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
   templateUrl: './animation-group-controls.component.html',
   styleUrls: ['./animation-group-controls.component.scss'],
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [MatIcon, ButtonComponent, TranslatePipe, TooltipDirective],
+  imports: [MatIcon, ButtonComponent, FluentPipe, TooltipDirective],
 })
 export class AnimationGroupControlsComponent {
   readonly target = input.required<AnimationGroup>();

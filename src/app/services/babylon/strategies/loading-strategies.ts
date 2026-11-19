@@ -2,7 +2,6 @@ import {
   AbstractMesh,
   ActionManager,
   Analyser,
-  Color3,
   Engine,
   ExecuteCodeAction,
   GaussianSplattingMesh,
@@ -18,10 +17,7 @@ import {
   Tags,
   Texture,
   Tools,
-  TransformNode,
   Vector3,
-  VertexBuffer,
-  VertexData,
   VideoTexture,
 } from '@babylonjs/core';
 import '@babylonjs/loaders';
@@ -202,7 +198,7 @@ export const loadVideo = async (rootUrl: string, scene: Scene) => {
   const filename = Tools.GetFilename(rootUrl);
 
   // TODO: Reject on videoTexture fails loading?
-  return new Promise<IVideoContainer>((resolve, _) => {
+  return new Promise<IVideoContainer>((resolve, __) => {
     const videoTexture = new VideoTexture(`Video: ${filename}`, rootUrl, scene, false);
     videoTexture.onLoadObservable.add(texture => {
       const video = videoTexture.video;
@@ -251,7 +247,7 @@ export const loadAudio = async (rootUrl: string, scene: Scene, meshes: AbstractM
   return fetch(rootUrl)
     .then(response => response.arrayBuffer())
     .then(async (arrayBuffer): Promise<IAudioContainer> => {
-      const audio = await new Promise<Sound>((resolve, _) => {
+      const audio = await new Promise<Sound>((resolve, __) => {
         const sound = new Sound(`Audio: ${filename}`, arrayBuffer, scene, () => {
           resolveSound();
         });

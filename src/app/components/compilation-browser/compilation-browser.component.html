@@ -1,4 +1,4 @@
-<h1>{{ 'Collection browser' | translate }}</h1>
+<h1>{{ 'k_compilation-browser-title' | fluent }}</h1>
 
 @if (processing.compilation(); as compilation) {
   @if (processing.compilationEntities(); as entities) {
@@ -9,17 +9,17 @@
         <k-button-row>
           <k-button rounded (click)="cancelReorder()" type="outlined-accent" full-width>
             <mat-icon>close</mat-icon>
-            <span>{{ 'Cancel' | translate }}</span>
+            <span>{{ 'k_button-cancel' | fluent }}</span>
           </k-button>
           <k-button rounded (click)="saveReorder()" type="solid-primary" full-width>
             <mat-icon>save</mat-icon>
-            <span>{{ 'Save' | translate }}</span>
+            <span>{{ 'k_button-save' | fluent }}</span>
           </k-button>
         </k-button-row>
       } @else {
         <k-button rounded (click)="enableReorder()" type="solid-primary">
           <mat-icon>reorder</mat-icon>
-          <span>{{ 'Change order' | translate }}</span>
+          <span>{{ 'k_compilation-browser-change-order-button' | fluent }}</span>
         </k-button>
       }
     }
@@ -47,7 +47,7 @@
             <div class="reorder-actions">
               <k-button
                 icon-button
-                [tooltip]="'Move to top' | translate"
+                [tooltip]="'k_compilation-browser-move-top-tooltip' | fluent"
                 (click)="applyReorderAction($event, 'move_top', i)"
                 [disabled]="first"
               >
@@ -56,7 +56,7 @@
 
               <k-button
                 icon-button
-                [tooltip]="'Move one up' | translate"
+                [tooltip]="'k_compilation-browser-move-up-tooltip' | fluent"
                 (click)="applyReorderAction($event, 'move_up', i)"
                 [disabled]="first"
               >
@@ -65,7 +65,7 @@
 
               <k-button
                 icon-button
-                [tooltip]="'Move one down' | translate"
+                [tooltip]="'k_compilation-browser-move-down-tooltip' | fluent"
                 (click)="applyReorderAction($event, 'move_down', i)"
                 [disabled]="last"
               >
@@ -74,7 +74,7 @@
 
               <k-button
                 icon-button
-                [tooltip]="'Move to bottom' | translate"
+                [tooltip]="'k_compilation-browser-move-bottom-tooltip' | fluent"
                 (click)="applyReorderAction($event, 'move_bottom', i)"
                 [disabled]="last"
               >

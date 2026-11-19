@@ -1,7 +1,15 @@
-import { Component, computed, effect, inject, Pipe, PipeTransform, signal, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  Pipe,
+  PipeTransform,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { TranslatePipe } from 'src/app/pipes/translate.pipe';
+import { FluentPipe } from 'src/app/pipes/fluent.pipe';
 import { OverlayService } from 'src/app/services/overlay/overlay.service';
 import { SequenceEditorService, TimelineItem } from 'src/app/services/sequence-editor.service';
 import { PlaybackControllerService } from 'src/app/services/playback/playback-controller.service';
@@ -28,7 +36,7 @@ class FramesToWidthPipe implements PipeTransform {
 @Component({
   selector: 'app-sequence-editor',
   imports: [
-    TranslatePipe,
+    FluentPipe,
     CdkDrag,
     CdkDropList,
     CdkDropListGroup,

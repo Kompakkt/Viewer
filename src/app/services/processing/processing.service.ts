@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { AbstractMesh, Quaternion } from '@babylonjs/core';
+import { AbstractMesh } from '@babylonjs/core';
 import { firstValueFrom } from 'rxjs';
 import {
   IAnnotation,
@@ -31,7 +31,7 @@ import { BackendService } from '../backend/backend.service';
 import { MessageService } from '../message/message.service';
 import { OverlayService } from '../overlay/overlay.service';
 import { UserdataService } from '../userdata/userdata.service';
-import { ActivatedRoute, ActivatedRouteSnapshot, ParamMap, Params, Router } from '@angular/router';
+import { Params } from '@angular/router';
 
 export type QualitySetting = 'low' | 'medium' | 'high' | 'raw';
 const isQualitySetting = (setting: any): setting is QualitySetting => {
@@ -487,7 +487,7 @@ export class ProcessingService {
         return this.loadFallbackEntity();
       })
       .then(() => {
-        if (!!entries.minimal) {
+        if (entries.minimal) {
           this.showAnnotationEditor.set(false);
           this.showSettingsEditor.set(false);
           this.showSidenav.set(false);

@@ -1,14 +1,14 @@
 @if (annotation(); as annotation) {
   @if (isSelected()) {
     <div class="header">
-      <h2>{{ annotation.body.content.title || ('No title' | translate) }}</h2>
+      <h2>{{ annotation.body.content.title || ('k_annotation-no-title' | fluent) }}</h2>
       <k-button icon-button color="transparent" (click)="closeAnnotation()"
         ><mat-icon>close</mat-icon></k-button
       >
     </div>
 
     <app-markdown-preview
-      [data]="annotation.body.content.description || ('No description' | translate)"
+      [data]="annotation.body.content.description || ('k_annotation-no-description' | fluent)"
     />
 
     <div
@@ -29,21 +29,21 @@
         <k-button
           icon-button
           color="transparent"
-          [tooltip]="'Delete annotation' | translate"
+          [tooltip]="'k_annotation-delete-tooltip' | fluent"
           (click)="deleteAnnotation()"
           ><mat-icon>delete</mat-icon></k-button
         >
         <k-button
           icon-button
           color="transparent"
-          [tooltip]="'Reposition annotation' | translate"
+          [tooltip]="'k_annotation-reposition-tooltip' | fluent"
           (click)="toggleRepositionMode()"
           ><mat-icon>open_with</mat-icon></k-button
         >
         <k-button
           icon-button
           color="transparent"
-          [tooltip]="'Edit annotation' | translate"
+          [tooltip]="'k_annotation-edit-tooltip' | fluent"
           (click)="toggleFullscreen('edit')"
           ><mat-icon>edit</mat-icon></k-button
         >
@@ -51,7 +51,7 @@
       <k-button
         icon-button
         color="transparent"
-        tooltip="Toggle fullscreen"
+        [tooltip]="'k_annotation-fullscreen-tooltip' | fluent"
         (click)="toggleFullscreen('preview')"
         ><mat-icon>select_all</mat-icon></k-button
       >

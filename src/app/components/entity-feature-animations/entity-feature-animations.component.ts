@@ -1,4 +1,11 @@
-import { Component, OnDestroy, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  computed,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { AnimationGroup } from '@babylonjs/core';
 import {
@@ -8,12 +15,10 @@ import {
   TooltipDirective,
 } from '@kompakkt/komponents';
 import { AnimationService, AnimTarget } from '../../services/animation/animation.service';
-import { TranslatePipe } from '../../pipes/translate.pipe';
+import { FluentPipe } from '../../pipes/fluent.pipe';
 import { AnimationGroupControlsComponent } from './animation-group-controls/animation-group-controls.component';
 import { SequenceEditorService } from 'src/app/services/sequence-editor.service';
 import { ProcessingService } from 'src/app/services/processing/processing.service';
-import { map } from 'rxjs';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-entity-feature-animations',
@@ -22,7 +27,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatIconModule,
-    TranslatePipe,
+    FluentPipe,
     TooltipDirective,
     DetailsComponent,
     SlideToggleComponent,

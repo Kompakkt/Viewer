@@ -1,6 +1,6 @@
-<div [style.opacity]="loadingScreen.opacity$ | async" id="loadingDiv">
+<div [style.opacity]="loadingScreen.opacity()" id="loadingDiv">
   <img src="assets/img/logo-with-stroke.png" alt="" />
   <span
-    ><strong>{{ loadingScreen.loadingText$ | async }}</strong></span
+    ><strong>{{ loadingScreen.loadingText() }}</strong></span
   >
 </div>

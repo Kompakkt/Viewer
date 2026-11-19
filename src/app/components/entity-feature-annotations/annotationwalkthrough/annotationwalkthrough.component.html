@@ -3,21 +3,26 @@
     <k-button
       (click)="previousAnnotation()"
       [disabled]="annotationService.isTransitioning()"
-      tooltip="{{ 'Back' | translate }}"
+      [tooltip]="'k_button-back' | fluent"
       tooltipPosition="above"
       icon-button
     >
-      <mat-icon [attr.aria-label]="'Back' | translate">keyboard_arrow_left</mat-icon>
+      <mat-icon [attr.aria-label]="'k_button-back' | fluent">keyboard_arrow_left</mat-icon>
     </k-button>
-    <span id="walktertitle">{{ title() }}</span>
+    <span id="walktertitle">{{
+      title() ||
+        (selectedAnnotation()
+          ? ('k_annotationwalkthrough-no-title' | fluent)
+          : ('k_annotationwalkthrough-title' | fluent))
+    }}</span>
     <k-button
       (click)="nextAnnotation()"
       [disabled]="annotationService.isTransitioning()"
-      tooltip="{{ 'Next' | translate }}"
+      [tooltip]="'k_button-next' | fluent"
       tooltipPosition="above"
       icon-button
     >
-      <mat-icon [attr.aria-label]="'Next' | translate">keyboard_arrow_right</mat-icon>
+      <mat-icon [attr.aria-label]="'k_button-next' | fluent">keyboard_arrow_right</mat-icon>
     </k-button>
   </div>
 }

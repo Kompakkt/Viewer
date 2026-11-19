@@ -8,7 +8,7 @@ import {
   input,
   output,
   signal,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Matrix, Vector3 } from '@babylonjs/core';
@@ -18,10 +18,9 @@ import { AnnotationService } from '../../../services/annotation/annotation.servi
 import { BabylonService } from '../../../services/babylon/babylon.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
 import { UserdataService } from '../../../services/userdata/userdata.service';
-import { FormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
 import { ButtonComponent, ButtonRowComponent, TooltipDirective } from '@kompakkt/komponents';
-import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { FluentPipe } from '../../../pipes/fluent.pipe';
 import { DialogAnnotationEditorComponent } from '../../dialogs/dialog-annotation-editor/dialog-annotation-editor.component';
 import { MarkdownPreviewComponent } from '../../markdown-preview/markdown-preview.component';
 import { ExtenderSlotDirective } from '../../../directives/extender-slot.directive';
@@ -37,10 +36,9 @@ export type ReorderMovement = 'one-up' | 'one-down' | 'first' | 'last';
   templateUrl: './annotation.component.html',
   styleUrls: ['./annotation.component.scss'],
   imports: [
-    FormsModule,
     MatIcon,
     MarkdownPreviewComponent,
-    TranslatePipe,
+    FluentPipe,
     ButtonComponent,
     ButtonRowComponent,
     TooltipDirective,
