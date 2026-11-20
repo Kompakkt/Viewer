@@ -44,6 +44,8 @@ export objects with their annotations as IIIF 4.0 manifests (button in the annot
   `git submodule update --init demos/iiif-3d`)
 - Kompakkt ↔ IIIF mapping: see `docs/superpowers/specs/2026-11-18-iiif-4-import-export-design.md`
 - Dropped on export (no IIIF equivalent): the normal at the annotation point, the preview image, `validated`.
+- Imported IIIF scenes with several models are exported with one painting annotation per model; Canvases in a
+  scene are not exported.
 - IDs: the exported manifest ID is the viewer URL of the entity (`…/viewer/?entity=<id>`); all other IDs
   (cameras, comments, models) live under `…/viewer/iiif/<id>/…`.
 - Comments link to their camera via a spec-style `scope` reference to the camera resource. On import,

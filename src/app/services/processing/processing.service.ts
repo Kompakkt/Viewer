@@ -40,6 +40,7 @@ import {
   IIIFSceneBuilderService,
   type IIIFBuildResult,
   type IIIFCameraChoice,
+  type IIIFLoadedModel,
 } from '../../iiif/scene-builder';
 
 export type QualitySetting = 'low' | 'medium' | 'high' | 'raw';
@@ -127,6 +128,16 @@ export class ProcessingService {
   /** Switchable cameras of an imported IIIF scene (a Choice of cameras); empty otherwise. */
   public iiifCameraChoices$ = new BehaviorSubject<IIIFCameraChoice[]>([]);
   public activeIIIFCameraChoice$ = new BehaviorSubject<string | undefined>(undefined);
+
+  /** Models of the imported IIIF scene, tied to the entity created for it. */
+  private iiifScene?: { entity: IEntity; models: IIIFLoadedModel[]; canvasCount: number };
+
+  /** Models (and Canvas count) of the entity if it is an imported IIIF scene, otherwise undefined. */
+  public getIIIFScene(
+    entity: IEntity | undefined,
+  ): { models: IIIFLoadedModel[]; canvasCount: number } | undefined {
+    return entity && this.iiifScene?.entity === entity ? this.iiifScene : undefined;
+  }
 
   public selectIIIFCameraChoice(id: string) {
     const choice = this.iiifCameraChoices$.getValue().find(c => c.id === id);
@@ -508,6 +519,7 @@ export class ProcessingService {
         ),
       } as IEntity;
 
+      this.iiifScene = { entity, models: result.models, canvasCount: model.canvases.length };
       this.updateActiveEntity(entity, result.meshes);
       this.settings$.next({
         localSettings: entity.settings,

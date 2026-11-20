@@ -161,8 +161,15 @@ export const effectiveModelTransform = (
   };
 };
 
-/** Effective placement → IIIF transforms, leaving out identity parts. */
-export const modelTransformToIIIFTransforms = ({ scale, rotation, translation }: IIIFModelTransform): IIIFTransform[] => {
+/** Rounds float noise from the world matrices (e.g. 0.029999999) to 6 decimals; avoids -0. */
+const round6 = (value: number) => Math.round(value * 1e6) / 1e6 + 0;
+const roundVec = (v: Vec3): Vec3 => ({ x: round6(v.x), y: round6(v.y), z: round6(v.z) });
+
+/** Effective placement → IIIF transforms (rounded to 6 decimals), leaving out identity parts. */
+export const modelTransformToIIIFTransforms = (placement: IIIFModelTransform): IIIFTransform[] => {
+  const scale = roundVec(placement.scale);
+  const rotation = roundVec(placement.rotation);
+  const translation = roundVec(placement.translation);
   const transforms: IIIFTransform[] = [];
   if (scale.x !== 1 || scale.y !== 1 || scale.z !== 1) transforms.push({ kind: 'scale', value: { ...scale } });
   if (rotation.x || rotation.y || rotation.z) transforms.push({ kind: 'rotate', value: { ...rotation } });

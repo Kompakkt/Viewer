@@ -13,11 +13,18 @@ import {
   type Transform,
 } from './types';
 
+export interface ExportModel {
+  /** absolute URL of the model */
+  url: string;
+  /** Effective placement in IIIF space (see `modelTransform`); without it, no transform is exported. */
+  transform?: IIIFModelTransform;
+}
+
 export interface ManifestExportInput {
   entityId: string;
   entityName: string;
-  /** absolute URL of the model */
-  modelUrl: string;
+  /** absolute URL of the model (single-model entities; ignored when `models` is given) */
+  modelUrl?: string;
   settings: IEntitySettings;
   /**
    * Effective placement of the model in IIIF space (Scale → Rotate → Translate), derived from the
@@ -27,6 +34,8 @@ export interface ManifestExportInput {
    * Without it, the exporter falls back to the settings with a warning.
    */
   modelTransform?: IIIFModelTransform;
+  /** Several models (e.g. an imported multi-model IIIF scene), painted in this order. */
+  models?: ExportModel[];
   annotations: IAnnotation[];
   /** HTTP(S) viewer URL of the entity, used as manifest id */
   manifestId: string;
@@ -118,11 +127,6 @@ export const exportManifest = (input: ManifestExportInput): ManifestExportResult
   for (const id of [manifestId, baseId]) {
     if (!isHttpUrl(id)) warnings.push(`IDs must be HTTP(S) URIs: ${id}`);
   }
-  if (!isPublicUrl(input.modelUrl)) {
-    warnings.push(`Model URL is not publicly reachable: ${input.modelUrl}`);
-  }
-  const format = modelFormatFromUrl(input.modelUrl);
-  if (!format) warnings.push(`Unknown model format for ${input.modelUrl}`);
 
   const placedAt = (p: Vec3) => ({
     type: 'SpecificResource' as const,
@@ -150,19 +154,19 @@ export const exportManifest = (input: ManifestExportInput): ManifestExportResult
     };
   };
 
-  // Model
-  const modelResource = { id: input.modelUrl, type: 'Model', ...(format ? { format } : {}) };
-  let transforms: Transform[];
-  if (input.modelTransform) {
-    transforms = modelTransformToIIIFTransforms(input.modelTransform).map(({ kind, value }) => ({
+  // Models
+  const toIIIFTransforms = (transform: IIIFModelTransform): Transform[] =>
+    modelTransformToIIIFTransforms(transform).map(({ kind, value }) => ({
       type: TRANSFORM_TYPES[kind],
       ...value,
     }));
-  } else {
+
+  /** Settings transforms, for a single model whose effective placement is unknown. */
+  const settingsTransforms = (): Transform[] => {
     warnings.push(
       'Effective model placement unavailable: exporting settings transforms, which ignore Kompakkt\'s auto-placement',
     );
-    transforms = [];
+    const transforms: Transform[] = [];
     if (settings.scale !== undefined && settings.scale !== 1) {
       transforms.push({ type: 'ScaleTransform', x: settings.scale, y: settings.scale, z: settings.scale });
     }
@@ -174,19 +178,36 @@ export const exportManifest = (input: ManifestExportInput): ManifestExportResult
     if (translate.x || translate.y || translate.z) {
       transforms.push({ type: 'TranslateTransform', ...pointToIIIF(translate) });
     }
-  }
+    return transforms;
+  };
 
-  const painting: Annotation[] = [
-    {
-      id: `${sceneId}/anno/model`,
+  const multiModel = !!input.models;
+  const models: ExportModel[] =
+    input.models ??
+    (input.modelUrl ? [{ url: input.modelUrl, transform: input.modelTransform }] : []);
+  if (!models.length) warnings.push('No model to export');
+
+  const painting: Annotation[] = models.map((model, index) => {
+    if (!isPublicUrl(model.url)) warnings.push(`Model URL is not publicly reachable: ${model.url}`);
+    const format = modelFormatFromUrl(model.url);
+    if (!format) warnings.push(`Unknown model format for ${model.url}`);
+    const modelResource = { id: model.url, type: 'Model', ...(format ? { format } : {}) };
+
+    let transforms: Transform[] = [];
+    if (model.transform) transforms = toIIIFTransforms(model.transform);
+    else if (!multiModel) transforms = settingsTransforms();
+    else warnings.push(`Effective model placement unavailable for ${model.url}: exported without transforms`);
+
+    return {
+      id: models.length > 1 ? `${sceneId}/anno/model/${index + 1}` : `${sceneId}/anno/model`,
       type: 'Annotation',
       motivation: ['painting'],
       body: transforms.length
         ? { type: 'SpecificResource', source: modelResource, transform: transforms }
         : modelResource,
       target: sceneRef,
-    },
-  ];
+    };
+  });
 
   // Default camera
   if (settings.cameraPositionInitial) {

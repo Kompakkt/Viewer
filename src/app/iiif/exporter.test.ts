@@ -281,3 +281,60 @@ describe('exportManifest', () => {
     expect(scene.items[0].items.some((a: any) => a.id.endsWith('/anno/camera'))).toBe(false);
   });
 });
+
+describe('exportManifest – several models', () => {
+  const identity = { scale: { x: 1, y: 1, z: 1 }, rotation: { x: 0, y: 0, z: 0 }, translation: { x: 0, y: 0, z: 0 } };
+  const models = [
+    {
+      url: 'https://example.org/whale_mandible.glb',
+      transform: { ...identity, translation: { x: 0, y: 0.03, z: 0.05 } },
+    },
+    {
+      url: 'https://example.org/whale_cranium.glb',
+      transform: { ...identity, rotation: { x: 0, y: 90, z: 0 }, translation: { x: 0, y: 0.18, z: 0 } },
+    },
+  ];
+
+  test('paints one annotation per model, each with its own placement', () => {
+    const { scene, warnings } = sceneOf(makeInput({ models, modelUrl: undefined, modelTransform: undefined }));
+    const paintings = scene.items[0].items.filter((a: any) => a.body?.source?.type === 'Model' || a.body?.type === 'Model');
+    expect(paintings).toHaveLength(2);
+    expect(paintings.map((a: any) => a.id)).toEqual([`${SCENE}/anno/model/1`, `${SCENE}/anno/model/2`]);
+    expect(paintings[0].body).toEqual({
+      type: 'SpecificResource',
+      source: { id: models[0].url, type: 'Model', format: 'model/gltf-binary' },
+      transform: [{ type: 'TranslateTransform', x: 0, y: 0.03, z: 0.05 }],
+    });
+    expect(paintings[1].body.transform).toEqual([
+      { type: 'RotateTransform', x: 0, y: 90, z: 0 },
+      { type: 'TranslateTransform', x: 0, y: 0.18, z: 0 },
+    ]);
+    expect(warnings).toEqual([]);
+  });
+
+  test('a single entry in models keeps the single-model id', () => {
+    const { scene } = sceneOf(makeInput({ models: [models[0]], modelUrl: undefined, modelTransform: undefined }));
+    expect(scene.items[0].items[0].id).toBe(`${SCENE}/anno/model`);
+  });
+
+  test('a model without placement is exported untransformed with a warning', () => {
+    const { scene, warnings } = sceneOf(
+      makeInput({ models: [models[0], { url: models[1].url }], modelUrl: undefined, modelTransform: undefined }),
+    );
+    expect(scene.items[0].items[1].body).toEqual({ id: models[1].url, type: 'Model', format: 'model/gltf-binary' });
+    expect(warnings.some(w => w.includes(`placement unavailable for ${models[1].url}`))).toBe(true);
+  });
+
+  test('warns per model about non-public URLs', () => {
+    const { warnings } = sceneOf(
+      makeInput({ models: [models[0], { url: 'blob:abc', transform: identity }], modelUrl: undefined, modelTransform: undefined }),
+    );
+    expect(warnings.some(w => w.includes('not publicly reachable: blob:abc'))).toBe(true);
+  });
+
+  test('all ids stay unique', () => {
+    const { manifest } = exportManifest(makeInput({ models, modelUrl: undefined, modelTransform: undefined }));
+    const ids = collectIds(manifest);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+});

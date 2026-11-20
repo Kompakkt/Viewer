@@ -70,7 +70,8 @@ The export therefore writes the model's **effective** placement, derived from th
 |---|---|
 | Entity title | `Manifest.label`, `Scene.label` (language map, default `none`) |
 | `entity.externalFile` or server URL + `entity.processed.high` | Painting annotation with body `Model`; `format` from the file extension (`.glb` → `model/gltf-binary`, `.gltf` → `model/gltf+json`, otherwise a matching MIME type) |
-| Effective model placement (see "Kompakkt model placement"; fallback: `settings.scale`, `rotation`, `translate`) | Body as `SpecificResource` with `transform: [ScaleTransform, RotateTransform, TranslateTransform]`; transforms with neutral values are left out |
+| Effective model placement (see "Kompakkt model placement"; fallback: `settings.scale`, `rotation`, `translate`) | Body as `SpecificResource` with `transform: [ScaleTransform, RotateTransform, TranslateTransform]`; values are rounded to 6 decimals (float noise from the world matrices) and transforms with neutral values are left out |
+| Imported IIIF scene (several models) | One painting annotation per model (`…/anno/model/<n>`, manifest order), each with the effective placement of its own meshes. Canvases are not exported (warning). |
 | `settings.cameraPositionInitial` | Painting annotation with body `PerspectiveCamera`; position as a PointSelector in the target, `lookAt` as a PointSelector on the camera target; skipped with a warning if position or target is missing or not finite |
 | `settings.background.color` | `Scene.backgroundColor` (hex `#RRGGBB`) |
 | `settings.lights[]` | `AmbientLight`, `PointLight` or `DirectionalLight` depending on `type`; position as a PointSelector; `intensity` as a `Quantity` (`quantityValue` 0–1, `unit: "relative"`). Known limitations: Kompakkt's PointLight is parented to the active camera, so its stored position is camera-relative but is exported as a fixed scene position; Hemispheric and Directional lights are exported without their direction |

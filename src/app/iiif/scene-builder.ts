@@ -43,6 +43,13 @@ export interface IIIFBuildResult {
   applyCamera: () => void;
   /** Cameras of the default camera's Choice (empty without a Choice); the first is the default. */
   cameraChoices: IIIFCameraChoice[];
+  /** Loaded models with their meshes, in manifest order (used by the IIIF export). */
+  models: IIIFLoadedModel[];
+}
+
+export interface IIIFLoadedModel {
+  url: string;
+  meshes: AbstractMesh[];
 }
 
 export interface IIIFCameraChoice {
@@ -195,9 +202,12 @@ export class IIIFSceneBuilderService {
     const transformNodes: TransformNode[] = [];
     const annotationPositions = new Map<string, Vector3>();
 
+    const loadedModels: IIIFLoadedModel[] = [];
     for (const item of model.models) {
+      const firstMesh = meshes.length;
       const node = await this.buildModel(item, meshes);
       if (!node) continue;
+      loadedModels.push({ url: item.url, meshes: meshes.slice(firstMesh) });
       transformNodes.push(node);
       annotationPositions.set(item.annotationId, node.position.clone());
     }
@@ -242,6 +252,7 @@ export class IIIFSceneBuilderService {
       hasExplicitCamera: !!defaultCamera,
       applyCamera,
       cameraChoices,
+      models: loadedModels,
     };
   }
 

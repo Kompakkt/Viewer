@@ -7,7 +7,7 @@ import { combineLatest, firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { AnnotationService } from '../../../services/annotation/annotation.service';
-import { exportManifest } from '../../../iiif/exporter';
+import { exportManifest, type ManifestExportInput as ExportInput } from '../../../iiif/exporter';
 import { getEffectiveModelTransform } from '../../../iiif/loaded-model-placement';
 import { MessageService } from '../../../services/message/message.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
@@ -91,32 +91,48 @@ export class AnnotationsEditorComponent {
       return;
     }
 
-    const resolvedUrl = this.processing.resolveEntityModelUrl(entity);
-    if (!resolvedUrl) {
-      this.message.error(
-        'This object has no single model file that could be exported (IIIF scenes with several models are not supported).',
-      );
-      return;
+    const toAbsolute = (url: string) => new URL(url, window.location.href).toString();
+    const placementWarnings: string[] = [];
+    let modelInput: Pick<ExportInput, 'modelUrl' | 'modelTransform' | 'models'>;
+
+    const iiifScene = this.processing.getIIIFScene(entity);
+    if (iiifScene?.models.length) {
+      // Imported IIIF scene: export every model where it is displayed.
+      if (iiifScene.canvasCount) {
+        placementWarnings.push(`${iiifScene.canvasCount} Canvas(es) in the scene are not exported`);
+      }
+      modelInput = {
+        models: iiifScene.models.map(model => {
+          const placement = getEffectiveModelTransform(model.meshes);
+          placementWarnings.push(...placement.warnings);
+          return { url: toAbsolute(model.url), transform: placement.transform };
+        }),
+      };
+    } else {
+      const resolvedUrl = this.processing.resolveEntityModelUrl(entity);
+      if (!resolvedUrl) {
+        this.message.error('This object has no model file that could be exported.');
+        return;
+      }
+      // Kompakkt auto-places the model; export where it is actually displayed.
+      const placement = getEffectiveModelTransform(this.processing.meshes$.getValue());
+      placementWarnings.push(...placement.warnings);
+      modelInput = { modelUrl: toAbsolute(resolvedUrl), modelTransform: placement.transform };
     }
-    const modelUrl = new URL(resolvedUrl, window.location.href).toString();
 
     const viewerBase = `${window.location.origin}${window.location.pathname.replace(/[^/]*$/, '')}`;
     const entityId = encodeURIComponent(String(entity._id));
 
-    // Kompakkt auto-places the model; export where it is actually displayed.
-    const placement = getEffectiveModelTransform(this.processing.meshes$.getValue());
-
     const { manifest, warnings: exportWarnings } = exportManifest({
       entityId: String(entity._id),
       entityName: entity.name,
-      modelUrl,
+      ...modelInput,
       settings: settings.localSettings,
-      modelTransform: placement.transform,
       annotations,
       manifestId: `${viewerBase}?entity=${entityId}`,
       baseId: `${viewerBase}iiif/${entityId}`,
     });
-    const warnings = [...placement.warnings, ...exportWarnings];
+    const warnings = [...placementWarnings, ...exportWarnings];
     warnings.forEach(warning => console.warn('[IIIF export]', warning));
     if (warnings.length) {
       const more = warnings.length > 1 ? ` (+${warnings.length - 1} more, see console)` : '';

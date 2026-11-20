@@ -207,6 +207,16 @@ describe('effectiveModelTransform (Kompakkt placement → IIIF)', () => {
     });
   }
 
+  test('float noise is rounded to 6 decimals and near-identity parts are left out', () => {
+    expect(
+      modelTransformToIIIFTransforms({
+        scale: { x: 0.9999999, y: 1.0000001, z: 1 },
+        rotation: { x: 1e-8, y: -2e-7, z: 0 },
+        translation: { x: 0, y: 0.029999999, z: 0.050000001 },
+      }),
+    ).toEqual([{ kind: 'translate', value: { x: 0, y: 0.03, z: 0.05 } }]);
+  });
+
   test('identity placement yields no transforms', () => {
     const { transform } = effectiveModelTransform(gltfRoot, gltfRoot);
     expect(modelTransformToIIIFTransforms(transform)).toEqual([]);

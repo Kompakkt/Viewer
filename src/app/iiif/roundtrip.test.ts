@@ -62,3 +62,36 @@ describe('round trip: exportManifest → parseManifest', () => {
     });
   });
 });
+
+describe('round trip: several models', () => {
+  test('every model keeps its url and placement', () => {
+    const transforms = [
+      { scale: { x: 1, y: 1, z: 1 }, rotation: { x: 0, y: 0, z: 0 }, translation: { x: 0, y: 0.03, z: 0.05 } },
+      { scale: { x: 2, y: 2, z: 2 }, rotation: { x: 10, y: 20, z: 30 }, translation: { x: 0, y: 0.18, z: 0 } },
+    ];
+    const input = makeInput({
+      modelUrl: undefined,
+      modelTransform: undefined,
+      models: [
+        { url: 'https://example.org/a.glb', transform: transforms[0] },
+        { url: 'https://example.org/b.glb', transform: transforms[1] },
+      ],
+    });
+    const model = parseManifest(JSON.parse(JSON.stringify(exportManifest(input).manifest)));
+    expect(model.models.map(m => m.url)).toEqual(['https://example.org/a.glb', 'https://example.org/b.glb']);
+    model.models.forEach((m, i) => {
+      const composed = composeIIIFTransforms(m.transforms);
+      const expected = composeIIIFTransforms([
+        ...(i === 1 ? [{ kind: 'scale' as const, value: transforms[1].scale }] : []),
+        ...(i === 1 ? [{ kind: 'rotate' as const, value: transforms[1].rotation }] : []),
+        { kind: 'translate', value: transforms[i].translation },
+      ]);
+      for (const p of [new Vector3(0, 0, 0), new Vector3(1, 2, 3)]) {
+        closeTo(
+          Vector3.TransformCoordinates(p, nodeMatrix(composed)),
+          Vector3.TransformCoordinates(p, nodeMatrix(expected)),
+        );
+      }
+    });
+  });
+});
