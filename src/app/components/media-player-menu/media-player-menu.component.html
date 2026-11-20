@@ -1,5 +1,5 @@
 <k-button icon-button (click)="togglePlay()">
-  @if (isPlaying) {
+  @if (isPlaying()) {
     <mat-icon class="material-symbols-filled">pause</mat-icon>
   } @else {
     <mat-icon class="material-symbols-filled">play_arrow</mat-icon>
@@ -9,7 +9,7 @@
 <div
   class="playtime"
   #playtimeEl
-  [style.--play-percentage]="playPercentage + '%'"
+  [style.--play-percentage]="playPercentage() + '%'"
   (mousemove)="onPlaytimeMouseMove($event)"
   (mouseenter)="playtimeEl.classList.add('hovered')"
   (mouseleave)="playtimeEl.classList.remove('hovered')"
@@ -46,7 +46,7 @@
   >
     <k-slider
       [label]="'Volume'"
-      [value]="currentVolumePercentageGetter"
+      [value]="currentVolumePercentage()"
       [showLabel]="false"
       direction="bottom-to-top"
       (valueChange)="setVolume($event)"

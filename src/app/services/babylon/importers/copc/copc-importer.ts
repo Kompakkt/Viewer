@@ -82,18 +82,20 @@ export class CopcImporter implements ISceneLoaderPluginAsync {
     );
     console.log('COPC nodes & pages:', nodes, pages);
 
-    PointCloudImporter.maxLOD = Math.max(...Object.keys(nodes).map(key => +key[0]));
-    PointCloudImporter.totalPoints = Object.values(nodes).reduce(
-      (acc, node) => acc + (node?.pointCount ?? 0),
-      0,
+    const maxLOD = Math.max(...Object.keys(nodes).map(key => +key[0]));
+    PointCloudImporter.maxLOD$.next(maxLOD);
+    PointCloudImporter.totalPoints$.next(
+      Object.values(nodes).reduce((acc, node) => acc + (node?.pointCount ?? 0), 0),
     );
-    PointCloudImporter.pointsPerLevel = Object.entries(nodes).reduce(
-      (acc, [key, node]) => {
-        const level = +key[0];
-        acc[level] += node?.pointCount ?? 0;
-        return acc;
-      },
-      Array.from({ length: PointCloudImporter.maxLOD + 1 }, () => 0),
+    PointCloudImporter.pointsPerLevel$.next(
+      Object.entries(nodes).reduce(
+        (acc, [key, node]) => {
+          const level = +key[0];
+          acc[level] += node?.pointCount ?? 0;
+          return acc;
+        },
+        Array.from({ length: maxLOD + 1 }, () => 0),
+      ),
     );
 
     const rootNodeMesh = new Mesh('root', scene);
@@ -106,7 +108,7 @@ export class CopcImporter implements ISceneLoaderPluginAsync {
     pointMat.pointsCloud = true;
     pointMat.pointSize = 1.5;
     pointMat.alphaMode = Engine.ALPHA_COMBINE;
-    PointCloudImporter.pointMat = pointMat;
+    PointCloudImporter.pointMat$.next(pointMat);
 
     const debugMat = new StandardMaterial(`debug-mat`, scene);
     debugMat.wireframe = true;
@@ -167,7 +169,7 @@ export class CopcImporter implements ISceneLoaderPluginAsync {
 
     const importNode = async (key: string) => {
       const [level] = key.split('-').map(Number);
-      if (level > PointCloudImporter.currentLOD) return;
+      if (level > PointCloudImporter.currentLOD$.getValue()) return;
       const node = nodes[key];
       if (!node) return;
       const loadingState = loadingStateMap[key];
@@ -188,7 +190,9 @@ export class CopcImporter implements ISceneLoaderPluginAsync {
           }
           const { positions, colors } = result;
           loadingStateMap[key] = 'loaded';
-          PointCloudImporter.totalLoadedPoints += node.pointCount;
+          PointCloudImporter.totalLoadedPoints$.next(
+            PointCloudImporter.totalLoadedPoints$.getValue() + node.pointCount,
+          );
 
           const mesh = nodeMeshMap[key];
           if (!mesh) return;
@@ -197,7 +201,7 @@ export class CopcImporter implements ISceneLoaderPluginAsync {
           vertexData.colors = colors;
           vertexData.applyToMesh(mesh, true);
 
-          mesh.material = PointCloudImporter.pointMat!;
+          mesh.material = PointCloudImporter.pointMat$.getValue()!;
           mesh.useVertexColors = true;
           mesh.hasVertexAlpha = false;
           mesh.alphaIndex = 0;
@@ -253,7 +257,7 @@ export class CopcImporter implements ISceneLoaderPluginAsync {
     const loadNodesWithLevel = async (level: number) => {
       if (loadedLevels.has(level)) return;
       loadedLevels.add(level);
-      PointCloudImporter.currentLOD = level;
+      PointCloudImporter.currentLOD$.next(level);
 
       const sorted = Object.keys(nodes)
         .filter(key => +key[0] === level)

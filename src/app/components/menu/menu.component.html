@@ -102,18 +102,18 @@
         </button>
       }
     </mat-menu>
-    @if (fullscreenCapable) {
+    @if (isFullscreenCapable()) {
       <k-button
         icon-button
         (click)="toggleFullscreen()"
         [tooltip]="
-          (fullscreen ? 'k_menu-fullscreen-exit-tooltip' : 'k_menu-fullscreen-enter-tooltip')
+          (isFullscreen() ? 'k_menu-fullscreen-exit-tooltip' : 'k_menu-fullscreen-enter-tooltip')
             | fluent
         "
         tooltipPosition="above"
       >
         <mat-icon [attr.aria-label]="'k_menu-fullscreen-aria' | fluent">{{
-          fullscreen ? 'fullscreen_exit' : 'fullscreen'
+          isFullscreen() ? 'fullscreen_exit' : 'fullscreen'
         }}</mat-icon>
       </k-button>
     }

@@ -1,4 +1,5 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ButtonComponent, LabelledCheckboxComponent, SliderComponent } from '@kompakkt/komponents';
 import { FluentPipe } from 'src/app/pipes/fluent.pipe';
 import { PointCloudImporter } from 'src/app/services/babylon/importers/common/point-cloud-importer';
@@ -7,41 +8,27 @@ import { PointCloudImporter } from 'src/app/services/babylon/importers/common/po
   selector: 'app-point-cloud-settings',
   imports: [FluentPipe, SliderComponent, ButtonComponent, LabelledCheckboxComponent],
   templateUrl: './point-cloud-settings.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './point-cloud-settings.component.scss',
 })
 export class PointCloudSettingsComponent {
-  get currentLevelOfDetail() {
-    return PointCloudImporter.currentLOD;
-  }
+  currentLevelOfDetail = toSignal(PointCloudImporter.currentLOD$, { initialValue: 0 });
+  maxLevelOfDetail = toSignal(PointCloudImporter.maxLOD$, { initialValue: 0 });
+  #pointMat = toSignal(PointCloudImporter.pointMat$);
+  currentPointSize = computed(() => this.#pointMat()?.pointSize ?? 1);
 
-  get maxLevelOfDetail() {
-    return PointCloudImporter.maxLOD;
-  }
+  #totalLoadedPoints = toSignal(PointCloudImporter.totalLoadedPoints$, { initialValue: 0 });
+  loadedPointsCount = computed(() => this.#totalLoadedPoints());
+  #totalPoints = toSignal(PointCloudImporter.totalPoints$, { initialValue: 1 });
+  totalPointsCount = computed(() => this.#totalPoints());
 
-  get currentPointSize() {
-    return PointCloudImporter.pointMat?.pointSize ?? 1;
-  }
+  #pointsPerLevel = toSignal(PointCloudImporter.pointsPerLevel$, { initialValue: [] });
+  pointsOfNextLevel = computed(
+    () => this.#pointsPerLevel().at(this.currentLevelOfDetail() + 1) ?? 0,
+  );
 
-  get loadedPointsCount() {
-    return PointCloudImporter.totalLoadedPoints.toLocaleString('en-US').replaceAll(',', ' ');
-  }
-
-  get totalPointsCount() {
-    return PointCloudImporter.totalPoints.toLocaleString('en-US').replaceAll(',', ' ');
-  }
-
-  get pointsOfNextLevel() {
-    return (PointCloudImporter.pointsPerLevel?.[PointCloudImporter.currentLOD + 1] ?? 0)
-      .toLocaleString('en-US')
-      .replaceAll(',', ' ');
-  }
-
-  get loadedPointsPercentage() {
-    return ((PointCloudImporter.totalLoadedPoints / PointCloudImporter.totalPoints) * 100).toFixed(
-      2,
-    );
-  }
+  loadedPointsPercentage = computed(() =>
+    (this.loadedPointsCount() / this.totalPointsCount()).toFixed(2),
+  );
 
   loadNextLevelOfDetail() {
     if (this.currentLevelOfDetail < this.maxLevelOfDetail) {

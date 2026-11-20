@@ -1,11 +1,4 @@
-import {
-  Component,
-  computed,
-  effect,
-  inject,
-  signal,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { OverlayService } from '../../services/overlay/overlay.service';
 import { FluentPipe } from 'src/app/pipes/fluent.pipe';
 import { CompilationBrowserComponent } from '../compilation-browser/compilation-browser.component';
@@ -38,7 +31,6 @@ function readStoredWidth(): number | null {
     CompilationBrowserComponent,
     PointCloudSettingsComponent,
   ],
-  changeDetection: ChangeDetectionStrategy.Eager,
   host: {
     '[class.is-open]': 'isReady()',
     '[class.is-resizing]': 'isResizing()',
@@ -48,19 +40,19 @@ function readStoredWidth(): number | null {
 export class SidenavComponent {
   #overlay = inject(OverlayService);
 
-  public isOpen = computed(() => this.#overlay.sidenav().open);
-  public mode = computed(() => this.#overlay.sidenav().mode);
-  public isReady = computed(() => this.isOpen() && !!this.mode());
+  isOpen = computed(() => this.#overlay.sidenav().open);
+  mode = computed(() => this.#overlay.sidenav().mode);
+  isReady = computed(() => this.isOpen() && !!this.mode());
 
   #viewportWidth = signal(window.innerWidth);
   #customWidth = signal<number | null>(readStoredWidth());
   #pointerId: number | null = null;
 
-  public isResizing = this.#overlay.panelResizing;
+  isResizing = computed(() => this.#overlay.panelResizing());
 
-  public width = computed(() => this.#clampToViewport(this.#customWidth() ?? this.#defaultWidth()));
-  public minWidth = computed(() => Math.min(SIDEBAR_MIN_WIDTH, this.maxWidth()));
-  public maxWidth = computed(() => Math.floor(this.#viewportWidth() / 2));
+  width = computed(() => this.#clampToViewport(this.#customWidth() ?? this.#defaultWidth()));
+  minWidth = computed(() => Math.min(SIDEBAR_MIN_WIDTH, this.maxWidth()));
+  maxWidth = computed(() => Math.floor(this.#viewportWidth() / 2));
 
   constructor() {
     effect(() => {
@@ -72,33 +64,33 @@ export class SidenavComponent {
     });
   }
 
-  public onWindowResize(): void {
+  onWindowResize(): void {
     this.#viewportWidth.set(window.innerWidth);
     if (this.#customWidth() !== null) this.#persist();
   }
 
-  public onHandlePointerDown(event: PointerEvent): void {
+  onHandlePointerDown(event: PointerEvent): void {
     if (event.button !== 0 || !event.isPrimary) return;
     event.preventDefault();
     this.#pointerId = event.pointerId;
-    this.isResizing.set(true);
+    this.#overlay.panelResizing.set(true);
     (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
   }
 
-  public onHandlePointerMove(event: PointerEvent): void {
+  onHandlePointerMove(event: PointerEvent): void {
     if (event.pointerId !== this.#pointerId) return;
     event.preventDefault();
     this.#customWidth.set(this.#clampToViewport(event.clientX));
   }
 
-  public onHandlePointerUp(event: PointerEvent): void {
+  onHandlePointerUp(event: PointerEvent): void {
     if (event.pointerId !== this.#pointerId) return;
     this.#pointerId = null;
-    this.isResizing.set(false);
+    this.#overlay.panelResizing.set(false);
     this.#persist();
   }
 
-  public onHandleKeydown(event: KeyboardEvent): void {
+  onHandleKeydown(event: KeyboardEvent): void {
     const step = event.shiftKey ? SIDEBAR_KEYBOARD_STEP_LARGE : SIDEBAR_KEYBOARD_STEP;
     const targets: Record<string, number> = {
       ArrowLeft: this.width() - step,

@@ -73,8 +73,7 @@
     "rfdc": "^1.4.1",
     "rxjs": "7.8.2",
     "tslib": "^2.6.3",
-    "uuid": "^14.0.1",
-    "zone.js": "0.16.1"
+    "uuid": "^14.0.1"
   },
   "devDependencies": {
     "@angular/build": "^22.2.5",

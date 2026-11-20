@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   computed,
@@ -20,7 +19,6 @@ import { FluentPipe } from 'src/app/pipes/fluent.pipe';
   selector: 'app-color-field',
   templateUrl: './color-field.component.html',
   styleUrls: ['./color-field.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [OverlayModule, ColorChromeModule, TooltipDirective, FluentPipe],
   host: {
     '(click)': 'toggle()',

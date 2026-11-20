@@ -30,14 +30,14 @@
   />
 </div>
 
-@for (entry of lights.entries | keyvalue; track entry.key) {
-  <div class="light-card" [class.selected]="entry.key === lights.selectedLightIndex()">
-    <span class="light-title">{{ entry.value.light.name }}</span>
+@for (entry of lights.entryList(); track entry.index) {
+  <div class="light-card" [class.selected]="entry.index === lights.selectedLightIndex()">
+    <span class="light-title">{{ entry.light.name }}</span>
     <div class="light-actions">
       <k-button
         icon-button
         type="solid-transparent"
-        (click)="jumpToLight(entry.key)"
+        (click)="jumpToLight(entry.index)"
         [title]="'k_entity-feature-settings-lights-jump-tooltip' | fluent"
       >
         <mat-icon>my_location</mat-icon>
@@ -45,7 +45,7 @@
       <k-button
         icon-button
         type="solid-transparent"
-        (click)="selectLight(entry.key)"
+        (click)="selectLight(entry.index)"
         [title]="'k_entity-feature-settings-lights-select-tooltip' | fluent"
       >
         <mat-icon>ads_click</mat-icon>
@@ -53,7 +53,7 @@
       <k-button
         icon-button
         type="solid-transparent"
-        (click)="removeLight(entry.key)"
+        (click)="removeLight(entry.index)"
         [title]="'k_entity-feature-settings-lights-delete-tooltip' | fluent"
       >
         <mat-icon>delete</mat-icon>

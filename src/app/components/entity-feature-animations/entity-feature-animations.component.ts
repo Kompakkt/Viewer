@@ -1,11 +1,4 @@
-import {
-  Component,
-  OnDestroy,
-  computed,
-  inject,
-  signal,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { AnimationGroup } from '@babylonjs/core';
 import {
@@ -24,7 +17,7 @@ import { ProcessingService } from 'src/app/services/processing/processing.servic
   selector: 'app-entity-feature-animations',
   templateUrl: './entity-feature-animations.component.html',
   styleUrls: ['./entity-feature-animations.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
+
   imports: [
     MatIconModule,
     FluentPipe,

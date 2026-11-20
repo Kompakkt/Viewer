@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ButtonComponent, TooltipDirective } from '@kompakkt/komponents';
 import { FluentPipe } from '../../../pipes/fluent.pipe';
@@ -10,7 +10,7 @@ import { OverlayService } from '../../../services/overlay/overlay.service';
   templateUrl: './annotationwalkthrough.component.html',
   styleUrls: ['./annotationwalkthrough.component.scss'],
   imports: [MatIconModule, FluentPipe, TooltipDirective, ButtonComponent],
-  changeDetection: ChangeDetectionStrategy.Eager,
+
   host: {
     '[class.hidden]': '!showWalkthrough()',
     '[class.is-resizing]': 'isResizing()',

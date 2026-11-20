@@ -5,7 +5,9 @@ import { TranslateService } from '../translate/translate.service';
 export class LoadingScreenService {
   #translate = inject(TranslateService);
   opacity = signal<string>('1');
-  loadingText = signal<string>(this.#translate.getTranslation('k_loadingscreen-text', { percentage: 0 }));
+  loadingText = signal<string>(
+    this.#translate.getTranslation('k_loadingscreen-text', { percentage: 0 }),
+  );
   isLoading = signal(false);
 
   show() {
@@ -26,6 +28,6 @@ export class LoadingScreenService {
   }
 
   updateLoadingPercentage(percentage: number): void {
-    this.loadingText.set(      this.#translate.getTranslation('k_loadingscreen-text', { percentage })    );
+    this.loadingText.set(this.#translate.getTranslation('k_loadingscreen-text', { percentage }));
   }
 }

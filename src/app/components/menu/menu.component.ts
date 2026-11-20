@@ -1,15 +1,7 @@
 import { KeyValuePipe } from '@angular/common';
-import {
-  Component,
-  computed,
-  inject,
-  OnInit,
-  ChangeDetectionStrategy,
-  signal,
-} from '@angular/core';
+import { Component, computed, inject, OnInit, signal, OnDestroy } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import fscreen from 'fscreen';
 import { ButtonComponent, TooltipDirective } from '@kompakkt/komponents';
 import { FluentPipe } from '../../pipes/fluent.pipe';
 import { BabylonService } from '../../services/babylon/babylon.service';
@@ -20,6 +12,8 @@ import { TranslateService } from '../../services/translate/translate.service';
 import { UserdataService } from '../../services/userdata/userdata.service';
 import { CameraSettingsComponent } from './camera-settings/camera-settings.component';
 import { languageNames } from 'src/app/app.fluent.sources';
+import { fromEvent, Subscription } from 'rxjs';
+import fscreen from 'fscreen';
 
 @Component({
   selector: 'app-menu',
@@ -34,23 +28,22 @@ import { languageNames } from 'src/app/app.fluent.sources';
     TooltipDirective,
     ButtonComponent,
   ],
-  changeDetection: ChangeDetectionStrategy.Eager,
   host: {
     '[class.is-resizing]': 'isResizing()',
   },
 })
-export class MenuComponent implements OnInit {
-  public processing = inject(ProcessingService);
-  public babylon = inject(BabylonService);
-  public userdata = inject(UserdataService);
-  public translateService = inject(TranslateService);
-  private message = inject(MessageService);
+export class MenuComponent implements OnInit, OnDestroy {
+  processing = inject(ProcessingService);
+  babylon = inject(BabylonService);
+  userdata = inject(UserdataService);
+  translateService = inject(TranslateService);
+  #message = inject(MessageService);
   #overlay = inject(OverlayService);
 
-  public isResizing = computed(() => this.#overlay.panelResizing());
+  isResizing = computed(() => this.#overlay.panelResizing());
 
-  public fullscreen = !!fscreen.fullscreenElement;
-  public fullscreenCapable = fscreen.fullscreenEnabled;
+  isFullscreen = signal(false);
+  isFullscreenCapable = signal(fscreen.fullscreenEnabled);
 
   languages = signal(languageNames);
 
@@ -64,14 +57,19 @@ export class MenuComponent implements OnInit {
     };
   });
 
+  #fscreenSubscription?: Subscription;
   ngOnInit() {
-    fscreen.addEventListener(
-      'fullscreenchange',
-      () => (this.fullscreen = !!fscreen.fullscreenElement),
-    );
+    this.#fscreenSubscription = fromEvent(fscreen, 'fullscreenchange').subscribe(() => {
+      this.isFullscreen.set(!!fscreen.fullscreenElement);
+    });
+    this.isFullscreenCapable.set(fscreen.fullscreenEnabled);
   }
 
-  public updateEntityQuality(nextQuality: QualitySetting) {
+  ngOnDestroy() {
+    this.#fscreenSubscription?.unsubscribe();
+  }
+
+  updateEntityQuality(nextQuality: QualitySetting) {
     const currentQuality = this.processing.quality();
     const entity = this.processing.entity();
     if (nextQuality === currentQuality) return;
@@ -84,7 +82,7 @@ export class MenuComponent implements OnInit {
   toggleFullscreen() {
     // BabylonJS' this.engine.switchFullscreen(false); creates a fullscreen without our menu.
     // To display the menu, we have to switch to fullscreen on our own.
-    if (this.fullscreen) {
+    if (this.isFullscreen()) {
       fscreen.exitFullscreen();
     } else {
       fscreen.requestFullscreen(document.body);
@@ -92,6 +90,6 @@ export class MenuComponent implements OnInit {
   }
 
   openLoginExplanation() {
-    this.message.info('You are logged in, that is required here.');
+    this.#message.info('You are logged in, that is required here.');
   }
 }

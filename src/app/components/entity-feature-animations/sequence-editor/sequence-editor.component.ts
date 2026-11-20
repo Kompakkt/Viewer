@@ -1,13 +1,4 @@
-import {
-  Component,
-  computed,
-  effect,
-  inject,
-  Pipe,
-  PipeTransform,
-  signal,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, computed, effect, inject, Pipe, PipeTransform, signal } from '@angular/core';
 import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { FluentPipe } from 'src/app/pipes/fluent.pipe';
 import { OverlayService } from 'src/app/services/overlay/overlay.service';
@@ -50,7 +41,7 @@ class FramesToWidthPipe implements PipeTransform {
     TooltipDirective,
   ],
   templateUrl: './sequence-editor.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+
   styleUrl: './sequence-editor.component.scss',
 })
 export class SequenceEditorComponent {

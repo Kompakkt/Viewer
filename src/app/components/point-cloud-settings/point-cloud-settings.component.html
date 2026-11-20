@@ -7,36 +7,36 @@
 <p>{{ 'k_point-cloud-settings-memory-warning' | fluent }}</p>
 
 <p>
-  @let currentLevel = currentLevelOfDetail + 1;
+  @let currentLevel = currentLevelOfDetail() + 1;
   <strong>
     {{
       'k_point-cloud-settings-level-label'
-        | fluent: { current: currentLevel, total: maxLevelOfDetail }
+        | fluent: { current: currentLevel, total: maxLevelOfDetail() }
     }}
   </strong>
   <br />
   <small>
     {{
-      'k_point-cloud-settings-loaded-percentage' | fluent: { percentage: loadedPointsPercentage }
+      'k_point-cloud-settings-loaded-percentage' | fluent: { percentage: loadedPointsPercentage() }
     }}
   </small>
   <br />
   <small>
     {{
       'k_point-cloud-settings-points-count'
-        | fluent: { loaded: loadedPointsCount, total: totalPointsCount }
+        | fluent: { loaded: loadedPointsCount(), total: totalPointsCount() }
     }}
   </small>
 </p>
 
 <p>
-  {{ 'k_point-cloud-settings-next-level-message' | fluent: { count: pointsOfNextLevel } }}
+  {{ 'k_point-cloud-settings-next-level-message' | fluent: { count: pointsOfNextLevel() } }}
 </p>
 
 <k-button
   type="solid-primary"
   (click)="loadNextLevelOfDetail()"
-  [disabled]="currentLevelOfDetail >= maxLevelOfDetail"
+  [disabled]="currentLevelOfDetail() >= maxLevelOfDetail()"
   >{{ 'k_point-cloud-settings-load-next-level-button' | fluent }}</k-button
 >
 
@@ -48,9 +48,9 @@
   [min]="0.1"
   [max]="3"
   [step]="0.1"
-  [value]="currentPointSize"
+  [value]="currentPointSize()"
   (valueChange)="changePointSize($event)"
-  [label]="'k_point-cloud-settings-point-size-label' | fluent: { size: currentPointSize }"
+  [label]="'k_point-cloud-settings-point-size-label' | fluent: { size: currentPointSize() }"
 />
 
 <h3>{{ 'k_point-cloud-settings-octree-heading' | fluent }}</h3>

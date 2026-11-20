@@ -1,12 +1,5 @@
 {
   "schemaVersion": 1,
   "defaultLocale": "en",
-  "files": [
-    "en.ftl",
-    "de.ftl",
-    "fr.ftl",
-    "it.ftl",
-    "es.ftl",
-    "mn.ftl"
-  ]
+  "files": ["en.ftl", "de.ftl", "fr.ftl", "it.ftl", "es.ftl", "mn.ftl"]
 }

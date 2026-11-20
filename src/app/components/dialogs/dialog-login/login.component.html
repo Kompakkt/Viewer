@@ -21,30 +21,23 @@
 
   <k-input
     [label]="'k_login-username-label' | fluent"
+    [formField]="form.username"
     type="username"
-    (valueChange)="data.username = $event"
   />
   <k-input
     [label]="'k_login-password-label' | fluent"
+    [formField]="form.password"
     type="password"
-    (valueChange)="data.password = $event"
   />
 
-  @if (loginFailed) {
+  @if (form().getError('serverError')) {
     <p style="color: red">{{ 'k_login-failed-message' | fluent }}</p>
   }
 
   <k-button-row>
-    <!--<k-button
-      (click)="dialogRef.close(false)"
-      [disabled]="waitingForResponse"
-      type="outlined-secondary"
-      full-width
-      >{{ 'Cancel' | fluent }}</k-button
-    >-->
     <k-button
       (click)="login()"
-      [disabled]="data.username.length === 0 || data.password.length === 0 || waitingForResponse"
+      [disabled]="form().invalid() || form().submitting()"
       full-width
       type="solid-primary"
     >

@@ -1,12 +1,11 @@
 import {
   Component,
   ElementRef,
-  Input,
   OnChanges,
   SecurityContext,
   SimpleChanges,
   inject,
-  ChangeDetectionStrategy,
+  input,
 } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { marked } from 'marked';
@@ -15,19 +14,15 @@ import { marked } from 'marked';
   selector: 'app-markdown-preview',
   templateUrl: './markdown-preview.component.html',
   styleUrls: ['./markdown-preview.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true,
 })
 export class MarkdownPreviewComponent implements OnChanges {
-  @Input('data')
-  public markdown!: string;
-
-  constructor(private sanitizer: DomSanitizer) {}
-
   #ref = inject<ElementRef<HTMLElement>>(ElementRef);
+  #sanitizer = inject(DomSanitizer);
+  markdown = input.required<string>({ alias: 'data' });
 
-  public sanitize(markdown: string) {
-    const sanitized = this.sanitizer.sanitize(SecurityContext.HTML, marked(markdown));
+  sanitize(markdown: string) {
+    const sanitized = this.#sanitizer.sanitize(SecurityContext.HTML, marked(markdown));
     if (!sanitized) return;
     this.#ref.nativeElement.innerHTML = sanitized;
   }

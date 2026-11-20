@@ -1,5 +1,5 @@
-import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
-import { MatIcon } from '@angular/material/icon';
+import { Component, computed, inject } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 import { ButtonComponent, TooltipDirective } from '@kompakkt/komponents';
 import { FluentPipe } from '../../pipes/fluent.pipe';
 import { OverlayService } from '../../services/overlay/overlay.service';
@@ -10,8 +10,7 @@ import { AnnotationService } from 'src/app/services/annotation/annotation.servic
   selector: 'app-sidenav-menu',
   templateUrl: './sidenav-menu.component.html',
   styleUrls: ['./sidenav-menu.component.scss'],
-  imports: [MatIcon, FluentPipe, TooltipDirective, ButtonComponent],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [MatIconModule, FluentPipe, TooltipDirective, ButtonComponent],
   host: {
     '[class.is-open]': 'isOpen()',
     '[class.disabled]': 'isDisabled()',

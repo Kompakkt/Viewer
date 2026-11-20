@@ -7,7 +7,6 @@ import {
   computed,
   effect,
   ElementRef,
-  ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { saveAs } from 'file-saver';
@@ -45,7 +44,7 @@ import { prepareSkyboxForUpload, skyboxToBase64 } from '../../services/babylon/s
   selector: 'app-entity-feature-settings',
   templateUrl: './entity-feature-settings.component.html',
   styleUrls: ['./entity-feature-settings.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
+
   imports: [
     ColorFieldComponent,
     EntityFeatureSettingsLightsComponent,

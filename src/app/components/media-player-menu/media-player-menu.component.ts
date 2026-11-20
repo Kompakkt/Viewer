@@ -6,12 +6,13 @@ import {
   Pipe,
   PipeTransform,
   signal,
-  ChangeDetectionStrategy,
+  OnDestroy,
+  OnInit,
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { Sound } from '@babylonjs/core';
 import { ButtonComponent, SliderComponent } from '@kompakkt/komponents';
-import { interval } from 'rxjs';
+import { interval, Subscription } from 'rxjs';
 import { BabylonService } from 'src/app/services/babylon/babylon.service';
 
 @Pipe({ name: 'prettyTime' })
@@ -37,14 +38,17 @@ class PrettyTimePipe implements PipeTransform {
   selector: 'app-media-player-menu',
   imports: [MatIconModule, ButtonComponent, SliderComponent, PrettyTimePipe],
   templateUrl: './media-player-menu.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './media-player-menu.component.scss',
 })
-export class MediaPlayerMenuComponent {
+export class MediaPlayerMenuComponent implements OnInit, OnDestroy {
   #babylon = inject(BabylonService);
 
   mediaElement = computed(() => {
     return this.#babylon.containers.video()?.video ?? this.#babylon.containers.audio()?.audio;
+  });
+  _mediaElChangedRef = effect(() => {
+    const el = this.mediaElement();
+    console.log('[MediaPlayerMenuComponent] Media element changed:', el);
   });
   totalDuration = computed(() => {
     const el = this.mediaElement();
@@ -55,8 +59,11 @@ export class MediaPlayerMenuComponent {
       return el.duration;
     }
   });
+  isPlaying = signal(false);
+  currentVolumePercentage = signal(0);
+  playPercentage = signal(0);
 
-  get isPlaying() {
+  #isPlaying() {
     const el = this.mediaElement();
     if (!el) return false;
     if (el instanceof Sound) {
@@ -66,7 +73,7 @@ export class MediaPlayerMenuComponent {
     }
   }
 
-  get playPercentage() {
+  #playPercentage() {
     const el = this.mediaElement();
     if (!el) return 0;
     const duration = el instanceof Sound ? (el.getAudioBuffer()?.duration ?? 0) : el.duration;
@@ -75,9 +82,7 @@ export class MediaPlayerMenuComponent {
     return (currentTime / duration) * 100;
   }
 
-  currentVolumePercentage = signal(0);
-
-  get currentVolumePercentageGetter() {
+  #currentVolumePercentageGetter() {
     const el = this.mediaElement();
     if (!el) return 0;
     if (el instanceof Sound) {
@@ -90,20 +95,22 @@ export class MediaPlayerMenuComponent {
   togglePlay() {
     const el = this.mediaElement();
     if (!el) return;
-    void (this.isPlaying ? el.pause() : el.play());
+    void (this.isPlaying() ? el.pause() : el.play());
   }
 
-  constructor() {
-    effect(() => {
-      const el = this.mediaElement();
-      console.log('Media element changed:', el);
-    });
-    interval(200).subscribe(() => this.#updateSignals());
+  #signalSubscription?: Subscription;
+  ngOnInit() {
+    this.#signalSubscription = interval(200).subscribe(() => this.#updateSignals());
     this.#updateSignals();
+  }
+  ngOnDestroy() {
+    this.#signalSubscription?.unsubscribe();
   }
 
   #updateSignals() {
-    this.currentVolumePercentage.set(this.currentVolumePercentageGetter);
+    this.currentVolumePercentage.set(this.#currentVolumePercentageGetter());
+    this.playPercentage.set(this.#playPercentage());
+    this.isPlaying.set(this.#isPlaying());
   }
 
   setVolume(percentage: number) {

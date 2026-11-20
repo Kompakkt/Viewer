@@ -148,20 +148,22 @@ export class EptImporter implements ISceneLoaderPluginAsync {
     const nodes = await retryWithBackoff(() => fetchHierarchy('0-0-0-0'));
 
     console.log('nodes', nodes);
-    PointCloudImporter.maxLOD = Math.max(...Object.keys(nodes).map(key => +key[0]));
-    PointCloudImporter.totalPoints = Object.values(nodes).reduce(
-      (acc, node) => acc + (node < 0 ? 0 : node),
-      0,
+    const maxLOD = Math.max(...Object.keys(nodes).map(key => +key[0]));
+    PointCloudImporter.maxLOD$.next(maxLOD);
+    PointCloudImporter.totalPoints$.next(
+      Object.values(nodes).reduce((acc, node) => acc + (node < 0 ? 0 : node), 0),
     );
-    PointCloudImporter.pointsPerLevel = Object.entries(nodes).reduce(
-      (acc, [key, node]) => {
-        const level = +key[0];
-        acc[level] += node < 0 ? 0 : node;
-        return acc;
-      },
-      Array.from({ length: PointCloudImporter.maxLOD + 1 }, () => 0),
+    PointCloudImporter.pointsPerLevel$.next(
+      Object.entries(nodes).reduce(
+        (acc, [key, node]) => {
+          const level = +key[0];
+          acc[level] += node < 0 ? 0 : node;
+          return acc;
+        },
+        Array.from({ length: maxLOD + 1 }, () => 0),
+      ),
     );
-    console.log('pointsPerLevel', PointCloudImporter.pointsPerLevel);
+    console.log('pointsPerLevel', PointCloudImporter.pointsPerLevel$.getValue());
 
     const [minX, minY, minZ, maxX, maxY, maxZ] = info.bounds;
 
@@ -174,7 +176,7 @@ export class EptImporter implements ISceneLoaderPluginAsync {
     pointMat.pointsCloud = true;
     pointMat.pointSize = 1.5;
     pointMat.alphaMode = Engine.ALPHA_COMBINE;
-    PointCloudImporter.pointMat = pointMat;
+    PointCloudImporter.pointMat$.next(pointMat);
 
     const debugMat = new StandardMaterial(`debug-mat`, scene);
     debugMat.wireframe = true;
@@ -189,7 +191,7 @@ export class EptImporter implements ISceneLoaderPluginAsync {
 
     const importNode = async (key: string) => {
       const [level] = key.split('-').map(Number);
-      if (level > PointCloudImporter.currentLOD) return;
+      if (level > PointCloudImporter.currentLOD$.getValue()) return;
       const node = nodes[key];
       if (node === undefined || node < 0) return;
 
@@ -212,7 +214,9 @@ export class EptImporter implements ISceneLoaderPluginAsync {
           }
           const { positions, colors } = result;
           loadingStateMap[key] = 'loaded';
-          PointCloudImporter.totalLoadedPoints += node;
+          PointCloudImporter.totalLoadedPoints$.next(
+            PointCloudImporter.totalLoadedPoints$.getValue() + node,
+          );
 
           const mesh = nodeMeshMap[key];
           if (!mesh) return;
@@ -221,7 +225,7 @@ export class EptImporter implements ISceneLoaderPluginAsync {
           vertexData.colors = colors;
           vertexData.applyToMesh(mesh, true);
 
-          mesh.material = PointCloudImporter.pointMat!;
+          mesh.material = PointCloudImporter.pointMat$.getValue()!;
           mesh.useVertexColors = true;
           mesh.hasVertexAlpha = true;
           mesh.alphaIndex = 0;
@@ -277,7 +281,7 @@ export class EptImporter implements ISceneLoaderPluginAsync {
     const loadNodesWithLevel = async (level: number) => {
       if (loadedLevels.has(level)) return;
       loadedLevels.add(level);
-      PointCloudImporter.currentLOD = level;
+      PointCloudImporter.currentLOD$.next(level);
 
       const sorted = Object.keys(nodes)
         .filter(key => +key[0] === level)

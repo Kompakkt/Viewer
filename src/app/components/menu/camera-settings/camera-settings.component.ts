@@ -1,13 +1,4 @@
-import {
-  Component,
-  ElementRef,
-  HostListener,
-  computed,
-  effect,
-  inject,
-  signal,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, ElementRef, computed, effect, inject, signal } from '@angular/core';
 import { ButtonComponent, ButtonRowComponent, SliderComponent } from '@kompakkt/komponents';
 import { AnnotationService } from 'src/app/services/annotation/annotation.service';
 import { BabylonService } from 'src/app/services/babylon/babylon.service';
@@ -20,9 +11,10 @@ import { MatIconModule } from '@angular/material/icon';
   templateUrl: './camera-settings.component.html',
   styleUrls: ['./camera-settings.component.scss'],
   imports: [MatIconModule, FluentPipe, SliderComponent, ButtonComponent, ButtonRowComponent],
-  changeDetection: ChangeDetectionStrategy.Eager,
+
   host: {
     '[class.is-resizing]': 'isResizing()',
+    '(document:click)': 'onClickOutside($event)',
   },
 })
 export class CameraSettingsComponent {
@@ -91,8 +83,6 @@ export class CameraSettingsComponent {
     this.showNotification.set('k_camera-settings-notification-camera-reset');
   }
 
-  //Alternate way to close camera-settings
-  @HostListener('document:click', ['$event'])
   onClickOutside(event: MouseEvent) {
     if (!this.opened()) return;
 

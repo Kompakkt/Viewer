@@ -107,6 +107,7 @@ export class LightService {
   private babylon = inject(BabylonService);
   private processing = inject(ProcessingService);
   readonly entries: Map<number, LightEntry> = new Map();
+  readonly entryList = signal<{ index: number; light: LightEntry }[]>([]);
   readonly lightPicked = new Subject<number>();
   readonly selectedLightIndex = signal<number | undefined>(undefined);
   // Global show/hide preferences: helper visuals default to on, gizmos stay
@@ -126,6 +127,10 @@ export class LightService {
     if (this.selectedLightIndex() === undefined) return;
     this.selectedLightIndex.set(undefined);
     this.applySelection();
+  }
+
+  private touch(): void {
+    this.entryList.set([...this.entries].map(([index, light]) => ({ index, light })));
   }
 
   private applySelection(): void {
@@ -203,6 +208,7 @@ export class LightService {
     this.updateConfig(index, { intensity: value });
     const entry = this.entries.get(index);
     if (entry) entry.light.intensity = value;
+    this.touch();
   }
 
   public setColor(index: number, value: IColor): void {
@@ -212,12 +218,14 @@ export class LightService {
       entry.light.diffuse = this.toColor3(value);
       entry.helper?.setColor(value);
     }
+    this.touch();
   }
 
   public setPosition(index: number, value: IVector3): void {
     this.updateConfig(index, { position: value });
     const entry = this.entries.get(index);
     if (entry) entry.proxy.position = this.toVector3(value);
+    this.touch();
   }
 
   public setRotation(index: number, value: IVector3): void {
@@ -227,6 +235,7 @@ export class LightService {
       entry.proxy.rotationQuaternion = this.toQuaternion(value);
       this.syncAmbientDirection(entry);
     }
+    this.touch();
   }
 
   public setSpotParams(index: number, angle: number, exponent: number): void {
@@ -237,6 +246,7 @@ export class LightService {
       entry.light.exponent = exponent;
       entry.helper?.rebuild({ angle });
     }
+    this.touch();
   }
 
   public setName(index: number, value: string): void {
@@ -248,6 +258,7 @@ export class LightService {
     if (entry && settings.lights[index]) {
       entry.light.name = this.lightName(settings.lights[index], index);
     }
+    this.touch();
   }
 
   public setPanelActive(active: boolean): void {
@@ -361,6 +372,7 @@ export class LightService {
     this.syncAmbientDirection(entry);
 
     this.entries.set(index, entry);
+    this.touch();
   }
 
   private createPositionGizmo(entry: LightEntry, index: number): PositionGizmo {
@@ -369,6 +381,7 @@ export class LightService {
     }
     const gizmo = new PositionGizmo(entry.utilityLayer, 2);
     gizmo.attachedNode = entry.proxy;
+    gizmo.onDragObservable.add(() => this.touch());
     gizmo.onDragEndObservable.add(() => this.writeBackPosition(index));
     entry.positionGizmo = gizmo;
     return gizmo;
@@ -382,7 +395,10 @@ export class LightService {
     gizmo.updateGizmoRotationToMatchAttachedMesh = true;
     gizmo.updateGizmoPositionToMatchAttachedMesh = true;
     gizmo.attachedNode = entry.proxy;
-    gizmo.onDragObservable.add(() => this.syncAmbientDirection(entry));
+    gizmo.onDragObservable.add(() => {
+      this.syncAmbientDirection(entry);
+      this.touch();
+    });
     gizmo.onDragEndObservable.add(() => this.writeBackRotation(index));
     entry.rotationGizmo = gizmo;
     return gizmo;
@@ -395,6 +411,7 @@ export class LightService {
     const settings = this.processing.settings().localSettings;
     settings.lights[index].position = { x: position.x, y: position.y, z: position.z };
     this.processing.localSettings.set(settings);
+    this.touch();
   }
 
   private writeBackRotation(index: number): void {
@@ -409,6 +426,7 @@ export class LightService {
     };
     this.processing.localSettings.set(settings);
     this.syncAmbientDirection(entry);
+    this.touch();
   }
 
   /**
@@ -436,6 +454,7 @@ export class LightService {
     entry.proxy.dispose();
 
     this.entries.delete(index);
+    this.touch();
   }
 
   private rebuildEntriesFromSettings(settings: IEntitySettings): void {

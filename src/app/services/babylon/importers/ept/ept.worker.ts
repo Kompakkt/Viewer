@@ -41,7 +41,7 @@ addEventListener('message', async event => {
     postMessage({ key, positions, colors, error: false });
   } catch (e: unknown) {
     if (e instanceof Error) {
-      postMessage({ error: true, message: e.toString(), stack: e.stack });
+      postMessage({ error: true, message: JSON.stringify(e), stack: e.stack });
     } else {
       postMessage({ error: true, message: 'Unknown error' });
     }

@@ -1,15 +1,5 @@
-import {
-  Component,
-  ElementRef,
-  computed,
-  effect,
-  inject,
-  signal,
-  viewChild,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, ElementRef, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { AsyncPipe } from '@angular/common';
 import {
   ButtonComponent,
   ButtonRowComponent,
@@ -26,7 +16,7 @@ import { ProcessingService } from 'src/app/services/processing/processing.servic
 import { UserdataService } from 'src/app/services/userdata/userdata.service';
 import { ExtenderSlotEvent } from '@kompakkt/plugins/extender';
 import { ExtenderSlotDirective } from '../../../directives/extender-slot.directive';
-import { BehaviorSubject, map } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 export interface IDialogData {
   annotation: IAnnotation;
@@ -43,9 +33,7 @@ interface IExternalImage {
   selector: 'app-dialog-annotation-editor',
   templateUrl: './dialog-annotation-editor.component.html',
   styleUrls: ['./dialog-annotation-editor.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
-    AsyncPipe,
     MarkdownPreviewComponent,
     MediaBrowserComponent,
     FluentPipe,
@@ -71,19 +59,17 @@ export class DialogAnnotationEditorComponent {
     preview: 'Preview',
   };
   currentMode = signal<keyof typeof this.modes>(this.dialogData.mode);
-  annotation$ = new BehaviorSubject<IAnnotation | undefined>(this.dialogData.annotation);
+  annotation = signal<IAnnotation>(this.dialogData.annotation);
+  annotation$ = toObservable(this.annotation);
 
-  annotationValidationErrors$ = this.annotation$.pipe(
-    map(annotation => {
-      if (!annotation) return false;
-      const { title, description } = annotation.body.content;
-      if (!title.trim() || !description.trim()) return 'k_dialog-annotation-editor-error-empty';
-      if (title.trim() === description.trim()) return 'k_dialog-annotation-editor-error-same';
-      return false;
-    }),
-  );
-
-  private serverUrl = environment.server_url;
+  annotationValidationErrors = computed(() => {
+    const annotation = this.annotation();
+    if (!annotation) return false;
+    const { title, description } = annotation.body.content;
+    if (!title.trim() || !description.trim()) return 'k_dialog-annotation-editor-error-empty';
+    if (title.trim() === description.trim()) return 'k_dialog-annotation-editor-error-same';
+    return false;
+  });
 
   canUserEdit = this.processing.hasAnnotationAllowance;
   canUserDelete = computed(() => {
@@ -104,13 +90,13 @@ export class DialogAnnotationEditorComponent {
     const annotation = event.event.detail;
     if (!isAnnotation(annotation)) return;
     console.log('Got new annotation from embeddables', annotation, event);
-    this.annotation$.next(annotation);
+    this.annotation.set(annotation);
   }
 
   private updateAnnotationContent(update: { title?: string; description?: string }) {
-    const annotation = this.annotation$.getValue();
+    const annotation = this.annotation();
     if (!annotation) return;
-    this.annotation$.next({
+    this.annotation.set({
       ...annotation,
       body: {
         ...annotation.body,
@@ -186,14 +172,14 @@ export class DialogAnnotationEditorComponent {
     let markdown = '';
     switch (entity.mediaType) {
       case 'video':
-        if (!entity.dataSource.isExternal) url += `${this.serverUrl}`;
+        if (!entity.dataSource.isExternal) url += `${environment.server_url}`;
         markdown += `
         <video class="video" controls poster="">
           <source src="${url}/${entity.processed.medium}" type="video/mp4">
         </video>`;
         break;
       case 'audio':
-        if (!entity.dataSource.isExternal) url += `${this.serverUrl}`;
+        if (!entity.dataSource.isExternal) url += `${environment.server_url}`;
         markdown += `
         <audio controls>
           <source src="${url}${entity.processed.medium}" type="audio/mpeg">
@@ -236,7 +222,7 @@ export class DialogAnnotationEditorComponent {
   }
 
   close(withData?: boolean) {
-    const annotation = this.annotation$.getValue();
+    const annotation = this.annotation();
     this.dialogRef.close(withData ? annotation : undefined);
   }
 

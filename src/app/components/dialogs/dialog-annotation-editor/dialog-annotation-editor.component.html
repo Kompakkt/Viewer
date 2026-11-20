@@ -14,7 +14,7 @@
   }
   @switch (mode) {
     @case ('edit') {
-      @if (annotation$ | async; as annotation) {
+      @if (annotation(); as annotation) {
         <div>
           <k-input
             [label]="'k_dialog-annotation-editor-title-label' | fluent"
@@ -31,7 +31,7 @@
           />
         </div>
 
-        @if (annotationValidationErrors$ | async; as error) {
+        @if (annotationValidationErrors(); as error) {
           <div class="error" style="color: var(--color-warn, red)">
             {{ error | fluent }}
           </div>
@@ -39,7 +39,7 @@
       }
     }
     @case ('preview') {
-      @if (annotation$ | async; as annotation) {
+      @if (annotation(); as annotation) {
         <h2>{{ annotation.body.content.title }}</h2>
 
         <app-markdown-preview [data]="annotation.body.content.description" />
@@ -77,7 +77,7 @@
     <k-button
       type="solid-primary"
       (click)="close(true)"
-      [disabled]="!!(annotationValidationErrors$ | async)"
+      [disabled]="!!annotationValidationErrors()"
     >
       <span>{{ 'k_button-save' | fluent }}</span>
     </k-button>

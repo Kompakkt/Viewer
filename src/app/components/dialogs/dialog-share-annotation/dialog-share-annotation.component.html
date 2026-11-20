@@ -5,12 +5,14 @@
 
   <k-input
     [label]="'k_dialog-share-annotation-collection-id-label' | fluent"
+    [formField]="form"
     type="text"
-    (valueChange)="targetCollectionId = $event"
   />
 
   <k-button-row align="end">
-    <k-button (click)="share()">{{ 'k_dialog-share-annotation-share-button' | fluent }}</k-button>
+    <k-button (click)="share()" [disabled]="form().invalid() || form().submitting()">{{
+      'k_dialog-share-annotation-share-button' | fluent
+    }}</k-button>
     <k-button (click)="cancel()">{{ 'k_button-cancel' | fluent }}</k-button>
   </k-button-row>
 </form>

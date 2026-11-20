@@ -56,7 +56,7 @@ k_menu-quality-low = Niedrig
 
 k_menu-screenshot-tooltip = Screenshot
 
-k_menu-language-tooltip = Wählen Sie Ihre Sprache aus
+k_menu-language-tooltip = Wählen eine Sprache aus
 
 k_menu-fullscreen-enter-tooltip = Vollbildmodus aktivieren
 
@@ -66,7 +66,7 @@ k_menu-fullscreen-aria = Vollbildmodus verlassen
 
 k_dialog-share-annotation-title = Annotationen der Sammlung teilen
 
-k_dialog-share-annotation-collection-id-hint = Um diese Annotation einer Sammlung zuzuweisen, geben Sie die Id der Zielsammlung ein.
+k_dialog-share-annotation-collection-id-hint = Um diese Annotation einer Sammlung zuzuweisen, gebe die Id der Zielsammlung ein.
 
 k_dialog-share-annotation-collection-id-label = Id der Sammlung
 
@@ -142,19 +142,19 @@ k_entity-feature-settings-background-lights-save-button = Hintergrund und Lichte
 
 k_entity-feature-settings-preview-heading = Vorschau und erste Perspektive
 
-k_entity-feature-settings-preview-hint = Bitte wählen Sie eine schöne und passende Kameraperspektive für Ihr Objekt aus, indem Sie es in die gewünschte Position bewegen. Klicken Sie auf „Vorschau speichern“, um die aktuelle Ansicht als Standardperspektive festzulegen. - Bitte lächeln!
+k_entity-feature-settings-preview-hint = Bitte wähle eine schöne und passende Kameraperspektive für dein Objekt aus, indem du es in die gewünschte Position bewegst. Klicke auf den Knopf, um die aktuelle Ansicht als Standardperspektive festzulegen. - Bitte lächeln!
 
 k_entity-feature-settings-preview-save-button = Vorschau und Ausgangsperspektive speichern
 
-k_entity-feature-settings-preview-image-hint = Klicken Sie auf dieses Bild, um eine passende Kameraperspektive einzustellen.
+k_entity-feature-settings-preview-image-hint = Klicke auf dieses Bild, um eine passende Kameraperspektive einzustellen.
 
 k_entity-feature-settings-confirm-heading = Bestätigen
 
 k_entity-feature-settings-confirm-message = Du hast alle Einstellungen eingestellt. Das feiern wir mit dieser Vorschau.
 
-k_entity-feature-settings-confirm-save-hint = Bitte speichern Sie die Einstellungen, wenn Sie fertig sind. Oder kehren Sie zurück, um Änderungen vorzunehmen. Anschließend können Sie Anmerkungen hinzufügen.
+k_entity-feature-settings-confirm-save-hint = Bitte speichere die Einstellungen, wenn du fertig bist, oder gehe zurück, um Änderungen vorzunehmen. Anschließend kannst du Annotationen hinzufügen.
 
-k_entity-feature-settings-export-message = Ihre Einstellungen können nun exportiert und im Standalone-Kompakkt-Viewer geladen werden.
+k_entity-feature-settings-export-message = Die Einstellungen können nun exportiert und im Standalone-Kompakkt-Viewer geladen werden.
 
 k_entity-feature-settings-download-settings-button = Viewer-Einstellungen herunterladen
 
@@ -174,7 +174,7 @@ k_entity-feature-settings-skybox-upload-heading = Skybox
 
 k_entity-feature-settings-skybox-uploading-message = Skybox wird hochgeladen. Das sollte nur einen Moment dauern...
 
-k_entity-feature-settings-skybox-upload-failed-message = Das Hochladen der Skybox auf den Server ist fehlgeschlagen. Bitte versuchen Sie es erneut.
+k_entity-feature-settings-skybox-upload-failed-message = Das Hochladen der Skybox auf den Server ist fehlgeschlagen. Bitte versuche es erneut.
 
 k_entity-feature-settings-skybox-upload-success-message = Die Skybox wurde erfolgreich hochgeladen.
 
@@ -290,11 +290,11 @@ k_annotations-editor-title = Annotationen
 
 k_annotations-editor-note-badge = Infos
 
-k_annotations-editor-upload-note = Bitte stellen Sie die Einstellungen fest und speichern Sie diese, bevor Sie Annotationen hinzufügen.
+k_annotations-editor-upload-note = Setze und speichere zuerst die Einstellungen, bevor du Annotationen hinzufügst.
 
-k_annotations-editor-default-mode-note = Alle von Ihnen erstellten Annotationen sind Standardannotationen und für alle sichtbar, die Zugriff auf das Objekt haben.
+k_annotations-editor-default-mode-note = Alle von dir erstellten Annotationen sind Standardannotationen und für alle sichtbar, die Zugriff auf das Objekt haben.
 
-k_annotations-editor-forbidden-note = Standard-Annotationen für fremde Objekte sind nicht bearbeitbar. Laden Sie das Objekt aus einer Sammlung, um Ihre Annotationen zu speichern und sie für andere sichtbar zu machen. Wenn Sie der Eigentümer dieses Objekts sind, laden Sie es ohne Sammlung, um die Standard-Annotationen zu bearbeiten.
+k_annotations-editor-forbidden-note = Standard-Annotationen für fremde Objekte sind nicht bearbeitbar. Lade das Objekt aus einer Sammlung, um deine Annotationen zu speichern und sie für andere sichtbar zu machen. Wenn du Eigentümer dieses Objektes bist, lade es ohne Sammlung, um die Standard-Annotationen zu bearbeiten.
 
 k_annotations-editor-add-hint = Doppelklick auf das Objekt um Annotationen hinzuzufügen.
 
@@ -410,9 +410,9 @@ k_sequence-editor-zoom-out-tooltip = Herauszoomen
 
 k_sequence-editor-zoom-in-tooltip = Zoomen
 
-k_sequence-editor-timeline-empty = Fügen Sie eine Animationsgruppe aus dem Animationsmenü auf der linken Seite hinzu oder ziehen Sie eine von einer anderen Timeline hierher.
+k_sequence-editor-timeline-empty = Füge eine Animationsgruppe aus dem Animationsmenü auf der linken Seite hinzu oder ziehe eine Gruppe von einer anderen Timeline hierher.
 
-k_sequence-editor-timeline-empty-hint = Um eine Zeitleiste zu erstellen, fügen Sie eine Animationsgruppe aus dem Animationsmenü auf der linken Seite hinzu oder klicken Sie auf die entsprechende Schaltfläche oben.
+k_sequence-editor-timeline-empty-hint = Um eine Zeitleiste zu erstellen, füge erst eine Animationsgruppe aus dem Animationsmenü auf der linken Seite hinzu oder klicke auf die entsprechende Schaltfläche oben.
 
 k_sequence-editor-hold-tooltip = Endzustand halten
 
@@ -442,11 +442,11 @@ k_animation-group-controls-add-to-sequence-button = Zum Sequenzeditor hinzufüge
 
 k_dialog-reposition-annotation-title = Repositionierungsannotation
 
-k_dialog-reposition-annotation-changed-hint = Sie haben die Anmerkung verschoben. Wählen Sie unten aus, ob Sie die neue Position übernehmen oder zur ursprünglichen Position zurückkehren möchten.
+k_dialog-reposition-annotation-changed-hint = Du hast die Annotation verschoben. Wähle unten aus, ob die neue Position übernommen werden soll, oder zur ursprünglichen Position zurückgesetzt werden soll.
 
 k_dialog-reposition-annotation-preview-hint = Bei Anwendung der Position wird zudem ein neues Vorschaubild mit der aktualisierten Position erstellt.
 
-k_dialog-reposition-annotation-move-hint = Bewegen Sie die Anmerkung, indem Sie diese auf der gewünschten Achse anklicken und ziehen.
+k_dialog-reposition-annotation-move-hint = Bewege die Annotation, indem du diese auf der gewünschten Achse klickst und ziehst.
 
 k_dialog-reposition-annotation-reset-button = Zurücksetzen
 
@@ -460,7 +460,7 @@ k_dialog-meshsettings-scaling-item = Skalierung
 
 k_dialog-meshsettings-rotation-item = Rotation
 
-k_dialog-meshsettings-confirm-question = Sind Sie mit der Darstellung Ihres Objekts zufrieden?
+k_dialog-meshsettings-confirm-question = Bist du mit der Darstellung deines Objektes zufrieden?
 
 k_dialog-meshsettings-cancel-button = Nein, stornieren und anpassen
 
@@ -472,9 +472,9 @@ k_login-protected-hint = Dieser Inhalt ist geschützt und erfordert eine Authent
 
 k_login-delete-title = Annotation löschen
 
-k_login-delete-confirm = Sind Sie sicher, dass Sie diese Anmerkung dauerhaft löschen möchten?
+k_login-delete-confirm = Bist du sicher, dass du die Annotation dauerhaft löschen möchtest?
 
-k_login-delete-hint = Wenn Sie sicher sind, geben Sie Ihren Benutzernamen und Ihr Passwort ein, um dies zu bestätigen.
+k_login-delete-hint = Wenn du dir sicher bist, gebe deinen Benutzernamen und dein Passwort ein, um dies zu bestätigen.
 
 k_login-delete-forever-button = Für immer löschen
 

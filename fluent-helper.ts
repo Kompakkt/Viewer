@@ -14,7 +14,7 @@ const { values } = parseArgs({
     },
     'mode': {
       type: 'string',
-      default: 'missing'
+      default: 'missing',
     },
     'list-matching': {
       type: 'boolean',
@@ -49,7 +49,7 @@ const fluentContent: Record<string, string> = Object.fromEntries(
   ),
 );
 
-const fluentErrors: Record<string, Error[]> = {}
+const fluentErrors: Record<string, Error[]> = {};
 const fluentBundles = Object.fromEntries(
   Object.entries(fluentContent).map(([locale, content]) => {
     const bundle = new FluentBundle(locale);
@@ -138,7 +138,7 @@ if (values.mode === 'missing') {
   console.timeEnd('Scanning .html and .ts files');
   console.log('Template files with keys:', Object.keys(templateContent).length);
 
-  const keyRegex = new RegExp(/['"]k_(\w+[-_]?)+['"]/g);
+  const keyRegex = new RegExp(/['"]k_(\w+[-_]?)+['"]/, 'g');
 
   const templateKeys = new Set<string>(
     Object.values(templateContent)
@@ -171,7 +171,6 @@ if (values.mode === 'missing') {
 
   console.log('Keys in templates that were not found in fluent:', missing.fluent);
   console.log('Keys in fluent that were not found in templates:', missing.templates);
-
 } else if (values.mode === 'validate') {
   for (const [locale, errors] of Object.entries(fluentErrors)) {
     if (errors.length > 0) {

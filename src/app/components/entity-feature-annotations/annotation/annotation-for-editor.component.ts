@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import {
   ButtonComponent,
@@ -16,7 +16,7 @@ import { AnnotationComponent } from './annotation.component';
   selector: 'app-annotation-for-editor',
   templateUrl: './annotation-for-editor.component.html',
   styleUrls: ['./annotation-for-editor.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
+
   imports: [
     MatIcon,
     MarkdownPreviewComponent,

@@ -1,11 +1,4 @@
-import {
-  Component,
-  effect,
-  inject,
-  input,
-  OnDestroy,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, computed, effect, inject, input, OnDestroy } from '@angular/core';
 import { IColor } from '@kompakkt/common';
 import { ColorFieldComponent } from '../../color-field/color-field.component';
 import {
@@ -18,23 +11,17 @@ import {
   SliderComponent,
 } from '@kompakkt/komponents';
 import { EntitySettingsService } from '../../../services/entitysettings/entitysettings.service';
-import {
-  LightEntry,
-  LightService,
-  LightType,
-  SPOT_ANGLE_MAX,
-} from '../../../services/light/light.service';
+import { LightService, LightType, SPOT_ANGLE_MAX } from '../../../services/light/light.service';
 import { ProcessingService } from '../../../services/processing/processing.service';
 import { BabylonService } from '../../../services/babylon/babylon.service';
 import { FluentPipe } from '../../../pipes/fluent.pipe';
 import { MatIconModule } from '@angular/material/icon';
-import { DecimalPipe, KeyValuePipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 
 @Component({
   selector: 'app-entity-feature-settings-lights',
   templateUrl: './entity-feature-settings-lights.component.html',
   styleUrls: ['./entity-feature-settings-lights.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FluentPipe,
     SliderComponent,
@@ -46,7 +33,6 @@ import { DecimalPipe, KeyValuePipe } from '@angular/common';
     ColorFieldComponent,
     DetailsComponent,
     MatIconModule,
-    KeyValuePipe,
     DecimalPipe,
   ],
 })
@@ -84,13 +70,11 @@ export class EntityFeatureSettingsLightsComponent implements OnDestroy {
     this.lights.selectLight(index);
   }
 
-  public selectedEntry(): { index: number; light: LightEntry } | undefined {
+  public readonly selectedEntry = computed(() => {
     const index = this.lights.selectedLightIndex();
     if (index === undefined) return undefined;
-    const light = this.lights.entries.get(index);
-    if (!light) return undefined;
-    return { index, light };
-  }
+    return this.lights.entryList().find(entry => entry.index === index);
+  });
 
   public jumpToLight(index: number) {
     const entry = this.lights.entries.get(index);

@@ -53,7 +53,7 @@
             "outputPath": {
               "base": "dist/viewer"
             },
-            "polyfills": ["zone.js", "src/global-shim.ts"],
+            "polyfills": ["src/global-shim.ts"],
             "scripts": ["node_modules/pepjs/dist/pep.js"],
             "sourceMap": true,
             "styles": ["src/styles.scss", "src/theme.scss"],
