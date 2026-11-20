@@ -157,12 +157,12 @@ export class DialogIiifImportComponent {
       label: '6. 2D Canvases in Scene',
       manifests: [
         {
-          label: 'Scene with a Canvas',
+          label: 'Scene with a Canvas: Backward',
           value: 'iiif_canvas_with_bgcolor_backward',
           url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/6_2d_canvases_in_scene/iiif_canvas_with_bgcolor_backward.json',
         },
         {
-          label: 'Scene with a Canvas (2)',
+          label: 'Scene with a Canvas: Forward',
           value: 'iiif_canvas_with_bgcolor_forward',
           url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/6_2d_canvases_in_scene/iiif_canvas_with_bgcolor_forward.json',
         },
