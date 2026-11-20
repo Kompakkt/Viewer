@@ -1,5 +1,6 @@
 import { hexToRgb } from './color';
 import { canvasCorners } from './canvas-placement';
+import { wktAnchorPoint } from './wkt';
 import type { Vec3 } from './coordinates';
 import type {
   IIIFCameraItem,
@@ -109,11 +110,29 @@ const isComment = (annotation: Json) =>
   annotation['bodyValue'] !== undefined ||
   asArray<Json>(annotation['body']).some(body => body?.['type'] === 'TextualBody');
 
+const SHAPE_SELECTOR_TYPES = ['WktSelector', 'PolygonZSelector'];
+
+/** First shape selector (WKT with Z coordinates) of the target, reduced to the centre of its vertices. */
+const targetShapeAnchor = (annotation: Json): { type: string; point: Vec3 } | undefined => {
+  for (const selector of targetSelectors(annotation)) {
+    if (!SHAPE_SELECTOR_TYPES.includes(selector?.['type'])) continue;
+    const point = typeof selector['value'] === 'string' ? wktAnchorPoint(selector['value']) : undefined;
+    if (point) return { type: selector['type'], point };
+  }
+  return undefined;
+};
+
 const parseComment = (annotation: Json, id: string, warnings: string[]): IIIFComment | undefined => {
-  const point = targetPoint(annotation);
+  let point = targetPoint(annotation);
   if (!point) {
-    warnings.push(`Comment ${id} has no PointSelector and was skipped`);
-    return undefined;
+    // Kompakkt anchors annotations at a point: fall back to the centre of a shape selector.
+    const anchor = targetShapeAnchor(annotation);
+    if (!anchor) {
+      warnings.push(`Comment ${id} has no usable selector and was skipped`);
+      return undefined;
+    }
+    warnings.push(`Comment ${id}: the ${anchor.type} shape is shown as a point at its centre`);
+    point = anchor.point;
   }
   const textual = asArray<Json>(annotation['body']).find(body => body?.['type'] === 'TextualBody');
   const value = String(textual?.['value'] ?? annotation['bodyValue'] ?? '');
@@ -342,8 +361,12 @@ export const parseManifest = (input: unknown): IIIFSceneModel => {
       if (asArray(annotation['exclude']).length) {
         model.warnings.push(`Annotation ${id}: "exclude" is not supported and was ignored`);
       }
+      // Comments also accept WKT shapes (anchored at their centre, see parseComment).
+      const supportedSelectors = isComment(annotation)
+        ? [...SUPPORTED_SELECTOR_TYPES, ...SHAPE_SELECTOR_TYPES]
+        : SUPPORTED_SELECTOR_TYPES;
       for (const selector of targetSelectors(annotation)) {
-        if (!SUPPORTED_SELECTOR_TYPES.includes(selector?.['type'])) {
+        if (!supportedSelectors.includes(selector?.['type'])) {
           model.warnings.push(
             `Annotation ${id}: Unsupported selector type "${selector?.['type']}" was ignored`,
           );

@@ -212,7 +212,7 @@ export class DialogIiifImportComponent {
         },
         {
           label:
-            'Whale Cranium and Mandible with Point and 2D Shape Comment Annotations (2D shape not shown)',
+            'Whale Cranium and Mandible with Point and 2D Shape Comment Annotations (shape shown as a point)',
           value: 'whale_comment_point_polygon',
           url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/9_commenting_annotations/whale_comment_point_polygon.json',
         },
