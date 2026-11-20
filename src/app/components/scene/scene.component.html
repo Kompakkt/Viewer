@@ -17,6 +17,23 @@
       <app-dialog-iiif-import />
     </aside>
   }
+  @if (processing.iiifCameraChoices$ | async; as cameraChoices) {
+    @if (cameraChoices.length > 1) {
+      <label class="iiif-camera-choice">
+        <span>Camera</span>
+        <select (change)="selectIIIFCamera($event)">
+          @for (choice of cameraChoices; track choice.id) {
+            <option
+              [value]="choice.id"
+              [selected]="choice.id === (processing.activeIIIFCameraChoice$ | async)"
+            >
+              {{ choice.label }}
+            </option>
+          }
+        </select>
+      </label>
+    }
+  }
   <app-sidenav-menu />
   <app-sidenav />
 

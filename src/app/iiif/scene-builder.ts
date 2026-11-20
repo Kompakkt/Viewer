@@ -41,6 +41,14 @@ export interface IIIFBuildResult {
   hasExplicitCamera: boolean;
   /** applies the manifest's default camera or positions the camera automatically */
   applyCamera: () => void;
+  /** Cameras of the default camera's Choice (empty without a Choice); the first is the default. */
+  cameraChoices: IIIFCameraChoice[];
+}
+
+export interface IIIFCameraChoice {
+  id: string;
+  label: string;
+  apply: () => void;
 }
 
 interface LookAtSource {
@@ -131,6 +139,34 @@ const canvasFaceIndices = (corners: Vec3[], polygon: Vector3[]): [number[], numb
   return Vector3.Dot(normalA, front) >= 0 ? [a, b] : [b, a];
 };
 
+/**
+ * Half height of an orthographic view centred on `target` that shows the whole bounding box,
+ * measured in the camera's view plane (the box may be off-centre).
+ */
+const orthoHalfHeightToFit = (
+  bounds: ReturnType<typeof getMeshBounds>,
+  position: Vector3,
+  target: Vector3,
+  aspect: number,
+) => {
+  if (!bounds) return 1;
+  const forward = target.subtract(position);
+  if (forward.lengthSquared() === 0) forward.set(0, 0, -1);
+  forward.normalize();
+  const worldUp = Math.abs(Vector3.Dot(forward, Vector3.Up())) > 0.999 ? Vector3.Forward() : Vector3.Up();
+  const right = Vector3.Cross(worldUp, forward).normalize();
+  const up = Vector3.Cross(forward, right).normalize();
+  const { min, max } = bounds;
+  let half = 0;
+  for (const x of [min.x, max.x])
+    for (const y of [min.y, max.y])
+      for (const z of [min.z, max.z]) {
+        const d = new Vector3(x, y, z).subtract(target);
+        half = Math.max(half, Math.abs(Vector3.Dot(d, up)), Math.abs(Vector3.Dot(d, right)) / aspect);
+      }
+  return Math.max(half * 1.1, 0.01);
+};
+
 /** Placeholder preview for imported IIIF scenes (they have no Kompakkt preview image). */
 export const IIIF_SCENE_PREVIEW = 'assets/image-not-found.png';
 
@@ -186,6 +222,18 @@ export class IIIFSceneBuilderService {
 
     const annotations = this.buildAnnotations(model, meshes);
 
+    const cameraChoices: IIIFCameraChoice[] = defaultCamera?.choiceGroup
+      ? model.cameras
+          .filter(camera => camera.choiceGroup === defaultCamera.choiceGroup)
+          .map((camera, index) => ({
+            id: camera.annotationId,
+            label:
+              camera.label ??
+              `${camera.projection === 'orthographic' ? 'Orthographic' : 'Perspective'} camera ${index + 1}`,
+            apply: () => this.applyExplicitCamera(camera, annotationPositions, meshes),
+          }))
+      : [];
+
     return {
       meshes,
       annotations,
@@ -193,6 +241,7 @@ export class IIIFSceneBuilderService {
       hasExplicitLights,
       hasExplicitCamera: !!defaultCamera,
       applyCamera,
+      cameraChoices,
     };
   }
 
@@ -428,9 +477,10 @@ export class IIIFSceneBuilderService {
     if (mode === Camera.ORTHOGRAPHIC_CAMERA) {
       const canvas = this.babylon.getCanvas();
       const aspect = (canvas.clientWidth || 1) / (canvas.clientHeight || 1);
-      const halfHeight = bounds
-        ? Math.max(bounds.size.y / 2, bounds.size.x / (2 * aspect), bounds.size.z / 2, 1) * 1.2
-        : 1;
+      const halfHeight =
+        camera.viewHeight !== undefined && camera.viewHeight > 0
+          ? camera.viewHeight / 2
+          : orthoHalfHeightToFit(bounds, position, target, aspect);
       active.orthoTop = halfHeight;
       active.orthoBottom = -halfHeight;
       active.orthoLeft = -halfHeight * aspect;

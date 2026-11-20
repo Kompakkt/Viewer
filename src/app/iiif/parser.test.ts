@@ -615,3 +615,129 @@ describe('parseManifest – annotations without id', () => {
     expect(parsed.comments[0].cameraAnnotationId).toBe(ids[1]);
   });
 });
+
+describe('parseManifest – Choice of cameras', () => {
+  const SCENE_ID = 'https://example.org/s';
+  const cam = (id: string, type: string, extra: Record<string, unknown> = {}) => ({
+    id,
+    type,
+    label: { en: [id.split('/').pop()] },
+    lookAt: { type: 'PointSelector', x: 2, y: 1, z: 0 },
+    ...extra,
+  });
+  const manifest = (body: unknown) => ({
+    id: 'https://example.org/m',
+    type: 'Manifest',
+    items: [
+      {
+        id: SCENE_ID,
+        type: 'Scene',
+        items: [
+          {
+            id: 'https://example.org/p1',
+            type: 'AnnotationPage',
+            items: [
+              {
+                id: 'https://example.org/anno/choice',
+                type: 'Annotation',
+                motivation: ['painting'],
+                body,
+                target: {
+                  type: 'SpecificResource',
+                  source: { id: SCENE_ID, type: 'Scene' },
+                  selector: { type: 'PointSelector', x: 0, y: 3, z: -10 },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+
+  test('the first item is the default camera, the others are hidden alternatives', () => {
+    const model = parseManifest(
+      manifest({
+        id: 'https://example.org/choice',
+        type: 'Choice',
+        items: [
+          cam('https://example.org/cameras/ortho', 'OrthographicCamera'),
+          cam('https://example.org/cameras/persp', 'PerspectiveCamera', { fieldOfView: 50 }),
+        ],
+      }),
+    );
+    expect(model.warnings).toEqual([]);
+    expect(model.cameras).toHaveLength(2);
+    const [first, second] = model.cameras;
+    expect(first.annotationId).toBe('https://example.org/anno/choice');
+    expect(first.projection).toBe('orthographic');
+    expect(first.hidden).toBe(false);
+    expect(first.choiceGroup).toBe('https://example.org/anno/choice');
+    expect(second.annotationId).toBe('https://example.org/anno/choice#choice-2');
+    expect(second.projection).toBe('perspective');
+    expect(second.fieldOfView).toBe(50);
+    expect(second.hidden).toBe(true);
+    expect(second.choiceGroup).toBe('https://example.org/anno/choice');
+    // Both share the annotation's position.
+    expect(second.position).toEqual({ x: 0, y: 3, z: -10 });
+  });
+
+  test('a scope reference to an alternative camera resource resolves to it', () => {
+    const json = manifest({
+      type: 'Choice',
+      items: [
+        cam('https://example.org/cameras/ortho', 'OrthographicCamera'),
+        cam('https://example.org/cameras/persp', 'PerspectiveCamera'),
+      ],
+    });
+    (json.items[0] as any).annotations = [
+      {
+        id: 'https://example.org/p2',
+        type: 'AnnotationPage',
+        items: [
+          {
+            id: 'https://example.org/anno/comment',
+            type: 'Annotation',
+            motivation: ['commenting'],
+            body: { type: 'TextualBody', value: 'Glove' },
+            target: {
+              type: 'SpecificResource',
+              source: { id: SCENE_ID, type: 'Scene' },
+              selector: [{ type: 'PointSelector', x: 1, y: 2, z: 3 }],
+            },
+            scope: [{ id: 'https://example.org/cameras/persp', type: 'PerspectiveCamera' }],
+          },
+        ],
+      },
+    ];
+    const model = parseManifest(json);
+    expect(model.comments[0].cameraAnnotationId).toBe('https://example.org/anno/choice#choice-2');
+  });
+
+  test('non-camera alternatives are ignored with a warning, the first item is used', () => {
+    const model = parseManifest(
+      manifest({
+        type: 'Choice',
+        items: [
+          { id: 'https://example.org/a.glb', type: 'Model' },
+          { id: 'https://example.org/b.glb', type: 'Model' },
+        ],
+      }),
+    );
+    expect(model.models.map(m => m.url)).toEqual(['https://example.org/a.glb']);
+    expect(model.warnings.some(w => w.includes('only the first item of the Choice is used'))).toBe(true);
+  });
+
+  test('OrthographicCamera viewHeight is read', () => {
+    const model = parseManifest(
+      manifest(cam('https://example.org/cameras/ortho', 'OrthographicCamera', { viewHeight: 4 })),
+    );
+    expect(model.cameras[0].viewHeight).toBe(4);
+  });
+
+  test('an empty Choice adds a warning', () => {
+    const model = parseManifest(manifest({ type: 'Choice', items: [] }));
+    expect(model.cameras).toHaveLength(0);
+    expect(model.warnings.some(w => w.includes('empty Choice'))).toBe(true);
+  });
+});

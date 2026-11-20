@@ -68,6 +68,10 @@ export class SceneComponent implements AfterViewInit {
     this.setupCanvas();
   }
 
+  selectIIIFCamera(event: Event) {
+    this.processing.selectIIIFCameraChoice((event.target as HTMLSelectElement).value);
+  }
+
   private hasInitialManifestParam() {
     const queryParams = new URLSearchParams(window.location.search);
     const hashParams = window.location.hash.startsWith('#?')

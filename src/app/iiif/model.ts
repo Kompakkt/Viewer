@@ -45,8 +45,12 @@ export interface IIIFCameraItem {
   fieldOfView?: number;
   near?: number;
   far?: number;
-  /** behavior: ["hidden"] – e.g. the camera of a comment */
+  /** OrthographicCamera: height of the view in Scene units */
+  viewHeight?: number;
+  /** behavior: ["hidden"] – e.g. the camera of a comment, or a non-default Choice alternative */
   hidden: boolean;
+  /** Annotation id of the Choice this camera belongs to; cameras of one Choice are switchable. */
+  choiceGroup?: string;
 }
 
 export type LightKind = 'ambient' | 'directional' | 'point' | 'spot';

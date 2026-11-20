@@ -36,7 +36,11 @@ import { OverlayService } from '../overlay/overlay.service';
 import { UserdataService } from '../userdata/userdata.service';
 import type { IIIFSceneModel } from '../../iiif/model';
 import { IIIFParseError, parseManifest as parseIIIFManifest } from '../../iiif/parser';
-import { IIIFSceneBuilderService, type IIIFBuildResult } from '../../iiif/scene-builder';
+import {
+  IIIFSceneBuilderService,
+  type IIIFBuildResult,
+  type IIIFCameraChoice,
+} from '../../iiif/scene-builder';
 
 export type QualitySetting = 'low' | 'medium' | 'high' | 'raw';
 const isQualitySetting = (setting: any): setting is QualitySetting => {
@@ -119,6 +123,17 @@ export class ProcessingService {
   public isStandalone$ = this.entity$.pipe(map(entity => entity?._id === 'standalone_entity'));
 
   public standaloneAnnotations$ = new BehaviorSubject<IAnnotation[]>([]);
+
+  /** Switchable cameras of an imported IIIF scene (a Choice of cameras); empty otherwise. */
+  public iiifCameraChoices$ = new BehaviorSubject<IIIFCameraChoice[]>([]);
+  public activeIIIFCameraChoice$ = new BehaviorSubject<string | undefined>(undefined);
+
+  public selectIIIFCameraChoice(id: string) {
+    const choice = this.iiifCameraChoices$.getValue().find(c => c.id === id);
+    if (!choice) return;
+    choice.apply();
+    this.activeIIIFCameraChoice$.next(choice.id);
+  }
 
   // general features and modes
   public showMenu$ = new BehaviorSubject(true);
@@ -436,6 +451,8 @@ export class ProcessingService {
   private async processIIIF3DManifest(manifestJson: unknown) {
     this.loadingScreen.show();
     this.standaloneAnnotations$.next([]);
+    this.iiifCameraChoices$.next([]);
+    this.activeIIIFCameraChoice$.next(undefined);
 
     try {
       this.babylon.clearScene();
@@ -467,6 +484,8 @@ export class ProcessingService {
       return;
     }
     this.standaloneAnnotations$.next(result.annotations);
+    this.iiifCameraChoices$.next(result.cameraChoices);
+    this.activeIIIFCameraChoice$.next(result.cameraChoices[0]?.id);
 
     if (result.meshes.length) {
       const entity = {

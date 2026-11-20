@@ -54,8 +54,9 @@ export class DialogIiifImportComponent {
           url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/2_cameras/positioned_camera_lookat_point.json',
         },
         {
-          label: 'Choice of cameras WARNING use of Choice (TBD)',
-          value: 'zz_choice_of_cameras_tbd',
+          label: 'Choice of Cameras (switchable)',
+          value: 'zz_choice_of_cameras',
+          url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/2_cameras/zz_choice_of_cameras.json',
         },
         {
           label: 'Orthographic Camera',

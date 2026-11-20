@@ -223,14 +223,44 @@ const parsePainting = (
   id: string = ownId(annotation) ?? 'unknown',
 ) => {
   const position = targetPoint(annotation);
+  const annotationHidden = asArray(annotation['behavior']).includes('hidden');
 
-  for (const rawBody of asArray<Json>(annotation['body'])) {
+  const addBody = (
+    rawBody: Json,
+    cameraOptions: { annotationId: string; hidden: boolean; choiceGroup?: string } = {
+      annotationId: id,
+      hidden: annotationHidden,
+    },
+  ) => {
     const { source, transforms, type } = unwrapBody(rawBody);
+
+    if (type === 'choice') {
+      // The first item is the default; alternative cameras become hidden, switchable cameras.
+      const items = asArray<Json>(source['items']);
+      if (!items.length) {
+        model.warnings.push(`Annotation ${id}: empty Choice was skipped`);
+        return;
+      }
+      const isCamera = (item: Json) =>
+        ['perspectivecamera', 'orthographiccamera'].includes(unwrapBody(item).type);
+      const choiceGroup = items.filter(isCamera).length > 1 ? id : undefined;
+      addBody(items[0], { annotationId: id, hidden: annotationHidden, choiceGroup });
+      items.slice(1).forEach((item, index) => {
+        if (choiceGroup && isCamera(item)) {
+          addBody(item, { annotationId: `${id}#choice-${index + 2}`, hidden: true, choiceGroup });
+        } else {
+          model.warnings.push(
+            `Annotation ${id}: only the first item of the Choice is used, a "${unwrapBody(item).type}" alternative was ignored`,
+          );
+        }
+      });
+      return;
+    }
 
     if (type === 'model') {
       if (typeof source['id'] !== 'string') {
         model.warnings.push(`Annotation ${id}: Model without id was skipped`);
-        continue;
+        return;
       }
       model.models.push({
         annotationId: id,
@@ -241,7 +271,8 @@ const parsePainting = (
       });
     } else if (type === 'perspectivecamera' || type === 'orthographiccamera') {
       model.cameras.push({
-        annotationId: id,
+        annotationId: cameraOptions.annotationId,
+        ...(cameraOptions.choiceGroup ? { choiceGroup: cameraOptions.choiceGroup } : {}),
         projection: type === 'perspectivecamera' ? 'perspective' : 'orthographic',
         label: firstLabel(source['label']),
         position,
@@ -250,7 +281,8 @@ const parsePainting = (
         fieldOfView: toNumber(source['fieldOfView']),
         near: toNumber(source['near']),
         far: toNumber(source['far']),
-        hidden: asArray(annotation['behavior']).includes('hidden'),
+        viewHeight: toNumber(source['viewHeight']),
+        hidden: cameraOptions.hidden,
         ...parseLookAt(source['lookAt'] ?? rawBody['lookAt']),
       });
     } else if (LIGHT_KINDS[type]) {
@@ -270,18 +302,18 @@ const parsePainting = (
       );
       if (!canvas) {
         model.warnings.push(`Annotation ${id}: Canvas not found in the Manifest`);
-        continue;
+        return;
       }
       const polygon = targetSelectors(annotation).find(s => s?.['type'] === 'PolygonZSelector');
       if (typeof polygon?.['value'] === 'string') {
         model.canvases.push({ annotationId: id, canvas, polygonZ: polygon['value'] });
-        continue;
+        return;
       }
       const width = toNumber(canvas['width']);
       const height = toNumber(canvas['height']);
       if (!width || !height || width <= 0 || height <= 0) {
         model.warnings.push(`Annotation ${id}: Canvas has no usable width and height`);
-        continue;
+        return;
       }
       model.canvases.push({
         annotationId: id,
@@ -293,7 +325,9 @@ const parsePainting = (
     } else {
       model.warnings.push(`Annotation ${id}: Unsupported body type "${type}"`);
     }
-  }
+  };
+
+  asArray<Json>(annotation['body']).forEach(rawBody => addBody(rawBody));
 };
 
 export const parseManifest = (input: unknown): IIIFSceneModel => {
