@@ -319,6 +319,8 @@ const parsePainting = (
         annotationId: id,
         canvas,
         corners: canvasCorners(width, height, transforms, position),
+        transforms,
+        position,
       });
     } else if (type === 'scene') {
       model.warnings.push(`Annotation ${id}: nested Scenes are not supported`);

@@ -1,6 +1,7 @@
 import type { IAnnotation, IEntitySettings } from 'src/common';
 import { rgbToHex } from './color';
 import { arcRotateToCartesian, pointToIIIF, rotationToIIIF, toVec3, type Vec3 } from './coordinates';
+import type { CameraProjection, IIIFTransform } from './model';
 import { modelTransformToIIIFTransforms, type IIIFModelTransform } from './placement';
 import {
   PRESENTATION_4_CONTEXT,
@@ -9,6 +10,7 @@ import {
   type PointSelector,
   type Quantity,
   type Reference,
+  type Resource,
   type Scene,
   type Transform,
 } from './types';
@@ -18,6 +20,32 @@ export interface ExportModel {
   url: string;
   /** Effective placement in IIIF space (see `modelTransform`); without it, no transform is exported. */
   transform?: IIIFModelTransform;
+}
+
+/** A Canvas painted into the Scene (from an imported IIIF scene). All vectors in IIIF space. */
+export interface ExportCanvas {
+  /** Canvas JSON as in the imported manifest; added to the Manifest's items. */
+  canvas: Record<string, any>;
+  /** Body transforms of the painting annotation, in document order */
+  transforms?: IIIFTransform[];
+  /** PointSelector of the target (top-left corner of the Canvas) */
+  position?: Vec3;
+  /** Older draft form: corners as PolygonZSelector value; exported unchanged */
+  polygonZ?: string;
+}
+
+/** Default camera as displayed (from an imported IIIF scene), IIIF space. */
+export interface ExportCamera {
+  projection: CameraProjection;
+  position: Vec3;
+  target: Vec3;
+  /** OrthographicCamera: height of the view in Scene units */
+  viewHeight?: number;
+  /** PerspectiveCamera: degrees */
+  fieldOfView?: number;
+  near?: number;
+  far?: number;
+  label?: string;
 }
 
 export interface ManifestExportInput {
@@ -36,6 +64,13 @@ export interface ManifestExportInput {
   modelTransform?: IIIFModelTransform;
   /** Several models (e.g. an imported multi-model IIIF scene), painted in this order. */
   models?: ExportModel[];
+  /** Canvases painted into the Scene, in this order. */
+  canvases?: ExportCanvas[];
+  /**
+   * Default camera that replaces `settings.cameraPositionInitial`; `null` exports no default
+   * camera (e.g. an imported scene without one, where the importer positions the camera itself).
+   */
+  camera?: ExportCamera | null;
   annotations: IAnnotation[];
   /** HTTP(S) viewer URL of the entity, used as manifest id */
   manifestId: string;
@@ -111,6 +146,10 @@ const cameraPoints = (arcPosition: unknown, rawTarget: unknown) => {
   return { position: pointToIIIF(position), target: pointToIIIF(target) };
 };
 
+/** Rounds float noise of displayed camera values to 6 decimals; avoids -0. */
+const round6 = (value: number) => Math.round(value * 1e6) / 1e6 + 0;
+const round6Vec = (v: Vec3): Vec3 => ({ x: round6(v.x), y: round6(v.y), z: round6(v.z) });
+
 const TRANSFORM_TYPES = {
   scale: 'ScaleTransform',
   rotate: 'RotateTransform',
@@ -185,7 +224,7 @@ export const exportManifest = (input: ManifestExportInput): ManifestExportResult
   const models: ExportModel[] =
     input.models ??
     (input.modelUrl ? [{ url: input.modelUrl, transform: input.modelTransform }] : []);
-  if (!models.length) warnings.push('No model to export');
+  if (!models.length && !input.canvases?.length) warnings.push('No model to export');
 
   const painting: Annotation[] = models.map((model, index) => {
     if (!isPublicUrl(model.url)) warnings.push(`Model URL is not publicly reachable: ${model.url}`);
@@ -209,8 +248,61 @@ export const exportManifest = (input: ManifestExportInput): ManifestExportResult
     };
   });
 
+  // Canvases
+  const canvasItems: Resource[] = [];
+  (input.canvases ?? []).forEach((item, index) => {
+    const canvasId = item.canvas?.['id'];
+    if (typeof canvasId !== 'string' || item.canvas?.['type'] !== 'Canvas') {
+      warnings.push(`Canvas ${index + 1}: no Canvas with an id, skipped`);
+      return;
+    }
+    if (!canvasItems.some(canvas => canvas.id === canvasId)) canvasItems.push(item.canvas as Resource);
+    const source: Resource = { id: canvasId, type: 'Canvas' };
+    const transforms: Transform[] = (item.transforms ?? []).map(({ kind, value }) => ({
+      type: TRANSFORM_TYPES[kind],
+      ...value,
+    }));
+    let target: Annotation['target'] = sceneRef;
+    if (item.position) {
+      target = placedAt(item.position);
+    } else if (item.polygonZ) {
+      warnings.push(`Canvas ${canvasId}: exported with the PolygonZSelector of an older draft`);
+      target = {
+        type: 'SpecificResource',
+        source: sceneRef,
+        selector: [{ type: 'PolygonZSelector', value: item.polygonZ }],
+      };
+    }
+    painting.push({
+      id: `${sceneId}/anno/canvas/${index + 1}`,
+      type: 'Annotation',
+      motivation: ['painting'],
+      body: transforms.length ? { type: 'SpecificResource', source, transform: transforms } : source,
+      target,
+    });
+  });
+
   // Default camera
-  if (settings.cameraPositionInitial) {
+  if (input.camera) {
+    const { camera } = input;
+    const orthographic = camera.projection === 'orthographic';
+    painting.push({
+      id: `${sceneId}/anno/camera`,
+      type: 'Annotation',
+      motivation: ['painting'],
+      body: {
+        id: `${baseId}/camera/initial`,
+        type: orthographic ? 'OrthographicCamera' : 'PerspectiveCamera',
+        ...(camera.label !== undefined ? { label: { none: [camera.label] } } : {}),
+        lookAt: pointSelector(round6Vec(camera.target)),
+        ...(orthographic && camera.viewHeight !== undefined ? { viewHeight: round6(camera.viewHeight) } : {}),
+        ...(!orthographic && camera.fieldOfView !== undefined ? { fieldOfView: camera.fieldOfView } : {}),
+        ...(camera.near !== undefined ? { near: camera.near } : {}),
+        ...(camera.far !== undefined ? { far: camera.far } : {}),
+      },
+      target: placedAt(round6Vec(camera.position)),
+    });
+  } else if (input.camera === undefined && settings.cameraPositionInitial) {
     const camera = cameraAnnotation(
       `${sceneId}/anno/camera`,
       `${baseId}/camera/initial`,
@@ -327,7 +419,13 @@ export const exportManifest = (input: ManifestExportInput): ManifestExportResult
   }
 
   return {
-    manifest: { '@context': PRESENTATION_4_CONTEXT, id: manifestId, type: 'Manifest', label, items: [scene] },
+    manifest: {
+      '@context': PRESENTATION_4_CONTEXT,
+      id: manifestId,
+      type: 'Manifest',
+      label,
+      items: [scene, ...canvasItems],
+    },
     warnings,
   };
 };

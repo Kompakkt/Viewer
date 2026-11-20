@@ -22,7 +22,8 @@ import { BabylonService } from '../services/babylon/babylon.service';
 import type { RGB } from './color';
 import { hexToRgb } from './color';
 import { commentToAnnotation, perspectiveAlongNormal, perspectiveFromCamera } from './comments';
-import { pointToBabylon, type Vec3 } from './coordinates';
+import { pointToBabylon, pointToIIIF, type Vec3 } from './coordinates';
+import type { ExportCamera } from './exporter';
 import type {
   IIIFCameraItem,
   IIIFCanvasItem,
@@ -45,6 +46,8 @@ export interface IIIFBuildResult {
   cameraChoices: IIIFCameraChoice[];
   /** Loaded models with their meshes, in manifest order (used by the IIIF export). */
   models: IIIFLoadedModel[];
+  /** The manifest's default camera as displayed (for the IIIF export); undefined without one. */
+  describeCamera?: () => ExportCamera;
 }
 
 export interface IIIFLoadedModel {
@@ -253,6 +256,9 @@ export class IIIFSceneBuilderService {
       applyCamera,
       cameraChoices,
       models: loadedModels,
+      describeCamera: defaultCamera
+        ? () => this.describeCamera(defaultCamera, annotationPositions, meshes)
+        : undefined,
     };
   }
 
@@ -448,7 +454,8 @@ export class IIIFSceneBuilderService {
     return false;
   }
 
-  private applyExplicitCamera(
+  /** Position, target and orthographic half height the camera is displayed with (Babylon space). */
+  private resolveCamera(
     camera: IIIFCameraItem,
     positions: Map<string, Vector3>,
     meshes: AbstractMesh[],
@@ -473,6 +480,44 @@ export class IIIFSceneBuilderService {
           )
         : (bounds?.center ?? position.add(new Vector3(0, 0, -1))));
 
+    const canvas = this.babylon.getCanvas();
+    const aspect = (canvas.clientWidth || 1) / (canvas.clientHeight || 1);
+    const halfHeight =
+      camera.projection !== 'orthographic'
+        ? undefined
+        : camera.viewHeight !== undefined && camera.viewHeight > 0
+          ? camera.viewHeight / 2
+          : orthoHalfHeightToFit(bounds, position, target, aspect);
+    return { position, target, halfHeight, aspect };
+  }
+
+  /** The camera as displayed, in IIIF space, for the IIIF export. */
+  private describeCamera(
+    camera: IIIFCameraItem,
+    positions: Map<string, Vector3>,
+    meshes: AbstractMesh[],
+  ): ExportCamera {
+    const { position, target, halfHeight } = this.resolveCamera(camera, positions, meshes);
+    const toIIIF = (v: Vector3) => pointToIIIF({ x: v.x, y: v.y, z: v.z });
+    return {
+      projection: camera.projection,
+      position: toIIIF(position),
+      target: toIIIF(target),
+      ...(halfHeight !== undefined ? { viewHeight: halfHeight * 2 } : {}),
+      ...(camera.fieldOfView !== undefined ? { fieldOfView: camera.fieldOfView } : {}),
+      ...(camera.near !== undefined ? { near: camera.near } : {}),
+      ...(camera.far !== undefined ? { far: camera.far } : {}),
+      ...(camera.label !== undefined ? { label: camera.label } : {}),
+    };
+  }
+
+  private applyExplicitCamera(
+    camera: IIIFCameraItem,
+    positions: Map<string, Vector3>,
+    meshes: AbstractMesh[],
+  ) {
+    const { position, target, halfHeight, aspect } = this.resolveCamera(camera, positions, meshes);
+
     this.babylon.cameraManager.setCameraType('ArcRotateCamera');
     const active = this.babylon.getScene().activeCamera as any;
     active.setTarget(target, true);
@@ -482,16 +527,8 @@ export class IIIFSceneBuilderService {
       active.position = position.clone();
     }
 
-    const mode =
-      camera.projection === 'orthographic' ? Camera.ORTHOGRAPHIC_CAMERA : Camera.PERSPECTIVE_CAMERA;
-    active.mode = mode;
-    if (mode === Camera.ORTHOGRAPHIC_CAMERA) {
-      const canvas = this.babylon.getCanvas();
-      const aspect = (canvas.clientWidth || 1) / (canvas.clientHeight || 1);
-      const halfHeight =
-        camera.viewHeight !== undefined && camera.viewHeight > 0
-          ? camera.viewHeight / 2
-          : orthoHalfHeightToFit(bounds, position, target, aspect);
+    active.mode = halfHeight !== undefined ? Camera.ORTHOGRAPHIC_CAMERA : Camera.PERSPECTIVE_CAMERA;
+    if (halfHeight !== undefined) {
       active.orthoTop = halfHeight;
       active.orthoBottom = -halfHeight;
       active.orthoLeft = -halfHeight * aspect;

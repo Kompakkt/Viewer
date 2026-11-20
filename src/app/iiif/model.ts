@@ -27,6 +27,9 @@ export interface IIIFCanvasItem {
    * from the Canvas size, the body transforms and the target PointSelector.
    */
   corners?: Vec3[];
+  /** Body transforms and target PointSelector as in the manifest (Canvases placed by corners) */
+  transforms?: IIIFTransform[];
+  position?: Vec3;
 }
 
 export type CameraProjection = 'perspective' | 'orthographic';

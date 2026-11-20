@@ -5,7 +5,7 @@ import { exportManifest, isPublicUrl, modelFormatFromUrl } from './exporter';
 const BASE = 'https://viewer.example/viewer/iiif/e1';
 const SCENE = `${BASE}/scene/1`;
 
-const ID_TYPES = ['Manifest', 'Scene', 'AnnotationPage', 'Annotation', 'PerspectiveCamera'];
+const ID_TYPES = ['Manifest', 'Scene', 'Canvas', 'AnnotationPage', 'Annotation', 'PerspectiveCamera', 'OrthographicCamera'];
 const REFERENCE_KEYS = ['scope', 'target', 'source'];
 
 const collectIds = (value: unknown, ids: string[] = []): string[] => {
@@ -334,6 +334,144 @@ describe('exportManifest – several models', () => {
 
   test('all ids stay unique', () => {
     const { manifest } = exportManifest(makeInput({ models, modelUrl: undefined, modelTransform: undefined }));
+    const ids = collectIds(manifest);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+describe('exportManifest – Canvases and cameras of an imported scene', () => {
+  const canvas = {
+    id: 'https://example.org/canvas/1',
+    type: 'Canvas',
+    width: 2000,
+    height: 1500,
+    items: [
+      {
+        id: 'https://example.org/canvas/1/page',
+        type: 'AnnotationPage',
+        items: [
+          {
+            id: 'https://example.org/canvas/1/page/anno',
+            type: 'Annotation',
+            motivation: ['painting'],
+            body: { id: 'https://example.org/image.jpg', type: 'Image', format: 'image/jpeg' },
+            target: 'https://example.org/canvas/1',
+          },
+        ],
+      },
+    ],
+  };
+  const placed = {
+    canvas,
+    transforms: [
+      { kind: 'scale' as const, value: { x: 0.001, y: 0.001, z: 1 } },
+      { kind: 'rotate' as const, value: { x: 0, y: 90, z: 0 } },
+    ],
+    position: { x: -1, y: 1.5, z: 0 },
+  };
+
+  test('paints the Canvas with its transforms and adds it to the Manifest', () => {
+    const { manifest, scene, warnings } = sceneOf(makeInput({ canvases: [placed] }));
+    const painting = scene.items[0].items.find((a: any) => a.body?.source?.type === 'Canvas');
+    expect(painting).toEqual({
+      id: `${SCENE}/anno/canvas/1`,
+      type: 'Annotation',
+      motivation: ['painting'],
+      body: {
+        type: 'SpecificResource',
+        source: { id: canvas.id, type: 'Canvas' },
+        transform: [
+          { type: 'ScaleTransform', x: 0.001, y: 0.001, z: 1 },
+          { type: 'RotateTransform', x: 0, y: 90, z: 0 },
+        ],
+      },
+      target: {
+        type: 'SpecificResource',
+        source: { id: SCENE, type: 'Scene' },
+        selector: [{ type: 'PointSelector', x: -1, y: 1.5, z: 0 }],
+      },
+    });
+    expect(manifest.items).toHaveLength(2);
+    expect(manifest.items[1]).toEqual(canvas);
+    expect(warnings).toEqual([]);
+  });
+
+  test('a Canvas painted twice is listed once', () => {
+    const { manifest, scene } = sceneOf(makeInput({ canvases: [placed, { canvas }] }));
+    expect(manifest.items).toHaveLength(2);
+    const second = scene.items[0].items.find((a: any) => a.id === `${SCENE}/anno/canvas/2`);
+    expect(second.body).toEqual({ id: canvas.id, type: 'Canvas' });
+    expect(second.target).toEqual({ id: SCENE, type: 'Scene' });
+  });
+
+  test('a PolygonZSelector placement is kept with a warning', () => {
+    const polygonZ = 'POLYGONZ((0 1 0, 1 1 0, 1 0 0, 0 0 0))';
+    const { scene, warnings } = sceneOf(makeInput({ canvases: [{ canvas, polygonZ }] }));
+    const painting = scene.items[0].items.find((a: any) => a.id === `${SCENE}/anno/canvas/1`);
+    expect(painting.target.selector).toEqual([{ type: 'PolygonZSelector', value: polygonZ }]);
+    expect(warnings.some(w => w.includes('PolygonZSelector'))).toBe(true);
+  });
+
+  test('skips Canvases without an id', () => {
+    const { manifest, warnings } = sceneOf(makeInput({ canvases: [{ canvas: { type: 'Canvas' } }] }));
+    expect(manifest.items).toHaveLength(1);
+    expect(warnings.some(w => w.includes('Canvas 1'))).toBe(true);
+  });
+
+  test('a Canvas-only scene does not warn about a missing model', () => {
+    const { warnings } = sceneOf(
+      makeInput({ modelUrl: undefined, modelTransform: undefined, models: [], canvases: [placed] }),
+    );
+    expect(warnings.some(w => w.includes('No model'))).toBe(false);
+  });
+
+  test('exports an OrthographicCamera with viewHeight instead of the settings camera', () => {
+    const { scene } = sceneOf(
+      makeInput({
+        camera: {
+          projection: 'orthographic',
+          position: { x: 0, y: 0.5, z: 3.0000000001 },
+          target: { x: 0, y: 0.5, z: 0 },
+          viewHeight: 1.23456789,
+          fieldOfView: 50,
+          near: 0.1,
+          far: 100,
+          label: 'Front',
+        },
+      }),
+    );
+    const camera = scene.items[0].items.find((a: any) => a.id === `${SCENE}/anno/camera`);
+    expect(camera.body).toEqual({
+      id: `${BASE}/camera/initial`,
+      type: 'OrthographicCamera',
+      label: { none: ['Front'] },
+      lookAt: { type: 'PointSelector', x: 0, y: 0.5, z: 0 },
+      viewHeight: 1.234568,
+      near: 0.1,
+      far: 100,
+    });
+    expect(camera.target.selector).toEqual([{ type: 'PointSelector', x: 0, y: 0.5, z: 3 }]);
+  });
+
+  test('exports fieldOfView for a PerspectiveCamera', () => {
+    const { scene } = sceneOf(
+      makeInput({
+        camera: { projection: 'perspective', position: { x: 1, y: 2, z: 3 }, target: { x: 0, y: 0, z: 0 }, fieldOfView: 45 },
+      }),
+    );
+    const camera = scene.items[0].items.find((a: any) => a.id === `${SCENE}/anno/camera`);
+    expect(camera.body.type).toBe('PerspectiveCamera');
+    expect(camera.body.fieldOfView).toBe(45);
+    expect(camera.body.viewHeight).toBeUndefined();
+  });
+
+  test('camera: null exports no default camera', () => {
+    const { scene } = sceneOf(makeInput({ camera: null }));
+    expect(scene.items[0].items.some((a: any) => a.id === `${SCENE}/anno/camera`)).toBe(false);
+  });
+
+  test('all ids stay unique', () => {
+    const { manifest } = exportManifest(makeInput({ canvases: [placed] }));
     const ids = collectIds(manifest);
     expect(new Set(ids).size).toBe(ids.length);
   });

@@ -93,20 +93,25 @@ export class AnnotationsEditorComponent {
 
     const toAbsolute = (url: string) => new URL(url, window.location.href).toString();
     const placementWarnings: string[] = [];
-    let modelInput: Pick<ExportInput, 'modelUrl' | 'modelTransform' | 'models'>;
+    let modelInput: Pick<ExportInput, 'modelUrl' | 'modelTransform' | 'models' | 'canvases' | 'camera'>;
 
     const iiifScene = this.processing.getIIIFScene(entity);
-    if (iiifScene?.models.length) {
-      // Imported IIIF scene: export every model where it is displayed.
-      if (iiifScene.canvasCount) {
-        placementWarnings.push(`${iiifScene.canvasCount} Canvas(es) in the scene are not exported`);
-      }
+    if (iiifScene && (iiifScene.models.length || iiifScene.canvases.length)) {
+      // Imported IIIF scene: export every model where it is displayed, the Canvases as placed
+      // in the manifest and the manifest's default camera (none: the importer places it).
       modelInput = {
         models: iiifScene.models.map(model => {
           const placement = getEffectiveModelTransform(model.meshes);
           placementWarnings.push(...placement.warnings);
           return { url: toAbsolute(model.url), transform: placement.transform };
         }),
+        canvases: iiifScene.canvases.map(({ canvas, transforms, position, polygonZ }) => ({
+          canvas,
+          transforms,
+          position,
+          polygonZ,
+        })),
+        camera: iiifScene.describeCamera?.() ?? null,
       };
     } else {
       const resolvedUrl = this.processing.resolveEntityModelUrl(entity);

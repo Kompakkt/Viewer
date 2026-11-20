@@ -34,7 +34,8 @@ import { BackendService } from '../backend/backend.service';
 import { MessageService } from '../message/message.service';
 import { OverlayService } from '../overlay/overlay.service';
 import { UserdataService } from '../userdata/userdata.service';
-import type { IIIFSceneModel } from '../../iiif/model';
+import type { ExportCamera } from '../../iiif/exporter';
+import type { IIIFCanvasItem, IIIFSceneModel } from '../../iiif/model';
 import { IIIFParseError, parseManifest as parseIIIFManifest } from '../../iiif/parser';
 import {
   IIIFSceneBuilderService,
@@ -42,6 +43,14 @@ import {
   type IIIFCameraChoice,
   type IIIFLoadedModel,
 } from '../../iiif/scene-builder';
+
+/** What the IIIF export needs from an imported IIIF scene. */
+export interface IIIFSceneExport {
+  models: IIIFLoadedModel[];
+  canvases: IIIFCanvasItem[];
+  /** The manifest's default camera as displayed; undefined if the manifest has none. */
+  describeCamera?: () => ExportCamera;
+}
 
 export type QualitySetting = 'low' | 'medium' | 'high' | 'raw';
 const isQualitySetting = (setting: any): setting is QualitySetting => {
@@ -130,12 +139,10 @@ export class ProcessingService {
   public activeIIIFCameraChoice$ = new BehaviorSubject<string | undefined>(undefined);
 
   /** Models of the imported IIIF scene, tied to the entity created for it. */
-  private iiifScene?: { entity: IEntity; models: IIIFLoadedModel[]; canvasCount: number };
+  private iiifScene?: { entity: IEntity } & IIIFSceneExport;
 
-  /** Models (and Canvas count) of the entity if it is an imported IIIF scene, otherwise undefined. */
-  public getIIIFScene(
-    entity: IEntity | undefined,
-  ): { models: IIIFLoadedModel[]; canvasCount: number } | undefined {
+  /** Exportable content of the entity if it is an imported IIIF scene, otherwise undefined. */
+  public getIIIFScene(entity: IEntity | undefined): IIIFSceneExport | undefined {
     return entity && this.iiifScene?.entity === entity ? this.iiifScene : undefined;
   }
 
@@ -519,7 +526,12 @@ export class ProcessingService {
         ),
       } as IEntity;
 
-      this.iiifScene = { entity, models: result.models, canvasCount: model.canvases.length };
+      this.iiifScene = {
+        entity,
+        models: result.models,
+        canvases: model.canvases,
+        describeCamera: result.describeCamera,
+      };
       this.updateActiveEntity(entity, result.meshes);
       this.settings$.next({
         localSettings: entity.settings,

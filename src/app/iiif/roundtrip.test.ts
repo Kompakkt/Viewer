@@ -95,3 +95,82 @@ describe('round trip: several models', () => {
     });
   });
 });
+
+describe('round trip: Canvases and an OrthographicCamera', () => {
+  const canvas = { id: 'https://example.org/canvas/1', type: 'Canvas', width: 400, height: 300, items: [] };
+  const transforms = [
+    { kind: 'scale' as const, value: { x: 0.01, y: 0.01, z: 1 } },
+    { kind: 'rotate' as const, value: { x: 0, y: 45, z: 0 } },
+  ];
+  const position = { x: -2, y: 3, z: 0.5 };
+  const original = parseManifest({
+    id: 'https://example.org/m',
+    type: 'Manifest',
+    label: { none: ['m'] },
+    items: [
+      {
+        id: 'https://example.org/scene',
+        type: 'Scene',
+        items: [
+          {
+            id: 'https://example.org/page',
+            type: 'AnnotationPage',
+            items: [
+              {
+                id: 'https://example.org/anno/canvas',
+                type: 'Annotation',
+                motivation: ['painting'],
+                body: {
+                  type: 'SpecificResource',
+                  source: { id: canvas.id, type: 'Canvas' },
+                  transform: [
+                    { type: 'ScaleTransform', x: 0.01, y: 0.01, z: 1 },
+                    { type: 'RotateTransform', x: 0, y: 45, z: 0 },
+                  ],
+                },
+                target: {
+                  type: 'SpecificResource',
+                  source: { id: 'https://example.org/scene', type: 'Scene' },
+                  selector: [{ type: 'PointSelector', ...position }],
+                },
+              },
+            ],
+          },
+        ],
+      },
+      canvas,
+    ],
+  });
+  const input = makeInput({
+    modelUrl: undefined,
+    modelTransform: undefined,
+    models: [],
+    canvases: original.canvases,
+    camera: {
+      projection: 'orthographic',
+      position: { x: 0, y: 1, z: 5 },
+      target: { x: 0, y: 1, z: 0 },
+      viewHeight: 2.5,
+    },
+  });
+  const model = parseManifest(JSON.parse(JSON.stringify(exportManifest(input).manifest)));
+
+  test('the parsed Canvas keeps its transforms and position', () => {
+    expect(original.canvases[0].transforms).toEqual(transforms);
+    expect(original.canvases[0].position).toEqual(position);
+  });
+
+  test('the Canvas keeps its corners', () => {
+    expect(model.canvases).toHaveLength(1);
+    expect(model.canvases[0].canvas).toEqual(canvas);
+    model.canvases[0].corners!.forEach((corner, i) => closeTo(corner, original.canvases[0].corners![i]));
+  });
+
+  test('the OrthographicCamera keeps projection, view height and placement', () => {
+    const camera = model.cameras.find(c => !c.hidden)!;
+    expect(camera.projection).toBe('orthographic');
+    expect(camera.viewHeight).toBe(2.5);
+    expect(camera.position).toEqual({ x: 0, y: 1, z: 5 });
+    expect(camera.lookAtPoint).toEqual({ x: 0, y: 1, z: 0 });
+  });
+});
