@@ -229,13 +229,13 @@ export class DialogIiifImportComponent {
         },
         {
           label:
-            'Single Model with Comment Annotations and Custom Views Per Annotation (Activating Motivation, custom views not yet supported)',
+            'Single Model with Comment Annotations and Custom Views Per Annotation (Activating Motivation)',
           value: 'astronaut_comment_activating_motivation',
           url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/10_activating_annotations/astronaut_comment_activating_motivation.json',
         },
         {
           label:
-            'Whale Cranium and Mandible with Comment Annotations and Custom Per-Anno Views (Activating Annotation, custom views not yet supported)',
+            'Whale Cranium and Mandible with Comment Annotations and Custom Per-Anno Views (Activating Annotation)',
           value: 'whale_comment_activating_annotation',
           url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/10_activating_annotations/whale_comment_activating_annotation.json',
         },

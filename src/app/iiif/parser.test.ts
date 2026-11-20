@@ -462,6 +462,100 @@ describe('parseManifest – comment camera scope', () => {
     expect(model.comments[0].cameraAnnotationId).toBeUndefined();
     expect(model.warnings.some(w => w.includes('does not reference a known camera'))).toBe(true);
   });
+
+  const activating = (
+    targetId: string,
+    sourceId: string,
+    extra: Record<string, unknown> = {},
+  ) => ({
+    id: 'https://example.org/anno/activating',
+    type: 'Annotation',
+    motivation: ['activating'],
+    target: { id: targetId, type: 'Annotation' },
+    body: {
+      id: 'https://example.org/anno/activating/body',
+      type: 'SpecificResource',
+      source: { id: sourceId, type: 'Annotation' },
+      action: ['show', 'enable', 'select'],
+    },
+    ...extra,
+  });
+
+  test('activating annotation links a comment to a camera annotation', () => {
+    const model = parseManifest(
+      manifest(
+        [camera()],
+        [comment(), activating('https://example.org/anno/comment', 'https://example.org/anno/cam')],
+      ),
+    );
+    expect(model.comments[0].cameraAnnotationId).toBe('https://example.org/anno/cam');
+    expect(model.warnings).toEqual([]);
+  });
+
+  test('activating annotation may come before the comment and the camera', () => {
+    const model = parseManifest(
+      manifest(
+        [],
+        [activating('https://example.org/anno/comment', 'https://example.org/anno/cam'), comment(), camera()],
+      ),
+    );
+    expect(model.comments[0].cameraAnnotationId).toBe('https://example.org/anno/cam');
+  });
+
+  test('activating body may reference the camera resource directly', () => {
+    const model = parseManifest(
+      manifest(
+        [camera()],
+        [
+          comment(),
+          activating('https://example.org/anno/comment', 'https://example.org/cameras/1', {
+            body: { id: 'https://example.org/cameras/1', type: 'PerspectiveCamera' },
+          }),
+        ],
+      ),
+    );
+    expect(model.comments[0].cameraAnnotationId).toBe('https://example.org/anno/cam');
+  });
+
+  test('explicit scope wins over an activating annotation', () => {
+    const other = camera({
+      id: 'https://example.org/anno/cam2',
+      body: { id: 'https://example.org/cameras/2', type: 'PerspectiveCamera' },
+    });
+    const model = parseManifest(
+      manifest(
+        [camera(), other],
+        [
+          comment({ scope: [{ id: 'https://example.org/cameras/2', type: 'PerspectiveCamera' }] }),
+          activating('https://example.org/anno/comment', 'https://example.org/anno/cam'),
+        ],
+      ),
+    );
+    expect(model.comments[0].cameraAnnotationId).toBe('https://example.org/anno/cam2');
+  });
+
+  test('activating annotation targeting an unknown comment adds a warning', () => {
+    const model = parseManifest(
+      manifest(
+        [camera()],
+        [comment(), activating('https://example.org/anno/missing', 'https://example.org/anno/cam')],
+      ),
+    );
+    expect(model.comments[0].cameraAnnotationId).toBeUndefined();
+    expect(model.warnings.some(w => w.includes('does not target a known comment'))).toBe(true);
+    expect(model.warnings.some(w => w.includes('Unsupported body type'))).toBe(false);
+  });
+
+  test('activating annotation not referencing a camera adds a warning', () => {
+    const model = parseManifest(
+      manifest(
+        [camera()],
+        [comment(), activating('https://example.org/anno/comment', 'https://example.org/anno/model')],
+      ),
+    );
+    expect(model.comments[0].cameraAnnotationId).toBeUndefined();
+    expect(model.warnings.some(w => w.includes('does not reference a known camera'))).toBe(true);
+  });
 });
 
 describe('parseManifest – annotations without id', () => {

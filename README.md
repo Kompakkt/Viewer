@@ -46,4 +46,5 @@ export objects with their annotations as IIIF 4.0 manifests (button in the annot
 - Dropped on export (no IIIF equivalent): the normal at the annotation point, the preview image, `validated`.
 - IDs: the exported manifest ID is the viewer URL of the entity (`…/viewer/?entity=<id>`); all other IDs
   (cameras, comments, models) live under `…/viewer/iiif/<id>/…`.
-- Comments link to their camera via a spec-style `scope` reference to the camera resource.
+- Comments link to their camera via a spec-style `scope` reference to the camera resource. On import,
+  `activating` annotations (target: the comment, body: the camera annotation) are understood as well.

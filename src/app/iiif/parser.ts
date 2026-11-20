@@ -149,6 +149,21 @@ const embeddedPaintingAnnotations = (ref: Json): Json[] => {
 
 type ScopeRef = { id?: string; embedded?: IIIFCameraItem };
 
+const isActivating = (annotation: Json) =>
+  asArray(annotation['motivation']).includes('activating');
+
+const refId = (ref: unknown): string | undefined =>
+  typeof ref === 'string' ? ref : typeof (ref as Json)?.['id'] === 'string' ? (ref as Json)['id'] : undefined;
+
+/**
+ * Ids of the resources an activating annotation acts on: the source of each SpecificResource
+ * body (usually a camera annotation), or the body itself when it is a plain reference.
+ */
+const activatedIds = (annotation: Json): string[] =>
+  asArray<Json>(annotation['body'])
+    .map(body => (body?.['type'] === 'SpecificResource' ? refId(body['source']) : refId(body)))
+    .filter((id): id is string => id !== undefined);
+
 const findCamera = (cameras: IIIFCameraItem[], id?: string, resourceId?: string) =>
   cameras.find(
     c =>
@@ -291,6 +306,7 @@ export const parseManifest = (input: unknown): IIIFSceneModel => {
   ];
 
   const pendingScopes: Array<{ comment: IIIFComment; refs: ScopeRef[] }> = [];
+  const activations: Array<{ id: string; targets: string[]; refs: ScopeRef[] }> = [];
   let annotationCount = 0;
 
   for (const page of pages) {
@@ -318,7 +334,15 @@ export const parseManifest = (input: unknown): IIIFSceneModel => {
           );
         }
       }
-      if (isComment(annotation)) {
+      if (isActivating(annotation)) {
+        activations.push({
+          id,
+          targets: asArray(annotation['target'])
+            .map(refId)
+            .filter((t): t is string => t !== undefined),
+          refs: activatedIds(annotation).map(ref => ({ id: ref })),
+        });
+      } else if (isComment(annotation)) {
         const comment = parseComment(annotation, id, model.warnings);
         if (comment) {
           model.comments.push(comment);
@@ -354,6 +378,17 @@ export const parseManifest = (input: unknown): IIIFSceneModel => {
         parsePainting(annotation, manifest, model, id);
       }
     }
+  }
+
+  // Activating annotations link a comment (target) to the camera annotation it activates (body).
+  // They are appended after the comment's own scope references, so an explicit scope wins.
+  for (const activation of activations) {
+    const pending = pendingScopes.filter(p => activation.targets.includes(p.comment.annotationId));
+    if (!pending.length) {
+      model.warnings.push(`Activating annotation ${activation.id} does not target a known comment`);
+      continue;
+    }
+    pending.forEach(p => p.refs.push(...activation.refs));
   }
 
   // Resolved after all pages are parsed, so a camera may appear after the comment referencing it.
