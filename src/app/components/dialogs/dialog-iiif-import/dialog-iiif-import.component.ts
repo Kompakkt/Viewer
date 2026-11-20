@@ -82,6 +82,11 @@ export class DialogIiifImportComponent {
           value: 'direction_light_transform_rotate',
           url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/3_lights/direction_light_transform_rotate.json',
         },
+        {
+          label: 'Model with Multiple Lights with Intensities and Colors',
+          value: 'multiple_lights_with_intensities_and_colors',
+          url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/3_lights/multiple_lights_with_intensities_and_colors.json',
+        },
       ],
     },
     {
@@ -132,6 +137,16 @@ export class DialogIiifImportComponent {
           value: 'whale_cranium_and_mandible_position',
           url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/4_transform_and_position/whale_cranium_and_mandible_position.json',
         },
+        {
+          label: 'glTF rotation property demonstration (Tipped Astronaut)',
+          value: 'tipped_astronaut',
+          url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/4_transform_and_position/tipped_astronaut.json',
+        },
+        {
+          label: 'glTF rotation property with IIIF transform (Tipped and Rotated Astronaut)',
+          value: 'tipped_and_rotated_astronaut',
+          url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/4_transform_and_position/tipped_and_rotated_astronaut.json',
+        },
       ],
     },
     {
@@ -165,47 +180,64 @@ export class DialogIiifImportComponent {
       label: '9. Commenting Annotations',
       manifests: [
         {
-          label: 'Single Model with Comment Annotations (TBD)',
+          label: 'Single Model with Comment Annotations',
           value: 'astronaut_comment',
-          // url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/9_commenting_annotations/astronaut_comment.json',
+          url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/9_commenting_annotations/astronaut_comment.json',
         },
         {
-          label: 'Whale Cranium and Mandible with Point Comment Annotation (TBD)',
+          label: 'Single Model with Multilingual Comment Annotations',
+          value: 'astronaut_multilingual_comment',
+          url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/9_commenting_annotations/astronaut_multilingual_comment.json',
+        },
+        {
+          label: 'Whale Cranium and Mandible with Point Comment Annotation',
           value: 'whale_comment',
-          // url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/9_commenting_annotations/whale_comment.json',
+          url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/9_commenting_annotations/whale_comment.json',
         },
         {
-          label: 'Whale Cranium and Mandible with Point Comment Annotation and Camera (TBD)',
+          label: 'Whale Cranium and Mandible with Point Comment Annotation and Camera',
           value: 'whale_comment_camera',
-          // url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/9_commenting_annotations/whale_comment_camera.json',
+          url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/9_commenting_annotations/whale_comment_camera.json',
+        },
+        {
+          label: 'Whale Cranium and Mandible with Point Comment Annotation Oriented Toward Camera',
+          value: 'whale_comment_label_body_position',
+          url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/9_commenting_annotations/whale_comment_label_body_position.json',
         },
         {
           label:
-            'Whale Cranium and Mandible with Point Comment Annotation Oriented Toward Camera (TBD)',
-          value: 'whale_comment_label_body_position_tbd',
+            'Whale Cranium and Mandible with Point Comment Annotation Oriented Toward Camera (2)',
+          value: 'whale_comment_label_body_position_rotate',
+          url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/9_commenting_annotations/whale_comment_label_body_position_rotate.json',
         },
         {
           label:
-            'Whale Cranium and Mandible with Point Comment Annotation Oriented Toward Camera (2) (TBD)',
-          value: 'whale_comment_label_body_position_rotate_tbd',
-        },
-        {
-          label: 'Whale Cranium and Mandible with Point and 2D Shape Comment Annotations (TBD)',
-          value: 'whale_comment_point_polygon_tbd',
+            'Whale Cranium and Mandible with Point and 2D Shape Comment Annotations (2D shape not shown)',
+          value: 'whale_comment_point_polygon',
+          url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/9_commenting_annotations/whale_comment_point_polygon.json',
         },
       ],
     },
     {
-      label: '10. Content State',
+      label: '10. Activating Annotations',
       manifests: [
         {
-          label: 'Single Model with Comment Annotations and Custom Views Per Annotation (TBD)',
-          value: 'astronaut_comment_scope_tbd',
+          label:
+            'Single Model with Comment Annotations and Custom Views Per Annotation (Activating Scope)',
+          value: 'astronaut_comment_activating_scope',
+          url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/10_activating_annotations/astronaut_comment_activating_scope.json',
         },
         {
           label:
-            'Whale Cranium and Mandible with Dynamic Commenting Annotations and Custom Per-Anno Views (TBD)',
-          value: 'whale_comment_scope_content_state_tbd',
+            'Single Model with Comment Annotations and Custom Views Per Annotation (Activating Motivation, custom views not yet supported)',
+          value: 'astronaut_comment_activating_motivation',
+          url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/10_activating_annotations/astronaut_comment_activating_motivation.json',
+        },
+        {
+          label:
+            'Whale Cranium and Mandible with Comment Annotations and Custom Per-Anno Views (Activating Annotation, custom views not yet supported)',
+          value: 'whale_comment_activating_annotation',
+          url: 'https://raw.githubusercontent.com/IIIF/3d/main/manifests/10_activating_annotations/whale_comment_activating_annotation.json',
         },
       ],
     },
