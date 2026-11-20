@@ -1,4 +1,5 @@
 import { hexToRgb } from './color';
+import { canvasCorners } from './canvas-placement';
 import type { Vec3 } from './coordinates';
 import type {
   IIIFCameraItem,
@@ -248,12 +249,26 @@ const parsePainting = (
       const canvas = asArray<Json>(manifest['items']).find(
         item => item?.['type'] === 'Canvas' && item?.['id'] === source['id'],
       );
-      const polygon = targetSelectors(annotation).find(s => s?.['type'] === 'PolygonZSelector');
-      if (!canvas || typeof polygon?.['value'] !== 'string') {
-        model.warnings.push(`Annotation ${id}: Canvas or PolygonZSelector not found`);
+      if (!canvas) {
+        model.warnings.push(`Annotation ${id}: Canvas not found in the Manifest`);
         continue;
       }
-      model.canvases.push({ annotationId: id, canvas, polygonZ: polygon['value'] });
+      const polygon = targetSelectors(annotation).find(s => s?.['type'] === 'PolygonZSelector');
+      if (typeof polygon?.['value'] === 'string') {
+        model.canvases.push({ annotationId: id, canvas, polygonZ: polygon['value'] });
+        continue;
+      }
+      const width = toNumber(canvas['width']);
+      const height = toNumber(canvas['height']);
+      if (!width || !height || width <= 0 || height <= 0) {
+        model.warnings.push(`Annotation ${id}: Canvas has no usable width and height`);
+        continue;
+      }
+      model.canvases.push({
+        annotationId: id,
+        canvas,
+        corners: canvasCorners(width, height, transforms, position),
+      });
     } else if (type === 'scene') {
       model.warnings.push(`Annotation ${id}: nested Scenes are not supported`);
     } else {

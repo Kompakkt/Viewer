@@ -128,5 +128,5 @@ Five PRs, each building on the previous one:
 - Kompakkt-specific IIIF extensions or a custom `@context`
 - Saving imported annotations to the backend
 - Timelines, audio emitters, nested Scenes, `exclude` (warning only)
-- OrthographicCamera and Canvas-in-Scene (PolygonZSelector) stay supported **as before**, but are not extended and not exported.
+- OrthographicCamera and Canvas-in-Scene are imported but not exported. A Canvas is placed either by a PolygonZSelector (older draft form) or, as in the current IIIF 3D examples, with its top-left corner at the target's PointSelector (the Scene origin without one), extending along +x and -y with one Canvas unit per Scene unit, after the body's transforms. The image is shown on the front side ((TR − TL) × (TL − BL)), the background colour on the back.
 - Switching to `useRightHandedSystem`

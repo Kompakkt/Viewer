@@ -114,6 +114,23 @@ const getCanvasUVs = (canvas: Record<string, any>, polygon: Vector3[]) => {
     : draftOrderUVs;
 };
 
+/**
+ * Triangle indices for the image side and the background side of a Canvas quad.
+ * The image side faces where the Canvas front points: the side from which top-left → top-right
+ * runs to the right and top-left → bottom-left runs down, i.e. (TR - TL) × (TL - BL) in IIIF space.
+ */
+const canvasFaceIndices = (corners: Vec3[], polygon: Vector3[]): [number[], number[]] => {
+  const [tl, tr, , bl] = corners.map(c => new Vector3(c.x, c.y, c.z));
+  const frontIIIF = Vector3.Cross(tr.subtract(tl), tl.subtract(bl));
+  const front = toBabylonVector({ x: frontIIIF.x, y: frontIIIF.y, z: frontIIIF.z });
+  const a: number[] = [0, 1, 2, 0, 2, 3];
+  const b: number[] = [0, 2, 1, 0, 3, 2];
+  const normals: number[] = [];
+  VertexData.ComputeNormals(polygon.flatMap(p => p.asArray()), a, normals);
+  const normalA = new Vector3(normals[0], normals[1], normals[2]);
+  return Vector3.Dot(normalA, front) >= 0 ? [a, b] : [b, a];
+};
+
 /** Placeholder preview for imported IIIF scenes (they have no Kompakkt preview image). */
 export const IIIF_SCENE_PREVIEW = 'assets/image-not-found.png';
 
@@ -231,15 +248,26 @@ export class IIIFSceneBuilderService {
   }
 
   private buildCanvas(item: IIIFCanvasItem, meshes: AbstractMesh[]) {
-    const polygon = parsePolygonZ(item.polygonZ);
+    const polygon = item.corners
+      ? item.corners.map(corner => toBabylonVector(corner))
+      : item.polygonZ
+        ? parsePolygonZ(item.polygonZ)
+        : undefined;
     if (!polygon) {
-      console.warn('[IIIF] Invalid PolygonZSelector', item);
+      console.warn('[IIIF] Invalid Canvas placement', item);
       return undefined;
     }
     const scene = this.babylon.getScene();
     const canvas = item.canvas;
     const canvasId = String(canvas['id'] ?? 'iiif-canvas');
-    const uvs = getCanvasUVs(canvas, polygon);
+    // Corners are ordered top-left, top-right, bottom-right, bottom-left (texture invertY: v = 1 is the top).
+    const uvs = item.corners ? [0, 1, 1, 1, 1, 0, 0, 0] : getCanvasUVs(canvas, polygon);
+    const [frontIndices, backIndices] = item.corners
+      ? canvasFaceIndices(item.corners, polygon)
+      : [
+          [0, 1, 2, 0, 2, 3],
+          [0, 2, 1, 0, 3, 2],
+        ];
     const background =
       typeof canvas['backgroundColor'] === 'string'
         ? hexToRgb(canvas['backgroundColor'])
@@ -282,12 +310,8 @@ export class IIIFSceneBuilderService {
     }
     backgroundMaterial.backFaceCulling = true;
 
-    const imagePlane = createSide(`${canvasId}-image`, [0, 1, 2, 0, 2, 3], imageMaterial);
-    const backgroundPlane = createSide(
-      `${canvasId}-background`,
-      [0, 2, 1, 0, 3, 2],
-      backgroundMaterial,
-    );
+    const imagePlane = createSide(`${canvasId}-image`, frontIndices, imageMaterial);
+    const backgroundPlane = createSide(`${canvasId}-background`, backIndices, backgroundMaterial);
     const node = new TransformNode(`transformNode-${canvasId}`, scene);
     imagePlane.setParent(node);
     backgroundPlane.setParent(node);

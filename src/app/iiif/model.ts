@@ -20,8 +20,13 @@ export interface IIIFCanvasItem {
   annotationId: string;
   /** Raw Canvas JSON from manifest.items */
   canvas: Record<string, any>;
-  /** Value of the PolygonZSelector, e.g. "POLYGONZ((0 0 0, ...))" */
-  polygonZ: string;
+  /** Value of the PolygonZSelector, e.g. "POLYGONZ((0 0 0, ...))" (older draft form) */
+  polygonZ?: string;
+  /**
+   * Corners in IIIF Scene space (top-left, top-right, bottom-right, bottom-left), computed
+   * from the Canvas size, the body transforms and the target PointSelector.
+   */
+  corners?: Vec3[];
 }
 
 export type CameraProjection = 'perspective' | 'orthographic';
